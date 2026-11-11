@@ -16,6 +16,7 @@
 //! No UI toolkit: the native app's hooks (`apps/native/src/data`) turn keys
 //! and loads into signals and resources.
 
+pub mod devices;
 pub mod fixtures;
 pub mod keys;
 pub mod labels;

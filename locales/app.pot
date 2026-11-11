@@ -480,6 +480,7 @@ msgid "{device} is one of your devices, so it's pairing without a code. This tak
 msgstr ""
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/flows/devices.rs
 msgid "{device} is out of reach."
 msgstr ""
 
@@ -530,6 +531,7 @@ msgid "{device} wants to stream games from this device."
 msgstr ""
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/flows/devices.rs
 msgid "{device}'s copy is for {system} and can't run here."
 msgstr ""
 
@@ -1641,6 +1643,7 @@ msgid "a Windows compatibility tool"
 msgstr ""
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/flows/devices.rs
 msgid "A Windows game: it runs here through Proton."
 msgstr ""
 
@@ -4090,6 +4093,7 @@ msgstr ""
 
 #. Sends the game to another of the user's devices
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Copy to {name}"
 msgstr ""
 
@@ -6861,6 +6865,7 @@ msgid "It asks for the file the first time it starts."
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "It asks there before copying"
 msgstr ""
 
@@ -6930,6 +6935,7 @@ msgid "It needs a new code to play from this device again."
 msgstr ""
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/flows/devices.rs
 msgid "It starts through its store's launcher there. Install it from the store here."
 msgstr ""
 
@@ -9036,6 +9042,7 @@ msgstr ""
 #. The game is installed on another of the user's devices
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "On {device}"
 msgstr ""
 
@@ -9778,6 +9785,7 @@ msgstr ""
 
 #. Starts the game on another of the user's devices
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Play on {name}"
 msgstr ""
 
@@ -9861,6 +9869,7 @@ msgid "Playing on {device}"
 msgstr ""
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/flows/devices.rs
 msgid "Playing on {device} now."
 msgstr ""
 
@@ -14321,6 +14330,7 @@ msgid "Wake and play on {device}"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Wakes it first"
 msgstr ""
 

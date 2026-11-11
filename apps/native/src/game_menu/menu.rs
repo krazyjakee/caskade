@@ -6,6 +6,7 @@
 use super::entries::{EntryView, located, playable};
 use crate::ui::{MenuEntry, MenuItem, icons};
 use caskade_core::model::{ActionKind, GameAction, GameDetails, PlaySession};
+use caskade_ui_data::devices::{DeviceLink, PairedDevice, PeerCopy};
 use caskade_ui_i18n::{t, tp};
 use std::collections::HashSet;
 
@@ -40,6 +41,10 @@ pub struct Facts<'a> {
     pub hide_failure: Option<String>,
     /// The app shares games through links (its share service, #247).
     pub shares: bool,
+    /// The game's copies on the user's other devices (#232).
+    pub peers: Vec<PeerCopy>,
+    /// The paired devices, for sending a copy there (#235).
+    pub paired: Vec<PairedDevice>,
 }
 
 /// The release a share link would carry: installed here, with files here,
@@ -292,17 +297,86 @@ pub fn items(target: &Target, facts: &Facts) -> Vec<MenuEntry> {
         items: second.into_iter().filter_map(only_item).collect(),
     });
 
-    // Your devices: Share with someone… (#247). Playing on and copying to
-    // paired devices join it with sync's views.
-    if !scoped && facts.shares && copyable(&facts.entries).is_some() {
-        menu.push(MenuEntry::Separator);
-        menu.push(MenuEntry::Section {
-            title: Some(tp!("game menu section", "Your devices")),
-            items: vec![MenuItem {
+    // Your devices: playing it on another device (#234), sending this
+    // copy to one reached directly (#235), Share with someone… (#247), and
+    // the copies there (#232).
+    let copy_here = copyable(&facts.entries).is_some();
+    if !scoped {
+        let mut devices = Vec::new();
+        for peer in &facts.peers {
+            if peer.playing || (peer.link == DeviceLink::Offline && !peer.wakeable) {
+                continue;
+            }
+            let offline = peer.link == DeviceLink::Offline;
+            devices.push(MenuItem {
+                description: offline.then(|| t!("Wakes it first")),
+                ..item(
+                    format!("play-on:{}", peer.device_id),
+                    t!(
+                        note = "Starts the game on another of the user's devices",
+                        "Play on {name}",
+                        name = peer.device_name.clone()
+                    ),
+                    if offline { icons::POWER } else { icons::PLAY },
+                )
+            });
+        }
+        if copy_here {
+            for device in &facts.paired {
+                let reached = matches!(device.link, DeviceLink::Lan | DeviceLink::Direct);
+                let has_it = facts.peers.iter().any(|peer| peer.device_id == device.id);
+                if reached && !has_it {
+                    devices.push(MenuItem {
+                        description: Some(t!("It asks there before copying")),
+                        ..item(
+                            format!("send:{}", device.id),
+                            t!(
+                                note = "Sends the game to another of the user's devices",
+                                "Copy to {name}",
+                                name = device.name.clone()
+                            ),
+                            icons::SEND,
+                        )
+                    });
+                }
+            }
+        }
+        if copy_here && facts.shares {
+            devices.push(MenuItem {
                 description: Some(t!("A link for someone else's Caskade")),
                 ..item("share", t!("Share with someone…"), icons::SHARE_2)
-            }],
-        });
+            });
+        }
+        for peer in &facts.peers {
+            let note = [
+                peer.size_bytes
+                    .map(|bytes| caskade_ui_i18n::format::size(Some(bytes))),
+                crate::flows::devices::peer_note(peer),
+            ]
+            .into_iter()
+            .flatten()
+            .collect::<Vec<_>>()
+            .join(" · ");
+            devices.push(MenuItem {
+                description: (!note.is_empty()).then_some(note),
+                ..item(
+                    format!("device:{}", peer.device_id),
+                    t!(
+                        note = "The game is installed on another of the user's devices",
+                        "On {device}",
+                        device = peer.device_name.clone()
+                    ),
+                    icons::MONITOR_SMARTPHONE,
+                )
+            });
+        }
+        if !devices.is_empty() {
+            menu.push(MenuEntry::Separator);
+            menu.push(MenuEntry::Section {
+                title: Some(tp!("game menu section", "Your devices")),
+                items: devices,
+            });
+        }
     }
 
     // Tools: a release's utilities, which count no playtime.

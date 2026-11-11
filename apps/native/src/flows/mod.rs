@@ -8,6 +8,7 @@
 
 pub mod add_game;
 mod anatomy;
+pub mod devices;
 pub mod folder_browser;
 pub mod manual_game;
 pub mod pairing;

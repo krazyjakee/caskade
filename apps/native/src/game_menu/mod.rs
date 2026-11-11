@@ -293,6 +293,28 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
     let game = use_game(target.game_id.clone());
     let sessions = use_sessions(target.game_id.clone());
     let actions_query = use_actions(target.game_id.clone());
+    // The game on the user's other devices, and where a copy could go
+    // (#232, #235), read as the menu opens.
+    let devices = crate::flows::devices::use_other_devices();
+    let elsewhere = {
+        let devices = devices.clone();
+        let game_id = target.game_id.clone();
+        use_resource(move || {
+            let devices = devices.clone();
+            let game_id = game_id.clone();
+            async move {
+                let devices = devices?;
+                crate::data::change(async move {
+                    let copies = devices.copies(&game_id).await?;
+                    let paired = devices.paired().await?;
+                    Ok((copies, paired))
+                })
+                .await
+                .ok()
+            }
+        })
+    };
+    let (peers, paired) = elsewhere.read().clone().flatten().unwrap_or_default();
     let game = game
         .read()
         .as_ref()
@@ -331,6 +353,8 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
         edits: false,
         failure: failure.clone(),
         shares: crate::flows::receive_share::use_shares().is_some(),
+        peers,
+        paired,
         ..menu::Facts::default()
     };
     let items = menu::items(&target, &facts);
@@ -436,7 +460,35 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
                     });
                 }
                 other => {
-                    if let Some(action) = other.strip_prefix("play:") {
+                    let game_id = target.game_id.clone();
+                    if let Some(device) = other.strip_prefix("play-on:") {
+                        let (devices, device) = (devices.clone(), device.to_owned());
+                        spawn_forever(async move {
+                            let Some(devices) = devices else { return };
+                            if let Err(report) = crate::data::change(async move {
+                                devices.play_on(&game_id, &device).await
+                            })
+                            .await
+                            {
+                                fail(report);
+                            }
+                        });
+                    } else if let Some(device) = other.strip_prefix("send:") {
+                        let (devices, device) = (devices.clone(), device.to_owned());
+                        spawn_forever(async move {
+                            let Some(devices) = devices else { return };
+                            if let Err(report) = crate::data::change(async move {
+                                devices.send_to(&game_id, &device).await
+                            })
+                            .await
+                            {
+                                fail(report);
+                            }
+                        });
+                    } else if other.starts_with("device:") {
+                        // Its page lists the copies on other devices.
+                        router.open_game(&game_id);
+                    } else if let Some(action) = other.strip_prefix("play:") {
                         let entry = entries::playable(&entries, &Default::default(), None)
                             .map(|entry| entry.id.clone());
                         open_dialog(MenuDialog::Play {

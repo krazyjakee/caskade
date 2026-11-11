@@ -479,6 +479,7 @@ msgid "{device} is one of your devices, so it's pairing without a code. This tak
 msgstr "{device} är en av dina enheter, så den parkopplas utan kod. Det tar en liten stund."
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/flows/devices.rs
 msgid "{device} is out of reach."
 msgstr "{device} går inte att nå."
 
@@ -529,6 +530,7 @@ msgid "{device} wants to stream games from this device."
 msgstr "{device} vill streama spel från den här enheten."
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/flows/devices.rs
 msgid "{device}'s copy is for {system} and can't run here."
 msgstr "Kopian på {device} är för {system} och kan inte köras här."
 
@@ -1633,6 +1635,7 @@ msgid "a Windows compatibility tool"
 msgstr "ett Windows-kompatibilitetsverktyg"
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/flows/devices.rs
 msgid "A Windows game: it runs here through Proton."
 msgstr "Ett Windows-spel: det körs här via Proton."
 
@@ -4049,6 +4052,7 @@ msgstr "Kopiera filerna"
 
 #. Sends the game to another of the user's devices
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Copy to {name}"
 msgstr "Kopiera till {name}"
 
@@ -6792,6 +6796,7 @@ msgid "It asks for the file the first time it starts."
 msgstr "Den frågar efter filen första gången den startar."
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "It asks there before copying"
 msgstr "Där frågar den innan kopieringen"
 
@@ -6861,6 +6866,7 @@ msgid "It needs a new code to play from this device again."
 msgstr "Den behöver en ny kod för att spela från den här enheten igen."
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/flows/devices.rs
 msgid "It starts through its store's launcher there. Install it from the store here."
 msgstr "Där startar det via butikens startprogram. Installera det från butiken här."
 
@@ -8942,6 +8948,7 @@ msgstr "På"
 #. The game is installed on another of the user's devices
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "On {device}"
 msgstr "På {device}"
 
@@ -9677,6 +9684,7 @@ msgstr "Spela på {device}"
 
 #. Starts the game on another of the user's devices
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Play on {name}"
 msgstr "Spela på {name}"
 
@@ -9762,6 +9770,7 @@ msgid "Playing on {device}"
 msgstr "Spelas på {device}"
 
 #: apps/desktop/src/views/game/OtherDevices.tsx
+#: apps/native/src/flows/devices.rs
 msgid "Playing on {device} now."
 msgstr "Spelas på {device} just nu."
 
@@ -14166,6 +14175,7 @@ msgid "Wake and play on {device}"
 msgstr "Väck och spela på {device}"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/menu.rs
 msgid "Wakes it first"
 msgstr "Väcker den först"
 
