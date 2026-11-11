@@ -17,6 +17,8 @@ pub enum Variant {
     Card,
     /// A list row's icon: 96 px.
     Icon,
+    /// A game page's hero: 960 px.
+    Hero,
 }
 
 impl Variant {
@@ -24,6 +26,7 @@ impl Variant {
         match self {
             Self::Card => 320,
             Self::Icon => 96,
+            Self::Hero => 960,
         }
     }
 }

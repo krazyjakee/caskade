@@ -22,7 +22,14 @@ pub fn Outlet() -> Element {
         Route::Library(library) => rsx! {
             Library { library }
         },
-        Route::Game { .. } | Route::StoreGame { .. } => placeholder(t!("Game")),
+        // Keyed in a list, so another game's page is a page of its own
+        // (Dioxus keys only list items).
+        Route::Game { id, from } => rsx! {
+            for (id, from) in [(id, from)] {
+                crate::game::GameView { key: "{id}", id, from }
+            }
+        },
+        Route::StoreGame { .. } => placeholder(t!("Game")),
         Route::Activity { .. } => rsx! {
             super::notifications::Activity { route }
         },

@@ -18,20 +18,20 @@ use std::sync::Mutex;
 
 /// What the app answers, and what it was asked.
 #[derive(Default)]
-struct Script {
-    update: Option<GameUpdate>,
-    playing: Vec<PlayingElsewhere>,
+pub(crate) struct Script {
+    pub(crate) update: Option<GameUpdate>,
+    pub(crate) playing: Vec<PlayingElsewhere>,
     /// The saves' answers in turn; then no saves.
-    saves: VecDeque<BeforePlay>,
+    pub(crate) saves: VecDeque<BeforePlay>,
     /// The launch's answers in turn; then it isn't available (fixtures
     /// mode's answer, which other tests expect).
-    outcomes: VecDeque<LaunchOutcome>,
+    pub(crate) outcomes: VecDeque<LaunchOutcome>,
     /// Looking again for a save never comes back (Skip's test).
-    pause_forever: bool,
-    skipped: Vec<(String, String)>,
-    chosen: Vec<(String, String)>,
-    launches: Vec<(String, LaunchChoice)>,
-    save_checks: usize,
+    pub(crate) pause_forever: bool,
+    pub(crate) skipped: Vec<(String, String)>,
+    pub(crate) chosen: Vec<(String, String)>,
+    pub(crate) launches: Vec<(String, LaunchChoice)>,
+    pub(crate) save_checks: usize,
 }
 
 static SCRIPT: Mutex<Option<Script>> = Mutex::new(None);
@@ -42,9 +42,9 @@ fn with<T>(f: impl FnOnce(&mut Script) -> T) -> T {
 }
 
 /// Sets the script for one test; the default comes back after it.
-struct Scripted;
+pub(crate) struct Scripted;
 
-fn script(script: Script) -> Scripted {
+pub(crate) fn script(script: Script) -> Scripted {
     *SCRIPT.lock().unwrap_or_else(|e| e.into_inner()) = Some(script);
     Scripted
 }
@@ -104,7 +104,7 @@ pub(crate) fn fake_steps() -> LaunchSteps {
     }
 }
 
-fn started(game_id: &str) -> LaunchOutcome {
+pub(crate) fn started(game_id: &str) -> LaunchOutcome {
     LaunchOutcome::Started {
         ticket: LaunchTicket {
             game_id: game_id.to_owned(),
@@ -112,6 +112,11 @@ fn started(game_id: &str) -> LaunchOutcome {
             session_id: "session".to_owned(),
         },
     }
+}
+
+/// How many launches were asked for.
+pub(crate) fn launches() -> usize {
+    with(|script| script.launches.len())
 }
 
 fn version(id: &str, local: bool) -> SaveVersion {

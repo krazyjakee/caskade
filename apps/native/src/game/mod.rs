@@ -3,10 +3,17 @@
 //! and what Play asks before a game starts ([`launch`]), which every Play
 //! shares.
 
+mod back;
 pub mod launch;
+mod page;
+pub mod present;
+
+pub use page::GameView;
 
 #[cfg(test)]
 pub(crate) mod launch_tests;
+#[cfg(test)]
+mod page_tests;
 
 use crate::ui::{Link, Svg, icons};
 use dioxus_native::prelude::*;

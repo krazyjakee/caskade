@@ -109,6 +109,11 @@ impl History {
         self.at > 0
     }
 
+    /// The visit Back goes to, if any.
+    pub fn previous(&self) -> Option<&Entry> {
+        self.at.checked_sub(1).map(|at| &self.entries[at])
+    }
+
     pub fn back(&mut self) -> bool {
         if self.at == 0 {
             return false;
@@ -211,6 +216,14 @@ impl Router {
 
     pub fn replace(&self, href: &str) {
         self.go(Navigation::Replace(href.to_owned()));
+    }
+
+    /// The page Back goes to, without subscribing to it.
+    pub fn previous(&self) -> Option<Route> {
+        self.history
+            .peek()
+            .previous()
+            .map(|entry| entry.route.clone())
     }
 
     /// Back a page; whether there was one (a held one counts).

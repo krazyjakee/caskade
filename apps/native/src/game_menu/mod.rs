@@ -153,10 +153,12 @@ pub fn GameMenuHost(children: Element) -> Element {
     let shares = crate::flows::receive_share::use_shares();
     rsx! {
         {children}
-        if let Some((target, anchor, failure)) = menu() {
+        // Keyed in lists, so another game's menu or quick look is one of
+        // its own (Dioxus keys only list items): never the last game's.
+        for (target, anchor, failure) in menu() {
             OpenMenu { key: "{target.game_id}:{target.entry_id:?}", target, anchor, failure }
         }
-        if let Some(target) = (menus.look)() {
+        for target in (menus.look)() {
             quick_look::QuickLook { key: "{target.game_id}", target }
         }
         if let Some((target, open)) = dialog() {

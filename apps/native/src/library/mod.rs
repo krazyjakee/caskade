@@ -43,6 +43,16 @@ pub fn art_url(art: Option<&caskade_core::model::Artwork>) -> Option<String> {
     art::url(art, art::Variant::Icon)
 }
 
+/// A game page's hero: its hero art, else its cover, at 960 px.
+pub fn art_url_hero(artwork: &[caskade_core::model::Artwork]) -> Option<String> {
+    use caskade_core::model::ArtworkKind;
+    let hero = artwork
+        .iter()
+        .find(|art| art.kind == ArtworkKind::Hero)
+        .or_else(|| artwork.iter().find(|art| art.kind == ArtworkKind::Cover));
+    art::url(hero, art::Variant::Hero)
+}
+
 /// A game's art for a card or tile: the 320 px thumbnail.
 pub fn art_url_card(art: Option<&caskade_core::model::Artwork>) -> Option<String> {
     art::url(art, art::Variant::Card)

@@ -156,10 +156,20 @@ fn a_click_on_a_card_opens_its_quick_look_beside_the_library() {
         text.contains("Play") && text.contains("View more"),
         "{text}"
     );
+    let first_title = window.text(
+        window
+            .find_in(look, "data-part", "title")
+            .expect("its title"),
+    );
     // Another card shows that one, in the one panel.
     let second = window.get("data-index", "1");
     window.click(second);
-    window.settle();
+    window.settle_until("the second game's quick look", |window| {
+        window
+            .find("data-cs", "quick-look")
+            .and_then(|look| window.find_in(look, "data-part", "title"))
+            .is_some_and(|title| window.text(title) != first_title)
+    });
     assert_eq!(window.find_all("data-cs", "quick-look").len(), 1);
     // Close closes it.
     let look = window.get("data-cs", "quick-look");

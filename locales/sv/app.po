@@ -791,7 +791,7 @@ msgid "{name} ({percent}% translated)"
 msgstr "{name} ({percent} % översatt)"
 
 #. A release and its install state
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "{name} ({state})"
 msgstr "{name} ({state})"
 
@@ -1856,6 +1856,7 @@ msgstr "Åtgärder för {title}"
 
 #: apps/desktop/src/views/activity/ActivityView.tsx
 #: apps/desktop/src/views/game/origin.ts apps/native/src/frame/notifications.rs
+#: apps/native/src/game/back.rs
 msgid "Activity"
 msgstr "Aktivitet"
 
@@ -2091,7 +2092,7 @@ msgstr "Lägg till, åtskilda med kommatecken"
 msgid "Added after the profile's arguments; variables like {variable} work."
 msgstr "Läggs till efter profilens argument; variabler som {variable} fungerar."
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Added by hand"
 msgstr "Tillagt för hand"
@@ -2384,7 +2385,7 @@ msgctxt "save version"
 msgid "Another device"
 msgstr "En annan enhet"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Another of your devices"
 msgstr "En annan av dina enheter"
@@ -2706,7 +2707,7 @@ msgstr "B"
 
 #. The game page's link back to where it was opened from
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
-#: apps/desktop/src/views/game/BackLink.tsx
+#: apps/desktop/src/views/game/BackLink.tsx apps/native/src/game/back.rs
 #: apps/native/src/library/bulk_edit.rs
 msgid "Back"
 msgstr "Tillbaka"
@@ -2722,7 +2723,7 @@ msgid "Back"
 msgstr "Tillbaka"
 
 #. {name} is the page, collection or game the game page was opened from
-#: apps/desktop/src/views/game/BackLink.tsx
+#: apps/desktop/src/views/game/BackLink.tsx apps/native/src/game/back.rs
 msgid "Back to {name}"
 msgstr "Tillbaka till {name}"
 
@@ -2891,7 +2892,7 @@ msgstr "Hämtar ditt bibliotek från {name}"
 msgid "Brings in every game your {name} account owns, installed or not."
 msgstr "Tar med varje spel som ditt {name}-konto äger, installerat eller inte."
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "release state"
 msgid "Broken"
 msgstr "Trasig"
@@ -3196,7 +3197,7 @@ msgstr "Caskade kan inte installera emulatorer här."
 msgid "Caskade can't install emulators on this system yet."
 msgstr "Caskade kan inte installera emulatorer på det här systemet än."
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Caskade can't start this game: it has nothing to launch. Add a program or URI in Edit details → Actions."
 msgstr "Caskade kan inte starta det här spelet: det har inget att starta. Lägg till ett program eller en URI i Redigera detaljer → Åtgärder."
 
@@ -3893,7 +3894,7 @@ msgstr "Koden som visas på {device}"
 #: apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/native/src/frame/sidebar.rs apps/native/src/frame/views.rs
-#: apps/native/src/settings/general.rs
+#: apps/native/src/game/back.rs apps/native/src/settings/general.rs
 msgid "Collections"
 msgstr "Samlingar"
 
@@ -4228,7 +4229,7 @@ msgstr "Kunde inte läsa in fler spel."
 msgid "Could not load notifications."
 msgstr "Kunde inte läsa in aviseringar."
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Could not load session history."
 msgstr "Kunde inte läsa in sessionshistoriken."
 
@@ -4253,7 +4254,7 @@ msgstr "Kunde inte läsa in de här spelen."
 msgid "Could not load this collection."
 msgstr "Kunde inte läsa in den här samlingen."
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Could not load this game"
 msgstr "Kunde inte läsa in det här spelet"
 
@@ -4513,6 +4514,14 @@ msgctxt "playtime tracking"
 msgid "Default"
 msgstr "Standard"
 
+#. The release the game's Play starts
+#: apps/native/src/game/page.rs
+#, fuzzy
+#| msgid "Default"
+msgctxt "release"
+msgid "Default"
+msgstr "Standard"
+
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
 #: apps/native/src/flows/storage.rs
 msgctxt "storage location"
@@ -4658,7 +4667,7 @@ msgctxt "discovery source"
 msgid "Desktop entries"
 msgstr "Skrivbordsposter"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Desktop entries"
 msgstr "Skrivbordsposter"
@@ -5877,7 +5886,7 @@ msgctxt "credit"
 msgid "Game metadata"
 msgstr "Spelmetadata"
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Game not found"
 msgstr "Spelet hittades inte"
 
@@ -6333,7 +6342,7 @@ msgstr "Högre ser skarpare ut och kräver ett snabbare nätverk."
 #: apps/desktop/src/shell/nav.ts apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/native/src/frame/sidebar.rs apps/native/src/frame/views.rs
-#: apps/native/src/settings/general.rs
+#: apps/native/src/game/back.rs apps/native/src/settings/general.rs
 msgctxt "navigation"
 msgid "Home"
 msgstr "Hem"
@@ -6759,7 +6768,7 @@ msgstr "Installationsplats"
 msgid "Install location preference"
 msgstr "Önskad installationsplats"
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Install location unknown"
 msgstr "Okänd installationsplats"
 
@@ -6836,7 +6845,7 @@ msgctxt "library filter"
 msgid "Installed"
 msgstr "Installerade"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "release state"
 msgid "Installed"
 msgstr "Installerad"
@@ -6955,7 +6964,7 @@ msgstr "installationer"
 msgid "Installs"
 msgstr "Installerar"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Installs"
 msgstr "Installationer"
@@ -7497,9 +7506,9 @@ msgstr "Bokstäver"
 #: apps/desktop/src/views/settings/devices/SyncChoices.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
-#: apps/native/src/frame/sidebar.rs apps/native/src/library/view.rs
-#: apps/native/src/settings/appearance.rs apps/native/src/settings/general.rs
-#: apps/native/src/settings/search.rs
+#: apps/native/src/frame/sidebar.rs apps/native/src/game/back.rs
+#: apps/native/src/library/view.rs apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/general.rs apps/native/src/settings/search.rs
 msgid "Library"
 msgstr "Bibliotek"
 
@@ -7687,7 +7696,7 @@ msgid "Loading game"
 msgstr "Läser in spel"
 
 #: apps/desktop/src/views/game/GameView.tsx
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/game/page.rs
 msgid "Loading game…"
 msgstr "Läser in spelet…"
 
@@ -7737,7 +7746,7 @@ msgstr "Läser in RomM-servrar…"
 msgid "Loading scripts…"
 msgstr "Läser in skript…"
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Loading sessions…"
 msgstr "Läser in sessioner…"
 
@@ -8546,7 +8555,7 @@ msgstr "Ingen standardplats har konfigurerats"
 msgid "No description on IGDB."
 msgstr "Ingen beskrivning på IGDB."
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "No description yet."
 msgstr "Ingen beskrivning än."
 
@@ -9214,7 +9223,7 @@ msgstr "Erbjuder att installera samma. Tillägg ber fortfarande om sina behörig
 #. A link to a game's website
 #. A link to a game's website
 #: apps/desktop/src/views/game/GameView.tsx
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/game/page.rs
 msgid "Official site"
 msgstr "Officiell webbplats"
 
@@ -9748,7 +9757,7 @@ msgstr "föräldrakontroll, PEGI, ESRB"
 msgid "partial result"
 msgstr "ofullständigt resultat"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "release state"
 msgid "Partly installed"
 msgstr "Delvis installerad"
@@ -9959,7 +9968,7 @@ msgid "Platforms: {platforms}"
 msgstr "Plattformar: {platforms}"
 
 #. Button: starts the game
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Play"
 msgstr "Spela"
 
@@ -10000,7 +10009,7 @@ msgstr "Spela emulerade spel i helskärm även i skrivbordsläge. Konsolläget g
 msgid "Play from other devices"
 msgstr "Spela från andra enheter"
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Play from your library"
 msgstr "Spela från ditt bibliotek"
 
@@ -10098,6 +10107,7 @@ msgstr "Spelare"
 #: apps/desktop/src/shell/console/GameCurtain.tsx
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
+#: apps/native/src/game/page.rs
 msgid "Playing"
 msgstr "Spelar"
 
@@ -10110,7 +10120,7 @@ msgctxt "streaming device"
 msgid "Playing another game"
 msgstr "Spelar ett annat spel"
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Playing now"
 msgstr "Spelas nu"
 
@@ -10549,7 +10559,7 @@ msgid "Ready"
 msgstr "Redo"
 
 #: apps/desktop/src/api/streaming.ts apps/desktop/src/views/game/GameView.tsx
-#: apps/native/src/settings/streaming.rs
+#: apps/native/src/game/page.rs apps/native/src/settings/streaming.rs
 msgctxt "streaming device"
 msgid "Ready"
 msgstr "Redo"
@@ -10796,7 +10806,7 @@ msgstr "Installera om från den sparade källan"
 #. Picks which release's actions to edit
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Release"
 msgstr "Utgåva"
 
@@ -11359,7 +11369,7 @@ msgstr "ROM-mapp"
 msgid "ROM folders"
 msgstr "ROM-mappar"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "ROM folders"
 msgstr "ROM-mappar"
@@ -11485,7 +11495,7 @@ msgid "Run the installer silently"
 msgstr "Kör installationsprogrammet utan frågor"
 
 #. The Play button while the game runs
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Running"
 msgstr "Körs"
 
@@ -12128,7 +12138,7 @@ msgstr "Serveradress"
 msgid "Servers and what they import. Each device signs in with its own password."
 msgstr "Servrar och vad de importerar. Varje enhet loggar in med sitt eget lösenord."
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Session history"
 msgstr "Sessionshistorik"
 
@@ -12754,9 +12764,10 @@ msgstr "Startar uppdateringen…"
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/flows/streaming.rs apps/native/src/game/launch.rs
-#: apps/native/src/game_menu/play.rs apps/native/src/game_menu/quick_look.rs
-#: apps/native/src/library/web.rs apps/native/src/settings/streaming.rs
-#: apps/native/src/ui/game_card.rs apps/native/src/ui/game_row.rs
+#: apps/native/src/game/page.rs apps/native/src/game_menu/play.rs
+#: apps/native/src/game_menu/quick_look.rs apps/native/src/library/web.rs
+#: apps/native/src/settings/streaming.rs apps/native/src/ui/game_card.rs
+#: apps/native/src/ui/game_row.rs
 msgid "Starting…"
 msgstr "Startar…"
 
@@ -12835,7 +12846,7 @@ msgstr "Stanna"
 msgid "Stay open"
 msgstr "Håll öppet"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgid "Steam shortcuts"
 msgstr "Steam-genvägar"
 
@@ -12875,7 +12886,8 @@ msgstr "Stoppa"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
-#: apps/native/src/game_menu/menu.rs apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/game/page.rs apps/native/src/game_menu/menu.rs
+#: apps/native/src/game_menu/quick_look.rs
 msgctxt "game action"
 msgid "Stop"
 msgstr "Stoppa"
@@ -12931,7 +12943,7 @@ msgid "Stopped: the link doesn't work any more."
 msgstr "Stoppad: länken fungerar inte längre."
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 #: apps/native/src/game_menu/quick_look.rs
 msgid "Stopping…"
 msgstr "Stoppar…"
@@ -12996,11 +13008,11 @@ msgstr "Lagringstjänsten är inte tillgänglig"
 
 #: apps/desktop/src/shell/nav.ts apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/frame/sidebar.rs
-#: apps/native/src/frame/views.rs
+#: apps/native/src/frame/views.rs apps/native/src/game/back.rs
 msgid "Store"
 msgstr "Butik"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Store account"
 msgstr "Butikskonto"
@@ -13026,7 +13038,7 @@ msgid "stores, Steam, GOG, Epic, sign in, log in, owned games, library import, p
 msgstr "butiker, Steam, GOG, Epic, logga in, ägda spel, biblioteksimport, speltid, prestationer"
 
 #. Button: streams the game from another device
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Stream"
 msgstr "Streama"
 
@@ -13052,11 +13064,11 @@ msgid "stream, remote play, play on TV, Moonlight, Sunshine, host, quality, bitr
 msgstr "streama, fjärrspel, spela på TV, Moonlight, Sunshine, värd, kvalitet, bithastighet, upplösning, bildfrekvens"
 
 #. The game is streaming from another device
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Streaming"
 msgstr "Streamar"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Streaming"
 msgstr "Streaming"
@@ -13809,7 +13821,7 @@ msgstr "Den här delen av Caskade startade inte under den här sessionen. Det ka
 msgid "This plugin view isn't available."
 msgstr "Den här tilläggsvyn är inte tillgänglig."
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "This release is being updated. Play is available again when the update finishes."
 msgstr "Den här utgåvan uppdateras. Spela är tillgängligt igen när uppdateringen är klar."
 
@@ -13988,9 +14000,9 @@ msgstr "systemfält, avsluta, stäng till systemfältet"
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs apps/native/src/frame/notifications.rs
-#: apps/native/src/library/bulk_edit.rs apps/native/src/library/view.rs
-#: apps/native/src/settings/general.rs apps/native/src/settings/streaming.rs
-#: apps/native/src/ui/failure.rs
+#: apps/native/src/game/page.rs apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/view.rs apps/native/src/settings/general.rs
+#: apps/native/src/settings/streaming.rs apps/native/src/ui/failure.rs
 msgid "Try again"
 msgstr "Försök igen"
 
@@ -14368,7 +14380,7 @@ msgstr "Uppdateringar"
 msgid "Updates automatically"
 msgstr "Uppdateras automatiskt"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "release state"
 msgid "Updating"
 msgstr "Uppdateras"
@@ -14708,7 +14720,7 @@ msgstr "Webb"
 msgid "Web games"
 msgstr "Webbspel"
 
-#: apps/desktop/src/api/presentation.ts
+#: apps/desktop/src/api/presentation.ts apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Web games"
 msgstr "Webbspel"
@@ -15136,7 +15148,7 @@ msgctxt "game menu section"
 msgid "Your devices"
 msgstr "Dina enheter"
 
-#: apps/desktop/src/views/game/GameView.tsx
+#: apps/desktop/src/views/game/GameView.tsx apps/native/src/game/page.rs
 msgid "Your first session will appear here."
 msgstr "Din första session visas här."
 

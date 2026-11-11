@@ -596,6 +596,9 @@
   .h-16 {
     height: calc(calc(0.25rem * var(--cs-density-scale)) * 16);
   }
+  .h-56 {
+    height: calc(calc(0.25rem * var(--cs-density-scale)) * 56);
+  }
   .h-72 {
     height: calc(calc(0.25rem * var(--cs-density-scale)) * 72);
   }
@@ -770,6 +773,9 @@
   .flex-\[1_1_16rem\] {
     flex: 1 1 16rem;
   }
+  .flex-\[1_1_32rem\] {
+    flex: 1 1 32rem;
+  }
   .shrink-0 {
     flex-shrink: 0;
   }
@@ -867,6 +873,9 @@
   .grid-cols-\[repeat\(auto-fill\,var\(--tile\)\)\] {
     grid-template-columns: repeat(auto-fill,var(--tile));
   }
+  .grid-cols-\[repeat\(auto-fit\,minmax\(min\(100\%\,34rem\)\,1fr\)\)\] {
+    grid-template-columns: repeat(auto-fit,minmax(min(100%, 34rem),1fr));
+  }
   .flex-col {
     flex-direction: column;
   }
@@ -887,6 +896,9 @@
   }
   .items-start {
     align-items: flex-start;
+  }
+  .items-stretch {
+    align-items: stretch;
   }
   .justify-between {
     justify-content: space-between;
@@ -989,6 +1001,9 @@
   :where(.divide-border > :not(:last-child)) {
     border-color: var(--cs-color-border);
   }
+  .self-center {
+    align-self: center;
+  }
   .self-start {
     align-self: flex-start;
   }
@@ -1082,6 +1097,9 @@
   .border-dashed {
     --tw-border-style: dashed;
     border-style: dashed;
+  }
+  .border-accent {
+    border-color: var(--cs-color-accent);
   }
   .border-accent-alt {
     border-color: var(--cs-color-accent-alt);
@@ -1483,6 +1501,9 @@
   }
   .py-6 {
     padding-block: calc(calc(0.25rem * var(--cs-density-scale)) * 6);
+  }
+  .py-12 {
+    padding-block: calc(calc(0.25rem * var(--cs-density-scale)) * 12);
   }
   .py-16 {
     padding-block: calc(calc(0.25rem * var(--cs-density-scale)) * 16);
@@ -2533,6 +2554,9 @@
     }
   }
   @media (width >= 40rem) {
+    .sm\:w-80 {
+      width: calc(calc(0.25rem * var(--cs-density-scale)) * 80);
+    }
     .sm\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }

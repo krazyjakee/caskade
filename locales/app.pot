@@ -797,6 +797,7 @@ msgstr ""
 
 #. A release and its install state
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "{name} ({state})"
 msgstr ""
 
@@ -1871,6 +1872,7 @@ msgstr ""
 #: apps/desktop/src/views/activity/ActivityView.tsx
 #: apps/desktop/src/views/game/origin.ts
 #: apps/native/src/frame/notifications.rs
+#: apps/native/src/game/back.rs
 msgid "Activity"
 msgstr ""
 
@@ -2111,6 +2113,7 @@ msgid "Added after the profile's arguments; variables like {variable} work."
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Added by hand"
 msgstr ""
@@ -2410,6 +2413,7 @@ msgid "Another device"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Another of your devices"
 msgstr ""
@@ -2734,6 +2738,7 @@ msgstr ""
 #. The game page's link back to where it was opened from
 #: apps/desktop/src/components/gameSelection/BulkEditDialog.tsx
 #: apps/desktop/src/views/game/BackLink.tsx
+#: apps/native/src/game/back.rs
 #: apps/native/src/library/bulk_edit.rs
 msgid "Back"
 msgstr ""
@@ -2750,6 +2755,7 @@ msgstr ""
 
 #. {name} is the page, collection or game the game page was opened from
 #: apps/desktop/src/views/game/BackLink.tsx
+#: apps/native/src/game/back.rs
 msgid "Back to {name}"
 msgstr ""
 
@@ -2923,6 +2929,7 @@ msgid "Brings in every game your {name} account owns, installed or not."
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "release state"
 msgid "Broken"
 msgstr ""
@@ -3242,6 +3249,7 @@ msgid "Caskade can't install emulators on this system yet."
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Caskade can't start this game: it has nothing to launch. Add a program or URI in Edit details → Actions."
 msgstr ""
 
@@ -3953,6 +3961,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/native/src/frame/sidebar.rs
 #: apps/native/src/frame/views.rs
+#: apps/native/src/game/back.rs
 #: apps/native/src/settings/general.rs
 msgid "Collections"
 msgstr ""
@@ -4290,6 +4299,7 @@ msgid "Could not load notifications."
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Could not load session history."
 msgstr ""
 
@@ -4315,6 +4325,7 @@ msgid "Could not load this collection."
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Could not load this game"
 msgstr ""
 
@@ -4579,6 +4590,12 @@ msgctxt "playtime tracking"
 msgid "Default"
 msgstr ""
 
+#. The release the game's Play starts
+#: apps/native/src/game/page.rs
+msgctxt "release"
+msgid "Default"
+msgstr ""
+
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
 #: apps/native/src/flows/storage.rs
 msgctxt "storage location"
@@ -4726,6 +4743,7 @@ msgid "Desktop entries"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Desktop entries"
 msgstr ""
@@ -5964,6 +5982,7 @@ msgid "Game metadata"
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Game not found"
 msgstr ""
 
@@ -6430,6 +6449,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/native/src/frame/sidebar.rs
 #: apps/native/src/frame/views.rs
+#: apps/native/src/game/back.rs
 #: apps/native/src/settings/general.rs
 msgctxt "navigation"
 msgid "Home"
@@ -6866,6 +6886,7 @@ msgid "Install location preference"
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Install location unknown"
 msgstr ""
 
@@ -6943,6 +6964,7 @@ msgid "Installed"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "release state"
 msgid "Installed"
 msgstr ""
@@ -7064,6 +7086,7 @@ msgid "Installs"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Installs"
 msgstr ""
@@ -7615,6 +7638,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/frame/sidebar.rs
+#: apps/native/src/game/back.rs
 #: apps/native/src/library/view.rs
 #: apps/native/src/settings/appearance.rs
 #: apps/native/src/settings/general.rs
@@ -7811,6 +7835,7 @@ msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Loading game…"
 msgstr ""
 
@@ -7861,6 +7886,7 @@ msgid "Loading scripts…"
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Loading sessions…"
 msgstr ""
 
@@ -8687,6 +8713,7 @@ msgid "No description on IGDB."
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "No description yet."
 msgstr ""
 
@@ -9361,6 +9388,7 @@ msgstr ""
 #. A link to a game's website
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Official site"
 msgstr ""
 
@@ -9905,6 +9933,7 @@ msgid "partial result"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "release state"
 msgid "Partly installed"
 msgstr ""
@@ -10119,6 +10148,7 @@ msgstr ""
 
 #. Button: starts the game
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Play"
 msgstr ""
 
@@ -10162,6 +10192,7 @@ msgid "Play from other devices"
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Play from your library"
 msgstr ""
 
@@ -10257,6 +10288,7 @@ msgstr ""
 #: apps/desktop/src/shell/console/GameCurtain.tsx
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
+#: apps/native/src/game/page.rs
 msgid "Playing"
 msgstr ""
 
@@ -10271,6 +10303,7 @@ msgid "Playing another game"
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Playing now"
 msgstr ""
 
@@ -10721,6 +10754,7 @@ msgstr ""
 
 #: apps/desktop/src/api/streaming.ts
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 #: apps/native/src/settings/streaming.rs
 msgctxt "streaming device"
 msgid "Ready"
@@ -10974,6 +11008,7 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/gameEditor/SavesTab.tsx
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Release"
 msgstr ""
 
@@ -11550,6 +11585,7 @@ msgid "ROM folders"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "ROM folders"
 msgstr ""
@@ -11676,6 +11712,7 @@ msgstr ""
 
 #. The Play button while the game runs
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Running"
 msgstr ""
 
@@ -12330,6 +12367,7 @@ msgid "Servers and what they import. Each device signs in with its own password.
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Session history"
 msgstr ""
 
@@ -12960,6 +12998,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/flows/streaming.rs
 #: apps/native/src/game/launch.rs
+#: apps/native/src/game/page.rs
 #: apps/native/src/game_menu/play.rs
 #: apps/native/src/game_menu/quick_look.rs
 #: apps/native/src/library/web.rs
@@ -13046,6 +13085,7 @@ msgid "Stay open"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgid "Steam shortcuts"
 msgstr ""
 
@@ -13085,6 +13125,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
+#: apps/native/src/game/page.rs
 #: apps/native/src/game_menu/menu.rs
 #: apps/native/src/game_menu/quick_look.rs
 msgctxt "game action"
@@ -13147,6 +13188,7 @@ msgstr ""
 
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 #: apps/native/src/game_menu/quick_look.rs
 msgid "Stopping…"
 msgstr ""
@@ -13217,10 +13259,12 @@ msgstr ""
 #: apps/desktop/src/views/StoreView.tsx
 #: apps/native/src/frame/sidebar.rs
 #: apps/native/src/frame/views.rs
+#: apps/native/src/game/back.rs
 msgid "Store"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Store account"
 msgstr ""
@@ -13248,6 +13292,7 @@ msgstr ""
 
 #. Button: streams the game from another device
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Stream"
 msgstr ""
 
@@ -13275,10 +13320,12 @@ msgstr ""
 
 #. The game is streaming from another device
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Streaming"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Streaming"
 msgstr ""
@@ -14037,6 +14084,7 @@ msgid "This plugin view isn't available."
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "This release is being updated. Play is available again when the update finishes."
 msgstr ""
 
@@ -14222,6 +14270,7 @@ msgstr ""
 #: apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs
 #: apps/native/src/frame/notifications.rs
+#: apps/native/src/game/page.rs
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/view.rs
 #: apps/native/src/settings/general.rs
@@ -14607,6 +14656,7 @@ msgid "Updates automatically"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "release state"
 msgid "Updating"
 msgstr ""
@@ -14949,6 +14999,7 @@ msgid "Web games"
 msgstr ""
 
 #: apps/desktop/src/api/presentation.ts
+#: apps/native/src/game/present.rs
 msgctxt "library source"
 msgid "Web games"
 msgstr ""
@@ -15381,6 +15432,7 @@ msgid "Your devices"
 msgstr ""
 
 #: apps/desktop/src/views/game/GameView.tsx
+#: apps/native/src/game/page.rs
 msgid "Your first session will appear here."
 msgstr ""
 
