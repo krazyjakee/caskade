@@ -1,8 +1,9 @@
 //! First-run setup's sounds (#97), as the webview's `onboarding/sound.ts`:
 //! the startup recording as the welcome's logo appears, and small cues
 //! synthesised from the same notes and envelopes (a step, something found,
-//! setup done). The output opens on the first sound and closes with setup;
-//! without an audio device setup stays silent. Muting takes effect at once.
+//! setup done). The output opens on the first sound, off the UI thread, and
+//! closes with setup; without an audio device setup stays silent. Muting
+//! takes effect at once.
 
 use std::cell::RefCell;
 use std::num::NonZero;
@@ -105,18 +106,73 @@ pub fn samples(cue: Cue) -> Vec<f32> {
     out
 }
 
-/// The audio output, once opened.
-struct Output {
-    sink: rodio::MixerDeviceSink,
-    startup: Option<rodio::Player>,
+/// Opens the audio output: the default device, or a test's stand-in.
+type Open = fn() -> Result<rodio::MixerDeviceSink, rodio::DeviceSinkError>;
+
+fn open_default() -> Result<rodio::MixerDeviceSink, rodio::DeviceSinkError> {
+    rodio::DeviceSinkBuilder::open_default_sink()
+}
+
+/// What setup asks of the audio output.
+enum Command {
+    /// The startup recording.
+    Startup,
+    /// A cue's samples.
+    Cue(Vec<f32>),
+    /// Stop the startup recording.
+    Silence,
+}
+
+/// The audio output, opened and played on a blocking task of the app's
+/// runtime, never on the UI thread: opening a device can stall (an ALSA
+/// setup without a sound card), and the UI only ever sends. The task ends,
+/// closing the output, when setup's last handle goes.
+fn run_output(commands: std::sync::mpsc::Receiver<Command>, open: Open) {
+    let mut sink = match open() {
+        Ok(sink) => sink,
+        Err(error) => {
+            tracing::info!(%error, "no audio output: setup stays silent");
+            return;
+        }
+    };
+    sink.log_on_drop(false);
+    let mut startup: Option<rodio::Player> = None;
+    while let Ok(command) = commands.recv() {
+        match command {
+            Command::Startup => {
+                let Ok(decoded) = rodio::Decoder::try_from(std::io::Cursor::new(STARTUP)) else {
+                    continue;
+                };
+                let player = rodio::Player::connect_new(sink.mixer());
+                player.set_volume(OUTPUT_GAIN);
+                player.append(decoded);
+                startup = Some(player);
+            }
+            Command::Cue(samples) => {
+                sink.mixer().add(rodio::buffer::SamplesBuffer::new(
+                    NonZero::new(1).expect("one channel"),
+                    NonZero::new(RATE).expect("a rate"),
+                    samples,
+                ));
+            }
+            Command::Silence => {
+                if let Some(startup) = &startup {
+                    startup.clear();
+                }
+            }
+        }
+    }
 }
 
 /// Setup's sounds; `enabled` is read on every cue.
 #[derive(Clone)]
 pub struct Sounds {
     enabled: Rc<dyn Fn() -> bool>,
-    output: Rc<RefCell<Option<Output>>>,
-    /// Tried and failed: no device; stay silent.
+    open: Open,
+    /// The output task's queue, from the first sound on; `None` before it,
+    /// and again once the output turned out to be unavailable.
+    output: Rc<RefCell<Option<std::sync::mpsc::Sender<Command>>>>,
+    /// The output was tried and isn't there: stay silent.
     unavailable: Rc<RefCell<bool>>,
     started: Rc<RefCell<bool>>,
 }
@@ -131,6 +187,7 @@ impl Sounds {
     pub fn new(enabled: impl Fn() -> bool + 'static) -> Self {
         Self {
             enabled: Rc::new(enabled),
+            open: open_default,
             output: Rc::default(),
             unavailable: Rc::default(),
             started: Rc::default(),
@@ -142,29 +199,23 @@ impl Sounds {
         Self::new(|| false)
     }
 
-    fn with_output(&self, play: impl FnOnce(&mut Output)) {
+    /// Queues `command` for the output, opening it on first use. Never
+    /// waits.
+    fn send(&self, command: Command) {
         if *self.unavailable.borrow() {
             return;
         }
         let mut output = self.output.borrow_mut();
-        if output.is_none() {
-            match rodio::DeviceSinkBuilder::open_default_sink() {
-                Ok(mut sink) => {
-                    sink.log_on_drop(false);
-                    *output = Some(Output {
-                        sink,
-                        startup: None,
-                    });
-                }
-                Err(error) => {
-                    tracing::info!(%error, "no audio output: setup stays silent");
-                    *self.unavailable.borrow_mut() = true;
-                    return;
-                }
-            }
-        }
-        if let Some(output) = output.as_mut() {
-            play(output);
+        let sender = output.get_or_insert_with(|| {
+            let (sender, commands) = std::sync::mpsc::channel();
+            let open = self.open;
+            caskade_app::runtime::spawn_blocking(move || run_output(commands, open));
+            sender
+        });
+        // The task ended: no output.
+        if sender.send(command).is_err() {
+            *output = None;
+            *self.unavailable.borrow_mut() = true;
         }
     }
 
@@ -177,33 +228,16 @@ impl Sounds {
             if self.started.replace(true) {
                 return;
             }
-            self.with_output(|output| {
-                let Ok(decoded) = rodio::Decoder::try_from(std::io::Cursor::new(STARTUP)) else {
-                    return;
-                };
-                let player = rodio::Player::connect_new(output.sink.mixer());
-                player.set_volume(OUTPUT_GAIN);
-                player.append(decoded);
-                output.startup = Some(player);
-            });
+            self.send(Command::Startup);
             return;
         }
-        let samples = samples(cue);
-        self.with_output(|output| {
-            output.sink.mixer().add(rodio::buffer::SamplesBuffer::new(
-                NonZero::new(1).expect("one channel"),
-                NonZero::new(RATE).expect("a rate"),
-                samples,
-            ));
-        });
+        self.send(Command::Cue(samples(cue)));
     }
 
     /// Stops what is playing, when sounds are turned off.
     pub fn silence(&self) {
-        if let Some(output) = self.output.borrow().as_ref()
-            && let Some(startup) = &output.startup
-        {
-            startup.clear();
+        if self.output.borrow().is_some() {
+            self.send(Command::Silence);
         }
     }
 }
@@ -227,6 +261,31 @@ mod tests {
         // Done is the longest: its first note lasts 1.8 s.
         assert!(samples(Cue::Done).len() > (1.8 * RATE as f32) as usize);
         assert!(samples(Cue::Start).is_empty());
+    }
+
+    /// An output that takes its time to open, as ALSA without a sound card
+    /// can, and then isn't there.
+    fn stalls() -> Result<rodio::MixerDeviceSink, rodio::DeviceSinkError> {
+        std::thread::sleep(std::time::Duration::from_secs(5));
+        Err(rodio::DeviceSinkError::NoDevice)
+    }
+
+    #[test]
+    fn a_stalled_output_never_holds_up_the_ui() {
+        let sounds = Sounds {
+            open: stalls,
+            ..Sounds::new(|| true)
+        };
+        let started = std::time::Instant::now();
+        sounds.play(Cue::Start);
+        sounds.play(Cue::Step);
+        sounds.silence();
+        sounds.play(Cue::Done);
+        assert!(
+            started.elapsed() < std::time::Duration::from_secs(1),
+            "{:?}",
+            started.elapsed()
+        );
     }
 
     #[test]
