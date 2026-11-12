@@ -117,7 +117,12 @@ async fn install_and_launch(fixture: &str, args: &[&str]) {
         0
     );
 
-    // Launch the installed game through Proton from its final location.
+    // Launch the installed game through Proton from its final location,
+    // with Proton's log of exceptions, processes and loaded modules, which a
+    // failure prints (#123). In the game's folder: the only one the
+    // container may write.
+    let logs = game.join(".caskade/proton-log");
+    fs::create_dir_all(&logs).unwrap();
     let launch = ProcessCommand {
         program: game.join("FixtureGame.exe"),
         args: vec![
@@ -128,14 +133,24 @@ async fn install_and_launch(fixture: &str, args: &[&str]) {
             ),
             "--check-z-drive".into(),
         ],
-        env: BTreeMap::new(),
+        env: BTreeMap::from([
+            ("PROTON_LOG".into(), "+seh,+process,+loaddll".into()),
+            ("PROTON_LOG_DIR".into(), logs.to_string_lossy().into_owned()),
+        ]),
         cwd: game.clone(),
     };
     let process = runtime.spawn(&launch).unwrap();
     let exit = runtime.wait(process, Duration::from_secs(600));
     runtime.kill(process).unwrap();
     let token = fs::read_to_string(game.join("launch-token")).unwrap_or_default();
-    assert_eq!(exit.unwrap().code, 0, "token: {token}");
+    let code = exit.unwrap().code;
+    assert_eq!(
+        code,
+        0,
+        "token: {token}\nexit {code}{}\n{}",
+        signal_of(code),
+        proton_log(&logs)
+    );
     assert!(
         token
             .trim_end()
@@ -145,6 +160,36 @@ async fn install_and_launch(fixture: &str, args: &[&str]) {
     );
     assert!(!token.contains("sandbox leak"), "{token}");
     root.assert_sentinel_untouched();
+}
+
+/// What an exit code says about a signal: umu and Proton are Python, whose
+/// `sys.exit(-N)` for a child killed by signal N exits with 256 - N, and
+/// a shell or pressure-vessel's own convention is 128 + N.
+fn signal_of(code: i32) -> String {
+    if (129..=255).contains(&code) {
+        format!(
+            " (a child killed by signal {} if from Python's sys.exit, {} if 128 + signal)",
+            256 - code,
+            code - 128
+        )
+    } else {
+        String::new()
+    }
+}
+
+/// The end of Proton's logs in `dir`.
+fn proton_log(dir: &Path) -> String {
+    let mut out = String::new();
+    for entry in fs::read_dir(dir).into_iter().flatten().flatten() {
+        let text = fs::read_to_string(entry.path()).unwrap_or_default();
+        let lines: Vec<&str> = text.lines().collect();
+        let tail = lines[lines.len().saturating_sub(120)..].join("\n");
+        out.push_str(&format!("--- {}\n{tail}\n", entry.path().display()));
+    }
+    if out.is_empty() {
+        out.push_str("(no Proton log)");
+    }
+    out
 }
 
 #[tokio::test(flavor = "multi_thread")]
