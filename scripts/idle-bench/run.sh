@@ -8,6 +8,10 @@
 #                             [--label <text>] [--games 8400] [--warmup 300]
 #                             [--duration 1800] [--interval 10]
 #                             [--exe 'caskade|WebKit\w*Process'] [--size 1600x900]
+#                             [--hide]
+#
+# --hide closes the window once it shows (WM_DELETE_WINDOW, as its close
+# button does), so the app idles in the tray.
 #
 # Needs no root and touches nothing outside --out. Stops only processes in its
 # own namespace, never any by name.
@@ -15,7 +19,7 @@ set -euo pipefail
 here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 if [ "${1:-}" != --inside ]; then
-  app= seed= out= label= games=8400 warmup=300 duration=1800 interval=10 size=1600x900
+  app= seed= out= label= games=8400 warmup=300 duration=1800 interval=10 size=1600x900 hide=0
   exe='caskade|WebKit\w*Process'
   while [ $# -gt 0 ]; do
     case $1 in
@@ -29,6 +33,7 @@ if [ "${1:-}" != --inside ]; then
       --interval) interval=$2; shift 2 ;;
       --exe) exe=$2; shift 2 ;;
       --size) size=$2; shift 2 ;;
+      --hide) hide=1; shift ;;
       *) echo "unknown option $1" >&2; exit 2 ;;
     esac
   done
@@ -36,9 +41,9 @@ if [ "${1:-}" != --inside ]; then
   [ -e "$out" ] && { echo "$out exists: pick a new --out" >&2; exit 2; }
   mkdir -p "$out"
   out=$(realpath "$out")
-  meta=$(python3 -I - "$app" "$label" "$games" "$size" <<'EOF'
+  meta=$(python3 -I - "$app" "$label" "$games" "$size" "$hide" <<'EOF'
 import hashlib, json, os, platform, sys
-app, label, games, size = sys.argv[1:]
+app, label, games, size, hide = sys.argv[1:]
 cpu = next((l.split(":", 1)[1].strip() for l in open("/proc/cpuinfo") if l.startswith("model name")), "?")
 mem = next((int(l.split()[1]) // 1024 for l in open("/proc/meminfo") if l.startswith("MemTotal")), 0)
 gpu = next((l.strip() for l in os.popen("lspci 2>/dev/null | grep -iE 'vga|3d'")), "?")
@@ -46,17 +51,18 @@ print(json.dumps({
     "label": label, "app": os.path.basename(app),
     "app_sha256": hashlib.sha256(open(app, "rb").read()).hexdigest(),
     "app_bytes": os.path.getsize(app), "games": int(games), "window": size,
+    "state": "closed to the tray" if hide == "1" else "open on its start view",
     "display": "Xvfb (software GL)", "network": "none (own namespace)",
     "kernel": platform.release(), "cpu": cpu, "cores": os.cpu_count(), "ram_mb": mem, "gpu": gpu,
 }))
 EOF
 )
   echo "$meta" > "$out/meta.json"
-  exec unshare -rn "$0" --inside "$app" "$seed" "$out" "$games" "$warmup" "$duration" "$interval" "$exe" "$size" "$meta"
+  exec unshare -rn "$0" --inside "$app" "$seed" "$out" "$games" "$warmup" "$duration" "$interval" "$exe" "$size" "$meta" "$hide"
 fi
 
 shift
-app=$1 seed=$2 out=$3 games=$4 warmup=$5 duration=$6 interval=$7 exe=$8 size=$9 meta=${10}
+app=$1 seed=$2 out=$3 games=$4 warmup=$5 duration=$6 interval=$7 exe=$8 size=$9 meta=${10} hide=${11}
 netns=$(readlink /proc/self/ns/net)
 
 # Stops every process in this namespace but this script.
@@ -84,7 +90,7 @@ echo "seeding $games games"
 
 export IDLE_BENCH_APP=$app IDLE_BENCH_OUT=$out IDLE_BENCH_HERE=$here
 export IDLE_BENCH_ARGS="--out $out --warmup $warmup --duration $duration --interval $interval"
-export IDLE_BENCH_EXE=$exe IDLE_BENCH_META=$meta
+export IDLE_BENCH_EXE=$exe IDLE_BENCH_META=$meta IDLE_BENCH_HIDE=$hide
 dbus-run-session -- bash -c '
   set -euo pipefail
   eval "$(printf idle-bench | gnome-keyring-daemon --unlock --components=secrets 2>/dev/null)"
@@ -95,6 +101,9 @@ dbus-run-session -- bash -c '
     sleep 0.2
   done
   "$IDLE_BENCH_APP" >"$IDLE_BENCH_OUT/app.log" 2>&1 &
+  if [ "$IDLE_BENCH_HIDE" = 1 ]; then
+    python3 -I "$IDLE_BENCH_HERE/hide.py" 180 >"$IDLE_BENCH_OUT/hide.log" 2>&1
+  fi
   echo "app started; warm-up, then measuring"
   python3 -I "$IDLE_BENCH_HERE/sample.py" $IDLE_BENCH_ARGS --exe "$IDLE_BENCH_EXE" --meta "$IDLE_BENCH_META"
 '

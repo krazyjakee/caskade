@@ -205,10 +205,14 @@ debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
   (#8)
 - [ ] **L8.** Idle memory, alongside the others: start an installed build
   (deb or AppImage) with your own library, leave it in the tray for an hour,
-  then run
-  `grep -E 'RssAnon|VmSwap' /proc/$(pgrep -xo caskade)/status`. **Pass:**
-  RssAnon plus VmSwap is under 400 MB with a library the size of 8,400
-  games. Record it in "Idle memory with a large library". (#71)
+  then add up RssAnon and VmSwap over every process the app runs: for the
+  native app (`caskade --native`, one process)
+  `grep -E 'RssAnon|VmSwap' /proc/$(pgrep -xo caskade-native)/status`; for
+  the webview app, the main process and its WebKit processes,
+  `for p in $(pgrep -xo caskade) $(pgrep -P $(pgrep -xo caskade)); do grep -E 'RssAnon|VmSwap' /proc/$p/status; done`.
+  **Pass:** the native app is under 250 MB and the webview app under 400 MB
+  with a library the size of 8,400 games. Record both in "Idle memory with a
+  large library". (#71, #111)
 - [ ] **L9.** Startup, once in an X11 session and once in a Wayland one,
   with an installed build (deb or AppImage). Settings → General → Startup:
   turn on Launch on system startup, set Open to Library, log out and in.
@@ -929,9 +933,10 @@ newest one listed.
 
 ### Idle memory with a large library (#71)
 
-The budget is the main `caskade` process's anonymous memory, RssAnon plus
-VmSwap from `/proc/<pid>/status`, after an hour idle: under 400 MB with
-8,400 games. The WebKit web process is separate and isn't counted.
+The budget is the anonymous memory of every process the app runs, RssAnon
+plus VmSwap from `/proc/<pid>/status`, after an hour idle in the tray: with
+8,400 games under 250 MB for the native app (one process) and under 400 MB
+for the webview app, whose WebKit processes count too (#111).
 `WebKitWebProcess` was about 270 MB in the report that opened #71.
 
 To find what holds memory, run a copy of the library under Xvfb with
@@ -945,3 +950,7 @@ the copy afterwards: its keyring holds your sign-ins.
 | 0.1.2 (deb) | Linux Mint 22.3, NVIDIA, X11, 8,439 games | 1.65–1.71 GB for 14 hours, 60 % of it swapped out |
 | `9d786ab` (debug) | copy of the same library under Xvfb, glibc, 100 minutes | 337 MB at start; from 10 minutes on 209–315 MB, mean 226 MB; 105 threads |
 | `cacf049` (debug) | the same copy restarted, 20 minutes | 152–155 MB between discovery's 5-minute polls, 178–231 MB for the 40 s after each |
+| `4a07e53c` (release), webview app | seeded 8,400 games (`scripts/idle-bench/`, `--hide`), an hour in the tray, every process | 250 MB (PSS 528 MB), 0.15 CPU-s/min |
+| `4a07e53c` (release), native app | the same, CPU renderer | 181 MB (PSS 327 MB), 0.13 CPU-s/min |
+| `4a07e53c` (release), webview app | copy of a real 8,466-game library under Xvfb, an hour in the tray, every process | 341 MB, 0.38 CPU-s/min (its streaming host didn't start) |
+| `4a07e53c` (release), native app | the same copy, 20 minutes in the tray | 486 MB in `caskade-native`, 75 MB in the Sunshine it started: over budget (#111) |

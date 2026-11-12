@@ -68,7 +68,9 @@ across builds you compare, and say so if you don't.
   renderer may still find the GPU's Vulkan driver. CPU figures from Xvfb
   favour GPU renderers; repeat the comparison on a real display before
   drawing conclusions about CPU.
-- The window stays open on Home, the default start view. The library grid
-  and idle in the tray aren't measured yet: "Open to" and "Start minimized"
-  aren't wired up, and deep links only install, so neither can be reached
-  without clicking. Add those scenarios once they can.
+- The window stays open on Home, the default start view. With `--hide`,
+  `hide.py` closes it once it shows (WM_DELETE_WINDOW, as its close button
+  does), so the app idles in the tray: Xvfb has no tray host, but both apps
+  put their icon up anyway, and a close hides the window. `meta.json`'s
+  `state` says which. The library grid isn't measured yet: "Open to" isn't
+  wired up, so it can't be reached without clicking.
