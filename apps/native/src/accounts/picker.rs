@@ -21,6 +21,14 @@ use crate::ui::{Avatar, AvatarSize, Button, Svg};
 #[component]
 pub fn AccountPicker(list: AccountList, on_signed_in: EventHandler<Account>) -> Element {
     let accounts = use_accounts();
+    // Console mode (#107): larger tiles and avatars, the hint bar, no window
+    // controls (the window is fullscreen).
+    let console = crate::console::is_console();
+    let size = if console {
+        AvatarSize::Xl
+    } else {
+        AvatarSize::Lg
+    };
     let mut chosen = use_signal(|| None::<String>);
     let mut error = use_signal(|| None::<String>);
     let mut pending = use_signal(|| false);
@@ -107,7 +115,9 @@ pub fn AccountPicker(list: AccountList, on_signed_in: EventHandler<Account>) -> 
                 "data-part": "titlebar",
                 "data-window-drag": "true",
                 class: "relative z-10 flex h-topbar shrink-0 items-center justify-end gap-2 pr-4 pl-6",
-                crate::frame::window::WindowControls {}
+                if !console {
+                    crate::frame::window::WindowControls {}
+                }
             }
             main {
                 "data-focus-section": "main",
@@ -121,7 +131,7 @@ pub fn AccountPicker(list: AccountList, on_signed_in: EventHandler<Account>) -> 
                             on_press: move |_| chosen.set(None),
                             {t!("All accounts")}
                         }
-                        Avatar { part: "avatar", avatar: Some(account.avatar.clone()), name: account.name.clone(), size: AvatarSize::Lg }
+                        Avatar { part: "avatar", avatar: Some(account.avatar.clone()), name: account.name.clone(), size }
                         PinPad {
                             title: t!("Enter {name}'s PIN", name = account.name.clone()),
                             locked_until_ms: account.locked_until_ms,
@@ -155,11 +165,12 @@ pub fn AccountPicker(list: AccountList, on_signed_in: EventHandler<Account>) -> 
                         ul {
                             "data-part": "accounts",
                             "aria-label": t!("Accounts"),
-                            class: "flex flex-wrap justify-center gap-6",
+                            class: if console { "flex flex-wrap justify-center gap-10" } else { "flex flex-wrap justify-center gap-6" },
                             for (index, account) in list.accounts.iter().cloned().enumerate() {
                                 li { key: "{account.id}", class: "animate-enter", style: "--i: {index}",
                                     AccountTile {
                                         preferred: Some(&account.id) == start.as_ref(),
+                                        large: console,
                                         disabled: pending(),
                                         on_press: {
                                             let mut choose = choose.clone();
@@ -177,6 +188,9 @@ pub fn AccountPicker(list: AccountList, on_signed_in: EventHandler<Account>) -> 
                     }
                 }
             }
+            if console {
+                crate::console::HintBar {}
+            }
         }
     }
 }
@@ -185,6 +199,8 @@ pub fn AccountPicker(list: AccountList, on_signed_in: EventHandler<Account>) -> 
 fn AccountTile(
     account: Account,
     preferred: bool,
+    /// Console mode's larger tile.
+    large: bool,
     disabled: bool,
     on_press: EventHandler<()>,
 ) -> Element {
@@ -212,7 +228,7 @@ fn AccountTile(
             "data-disabled": flag(disabled),
             "aria-disabled": flag(disabled),
             "aria-label": label,
-            class: "group relative flex w-36 flex-col items-center gap-3 rounded-card p-3 outline-none transition-[background-color,scale] duration-(--cs-motion-duration-fast) data-focus-visible:focus-ring data-hovered:bg-surface-hover data-pressed:scale-[0.97]",
+            class: if large { "group relative flex w-48 flex-col items-center gap-3 rounded-card p-3 outline-none transition-[background-color,scale] duration-(--cs-motion-duration-fast) data-focus-visible:focus-ring data-hovered:bg-surface-hover data-pressed:scale-[0.97]" } else { "group relative flex w-36 flex-col items-center gap-3 rounded-card p-3 outline-none transition-[background-color,scale] duration-(--cs-motion-duration-fast) data-focus-visible:focus-ring data-hovered:bg-surface-hover data-pressed:scale-[0.97]" },
             onfocus: move |_| interaction.focus(),
             onblur: move |_| interaction.blur(),
             onmouseenter: move |_| interaction.enter(),
@@ -225,7 +241,12 @@ fn AccountTile(
             },
             onkeyup: move |event| interaction.key_up(&event, press),
             span { class: "relative",
-                Avatar { part: "avatar", avatar: Some(account.avatar.clone()), name: account.name.clone(), size: AvatarSize::Lg }
+                Avatar {
+                    part: "avatar",
+                    avatar: Some(account.avatar.clone()),
+                    name: account.name.clone(),
+                    size: if large { AvatarSize::Xl } else { AvatarSize::Lg },
+                }
                 if account.has_pin {
                     span {
                         "data-part": "lock",

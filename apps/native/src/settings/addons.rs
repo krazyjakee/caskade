@@ -4,8 +4,8 @@
 //! from the last fetch; each opens its details, where it installs, updates,
 //! is skipped or removed through the shared package service. A first
 //! plugin install goes through the plugin review; an installed theme can
-//! be put to use. The native app asks for desktop mode's catalogue until
-//! console mode has its shell (#107).
+//! be put to use. The catalogue is the window's mode's: console mode's
+//! releases while it's on (#107).
 
 use caskade_app::commands::addon_offers::DeviceAddon;
 use caskade_app::commands::addon_packages::{AddonOutcome, AddonPhase, AddonProgress};
@@ -126,8 +126,14 @@ pub const ANATOMY: [Entry; 2] = [
 /// The catalogue is fetched again on opening when older than this.
 const STALE_MS: i64 = 24 * 3_600_000;
 
-/// Until console mode has its shell (#107).
-const MODE: AppMode = AppMode::Desktop;
+/// The mode the catalogue's releases are for: the window's (#107).
+fn mode() -> AppMode {
+    if crate::console::active() {
+        AppMode::Console
+    } else {
+        AppMode::Desktop
+    }
+}
 
 fn when(ms: i64) -> String {
     format::date_time(crate::library::local_date_time(ms))
@@ -198,7 +204,7 @@ pub fn StateBadge(item: CatalogueItem) -> Element {
 #[component]
 pub fn AddonCatalogue() -> Element {
     let addons = use_addons();
-    let mut catalogue = use_addons_query(|addons| async move { addons.catalogue(MODE).await });
+    let mut catalogue = use_addons_query(|addons| async move { addons.catalogue(mode()).await });
     let mut records = use_addons_query(|addons| async move { addons.records().await });
     let mut query = use_signal(String::new);
     let mut kind = use_signal(|| "all".to_owned());
@@ -214,7 +220,7 @@ pub fn AddonCatalogue() -> Element {
             refreshing.set(true);
             refresh_error.set(None);
             spawn(async move {
-                let outcome = change(async move { addons.refresh(MODE).await }).await;
+                let outcome = change(async move { addons.refresh(mode()).await }).await;
                 refreshing.set(false);
                 if let Err(error) = outcome {
                     refresh_error.set(Some(error));
@@ -667,7 +673,7 @@ fn AddonDetails(
             install_error.set(None);
             spawn(async move {
                 let result =
-                    change(async move { addons.install(&id, MODE, accept, retry).await }).await;
+                    change(async move { addons.install(&id, mode(), accept, retry).await }).await;
                 installing.set(false);
                 progress.set(None);
                 match result {

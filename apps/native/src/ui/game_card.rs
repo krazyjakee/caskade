@@ -324,6 +324,10 @@ pub fn GameCard(
                     }
                 }
             }
+            // Console mode: the device it's running on (#107).
+            if variant == CardVariant::Library {
+                crate::game::PlayingElsewhereMark { game_id: game.id.clone() }
+            }
             if game.favorite {
                 span {
                     "data-part": "favorite",

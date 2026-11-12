@@ -69,6 +69,8 @@ fn ShellBindings() -> Element {
 /// Console mode's window: sidebar, top bar, view and hints.
 #[component]
 pub fn ConsoleShell(view_key: String) -> Element {
+    // The cards' "Playing on …" marks, read once.
+    crate::game::provide_playing_marks();
     // The pointer hides when it rests (2.5 s after it last moved).
     let mut idle = use_signal(|| true);
     let mut moves = use_signal(|| 0u64);

@@ -97,6 +97,10 @@ fn the_hint_bar_shows_what_each_button_does_in_the_controllers_glyphs() {
         "{}",
         window.text(bar)
     );
+    // The search's shortcut and Home's shelves name the pad's buttons too.
+    assert_eq!(window.text(window.get("data-part", "shortcut")), "Y");
+    let pager = window.get("data-part", "pager");
+    assert_eq!(window.text(pager), "LTRT");
     // A key pressed: the keyboard's names.
     window.key(Key::Named(NamedKey::ArrowDown));
     window.settle_until("keyboard hints", |window| {
@@ -162,4 +166,44 @@ fn the_curtain_comes_down_over_a_running_game_and_lifts() {
     window.settle_until("lifted by the exit", |window| {
         state(window).as_deref() == Some("open")
     });
+}
+
+#[test]
+fn a_card_shows_the_device_its_game_is_running_on() {
+    use crate::game::launch_tests::{Script, script};
+    use caskade_app::commands::presence::PlayingElsewhere;
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _desktop = Desktop;
+    let mut window = open();
+    window.go("/library");
+    window.settle_until("the library's cards", |window| {
+        window.find("data-cs", "game-card").is_some()
+    });
+    let key = window
+        .attr(window.get("data-cs", "game-card"), "data-focus-key")
+        .expect("a card's focus key");
+    let game = key.trim_start_matches("game-").to_owned();
+    let _script = script(Script {
+        playing: vec![PlayingElsewhere {
+            device_id: "den".to_owned(),
+            device_name: "Den PC".to_owned(),
+            game_id: game.clone(),
+            title: "A fixture".to_owned(),
+            account_id: String::new(),
+            started_at_ms: 1_700_000_000_000,
+        }],
+        ..Script::default()
+    });
+    // Not on the desktop's cards.
+    assert!(window.find("data-part", "playing-elsewhere").is_none());
+    to_console(&mut window);
+    window.settle_until("the mark", |window| {
+        window
+            .find("data-focus-key", &key)
+            .and_then(|card| window.find_in(card, "data-part", "playing-elsewhere"))
+            .is_some_and(|mark| window.text(mark) == "Playing on Den PC")
+    });
+    let others = window.find_all("data-part", "playing-elsewhere");
+    assert_eq!(others.len(), 1, "only the game being played");
 }

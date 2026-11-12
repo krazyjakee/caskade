@@ -443,3 +443,45 @@ pub fn PlayingElsewhereLine(game_id: String) -> Element {
         }
     }
 }
+
+/// Which games are running on another device, read once for every card in
+/// console mode's shell.
+#[derive(Clone, Copy)]
+pub struct PlayingMarks(crate::data::Query<Vec<caskade_app::commands::presence::PlayingElsewhere>>);
+
+/// Gives the cards below what's being played elsewhere (console mode).
+pub fn provide_playing_marks() {
+    let steps = super::launch::use_launch_steps();
+    let playing = use_answer(DataKey::Devices, move || (steps.playing_elsewhere)());
+    use_context_provider(|| PlayingMarks(playing));
+}
+
+/// A game's card in console mode: the device it's running on.
+#[component]
+pub fn PlayingElsewhereMark(game_id: String) -> Element {
+    let Some(PlayingMarks(playing)) = try_use_context::<PlayingMarks>() else {
+        return rsx! {};
+    };
+    let device = playing
+        .read()
+        .as_ref()
+        .and_then(|list| list.as_ref().ok())
+        .and_then(|list| list.iter().find(|each| each.game_id == game_id))
+        .map(|each| {
+            if each.device_name.is_empty() {
+                tp!("playing on", "another device")
+            } else {
+                each.device_name.clone()
+            }
+        });
+    let Some(device) = device else {
+        return rsx! {};
+    };
+    rsx! {
+        span {
+            "data-part": "playing-elsewhere",
+            class: "absolute right-2 bottom-16 left-2 truncate rounded-control bg-surface-base/90 px-2 py-1 text-[11px] text-accent-alt",
+            {t!("Playing on {device}", device = device)}
+        }
+    }
+}

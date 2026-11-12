@@ -322,6 +322,9 @@
   .bottom-12 {
     bottom: calc(calc(0.25rem * var(--cs-density-scale)) * 12);
   }
+  .bottom-16 {
+    bottom: calc(calc(0.25rem * var(--cs-density-scale)) * 16);
+  }
   .left-0 {
     left: 0px;
   }

@@ -69,6 +69,8 @@ async fn sleep(time: Duration) {
 
 #[component]
 pub fn SearchBox() -> Element {
+    // The pad family for the shortcut in console mode (#107).
+    let family = crate::console::use_family();
     let router = use_router();
     let input = use_input();
     let list_id = "search-suggestions";
@@ -262,9 +264,15 @@ pub fn SearchBox() -> Element {
                 kbd {
                     "data-part": "shortcut",
                     class: "whitespace-nowrap rounded border border-border-strong px-1.5 py-0.5 font-mono text-[10px] text-fg-subtle",
-                    {tp!(note = "The keyboard shortcut that focuses the search", "keyboard key",
-                        "CTRL K"
-                    )}
+                    // Console mode names the pad's search button (Y), or `/`
+                    // on the keyboard (#107).
+                    if crate::console::is_console() {
+                        {crate::console::glyph(caskade_ui_input::Action::Search, family).unwrap_or_default()}
+                    } else {
+                        {tp!(note = "The keyboard shortcut that focuses the search", "keyboard key",
+                            "CTRL K"
+                        )}
+                    }
                 }
             }
             if let Some(anchor) = open().filter(|_| has_query) {

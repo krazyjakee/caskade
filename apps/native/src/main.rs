@@ -292,9 +292,9 @@ struct NativeShell;
 
 impl launch::Shell for NativeShell {
     fn on_close(&mut self) -> launch::OnClose {
-        // Console mode isn't in the native app yet (#92), and nothing in its
+        // Console mode (#107) closes as the setting says, and nothing in its
         // UI holds a close (#58).
-        match tray::state().close(false) {
+        match tray::state().close(crate::console::active()) {
             caskade_app::tray::Close::Hide => launch::OnClose::Hide,
             // Settings' unsaved edits ask before a quit (#103).
             caskade_app::tray::Close::Go | caskade_app::tray::Close::Held(_)

@@ -60,8 +60,13 @@ pub fn Frame(
                         crate::activity::InstallIngress {}
                         // What plugins draw (#109), for every slot.
                         crate::plugins::PluginRoot {
-                            crate::game_menu::GameMenuHost {
-                                Shell {}
+                            // File and folder pickers: in console mode, the
+                            // in-app browser (#107).
+                            crate::flows::paths::PathPickerProvider {
+                                in_app: crate::console::is_console(),
+                                crate::game_menu::GameMenuHost {
+                                    Shell {}
+                                }
                             }
                         }
                     }

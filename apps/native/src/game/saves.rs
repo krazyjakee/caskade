@@ -184,6 +184,9 @@ pub fn SavesPanel(
                         for (index, path) in paths.iter().enumerate() {
                             li { key: "{path}", class: "flex items-center justify-between gap-3",
                                 span { class: "min-w-0 break-all font-mono text-xs text-fg-muted", "{path}" }
+                                // A file manager would open behind console
+                                // mode's fullscreen window (#107).
+                                if !crate::console::is_console() {
                                 Button {
                                     "data-spatial": "focusable",
                                     "data-part": "reveal",
@@ -196,6 +199,7 @@ pub fn SavesPanel(
                                         move |_| reveal(index as u32)
                                     },
                                     {t!("Show in folder")}
+                                }
                                 }
                             }
                         }

@@ -1645,6 +1645,7 @@
     {"id": "Playing another game", "context": "streaming device", "references": ["apps/native/src/settings/streaming.rs"]},
     {"id": "Playing now", "references": ["apps/native/src/game/page.rs"]},
     {"id": "Playing on {devices}", "references": ["apps/native/src/game/elsewhere.rs"]},
+    {"id": "Playing on {device}", "references": ["apps/native/src/game/elsewhere.rs"]},
     {"id": "Playing on {device} now.", "references": ["apps/native/src/flows/devices.rs"]},
     {"id": "Playlists absorb the files they list, so disc tracks aren't separate games.", "references": ["apps/native/src/settings/emulation/scanners.rs"]},
     {"id": "Plays the game", "context": "launch action kind", "references": ["apps/native/src/game/editor/action_form.rs"]},

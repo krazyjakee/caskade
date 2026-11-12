@@ -22,6 +22,7 @@ mod saves;
 
 pub use anatomy::ANATOMY;
 pub(crate) use back::{GameBackLink, STORE_GAMES};
+pub(crate) use elsewhere::{PlayingElsewhereMark, provide_playing_marks};
 pub(crate) use media::{
     AgeRatingLabel, BOARDS, DEFAULT_BOARD, Screenshots, Shot, Videos, board_name, rating_name,
     shown_rating, use_preferred_board,

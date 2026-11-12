@@ -37,6 +37,19 @@ impl Mode {
 /// The mode now; `None` until the start has been decided.
 static MODE: GlobalSignal<Option<Mode>> = Signal::global(|| None);
 
+/// [`MODE`] for code outside the UI (the event loop's close, plugin runs).
+static ACTIVE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Whether console mode is on, from any thread.
+pub fn active() -> bool {
+    ACTIVE.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+fn store(mode: Mode) {
+    *MODE.write() = Some(mode);
+    ACTIVE.store(mode == Mode::Console, std::sync::atomic::Ordering::Relaxed);
+}
+
 /// The mode the window is in (desktop until the start is decided).
 pub fn mode() -> Mode {
     MODE().unwrap_or_default()
@@ -48,12 +61,23 @@ pub fn is_console() -> bool {
 
 /// Switches to `next`: the window goes fullscreen (or back), the input
 /// layer takes it, and with `keep` the choice is remembered for the next
-/// start.
+/// start. The other shell replaces the view, so Settings' unsaved edits are
+/// asked about first.
 pub fn set_mode(next: Mode, keep: bool) {
     if MODE.peek().is_some_and(|current| current == next) {
         return;
     }
-    *MODE.write() = Some(next);
+    crate::settings::unsaved::after_unsaved_changes(
+        crate::settings::unsaved::Leaving::Mode,
+        move || switch(next, keep),
+    );
+}
+
+fn switch(next: Mode, keep: bool) {
+    if MODE.peek().is_some_and(|current| current == next) {
+        return;
+    }
+    store(next);
     crate::launch::ask(crate::launch::Request::Fullscreen(next == Mode::Console));
     if keep && let Some(source) = try_consume_context::<crate::data::DataSource>() {
         let settings = source.settings.clone();
@@ -127,7 +151,7 @@ pub fn ModeRoot(children: Element) -> Element {
         // "Start in" (Settings → General) would carry from one to the next:
         // they start on the desktop and switch with View.
         let Some(settings) = settings.filter(|_| !cfg!(test)) else {
-            *MODE.write() = Some(Mode::Desktop);
+            store(Mode::Desktop);
             return;
         };
         spawn(async move {
@@ -145,7 +169,7 @@ pub fn ModeRoot(children: Element) -> Element {
             } else {
                 Mode::Desktop
             };
-            *MODE.write() = Some(start);
+            store(start);
             if console {
                 crate::launch::ask(crate::launch::Request::Fullscreen(true));
             }

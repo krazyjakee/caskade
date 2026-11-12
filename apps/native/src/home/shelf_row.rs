@@ -118,6 +118,7 @@ pub fn ShelfRow(
         },
         move || page.call(1),
     );
+    let family = crate::console::use_family();
     let heading = format!("shelf-{id}-heading");
     let gaps = GRID_GAP * (count as f64 - 1.0);
     rsx! {
@@ -130,7 +131,21 @@ pub fn ShelfRow(
             header { "data-part": "header", class: "mb-4 flex items-center gap-3",
                 Svg { icon, part: "icon", class: "size-5 text-accent-alt" }
                 h2 { id: "{heading}", "data-part": "title", class: "font-display text-xl font-semibold", "{title}" }
-                span { class: "ml-auto flex items-center gap-4", {view_all} }
+                span { class: "ml-auto flex items-center gap-4",
+                    // Console mode shows the buttons that page it (#107).
+                    if crate::console::is_console() {
+                        span { "data-part": "pager", "aria-hidden": "true", class: "flex gap-1.5",
+                            for action in [caskade_ui_input::Action::PagePrev, caskade_ui_input::Action::PageNext] {
+                                kbd {
+                                    key: "{action:?}",
+                                    class: "rounded-control border border-border-strong px-2 py-0.5 font-mono text-xs text-fg-muted",
+                                    {crate::console::glyph(action, family).unwrap_or_default()}
+                                }
+                            }
+                        }
+                    }
+                    {view_all}
+                }
             }
             {notice}
             div {

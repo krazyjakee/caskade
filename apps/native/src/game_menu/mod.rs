@@ -88,7 +88,15 @@ impl GameMenus {
     }
 
     /// Opens `target`'s quick look beside the view.
+    /// Chooses a game, as a click on its card does: its quick look on the
+    /// desktop, its page in console mode (#107).
     pub fn look(&self, target: Target) {
+        if crate::console::is_console()
+            && let Some(router) = try_consume_context::<crate::router::Router>()
+        {
+            router.open_game(&target.game_id);
+            return;
+        }
         let mut look = self.look;
         look.set(Some(target));
     }
@@ -231,6 +239,7 @@ pub fn GameMenuHost(children: Element) -> Element {
                         Some(shares) => rsx! {
                             crate::flows::share_game::ShareGameDialog {
                                 shares,
+                                console: crate::console::is_console(),
                                 target: match item {
                                     Some(item) => crate::flows::share_game::ShareTarget::Item {
                                         item,
@@ -351,9 +360,9 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
             )
         })
         .collect();
-    // Console mode's shell (#107) has no "Open installation folder"; the
-    // native app has no console mode yet.
-    let console = false;
+    // Console mode (#107) has no "Open installation folder": a file manager
+    // would open behind its fullscreen window.
+    let console = crate::console::is_console();
     let edits = crate::game::editor::use_edits();
     let facts = menu::Facts {
         game: game.as_ref(),

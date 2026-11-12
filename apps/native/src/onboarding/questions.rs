@@ -525,26 +525,15 @@ pub fn SourcesStep(
 
 // -------------------------------------------------------------------- mode
 
-/// How the user plays. The native app has no console mode yet (#107): the
-/// choice is saved as the mode Caskade starts in (`core.console.start`).
+/// How the user plays: the choice switches the window at once (#107) and
+/// is remembered for the next start.
 /// `last`: setup starts from here; otherwise the account question follows.
 #[component]
 pub fn ModeStep(on_next: EventHandler<()>, last: bool) -> Element {
-    let console = use_settings_section("core.console");
     let nodes = use_signal(Vec::<(String, NodeId)>::new);
     // A pad is plugged in: a hint towards console mode.
     let pads = use_hook(crate::input::connected_pads);
-    let saved = console.value().and_then(|settings| {
-        settings
-            .get("start")
-            .and_then(Value::as_str)
-            .map(str::to_owned)
-    });
-    // Automatic (or not loaded yet) shows the mode this app is in.
-    let mode = match saved.as_deref() {
-        Some("console") => "console",
-        _ => "desktop",
-    };
+    let mode = crate::console::mode().name();
     let values = vec!["desktop".to_owned(), "console".to_owned()];
     let stops = stops(&values, mode, false);
     let cards = [
@@ -610,7 +599,16 @@ pub fn ModeStep(on_next: EventHandler<()>, last: bool) -> Element {
                         nodes,
                         previous,
                         next,
-                        on_check: move |start: String| console.set_field("start", Value::String(start)),
+                        on_check: move |chosen: String| {
+                            crate::console::set_mode(
+                                if chosen == "console" {
+                                    crate::console::Mode::Console
+                                } else {
+                                    crate::console::Mode::Desktop
+                                },
+                                true,
+                            );
+                        },
                         part: "mode",
                         class: "group flex animate-rise cursor-default flex-col items-center gap-3 rounded-panel border border-border-strong bg-surface-raised p-6 text-center transition-[border-color,box-shadow,background-color] duration-(--cs-motion-duration-base) data-focus-visible:focus-ring data-hovered:bg-surface-hover data-selected:border-accent data-selected:shadow-[0_0_28px_-8px] data-selected:shadow-glow",
                         value: value.clone(),

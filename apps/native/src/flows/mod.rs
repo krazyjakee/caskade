@@ -66,7 +66,7 @@ pub fn Hosts() -> Element {
     let streaming = streaming::use_stream_pairing();
     rsx! {
         if let Some(pairing) = pairing {
-            pairing::PairingHost { pairing }
+            pairing::PairingHost { pairing, console: crate::console::is_console() }
         }
         if let Some(plays) = plays {
             remote_play::RemotePlayHost { plays }

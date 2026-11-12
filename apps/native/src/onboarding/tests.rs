@@ -270,3 +270,39 @@ fn the_choices_and_the_admins_account_are_saved() {
     assert_eq!(after.name, "Ada");
     assert!(after.has_pin);
 }
+
+#[test]
+fn choosing_console_mode_switches_the_window_at_once() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _run = first_run();
+    let dir = tempfile::tempdir().unwrap();
+    let mut window = open(Some(storage(dir.path())));
+    press(&mut window, "onboarding-start");
+    window.settle_until("the language", |window| {
+        step(window).as_deref() == Some("language")
+    });
+    // Past the questions to the mode.
+    for _ in 0..4 {
+        if step(&window).as_deref() == Some("mode") {
+            break;
+        }
+        let at = step(&window);
+        press(&mut window, "onboarding-next");
+        window.settle_until("the next question", |window| step(window) != at);
+    }
+    window.settle_until("the mode", |window| step(window).as_deref() == Some("mode"));
+    assert!(window.find("data-mode", "desktop").is_some());
+    press(&mut window, "onboarding-mode-console");
+    // The window is in console mode now, still on setup, and stays so.
+    window.settle_until("console mode", |window| {
+        window.find("data-mode", "console").is_some()
+    });
+    assert_eq!(step(&window).as_deref(), Some("mode"));
+    window.settle_until("remembered", |_| {
+        saved("core.console")["active"] == json!(true)
+    });
+    press(&mut window, "onboarding-mode-desktop");
+    window.settle_until("the desktop", |window| {
+        window.find("data-mode", "desktop").is_some()
+    });
+}

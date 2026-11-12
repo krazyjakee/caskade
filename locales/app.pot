@@ -11492,6 +11492,7 @@ msgid "Playing now"
 msgstr ""
 
 #: apps/desktop/src/views/game/PlayingElsewhere.tsx
+#: apps/native/src/game/elsewhere.rs
 msgid "Playing on {device}"
 msgstr ""
 

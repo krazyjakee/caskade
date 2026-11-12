@@ -224,3 +224,33 @@ fn an_age_limit_asks_for_an_admins_pin_before_play_then_plays() {
     enter_pin(&mut window, PIN);
     window.settle_until("the launch", |_| launches() >= 1);
 }
+
+#[test]
+fn the_picker_in_console_mode_has_larger_tiles_and_the_hint_bar() {
+    use caskade_ui_input::Action;
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let home = household(None);
+    let mut window = Window::open();
+    window.settle_until("the desktop shell", |window| {
+        window.find("data-cs", "app-shell").is_some()
+    });
+    window.pad(Action::View);
+    window.settle_until("the console shell", |window| {
+        window.find("data-cs", "console-shell").is_some()
+    });
+    block(accounts().sign_out()).unwrap();
+    window.settle_until("the picker", |window| {
+        window.find("data-cs", "account-picker").is_some()
+    });
+    let picker = window.get("data-cs", "account-picker");
+    assert!(window.find_in(picker, "data-cs", "hint-bar").is_some());
+    // Fullscreen: no window controls.
+    assert!(window.find("data-cs", "window-controls").is_none());
+    let kit = tile(&window, &home.kit.name);
+    let avatar = window
+        .find_in(kit, "data-part", "avatar")
+        .expect("the tile's avatar");
+    assert_eq!(window.attr(avatar, "data-size").as_deref(), Some("xl"));
+    let _ = block(source().settings.remember_console(false));
+}

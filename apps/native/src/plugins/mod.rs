@@ -31,9 +31,13 @@ use crate::router::{Route, RouteLink};
 use crate::ui::{Button, Svg, Tab, Tabs, icons, use_toasts};
 use tree::{Act, PluginTree};
 
-/// The mode plugins draw for. Console mode is #107's.
+/// The mode plugins draw for: the window's (#107).
 pub fn mode() -> Mode {
-    Mode::Desktop
+    if crate::console::active() {
+        Mode::Console
+    } else {
+        Mode::Desktop
+    }
 }
 
 /// What enabled plugins draw, loaded once for the whole frame.
