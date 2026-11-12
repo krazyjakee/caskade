@@ -22,7 +22,7 @@ You need:
 - Node with pnpm 9
 - `just`
 - Python 3, which fetches the pinned 7-Zip sidecar
-- On Linux, Tauri's WebKitGTK build dependencies and `libudev-dev`. App bundles also need `libayatana-appindicator3-dev`: the Tauri CLI finds the tray library through pkg-config and bundles it
+- On Linux, Tauri's WebKitGTK build dependencies, `libudev-dev` and `libasound2-dev` (the native app's first-run sounds). App bundles also need `libayatana-appindicator3-dev`: the Tauri CLI finds the tray library through pkg-config and bundles it
 - For the plugin host tests: `rustup target add wasm32-wasip2`
 
 ```sh

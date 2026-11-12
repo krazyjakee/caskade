@@ -24,7 +24,17 @@ use caskade_test_desktop::PrivateDesktop;
 use std::time::{Duration, Instant};
 
 const SCRIPT: &str = "\
-# The window is up, on Home (#98).
+# A fresh profile: first-run setup (#97) first. Up to its top bar, and
+# Skip setup, which opens the library.
+wait-text Get started
+press nav.up
+seek nav.right Skip setup
+press confirm
+wait-text All Games
+# Home, from the sidebar (#98).
+seek-section nav.left sidebar
+seek nav.up Home
+press confirm
 wait-text Welcome back
 # A pad: into the sidebar, to its top, down to Collections, and A opens it.
 press nav.down

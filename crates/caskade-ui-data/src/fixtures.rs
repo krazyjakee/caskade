@@ -253,6 +253,11 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
             &std::env::temp_dir().join("caskade-fixtures"),
         ))
         .map_err(|error| caskade_core::Error::Invalid(error.to_string()))?;
+    // A library with games counts as set up, as at the app's start: no
+    // first-run setup in front of it (#97).
+    caskade_app::onboarding::settle_existing(&service, &store)
+        .await
+        .map_err(caskade_core::Error::Invalid)?;
     let theme_service = caskade_core::themes::ThemeService::new(themes_folder());
     let themes = Themes::new(
         theme_service.clone(),

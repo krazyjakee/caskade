@@ -445,6 +445,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "{controller} is connected."
 msgstr ""
 
@@ -482,6 +483,7 @@ msgstr[1] ""
 
 #. js-lingui:icu=%7Bcount%2C+plural%2C+one+%7BCopy+%23+game%7D+other+%7BCopy+%23+games%7D%7D&pluralize_on=count
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Copy # game"
 msgid_plural "Copy # games"
 msgstr[0] ""
@@ -496,6 +498,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "{count} awaiting review in Settings → Library."
 msgstr ""
 
@@ -666,11 +669,13 @@ msgstr ""
 #: apps/desktop/src/components/storage/InstallRootPicker.tsx
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/native/src/flows/storage.rs
+#: apps/native/src/onboarding/questions.rs
 msgid "{free} free"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/statistics/StatisticsDashboard.tsx
+#: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/statistics.rs
 msgid "{free} free of {total}"
 msgstr ""
@@ -892,6 +897,7 @@ msgid "{name} didn't start"
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "{name} has no installed games that can be copied to this device. Install games here as usual."
 msgstr ""
 
@@ -962,14 +968,17 @@ msgid "{name}'s collections go with it. Games, installs and play history stay."
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "{neededText} chosen"
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "{neededText} chosen needs {peakText} while it copies, but only {freeText} is free here"
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "{neededText} chosen, {freeText} free here"
 msgstr ""
 
@@ -1333,6 +1342,7 @@ msgstr ""
 #: apps/native/src/collections/page.rs
 #: apps/native/src/frame/type_search.rs
 #: apps/native/src/library/platform_grid.rs
+#: apps/native/src/onboarding/run.rs
 #: apps/native/src/settings/backup.rs
 #: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/emulation/romm.rs
@@ -1346,6 +1356,7 @@ msgstr[1] ""
 #. Under the library's game count, shown large above it
 #. js-lingui:icu=%7Btotal%2C+plural%2C+one+%7Bgame+in+your+library%7D+other+%7Bgames+in+your+library%7D%7D&pluralize_on=total
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "game in your library"
 msgid_plural "games in your library"
 msgstr[0] ""
@@ -1662,6 +1673,7 @@ msgid "A comment is never closed."
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "A controller is connected."
 msgstr ""
 
@@ -1814,6 +1826,7 @@ msgstr ""
 
 #. snes and psx are folder names; keep them as they are
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "A ROMs folder with a folder per console, like snes or psx."
 msgstr ""
 
@@ -2323,6 +2336,7 @@ msgid "Added by hand"
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Adding discovered games — {count} found"
 msgstr ""
 
@@ -2347,6 +2361,7 @@ msgid "Address"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgctxt "server"
 msgid "Address"
 msgstr ""
@@ -2690,6 +2705,7 @@ msgstr ""
 #. How Caskade signs in to a RomM server
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/emulation/romm_editor.rs
 msgid "API token"
 msgstr ""
@@ -2809,6 +2825,8 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/questions.rs
+#: apps/native/src/onboarding/run.rs
 msgid "Artwork and game info"
 msgstr ""
 
@@ -3215,6 +3233,7 @@ msgid "Brazil"
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Bringing your library from {name}"
 msgstr ""
 
@@ -3659,6 +3678,7 @@ msgid "Caskade finds the game the usual way: its install folder and what the sto
 msgstr ""
 
 #: apps/desktop/src/onboarding/LanguageStep.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Caskade follows your system's language unless you pick another. You can change it later in Settings."
 msgstr ""
 
@@ -3848,6 +3868,7 @@ msgid "CD console"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgctxt "folder"
 msgid "Change"
 msgstr ""
@@ -3861,6 +3882,7 @@ msgid "Change {label}"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Change folder"
 msgstr ""
 
@@ -3906,6 +3928,7 @@ msgstr ""
 
 #. Tests the RomM server
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgctxt "action"
 msgid "Check"
 msgstr ""
@@ -4039,6 +4062,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/emulators/EmulatorSetup.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
 #: apps/native/src/game/entry_update.rs
+#: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/settings/general.rs
@@ -4058,6 +4082,7 @@ msgid "China"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgctxt "folder"
 msgid "Choose"
 msgstr ""
@@ -4096,6 +4121,7 @@ msgid "Choose a folder"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Choose a folder for your games."
 msgstr ""
 
@@ -4175,6 +4201,7 @@ msgid "Choose Caskade for magnet links and .torrent files in Windows' Default ap
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Choose folder"
 msgstr ""
 
@@ -4204,6 +4231,7 @@ msgid "Choose the game's folder"
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Choose the games to copy here over your network. They copy in the background while you finish setting up. Nothing copies unless you choose it."
 msgstr ""
 
@@ -4257,6 +4285,7 @@ msgid "Choose your games folder, what to look for and how you play again."
 msgstr ""
 
 #: apps/desktop/src/onboarding/LanguageStep.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Choose your language"
 msgstr ""
 
@@ -4531,6 +4560,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/emulation/romm.rs
 msgid "Connected"
 msgstr ""
@@ -4542,6 +4572,7 @@ msgid "Connected"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Connected · RomM {version}"
 msgstr ""
 
@@ -4562,6 +4593,7 @@ msgstr ""
 #. A RomM server's status
 #: apps/desktop/src/onboarding/run.ts
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/onboarding/run.rs
 #: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Connecting…"
 msgstr ""
@@ -4587,6 +4619,7 @@ msgstr ""
 #: apps/desktop/src/shell/AppShell.tsx
 #: apps/desktop/src/shell/console/ModeToggle.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/general.rs
 msgid "Console mode"
@@ -4606,6 +4639,8 @@ msgstr ""
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/activity/QuestionDialog.tsx
 #: apps/native/src/activity/question.rs
+#: apps/native/src/onboarding/device.rs
+#: apps/native/src/onboarding/mod.rs
 msgid "Continue"
 msgstr ""
 
@@ -4615,10 +4650,12 @@ msgid "Continue Playing"
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Continue with current settings"
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Continue without copying"
 msgstr ""
 
@@ -4868,6 +4905,7 @@ msgid "Covers, descriptions and genres from IGDB and Hasheous, looked up in the 
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Covers, descriptions and genres, looked up online."
 msgstr ""
 
@@ -5211,6 +5249,7 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/general.rs
 msgctxt "mode"
 msgid "Desktop"
@@ -5424,6 +5463,7 @@ msgid "Disconnecting keeps the account's games. Removing it takes out the games 
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Discovery has finished. Review any warnings below, or open your library."
 msgstr ""
 
@@ -5758,6 +5798,7 @@ msgid "Editor sections"
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Elapsed: {seconds} seconds"
 msgstr ""
 
@@ -5836,10 +5877,12 @@ msgid "Emulator detection failed."
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Emulator detection failed. Retry in Settings → Emulation."
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Emulator detection was cancelled."
 msgstr ""
 
@@ -5884,6 +5927,7 @@ msgid "Emulator settings are unavailable."
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Emulators"
 msgstr ""
 
@@ -6506,6 +6550,7 @@ msgid "From profile ({platforms})"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "From Steam, Epic, GOG, Heroic, Lutris and more."
 msgstr ""
 
@@ -6546,6 +6591,7 @@ msgid "Full scan on startup"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Full screen, made for a controller and a TV."
 msgstr ""
 
@@ -6739,10 +6785,12 @@ msgid "games for your library"
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Games found so far are ready to play. More may appear while discovery continues in the background."
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Games from {name}"
 msgstr ""
 
@@ -6757,6 +6805,7 @@ msgid "Games from the launchers turned on here join your library. Turning one of
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Games from your own RomM server."
 msgstr ""
 
@@ -6778,6 +6827,8 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/questions.rs
+#: apps/native/src/onboarding/run.rs
 msgid "Games on this PC"
 msgstr ""
 
@@ -6826,6 +6877,7 @@ msgid "Games the system itself keeps a record of, besides launchers' own."
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Games to copy"
 msgstr ""
 
@@ -6835,6 +6887,7 @@ msgid "Games you chose to ignore. Scans leave them out of your library."
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Games you install with Caskade are kept here. You can add more places later."
 msgstr ""
 
@@ -6844,6 +6897,7 @@ msgid "Games you linked to their achievements by hand."
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Games, accounts, collections and play history came from {name}. Next, set up what belongs to this device: its folders, emulators and how it starts."
 msgstr ""
 
@@ -6902,6 +6956,7 @@ msgstr ""
 
 #. First-run setup's welcome button
 #: apps/desktop/src/onboarding/Onboarding.tsx
+#: apps/native/src/onboarding/mod.rs
 msgid "Get started"
 msgstr ""
 
@@ -6921,6 +6976,7 @@ msgid "Getting the files ready. The link works already."
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Getting this device ready to pair…"
 msgstr ""
 
@@ -7156,6 +7212,7 @@ msgid "How Caskade looks. Themes restyle every view through design tokens."
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "How do you play?"
 msgstr ""
 
@@ -7212,6 +7269,7 @@ msgstr ""
 
 #. An example server address
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "https://romm.example.com"
 msgstr ""
 
@@ -7409,6 +7467,7 @@ msgid "Importing…"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "In a window, with mouse and keyboard."
 msgstr ""
 
@@ -8161,6 +8220,7 @@ msgid "Keep my arguments"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Keep my play time"
 msgstr ""
 
@@ -8230,6 +8290,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/LanguageStep.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search.rs
 msgid "Language"
@@ -8892,16 +8953,19 @@ msgid "look, theme, colour, color, accent, dark, light, density, card size, scal
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Looking at what it has…"
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
+#: apps/native/src/onboarding/device.rs
 #: apps/native/src/settings/devices.rs
 msgid "Looking for Caskade on this network…"
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Looking for installed emulators…"
 msgstr ""
 
@@ -8916,6 +8980,7 @@ msgid "Looking on RomM…"
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Looking…"
 msgstr ""
 
@@ -9086,6 +9151,7 @@ msgid "Matches all rules"
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Matches and downloads run in the background as games arrive. You can open your library now."
 msgstr ""
 
@@ -9356,6 +9422,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/onboarding/account.rs
 #: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/search.rs
 msgctxt "account"
@@ -9395,10 +9462,12 @@ msgid "name, avatar, picture, PIN, me, my account"
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Nearby"
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Nearby devices"
 msgstr ""
 
@@ -9620,6 +9689,7 @@ msgid "No configured profiles or ROMs yet."
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "No console folders found (like snes or psx)"
 msgstr ""
 
@@ -9664,6 +9734,7 @@ msgid "No drives found."
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "No emulator for {platforms}"
 msgstr ""
 
@@ -9776,6 +9847,7 @@ msgid "No network interfaces found."
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "No new progress reported for {seconds} seconds. A scan or network request may be taking longer. Open your library now; you can check or retry discovery in Settings → Library, and ROMs or RomM in Settings."
 msgstr ""
 
@@ -9971,6 +10043,7 @@ msgid "None (custom)"
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "None found"
 msgstr ""
 
@@ -10132,6 +10205,7 @@ msgstr ""
 #: apps/native/src/activity/question.rs
 #: apps/native/src/flows/pairing.rs
 #: apps/native/src/flows/streaming.rs
+#: apps/native/src/onboarding/device.rs
 #: apps/native/src/settings/devices.rs
 msgid "Not now"
 msgstr ""
@@ -10482,6 +10556,7 @@ msgid "On every refresh"
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "On the other device, open Settings → Devices and copy a pairing link, then paste it here."
 msgstr ""
 
@@ -10606,6 +10681,7 @@ msgid "Open Caskade desktop to use RomM."
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Open Caskade on the device you already use, on the same network. Pair with it here and compare the codes both show."
 msgstr ""
 
@@ -10652,6 +10728,7 @@ msgid "Open jobs"
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Open my library"
 msgstr ""
 
@@ -10740,6 +10817,7 @@ msgid "Optional deep scans"
 msgstr ""
 
 #: apps/desktop/src/onboarding/AccountStep.tsx
+#: apps/native/src/onboarding/account.rs
 msgid "Optional while you're the only account: 4 to 8 digits that lock it."
 msgstr ""
 
@@ -10772,6 +10850,7 @@ msgid "Or paste the code the page shows"
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Or use a pairing link"
 msgstr ""
 
@@ -10844,6 +10923,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/devices/DevicesSettings.tsx
 #: apps/native/src/flows/pairing.rs
 #: apps/native/src/flows/streaming.rs
+#: apps/native/src/onboarding/device.rs
 #: apps/native/src/settings/devices.rs
 msgid "Pair"
 msgstr ""
@@ -10922,6 +11002,7 @@ msgid "Paired. {device}'s games show in your library as Stream from {device}."
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Pairing link"
 msgstr ""
 
@@ -10980,6 +11061,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
+#: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/emulation/romm_editor.rs
 #: apps/native/src/settings/streaming.rs
 msgid "Password"
@@ -11076,6 +11158,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/AccountStep.tsx
 #: apps/desktop/src/views/settings/accounts/PinSetting.tsx
 #: apps/desktop/src/views/settings/searchIndex.ts
+#: apps/native/src/onboarding/account.rs
 #: apps/native/src/settings/pin.rs
 #: apps/native/src/settings/search.rs
 msgid "PIN"
@@ -11350,6 +11433,7 @@ msgid "Played"
 msgstr ""
 
 #: apps/desktop/src/onboarding/AccountStep.tsx
+#: apps/native/src/onboarding/account.rs
 msgctxt "account name"
 msgid "Player"
 msgstr ""
@@ -12709,6 +12793,8 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/questions.rs
+#: apps/native/src/onboarding/run.rs
 msgid "Retro games"
 msgstr ""
 
@@ -12725,6 +12811,7 @@ msgid "Retry"
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Retry discovery in Settings → Library, ROM folders in Settings → Emulation, or RomM in Settings → RomM."
 msgstr ""
 
@@ -12778,6 +12865,7 @@ msgstr ""
 
 #. How a RomM API token starts; keep it as it is
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "rmm_…"
 msgstr ""
 
@@ -13006,6 +13094,7 @@ msgid "Runs once the game has ended, or a launch didn't start. A failure is note
 msgstr ""
 
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Runs through Proton"
 msgstr ""
 
@@ -13240,10 +13329,12 @@ msgid "Saving another emulator here removes the old one's built-in profiles. You
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Saving is taking longer than expected. Continue with your current settings, or wait. You can run setup again from Settings → General."
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Saving your choices before opening the library…"
 msgstr ""
 
@@ -13309,6 +13400,7 @@ msgid "Scan cancelled."
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Scan cancelled. Retry in Settings → Library."
 msgstr ""
 
@@ -13370,10 +13462,12 @@ msgid "Scanning"
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Scanning {sources} — {found} found so far"
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Scanning installed launchers and game folders…"
 msgstr ""
 
@@ -13384,6 +13478,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/run.ts
 #: apps/desktop/src/views/settings/emulators/EmulationPanel.tsx
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
+#: apps/native/src/onboarding/run.rs
 #: apps/native/src/settings/emulation/mod.rs
 #: apps/native/src/settings/emulation/scanners.rs
 msgid "Scanning…"
@@ -13731,15 +13826,20 @@ msgstr ""
 #. Finishes first-run setup's questions and starts the work
 #: apps/desktop/src/onboarding/AccountStep.tsx
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/account.rs
+#: apps/native/src/onboarding/questions.rs
 msgid "Set up"
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
 #: apps/desktop/src/onboarding/Onboarding.tsx
+#: apps/native/src/onboarding/device.rs
+#: apps/native/src/onboarding/mod.rs
 msgid "Set up from another device"
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Set up ROM folders in Settings → Emulation."
 msgstr ""
 
@@ -13749,6 +13849,7 @@ msgid "Sets it up again where something went missing or changed."
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Setting things up"
 msgstr ""
 
@@ -13818,10 +13919,12 @@ msgid "Setup"
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Setup needs attention"
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Setup will keep running in the background."
 msgstr ""
 
@@ -14036,6 +14139,7 @@ msgstr ""
 #. Followed by the ways to sign in to a RomM server
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Sign in with"
 msgstr ""
@@ -14118,6 +14222,7 @@ msgstr ""
 #. A game whose size isn't known
 #: apps/desktop/src/api/presentation.ts
 #: apps/desktop/src/onboarding/GamesStep.tsx
+#: apps/native/src/onboarding/device.rs
 #: crates/caskade-ui-i18n/src/format.rs
 msgid "Size unknown"
 msgstr ""
@@ -14133,6 +14238,7 @@ msgid "Skip cloud-only files"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Onboarding.tsx
+#: apps/native/src/onboarding/mod.rs
 msgid "Skip setup"
 msgstr ""
 
@@ -14269,6 +14375,7 @@ msgid "Sorted by title"
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "Sorting your folders…"
 msgstr ""
 
@@ -14488,6 +14595,7 @@ msgstr ""
 
 #. First-run setup's progress dots
 #: apps/desktop/src/onboarding/Onboarding.tsx
+#: apps/native/src/onboarding/mod.rs
 msgid "Step {step} of {total}"
 msgstr ""
 
@@ -14608,6 +14716,7 @@ msgid "Storage folders"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Storage is unavailable."
 msgstr ""
 
@@ -14764,6 +14873,7 @@ msgstr ""
 
 #. View is a controller button
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Switch any time with the button at the top, or View on a controller."
 msgstr ""
 
@@ -14850,6 +14960,7 @@ msgid "sync, theme"
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Syncing with {name}…"
 msgstr ""
 
@@ -14858,6 +14969,7 @@ msgstr ""
 #: apps/desktop/src/onboarding/run.ts
 #: apps/desktop/src/views/settings/romm/RommPanel.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/onboarding/run.rs
 #: apps/native/src/settings/emulation/romm.rs
 #: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Syncing…"
@@ -15142,6 +15254,7 @@ msgid "The last refresh failed: {reason}"
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "The last try didn't reach {name}. It tries again in a moment."
 msgstr ""
 
@@ -15246,6 +15359,7 @@ msgid "the sampler didn't answer"
 msgstr ""
 
 #: apps/desktop/src/onboarding/run.ts
+#: apps/native/src/onboarding/run.rs
 msgid "The scan didn't finish."
 msgstr ""
 
@@ -15568,6 +15682,8 @@ msgid "This pairing link has expired. Make a new one on the other device (it sta
 msgstr ""
 
 #: apps/desktop/src/api/reply.ts
+#: apps/native/src/onboarding/questions.rs
+#: apps/native/src/onboarding/run.rs
 #: apps/native/src/settings/emulation/mod.rs
 #: apps/native/src/settings/emulation/romm.rs
 msgid "This part of Caskade didn't start this session. Restarting Caskade may fix it."
@@ -15613,6 +15729,7 @@ msgid "This system can't send magnet links and .torrent files to Caskade yet."
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "This takes a moment on the same network, with or without the internet."
 msgstr ""
 
@@ -15784,6 +15901,7 @@ msgstr ""
 #: apps/native/src/game/page.rs
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/view.rs
+#: apps/native/src/onboarding/setup.rs
 #: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/devices.rs
 #: apps/native/src/settings/emulation/scanners.rs
@@ -15820,14 +15938,17 @@ msgid "Turn on online lookups"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Turn on what you have. Everything can be changed later in Settings."
 msgstr ""
 
 #: apps/desktop/src/onboarding/Onboarding.tsx
+#: apps/native/src/onboarding/mod.rs
 msgid "Turn sounds off"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Onboarding.tsx
+#: apps/native/src/onboarding/mod.rs
 msgid "Turn sounds on"
 msgstr ""
 
@@ -16323,6 +16444,7 @@ msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Username"
 msgstr ""
@@ -16330,6 +16452,7 @@ msgstr ""
 #. How Caskade signs in to a RomM server
 #: apps/desktop/src/onboarding/Questions.tsx
 #: apps/desktop/src/views/settings/romm/ServerEditor.tsx
+#: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Username & password"
 msgstr ""
@@ -16705,6 +16828,7 @@ msgid "What scans look for, their folders and ignored results."
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "What should Caskade look for?"
 msgstr ""
 
@@ -16790,6 +16914,7 @@ msgid "Where games install, and the default location."
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Where should new games go?"
 msgstr ""
 
@@ -16858,6 +16983,7 @@ msgid "While it arrives, this computer helps the share's other recipients. After
 msgstr ""
 
 #: apps/desktop/src/onboarding/AccountStep.tsx
+#: apps/native/src/onboarding/account.rs
 msgid "Who are you?"
 msgstr ""
 
@@ -17038,14 +17164,17 @@ msgid "You skipped {skipped}."
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "You're all set"
 msgstr ""
 
 #: apps/desktop/src/onboarding/AccountStep.tsx
+#: apps/native/src/onboarding/account.rs
 msgid "You're the admin: you'll add the others' accounts and choose what they can do."
 msgstr ""
 
 #: apps/desktop/src/onboarding/AccountStep.tsx
+#: apps/native/src/onboarding/account.rs
 msgid "Your account has a PIN. Type a new one to change it."
 msgstr ""
 
@@ -17064,6 +17193,7 @@ msgid "Your browser and file manager send magnet links and .torrent files to Cas
 msgstr ""
 
 #: apps/desktop/src/onboarding/SetupStep.tsx
+#: apps/native/src/onboarding/setup.rs
 msgid "Your choices could not be saved. Try again to finish setup, or continue with your current settings."
 msgstr ""
 
@@ -17112,6 +17242,7 @@ msgid "Your library has no games yet."
 msgstr ""
 
 #: apps/desktop/src/onboarding/DeviceStep.tsx
+#: apps/native/src/onboarding/device.rs
 msgid "Your library is here"
 msgstr ""
 
@@ -17152,6 +17283,7 @@ msgid "Your rating"
 msgstr ""
 
 #: apps/desktop/src/onboarding/Questions.tsx
+#: apps/native/src/onboarding/questions.rs
 msgid "Your ROM folder"
 msgstr ""
 

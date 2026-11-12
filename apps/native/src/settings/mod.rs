@@ -43,6 +43,9 @@ pub(crate) mod unsaved;
 
 #[allow(unused_imports)]
 pub use drafts::{DraftField, DraftSlider};
+pub(crate) use emulation::romm_server_id;
+pub(crate) use general::language_options;
+pub(crate) use launchers::source_name;
 #[allow(unused_imports)]
 pub use reset::{ResetDefaults, ResetField, ResetPart};
 #[allow(unused_imports)]

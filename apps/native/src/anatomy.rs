@@ -22,6 +22,7 @@ pub fn catalogue() -> Vec<Entry> {
     all.extend_from_slice(crate::ui::ANATOMY);
     all.push(crate::settings::ANATOMY);
     all.extend_from_slice(crate::accounts::ANATOMY);
+    all.extend_from_slice(crate::onboarding::ANATOMY);
     all.extend_from_slice(&crate::settings::addons::ANATOMY);
     all.extend_from_slice(&crate::activity::ANATOMY);
     all.extend_from_slice(&crate::plugins::ANATOMY);

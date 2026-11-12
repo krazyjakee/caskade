@@ -44,6 +44,13 @@ use std::sync::{Arc, OnceLock};
 /// The pads' reader, for as long as the app runs.
 static PADS: OnceLock<InputService> = OnceLock::new();
 
+/// The pads connected now (first-run setup's controller hint, #97).
+pub fn connected_pads() -> Vec<caskade_input::PadInfo> {
+    PADS.get()
+        .map(caskade_app::commands::input::input_devices)
+        .unwrap_or_default()
+}
+
 /// Starts reading pads: their actions reach [`InputRoot`] as app events
 /// while the main window has focus, and `guide` raises the window.
 pub fn start_pads(

@@ -66,6 +66,7 @@ msgstr ""
 
 #. The picker of an account's picture
 #: packages/ui/src/Avatar.tsx
+#: apps/native/src/onboarding/account.rs
 #: apps/native/src/settings/accounts.rs
 #: apps/native/src/settings/search.rs
 #: apps/native/src/ui/avatar.rs

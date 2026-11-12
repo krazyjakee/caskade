@@ -40,6 +40,7 @@ mod library;
 // Plugins' drawn UI (#109).
 mod plugins;
 // Navigation between the pages (#96), in place of the webview's router.
+mod onboarding;
 mod router;
 mod settings;
 mod shell;

@@ -592,7 +592,7 @@ Root: `[data-cs="backdrop"]`
 
 ## `onboarding`
 
-First-run setup, shown in place of the app shell: a welcome, the questions (`language`, `folder`, `sources`, `mode`, and `account`, the admin's name, avatar and PIN), then the work they start (`setup`). Things arriving use `animate-rise`; the running task's sweep pauses with `--cs-motion-ambient`. Rendered by Onboarding (app).
+First-run setup, shown in place of the app shell: a welcome, the questions (`language`, `folder`, `sources`, `mode`, and `account`, the admin's name, avatar and PIN), then the work they start (`setup`). Things arriving use `animate-rise`; the running task's sweep pauses with `--cs-motion-ambient`. Rendered by Onboarding (apps/native/src/onboarding/mod.rs); in the webview, Onboarding (app).
 
 Root: `[data-cs="onboarding"]`
 

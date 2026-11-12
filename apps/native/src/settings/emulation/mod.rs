@@ -38,6 +38,8 @@ mod romm_editor;
 mod scanners;
 mod setup;
 
+pub(crate) use romm::server_id as romm_server_id;
+
 /// The app's emulation: a test's, else the running app's; `None` without
 /// an app (fixtures mode).
 fn find_emulation() -> Option<Emulation> {

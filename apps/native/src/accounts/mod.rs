@@ -15,6 +15,7 @@ mod tests;
 
 pub use age_gate::{AgeGateDialog, AgeLock};
 pub use menu::AccountMenu;
+pub use picker::AccountPicker;
 
 use caskade_ui_data::Key as DataKey;
 use caskade_ui_data::accounts::{AccountList, Accounts};

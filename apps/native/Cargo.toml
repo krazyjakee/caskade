@@ -82,8 +82,10 @@ caskade-player = { path = "../../crates/caskade-player" }
 caskade-system-stats = { path = "../../crates/caskade-system-stats" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tokio = { version = "1", features = ["rt", "sync", "time"] }
+tokio = { version = "1", features = ["macros", "rt", "sync", "time"] }
 tracing = "0.1"
+# First-run setup's sounds (#97): the startup recording and synthesised cues.
+rodio = { version = "0.22", default-features = false, features = ["playback", "wav"] }
 # The window's own event loop around Dioxus Native's (`launch.rs`): the
 # BLITZ-0 revision, as dioxus-native has them.
 blitz-dom = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false }

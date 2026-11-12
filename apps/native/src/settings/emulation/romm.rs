@@ -65,7 +65,7 @@ pub(super) fn merge_download(list: &mut Vec<DownloadProgress>, next: DownloadPro
 
 /// A server id the core accepts: lowercase letters, digits and dashes
 /// (the webview's `serverId`).
-pub(super) fn server_id(name: &str, taken: &[String]) -> String {
+pub(crate) fn server_id(name: &str, taken: &[String]) -> String {
     let mut slug = String::new();
     let mut dash = false;
     for c in name.to_lowercase().chars() {
