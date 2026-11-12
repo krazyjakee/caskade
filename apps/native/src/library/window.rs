@@ -46,13 +46,14 @@ impl Layout {
         }
     }
 
-    /// Rows mounted beyond the viewport, each way: one grid row keeps
-    /// keyboard and pad moves on mounted cards; list rows are short, so a
-    /// few more cost little (as the webview's `overscan`).
+    /// Rows mounted beyond the viewport, each way: one keeps keyboard and
+    /// pad moves on mounted games. The list keeps two: every scroll step
+    /// mounts new rows, so each one more costs the frame (the webview's
+    /// six took the list's p95 frame from 46 to 49 ms on the CPU; #111).
     pub fn overscan(self) -> usize {
         match self {
             Self::Grid => 1,
-            Self::List => 6,
+            Self::List => 2,
         }
     }
 
@@ -260,8 +261,8 @@ mod tests {
             scroll_top: 0.0,
         };
         assert_eq!(frame.content_height(), 32.0 + 300.0 * 44.0);
-        // 408 px of rows: 0..=9, and six more.
-        assert_eq!(frame.window(), Some(0..=15));
+        // 408 px of rows: 0..=9, and two more.
+        assert_eq!(frame.window(), Some(0..=11));
         assert_eq!(frame.per_page(), 9);
     }
 

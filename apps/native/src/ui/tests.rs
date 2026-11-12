@@ -1512,7 +1512,7 @@ fn TableRow() -> Element {
                     title: "Hollow Pines".into(),
                     ..CardGame::default()
                 },
-                columns: "minmax(0,1fr) 7.5rem 7.5rem 5rem 5.5rem 2rem".to_owned(),
+                table: true,
             }
         }
     }
@@ -1526,20 +1526,38 @@ fn table_row() -> Element {
 fn a_game_row_in_a_tables_columns_is_one_cell_per_column() {
     let _one = one_window();
     let window = Window::open(table_row);
-    let style = window.attr("row", "style").unwrap_or_default();
-    assert!(
-        style.contains("grid-template-columns: minmax(0,1fr) 7.5rem"),
-        "{style}"
-    );
     let doc = window.doc.inner.borrow();
     let row = doc.get_node(window.id("row")).unwrap();
-    let cells = row
+    let cells: Vec<String> = row
         .children
         .iter()
-        .filter(|&&child| doc.get_node(child).is_some_and(|node| node.is_element()))
-        .count();
+        .filter_map(|&child| doc.get_node(child).filter(|node| node.is_element()))
+        .map(|node| {
+            node.attr(blitz_dom::LocalName::from("class"))
+                .unwrap_or_default()
+                .to_owned()
+        })
+        .collect();
     assert_eq!(
-        cells, 6,
+        cells.len(),
+        6,
         "title, status, last played, playtime, size, actions"
     );
+    // Each cell after the title is as wide as its column in TABLE_COLUMNS
+    // (`7.5rem` is Tailwind's `w-30`), so rows line up with the header.
+    let widths: Vec<String> = crate::ui::TABLE_COLUMNS
+        .split(' ')
+        .skip(1)
+        .map(|rem| {
+            let rem: f32 = rem.trim_end_matches("rem").parse().unwrap();
+            format!("w-{}", rem * 4.0)
+        })
+        .collect();
+    for (cell, width) in cells[1..].iter().zip(&widths) {
+        assert!(
+            cell.split(' ').any(|class| class == width),
+            "{width} in {cell:?}"
+        );
+    }
+    assert!(cells[0].contains("flex-1"), "{:?}", cells[0]);
 }

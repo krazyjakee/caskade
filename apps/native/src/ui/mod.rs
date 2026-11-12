@@ -67,7 +67,7 @@ pub use game_art::{GameArt, art_background};
 #[allow(unused_imports)]
 pub use game_card::{CardGame, CardVariant, GameCard, platform_line};
 #[allow(unused_imports)]
-pub use game_row::GameRow;
+pub use game_row::{GameRow, TABLE_COLUMNS};
 #[allow(unused_imports)]
 pub use hero::{Hero, HeroGame};
 #[allow(unused_imports)]

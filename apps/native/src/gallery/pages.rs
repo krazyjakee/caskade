@@ -645,7 +645,7 @@ pub fn Rows() -> Element {
 
 /// The webview's library table's columns: title, status, last played,
 /// playtime, size, actions.
-const LIST_COLUMNS: &str = "minmax(0,1fr) 7.5rem 7.5rem 5rem 5.5rem 2rem";
+const LIST_COLUMNS: &str = crate::ui::TABLE_COLUMNS;
 
 pub fn Table() -> Element {
     let rows = [
@@ -688,7 +688,7 @@ pub fn Table() -> Element {
                     div { key: "{row.id}", class: "h-11 w-full",
                         GameRow {
                             game: row,
-                            columns: LIST_COLUMNS.to_owned(),
+                            table: true,
                             actions: rsx! { Button { variant: ButtonVariant::Ghost, size: ButtonSize::Sm, icon: Some(CHEVRON_DOWN), "aria-label": "Actions" } },
                         }
                     }

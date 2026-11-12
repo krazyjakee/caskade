@@ -54,6 +54,11 @@ pub const ANATOMY: Entry = Entry {
     )
 };
 
+/// A table's columns (the webview's list): title, status, last played,
+/// playtime, size and actions, a header's `grid-template-columns`. A
+/// [`GameRow`] with `table` sizes its cells to them.
+pub const TABLE_COLUMNS: &str = "minmax(0,1fr) 7.5rem 7.5rem 5rem 5.5rem 2rem";
+
 #[component]
 pub fn GameRow(
     game: CardGame,
@@ -68,25 +73,22 @@ pub fn GameRow(
     /// The actions menu button, at the end of the row.
     #[props(default)]
     actions: Option<Element>,
-    /// A table's `grid-template-columns` (the webview's list:
-    /// `minmax(0,1fr) 7.5rem 7.5rem 5rem 5.5rem 2rem`): the row lays out
-    /// as cells in them (title, status, last played, playtime, size,
-    /// actions), lining up with a header that uses the same. Without
-    /// them, a flex row.
+    /// A table row (the webview's list): its cells (title, status, last
+    /// played, playtime, size, actions) are as wide as [`TABLE_COLUMNS`],
+    /// so they line up with a header laid out in those. A flex row, not a
+    /// grid: rows mount and unmount on every scroll step, and flex lays
+    /// out for less (#111). Otherwise a row with its own widths.
     #[props(default)]
-    columns: Option<String>,
+    table: bool,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
 ) -> Element {
     let interaction = use_interaction();
-    let table = columns.is_some();
-    let layout = match &columns {
-        Some(columns) => format!("grid-template-columns: {columns};"),
-        None => String::new(),
+    // A table's cells are [`TABLE_COLUMNS`]' widths.
+    let (status_width, last_played_width, playtime_width, size_width) = if table {
+        ("w-30", "w-30", "w-20", "w-22")
+    } else {
+        ("", "w-40", "w-24", "w-20")
     };
-    // Fixed widths in a flex row; a table's columns size its cells.
-    let width = |flex: &'static str| if table { "" } else { flex };
-    let (last_played_width, playtime_width, size_width) =
-        (width("w-40"), width("w-24"), width("w-20"));
     let open = move || {
         if let Some(on_open) = on_open {
             on_open.call(());
@@ -118,8 +120,7 @@ pub fn GameRow(
             "data-focus-key": focus_key,
             "data-hovered": interaction.hovered(),
             "data-focus-visible": interaction.ring(),
-            class: if table { "relative grid h-full items-center gap-3 border-b border-border px-2 outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over" } else { "relative flex h-full items-center gap-4 border-b border-border px-3 outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over" },
-            style: "{layout}",
+            class: if table { "relative flex h-full items-center gap-3 border-b border-border px-2 outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over" } else { "relative flex h-full items-center gap-4 border-b border-border px-3 outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over" },
             onfocusin: move |_| {
                 interaction.focus();
                 if let Some(on_focus) = on_focus {
@@ -135,7 +136,7 @@ pub fn GameRow(
             },
             ..attributes,
             // The title's cell.
-            div { class: if table { "flex min-w-0 items-center gap-3" } else { "flex min-w-0 flex-1 items-center gap-4" },
+            div { class: if table { "flex min-w-0 flex-1 items-center gap-3" } else { "flex min-w-0 flex-1 items-center gap-4" },
             if let Some(selected) = selected {
                 span {
                     "data-part": "select",
@@ -177,14 +178,14 @@ pub fn GameRow(
                 crate::plugins::RowBadges { game_id: game.id.clone() }
             }
             }
-            div { class: "flex min-w-0 shrink-0",
+            div { class: "flex min-w-0 shrink-0 {status_width}",
                 StatusBadge { part: "badge", status: game.status }
             }
             span { "data-part": "last-played", class: "{last_played_width} shrink-0 truncate text-xs text-fg-muted", "{last_played}" }
             span { "data-part": "playtime", class: "{playtime_width} shrink-0 text-right text-xs text-fg-muted", "{playtime}" }
             span { "data-part": "size", class: "{size_width} shrink-0 text-right text-xs text-fg-muted", "{size}" }
             if actions.is_some() || table {
-                span { "data-part": "actions", class: "flex shrink-0 justify-end", {actions} }
+                span { "data-part": "actions", class: if table { "flex w-8 shrink-0 justify-end" } else { "flex shrink-0 justify-end" }, {actions} }
             }
         }
     }

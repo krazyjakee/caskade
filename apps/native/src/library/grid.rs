@@ -553,8 +553,9 @@ fn card_node(doc: &BaseDocument, scroller: NodeId, index: usize) -> Option<NodeI
 }
 
 /// The list's columns (`LibraryRow.tsx`'s `listColumns`): title, status,
-/// last played, playtime, size and actions; its header uses them too.
-pub const LIST_COLUMNS: &str = "minmax(0,1fr) 7.5rem 7.5rem 5rem 5.5rem 2rem";
+/// last played, playtime, size and actions, its header's; the rows' cells
+/// are as wide.
+pub const LIST_COLUMNS: &str = crate::ui::TABLE_COLUMNS;
 
 /// One game: a card in the grid, a row in the list (`ui::GameCard`,
 /// `ui::GameRow`, #93), and the card on Home's shelves (the webview's
@@ -689,7 +690,7 @@ pub(crate) fn Game(
                 icon,
                 selected,
                 starting,
-                columns: LIST_COLUMNS.to_owned(),
+                table: true,
                 // Its menu, from the "…" at the row's end.
                 actions: rsx! {
                     button {

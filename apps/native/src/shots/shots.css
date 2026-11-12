@@ -820,11 +820,17 @@
   .w-20 {
     width: calc(calc(0.25rem * var(--cs-density-scale)) * 20);
   }
+  .w-22 {
+    width: calc(calc(0.25rem * var(--cs-density-scale)) * 22);
+  }
   .w-24 {
     width: calc(calc(0.25rem * var(--cs-density-scale)) * 24);
   }
   .w-28 {
     width: calc(calc(0.25rem * var(--cs-density-scale)) * 28);
+  }
+  .w-30 {
+    width: calc(calc(0.25rem * var(--cs-density-scale)) * 30);
   }
   .w-32 {
     width: calc(calc(0.25rem * var(--cs-density-scale)) * 32);
