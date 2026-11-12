@@ -78,6 +78,8 @@ pub fn CollectionPicker(game_id: String, title: String, on_close: EventHandler<(
                 error.set(result.err().map(|error| error.summary));
                 busy.set(false);
                 of.restart();
+                // Open collection pages and lists load again (#102).
+                crate::collections::changed();
             });
         })
     };
@@ -112,6 +114,7 @@ pub fn CollectionPicker(game_id: String, title: String, on_close: EventHandler<(
                 busy.set(false);
                 collections.restart();
                 of.restart();
+                crate::collections::changed();
             });
         })
     };

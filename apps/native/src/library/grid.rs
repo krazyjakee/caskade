@@ -39,6 +39,10 @@ struct Pages {
     /// dropped.
     generation: u64,
     query: Option<ListGames>,
+    /// The collection whose games these are (#102).
+    collection: Option<String>,
+    /// The view's `reload` they were loaded at.
+    reload: u64,
 }
 
 /// What a view hears from the grid.
@@ -62,6 +66,14 @@ pub fn VirtualLibrary(
     /// The library's route: the list's column headers sort it.
     #[props(default)]
     sorting: Option<LibraryRoute>,
+    /// A collection's games in place of the library's (#102): its own rules
+    /// and order; `query`'s filter, sort and search aren't used.
+    #[props(default)]
+    collection: Option<String>,
+    /// Bumped when the games changed without a library event (a
+    /// collection's members): the shown pages load again.
+    #[props(default)]
+    reload: u64,
 ) -> Element {
     let input = use_input();
     let source = use_context::<DataSource>();
@@ -138,8 +150,9 @@ pub fn VirtualLibrary(
     // A new query starts again from the top.
     {
         let mut state = pages.borrow_mut();
-        if state.query.as_ref() != Some(&query) {
+        if state.query.as_ref() != Some(&query) || state.collection != collection {
             state.query = Some(query.clone());
+            state.collection = collection.clone();
             state.pages.clear();
             state.pending.clear();
             state.generation += 1;
@@ -155,6 +168,14 @@ pub fn VirtualLibrary(
                 scroll_to(handle, 0.0, &input);
             }
         }
+    }
+    // A change the library's events don't tell of: the shown pages again.
+    if pages.borrow().reload != reload {
+        let mut state = pages.borrow_mut();
+        state.reload = reload;
+        state.pages.clear();
+        state.pending.clear();
+        state.generation += 1;
     }
 
     let frame = Frame {
@@ -190,8 +211,19 @@ pub fn VirtualLibrary(
                 limit: PAGE as u32,
                 ..query.clone()
             };
+            let collection = collection.clone();
             spawn(async move {
-                let result = change(async move { library.page(&page_query).await }).await;
+                let result = change(async move {
+                    match collection {
+                        Some(id) => {
+                            library
+                                .collection_games(&id, page_query.offset, page_query.limit)
+                                .await
+                        }
+                        None => library.page(&page_query).await,
+                    }
+                })
+                .await;
                 let mut state = pages.borrow_mut();
                 if state.generation != generation {
                     return;

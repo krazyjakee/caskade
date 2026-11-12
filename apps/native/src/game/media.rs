@@ -314,8 +314,32 @@ pub(crate) fn use_preferred_board() -> String {
         .unwrap_or_else(|| DEFAULT_BOARD.to_owned())
 }
 
-/// A game's age rating, on the board an admin prefers (Settings →
-/// Accounts), every board's in its tooltip. Nothing for an unrated game.
+/// An age rating from IGDB's `ratings` (the webview's `AgeRatingLabel`):
+/// the board an admin prefers, every board's in its tooltip. Nothing when
+/// there are none.
+#[component]
+pub fn AgeRatingLabel(ratings: Vec<IgdbAgeRating>) -> Element {
+    let board = use_preferred_board();
+    let Some(shown) = shown_rating(&ratings, &board) else {
+        return rsx! {};
+    };
+    let all = ratings
+        .iter()
+        .map(rating_name)
+        .collect::<Vec<_>>()
+        .join(" · ");
+    rsx! {
+        span {
+            "data-age-rating": "{shown.board}",
+            title: "{all}",
+            class: "rounded-control border border-border-strong px-1.5 py-0.5 font-mono text-[11px] text-fg",
+            {rating_name(shown)}
+        }
+    }
+}
+
+/// A library game's age rating, from its IGDB match (the webview's
+/// `GameAgeRating`), after a separator. Nothing for an unrated game.
 #[component]
 pub fn AgeRating(game_id: String) -> Element {
     let data = use_page_data();
@@ -325,18 +349,16 @@ pub fn AgeRating(game_id: String) -> Element {
             (data.age_ratings)(game_id.clone())
         })
     };
-    let board = use_preferred_board();
     let list: Vec<IgdbAgeRating> = ratings
         .read()
         .as_ref()
         .and_then(|ratings| ratings.as_ref().ok().cloned())
         .unwrap_or_default();
-    let Some(shown) = shown_rating(&list, &board).cloned() else {
+    if list.is_empty() {
         return rsx! {};
-    };
-    let all = list.iter().map(rating_name).collect::<Vec<_>>().join(", ");
+    }
     rsx! {
         " · "
-        span { title: "{all}", class: "font-mono", {rating_name(&shown)} }
+        AgeRatingLabel { ratings: list }
     }
 }

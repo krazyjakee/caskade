@@ -1,7 +1,7 @@
 //! A game page's way back (#195, the webview's `views/game/BackLink.tsx`
 //! and `origin.ts`'s `returnPlace`): to the page the game was opened from,
-//! named after it ("Back to Library", a collection's or a game's name), or
-//! to the Library.
+//! named after it ("Back to Library", a collection's, a game's or a Store
+//! game's name), or to the Library (the Store, for a Store game's page).
 
 use crate::data::{use_game, use_query};
 use crate::router::href::back_target;
@@ -14,6 +14,10 @@ use dioxus_native::prelude::*;
 
 /// Where library game pages live.
 pub const LIBRARY_GAMES: &str = "/games";
+/// Where the Store's catalogue game pages live (#102).
+pub const STORE_GAMES: &str = "/store/games";
+/// Where Back goes from a library game opened from nowhere.
+const LIBRARY: &str = "/library";
 
 fn back_to(name: Option<String>) -> String {
     match name {
@@ -51,13 +55,17 @@ pub fn GameBackLink(
     /// The game route's `from`.
     from: Option<String>,
     #[props(default)] class: String,
+    /// Where the page lives: library games, or the Store's
+    /// ([`STORE_GAMES`]).
+    #[props(default = LIBRARY_GAMES)]
+    base: &'static str,
+    /// Where Back goes without a `from`.
+    #[props(default = LIBRARY)]
+    fallback: &'static str,
 ) -> Element {
     let router = use_router();
-    let target = back_target(&game_id, from.as_deref(), LIBRARY_GAMES);
-    let route = target
-        .as_deref()
-        .map(|href| Route::parse(href, &Remembered::default()));
-    let href = target.unwrap_or_else(|| "/library".to_owned());
+    let href = back_target(&game_id, from.as_deref(), base).unwrap_or_else(|| fallback.to_owned());
+    let route = Route::parse(&href, &Remembered::default());
     rsx! {
         Link {
             href: href.clone(),
@@ -77,10 +85,10 @@ pub fn GameBackLink(
             },
             span { "aria-hidden": "true", "← " }
             match route {
-                None => rsx! { {back_to(Some(t!("Library")))} },
-                Some(Route::Game { id, .. }) => rsx! { GameName { id } },
-                Some(Route::Collection { id }) => rsx! { CollectionName { id } },
-                Some(other) => rsx! { {back_to(page_name(&other))} },
+                Route::Game { id, .. } => rsx! { GameName { id } },
+                Route::Collection { id } => rsx! { CollectionName { id } },
+                Route::StoreGame { igdb_id, .. } => rsx! { StoreGameName { id: igdb_id } },
+                other => rsx! { {back_to(page_name(&other))} },
             }
         }
     }
@@ -109,4 +117,18 @@ fn CollectionName(id: String) -> Element {
         .and_then(|list| list.iter().find(|collection| collection.id == id))
         .map(|collection| collection.name.clone());
     rsx! { {back_to(name)} }
+}
+
+/// A Store game's name, from the catalogue.
+#[component]
+fn StoreGameName(id: String) -> Element {
+    let data = crate::store::data::use_store_data();
+    let lookup = use_resource(move || (data.games)(vec![id.clone()]));
+    let title = lookup
+        .read()
+        .as_ref()
+        .and_then(|lookup| lookup.as_ref().ok())
+        .and_then(|lookup| lookup.games.first())
+        .map(|game| game.title.clone());
+    rsx! { {back_to(title)} }
 }

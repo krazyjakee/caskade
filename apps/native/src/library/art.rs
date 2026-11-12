@@ -75,6 +75,52 @@ pub fn fetch(request: &Request, handler: Box<dyn NetHandler>) -> Result<(), Box<
     Ok(())
 }
 
+/// The image hosts the webview's CSP lets it show (`tauri.conf.json`'s
+/// `img-src`): IGDB's covers and screenshots, and YouTube's thumbnails.
+pub const REMOTE_IMAGE_HOSTS: [&str; 2] = ["images.igdb.com", "i.ytimg.com"];
+
+/// Serves an image from [`REMOTE_IMAGE_HOSTS`] through the artwork cache
+/// (downloaded once, kept for offline use, as achievement pictures are);
+/// whether the request was one. Other remote URLs aren't fetched.
+pub fn fetch_remote(
+    request: &Request,
+    handler: Box<dyn NetHandler>,
+) -> Result<(), Box<dyn NetHandler>> {
+    let remote = request.url.scheme() == "https"
+        && request
+            .url
+            .host_str()
+            .is_some_and(|host| REMOTE_IMAGE_HOSTS.contains(&host));
+    if !remote {
+        return Err(handler);
+    }
+    let url = request.url.to_string();
+    caskade_app::runtime::handle().spawn(async move {
+        let Some(cache) = cache() else {
+            handler.error(url, "no artwork cache".into());
+            return;
+        };
+        let cached = match cache.download_metadata(&url).await {
+            Ok(cached) => cached,
+            Err(error) => {
+                handler.error(url, format!("remote image: {error}"));
+                return;
+            }
+        };
+        let local = format!(
+            "{SCHEME}://localhost/{}",
+            cached.cached_path.trim_start_matches('/')
+        );
+        let response = caskade_core::artwork::serve(cache, &local).await;
+        if response.status == 200 {
+            handler.bytes(url, response.bytes.into());
+        } else {
+            handler.error(url, format!("remote image: {}", response.status));
+        }
+    });
+    Ok(())
+}
+
 /// The artwork cache, as the shell opened it (`paths.cache/artwork`), once
 /// the services are up.
 fn cache() -> Option<&'static ArtworkCache> {

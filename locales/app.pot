@@ -27,6 +27,7 @@ msgstr ""
 
 #. The title text a smart collection looks for, in quotes
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 msgid "“{text}”"
 msgstr ""
 
@@ -895,6 +896,7 @@ msgid "{name} has no installed games that can be copied to this device. Install 
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "{name} options"
 msgstr ""
 
@@ -1044,6 +1046,7 @@ msgstr[1] ""
 
 #. {played} is a duration: “12h 30m”
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "{played} played"
 msgstr ""
 
@@ -1327,6 +1330,7 @@ msgstr ""
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
+#: apps/native/src/collections/page.rs
 #: apps/native/src/frame/type_search.rs
 #: apps/native/src/library/platform_grid.rs
 #: apps/native/src/settings/backup.rs
@@ -2189,6 +2193,7 @@ msgid "Add game"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Add Games"
 msgstr ""
 
@@ -2198,10 +2203,12 @@ msgid "Add games from their menu, or from the collection's Add games."
 msgstr ""
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
+#: apps/native/src/collections/add_games.rs
 msgid "Add games to {name}"
 msgstr ""
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
+#: apps/native/src/collections/actions.rs
 msgid "Add games…"
 msgstr ""
 
@@ -2442,6 +2449,8 @@ msgstr ""
 
 #: apps/desktop/src/views/CollectionsView.tsx
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/list.rs
+#: apps/native/src/collections/page.rs
 msgid "All Collections"
 msgstr ""
 
@@ -2458,6 +2467,7 @@ msgid "All Games"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "All genres"
 msgstr ""
 
@@ -2465,6 +2475,7 @@ msgstr ""
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/desktop/src/views/StoreView.tsx
 #: apps/native/src/library/view.rs
+#: apps/native/src/store/view.rs
 msgid "All platforms"
 msgstr ""
 
@@ -2490,6 +2501,7 @@ msgstr ""
 
 #. A game's or release's status on IGDB
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Alpha"
 msgstr ""
 
@@ -2604,6 +2616,7 @@ msgid "Animations"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Announced releases without a date yet."
 msgstr ""
 
@@ -2660,6 +2673,7 @@ msgid "Any title"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Any year"
 msgstr ""
 
@@ -2758,6 +2772,7 @@ msgid "Approve {game} for {account}."
 msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 msgctxt "smart collection rule"
 msgid "are"
 msgstr ""
@@ -2804,6 +2819,7 @@ msgstr ""
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Asia"
 msgstr ""
 
@@ -2862,6 +2878,7 @@ msgstr ""
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Australia"
 msgstr ""
 
@@ -3141,6 +3158,7 @@ msgstr ""
 
 #. A game's or release's status on IGDB
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Beta"
 msgstr ""
 
@@ -3192,6 +3210,7 @@ msgstr ""
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Brazil"
 msgstr ""
 
@@ -3212,6 +3231,7 @@ msgstr ""
 
 #. A Store tab: search and filter the whole catalog
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Browse"
 msgstr ""
 
@@ -3475,6 +3495,8 @@ msgstr ""
 #: apps/desktop/src/views/store/CatalogCard.tsx
 #: apps/desktop/src/views/store/releases.ts
 #: apps/native/src/settings/emulation/setup.rs
+#: apps/native/src/store/card.rs
+#: apps/native/src/store/releases.rs
 msgid "Cancelled"
 msgstr ""
 
@@ -4031,6 +4053,7 @@ msgstr ""
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "China"
 msgstr ""
 
@@ -4344,8 +4367,8 @@ msgstr ""
 #: apps/desktop/src/views/CollectionsView.tsx
 #: apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
+#: apps/native/src/collections/list.rs
 #: apps/native/src/frame/sidebar.rs
-#: apps/native/src/frame/views.rs
 #: apps/native/src/game/back.rs
 #: apps/native/src/settings/general.rs
 msgid "Collections"
@@ -4399,6 +4422,7 @@ msgstr ""
 
 #. A link to a game's community page
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Community"
 msgstr ""
 
@@ -4707,6 +4731,7 @@ msgid "Could not add the dropped file."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Could not load more games."
 msgstr ""
 
@@ -4721,10 +4746,12 @@ msgid "Could not load session history."
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Could not load similar games."
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Could not load the games."
 msgstr ""
 
@@ -4739,6 +4766,7 @@ msgid "Could not load these games."
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Could not load this collection."
 msgstr ""
 
@@ -4748,6 +4776,7 @@ msgid "Could not load this game"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "Could not load your collections."
 msgstr ""
 
@@ -4757,14 +4786,17 @@ msgid "Could not load your recent activity."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Could not reach the game catalog: {error}"
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Could not reach the game catalog: {reason}"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Could not reach the game catalog."
 msgstr ""
 
@@ -4960,6 +4992,7 @@ msgstr ""
 
 #. A column of a store game's releases
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Date"
 msgstr ""
 
@@ -4970,6 +5003,7 @@ msgstr ""
 
 #. Upcoming releases with a release date
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Dated"
 msgstr ""
 
@@ -5074,6 +5108,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/collections/delete.rs
 #: apps/native/src/settings/accounts.rs
 msgid "Delete"
 msgstr ""
@@ -5109,6 +5144,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/collections/delete.rs
 #: apps/native/src/settings/accounts.rs
 msgid "Delete {name}?"
 msgstr ""
@@ -5117,6 +5153,7 @@ msgstr ""
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/collections/actions.rs
 #: apps/native/src/flows/scripts.rs
 #: apps/native/src/game/editor/actions.rs
 #: apps/native/src/settings/accounts.rs
@@ -5125,12 +5162,14 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/collections/delete.rs
 #: apps/native/src/settings/accounts.rs
 msgid "Deleting…"
 msgstr ""
 
 #. A game's or release's status on IGDB
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Delisted"
 msgstr ""
 
@@ -5439,6 +5478,7 @@ msgstr ""
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
+#: apps/native/src/collections/add_games.rs
 #: apps/native/src/flows/pairing.rs
 #: apps/native/src/flows/share_game.rs
 #: apps/native/src/game_menu/collections.rs
@@ -5462,6 +5502,7 @@ msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/collections/page.rs
 #: apps/native/src/library/view.rs
 msgid "Done selecting"
 msgstr ""
@@ -5639,6 +5680,8 @@ msgstr ""
 #. A game release's status
 #: apps/desktop/src/views/store/CatalogCard.tsx
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/card.rs
+#: apps/native/src/store/releases.rs
 msgid "Early access"
 msgstr ""
 
@@ -5670,10 +5713,12 @@ msgid "Edit details"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Edit Rules"
 msgstr ""
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
+#: apps/native/src/collections/actions.rs
 msgid "Edit rules…"
 msgstr ""
 
@@ -5701,6 +5746,7 @@ msgstr ""
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
+#: apps/native/src/collections/actions.rs
 #: apps/native/src/game_menu/menu.rs
 #: apps/native/src/settings/accounts.rs
 msgid "Edit…"
@@ -6007,6 +6053,7 @@ msgstr ""
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Europe"
 msgstr ""
 
@@ -6038,6 +6085,7 @@ msgid "Every device then needs a new code to play from this one."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Every game IGDB knows, with where it is sold. Prices and availability are the stores' own."
 msgstr ""
 
@@ -6486,6 +6534,7 @@ msgstr ""
 
 #. A game's or release's status on IGDB
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Full release"
 msgstr ""
 
@@ -6512,7 +6561,6 @@ msgstr ""
 
 #. The IGDB game the library game is matched to
 #: apps/desktop/src/views/game/IgdbPanel.tsx
-#: apps/native/src/frame/views.rs
 #: apps/native/src/game/igdb.rs
 msgid "Game"
 msgstr ""
@@ -6628,6 +6676,7 @@ msgstr ""
 #. The first word of a rule such as “Games are Installed”
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 #: apps/native/src/library/collection_dialog.rs
 msgctxt "smart collection rule"
 msgid "Games"
@@ -6635,6 +6684,7 @@ msgstr ""
 
 #. The heading over a collection's games, with how many
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Games ({count})"
 msgstr ""
 
@@ -6814,6 +6864,7 @@ msgstr ""
 
 #. The Store's genre filter
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Genre"
 msgstr ""
 
@@ -6941,6 +6992,7 @@ msgid "Hand it to another program"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "Hand-pick games into lists, or save a filter as a smart collection that keeps itself up to date."
 msgstr ""
 
@@ -6972,6 +7024,7 @@ msgstr ""
 
 #. As in “Title has ‘mario’”
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 msgctxt "smart collection rule"
 msgid "has"
 msgstr ""
@@ -7205,6 +7258,7 @@ msgstr ""
 
 #. The eyebrow above a store game's title: where the page comes from
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "IGDB catalog"
 msgstr ""
 
@@ -7219,10 +7273,12 @@ msgid "IGDB games"
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "IGDB has no game {igdbId}."
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "IGDB has no release dates for this game."
 msgstr ""
 
@@ -7237,14 +7293,17 @@ msgid "IGDB ID {igdbId}"
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "IGDB lists no similar games."
 msgstr ""
 
 #: apps/desktop/src/views/store/WhereToBuy.tsx
+#: apps/native/src/store/game.rs
 msgid "IGDB lists no stores for this game."
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "IGDB page"
 msgstr ""
 
@@ -7355,6 +7414,7 @@ msgstr ""
 
 #. A store game the library has but isn't installed
 #: apps/desktop/src/views/store/CatalogCard.tsx
+#: apps/native/src/store/card.rs
 msgid "In library"
 msgstr ""
 
@@ -7391,6 +7451,7 @@ msgstr ""
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
 #: apps/native/src/flows/shares_common.rs
+#: apps/native/src/store/game.rs
 msgid "In your library"
 msgstr ""
 
@@ -7618,6 +7679,8 @@ msgstr ""
 
 #: apps/desktop/src/views/store/CatalogCard.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/card.rs
+#: apps/native/src/store/game.rs
 msgctxt "game status"
 msgid "Installed"
 msgstr ""
@@ -7817,6 +7880,7 @@ msgid "IP address"
 msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 msgctxt "smart collection rule"
 msgid "is"
 msgstr ""
@@ -8016,6 +8080,7 @@ msgstr ""
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Japan"
 msgstr ""
 
@@ -8152,6 +8217,7 @@ msgstr ""
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Korea"
 msgstr ""
 
@@ -8493,6 +8559,7 @@ msgid "Link copied"
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Links"
 msgstr ""
 
@@ -8508,6 +8575,7 @@ msgstr ""
 
 #. A smart collection, which follows the library as it changes
 #: apps/desktop/src/components/CollectionCard.tsx
+#: apps/native/src/collections/card.rs
 msgctxt "collection"
 msgid "Live"
 msgstr ""
@@ -8523,6 +8591,7 @@ msgid "Live: updates every second, graphs show the last {span}."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Load more"
 msgstr ""
 
@@ -8556,11 +8625,13 @@ msgid "Loading activity…"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Loading collection…"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 #: apps/native/src/game_menu/collections.rs
 msgid "Loading collections…"
 msgstr ""
@@ -8589,11 +8660,14 @@ msgstr ""
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
 #: apps/native/src/game/page.rs
+#: apps/native/src/store/game.rs
 msgid "Loading game…"
 msgstr ""
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/collections/add_games.rs
+#: apps/native/src/store/view.rs
 msgid "Loading games…"
 msgstr ""
 
@@ -8654,6 +8728,7 @@ msgid "Loading settings…"
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Loading similar games…"
 msgstr ""
 
@@ -8683,6 +8758,7 @@ msgstr ""
 #: apps/native/src/game/editor/mod.rs
 #: apps/native/src/plugins/mod.rs
 #: apps/native/src/settings/appearance.rs
+#: apps/native/src/store/view.rs
 msgid "Loading…"
 msgstr ""
 
@@ -8887,6 +8963,7 @@ msgid "Make default"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "Make your first one"
 msgstr ""
 
@@ -8914,6 +8991,7 @@ msgstr ""
 
 #: apps/desktop/src/components/CollectionCard.tsx
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/collections/card.rs
 #: apps/native/src/library/collection_dialog.rs
 msgctxt "collection kind"
 msgid "Manual"
@@ -8921,11 +8999,13 @@ msgstr ""
 
 #. Collections whose games are picked by hand
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgctxt "collection type"
 msgid "Manual"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "Manual list or smart filter"
 msgstr ""
 
@@ -9001,6 +9081,7 @@ msgid "Matches"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Matches all rules"
 msgstr ""
 
@@ -9014,6 +9095,7 @@ msgid "Matches games that have no match yet and fills in what they lack from wha
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Matching games"
 msgstr ""
 
@@ -9157,11 +9239,13 @@ msgid "More themes in the plugin and theme catalogue"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Most rated"
 msgstr ""
 
 #. The Store's games released in the last 12 months with the most ratings
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Most rated this past year"
 msgstr ""
 
@@ -9400,6 +9484,7 @@ msgid "New collection"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "New Collection"
 msgstr ""
 
@@ -9452,6 +9537,7 @@ msgstr ""
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "New Zealand"
 msgstr ""
 
@@ -9461,10 +9547,12 @@ msgid "Newer"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Newest"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Newest games"
 msgstr ""
 
@@ -9504,7 +9592,9 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/input/hooks.tsx
+#: apps/native/src/collections/list.rs
 #: apps/native/src/library/view.rs
+#: apps/native/src/store/view.rs
 msgid "Next tab"
 msgstr ""
 
@@ -9539,6 +9629,7 @@ msgid "No default location configured"
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "No description on IGDB."
 msgstr ""
 
@@ -9597,14 +9688,17 @@ msgid "No games in this filter yet."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "No games match “{query}”."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "No games match these filters."
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "No games match these rules yet. They'll show up here as your library changes."
 msgstr ""
 
@@ -9614,6 +9708,7 @@ msgid "No games match your search in this filter."
 msgstr ""
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
+#: apps/native/src/collections/add_games.rs
 msgid "No games match your search."
 msgstr ""
 
@@ -9736,6 +9831,7 @@ msgid "No reading this time."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "No recent releases here."
 msgstr ""
 
@@ -9823,6 +9919,7 @@ msgid "No unread notifications."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "No upcoming releases here."
 msgstr ""
 
@@ -9895,6 +9992,7 @@ msgstr ""
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "North America"
 msgstr ""
 
@@ -10289,6 +10387,7 @@ msgstr ""
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
 #: apps/native/src/game/page.rs
+#: apps/native/src/store/game.rs
 msgid "Official site"
 msgstr ""
 
@@ -10304,6 +10403,7 @@ msgstr ""
 #: apps/desktop/src/components/sync/common.tsx
 #: apps/desktop/src/views/store/releases.ts
 #: apps/native/src/settings/devices.rs
+#: apps/native/src/store/releases.rs
 msgid "Offline"
 msgstr ""
 
@@ -10527,6 +10627,7 @@ msgid "Open game details"
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Open in library"
 msgstr ""
 
@@ -10650,6 +10751,7 @@ msgstr ""
 #. Button hint: a pad's Start opens the focused item's menu
 #: apps/desktop/src/views/CollectionsView.tsx
 #: apps/desktop/src/views/library/GameActions.tsx
+#: apps/native/src/collections/list.rs
 #: apps/native/src/home/mod.rs
 #: apps/native/src/library/grid.rs
 msgid "Options"
@@ -10986,6 +11088,7 @@ msgid "PIN"
 msgstr ""
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
+#: apps/native/src/collections/actions.rs
 msgid "Pin to the top"
 msgstr ""
 
@@ -10996,11 +11099,13 @@ msgid "Pink"
 msgstr ""
 
 #: apps/desktop/src/components/CollectionCard.tsx
+#: apps/native/src/collections/card.rs
 msgctxt "collection"
 msgid "Pinned"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgctxt "collection stats"
 msgid "Pinned"
 msgstr ""
@@ -11022,11 +11127,14 @@ msgstr ""
 #: apps/desktop/src/views/StoreView.tsx
 #: apps/native/src/flows/shares_common.rs
 #: apps/native/src/settings/emulation/scanners.rs
+#: apps/native/src/store/game.rs
+#: apps/native/src/store/view.rs
 msgid "Platform"
 msgstr ""
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 #: apps/native/src/library/collection_dialog.rs
 msgctxt "smart collection rule"
 msgid "Platform"
@@ -11188,6 +11296,7 @@ msgid "Play on {name}"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Play Random"
 msgstr ""
 
@@ -11416,6 +11525,7 @@ msgid "Plugins' files"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgctxt "catalog sort"
 msgid "Popular"
 msgstr ""
@@ -11429,6 +11539,7 @@ msgid "Popular"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Popular games"
 msgstr ""
 
@@ -11507,7 +11618,9 @@ msgstr ""
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
 #: apps/desktop/src/input/hooks.tsx
+#: apps/native/src/collections/list.rs
 #: apps/native/src/library/view.rs
+#: apps/native/src/store/view.rs
 msgid "Previous tab"
 msgstr ""
 
@@ -11635,6 +11748,7 @@ msgstr ""
 
 #. A release date known to the quarter of a year: Q1 2027
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Q{quarter} {year}"
 msgstr ""
 
@@ -11854,6 +11968,7 @@ msgstr ""
 
 #. A Store tab and shelf
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Recently released"
 msgstr ""
 
@@ -11985,6 +12100,7 @@ msgstr ""
 
 #. A column of a store game's releases
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Region"
 msgstr ""
 
@@ -12065,6 +12181,7 @@ msgid "Release date"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Release year"
 msgstr ""
 
@@ -12074,12 +12191,14 @@ msgstr ""
 #: apps/desktop/src/views/store/releases.ts
 #: apps/native/src/game/igdb.rs
 #: apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/store/releases.rs
 msgid "Released"
 msgstr ""
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
 #: apps/native/src/game/entry_update.rs
+#: apps/native/src/store/game.rs
 msgid "Releases"
 msgstr ""
 
@@ -12090,14 +12209,17 @@ msgid "Releases"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Releases dated to the day in the last 90 days (UTC), newest first, on each platform."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Releases to come, soonest first. Month, quarter and year dates are as precise as IGDB knows them; cancelled ones are marked."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Relevance"
 msgstr ""
 
@@ -12571,6 +12693,7 @@ msgstr ""
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/desktop/src/views/StoreView.tsx
 #: apps/native/src/library/view.rs
+#: apps/native/src/store/view.rs
 msgid "Results for “{query}”"
 msgstr ""
 
@@ -12783,6 +12906,7 @@ msgstr ""
 
 #. A game's or release's status on IGDB
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Rumoured"
 msgstr ""
 
@@ -13356,6 +13480,7 @@ msgid "Search Applications and Games inside your home directory."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Search every game…"
 msgstr ""
 
@@ -13392,6 +13517,7 @@ msgid "Search settings"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Search the catalog"
 msgstr ""
 
@@ -13401,6 +13527,7 @@ msgid "Search the catalogue"
 msgstr ""
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
+#: apps/native/src/collections/add_games.rs
 msgid "Search the library"
 msgstr ""
 
@@ -13442,6 +13569,7 @@ msgstr ""
 #. Starts choosing several games in the library
 #: apps/desktop/src/views/CollectionView.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
+#: apps/native/src/collections/page.rs
 #: apps/native/src/library/view.rs
 msgid "Select"
 msgstr ""
@@ -13729,6 +13857,7 @@ msgstr ""
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/collections/actions.rs
 #: apps/native/src/game_menu/menu.rs
 msgid "Share with someone…"
 msgstr ""
@@ -13838,6 +13967,7 @@ msgid "Show updates"
 msgstr ""
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
+#: apps/native/src/collections/add_games.rs
 msgid "Showing {shown} of {total}. Search to find the rest."
 msgstr ""
 
@@ -13852,6 +13982,7 @@ msgid "Showing achievements from {when}. The last refresh failed: {reason}"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Showing saved results: the metadata server can't be reached right now."
 msgstr ""
 
@@ -13960,6 +14091,7 @@ msgid "Signing in…"
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Similar games"
 msgstr ""
 
@@ -14034,6 +14166,7 @@ msgstr ""
 
 #: apps/desktop/src/components/CollectionCard.tsx
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/collections/card.rs
 #: apps/native/src/library/collection_dialog.rs
 msgctxt "collection kind"
 msgid "Smart"
@@ -14041,6 +14174,7 @@ msgstr ""
 
 #. Collections that save a library filter and keep themselves up to date
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgctxt "collection type"
 msgid "Smart"
 msgstr ""
@@ -14058,6 +14192,7 @@ msgstr ""
 
 #. A link to a game's social media page
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Social"
 msgstr ""
 
@@ -14088,6 +14223,7 @@ msgid "Sort by"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Sort catalog games"
 msgstr ""
 
@@ -14103,26 +14239,32 @@ msgid "Sort title"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by playtime"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by popularity"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by recently added"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by recently played"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by release date"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by title"
 msgstr ""
 
@@ -14306,6 +14448,7 @@ msgstr ""
 
 #. A column of a store game's releases
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Status"
 msgstr ""
 
@@ -14513,8 +14656,8 @@ msgstr ""
 #: apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/StoreView.tsx
 #: apps/native/src/frame/sidebar.rs
-#: apps/native/src/frame/views.rs
 #: apps/native/src/game/back.rs
+#: apps/native/src/store/view.rs
 msgid "Store"
 msgstr ""
 
@@ -14761,6 +14904,9 @@ msgstr ""
 #: apps/desktop/src/views/store/CatalogCard.tsx
 #: apps/desktop/src/views/store/releases.ts
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/card.rs
+#: apps/native/src/store/releases.rs
+#: apps/native/src/store/view.rs
 msgid "TBD"
 msgstr ""
 
@@ -14815,6 +14961,7 @@ msgstr ""
 #: apps/native/src/game/editor/data.rs
 #: apps/native/src/game/launch.rs
 #: apps/native/src/game_menu/actions.rs
+#: apps/native/src/store/data.rs
 msgid "That isn't available in this copy of Caskade."
 msgstr ""
 
@@ -14881,6 +15028,7 @@ msgid "The code entered on {device} didn't match. Try again with a new code."
 msgstr ""
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
+#: apps/native/src/collections/delete.rs
 msgid "The collection goes. Its games stay in your library."
 msgstr ""
 
@@ -14910,6 +15058,7 @@ msgid "The first view you see."
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "The game catalog can't sort this way yet, so these are in its usual order."
 msgstr ""
 
@@ -15037,6 +15186,7 @@ msgid "The Ludusavi manifest includes data compiled from PCGamingWiki, licensed 
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "The metadata server sent nothing for this game yet. Try again later."
 msgstr ""
 
@@ -15121,6 +15271,7 @@ msgid "The sign-in expires {0}. Caskade keeps it in your system's keychain, neve
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "The similar games aren't available yet."
 msgstr ""
 
@@ -15275,14 +15426,17 @@ msgid "They match: pair"
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "This collection doesn't exist any more."
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "This collection has no games."
 msgstr ""
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "This collection is empty. Add games here, or from a game's menu."
 msgstr ""
 
@@ -15518,6 +15672,7 @@ msgid "Title"
 msgstr ""
 
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 msgctxt "smart collection rule"
 msgid "Title"
 msgstr ""
@@ -15620,6 +15775,7 @@ msgstr ""
 #: apps/desktop/src/views/StoreView.tsx
 #: apps/native/src/activity/card.rs
 #: apps/native/src/activity/mod.rs
+#: apps/native/src/collections/list.rs
 #: apps/native/src/flows/storage.rs
 #: apps/native/src/frame/error.rs
 #: apps/native/src/frame/notifications.rs
@@ -15634,6 +15790,7 @@ msgstr ""
 #: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/streaming.rs
+#: apps/native/src/store/view.rs
 #: apps/native/src/ui/failure.rs
 msgid "Try again"
 msgstr ""
@@ -15868,6 +16025,7 @@ msgid "Unpacking…"
 msgstr ""
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
+#: apps/native/src/collections/actions.rs
 msgid "Unpin"
 msgstr ""
 
@@ -15940,10 +16098,12 @@ msgstr ""
 
 #. A Store tab and shelf: releases to come
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Upcoming"
 msgstr ""
 
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/store/view.rs
 msgid "Upcoming releases"
 msgstr ""
 
@@ -16036,6 +16196,7 @@ msgstr ""
 
 #. {when} is a day: “today”, “3 days ago”
 #: apps/desktop/src/components/CollectionCard.tsx
+#: apps/native/src/collections/card.rs
 msgid "Updated {when}"
 msgstr ""
 
@@ -16288,6 +16449,7 @@ msgstr ""
 
 #. A link to a game's video page
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Video"
 msgstr ""
 
@@ -16310,6 +16472,7 @@ msgstr ""
 #: apps/desktop/src/views/home/HomeView.tsx
 #: apps/desktop/src/views/StoreView.tsx
 #: apps/native/src/home/mod.rs
+#: apps/native/src/store/view.rs
 msgid "View all →"
 msgstr ""
 
@@ -16465,6 +16628,7 @@ msgstr ""
 
 #. A link to a game's website
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Website"
 msgstr ""
 
@@ -16640,6 +16804,7 @@ msgid "Where they are on this device"
 msgstr ""
 
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Where to buy"
 msgstr ""
 
@@ -16713,11 +16878,13 @@ msgstr ""
 
 #. A link to a game's website
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Wiki"
 msgstr ""
 
 #. A link to a game's website
 #: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/native/src/store/game.rs
 msgid "Wikipedia"
 msgstr ""
 
@@ -16818,6 +16985,7 @@ msgstr ""
 
 #. A game release's region
 #: apps/desktop/src/views/store/releases.ts
+#: apps/native/src/store/releases.rs
 msgid "Worldwide"
 msgstr ""
 
@@ -16900,6 +17068,7 @@ msgid "Your choices could not be saved. Try again to finish setup, or continue w
 msgstr ""
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "Your Collections"
 msgstr ""
 
@@ -16938,6 +17107,7 @@ msgid "your library"
 msgstr ""
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
+#: apps/native/src/collections/add_games.rs
 msgid "Your library has no games yet."
 msgstr ""
 

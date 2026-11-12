@@ -30,6 +30,7 @@ msgstr "Installerad {installedVersion}"
 
 #. The title text a smart collection looks for, in quotes
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 msgid "“{text}”"
 msgstr "”{text}”"
 
@@ -892,6 +893,7 @@ msgid "{name} has no installed games that can be copied to this device. Install 
 msgstr "{name} har inga installerade spel som kan kopieras till den här enheten. Installera spel här som vanligt."
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "{name} options"
 msgstr "Alternativ för {name}"
 
@@ -1043,6 +1045,7 @@ msgstr[1] "# plattformar saknar emulator"
 
 #. {played} is a duration: “12h 30m”
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "{played} played"
 msgstr "{played} spelat"
 
@@ -1328,7 +1331,7 @@ msgstr "{title}, skärmbilder"
 #: apps/desktop/src/views/settings/LibraryDiscoverySettings.tsx
 #: apps/desktop/src/views/settings/romm/CacheSection.tsx
 #: apps/desktop/src/views/settings/StoragePanel.tsx
-#: apps/native/src/frame/type_search.rs
+#: apps/native/src/collections/page.rs apps/native/src/frame/type_search.rs
 #: apps/native/src/library/platform_grid.rs apps/native/src/settings/backup.rs
 #: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/emulation/romm.rs
@@ -2170,6 +2173,7 @@ msgid "Add game"
 msgstr "Lägg till spel"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Add Games"
 msgstr "Lägg till spel"
 
@@ -2179,10 +2183,12 @@ msgid "Add games from their menu, or from the collection's Add games."
 msgstr "Lägg till spel från deras meny, eller via samlingens Lägg till spel."
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
+#: apps/native/src/collections/add_games.rs
 msgid "Add games to {name}"
 msgstr "Lägg till spel i {name}"
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
+#: apps/native/src/collections/actions.rs
 msgid "Add games…"
 msgstr "Lägg till spel…"
 
@@ -2415,6 +2421,7 @@ msgstr "Alla konton"
 
 #: apps/desktop/src/views/CollectionsView.tsx
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/list.rs apps/native/src/collections/page.rs
 msgid "All Collections"
 msgstr "Alla samlingar"
 
@@ -2430,13 +2437,14 @@ msgctxt "library filter"
 msgid "All Games"
 msgstr "Alla spel"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "All genres"
 msgstr "Alla genrer"
 
 #. Goes back from one platform's games to the list of platforms
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/library/view.rs
+#: apps/native/src/store/view.rs
 msgid "All platforms"
 msgstr "Alla plattformar"
 
@@ -2461,7 +2469,7 @@ msgid "Allow self-signed certificates"
 msgstr "Tillåt självsignerade certifikat"
 
 #. A game's or release's status on IGDB
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Alpha"
 msgstr "Alfa"
 
@@ -2569,7 +2577,7 @@ msgstr "Och {0} till."
 msgid "Animations"
 msgstr "Animationer"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Announced releases without a date yet."
 msgstr "Utannonserade utgåvor som ännu saknar datum."
 
@@ -2621,7 +2629,7 @@ msgstr "Valfri process i mappen"
 msgid "Any title"
 msgstr "Valfri titel"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Any year"
 msgstr "Valfritt år"
 
@@ -2714,6 +2722,7 @@ msgid "Approve {game} for {account}."
 msgstr "Godkänn {game} för {account}."
 
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 msgctxt "smart collection rule"
 msgid "are"
 msgstr "är"
@@ -2757,7 +2766,7 @@ msgid "Artwork, thumbnails and game details that Caskade can download again."
 msgstr "Bilder, miniatyrer och speldetaljer som Caskade kan ladda ner igen."
 
 #. A game release's region
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Asia"
 msgstr "Asien"
 
@@ -2813,7 +2822,7 @@ msgid "Asleep: it wakes when you stream"
 msgstr "Sover: den vaknar när du streamar"
 
 #. A game release's region
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Australia"
 msgstr "Australien"
 
@@ -3083,7 +3092,7 @@ msgid "Behaviour"
 msgstr "Beteende"
 
 #. A game's or release's status on IGDB
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Beta"
 msgstr "Beta"
 
@@ -3133,7 +3142,7 @@ msgid "Blue"
 msgstr "Blå"
 
 #. A game release's region
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Brazil"
 msgstr "Brasilien"
 
@@ -3152,7 +3161,7 @@ msgid "Broken"
 msgstr "Trasig"
 
 #. A Store tab: search and filter the whole catalog
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Browse"
 msgstr "Bläddra"
 
@@ -3397,7 +3406,8 @@ msgstr "Avbryt test"
 #: apps/desktop/src/api/emulatorSetup.ts
 #: apps/desktop/src/views/store/CatalogCard.tsx
 #: apps/desktop/src/views/store/releases.ts
-#: apps/native/src/settings/emulation/setup.rs
+#: apps/native/src/settings/emulation/setup.rs apps/native/src/store/card.rs
+#: apps/native/src/store/releases.rs
 msgid "Cancelled"
 msgstr "Avbruten"
 
@@ -3937,7 +3947,7 @@ msgid "checksum"
 msgstr "kontrollsumma"
 
 #. A game release's region
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "China"
 msgstr "Kina"
 
@@ -4231,7 +4241,7 @@ msgstr "Koden som visas på {device}"
 #: apps/desktop/src/shell/nav.ts apps/desktop/src/views/CollectionsView.tsx
 #: apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-#: apps/native/src/frame/sidebar.rs apps/native/src/frame/views.rs
+#: apps/native/src/collections/list.rs apps/native/src/frame/sidebar.rs
 #: apps/native/src/game/back.rs apps/native/src/settings/general.rs
 msgid "Collections"
 msgstr "Samlingar"
@@ -4283,7 +4293,7 @@ msgid "Commands that run around every game's launch. Emulator profiles and games
 msgstr "Kommandon som körs kring varje spels start. Emulatorprofiler och spel kan lägga till egna; se ordningen vid start nedan."
 
 #. A link to a game's community page
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Community"
 msgstr "Gemenskap"
 
@@ -4585,7 +4595,7 @@ msgstr "Kopierar till den här datorn. Följ det under Aktivitet."
 msgid "Could not add the dropped file."
 msgstr "Kunde inte lägga till den släppta filen."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Could not load more games."
 msgstr "Kunde inte läsa in fler spel."
 
@@ -4598,11 +4608,12 @@ msgstr "Kunde inte läsa in aviseringar."
 msgid "Could not load session history."
 msgstr "Kunde inte läsa in sessionshistoriken."
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Could not load similar games."
 msgstr "Kunde inte läsa in liknande spel."
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Could not load the games."
 msgstr "Kunde inte läsa in spelen."
 
@@ -4616,6 +4627,7 @@ msgid "Could not load these games."
 msgstr "Kunde inte läsa in de här spelen."
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Could not load this collection."
 msgstr "Kunde inte läsa in den här samlingen."
 
@@ -4624,6 +4636,7 @@ msgid "Could not load this game"
 msgstr "Kunde inte läsa in det här spelet"
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "Could not load your collections."
 msgstr "Kunde inte läsa in dina samlingar."
 
@@ -4631,15 +4644,15 @@ msgstr "Kunde inte läsa in dina samlingar."
 msgid "Could not load your recent activity."
 msgstr "Kunde inte läsa in din senaste aktivitet."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Could not reach the game catalog: {error}"
 msgstr "Kunde inte nå spelkatalogen: {error}"
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Could not reach the game catalog: {reason}"
 msgstr "Kunde inte nå spelkatalogen: {reason}"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Could not reach the game catalog."
 msgstr "Kunde inte nå spelkatalogen."
 
@@ -4828,7 +4841,7 @@ msgid "dark, light, skin"
 msgstr "mörkt, ljust, skal"
 
 #. A column of a store game's releases
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Date"
 msgstr "Datum"
 
@@ -4838,7 +4851,7 @@ msgid "Date unavailable"
 msgstr "Datum saknas"
 
 #. Upcoming releases with a release date
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Dated"
 msgstr "Med datum"
 
@@ -4944,7 +4957,7 @@ msgstr "Standardvalen gäller för kompatibla spel som använder Plattformens st
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/collections/delete.rs apps/native/src/settings/accounts.rs
 msgid "Delete"
 msgstr "Radera"
 
@@ -4981,7 +4994,7 @@ msgstr "Radera {name}"
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/collections/delete.rs apps/native/src/settings/accounts.rs
 msgid "Delete {name}?"
 msgstr "Radera {name}?"
 
@@ -4989,19 +5002,19 @@ msgstr "Radera {name}?"
 #: apps/desktop/src/components/gameEditor/ActionsTab.tsx
 #: apps/desktop/src/components/scripts/ScriptsPanel.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/native/src/flows/scripts.rs apps/native/src/game/editor/actions.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/collections/actions.rs apps/native/src/flows/scripts.rs
+#: apps/native/src/game/editor/actions.rs apps/native/src/settings/accounts.rs
 msgid "Delete…"
 msgstr "Radera…"
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/collections/delete.rs apps/native/src/settings/accounts.rs
 msgid "Deleting…"
 msgstr "Raderar…"
 
 #. A game's or release's status on IGDB
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Delisted"
 msgstr "Borttaget från butiken"
 
@@ -5299,8 +5312,8 @@ msgstr "Försök inte igen automatiskt"
 #: apps/desktop/src/components/shares/ShareGameDialog.tsx
 #: apps/desktop/src/components/sync/PairingHost.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
-#: apps/native/src/flows/pairing.rs apps/native/src/flows/share_game.rs
-#: apps/native/src/game_menu/collections.rs
+#: apps/native/src/collections/add_games.rs apps/native/src/flows/pairing.rs
+#: apps/native/src/flows/share_game.rs apps/native/src/game_menu/collections.rs
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/selection_bar.rs
 #: apps/native/src/settings/streaming.rs
@@ -5321,7 +5334,7 @@ msgstr "Klar"
 
 #: apps/desktop/src/views/CollectionView.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
-#: apps/native/src/library/view.rs
+#: apps/native/src/collections/page.rs apps/native/src/library/view.rs
 msgid "Done selecting"
 msgstr "Klar med valet"
 
@@ -5493,7 +5506,8 @@ msgstr "Varje säkerhetskopia skickas också till den enheten nästa gång de sy
 #. A game release's status
 #. A game release's status
 #: apps/desktop/src/views/store/CatalogCard.tsx
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/card.rs
+#: apps/native/src/store/releases.rs
 msgid "Early access"
 msgstr "Early access"
 
@@ -5524,10 +5538,12 @@ msgid "Edit details"
 msgstr "Redigera detaljer"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Edit Rules"
 msgstr "Redigera regler"
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
+#: apps/native/src/collections/actions.rs
 msgid "Edit rules…"
 msgstr "Redigera regler…"
 
@@ -5555,7 +5571,8 @@ msgstr "Redigera server"
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/native/src/game_menu/menu.rs apps/native/src/settings/accounts.rs
+#: apps/native/src/collections/actions.rs apps/native/src/game_menu/menu.rs
+#: apps/native/src/settings/accounts.rs
 msgid "Edit…"
 msgstr "Redigera…"
 
@@ -5852,7 +5869,7 @@ msgid "Estimated space: Unknown — free space will be checked again before inst
 msgstr "Uppskattat utrymme: Okänt – ledigt utrymme kontrolleras igen före installationen."
 
 #. A game release's region
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Europe"
 msgstr "Europa"
 
@@ -5883,7 +5900,7 @@ msgstr "Varje säkerhetskopia läses tillbaka och kontrolleras innan den rapport
 msgid "Every device then needs a new code to play from this one."
 msgstr "Alla enheter behöver då en ny kod för att spela från den här."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Every game IGDB knows, with where it is sold. Prices and availability are the stores' own."
 msgstr "Alla spel som IGDB känner till, med var de säljs. Priser och tillgänglighet kommer från butikerna själva."
 
@@ -6319,7 +6336,7 @@ msgid "Full disk scan"
 msgstr "Genomsök hela disken"
 
 #. A game's or release's status on IGDB
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Full release"
 msgstr "Fullständig utgåva"
 
@@ -6344,8 +6361,7 @@ msgid "Future scans skip it"
 msgstr "Framtida genomsökningar hoppar över det"
 
 #. The IGDB game the library game is matched to
-#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/frame/views.rs
-#: apps/native/src/game/igdb.rs
+#: apps/desktop/src/views/game/IgdbPanel.tsx apps/native/src/game/igdb.rs
 msgid "Game"
 msgstr "Spel"
 
@@ -6455,6 +6471,7 @@ msgstr "Spel"
 #. The first word of a rule such as “Games are Installed”
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 #: apps/native/src/library/collection_dialog.rs
 msgctxt "smart collection rule"
 msgid "Games"
@@ -6462,6 +6479,7 @@ msgstr "Spel"
 
 #. The heading over a collection's games, with how many
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Games ({count})"
 msgstr "Spel ({count})"
 
@@ -6635,7 +6653,7 @@ msgid "General"
 msgstr "Allmänt"
 
 #. The Store's genre filter
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Genre"
 msgstr "Genre"
 
@@ -6759,6 +6777,7 @@ msgid "Hand it to another program"
 msgstr "Lämna över till ett annat program"
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "Hand-pick games into lists, or save a filter as a smart collection that keeps itself up to date."
 msgstr "Välj spel för hand till listor, eller spara ett filter som en smart samling som håller sig uppdaterad."
 
@@ -6792,6 +6811,7 @@ msgstr "Hardcore {0}"
 
 #. As in “Title has ‘mario’”
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 msgctxt "smart collection rule"
 msgid "has"
 msgstr "innehåller"
@@ -7018,7 +7038,7 @@ msgid "If you play here too, each device keeps its own save, and the next time y
 msgstr "Om du spelar här också behåller varje enhet sin egen sparfil, och nästa gång du spelar väljer du vilken du vill fortsätta med."
 
 #. The eyebrow above a store game's title: where the page comes from
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "IGDB catalog"
 msgstr "IGDB-katalogen"
 
@@ -7030,11 +7050,11 @@ msgstr "IGDB-spel {igdbId}. Detaljerna visas när Caskade når metadataservern."
 msgid "IGDB games"
 msgstr "IGDB-spel"
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "IGDB has no game {igdbId}."
 msgstr "IGDB har inget spel {igdbId}."
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "IGDB has no release dates for this game."
 msgstr "IGDB har inga utgivningsdatum för det här spelet."
 
@@ -7046,15 +7066,15 @@ msgstr "IGDB-ID {id}"
 msgid "IGDB ID {igdbId}"
 msgstr "IGDB-ID {igdbId}"
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "IGDB lists no similar games."
 msgstr "IGDB listar inga liknande spel."
 
-#: apps/desktop/src/views/store/WhereToBuy.tsx
+#: apps/desktop/src/views/store/WhereToBuy.tsx apps/native/src/store/game.rs
 msgid "IGDB lists no stores for this game."
 msgstr "IGDB listar inga butiker för det här spelet."
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "IGDB page"
 msgstr "IGDB-sida"
 
@@ -7159,7 +7179,7 @@ msgid "In a window, with mouse and keyboard."
 msgstr "I ett fönster, med mus och tangentbord."
 
 #. A store game the library has but isn't installed
-#: apps/desktop/src/views/store/CatalogCard.tsx
+#: apps/desktop/src/views/store/CatalogCard.tsx apps/native/src/store/card.rs
 msgid "In library"
 msgstr "I biblioteket"
 
@@ -7193,7 +7213,7 @@ msgstr "i ditt bibliotek"
 #. A store game the library has but isn't installed
 #: apps/desktop/src/components/shares/ShareInfoDetails.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
-#: apps/native/src/flows/shares_common.rs
+#: apps/native/src/flows/shares_common.rs apps/native/src/store/game.rs
 msgid "In your library"
 msgstr "I ditt bibliotek"
 
@@ -7412,7 +7432,8 @@ msgid "Installed"
 msgstr "Installerad"
 
 #: apps/desktop/src/views/store/CatalogCard.tsx
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/card.rs
+#: apps/native/src/store/game.rs
 msgctxt "game status"
 msgid "Installed"
 msgstr "Installerat"
@@ -7601,6 +7622,7 @@ msgid "IP address"
 msgstr "IP-adress"
 
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 msgctxt "smart collection rule"
 msgid "is"
 msgstr "är"
@@ -7793,7 +7815,7 @@ msgid "Its web version is removed: the offline copy and the progress saved in th
 msgstr "Webbversionen tas bort: offlinekopian och framstegen som sparats i spelfönstret raderas, tillsammans med dess spelsessioner. Spelets andra versioner finns kvar i biblioteket."
 
 #. A game release's region
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Japan"
 msgstr "Japan"
 
@@ -7926,7 +7948,7 @@ msgid "Kind of collection"
 msgstr "Typ av samling"
 
 #. A game release's region
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Korea"
 msgstr "Korea"
 
@@ -8251,7 +8273,7 @@ msgstr "Länk"
 msgid "Link copied"
 msgstr "Länken kopierad"
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Links"
 msgstr "Länkar"
 
@@ -8267,6 +8289,7 @@ msgstr "listvy"
 
 #. A smart collection, which follows the library as it changes
 #: apps/desktop/src/components/CollectionCard.tsx
+#: apps/native/src/collections/card.rs
 msgctxt "collection"
 msgid "Live"
 msgstr "Live"
@@ -8281,7 +8304,7 @@ msgstr "Live: uppdateras var {interval}, graferna visar de senaste {span}."
 msgid "Live: updates every second, graphs show the last {span}."
 msgstr "Live: uppdateras varje sekund, graferna visar de senaste {span}."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Load more"
 msgstr "Läs in fler"
 
@@ -8315,12 +8338,13 @@ msgid "Loading activity…"
 msgstr "Läser in aktivitet…"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Loading collection…"
 msgstr "Läser in samlingen…"
 
 #: apps/desktop/src/components/collections/CollectionPicker.tsx
 #: apps/desktop/src/views/CollectionsView.tsx
-#: apps/native/src/game_menu/collections.rs
+#: apps/native/src/collections/list.rs apps/native/src/game_menu/collections.rs
 msgid "Loading collections…"
 msgstr "Läser in samlingar…"
 
@@ -8347,11 +8371,13 @@ msgstr "Läser in spel"
 
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/game/page.rs
+#: apps/native/src/store/game.rs
 msgid "Loading game…"
 msgstr "Läser in spelet…"
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/collections/add_games.rs apps/native/src/store/view.rs
 msgid "Loading games…"
 msgstr "Läser in spel…"
 
@@ -8409,7 +8435,7 @@ msgstr "Läser in sessioner…"
 msgid "Loading settings…"
 msgstr "Läser in inställningar…"
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Loading similar games…"
 msgstr "Läser in liknande spel…"
 
@@ -8435,6 +8461,7 @@ msgstr "Läser in din profil…"
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/frame/notifications.rs
 #: apps/native/src/game/editor/artwork.rs apps/native/src/game/editor/mod.rs
 #: apps/native/src/plugins/mod.rs apps/native/src/settings/appearance.rs
+#: apps/native/src/store/view.rs
 msgid "Loading…"
 msgstr "Läser in…"
 
@@ -8635,6 +8662,7 @@ msgid "Make default"
 msgstr "Gör till standard"
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "Make your first one"
 msgstr "Skapa din första"
 
@@ -8661,6 +8689,7 @@ msgstr "Spelnamn i manifestet"
 
 #: apps/desktop/src/components/CollectionCard.tsx
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/collections/card.rs
 #: apps/native/src/library/collection_dialog.rs
 msgctxt "collection kind"
 msgid "Manual"
@@ -8668,11 +8697,13 @@ msgstr "Manuell"
 
 #. Collections whose games are picked by hand
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgctxt "collection type"
 msgid "Manual"
 msgstr "Manuella"
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "Manual list or smart filter"
 msgstr "Manuell lista eller smart filter"
 
@@ -8741,6 +8772,7 @@ msgid "Matches"
 msgstr "Matchar"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Matches all rules"
 msgstr "Uppfyller alla regler"
 
@@ -8753,7 +8785,7 @@ msgstr "Matchningar och nedladdningar körs i bakgrunden när spel kommer in. Du
 msgid "Matches games that have no match yet and fills in what they lack from what Caskade already has."
 msgstr "Matchar spel som saknar matchning och fyller i det som saknas utifrån det Caskade redan har."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Matching games"
 msgstr "Matchande spel"
 
@@ -8888,12 +8920,12 @@ msgstr "Fler än ett spel i manifestet matchar: {titles}. Ange det rätta namnet
 msgid "More themes in the plugin and theme catalogue"
 msgstr "Fler teman i katalogen med plugins och teman"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Most rated"
 msgstr "Flest betyg"
 
 #. The Store's games released in the last 12 months with the most ratings
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Most rated this past year"
 msgstr "Flest betyg det senaste året"
 
@@ -9123,6 +9155,7 @@ msgid "New collection"
 msgstr "Ny samling"
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "New Collection"
 msgstr "Ny samling"
 
@@ -9174,7 +9207,7 @@ msgid "New versions of Caskade itself. Updates are signed, and nothing installs 
 msgstr "Nya versioner av själva Caskade. Uppdateringar är signerade, och inget installeras förrän du ber om det."
 
 #. A game release's region
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "New Zealand"
 msgstr "Nya Zeeland"
 
@@ -9183,11 +9216,11 @@ msgstr "Nya Zeeland"
 msgid "Newer"
 msgstr "Nyare"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Newest"
 msgstr "Nyast"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Newest games"
 msgstr "Nyaste spelen"
 
@@ -9224,7 +9257,8 @@ msgid "Next screenshot"
 msgstr "Nästa skärmbild"
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
-#: apps/desktop/src/input/hooks.tsx apps/native/src/library/view.rs
+#: apps/desktop/src/input/hooks.tsx apps/native/src/collections/list.rs
+#: apps/native/src/library/view.rs apps/native/src/store/view.rs
 msgid "Next tab"
 msgstr "Nästa flik"
 
@@ -9258,7 +9292,7 @@ msgstr "Inga konsolmappar hittades (som snes eller psx)"
 msgid "No default location configured"
 msgstr "Ingen standardplats har konfigurerats"
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "No description on IGDB."
 msgstr "Ingen beskrivning på IGDB."
 
@@ -9315,15 +9349,16 @@ msgstr "Inga spel väntar på granskning."
 msgid "No games in this filter yet."
 msgstr "Inga spel i det här filtret än."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "No games match “{query}”."
 msgstr "Inga spel matchar ”{query}”."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "No games match these filters."
 msgstr "Inga spel matchar de här filtren."
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "No games match these rules yet. They'll show up here as your library changes."
 msgstr "Inga spel matchar de här reglerna än. De dyker upp här när ditt bibliotek ändras."
 
@@ -9333,6 +9368,7 @@ msgid "No games match your search in this filter."
 msgstr "Inga spel matchar din sökning i det här filtret."
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
+#: apps/native/src/collections/add_games.rs
 msgid "No games match your search."
 msgstr "Inga spel matchar din sökning."
 
@@ -9451,7 +9487,7 @@ msgstr "Ingen avläsning"
 msgid "No reading this time."
 msgstr "Ingen avläsning den här gången."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "No recent releases here."
 msgstr "Inga nya utgåvor här."
 
@@ -9535,7 +9571,7 @@ msgstr "Inga teman hittades. Sök efter teman igen letar efter dem på nytt."
 msgid "No unread notifications."
 msgstr "Inga olästa aviseringar."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "No upcoming releases here."
 msgstr "Inga kommande utgåvor här."
 
@@ -9606,7 +9642,7 @@ msgid "None, by your choice"
 msgstr "Ingen, enligt ditt val"
 
 #. A game release's region
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "North America"
 msgstr "Nordamerika"
 
@@ -9986,6 +10022,7 @@ msgstr "Erbjuder att installera samma. Tillägg ber fortfarande om sina behörig
 #. A link to a game's website
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/game/page.rs
+#: apps/native/src/store/game.rs
 msgid "Official site"
 msgstr "Officiell webbplats"
 
@@ -9999,6 +10036,7 @@ msgstr "offline"
 #. A game's or release's status on IGDB
 #: apps/desktop/src/components/sync/common.tsx
 #: apps/desktop/src/views/store/releases.ts apps/native/src/settings/devices.rs
+#: apps/native/src/store/releases.rs
 msgid "Offline"
 msgstr "Offline"
 
@@ -10215,7 +10253,7 @@ msgstr "Öppna spel"
 msgid "Open game details"
 msgstr "Öppna speldetaljer"
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Open in library"
 msgstr "Öppna i biblioteket"
 
@@ -10332,7 +10370,8 @@ msgstr "Valfritt. Ett kommando att köra först; om det misslyckas startar inte 
 
 #. Button hint: a pad's Start opens the focused item's menu
 #: apps/desktop/src/views/CollectionsView.tsx
-#: apps/desktop/src/views/library/GameActions.tsx apps/native/src/home/mod.rs
+#: apps/desktop/src/views/library/GameActions.tsx
+#: apps/native/src/collections/list.rs apps/native/src/home/mod.rs
 #: apps/native/src/library/grid.rs
 msgid "Options"
 msgstr "Alternativ"
@@ -10660,6 +10699,7 @@ msgid "PIN"
 msgstr "PIN"
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
+#: apps/native/src/collections/actions.rs
 msgid "Pin to the top"
 msgstr "Fäst högst upp"
 
@@ -10670,11 +10710,13 @@ msgid "Pink"
 msgstr "Rosa"
 
 #: apps/desktop/src/components/CollectionCard.tsx
+#: apps/native/src/collections/card.rs
 msgctxt "collection"
 msgid "Pinned"
 msgstr "Fäst"
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgctxt "collection stats"
 msgid "Pinned"
 msgstr "Fästa"
@@ -10694,12 +10736,14 @@ msgstr "Platser"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/flows/shares_common.rs
-#: apps/native/src/settings/emulation/scanners.rs
+#: apps/native/src/settings/emulation/scanners.rs apps/native/src/store/game.rs
+#: apps/native/src/store/view.rs
 msgid "Platform"
 msgstr "Plattform"
 
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 #: apps/native/src/library/collection_dialog.rs
 msgctxt "smart collection rule"
 msgid "Platform"
@@ -10854,6 +10898,7 @@ msgid "Play on {name}"
 msgstr "Spela på {name}"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "Play Random"
 msgstr "Spela slumpmässigt"
 
@@ -11072,7 +11117,7 @@ msgstr "Tillägg och teman"
 msgid "Plugins' files"
 msgstr "Tilläggens filer"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgctxt "catalog sort"
 msgid "Popular"
 msgstr "Populära"
@@ -11084,7 +11129,7 @@ msgctxt "library sort"
 msgid "Popular"
 msgstr "Populära"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Popular games"
 msgstr "Populära spel"
 
@@ -11157,7 +11202,8 @@ msgid "Previous screenshot"
 msgstr "Föregående skärmbild"
 
 #: apps/desktop/src/components/gameEditor/GameEditor.tsx
-#: apps/desktop/src/input/hooks.tsx apps/native/src/library/view.rs
+#: apps/desktop/src/input/hooks.tsx apps/native/src/collections/list.rs
+#: apps/native/src/library/view.rs apps/native/src/store/view.rs
 msgid "Previous tab"
 msgstr "Föregående flik"
 
@@ -11281,7 +11327,7 @@ msgid "Put it in the port's folder once installed."
 msgstr "Lägg den i portens mapp när den är installerad."
 
 #. A release date known to the quarter of a year: Q1 2027
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Q{quarter} {year}"
 msgstr "K{quarter} {year}"
 
@@ -11486,7 +11532,7 @@ msgid "Recently Played"
 msgstr "Nyligen spelade"
 
 #. A Store tab and shelf
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Recently released"
 msgstr "Nyligen släppta"
 
@@ -11612,7 +11658,7 @@ msgid "Refreshing…"
 msgstr "Uppdaterar…"
 
 #. A column of a store game's releases
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Region"
 msgstr "Region"
 
@@ -11690,7 +11736,7 @@ msgctxt "library sort"
 msgid "Release date"
 msgstr "Utgivningsdatum"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Release year"
 msgstr "Utgivningsår"
 
@@ -11698,13 +11744,13 @@ msgstr "Utgivningsår"
 #: apps/desktop/src/components/gameMenu/QuickLook.tsx
 #: apps/desktop/src/views/game/IgdbPanel.tsx
 #: apps/desktop/src/views/store/releases.ts apps/native/src/game/igdb.rs
-#: apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/game_menu/quick_look.rs apps/native/src/store/releases.rs
 msgid "Released"
 msgstr "Släppt"
 
 #: apps/desktop/src/views/game/EntryUpdate.tsx
 #: apps/desktop/src/views/store/StoreGameView.tsx
-#: apps/native/src/game/entry_update.rs
+#: apps/native/src/game/entry_update.rs apps/native/src/store/game.rs
 msgid "Releases"
 msgstr "Versioner"
 
@@ -11714,15 +11760,15 @@ msgctxt "project link"
 msgid "Releases"
 msgstr "Versioner"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Releases dated to the day in the last 90 days (UTC), newest first, on each platform."
 msgstr "Utgåvor daterade till dagen under de senaste 90 dagarna (UTC), nyaste först, på varje plattform."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Releases to come, soonest first. Month, quarter and year dates are as precise as IGDB knows them; cancelled ones are marked."
 msgstr "Kommande utgåvor, närmast först. Datum på månad, kvartal och år är så exakta som IGDB känner till dem; inställda utgåvor är markerade."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Relevance"
 msgstr "Relevans"
 
@@ -12181,6 +12227,7 @@ msgstr "Resultat"
 
 #: apps/desktop/src/views/library/LibraryView.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/library/view.rs
+#: apps/native/src/store/view.rs
 msgid "Results for “{query}”"
 msgstr "Resultat för ”{query}”"
 
@@ -12383,7 +12430,7 @@ msgid "ROMs on this server appear in your library. They download the first time 
 msgstr "ROM:ar på den här servern visas i ditt bibliotek. De laddas ner första gången du spelar dem."
 
 #. A game's or release's status on IGDB
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Rumoured"
 msgstr "Ryktat"
 
@@ -12934,7 +12981,7 @@ msgstr "Sök efter vilket spel som helst… (klassiskt, modernt eller något obs
 msgid "Search Applications and Games inside your home directory."
 msgstr "Sök efter Applications och Games i din hemmapp."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Search every game…"
 msgstr "Sök bland alla spel…"
 
@@ -12967,7 +13014,7 @@ msgstr "Sök på flyttbara volymer som enheten rapporterar."
 msgid "Search settings"
 msgstr "Sök i inställningarna"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Search the catalog"
 msgstr "Sök i katalogen"
 
@@ -12977,6 +13024,7 @@ msgid "Search the catalogue"
 msgstr "Sök i katalogen"
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
+#: apps/native/src/collections/add_games.rs
 msgid "Search the library"
 msgstr "Sök i biblioteket"
 
@@ -13017,7 +13065,7 @@ msgstr "Se vad som synkas"
 #. Starts choosing several games in the library
 #: apps/desktop/src/views/CollectionView.tsx
 #: apps/desktop/src/views/library/LibraryView.tsx
-#: apps/native/src/library/view.rs
+#: apps/native/src/collections/page.rs apps/native/src/library/view.rs
 msgid "Select"
 msgstr "Välj"
 
@@ -13294,7 +13342,7 @@ msgstr "Dela den här sparningen med någon…"
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
-#: apps/native/src/game_menu/menu.rs
+#: apps/native/src/collections/actions.rs apps/native/src/game_menu/menu.rs
 msgid "Share with someone…"
 msgstr "Dela med någon…"
 
@@ -13395,6 +13443,7 @@ msgid "Show updates"
 msgstr "Visa uppdateringar"
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
+#: apps/native/src/collections/add_games.rs
 msgid "Showing {shown} of {total}. Search to find the rest."
 msgstr "Visar {shown} av {total}. Sök för att hitta resten."
 
@@ -13410,7 +13459,7 @@ msgstr "Visar prestationer från {0}. Den senaste uppdateringen misslyckades: {1
 msgid "Showing achievements from {when}. The last refresh failed: {reason}"
 msgstr "Visar prestationer från {0}. Den senaste uppdateringen misslyckades: {1}"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Showing saved results: the metadata server can't be reached right now."
 msgstr "Visar sparade resultat: metadataservern går inte att nå just nu."
 
@@ -13524,7 +13573,7 @@ msgctxt "store account"
 msgid "Signing in…"
 msgstr "Loggar in…"
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Similar games"
 msgstr "Liknande spel"
 
@@ -13598,6 +13647,7 @@ msgstr "Långsammare sökningar efter spel som inget startprogram känner till. 
 
 #: apps/desktop/src/components/CollectionCard.tsx
 #: apps/desktop/src/components/collections/CollectionDialog.tsx
+#: apps/native/src/collections/card.rs
 #: apps/native/src/library/collection_dialog.rs
 msgctxt "collection kind"
 msgid "Smart"
@@ -13605,6 +13655,7 @@ msgstr "Smart"
 
 #. Collections that save a library filter and keep themselves up to date
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgctxt "collection type"
 msgid "Smart"
 msgstr "Smarta"
@@ -13621,7 +13672,7 @@ msgid "Snap apps"
 msgstr "Snap-appar"
 
 #. A link to a game's social media page
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Social"
 msgstr "Sociala medier"
 
@@ -13650,7 +13701,7 @@ msgstr "Något gick fel."
 msgid "Sort by"
 msgstr "Sortera efter"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Sort catalog games"
 msgstr "Sortera katalogens spel"
 
@@ -13666,26 +13717,32 @@ msgid "Sort title"
 msgstr "Sorteringstitel"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by playtime"
 msgstr "Sorterade efter speltid"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by popularity"
 msgstr "Sorterade efter popularitet"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by recently added"
 msgstr "Sorterade efter senast tillagda"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by recently played"
 msgstr "Sorterade efter senast spelade"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by release date"
 msgstr "Sorterade efter utgivningsdatum"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/rules.rs
 msgid "Sorted by title"
 msgstr "Sorterade efter titel"
 
@@ -13857,7 +13914,7 @@ msgid "stats, CPU, memory, RAM, network, performance, usage, system monitor"
 msgstr "statistik, CPU, minne, RAM, nätverk, prestanda, användning, systemövervakning"
 
 #. A column of a store game's releases
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Status"
 msgstr "Status"
 
@@ -14053,7 +14110,7 @@ msgstr "Lagringstjänsten är inte tillgänglig"
 
 #: apps/desktop/src/shell/nav.ts apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/frame/sidebar.rs
-#: apps/native/src/frame/views.rs apps/native/src/game/back.rs
+#: apps/native/src/game/back.rs apps/native/src/store/view.rs
 msgid "Store"
 msgstr "Butik"
 
@@ -14289,7 +14346,8 @@ msgstr "Mål: {targetDir}"
 #. A release date that isn't known yet (to be determined)
 #: apps/desktop/src/views/store/CatalogCard.tsx
 #: apps/desktop/src/views/store/releases.ts
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/card.rs
+#: apps/native/src/store/releases.rs apps/native/src/store/view.rs
 msgid "TBD"
 msgstr "Ej fastställt"
 
@@ -14340,7 +14398,7 @@ msgstr "Det fungerade inte"
 
 #: apps/native/src/flows/tool_request.rs apps/native/src/game/data.rs
 #: apps/native/src/game/editor/data.rs apps/native/src/game/launch.rs
-#: apps/native/src/game_menu/actions.rs
+#: apps/native/src/game_menu/actions.rs apps/native/src/store/data.rs
 #, fuzzy
 #| msgid "This store isn't available in this version of Caskade."
 msgid "That isn't available in this copy of Caskade."
@@ -14409,6 +14467,7 @@ msgid "The code entered on {device} didn't match. Try again with a new code."
 msgstr "Koden som angavs på {device} stämde inte. Försök igen med en ny kod."
 
 #: apps/desktop/src/components/collections/DeleteCollectionDialog.tsx
+#: apps/native/src/collections/delete.rs
 msgid "The collection goes. Its games stay in your library."
 msgstr "Samlingen tas bort. Dess spel finns kvar i ditt bibliotek."
 
@@ -14436,7 +14495,7 @@ msgstr "Den första synkningen startar nu. Ditt bibliotek, din spelhistorik och 
 msgid "The first view you see."
 msgstr "Den första vyn du ser."
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "The game catalog can't sort this way yet, so these are in its usual order."
 msgstr "Spelkatalogen kan inte sortera så här än, så de visas i sin vanliga ordning."
 
@@ -14560,7 +14619,7 @@ msgstr "Länken fungerar tills du slutar dela."
 msgid "The Ludusavi manifest includes data compiled from PCGamingWiki, licensed under CC BY-NC-SA 3.0."
 msgstr "Ludusavi-manifestet innehåller data sammanställda från PCGamingWiki, licensierade under CC BY-NC-SA 3.0."
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "The metadata server sent nothing for this game yet. Try again later."
 msgstr "Metadataservern har inte skickat något för det här spelet än. Försök igen senare."
 
@@ -14645,7 +14704,7 @@ msgstr "Konfigurationen som Caskade startar med."
 msgid "The sign-in expires {0}. Caskade keeps it in your system's keychain, never in its settings or backups."
 msgstr "Inloggningen går ut {0}. Caskade sparar den i systemets nyckelring, aldrig i sina inställningar eller säkerhetskopior."
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "The similar games aren't available yet."
 msgstr "Liknande spel är inte tillgängliga än."
 
@@ -14800,14 +14859,17 @@ msgid "They match: pair"
 msgstr "De stämmer: parkoppla"
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "This collection doesn't exist any more."
 msgstr "Den här samlingen finns inte längre."
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "This collection has no games."
 msgstr "Den här samlingen har inga spel."
 
 #: apps/desktop/src/views/CollectionView.tsx
+#: apps/native/src/collections/page.rs
 msgid "This collection is empty. Add games here, or from a game's menu."
 msgstr "Den här samlingen är tom. Lägg till spel här, eller från ett spels meny."
 
@@ -15028,6 +15090,7 @@ msgid "Title"
 msgstr "Titel"
 
 #: apps/desktop/src/components/collections/rules.ts
+#: apps/native/src/collections/rules.rs
 msgctxt "smart collection rule"
 msgid "Title"
 msgstr "Titel"
@@ -15128,16 +15191,16 @@ msgstr "systemfält, avsluta, stäng till systemfältet"
 #: apps/desktop/src/views/settings/emulators/ScannersSection.tsx
 #: apps/desktop/src/views/settings/streaming/PairDialog.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/activity/card.rs
-#: apps/native/src/activity/mod.rs apps/native/src/flows/storage.rs
-#: apps/native/src/frame/error.rs apps/native/src/frame/notifications.rs
-#: apps/native/src/game/achievements.rs apps/native/src/game/editor/mod.rs
-#: apps/native/src/game/page.rs apps/native/src/library/bulk_edit.rs
-#: apps/native/src/library/view.rs apps/native/src/settings/addons.rs
-#: apps/native/src/settings/devices.rs
+#: apps/native/src/activity/mod.rs apps/native/src/collections/list.rs
+#: apps/native/src/flows/storage.rs apps/native/src/frame/error.rs
+#: apps/native/src/frame/notifications.rs apps/native/src/game/achievements.rs
+#: apps/native/src/game/editor/mod.rs apps/native/src/game/page.rs
+#: apps/native/src/library/bulk_edit.rs apps/native/src/library/view.rs
+#: apps/native/src/settings/addons.rs apps/native/src/settings/devices.rs
 #: apps/native/src/settings/emulation/scanners.rs
 #: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/settings/general.rs apps/native/src/settings/streaming.rs
-#: apps/native/src/ui/failure.rs
+#: apps/native/src/store/view.rs apps/native/src/ui/failure.rs
 msgid "Try again"
 msgstr "Försök igen"
 
@@ -15368,6 +15431,7 @@ msgid "Unpacking…"
 msgstr "Packar upp…"
 
 #: apps/desktop/src/components/collections/useCollectionActions.tsx
+#: apps/native/src/collections/actions.rs
 msgid "Unpin"
 msgstr "Lossa"
 
@@ -15439,11 +15503,11 @@ msgid "Up to date."
 msgstr "Uppdaterad."
 
 #. A Store tab and shelf: releases to come
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Upcoming"
 msgstr "Kommande"
 
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/store/view.rs
 msgid "Upcoming releases"
 msgstr "Kommande utgåvor"
 
@@ -15537,6 +15601,7 @@ msgstr "Uppdaterad {when}"
 
 #. {when} is a day: “today”, “3 days ago”
 #: apps/desktop/src/components/CollectionCard.tsx
+#: apps/native/src/collections/card.rs
 msgid "Updated {when}"
 msgstr "Uppdaterad {when}"
 
@@ -15779,7 +15844,7 @@ msgid "Versions to keep"
 msgstr "Versioner att behålla"
 
 #. A link to a game's video page
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Video"
 msgstr "Video"
 
@@ -15799,6 +15864,7 @@ msgstr "Videor"
 
 #: apps/desktop/src/views/home/HomeView.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/home/mod.rs
+#: apps/native/src/store/view.rs
 msgid "View all →"
 msgstr "Visa alla →"
 
@@ -15951,7 +16017,7 @@ msgid "web games' browser data"
 msgstr "webbspels webbläsardata"
 
 #. A link to a game's website
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Website"
 msgstr "Webbplats"
 
@@ -16120,7 +16186,7 @@ msgstr "Var ska de här ROM-filerna hamna?"
 msgid "Where they are on this device"
 msgstr "Var de finns på den här enheten"
 
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Where to buy"
 msgstr "Var du kan köpa"
 
@@ -16193,12 +16259,12 @@ msgid "Who's playing?"
 msgstr "Vem spelar?"
 
 #. A link to a game's website
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Wiki"
 msgstr "Wiki"
 
 #. A link to a game's website
-#: apps/desktop/src/views/store/StoreGameView.tsx
+#: apps/desktop/src/views/store/StoreGameView.tsx apps/native/src/store/game.rs
 msgid "Wikipedia"
 msgstr "Wikipedia"
 
@@ -16293,7 +16359,7 @@ msgid "Works until it's stopped"
 msgstr "Fungerar tills den stoppas"
 
 #. A game release's region
-#: apps/desktop/src/views/store/releases.ts
+#: apps/desktop/src/views/store/releases.ts apps/native/src/store/releases.rs
 msgid "Worldwide"
 msgstr "Hela världen"
 
@@ -16374,6 +16440,7 @@ msgid "Your choices could not be saved. Try again to finish setup, or continue w
 msgstr "Dina val kunde inte sparas. Försök igen för att slutföra konfigurationen, eller fortsätt med dina nuvarande inställningar."
 
 #: apps/desktop/src/views/CollectionsView.tsx
+#: apps/native/src/collections/list.rs
 msgid "Your Collections"
 msgstr "Dina samlingar"
 
@@ -16409,6 +16476,7 @@ msgid "your library"
 msgstr "ditt bibliotek"
 
 #: apps/desktop/src/components/collections/AddGamesDialog.tsx
+#: apps/native/src/collections/add_games.rs
 msgid "Your library has no games yet."
 msgstr "Ditt bibliotek har inga spel än."
 

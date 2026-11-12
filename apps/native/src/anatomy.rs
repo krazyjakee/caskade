@@ -31,6 +31,8 @@ pub fn catalogue() -> Vec<Entry> {
     all.extend_from_slice(crate::library::ANATOMY);
     all.extend_from_slice(crate::game::ANATOMY);
     all.extend_from_slice(crate::home::ANATOMY);
+    all.push(crate::store::STORE_LINKS);
+    all.extend_from_slice(crate::collections::ANATOMY);
     all
 }
 
@@ -63,6 +65,14 @@ mod tests {
     /// Roots the native UI renders that the webview doesn't catalogue yet,
     /// with the issue that will.
     const NOT_YET: &[(&str, &str)] = &[
+        (
+            "new-collection",
+            "#102: the webview's New Collection tile isn't catalogued either",
+        ),
+        (
+            "add-games",
+            "#102: the webview's AddGamesDialog isn't catalogued either",
+        ),
         (
             "activity-job",
             "#101: the webview's JobCard isn't catalogued either",

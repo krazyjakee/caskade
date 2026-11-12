@@ -50,6 +50,8 @@ fn app() -> Element {
     use_context_provider(crate::game::page_tests::fake_data);
     // The game editor's data, scripted.
     use_context_provider(crate::game::editor::tests::fake_edit_data);
+    // The Store's catalogue, scripted.
+    use_context_provider(crate::store::harness::fake_store_data);
     rsx! {
         // The app's stylesheet: the frame lays out as in the app.
         style { {include_str!("../../assets/app.css")} }
@@ -386,7 +388,7 @@ fn every_page_of_the_webview_opens() {
         ("/", "Welcome back"),
         ("/store?tab=upcoming", "Store"),
         ("/games/abc?from=%2F", "Game"),
-        ("/store/games/1001", "Game"),
+        ("/store/games/1001", "IGDB has no game 1001."),
         ("/collections", "Collections"),
         ("/collections/weekend", "Collections"),
         ("/settings?tab=devices", "Settings"),

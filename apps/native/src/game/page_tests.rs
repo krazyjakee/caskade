@@ -231,7 +231,7 @@ pub(crate) struct PageScript {
 
 static PAGE: Mutex<Option<PageScript>> = Mutex::new(None);
 
-fn page<T>(f: impl FnOnce(&mut PageScript) -> T) -> T {
+pub(crate) fn page<T>(f: impl FnOnce(&mut PageScript) -> T) -> T {
     let mut script = PAGE.lock().unwrap_or_else(|e| e.into_inner());
     f(script.get_or_insert_with(PageScript::default))
 }

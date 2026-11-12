@@ -35,7 +35,7 @@ mod selection_tests;
 mod tests;
 
 #[allow(unused_imports)]
-pub use art::{SCHEME as ART_SCHEME, fetch as fetch_art};
+pub use art::{SCHEME as ART_SCHEME, fetch as fetch_art, fetch_remote as fetch_remote_art};
 
 /// A game's art for a small place (a search suggestion): the 96 px
 /// thumbnail.
@@ -79,6 +79,8 @@ pub(crate) use bulk_edit::{ListInput, TextAreaField, field_label};
 pub(crate) use grid::Game as LibraryCard;
 #[allow(unused_imports)]
 pub use grid::{Events, VirtualLibrary};
+pub(crate) use selection::use_selection_provider;
+pub(crate) use selection_bar::{AllIds, AllIdsProp, SelectionBar};
 #[allow(unused_imports)]
 pub use view::{DropInstall, LibraryView};
 pub use window::Layout;

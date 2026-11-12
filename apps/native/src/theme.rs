@@ -478,6 +478,11 @@ impl NetProvider for Net {
             Ok(()) => return,
             Err(handler) => handler,
         };
+        // IGDB's and YouTube's images, through the artwork cache (#102).
+        let handler = match crate::library::fetch_remote_art(&request, handler) {
+            Ok(()) => return,
+            Err(handler) => handler,
+        };
         if request.url.scheme() != "caskade-theme" {
             return self.data.fetch(doc_id, request, handler);
         }

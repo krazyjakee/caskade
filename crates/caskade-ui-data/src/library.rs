@@ -137,6 +137,22 @@ impl Library {
         collections::list_collections(&self.store, &self.accounts).await
     }
 
+    /// A collection, with a manual one's games in the order they were
+    /// added; `None` when it's gone.
+    pub async fn collection(&self, id: &str) -> Result<Option<Collection>> {
+        collections::get_collection(&self.store, &self.accounts, id).await
+    }
+
+    /// Pins a collection to the top of the list, or unpins it.
+    pub async fn set_collection_pinned(&self, id: &str, pinned: bool) -> Result<()> {
+        collections::set_collection_pinned(&self.store, &self.accounts, id, pinned).await
+    }
+
+    /// Deletes a collection; its games stay in the library.
+    pub async fn delete_collection(&self, id: &str) -> Result<bool> {
+        collections::delete_collection(&self.store, &self.accounts, id).await
+    }
+
     /// A page of a collection's games.
     pub async fn collection_games(&self, id: &str, offset: u32, limit: u32) -> Result<GamePage> {
         collections::collection_games(

@@ -16,6 +16,8 @@ mod accounts;
 mod activity;
 mod anatomy;
 // The data hooks (#89); the views (#96 onwards) use them.
+// Collections and a collection's page (#102).
+mod collections;
 mod data;
 mod dialogs;
 mod flows;
@@ -44,6 +46,7 @@ mod shell;
 #[cfg(feature = "shots")]
 mod shots;
 mod smoke;
+mod store;
 mod theme;
 mod tray;
 // The component library (#93).

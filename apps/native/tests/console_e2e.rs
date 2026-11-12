@@ -5,9 +5,10 @@
 //! no key or pointer event.
 //!
 //! The script drives the frame (#96): a pad goes into the sidebar, opens
-//! Store and goes back, and the guide button opens nothing with no game
-//! running. The webview's full console script runs here once the native
-//! views exist (#97 onwards).
+//! Collections and goes back, and the guide button opens nothing with no
+//! game running. Not the Store: its catalogue is the metadata server's,
+//! and tests never reach the internet. The webview's full console script
+//! runs here once the native views exist (#97 onwards).
 //!
 //! The app runs on a display and session bus of its own
 //! (`caskade-test-desktop`), never the developer's (#122):
@@ -25,13 +26,13 @@ use std::time::{Duration, Instant};
 const SCRIPT: &str = "\
 # The window is up, on Home (#98).
 wait-text Welcome back
-# A pad: into the sidebar, to its top, down to Store, and A opens it.
+# A pad: into the sidebar, to its top, down to Collections, and A opens it.
 press nav.down
 seek-section nav.left sidebar
 seek nav.up Home
-seek nav.down Store
+seek nav.down Collections
 press confirm
-wait-text Store
+wait-text New Collection
 # B goes back a page.
 press back
 wait-text Welcome back

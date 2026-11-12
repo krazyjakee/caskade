@@ -941,7 +941,7 @@ State on the root:
 
 ## `panel`
 
-A framed panel inside a view. Rendered by Collection, Collections and Emulation views (app).
+A framed panel inside a view. Rendered by CollectionsView (apps/native/src/collections/list.rs), CollectionView (apps/native/src/collections/page.rs); in the webview, Collection, Collections and Emulation views (app).
 
 Root: `[data-cs="panel"]`
 
@@ -949,7 +949,7 @@ Container: its content comes from the caller, which may add parts of its own.
 
 ## `collection-card`
 
-A collection tile. Rendered by CollectionCard (app).
+A collection tile. Rendered by CollectionCard (apps/native/src/collections/card.rs); in the webview, CollectionCard (app).
 
 Root: `[data-cs="collection-card"]`
 
@@ -1387,7 +1387,7 @@ Contains: [`button`](#button)
 
 ## `store-links`
 
-Links to the stores that sell a game. Rendered by StoreLinks (app).
+Links to the stores that sell a game. Rendered by WhereToBuy (apps/native/src/store/game.rs); in the webview, StoreLinks (app).
 
 Root: `[data-cs="store-links"]`
 

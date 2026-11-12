@@ -27,12 +27,25 @@ pub fn Outlet() -> Element {
                 crate::game::GameView { key: "{id}", id, from }
             }
         },
-        Route::StoreGame { .. } => placeholder(t!("Game")),
+        Route::StoreGame { igdb_id, from } => rsx! {
+            for (igdb_id, from) in [(igdb_id, from)] {
+                crate::store::StoreGameView { key: "{igdb_id}", igdb_id, from }
+            }
+        },
         Route::Activity { .. } => rsx! {
             super::notifications::Activity { route }
         },
-        Route::Store(_) => placeholder(t!("Store")),
-        Route::Collections { .. } | Route::Collection { .. } => placeholder(t!("Collections")),
+        Route::Store(store) => rsx! {
+            crate::store::StoreView { store }
+        },
+        Route::Collections { filter } => rsx! {
+            crate::collections::CollectionsView { filter }
+        },
+        Route::Collection { id } => rsx! {
+            for id in [id] {
+                crate::collections::CollectionView { key: "{id}", id }
+            }
+        },
         Route::Settings { tab, section } => rsx! {
             crate::settings::SettingsView { tab, section }
         },

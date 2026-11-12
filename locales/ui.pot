@@ -162,7 +162,9 @@ msgid "Moon"
 msgstr ""
 
 #. A button opening more actions
+#. The button that opens more actions
 #: packages/ui/src/Hero.tsx
+#: apps/native/src/collections/page.rs
 #: apps/native/src/ui/hero.rs
 msgid "More"
 msgstr ""
