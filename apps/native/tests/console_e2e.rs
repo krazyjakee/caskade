@@ -82,7 +82,15 @@ fn a_scripted_pad_drives_the_native_app_with_no_key_or_pointer_event() {
         .stderr(log)
         .spawn()
         .expect("the native binary starts");
-    let deadline = Instant::now() + Duration::from_secs(120);
+    // The app bounds its own run: 90 s for the window, 20 s for each step's
+    // wait and 20 s to quit (`src/input/e2e.rs`). CI's Xvfb and lavapipe are
+    // several times slower than a desktop, so the deadline covers all of it
+    // rather than guessing a total.
+    let steps = SCRIPT
+        .lines()
+        .filter(|line| !line.trim().is_empty() && !line.starts_with('#'))
+        .count();
+    let deadline = Instant::now() + Duration::from_secs(90 + 25 * steps as u64 + 30);
     let status = loop {
         if let Some(status) = app.try_wait().unwrap() {
             break Some(status);
@@ -95,8 +103,18 @@ fn a_scripted_pad_drives_the_native_app_with_no_key_or_pointer_event() {
         std::thread::sleep(Duration::from_millis(200));
     };
     let output = std::fs::read_to_string(home.join("native.log")).unwrap_or_default();
+    // The step it was on, and the log without the renderer's per-frame
+    // warnings and Dioxus's teardown advice, which would fill the tail.
+    let last_step = output
+        .lines()
+        .rev()
+        .find(|line| line.contains("e2e") && line.contains("step="))
+        .unwrap_or("no step started: the window never answered");
     let tail: String = output
         .lines()
+        .filter(|line| !line.contains("vello_common::flatten"))
+        .filter(|line| !line.contains("dioxus_signals::warnings"))
+        .filter(|line| !line.starts_with(' ') && !line.starts_with('}') && !line.starts_with("```"))
         .rev()
         .take(40)
         .collect::<Vec<_>>()
@@ -104,7 +122,9 @@ fn a_scripted_pad_drives_the_native_app_with_no_key_or_pointer_event() {
         .rev()
         .collect::<Vec<_>>()
         .join("\n");
-    let status = status.unwrap_or_else(|| panic!("the run never ended; its log:\n{tail}"));
+    let status = status.unwrap_or_else(|| {
+        panic!("the run never ended; its last step: {last_step}\nits log:\n{tail}")
+    });
     let report: serde_json::Value = serde_json::from_slice(
         &std::fs::read(&report).unwrap_or_else(|_| panic!("no report; the log:\n{tail}")),
     )
@@ -115,10 +135,6 @@ fn a_scripted_pad_drives_the_native_app_with_no_key_or_pointer_event() {
         report["failure"]
     );
     assert!(status.success(), "{status}; the log:\n{tail}");
-    let steps = SCRIPT
-        .lines()
-        .filter(|line| !line.trim().is_empty() && !line.starts_with('#'))
-        .count();
     assert_eq!(report["steps"].as_array().map(Vec::len), Some(steps));
     assert_eq!(report["keyboardEvents"], 0, "a pad-only run");
     assert_eq!(report["pointerEvents"], 0, "a pad-only run");
