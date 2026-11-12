@@ -1186,3 +1186,101 @@ fn typing_outside_a_field_a_menu_or_a_dialog_starts_a_search() {
     let yes = app.ui.focus.unwrap();
     assert_eq!(starts_typing(&app.ui, Some(yes), "f", none), None);
 }
+
+#[test]
+fn console_mode_turned_on_after_the_view_mounted_places_its_focus() {
+    let mut ui = Fake::default();
+    let main = ui.tree.section(0, "main");
+    grid_view(&mut ui, main);
+    // The window decides on console mode once its first view is there.
+    let mut app = App::new(ui, false);
+    assert_eq!(app.ui.focus, None);
+    app.input.set_console(true);
+    app.settle();
+    assert_eq!(app.focused(), "Card 0");
+    // Off and on again: focus stays where it is.
+    let card = app.by_text("Card 2");
+    app.focus(card);
+    app.input.set_console(false);
+    app.input.set_console(true);
+    app.settle();
+    assert_eq!(app.focused(), "Card 2");
+}
+
+#[test]
+fn console_mode_waits_for_the_views_controls_before_the_sidebar() {
+    let mut ui = Fake::default();
+    let sidebar = ui.tree.section(0, "sidebar");
+    ui.tree.button(sidebar, "0 0 100 40", "Home");
+    let main = ui.tree.section(0, "main");
+    ui.location = Some("home".into());
+    let mut app = App::new(ui, false);
+    app.input.set_console(true);
+    // The view's data hasn't come: nothing yet.
+    app.settle();
+    assert_eq!(app.ui.focus, None);
+    // It has: its default.
+    app.ui.tree.button(main, "200 0 140 80", "Resume");
+    let preferred = app.ui.tree.button(main, "200 100 140 80", "View");
+    app.ui.tree.set(preferred, "data-focus-default", "");
+    app.settle();
+    assert_eq!(app.focused(), "View");
+}
+
+#[test]
+fn a_views_focus_waits_for_its_data_after_a_navigation() {
+    let mut ui = Fake::default();
+    let sidebar = ui.tree.section(0, "sidebar");
+    ui.tree.button(sidebar, "0 0 100 40", "Home");
+    let main = ui.tree.section(0, "main");
+    grid_view(&mut ui, main);
+    let mut app = App::new(ui, true);
+    assert_eq!(app.focused(), "Card 0");
+    // A page whose content comes later.
+    for child in app.ui.tree.children(main) {
+        app.ui.tree.remove(child);
+    }
+    app.ui.location = Some("game".into());
+    app.settle();
+    assert_ne!(
+        app.focused(),
+        "Home",
+        "not the sidebar while the page loads"
+    );
+    app.ui.tree.button(main, "200 0 140 80", "Play");
+    app.settle();
+    assert_eq!(app.focused(), "Play");
+}
+
+#[test]
+fn focus_goes_back_to_the_view_when_what_had_it_before_a_menu_went_too() {
+    let mut ui = Fake::default();
+    let main = ui.tree.section(0, "main");
+    ui.tree.button(main, "0 0 140 40", "Play");
+    ui.location = Some("game".into());
+    let mut app = App::new(ui, true);
+    assert_eq!(app.focused(), "Play");
+    // Console mode's curtain over a running game takes focus itself.
+    let curtain = app.ui.tree.add(
+        0,
+        "div",
+        &[
+            ("role", "dialog"),
+            ("tabindex", "-1"),
+            ("data-rect", "0 0 1600 1000"),
+        ],
+        "",
+    );
+    app.focus(curtain);
+    // The quick menu over it.
+    let menu = app.ui.tree.add(0, "div", &[("role", "dialog")], "");
+    app.ui.tree.button(menu, "600 400 200 40", "Stop game");
+    app.settle();
+    assert_eq!(app.focused(), "Stop game");
+    // The game exits: the curtain lifts under the menu, then the menu goes.
+    app.ui.tree.remove(curtain);
+    app.settle();
+    app.ui.tree.remove(menu);
+    app.settle();
+    assert_eq!(app.focused(), "Play");
+}
