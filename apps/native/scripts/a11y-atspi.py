@@ -33,6 +33,32 @@ ap.add_argument("demo")
 ap.add_argument("--out", help="keep Orca's debug log here")
 args = ap.parse_args()
 
+# Daemons the run starts (Orca's speech-dispatcher --spawn forks and leaves
+# its parent) come back to this script instead of init, so the teardown
+# ends them too: on 10 Nov nine speech-dispatchers outlived their runs (#122).
+PR_SET_CHILD_SUBREAPER = 36
+import ctypes
+ctypes.CDLL(None, use_errno=True).prctl(PR_SET_CHILD_SUBREAPER, 1, 0, 0, 0)
+
+
+def descendants():
+    """This script's living descendants, children first."""
+    parents = {}
+    for entry in os.listdir("/proc"):
+        if entry.isdigit():
+            try:
+                with open(f"/proc/{entry}/stat") as fh:
+                    parents[int(entry)] = int(fh.read().rsplit(")", 1)[1].split()[1])
+            except (OSError, ValueError, IndexError):
+                pass
+    found, frontier = [], [os.getpid()]
+    while frontier:
+        children = [pid for pid, parent in parents.items() if parent in frontier]
+        found.extend(children)
+        frontier = children
+    return found
+
+
 # Everything AT-SPI and Orca keep (sockets, settings) goes in a home of its
 # own, never the user's runtime dir.
 home = tempfile.mkdtemp(prefix="caskade-a11y-")
@@ -295,6 +321,24 @@ finally:
             print(f"killing {proc.args[0]}: it didn't stop")
             proc.kill()
             proc.wait()
+    # Whatever they left: daemons that forked away from them.
+    import signal
+    for signum in (signal.SIGTERM, signal.SIGKILL):
+        left = descendants()
+        for pid in left:
+            try:
+                os.kill(pid, signum)
+            except ProcessLookupError:
+                pass
+        for _ in range(50):
+            for pid in left:
+                try:
+                    os.waitpid(pid, os.WNOHANG)
+                except ChildProcessError:
+                    pass
+            if not descendants():
+                break
+            time.sleep(0.1)
     # Orca's debug log is complete once it has exited.
     orca_log = os.path.join(home, "orca.log")
     if os.path.exists(orca_log) and app is not None:
