@@ -20,8 +20,8 @@
 //! - `focus-has <text>`: the focused control's text contains `<text>`.
 //! - `wait-text <text>`: the window shows `<text>`.
 //! - `wait-event <event>`: `game-started`, `game-exited` or
-//!   `settings-changed` happens. (Console mode's events come with console
-//!   mode.)
+//!   `settings-changed` happens, or the window is in console mode
+//!   (`console-on`) or out of it (`console-off`, #107).
 //! - `sleep <ms>`.
 
 use caskade_app::events::Event as AppEvent;
@@ -244,7 +244,16 @@ impl Driver {
                     "game-exited" => "game.exited",
                     "settings-changed" => "settings.changed",
                     "console-on" | "console-off" => {
-                        return Err("the native app has no console mode yet".into());
+                        // The mode is the window's, not an app event.
+                        let on = rest == "console-on";
+                        let deadline = Instant::now() + WAIT;
+                        while crate::console::active() != on {
+                            if Instant::now() > deadline {
+                                return Err(format!("no {rest} event"));
+                            }
+                            std::thread::sleep(Duration::from_millis(50));
+                        }
+                        return Ok(());
                     }
                     other => return Err(format!("unknown event {other:?}")),
                 };

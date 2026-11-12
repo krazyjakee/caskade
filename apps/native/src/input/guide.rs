@@ -129,6 +129,16 @@ pub fn GuideMenu(guide: Guide) -> Element {
         confirming.set(false);
         error.set(None);
     };
+    // Closed and drawn without it: focus goes back to what had it or, if
+    // that went too (the curtain lifted under it), into the view.
+    {
+        let closed = input.clone();
+        use_effect(move || {
+            if game().is_none() {
+                closed.settle();
+            }
+        });
+    }
     let opener = guide.clone();
     let shown = input.clone();
     use_input_action(

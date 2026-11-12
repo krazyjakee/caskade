@@ -260,7 +260,9 @@ impl Input {
 
     /// Console mode: navigation is always on.
     pub fn set_console(&self, console: bool) {
-        self.inner.dispatcher.borrow_mut().console = console;
+        self.inner.dispatcher.borrow_mut().set_console(console);
+        // Its focus goes in over the next frames.
+        self.frames();
     }
 
     /// Whether spatial navigation and the keyboard map are on.
@@ -573,15 +575,22 @@ impl Input {
         }
         let input = self.clone();
         spawn(async move {
-            for frame in 0..MAX_FRAMES {
+            let mut frame = 0;
+            loop {
                 // Made on the app's runtime: a timer needs its reactor.
                 let _ = caskade_app::runtime::spawn(async {
                     tokio::time::sleep(FRAME).await;
                 })
                 .await;
                 input.run_frame();
-                let pending = input.inner.dispatcher.borrow().pending();
-                if frame + 1 >= SETTLE_FRAMES && !pending {
+                frame += 1;
+                let (pending, waiting) = {
+                    let dispatcher = input.inner.dispatcher.borrow();
+                    (dispatcher.pending(), dispatcher.waiting_for_view())
+                };
+                // A view's focus waits longer for the view's controls (its
+                // own bound, `caskade_ui_input`'s VIEW_FRAMES).
+                if (frame >= SETTLE_FRAMES && !pending) || (frame >= MAX_FRAMES && !waiting) {
                     break;
                 }
             }

@@ -82,10 +82,24 @@ pub struct Routed<N> {
 struct Restore {
     saved: Option<FocusMark>,
     frames: u32,
+    /// Only when nothing has focus (console mode turned on).
+    idle: bool,
+    /// Focus went on the view's first control before its default came
+    /// (its data still loading): the default takes it when it comes, if
+    /// focus hasn't moved.
+    placed: bool,
+    /// Frames it has stayed on the view's default.
+    stable: u32,
 }
 
 /// Frames to wait for a view to render before giving up on its focus.
 const RESTORE_FRAMES: u32 = 30;
+/// How many frames a view's focus waits for the view's own controls (its
+/// data may come well after it mounts) before taking anything in the
+/// window.
+const VIEW_FRAMES: u32 = 300;
+/// Frames focus stays on a view's default before its placing is done.
+const STABLE_FRAMES: u32 = 6;
 
 /// Input state for one window.
 pub struct Dispatcher<N> {
@@ -144,6 +158,24 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
     /// Spatial navigation and the keyboard map are on.
     pub fn active(&self) -> bool {
         self.console || self.pad_used
+    }
+
+    /// Console mode on or off. Turned on with navigation off, the view's
+    /// focus is placed as a navigation would place it (once the window
+    /// starts in console mode, its first view mounted before), unless
+    /// something has focus already.
+    pub fn set_console(&mut self, console: bool) {
+        let starting = console && !self.active();
+        self.console = console;
+        if starting && self.restore.is_none() {
+            self.restore = Some(Restore {
+                saved: None,
+                frames: 0,
+                idle: true,
+                placed: false,
+                stable: 0,
+            });
+        }
     }
 
     /// What sent the last action.
@@ -400,7 +432,13 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
         }
         self.here = Some(key.to_owned());
         let saved = self.marks.get(key).cloned();
-        self.restore = (saved.is_some() || self.active()).then_some(Restore { saved, frames: 0 });
+        self.restore = (saved.is_some() || self.active()).then_some(Restore {
+            saved,
+            frames: 0,
+            idle: false,
+            placed: false,
+            stable: 0,
+        });
     }
 
     /// After each render: the pending dialog start and view focus.
@@ -421,11 +459,43 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
         let Some(mut restore) = self.restore.take() else {
             return;
         };
-        // A dialog opened meanwhile: it has focus now, not the view.
-        let current = ui.focused();
+        // A dialog opened meanwhile: it has focus now, not the view. (Focus
+        // on something gone from the window is none.)
+        let root = ui.root();
+        let current = ui.focused().filter(|&node| contains(ui, root, node));
         if spatial::has_overlay(ui)
             || current.is_some_and(|node| closest(ui, node, |at| is_dialog(ui, at)).is_some())
         {
+            return;
+        }
+        if restore.placed {
+            if current.is_some() {
+                // Moved since: the user's.
+                if current != self.entered {
+                    return;
+                }
+                restore.frames += 1;
+                match self.spatial.view_default(ui) {
+                    Some(preferred) if Some(preferred) != current => {
+                        self.focus(ui, preferred, false);
+                        self.entered = Some(preferred);
+                        restore.stable = 0;
+                    }
+                    // On the view's default: done once it has stayed there
+                    // (the old view can still be on screen for a frame).
+                    Some(_) => restore.stable += 1,
+                    None => {}
+                }
+                if restore.stable < STABLE_FRAMES && restore.frames <= VIEW_FRAMES {
+                    self.restore = Some(restore);
+                }
+                return;
+            }
+            // What it was placed on went (the view it was in unmounted):
+            // look again.
+            restore.placed = false;
+        }
+        if restore.idle && current.is_some() {
             return;
         }
         // The view already chose its focus: keep it.
@@ -438,17 +508,42 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
         }
         let target = match &restore.saved {
             Some(saved) => spatial::find(ui, saved),
-            None => self.spatial.entry(ui),
+            None => match self.spatial.view_entry(ui) {
+                Some(None) if restore.frames < VIEW_FRAMES => None,
+                Some(Some(found)) => Some(found),
+                _ => self.spatial.entry(ui),
+            },
         };
         if let Some(target) = target {
             self.focus(ui, target, false);
             self.entered = restore.saved.is_none().then_some(target);
+            // Until it has stayed on the view's default: the default may
+            // still come, or the view it went into may still be the old one.
+            if restore.saved.is_none() {
+                restore.placed = true;
+                restore.stable = 0;
+                self.restore = Some(restore);
+            }
         } else {
             restore.frames += 1;
-            if restore.frames < RESTORE_FRAMES {
+            // A view's focus has one last frame to fall back on the window.
+            let keep = if restore.saved.is_some() {
+                restore.frames < RESTORE_FRAMES
+            } else {
+                restore.frames <= VIEW_FRAMES
+            };
+            if keep {
                 self.restore = Some(restore);
             }
         }
+    }
+
+    /// Whether a view's focus is still waiting for the view's controls:
+    /// frames go on longer for it.
+    pub fn waiting_for_view(&self) -> bool {
+        self.restore
+            .as_ref()
+            .is_some_and(|restore| restore.saved.is_none())
     }
 
     /// Whether a later frame still has focus to place.
@@ -462,6 +557,7 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
         let root = ui.root();
         let within = scope(ui);
         // Closed: gone from the tree, or no longer an open overlay.
+        let mut closed = false;
         while let Some(&(overlay, back)) = self.overlays.last() {
             let open =
                 contains(ui, root, overlay) && (overlay == within || contains(ui, overlay, within));
@@ -469,12 +565,30 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
                 break;
             }
             self.overlays.pop();
+            closed = true;
             let lost = ui
                 .focused()
                 .is_none_or(|node| !contains(ui, root, node) || contains(ui, overlay, node));
             if lost && let Some(back) = back.filter(|&back| is_focusable(ui, back)) {
                 self.focus(ui, back, true);
             }
+        }
+        // Everything closed and what had focus before went too (the quick
+        // menu over console mode's curtain, which lifted under it): the
+        // view's focus, as after a navigation.
+        if closed
+            && within == root
+            && self.active()
+            && self.restore.is_none()
+            && ui.focused().is_none_or(|node| !contains(ui, root, node))
+        {
+            self.restore = Some(Restore {
+                saved: None,
+                frames: 0,
+                idle: true,
+                placed: false,
+                stable: 0,
+            });
         }
         self.entering = false;
         if within == root {
