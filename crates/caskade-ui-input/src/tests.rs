@@ -1332,3 +1332,25 @@ fn a_views_focus_looks_again_when_the_old_view_was_still_drawn() {
     app.settle();
     assert_eq!(app.focused(), "Play");
 }
+
+#[test]
+fn a_views_default_takes_focus_when_it_becomes_pressable_later() {
+    let mut ui = Fake::default();
+    let main = ui.tree.section(0, "main");
+    let back = ui.tree.button(main, "0 0 140 40", "Back");
+    let play = ui.tree.button(main, "0 60 140 40", "Play");
+    ui.tree.set(play, "data-focus-default", "");
+    ui.tree.set(play, "aria-disabled", "true");
+    ui.location = Some("game".into());
+    let mut app = App::new(ui, true);
+    assert_eq!(app.ui.focus, Some(back));
+    // Long after the view's frames ran out (a slow emulator check).
+    for _ in 0..10 {
+        app.settle();
+    }
+    assert_eq!(app.ui.focus, Some(back));
+    // Pressable now; the frame it asks for gives it focus.
+    app.ui.tree.set(play, "aria-disabled", "false");
+    app.settle();
+    assert_eq!(app.ui.focus, Some(play));
+}

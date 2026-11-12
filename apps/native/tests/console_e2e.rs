@@ -253,9 +253,8 @@ seek-section nav.right main
 seek nav.down Pocket Quest
 press confirm
 wait-text Play from your library
-# Play waits for the emulator check; go to it once it can start.
-sleep 1000
-seek nav.down Play
+# Play waits for the emulator check; focus goes to it once it can start.
+focus-is Play
 press confirm
 wait-event game-started
 wait-event game-exited

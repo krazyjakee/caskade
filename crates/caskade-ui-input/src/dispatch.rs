@@ -123,6 +123,10 @@ pub struct Dispatcher<N> {
     here: Option<String>,
     /// What focus was put on when a view opened, until the user moves it.
     entered: Option<N>,
+    /// The view's focus went elsewhere than its default (not there yet, or
+    /// not pressable yet): a later frame gives it to the default if focus
+    /// hasn't moved. No frames are kept running for it.
+    awaiting: bool,
     restore: Option<Restore>,
     /// A dialog that took focus itself, to move onto its default control.
     dialog: Option<N>,
@@ -148,6 +152,7 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
             marks: HashMap::new(),
             here: None,
             entered: None,
+            awaiting: false,
             restore: None,
             dialog: None,
             overlays: Vec::new(),
@@ -419,6 +424,7 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
         if self.here.as_deref() == Some(key) {
             return;
         }
+        self.awaiting = false;
         // Leaving `here`: where the user left focus, from the old view if
         // it's still on screen, else as it was when focus arrived there.
         if let Some(here) = &self.here {
@@ -457,6 +463,7 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
             }
         }
         let Some(mut restore) = self.restore.take() else {
+            self.default_when_ready(ui);
             return;
         };
         // A dialog opened meanwhile: it has focus now, not the view. (Focus
@@ -488,6 +495,10 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
                 }
                 if restore.stable < STABLE_FRAMES && restore.frames <= VIEW_FRAMES {
                     self.restore = Some(restore);
+                } else if restore.stable < STABLE_FRAMES {
+                    // Out of frames before the default could take focus:
+                    // it takes it on a later frame (one it asks for).
+                    self.awaiting = true;
                 }
                 return;
             }
@@ -535,6 +546,27 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
             if keep {
                 self.restore = Some(restore);
             }
+        }
+    }
+
+    /// The view's default takes focus from where the view put it, once it
+    /// can, unless the user moved it since.
+    fn default_when_ready<U: Ui<Node = N>>(&mut self, ui: &mut U) {
+        if !self.awaiting {
+            return;
+        }
+        let root = ui.root();
+        let current = ui.focused().filter(|&node| contains(ui, root, node));
+        if current.is_none() || current != self.entered {
+            self.awaiting = false;
+            return;
+        }
+        if let Some(preferred) = self.spatial.view_default(ui) {
+            if Some(preferred) != current {
+                self.focus(ui, preferred, false);
+                self.entered = Some(preferred);
+            }
+            self.awaiting = false;
         }
     }
 

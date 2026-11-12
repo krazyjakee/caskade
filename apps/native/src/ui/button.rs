@@ -106,6 +106,21 @@ pub fn Button(
     children: Element,
 ) -> Element {
     let interaction = use_interaction();
+    // A view's default control that becomes pressable (Play once the
+    // emulator check passes) may take the focus the view put elsewhere
+    // while it waited: the input layer looks again.
+    let default = attributes
+        .iter()
+        .any(|attribute| attribute.name == "data-focus-default");
+    let input = try_use_context::<crate::input::Input>();
+    use_effect(use_reactive!(|disabled| {
+        if default
+            && !disabled
+            && let Some(input) = &input
+        {
+            input.settle();
+        }
+    }));
     let press = move || {
         if !disabled
             && !pending
