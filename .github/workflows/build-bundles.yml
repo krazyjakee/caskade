@@ -68,8 +68,9 @@ jobs:
         env:
           TARGET: ${{ matrix.target }}
         run: |
-          rustup toolchain install stable --profile minimal --target "$TARGET"
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal --target "$TARGET"
+          rustup default 1.99.1
           rustc -Vv
 
       # Compiled dependencies, per target. GitHub scopes a cache to the ref

@@ -118,8 +118,9 @@ jobs:
       # wasm32-wasip2 builds the plugin host's test guests and the examples.
       - name: Rust toolchain
         run: |
-          rustup toolchain install stable --profile minimal --component clippy,rustfmt --target wasm32-wasip2
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal --component clippy,rustfmt --target wasm32-wasip2
+          rustup default 1.99.1
           rustc -Vv
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
@@ -233,8 +234,9 @@ jobs:
           sudo apt-get install -y --no-install-recommends $packages
       - name: Rust toolchain
         run: |
-          rustup toolchain install stable --profile minimal --component clippy --target x86_64-pc-windows-gnu
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal --component clippy --target x86_64-pc-windows-gnu
+          rustup default 1.99.1
           rustc -Vv
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
@@ -263,8 +265,9 @@ jobs:
           persist-credentials: false
       - name: Rust toolchain
         run: |
-          rustup toolchain install stable --profile minimal
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal
+          rustup default 1.99.1
           rustc -Vv
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
@@ -306,8 +309,9 @@ jobs:
           persist-credentials: false
       - name: Rust toolchain
         run: |
-          rustup toolchain install stable --profile minimal
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal
+          rustup default 1.99.1
           rustc -Vv
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
@@ -359,8 +363,9 @@ jobs:
             xvfb xauth dbus x11-utils
       - name: Rust toolchain
         run: |
-          rustup toolchain install stable --profile minimal --component clippy
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal --component clippy
+          rustup default 1.99.1
           rustc -Vv
       # Reads the rust job's cache; its own build differs only in features.
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
@@ -415,8 +420,9 @@ jobs:
           sudo apt-get install -y --no-install-recommends libxkbcommon-x11-0 libxcursor1 libxi6 libxrandr2 mesa-vulkan-drivers
       - name: Rust toolchain
         run: |
-          rustup toolchain install stable --profile minimal
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal
+          rustup default 1.99.1
           rustc -Vv
       # Reads the rust job's cache, which tests caskade-native too.
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
@@ -456,8 +462,9 @@ jobs:
           persist-credentials: false
       - name: Rust toolchain
         run: |
-          rustup toolchain install stable --profile minimal
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal
+          rustup default 1.99.1
           rustc -Vv
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
@@ -500,8 +507,9 @@ jobs:
           persist-credentials: false
       - name: Rust toolchain
         run: |
-          rustup toolchain install stable --profile minimal --component rustfmt,clippy
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal --component rustfmt,clippy
+          rustup default 1.99.1
           rustc -Vv
       - uses: taiki-e/install-action@682ce6c3c696a4cd5168a05f98e51aa02b877941 # v2.89.1
         with:
@@ -622,8 +630,9 @@ jobs:
           docker info --format '{{.ServerVersion}}'
       - name: Rust toolchain
         run: |
-          rustup toolchain install stable --profile minimal
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal
+          rustup default 1.99.1
           rustc -Vv
       - uses: taiki-e/install-action@682ce6c3c696a4cd5168a05f98e51aa02b877941 # v2.89.1
         with:
@@ -738,8 +747,9 @@ jobs:
         env:
           TARGETS: ${{ matrix.os == 'linux' && '--target x86_64-pc-windows-gnu --target x86_64-apple-darwin' || '' }}
         run: |
-          rustup toolchain install stable --profile minimal --component clippy,rustfmt $TARGETS
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal --component clippy,rustfmt $TARGETS
+          rustup default 1.99.1
           rustc -Vv
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
@@ -808,8 +818,9 @@ jobs:
           python-version: "3.12"
       - name: Rust toolchain
         run: |
-          rustup toolchain install stable --profile minimal
-          rustup default stable
+          # Pinned: Rust 1.100's new Clippy lints fail the build until #136.
+          rustup toolchain install 1.99.1 --profile minimal
+          rustup default 1.99.1
           rustc -Vv
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
