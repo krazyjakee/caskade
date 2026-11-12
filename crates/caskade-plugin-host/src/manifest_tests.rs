@@ -152,8 +152,30 @@ fn the_current_and_previous_minor_api_are_accepted() {
     // 0.1.1 added `host.locale` (#219); a plugin that needs it asks for it.
     assert!(api_supported(&req("^0.1.1")));
     assert!(!api_supported(&req("^0.1.2")));
-    assert!(!api_supported(&req("^0.2")));
+    // 0.2 drew plugins' UI from their backends (#109); 0.1 is deprecated
+    // but still loads.
+    assert!(api_supported(&req("^0.2")));
+    assert!(draws_ui(&req("^0.2")) && !draws_ui(&req("^0.1.1")));
+    assert!(!api_supported(&req("^0.2.1")));
+    assert!(!api_supported(&req("^0.3")));
     assert!(!api_supported(&req("^1")));
+}
+
+#[test]
+fn a_0_2_plugin_draws_its_ui_from_its_backend() {
+    // A JavaScript UI module is for 0.1 plugins.
+    let mut value = valid();
+    value["api"] = json!("^0.2");
+    assert_eq!(keys(value.clone()), ["ui"]);
+    // Slots and views need the backend that draws them.
+    value.as_object_mut().unwrap().remove("ui");
+    assert!(keys(value.clone()).is_empty());
+    value.as_object_mut().unwrap().remove("backend");
+    value["contributes"]
+        .as_object_mut()
+        .unwrap()
+        .remove("hooks");
+    assert_eq!(keys(value), ["backend", ""]);
 }
 
 #[cfg(unix)]

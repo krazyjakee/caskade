@@ -34,6 +34,8 @@ pub struct Sandbox {
     pub folders: Vec<FolderGrant>,
     /// What `host.locale` answers (#219).
     pub language: crate::locales::Language,
+    /// The plugin's catalogs, for `host.message` and `host.plural` (#109).
+    pub locales: Arc<crate::locales::PluginLocales>,
 }
 
 /// Where a plugin sees its private data folder.
@@ -48,6 +50,35 @@ wasmtime::component::bindgen!({
 });
 
 pub use caskade::plugin::types::{InterceptResult, PluginError as GuestError};
+
+/// The 0.1 world, frozen at 0.1.1 in `wit-0.1/`. It stays linked beside
+/// 0.2 while 0.1 plugins are deprecated (#109), so their backends load
+/// unchanged.
+pub(crate) mod v0_1 {
+    wasmtime::component::bindgen!({
+        path: "wit-0.1",
+        world: "plugin",
+        imports: { default: async },
+        exports: { default: async },
+        additional_derives: [PartialEq, Eq],
+    });
+}
+
+/// The `caskade:plugin` version of the 0.1 world.
+const V0_1: &str = "0.1.1";
+
+fn from_v0_1(error: v0_1::caskade::plugin::types::PluginError) -> GuestError {
+    GuestError {
+        code: error.code,
+        message: error.message,
+    }
+}
+
+/// A backend's exports, by the world it was built for.
+enum Bindings {
+    Current(Plugin),
+    V0_1(v0_1::Plugin),
+}
 
 /// Limits for every backend call.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -178,6 +209,10 @@ impl Runtime {
             .map_err(|e| CallError::Instantiate(e.to_string()))?;
         Plugin::add_to_linker::<_, wasmtime::component::HasSelf<_>>(&mut linker, |state| state)
             .map_err(|e| CallError::Instantiate(e.to_string()))?;
+        v0_1::Plugin::add_to_linker::<_, wasmtime::component::HasSelf<_>>(&mut linker, |state| {
+            state
+        })
+        .map_err(|e| CallError::Instantiate(e.to_string()))?;
         Ok(Self {
             ticker: std::sync::OnceLock::new(),
             engine,
@@ -260,6 +295,7 @@ impl Runtime {
             services,
             install_input: None,
             language: sandbox.language,
+            locales: sandbox.locales,
         };
         self.ticker
             .get_or_init(|| Ticker::start(self.engine.clone()));
@@ -267,11 +303,17 @@ impl Runtime {
         store.limiter(|state| &mut state.limits);
         store.set_epoch_deadline(deadline);
         store.epoch_deadline_trap();
+        // A 0.2 backend, or else a 0.1 one.
         let started = match self.linker.instantiate_async(&mut store, component).await {
-            Ok(instance) => Plugin::new(&mut store, &instance).map(|bindings| (instance, bindings)),
+            Ok(instance) => match Plugin::new(&mut store, &instance) {
+                Ok(bindings) => Ok((instance, Bindings::Current(bindings), crate::HOST_API_TEXT)),
+                Err(current) => v0_1::Plugin::new(&mut store, &instance)
+                    .map(|bindings| (instance, Bindings::V0_1(bindings), V0_1))
+                    .map_err(|_| current),
+            },
             Err(error) => Err(error),
         };
-        let (instance, bindings) =
+        let (instance, bindings, version) =
             started
                 .map_err(|e| classify(e, timeout))
                 .map_err(|e| match e {
@@ -282,6 +324,7 @@ impl Runtime {
             store,
             instance,
             bindings,
+            version,
             timeout,
             deadline,
         })
@@ -323,6 +366,8 @@ pub struct State {
     pub(crate) install_input: Option<std::path::PathBuf>,
     /// The language Caskade shows text in (#219).
     pub(crate) language: crate::locales::Language,
+    /// The plugin's catalogs (#109).
+    pub(crate) locales: Arc<crate::locales::PluginLocales>,
 }
 
 impl WasiHttpView for State {
@@ -348,7 +393,9 @@ impl WasiView for State {
 pub struct Instance {
     store: Store<State>,
     instance: wasmtime::component::Instance,
-    bindings: Plugin,
+    bindings: Bindings,
+    /// The `caskade:plugin` version the backend was built for.
+    version: &'static str,
     timeout: Duration,
     deadline: u64,
 }
@@ -357,7 +404,7 @@ impl Instance {
     /// Runs one export under the time box.
     async fn bounded<T>(
         &mut self,
-        call: impl AsyncFnOnce(&Plugin, &mut Store<State>) -> wasmtime::Result<T>,
+        call: impl AsyncFnOnce(&Bindings, &mut Store<State>) -> wasmtime::Result<T>,
     ) -> Result<T, CallError> {
         self.store.set_epoch_deadline(self.deadline);
         // The epoch stops guest code; the outer timeout covers host awaits.
@@ -394,7 +441,7 @@ impl Instance {
             + Sync
             + 'static,
     {
-        let name = format!("caskade:plugin/{interface}@{}", crate::HOST_API);
+        let name = format!("caskade:plugin/{interface}@{}", self.version);
         let Some(export) = self.instance.get_export_index(&mut self.store, None, &name) else {
             return Ok(None);
         };
@@ -420,21 +467,77 @@ impl Instance {
         method: &str,
         payload: &str,
     ) -> Result<Result<String, GuestError>, CallError> {
-        self.bounded(async |bindings, store| {
-            bindings
+        self.bounded(async |bindings, store| match bindings {
+            Bindings::Current(bindings) => {
+                bindings
+                    .caskade_plugin_requests()
+                    .call_handle_request(store, method, payload)
+                    .await
+            }
+            Bindings::V0_1(bindings) => bindings
                 .caskade_plugin_requests()
                 .call_handle_request(store, method, payload)
                 .await
+                .map(|answer| answer.map_err(from_v0_1)),
         })
         .await
     }
 
+    /// Draws contribution `id` of `slot` (#109); `None` when the backend
+    /// has no `ui` export.
+    pub async fn ui_render(
+        &mut self,
+        slot: &str,
+        id: &str,
+        context: &str,
+    ) -> Result<Option<Result<String, GuestError>>, CallError> {
+        self.provider::<(String, String, String), (Result<String, GuestError>,)>(
+            "ui",
+            "render",
+            (slot.to_owned(), id.to_owned(), context.to_owned()),
+        )
+        .await
+        .map(|answer| answer.map(|(answer,)| answer))
+    }
+
+    /// Tells contribution `id` of `slot` the user used `action` (#109).
+    pub async fn ui_act(
+        &mut self,
+        slot: &str,
+        id: &str,
+        action: &str,
+        value: &str,
+        context: &str,
+    ) -> Result<Option<Result<String, GuestError>>, CallError> {
+        self.provider::<(String, String, String, String, String), (Result<String, GuestError>,)>(
+            "ui",
+            "act",
+            (
+                slot.to_owned(),
+                id.to_owned(),
+                action.to_owned(),
+                value.to_owned(),
+                context.to_owned(),
+            ),
+        )
+        .await
+        .map(|answer| answer.map(|(answer,)| answer))
+    }
+
     pub async fn on_event(&mut self, name: &str, payload: &str) -> Result<(), CallError> {
-        self.bounded(async |bindings, store| {
-            bindings
-                .caskade_plugin_hooks()
-                .call_on_event(store, name, payload)
-                .await
+        self.bounded(async |bindings, store| match bindings {
+            Bindings::Current(bindings) => {
+                bindings
+                    .caskade_plugin_hooks()
+                    .call_on_event(store, name, payload)
+                    .await
+            }
+            Bindings::V0_1(bindings) => {
+                bindings
+                    .caskade_plugin_hooks()
+                    .call_on_event(store, name, payload)
+                    .await
+            }
         })
         .await
     }
@@ -444,11 +547,28 @@ impl Instance {
         point: &str,
         payload: &str,
     ) -> Result<Result<InterceptResult, GuestError>, CallError> {
-        self.bounded(async |bindings, store| {
-            bindings
-                .caskade_plugin_hooks()
-                .call_intercept(store, point, payload)
-                .await
+        self.bounded(async |bindings, store| match bindings {
+            Bindings::Current(bindings) => {
+                bindings
+                    .caskade_plugin_hooks()
+                    .call_intercept(store, point, payload)
+                    .await
+            }
+            Bindings::V0_1(bindings) => {
+                use v0_1::caskade::plugin::types::InterceptResult as Old;
+                bindings
+                    .caskade_plugin_hooks()
+                    .call_intercept(store, point, payload)
+                    .await
+                    .map(|answer| {
+                        answer
+                            .map(|result| match result {
+                                Old::Continue(payload) => InterceptResult::Continue(payload),
+                                Old::Cancel(reason) => InterceptResult::Cancel(reason),
+                            })
+                            .map_err(from_v0_1)
+                    })
+            }
         })
         .await
     }

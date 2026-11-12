@@ -27,6 +27,14 @@ fn failure(error: HostError) -> CommandError {
             ErrorCode::Invalid,
             caskade_core::tr!("This plugin has nothing to run."),
         ),
+        HostError::NoUi(_) => (
+            ErrorCode::Invalid,
+            caskade_core::tr!("This plugin has no UI to show."),
+        ),
+        HostError::Undeclared { .. } | HostError::BadUi { .. } => (
+            ErrorCode::Other,
+            caskade_core::tr!("This plugin's UI can't be shown. The details say why."),
+        ),
         HostError::Call { .. } | HostError::Plugin { .. } => (
             ErrorCode::Other,
             caskade_core::tr!("This plugin ran into a problem. The details say what."),

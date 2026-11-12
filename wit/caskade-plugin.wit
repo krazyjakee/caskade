@@ -2,10 +2,12 @@
 /// Payloads cross as JSON text, so the shapes can grow without breaking
 /// the binary interface.
 ///
-/// Versions: 0.1.1 added `host.locale` (#219). Hosts link a component built
-/// for any 0.1.x, so 0.1.0 backends load unchanged; a backend that calls
-/// `locale` asks for `^0.1.1` in its manifest's `api`.
-package caskade:plugin@0.1.1;
+/// Versions: 0.1.1 added `host.locale` (#219). 0.2.0 (#109) added the `ui`
+/// interface, through which a backend draws its plugin's UI as a tree of
+/// Caskade's components, and `host.message` and `host.plural` for its own
+/// translations. Hosts link a component built for any 0.1.x or 0.2.x: the
+/// 0.1 world stays linked beside this one while 0.1 plugins are deprecated.
+package caskade:plugin@0.2.0;
 
 interface types {
     enum level {
@@ -54,6 +56,16 @@ interface host {
     /// when making text people see (errors, plan warnings). Since 0.1.1.
     locale: func() -> string;
 
+    /// `text` from the plugin's own catalog (`locales/<lang>.po`) in the
+    /// language Caskade shows text in, or `text` itself; `context` is the
+    /// message's gettext context. Since 0.2.0.
+    message: func(text: string, context: option<string>) -> string;
+
+    /// `one` or `other` for `count`, from the plugin's catalog in the
+    /// language in use: the language's plural rules pick the form. Since
+    /// 0.2.0.
+    plural: func(one: string, other: string, count: u64, context: option<string>) -> string;
+
     /// Reads the library; needs `library: read` (or `write`). `request` is
     /// JSON: `{"games": {"query": "…", "limit": 50}}` lists games, and
     /// `{"game": "<id>"}` returns one. Answers are JSON.
@@ -83,6 +95,24 @@ interface requests {
     use types.{plugin-error};
 
     handle-request: func(method: string, payload: string) -> result<string, plugin-error>;
+}
+
+/// The plugin's UI (#109), for the slots and views `plugin.json` declares.
+/// Trees and answers are JSON; `docs/plugins/ui.md` lists the components.
+interface ui {
+    use types.{plugin-error};
+
+    /// Draws contribution `id` of `slot` (`views` for a view): one node or a
+    /// list of them. `context` is `{"mode": "desktop" | "console",
+    /// "gameId"?: "…", "state": …}`, `state` being what `act` last returned
+    /// for this contribution (`null` before).
+    render: func(slot: string, id: string, context: string) -> result<string, plugin-error>;
+
+    /// The user used `action` in contribution `id` of `slot`: a button's or
+    /// a segmented control's, with its `value` as JSON; `run` for a
+    /// `game.actions` or `commands` entry. Returns `{"state"?: …,
+    /// "notice"?: "…"}`; the contribution is drawn again after it.
+    act: func(slot: string, id: string, action: string, value: string, context: string) -> result<string, plugin-error>;
 }
 
 /// Providers (#126). A plugin implements the ones it lists in
@@ -141,11 +171,19 @@ world plugin {
     export requests;
 }
 
-/// A plugin implementing every provider. Real plugins export only the ones
+/// A plugin that draws UI. The host finds the `ui` export on the component;
+/// backends without it have no UI.
+world ui-plugin {
+    include plugin;
+    export ui;
+}
+
+/// A plugin implementing every provider and the UI. Real plugins export only the ones
 /// they list in `contributes.providers`, in a world of their own that
 /// includes `plugin`; the host finds provider exports on the component.
 world all-providers {
     include plugin;
+    export ui;
     export library-source;
     export metadata-provider;
     export runner;

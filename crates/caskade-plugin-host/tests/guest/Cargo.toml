@@ -11,6 +11,8 @@ crate-type = ["cdylib"]
 caskade-plugin-sdk = { path = "../../../caskade-plugin-sdk" }
 # Outbound HTTP through wasi:http (capability tests).
 wasi = "0.14"
+# UI state (#109).
+serde_json = "1"
 
 [profile.release]
 panic = "abort"

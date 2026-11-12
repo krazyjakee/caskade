@@ -133,6 +133,7 @@ impl PluginHost {
             data: Some(self.data_folder(id)?),
             grants,
             language: self.language.clone(),
+            locales: entry.locales.clone(),
         };
         let component = live.component.as_ref().expect("compiled above");
         let instance = caskade_jobs::global()

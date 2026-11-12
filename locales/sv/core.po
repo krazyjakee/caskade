@@ -5237,6 +5237,14 @@ msgid "This plugin has nothing to run."
 msgstr "Det här tillägget har inget att köra."
 
 #: crates/caskade-app/src/commands/plugins.rs
+msgid "This plugin has no UI to show."
+msgstr ""
+
+#: crates/caskade-app/src/commands/plugins.rs
+msgid "This plugin's UI can't be shown. The details say why."
+msgstr ""
+
+#: crates/caskade-app/src/commands/plugins.rs
 msgid "This plugin ran into a problem. The details say what."
 msgstr "Det här tillägget stötte på ett problem. Detaljerna visar vad."
 

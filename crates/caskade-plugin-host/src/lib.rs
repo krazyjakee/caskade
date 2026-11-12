@@ -23,7 +23,7 @@ pub mod settings;
 pub use hooks::PluginHooks;
 pub use host::{HostError, HostOptions, PluginHost, PluginPreview, PluginStatus, PluginSummary};
 pub use locales::{PluginMessage, PluginMessages};
-pub use manifest::{HOST_API, Manifest, ManifestError, Permissions};
+pub use manifest::{HOST_API, HOST_API_TEXT, Manifest, ManifestError, Permissions};
 pub use runtime::{CallError, CompileCounts, DATA_MOUNT, InterceptResult, Limits, Sandbox};
 
 use caskade_core::{bus::Bus, db::LibraryStore, settings::SettingsService};

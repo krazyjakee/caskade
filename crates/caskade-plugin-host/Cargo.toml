@@ -14,6 +14,8 @@ caskade-core = { path = "../caskade-core" }
 caskade-component-cache = { path = "../caskade-component-cache" }
 # Plugins' own PO catalogs (#219).
 caskade-i18n = { path = "../caskade-i18n" }
+# The UI trees plugins draw from 0.2 (#109).
+caskade-plugin-ui = { path = "../caskade-plugin-ui", features = ["specta"] }
 # `fetch` for its network grant rules (`fetch::grant`), which backends'
 # own HTTP requests follow too (CSK-03).
 caskade-installer = { path = "../caskade-installer", default-features = false, features = ["fetch"] }

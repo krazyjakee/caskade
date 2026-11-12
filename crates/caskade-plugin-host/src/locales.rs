@@ -199,6 +199,31 @@ impl PluginLocales {
             .to_owned()
     }
 
+    /// `text` in `context` and `locale`, or `text` itself (`host.message`,
+    /// #109).
+    pub fn message(&self, locale: &str, context: Option<&str>, text: &str) -> String {
+        self.catalog(locale)
+            .and_then(|loaded| loaded.catalog.get(context, text))
+            .unwrap_or(text)
+            .to_owned()
+    }
+
+    /// `one` or `other` for `count` in `locale` (`host.plural`, #109): the
+    /// catalog's plural form, else English's.
+    pub fn plural(
+        &self,
+        locale: &str,
+        context: Option<&str>,
+        one: &str,
+        other: &str,
+        count: u64,
+    ) -> String {
+        self.catalog(locale)
+            .and_then(|loaded| loaded.catalog.get_plural(context, one, count))
+            .unwrap_or(if count == 1 { one } else { other })
+            .to_owned()
+    }
+
     /// The manifest's texts in `locale`: the name, the description, slot,
     /// view and command titles and the settings schema's titles and
     /// descriptions. Only for showing; ids and everything else stay.

@@ -2122,6 +2122,7 @@ dependencies = [
  "caskade-i18n",
  "caskade-installer",
  "caskade-jobs",
+ "caskade-plugin-ui",
  "caskade-sources",
  "http",
  "http-body",
@@ -2148,11 +2149,21 @@ dependencies = [
 
 [[package]]
 name = "caskade-plugin-sdk"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
+ "caskade-plugin-ui",
  "serde",
  "serde_json",
  "wit-bindgen 0.63.0",
+]
+
+[[package]]
+name = "caskade-plugin-ui"
+version = "0.2.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "specta",
 ]
 
 [[package]]

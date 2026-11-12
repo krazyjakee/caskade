@@ -34,8 +34,8 @@ types (`cargo test -p caskade-plugin-host` checks it is current;
 | `id`          | Reverse-DNS, lowercase: `dev.example.howlongtobeat`.                                                                     |
 | `name`        | Shown in Settings → Plugins.                                                                                            |
 | `version`     | Semver.                                                                                                                 |
-| `api`         | Semver range of the `caskade:plugin` API it targets, e.g. `^0.1`, or `^0.1.1` for `host.locale`. The current and the previous 0.x minor are accepted. |
-| `ui`          | Path of the UI module inside the folder.                                                                                |
+| `api`         | Semver range of the `caskade:plugin` API it targets, e.g. `^0.2`. The current and the previous 0.x minor are accepted: `^0.1` plugins still load while 0.1 is deprecated (see [UI](#ui-02)). |
+| `ui`          | 0.1 only, deprecated: path of the JavaScript UI module inside the folder. From 0.2 the backend draws the UI, and a `ui` key is an error. |
 | `backend`     | Path of the backend component inside the folder.                                                                        |
 | `permissions` | `network` (host or `host:port`), `fs` (`folder` or `folder:ro`), `process` (bool), `library` (`none`, `read`, `write`). |
 | `activation`  | `onStartup`, `onRequest`, `onView:<id>`, `onEvent:<name>`, `onCommand:<id>`.                                            |
@@ -62,22 +62,29 @@ contribution points (`contributes.slots[].slot`) are `views`,
 ## Backend contract
 
 [`wit/caskade-plugin.wit`](../../wit/caskade-plugin.wit) defines the
-package `caskade:plugin@0.1.1`. A backend is a WebAssembly component
+package `caskade:plugin@0.2.0`. A backend is a WebAssembly component
 targeting the `plugin` world:
 
 - **imports `host`:** `log`, `kv-get`/`kv-set`/`kv-delete` (the plugin's own
   store; keys up to 256 bytes, values up to 64 KiB, 4 MiB per plugin),
   `emit` (publishes `plugin.event` on the bus), `settings-get`,
-  `install-input-read` (an install handler's input, during its calls) and
-  `locale` (the language Caskade shows text in, since 0.1.1).
-
-**Versions.** 0.1.1 added `host.locale` (#219). wasmtime links any 0.1.x
-component against the host, so backends built for 0.1.0 load unchanged. A
-backend that calls `locale` declares `"api": "^0.1.1"`, so an older
-Caskade refuses it in the manifest instead of failing to link it.
+  `install-input-read` (an install handler's input, during its calls),
+  `locale` (the language Caskade shows text in, since 0.1.1), and `message`
+  and `plural` (text from the plugin's own catalog in that language, since
+  0.2.0).
 - **exports `hooks`:** `on-event` and `intercept` (continue with a rewritten
   payload, or cancel with a reason).
-- **exports `requests`:** `handle-request`, for the plugin's own UI half.
+- **exports `requests`:** `handle-request`, for calls to the backend by name.
+- **exports `ui`** (optional, the `ui-plugin` world; since 0.2.0): `render`
+  and `act`, which draw the plugin's slots and views ([UI](#ui-02)).
+
+**Versions.** 0.1.1 added `host.locale` (#219). 0.2.0 added the `ui` export
+and `host.message`/`host.plural` (#109), and moved plugins' UI from
+JavaScript halves to the backend. The host links components built for any
+0.1.x or 0.2.x: the 0.1 world, frozen at 0.1.1, stays linked beside 0.2
+while 0.1 is deprecated, so 0.1 backends load unchanged. A backend that
+needs something newer declares it in `api` (`^0.2`), so an older Caskade
+refuses it in the manifest instead of failing to link it.
 
 Payloads cross as JSON text.
 
@@ -202,10 +209,11 @@ empty or fuzzy shows its English.
   the language changes (`LocaleChanged`, the `locale.changed` plugin
   event), it activates every plugin again with the new catalog, so titles
   registered in `activate` and rendered text both follow.
-- **Backend.** `host.locale()` (Rust SDK: `host::locale()`) answers the
-  language now, for messages the backend makes (errors, results). A
-  backend can't read its folder, so it carries its translations;
-  `plugins/examples/caskade-pack` keeps a table beside `locales/sv.po`.
+- **Backend.** From 0.2, `host.message` and `host.plural` look text up in
+  the plugin's catalog in the language in use (Rust SDK: `i18n::t`,
+  `i18n::tc` with a context, `i18n::tf` with `{name}` values and
+  `i18n::plural`), for what `render` draws and for the backend's own
+  messages. `host.locale()` answers the language itself.
 - **Extraction.** `create-caskade-plugin` gives every plugin an empty
   `locales/` and `scripts/extract-messages.mjs` (`npm run i18n:extract`).
   It writes `locales/<plugin id>.pot` from `plugin.json`, the UI's `t()`,
@@ -259,9 +267,9 @@ enabled again.
 
 ## Backend languages
 
-Plugin API 0.1 supports **Rust** backends only. **JavaScript/TypeScript
-backends are not supported in 0.1**: write the UI half in TypeScript and
-the backend half in Rust. A jco-built TypeScript backend can pass the host's
+Plugin API 0.2 supports **Rust** backends only, as 0.1 did. **JavaScript/TypeScript
+backends are not supported**: from 0.2 the backend draws the UI too, so a
+plugin with UI is written in Rust. A jco-built TypeScript backend can pass the host's
 functional checks, but it can't make HTTP calls from the 0.1 exports (they
 are synchronous, and `fetch()` never settles). It is also about 70× larger,
 about 30× slower per call and needs 12 MiB per instance. The full measurements
@@ -321,11 +329,143 @@ functions plus JSON helpers (`settings`, `kv_json`, `set_kv_json`), `json`
 parses and writes payloads (`json::event` unwraps an `on-event` payload;
 `intercept` payloads aren't wrapped), and `payloads` has the shapes the core
 sends.
+`render` and `act` draw the plugin's UI ([UI](#ui-02)), and `i18n` has
+`t`, `tc`, `tf` and `plural` over the plugin's own catalog.
 `cargo build --release --target wasm32-wasip2` produces the component. The
 host's test guest (`crates/caskade-plugin-host/tests/guest`) is a complete
 example.
 
-## UI half
+## UI (0.2)
+
+From API 0.2 (#109) a plugin's UI is drawn by its backend: `render` returns
+the slot or view as a tree of Caskade's own components, as JSON, and Caskade
+draws it with its components. The plugin gets the theme, focus, pad input,
+console mode and screen readers without doing anything, and no plugin code
+runs outside its sandbox. The node types are
+[`crates/caskade-plugin-ui`](../../crates/caskade-plugin-ui), which the
+Rust SDK re-exports as `ui`, with builders (`ui::heading`, `ui::button`,
+…).
+
+- **What draws.** Only the slots and views `plugin.json` declares. Caskade
+  calls `render(slot, id, context)` when one shows: `slot` is the slot
+  (`views` for a view), `id` the contribution's, and `context` is
+  `{"mode": "desktop" | "console", "gameId"?: "…", "state": …}`. Game slots
+  get the game. Titles come from `plugin.json`, translated by the plugin's
+  catalog.
+- **What the user does.** A `button` or `segmented` control names an
+  `action`. Using it calls `act(slot, id, action, value, context)`, which
+  returns `{"state"?: …, "notice"?: "…"}`. Caskade keeps `state` for that
+  contribution and passes it to the next `render`, shows `notice` as the
+  plugin's notification, and draws the contribution again. A `game.actions`
+  or `commands` entry calls `act` with the action `run`.
+- **Checks.** A tree is at most 256 KiB, 12 levels deep and 2000 nodes,
+  with texts up to 4000 characters and action ids of 1 to 64 letters,
+  digits, `-`, `_`, `.` or `:`. Anything else (an unknown node or field, a
+  ragged table, a heading level other than 2 or 3) is refused, and the
+  plugin's placeholder shows instead, as when `render` fails.
+- **Translations.** `i18n::t("Most played")` and
+  `i18n::plural("{count} game", "{count} games", n)` read the plugin's
+  `locales/<lang>.po` in the language Caskade is in ([Translations](#translations-219)).
+
+| Node (`type`) | Fields | Draws |
+| ------------- | ------ | ----- |
+| `text`        | `text` | Plain text. |
+| `heading`     | `text`, `level` (2 or 3, default 2) | A heading. |
+| `paragraph`   | `text` | A paragraph. |
+| `note`        | `text` | Secondary text, muted. |
+| `alert`       | `text` | Something that went wrong, announced. |
+| `stack`       | `children`, `direction` (`column` or `row`), `gap` (`none`, `small`, `medium`, `large`) | Children in a column or a row. |
+| `section`     | `label`, `children` | A labelled part that pad focus moves between. |
+| `stats`       | `items` (`label`, `value`), `label`? | Labelled values. |
+| `tile`        | `value`, `label` | One large value. |
+| `bars`        | `label`, `items` (`label`, `value`, `text`) | A bar chart; `text` is each value for reading. |
+| `table`       | `caption`, `columns`, `rows`, `rowHeaders` | A table. |
+| `list`        | `items`, `ordered` | A list of nodes. |
+| `badge`       | `text`, `tone` (`neutral`, `accent`, `success`, `warning`, `danger`) | A short status label. |
+| `progress`    | `label`, `value`, `max` | A progress bar. |
+| `button`      | `label`, `action`, `value`?, `variant` (`secondary`, `primary`) | Calls `act`. |
+| `segmented`   | `label`, `action`, `value`, `options` (`value`, `label`) | One of up to 8 options; calls `act` with the chosen value. |
+
+```rust
+use caskade_plugin_sdk::{Error, Plugin, i18n::t, ui};
+
+struct Stats;
+
+impl Plugin for Stats {
+    fn render(slot: &str, id: &str, context: &ui::Context) -> Result<Vec<ui::Node>, Error> {
+        let view = context.state["view"].as_str().unwrap_or("chart").to_owned();
+        Ok(vec![
+            ui::heading(t("Most played")),
+            ui::segmented(t("Show as"), "view", view, [("chart", t("Chart")), ("table", t("Table"))]),
+        ])
+    }
+    fn act(
+        slot: &str,
+        id: &str,
+        action: &str,
+        value: &serde_json::Value,
+        context: &ui::Context,
+    ) -> Result<ui::Outcome, Error> {
+        Ok(ui::Outcome { state: Some(serde_json::json!({"view": value})), notice: None })
+    }
+}
+```
+
+The manifest asks for `"api": "^0.2"`, names a `backend` and no `ui`
+module. Slots and views need the backend that draws them.
+
+### Console mode
+
+Console mode (#148) is the same app on a TV with a controller: a fullscreen
+shell, bigger type and a button-hint bar. A plugin's UI joins it on the
+same terms as the built-in views (#152).
+
+- **Where things show.** A view or slot contribution declares `modes`:
+  `["desktop"]`, `["console"]` or both. Without `modes`, views show in both;
+  slots on the game page and Home (`game.details.tabs`,
+  `game.details.panels`, `game.actions`, `home.sections`) show in both, and
+  every other slot only on the desktop. A console view gets an entry in the
+  console sidebar. A link into a view the current mode hides shows "not
+  available in console mode".
+
+  ```json
+  "views": [{ "id": "stats", "title": "Playtime stats", "modes": ["desktop", "console"] }]
+  ```
+
+- **Focus and buttons.** Buttons and segmented controls are focus stops,
+  and a `section` is a focus group that brings focus back to where it last
+  was. A (confirm) presses the focused control, B goes back, and in a view
+  LB and RB move a segmented control between its options. `context.mode`
+  says which mode a tree is for.
+- **Crashes.** A contribution that fails to draw is replaced by its
+  placeholder, and focus that was inside it stays on the placeholder, so a
+  pad can move on.
+
+### Migrating from 0.1
+
+0.1 plugins are deprecated. They still load: their backends link to the
+0.1 world, and their JavaScript UI halves run in the webview app until the
+native app replaces it (BLITZ-33). The native app doesn't run JavaScript,
+so it draws no 0.1 UI, and Settings → Plugins says the plugin's UI needs an
+update. To move a plugin to 0.2:
+
+1. Set `"api": "^0.2"` and remove `ui` from `plugin.json`. Keep the
+   `slots` and `views` entries; their titles now come only from the
+   manifest.
+2. Depend on `caskade-plugin-sdk` 0.2, and move each registered component
+   into `render`: `match (slot, id)` and return its tree. State a
+   component kept in React (`useState`) goes in the `state` that `act`
+   returns. Data a component fetched with `useBackendQuery` is read in
+   `render` itself.
+3. Move `game.actions` and `commands` callbacks into `act` with the action
+   `run`; `ctx.notify(message)` becomes the outcome's `notice`.
+4. Move the UI half's texts to `i18n::t` (the catalog stays the same) and
+   delete `src/`, the Vite config and the `@caskade/sdk` dependency.
+
+## UI half (0.1, deprecated)
+
+This is how 0.1 plugins drew their UI. It still works in the webview app
+until BLITZ-33; new plugins use [UI (0.2)](#ui-02).
 
 A UI half is one ES module whose default export is `definePlugin(...)`.
 Inside Caskade, `react`, `react-dom`, `react/jsx-runtime`, `@caskade/sdk`
@@ -382,53 +522,11 @@ export default definePlugin({
 `plugin.json` then points `ui` at `dist/ui.js`; the app loads `dist/ui.css`
 from beside it when it exists.
 
-### Console mode
+### Console mode (0.1)
 
-Console mode (#148) is the same app on a TV with a controller: a fullscreen
-shell, bigger type and a button-hint bar. A plugin's UI joins it on the
-same terms as the built-in views (#152).
-
-- **Where things show.** A view or slot contribution declares `modes`:
-  `["desktop"]`, `["console"]` or both. Without `modes`, views show in both;
-  slots on the game page and Home (`game.details.tabs`,
-  `game.details.panels`, `game.actions`, `home.sections`) show in both, and
-  every other slot only on the desktop. A console view gets an entry in the
-  console sidebar. A link into a view the current mode hides shows "not
-  available in console mode".
-
-  ```json
-  "views": [{ "id": "stats", "title": "Playtime stats", "modes": ["desktop", "console"] }]
-  ```
-
-- **Focus.** A pad moves focus by direction between focus stops. Buttons,
-  links, inputs and every `@caskade/ui` control already are stops, so a
-  view built from them needs nothing more. `useFocusable()` makes a custom
-  element a stop (with an optional `focusKey`, so focus comes back to it
-  after a re-render or when the user returns to the view). `FocusSection`
-  groups stops, such as a row of tiles, and brings focus back to where it
-  last was when the user re-enters it.
-- **Buttons.** `confirm` (A) presses the focused control and `back` (B)
-  goes back by default. `useInputAction(action, handler, { label, owner })`
-  gives a button a job while focus is inside `owner`, or anywhere in the
-  view without one. Return `false` to pass the action on. A `label` shows
-  in the hint bar. The actions are the SDK's `InputAction`: `confirm`,
-  `back`, `details` (X), `search` (Y), `tab.prev`/`tab.next` (LB/RB),
-  `page.prev`/`page.next` (LT/RT), `menu`, `view` and `guide`, plus the
-  four `nav.*` directions.
-- **Mode.** `useMode()` is `"desktop"` or `"console"`, for layouts that
-  differ. Prefer the theme tokens, which console mode already raises.
-- **Crashes.** A view that throws is replaced by its placeholder, and
-  focus that was inside it stays on the placeholder, so a pad can move on.
-
-```tsx
-import { FocusSection, useInputAction } from "@caskade/sdk";
-
-function Stats() {
-  const [view, setView] = useState<"chart" | "table">("chart");
-  const toggle = () => setView((current) => (current === "chart" ? "table" : "chart"));
-  useInputAction("tab.next", toggle, { label: "Chart or table" });
-  return <FocusSection id="stats">{/* … */}</FocusSection>;
-}
-```
-
-`plugins/examples/playtime-stats` is a console view.
+0.1 UI halves joined console mode through the SDK: `useMode`,
+`useInputAction(action, handler, { label, owner })`, `useFocusable` and
+`FocusSection`, with the actions `confirm`, `back`, `details`, `search`,
+`tab.prev`/`tab.next`, `page.prev`/`page.next`, `menu`, `view`, `guide` and
+the four `nav.*` directions. 0.2 trees get all of it from Caskade's own
+components.

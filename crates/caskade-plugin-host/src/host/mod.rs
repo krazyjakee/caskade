@@ -5,6 +5,7 @@
 
 mod backend;
 mod install;
+mod ui;
 
 use crate::{
     PluginServices,
@@ -50,6 +51,20 @@ pub enum HostError {
         code: String,
         message: String,
     },
+    /// It has no UI to draw: an 0.1 plugin, or one whose backend lacks the
+    /// `ui` export (#109).
+    #[error("plugin {0} draws no UI")]
+    NoUi(String),
+    /// It drew a contribution its manifest doesn't declare (#109).
+    #[error("plugin {id} declares no {slot} contribution {contribution}")]
+    Undeclared {
+        id: String,
+        slot: String,
+        contribution: String,
+    },
+    /// What it drew or answered isn't a UI Caskade draws (#109).
+    #[error("plugin {id} drew something Caskade can't show: {message}")]
+    BadUi { id: String, message: String },
     #[error(transparent)]
     Core(#[from] caskade_core::Error),
     #[error(transparent)]

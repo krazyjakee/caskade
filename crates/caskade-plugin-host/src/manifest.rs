@@ -12,8 +12,18 @@ use std::{
 };
 
 /// The `caskade:plugin` API this host implements. 0.1.1 added
-/// `host.locale` (#219); 0.1.0 backends load unchanged.
-pub const HOST_API: semver::Version = semver::Version::new(0, 1, 1);
+/// `host.locale` (#219); 0.2.0 added the `ui` export and `host.message`
+/// and `host.plural` (#109), and plugins' UI moved from JavaScript halves
+/// to it. 0.1 plugins still load while they're deprecated: their backends
+/// link to the 0.1 world, and their JavaScript halves run in the webview
+/// only.
+pub const HOST_API: semver::Version = semver::Version::new(0, 2, 0);
+
+/// [`HOST_API`] as the WIT package writes it.
+pub const HOST_API_TEXT: &str = "0.2.0";
+
+/// The last API of the previous minor, still accepted.
+pub const PREVIOUS_API: semver::Version = semver::Version::new(0, 1, 1);
 
 /// The manifest file in a plugin folder.
 pub const MANIFEST: &str = "plugin.json";
@@ -251,9 +261,13 @@ fn valid_id(id: &str) -> bool {
 
 /// Whether `api` accepts this host: the current or the previous 0.x minor.
 pub fn api_supported(api: &semver::VersionReq) -> bool {
-    let previous = (HOST_API.major == 0 && HOST_API.minor > 0)
-        .then(|| semver::Version::new(0, HOST_API.minor - 1, 0));
-    api.matches(&HOST_API) || previous.is_some_and(|previous| api.matches(&previous))
+    api.matches(&HOST_API) || api.matches(&PREVIOUS_API)
+}
+
+/// Whether a plugin targets 0.2 or later: its UI is drawn from its
+/// backend's `ui` export, and it may not name a JavaScript `ui` module.
+pub fn draws_ui(api: &semver::VersionReq) -> bool {
+    api.matches(&HOST_API)
 }
 
 /// A path inside the plugin folder: relative, no `..`, and (when the folder
@@ -348,6 +362,22 @@ impl Manifest {
                     "{} does not accept this Caskade's plugin API {HOST_API}",
                     self.api
                 ),
+            ));
+        }
+        if self.ui.is_some() && draws_ui(&self.api) {
+            errors.push(error(
+                "ui",
+                "from plugin API 0.2 a plugin's UI is drawn by its backend's `ui` export; \
+                 JavaScript UI modules are for 0.1 plugins",
+            ));
+        }
+        let drawn = draws_ui(&self.api)
+            && self.backend.is_none()
+            && (!self.contributes.slots.is_empty() || !self.contributes.views.is_empty());
+        if drawn {
+            errors.push(error(
+                "backend",
+                "slots and views are drawn by the backend from plugin API 0.2",
             ));
         }
         if self.ui.is_none()

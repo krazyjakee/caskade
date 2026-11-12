@@ -22,9 +22,9 @@ wit_bindgen::generate!({
         package example:caskade-pack;
 
         world pack {
-            include caskade:plugin/plugin@0.1.1;
-            export caskade:plugin/install-handler@0.1.1;
-            export caskade:plugin/url-resolver@0.1.1;
+            include caskade:plugin/plugin@0.2.0;
+            export caskade:plugin/install-handler@0.2.0;
+            export caskade:plugin/url-resolver@0.2.0;
         }
     ",
     world: "example:caskade-pack/pack",

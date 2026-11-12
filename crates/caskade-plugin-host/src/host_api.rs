@@ -73,6 +73,29 @@ impl host::Host for State {
         self.language.current()
     }
 
+    /// `text` from the plugin's own catalog, in the language in use (#109).
+    async fn message(&mut self, text: String, context: Option<String>) -> String {
+        self.locales
+            .message(&self.language.current(), context.as_deref(), &text)
+    }
+
+    /// `one` or `other` for `count`, from the plugin's catalog (#109).
+    async fn plural(
+        &mut self,
+        one: String,
+        other: String,
+        count: u64,
+        context: Option<String>,
+    ) -> String {
+        self.locales.plural(
+            &self.language.current(),
+            context.as_deref(),
+            &one,
+            &other,
+            count,
+        )
+    }
+
     async fn kv_get(&mut self, key: String) -> Option<Vec<u8>> {
         match self.services.store.plugin_kv_get(&self.plugin, &key).await {
             Ok(value) => value,
@@ -229,5 +252,70 @@ impl host::Host for State {
             .await
             .ok()?;
         serde_json::to_string(&snapshot.value).ok()
+    }
+}
+
+/// The 0.1 world's host functions (#109): the same as 0.2's.
+mod v0_1 {
+    use super::State;
+    use crate::runtime::caskade::plugin::{host::Host as Current, types};
+    use crate::runtime::v0_1::caskade::plugin::{host, types as old};
+
+    fn level(level: old::Level) -> types::Level {
+        match level {
+            old::Level::Trace => types::Level::Trace,
+            old::Level::Debug => types::Level::Debug,
+            old::Level::Info => types::Level::Info,
+            old::Level::Warn => types::Level::Warn,
+            old::Level::Error => types::Level::Error,
+        }
+    }
+
+    fn error(error: types::PluginError) -> old::PluginError {
+        old::PluginError {
+            code: error.code,
+            message: error.message,
+        }
+    }
+
+    impl old::Host for State {}
+
+    impl host::Host for State {
+        async fn log(&mut self, at: old::Level, message: String) {
+            Current::log(self, level(at), message).await;
+        }
+        async fn locale(&mut self) -> String {
+            Current::locale(self).await
+        }
+        async fn kv_get(&mut self, key: String) -> Option<Vec<u8>> {
+            Current::kv_get(self, key).await
+        }
+        async fn kv_set(&mut self, key: String, value: Vec<u8>) {
+            Current::kv_set(self, key, value).await;
+        }
+        async fn kv_delete(&mut self, key: String) {
+            Current::kv_delete(self, key).await;
+        }
+        async fn emit(&mut self, name: String, payload: String) {
+            Current::emit(self, name, payload).await;
+        }
+        async fn settings_get(&mut self) -> Option<String> {
+            Current::settings_get(self).await
+        }
+        async fn library_query(&mut self, request: String) -> Result<String, old::PluginError> {
+            Current::library_query(self, request).await.map_err(error)
+        }
+        async fn library_update(&mut self, request: String) -> Result<String, old::PluginError> {
+            Current::library_update(self, request).await.map_err(error)
+        }
+        async fn install_input_read(
+            &mut self,
+            offset: u64,
+            length: u32,
+        ) -> Result<Vec<u8>, old::PluginError> {
+            Current::install_input_read(self, offset, length)
+                .await
+                .map_err(error)
+        }
     }
 }

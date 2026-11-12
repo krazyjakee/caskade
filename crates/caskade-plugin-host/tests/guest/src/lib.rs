@@ -2,7 +2,7 @@
 //! request so the host's limits can be tested. It is written with
 //! `caskade-plugin-sdk`, like a real plugin backend.
 
-use caskade_plugin_sdk::{Error, Intercept, Level, Plugin, host};
+use caskade_plugin_sdk::{Error, Intercept, Level, Plugin, host, i18n, ui};
 
 struct TestPlugin;
 
@@ -121,6 +121,58 @@ impl Plugin for TestPlugin {
                 size - 6
             ),
         ))
+    }
+
+    /// Draws a view (#109): a heading from its catalog, a segmented
+    /// control holding the state `act` returned, a plural, and the game in a
+    /// game slot. `bad` draws an action Caskade refuses; `fail` fails.
+    fn render(slot: &str, id: &str, context: &ui::Context) -> Result<Vec<ui::Node>, Error> {
+        match id {
+            "bad" => return Ok(vec![ui::button("Go", "has space")]),
+            "fail" => return Err(Error::new("lookup", "the service is down")),
+            _ => {}
+        }
+        let view = context
+            .state
+            .get("view")
+            .and_then(|view| view.as_str())
+            .unwrap_or("chart")
+            .to_owned();
+        let mut tree = vec![
+            ui::heading(i18n::t("Hello")),
+            ui::segmented(
+                i18n::t("Show as"),
+                "view",
+                view,
+                [("chart", i18n::t("Chart")), ("table", i18n::t("Table"))],
+            ),
+            ui::note(i18n::plural("{count} game", "{count} games", 2)),
+            ui::text(format!("{slot} {:?}", context.mode)),
+        ];
+        if let Some(game) = &context.game_id {
+            tree.push(ui::text(format!("game {game}")));
+        }
+        Ok(tree)
+    }
+
+    fn act(
+        slot: &str,
+        id: &str,
+        action: &str,
+        value: &serde_json::Value,
+        _context: &ui::Context,
+    ) -> Result<ui::Outcome, Error> {
+        match action {
+            "view" => Ok(ui::Outcome {
+                state: Some(serde_json::json!({"view": value})),
+                notice: None,
+            }),
+            "run" => Ok(ui::Outcome {
+                state: None,
+                notice: Some(i18n::tf("Ran {what}", &[("what", &format!("{slot} {id}"))])),
+            }),
+            _ => Err(Error::unknown_method(action)),
+        }
     }
 
     fn resolve_url(url: &str) -> Result<String, Error> {

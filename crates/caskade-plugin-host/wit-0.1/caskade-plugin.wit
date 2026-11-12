@@ -1,0 +1,154 @@
+/// The contract between Caskade and a plugin's backend half.
+/// Payloads cross as JSON text, so the shapes can grow without breaking
+/// the binary interface.
+///
+/// Versions: 0.1.1 added `host.locale` (#219). Hosts link a component built
+/// for any 0.1.x, so 0.1.0 backends load unchanged; a backend that calls
+/// `locale` asks for `^0.1.1` in its manifest's `api`.
+package caskade:plugin@0.1.1;
+
+interface types {
+    enum level {
+        trace,
+        debug,
+        info,
+        warn,
+        error,
+    }
+
+    /// A failure a plugin reports; the host logs it under the plugin's id.
+    record plugin-error {
+        code: string,
+        message: string,
+    }
+
+    /// What one interceptor decided.
+    variant intercept-result {
+        /// Go on with this (possibly rewritten) JSON payload.
+        continue(string),
+        /// Stop the chain; the reason is shown to the user.
+        cancel(string),
+    }
+}
+
+/// What the host offers every backend plugin.
+interface host {
+    use types.{level, plugin-error};
+
+    log: func(level: level, message: string);
+
+    /// The plugin's own key-value store.
+    kv-get: func(key: string) -> option<list<u8>>;
+    kv-set: func(key: string, value: list<u8>);
+    kv-delete: func(key: string);
+
+    /// Publishes a `plugin.event` from this plugin on the event bus.
+    emit: func(name: string, payload: string);
+
+    /// The plugin's settings as a JSON object (its `contributes.settings`
+    /// schema), if any are saved.
+    settings-get: func() -> option<string>;
+
+    /// The language Caskade shows text in: a BCP 47 tag such as `sv` or
+    /// `pt-BR`, `en` for English. It can change between calls, so read it
+    /// when making text people see (errors, plan warnings). Since 0.1.1.
+    locale: func() -> string;
+
+    /// Reads the library; needs `library: read` (or `write`). `request` is
+    /// JSON: `{"games": {"query": "…", "limit": 50}}` lists games, and
+    /// `{"game": "<id>"}` returns one. Answers are JSON.
+    library-query: func(request: string) -> result<string, plugin-error>;
+
+    /// Changes the library; needs `library: write`. `request` is JSON:
+    /// `{"setFavorite": {"gameId": "…", "favorite": true}}` or
+    /// `{"setTags": {"gameId": "…", "tags": ["…"]}}`.
+    library-update: func(request: string) -> result<string, plugin-error>;
+
+    /// Reads `length` bytes (at most 1 MiB) of the input an `install-handler`
+    /// call is about, from `offset`; fewer at the end of the file. Only
+    /// during `claims` and `plan`: the input is never visible as a file.
+    install-input-read: func(offset: u64, length: u32) -> result<list<u8>, plugin-error>;
+}
+
+/// Events and interceptor points the plugin declared in `contributes.hooks`.
+interface hooks {
+    use types.{intercept-result, plugin-error};
+
+    on-event: func(name: string, payload: string);
+    intercept: func(point: string, payload: string) -> result<intercept-result, plugin-error>;
+}
+
+/// Calls from the plugin's own UI half (`ctx.backend.call`).
+interface requests {
+    use types.{plugin-error};
+
+    handle-request: func(method: string, payload: string) -> result<string, plugin-error>;
+}
+
+/// Providers (#126). A plugin implements the ones it lists in
+/// `contributes.providers`; payloads are JSON, documented per provider.
+
+/// A source of installed games.
+interface library-source {
+    use types.{plugin-error};
+
+    /// The games the source knows, as a JSON list.
+    scan: func() -> result<string, plugin-error>;
+}
+
+/// Metadata and artwork for a game.
+interface metadata-provider {
+    use types.{plugin-error};
+
+    /// `game` is a JSON game reference; returns the requested `fields`.
+    lookup: func(game: string, fields: list<string>) -> result<string, plugin-error>;
+}
+
+/// Launches a kind of launch spec, e.g. a runner for a compatibility tool.
+interface runner {
+    use types.{plugin-error};
+
+    /// The command to run for a JSON launch spec.
+    prepare: func(spec: string) -> result<string, plugin-error>;
+}
+
+/// Teaches the installer a format (#55). `input` is JSON:
+/// `{"artifactId", "name", "size", "format", "facts"}`; read its bytes with
+/// `host.install-input-read`. The plugin describes; the installer writes.
+interface install-handler {
+    use types.{plugin-error};
+
+    /// Whether the plugin knows this input.
+    claims: func(input: string) -> bool;
+    /// A plan as JSON: `{"steps": [...], "confidence": 0.8}`. Steps are the
+    /// installer's (`extract`, `copy`, `copy_range`, `write_file`,
+    /// `set_executable`, `symlink`); nothing that runs a program.
+    plan: func(input: string) -> result<string, plugin-error>;
+}
+
+/// Turns a web page URL into downloads; the installer fetches them.
+interface url-resolver {
+    use types.{plugin-error};
+
+    /// A JSON list of `{"url", "headers", "fileName", "size", "sha256"}`
+    /// (all but `url` optional). `headers` are sent to that URL's origin only.
+    resolve: func(url: string) -> result<string, plugin-error>;
+}
+
+world plugin {
+    import host;
+    export hooks;
+    export requests;
+}
+
+/// A plugin implementing every provider. Real plugins export only the ones
+/// they list in `contributes.providers`, in a world of their own that
+/// includes `plugin`; the host finds provider exports on the component.
+world all-providers {
+    include plugin;
+    export library-source;
+    export metadata-provider;
+    export runner;
+    export install-handler;
+    export url-resolver;
+}

@@ -1,6 +1,6 @@
 //! Rust SDK for Caskade plugin backends.
 //!
-//! A backend is a WebAssembly component for the `caskade:plugin@0.1.1`
+//! A backend is a WebAssembly component for the `caskade:plugin@0.2.0`
 //! world. This crate carries the bindings, so a plugin implements one
 //! [`Plugin`] trait (every method has a default) and calls [`export!`]:
 //!
@@ -29,6 +29,11 @@
 //! caskade_plugin_sdk::export!(Stats);
 //! ```
 //!
+//! From 0.2 a plugin's UI is drawn here too (#109): [`Plugin::render`]
+//! returns a tree of Caskade's components ([`ui`]) for a slot or view the
+//! manifest declares, and [`Plugin::act`] hears what the user did with it.
+//! [`i18n`] translates text from the plugin's own `locales/`.
+//!
 //! Build with `cargo build --release --target wasm32-wasip2` and a
 //! `crate-type = ["cdylib"]` library. Payloads cross as JSON text; the
 //! [`json`] helpers parse and write them. The crate's version is the WIT
@@ -51,7 +56,11 @@ pub use bindings::caskade::plugin::types::Level;
 use bindings::caskade::plugin::types::{InterceptResult, PluginError};
 
 /// The `caskade:plugin` version these bindings implement.
-pub const API_VERSION: &str = "0.1.1";
+pub const API_VERSION: &str = "0.2.0";
+
+/// The UI a plugin draws: Caskade's components as a tree (#109), with
+/// builders (`ui::heading`, `ui::button`, …).
+pub use caskade_plugin_ui as ui;
 
 /// A failure the plugin reports; the host logs it under the plugin's id and
 /// shows `message` where the call came from.
@@ -172,13 +181,75 @@ pub trait Plugin {
         let _ = url;
         Err(Error::not_provided("url-resolver"))
     }
+    /// Draws contribution `id` of `slot` (`views` for a view), one the
+    /// manifest declares, as Caskade's components (#109). `context` has the
+    /// mode, the game in a game slot, and the state the last [`Plugin::act`]
+    /// returned.
+    fn render(slot: &str, id: &str, context: &ui::Context) -> Result<Vec<ui::Node>, Error> {
+        let _ = context;
+        Err(Error::new(
+            "no_ui",
+            format!("this plugin draws no {slot} {id}"),
+        ))
+    }
+    /// The user used `action` in contribution `id` of `slot`: a button or a
+    /// segmented control, with its `value`; `run` for a `game.actions` or
+    /// `commands` entry. The contribution is drawn again afterwards.
+    fn act(
+        slot: &str,
+        id: &str,
+        action: &str,
+        value: &serde_json::Value,
+        context: &ui::Context,
+    ) -> Result<ui::Outcome, Error> {
+        let _ = (slot, id, value, context);
+        Err(Error::unknown_method(action))
+    }
+}
+
+/// The plugin's own translations (#109): text from its `locales/<lang>.po`
+/// in the language Caskade shows text in. The English text is the message
+/// id; `{name}` placeholders are filled after translating.
+pub mod i18n {
+    use crate::bindings::caskade::plugin::host;
+
+    /// `text` in the language in use.
+    pub fn t(text: &str) -> String {
+        host::message(text, None)
+    }
+
+    /// `text` in `context` (the message's gettext context).
+    pub fn tc(context: &str, text: &str) -> String {
+        host::message(text, Some(context))
+    }
+
+    /// `text` with its `{name}` placeholders filled.
+    pub fn tf(text: &str, values: &[(&str, &str)]) -> String {
+        fill(host::message(text, None), values)
+    }
+
+    /// `one` or `other` for `count`, with `{count}` filled.
+    pub fn plural(one: &str, other: &str, count: u64) -> String {
+        fill(
+            host::plural(one, other, count, None),
+            &[("count", &count.to_string())],
+        )
+    }
+
+    /// Fills `{name}` placeholders.
+    pub fn fill(mut text: String, values: &[(&str, &str)]) -> String {
+        for (name, value) in values {
+            text = text.replace(&format!("{{{name}}}"), value);
+        }
+        text
+    }
 }
 
 /// What the host offers every backend.
 pub mod host {
     pub use crate::bindings::caskade::plugin::host::{
         emit, install_input_read, kv_delete, kv_get, kv_set, library_query, library_update, locale,
-        log, settings_get,
+        log, message, plural, settings_get,
     };
     use serde::de::DeserializeOwned;
 
@@ -313,9 +384,40 @@ pub mod __private {
     pub fn resolve<P: Plugin>(url: String) -> Result<String, PluginError> {
         P::resolve_url(&url).map_err(Into::into)
     }
+    fn context(context: &str) -> Result<crate::ui::Context, PluginError> {
+        crate::json::from_str(context).map_err(Into::into)
+    }
+    pub fn render<P: Plugin>(
+        slot: String,
+        id: String,
+        context: String,
+    ) -> Result<String, PluginError> {
+        let context = self::context(&context)?;
+        P::render(&slot, &id, &context)
+            .and_then(|tree| crate::json::to_string(&tree))
+            .map_err(Into::into)
+    }
+    pub fn act<P: Plugin>(
+        slot: String,
+        id: String,
+        action: String,
+        value: String,
+        context: String,
+    ) -> Result<String, PluginError> {
+        let context = self::context(&context)?;
+        let value: serde_json::Value = if value.is_empty() {
+            serde_json::Value::Null
+        } else {
+            crate::json::from_str(&value).map_err(PluginError::from)?
+        };
+        P::act(&slot, &id, &action, &value, &context)
+            .and_then(|outcome| crate::json::to_string(&outcome))
+            .map_err(Into::into)
+    }
     // Keeps the generated module paths referenced from one place.
     pub use e::{
-        hooks, install_handler, library_source, metadata_provider, requests, runner, url_resolver,
+        hooks, install_handler, library_source, metadata_provider, requests, runner, ui,
+        url_resolver,
     };
 }
 
@@ -378,6 +480,24 @@ macro_rules! export {
                     __c::plan::<$plugin>(input)
                 }
             }
+            impl __c::ui::Guest for $plugin {
+                fn render(
+                    slot: String,
+                    id: String,
+                    context: String,
+                ) -> Result<String, $crate::bindings::caskade::plugin::types::PluginError> {
+                    __c::render::<$plugin>(slot, id, context)
+                }
+                fn act(
+                    slot: String,
+                    id: String,
+                    action: String,
+                    value: String,
+                    context: String,
+                ) -> Result<String, $crate::bindings::caskade::plugin::types::PluginError> {
+                    __c::act::<$plugin>(slot, id, action, value, context)
+                }
+            }
             impl __c::url_resolver::Guest for $plugin {
                 fn resolve(
                     url: String,
@@ -412,6 +532,21 @@ mod tests {
         assert_eq!(
             Quiet::resolve_url("https://example.com").unwrap_err().code,
             "not_provided"
+        );
+        let context = ui::Context::default();
+        assert_eq!(
+            Quiet::render("views", "stats", &context).unwrap_err().code,
+            "no_ui"
+        );
+        assert_eq!(
+            Quiet::act("views", "stats", "view", &serde_json::Value::Null, &context)
+                .unwrap_err()
+                .code,
+            "unknown_method"
+        );
+        assert_eq!(
+            i18n::fill("Played {title}".into(), &[("title", "Celeste")]),
+            "Played Celeste"
         );
     }
 

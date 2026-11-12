@@ -1,0 +1,19 @@
+[package]
+name = "caskade-test-plugin-v0-1"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen = { version = "0.63", default-features = false, features = ["macros", "realloc"] }
+
+[profile.release]
+panic = "abort"
+opt-level = "s"
+
+# A backend built for the 0.1 world (#109), which the host still links:
+# built by the host's tests for wasm32-wasip2, outside the workspace.
+[workspace]
