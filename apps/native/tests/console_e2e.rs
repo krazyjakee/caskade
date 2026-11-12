@@ -23,21 +23,22 @@ use caskade_test_desktop::PrivateDesktop;
 use std::time::{Duration, Instant};
 
 const SCRIPT: &str = "\
-# The window is up, on Home (#96's frame; its view isn't built yet).
-wait-text Not built yet.
-# A pad: into the sidebar, down to Store, and A opens it.
+# The window is up, on Home (#98).
+wait-text Welcome back
+# A pad: into the sidebar, to its top, down to Store, and A opens it.
 press nav.down
 seek-section nav.left sidebar
+seek nav.up Home
 seek nav.down Store
 press confirm
 wait-text Store
 # B goes back a page.
 press back
-wait-text Home
+wait-text Welcome back
 # With no game running, guide opens no quick menu.
 press guide
 sleep 300
-wait-text Home
+wait-text Welcome back
 ";
 
 #[test]
