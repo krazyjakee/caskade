@@ -39,6 +39,8 @@ pub enum Request {
     /// Console mode's window (#107): fullscreen, or back to its desktop
     /// size and place.
     Fullscreen(bool),
+    /// Read the clipboard for a paste outside a text field (#132).
+    Paste,
 }
 
 /// What a close request of the main window does.
@@ -185,6 +187,7 @@ impl<S: Shell> Loop<S> {
                         ));
                     }
                 }
+                Request::Paste => crate::paste::fetch(event_loop),
                 Request::Relabel => crate::tray::relabel(),
                 Request::Restyle => {
                     if crate::theme::apply_pending(&mut self.doc.borrow_mut())
@@ -241,6 +244,10 @@ impl<S: Shell> ApplicationHandler for Loop<S> {
         // Console mode's curtain lifts when Caskade has focus again (#107).
         if let WindowEvent::Focused(focused) = event {
             let _ = crate::console::focus_changes().send(focused);
+        }
+        // The clipboard's text for a paste outside a text field (#132).
+        if crate::paste::follow(&event) {
+            return;
         }
         if crate::drops::follow(event_loop, &event)
             && matches!(event, WindowEvent::DataTransferReceived { .. })

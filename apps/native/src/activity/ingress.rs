@@ -3,7 +3,8 @@
 //! a share link or a game another device sends waits, inert, until the
 //! user confirms it here; closing dismisses it and never starts a download.
 //! A confirmed install asks where it goes, then its job is followed, so a
-//! choice it needs opens where the user is. Dropped on the library, a file
+//! choice it needs opens where the user is. A link, magnet link or path
+//! pasted outside a text field asks the same way (#132, `crate::paste`). Dropped on the library, a file
 //! is the library's (`library/view.rs`); it still confirms here.
 
 use caskade_app::commands::install_requests::{InputKind, InstallRequest, PeerSend};
@@ -42,6 +43,41 @@ pub fn InstallIngress() -> Element {
     let mut error = use_signal(|| None::<String>);
     // The request waiting for where it installs.
     let mut placing = use_signal(|| None::<String>);
+    // Ctrl V (⌘ V) outside a text field reads the clipboard (#132).
+    let input = try_use_context::<crate::input::Input>();
+    use_hook({
+        let handle = handle.clone();
+        move || {
+            let (Some(handle), Some(input)) = (handle, input) else {
+                return;
+            };
+            input.on_paste_key(crate::paste::read);
+            let mut pastes = crate::paste::pastes().subscribe();
+            spawn(async move {
+                loop {
+                    let text = match pastes.recv().await {
+                        Ok(text) => text,
+                        Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
+                        Err(tokio::sync::broadcast::error::RecvError::Closed) => break,
+                    };
+                    // Anything else on the clipboard is left alone.
+                    let Some(value) = crate::paste::installation_text(&text) else {
+                        continue;
+                    };
+                    let handle = handle.clone();
+                    let asked =
+                        change(async move { handle.request_install(value).await.map_err(report) })
+                            .await;
+                    match asked {
+                        Ok(_) => requests.restart(),
+                        Err(error) => {
+                            toasts.show(error.summary, true, None);
+                        }
+                    }
+                }
+            });
+        }
+    });
     use_hook({
         let handle = handle.clone();
         move || {

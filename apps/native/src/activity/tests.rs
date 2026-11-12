@@ -3,7 +3,8 @@
 //! and details refresh: jobs show live progress, pause and resume a
 //! download (#131), cancel, remove and retry (as before or another install
 //! way); a followed job's question is
-//! answered; a failed install says why and recovers; the details refresh's
+//! answered; a failed install says why and recovers; a link pasted
+//! outside a text field asks to install it (#132); the details refresh's
 //! card cancels, retries the failed games and continues the rest.
 
 use crate::frame::tests::{ONE, START, Window, source};
@@ -487,6 +488,59 @@ fn request(
         base[key] = field.clone();
     }
     serde_json::from_value(base).unwrap()
+}
+
+/// Empties the test clipboard, whatever happened.
+struct NoClipboard;
+
+impl Drop for NoClipboard {
+    fn drop(&mut self) {
+        crate::paste::tests::set_clipboard(None);
+    }
+}
+
+fn paste(window: &mut Window) {
+    use dioxus_native::prelude::keyboard_types::Modifiers;
+    window.key_with(Key::Character("v".into()), Modifiers::CONTROL);
+}
+
+#[test]
+fn a_link_pasted_outside_a_field_asks_to_install_it() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _clean = Clean;
+    let _clipboard = NoClipboard;
+    let mut window = activity();
+    // Arbitrary text: nothing asked, nothing shown.
+    crate::paste::tests::set_clipboard(Some("just some words"));
+    paste(&mut window);
+    window.settle();
+    assert!(inbox().calls().is_empty(), "{:?}", inbox().calls());
+    assert!(window.find("data-cs", "install-confirmation").is_none());
+    // Into a text field, a paste is the field's.
+    crate::paste::tests::set_clipboard(Some("https://example.invalid/celeste.zip"));
+    let search = window.get("aria-label", "Search games");
+    window.focus(search);
+    paste(&mut window);
+    window.settle();
+    assert!(inbox().calls().is_empty(), "{:?}", inbox().calls());
+    // Outside one, a link asks for its install, and waits for the
+    // confirmation: nothing starts.
+    let root = window.get("data-cs", "app-shell");
+    window.focus(root);
+    paste(&mut window);
+    window.settle_until("the confirmation", |window| {
+        window.find("data-cs", "install-confirmation").is_some()
+    });
+    assert_eq!(
+        inbox().calls(),
+        ["request https://example.invalid/celeste.zip"]
+    );
+    assert_eq!(
+        window.text(window.get("data-part", "source")).trim(),
+        "https://example.invalid/celeste.zip"
+    );
+    assert!(caskade_ui_data::jobs::JobQueue::list(fakes().0).is_empty());
 }
 
 #[test]

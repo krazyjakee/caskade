@@ -43,6 +43,7 @@ mod library;
 mod plugins;
 // Navigation between the pages (#96), in place of the webview's router.
 mod onboarding;
+mod paste;
 mod router;
 mod settings;
 mod shell;

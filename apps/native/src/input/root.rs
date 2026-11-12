@@ -94,6 +94,8 @@ struct Inner {
     typing: RefCell<Option<StartSearch>>,
     /// What Ctrl K (⌘ K) does: the search's focus.
     search_key: RefCell<Option<Rc<dyn Fn()>>>,
+    /// What Ctrl V (⌘ V) outside a text field does (#132).
+    paste_key: RefCell<Option<Rc<dyn Fn()>>>,
 }
 
 impl PartialEq for Input {
@@ -123,6 +125,7 @@ impl Input {
                 details: RefCell::new(None),
                 typing: RefCell::new(None),
                 search_key: RefCell::new(None),
+                paste_key: RefCell::new(None),
             }),
             changed: Signal::new(0),
             keyboard: Signal::new(None),
@@ -181,6 +184,35 @@ impl Input {
             }
             _ => false,
         }
+    }
+
+    /// What Ctrl V (⌘ V) does outside a text field (#132): a paste there
+    /// stays the field's.
+    pub fn on_paste_key(&self, paste: impl Fn() + 'static) {
+        *self.inner.paste_key.borrow_mut() = Some(Rc::new(paste));
+    }
+
+    /// Ctrl V or ⌘ V outside a text field: whether it was taken.
+    fn paste_key(&self, event: &KeyboardEvent) -> bool {
+        let held = event.modifiers();
+        let shortcut = (held.ctrl() || held.meta())
+            && !held.alt()
+            && !held.shift()
+            && event.key().to_string().eq_ignore_ascii_case("v");
+        if !shortcut || event.is_composing() {
+            return false;
+        }
+        let Some(paste) = self.inner.paste_key.borrow().clone() else {
+            return false;
+        };
+        let in_field = self.with_ui(|ui, _| {
+            caskade_ui_input::dispatch::Ui::focused(ui).is_some_and(|node| editable(ui, node))
+        });
+        if in_field != Some(false) {
+            return false;
+        }
+        paste();
+        true
     }
 
     /// A key the keyboard map left alone: whether it started a search.
@@ -749,7 +781,11 @@ pub fn InputRoot(
             },
             onkeydown: move |event: KeyboardEvent| {
                 on_key.inner.keys.set(on_key.inner.keys.get() + 1);
-                if on_key.search_key(&event) || on_key.key(&event) || on_key.typing(&event) {
+                if on_key.search_key(&event)
+                    || on_key.paste_key(&event)
+                    || on_key.key(&event)
+                    || on_key.typing(&event)
+                {
                     event.prevent_default();
                     event.stop_propagation();
                 }
@@ -780,4 +816,16 @@ pub fn InputRoot(
             }
         }
     }
+}
+
+/// Text the user edits, which a paste belongs to: a field, a select, an
+/// editable element, a text box or combo box (the webview's
+/// `editableTarget`).
+fn editable(ui: &BlitzUi<'_>, node: NodeId) -> bool {
+    use caskade_ui_input::FocusTree;
+    caskade_ui_input::keys::is_text_entry(ui, node)
+        || caskade_ui_input::tree::closest(ui, node, |at| {
+            ui.tag(at) == "select" || matches!(ui.attr(at, "role"), Some("textbox" | "combobox"))
+        })
+        .is_some()
 }
