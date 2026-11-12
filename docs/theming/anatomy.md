@@ -696,7 +696,7 @@ Root: `[data-cs="view-error"]`
 
 ## `console-shell`
 
-Console mode's window (`[data-mode="console"]` on the root): the console sidebar, top bar and view, and the button-hint bar. `data-cursor` is `hidden` while the pointer rests. Rendered by ConsoleShell (app).
+Console mode's window (`[data-mode="console"]` on the root): the console sidebar, top bar and view, and the button-hint bar. `data-cursor` is `hidden` while the pointer rests. Rendered by ConsoleShell (apps/native/src/frame/console.rs); in the webview, ConsoleShell (app).
 
 Root: `[data-cs="console-shell"]`
 
@@ -710,7 +710,7 @@ Contains: [`backdrop`](#backdrop), [`console-sidebar`](#console-sidebar), [`cons
 
 ## `console-sidebar`
 
-Console mode's navigation: big targets. Rendered by ConsoleSidebar (app).
+Console mode's navigation: big targets. Rendered by ConsoleSidebar (apps/native/src/frame/console.rs); in the webview, ConsoleSidebar (app).
 
 Root: `[data-cs="console-sidebar"]`
 
@@ -731,7 +731,7 @@ Slots: `plugin-nav` hold the caller's content; parts inside them belong to that 
 
 ## `console-topbar`
 
-Console mode's top bar: search and activity. Rendered by ConsoleTopbar (app).
+Console mode's top bar: search and activity. Rendered by ConsoleTopbar (apps/native/src/frame/console.rs); in the webview, ConsoleTopbar (app).
 
 Root: `[data-cs="console-topbar"]`
 
@@ -789,7 +789,7 @@ Contains: [`button`](#button)
 
 ## `hint-bar`
 
-What each controller button does where focus is. `data-glyphs` is the controller family in hand: `xbox`, `playstation`, `nintendo`, `generic`, or `keyboard`. Rendered by HintBar (app).
+What each controller button does where focus is. `data-glyphs` is the controller family in hand: `xbox`, `playstation`, `nintendo`, `generic`, or `keyboard`. Rendered by HintBar (apps/native/src/console/hint_bar.rs); in the webview, HintBar (app).
 
 Root: `[data-cs="hint-bar"]`
 
@@ -802,7 +802,7 @@ Root: `[data-cs="hint-bar"]`
 
 ## `game-curtain`
 
-Console mode's black screen behind a running game: it fades in when a game starts, so the game's window takes over without Caskade minimizing, and fades out when the last game exits. Always present in console mode; `data-state` is `covered` while it is down. Rendered by GameCurtain (app).
+Console mode's black screen behind a running game: it fades in when a game starts, so the game's window takes over without Caskade minimizing, and fades out when the last game exits. Always present in console mode; `data-state` is `covered` while it is down. Rendered by GameCurtain (apps/native/src/frame/console.rs); in the webview, GameCurtain (app).
 
 Root: `[data-cs="game-curtain"]`
 

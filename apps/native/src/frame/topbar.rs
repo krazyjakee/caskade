@@ -67,6 +67,18 @@ pub fn Topbar() -> Element {
                 crate::plugins::TopbarItems {}
                 ActivityLink {}
                 crate::accounts::AccountMenu {}
+                // Console mode (#107), where Caskade draws no window
+                // controls of its own (macOS); otherwise they have it.
+                if !super::window::CUSTOM_FRAME {
+                    button {
+                        "data-part": "console",
+                        r#type: "button",
+                        "aria-label": t!("Console mode"),
+                        class: "grid size-8 place-items-center rounded-control text-fg-muted transition-colors duration-(--cs-motion-duration-fast) hover:bg-surface-hover hover:text-fg data-focus-visible:focus-ring",
+                        onclick: move |_| crate::console::set_mode(crate::console::Mode::Console, true),
+                        crate::ui::Svg { icon: crate::ui::icons::GAMEPAD_2, class: "size-4", stroke_width: 1.75 }
+                    }
+                }
             }
             super::window::WindowControls {}
             if let Some(anchor) = menu() {

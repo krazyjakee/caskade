@@ -12,15 +12,15 @@ const ITEM: &str = "relative flex items-center gap-3 rounded-control px-3 py-2.5
 
 /// A link of the sidebar's: where it goes, and whether only the whole href
 /// makes it current (Home's `/`).
-struct NavItem {
-    label: fn() -> String,
-    icon: Icon,
-    to: &'static str,
-    exact: bool,
+pub(super) struct NavItem {
+    pub(super) label: fn() -> String,
+    pub(super) icon: Icon,
+    pub(super) to: &'static str,
+    pub(super) exact: bool,
 }
 
 /// Above the divider (`primaryNav`).
-const PRIMARY: [NavItem; 4] = [
+pub(super) const PRIMARY: [NavItem; 4] = [
     NavItem {
         label: || {
             tp!(
@@ -56,7 +56,7 @@ const PRIMARY: [NavItem; 4] = [
 ];
 
 /// Below the divider (`secondaryNav`).
-const SECONDARY: [NavItem; 1] = [NavItem {
+pub(super) const SECONDARY: [NavItem; 1] = [NavItem {
     label: || t!("Settings"),
     icon: icons::SETTINGS,
     to: "/settings",
@@ -180,8 +180,9 @@ pub(crate) fn Brand(#[props(default = "size-9".to_owned())] class: String) -> El
 /// The library's filters under its link, while the library is open (a
 /// closed list is out of the tab order and the pad's reach). A filter keeps
 /// the library's search; its sort and layout are the remembered ones.
+/// In console mode (#107) they're bigger, for a TV.
 #[component]
-fn LibraryNav() -> Element {
+pub(super) fn LibraryNav(#[props(default)] console: bool) -> Element {
     let router = use_router();
     let route = router.route();
     let Route::Library(library) = &route else {
@@ -209,7 +210,7 @@ fn LibraryNav() -> Element {
                             RouteLink {
                                 key: "{filter_name(filter)}",
                                 to,
-                                class: "flex items-center gap-2 rounded-control px-3 py-1.5 text-sm text-fg-muted transition-colors duration-(--cs-motion-duration-fast) hover:bg-surface-hover hover:text-fg data-focus-visible:bg-surface-hover data-focus-visible:text-fg data-[status=active]:bg-accent/15 data-[status=active]:text-fg",
+                                class: if console { "flex items-center gap-3 rounded-control px-4 py-2 text-base text-fg-muted transition-colors duration-(--cs-motion-duration-fast) hover:bg-surface-hover hover:text-fg data-focus-visible:bg-surface-hover data-focus-visible:text-fg data-[status=active]:bg-accent/15 data-[status=active]:text-fg" } else { "flex items-center gap-2 rounded-control px-3 py-1.5 text-sm text-fg-muted transition-colors duration-(--cs-motion-duration-fast) hover:bg-surface-hover hover:text-fg data-focus-visible:bg-surface-hover data-focus-visible:text-fg data-[status=active]:bg-accent/15 data-[status=active]:text-fg" },
                                 current: library.filter == filter,
                                 "data-part": "sub-item",
                                 span { "data-part": "label", class: "flex-1 truncate", {filter_label(filter)} }

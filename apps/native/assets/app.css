@@ -643,6 +643,9 @@
   .h-\(--cs-hero-height\) {
     height: var(--cs-hero-height);
   }
+  .h-\(--cs-hintbar-height\) {
+    height: var(--cs-hintbar-height);
+  }
   .h-0\.5 {
     height: calc(calc(0.25rem * var(--cs-density-scale)) * 0.5);
   }
@@ -663,6 +666,9 @@
   }
   .h-6 {
     height: calc(calc(0.25rem * var(--cs-density-scale)) * 6);
+  }
+  .h-7 {
+    height: calc(calc(0.25rem * var(--cs-density-scale)) * 7);
   }
   .h-8 {
     height: calc(calc(0.25rem * var(--cs-density-scale)) * 8);
@@ -913,6 +919,9 @@
   .min-w-4 {
     min-width: calc(calc(0.25rem * var(--cs-density-scale)) * 4);
   }
+  .min-w-7 {
+    min-width: calc(calc(0.25rem * var(--cs-density-scale)) * 7);
+  }
   .min-w-10 {
     min-width: calc(calc(0.25rem * var(--cs-density-scale)) * 10);
   }
@@ -1007,6 +1016,9 @@
   }
   .cursor-default {
     cursor: default;
+  }
+  .cursor-none {
+    cursor: none;
   }
   .cursor-pointer {
     cursor: pointer;
@@ -1448,6 +1460,9 @@
       background-color: color-mix(in oklab, var(--cs-color-accent) 10%, transparent);
     }
   }
+  .bg-black {
+    background-color: var(--color-black);
+  }
   .bg-border {
     background-color: var(--cs-color-border);
   }
@@ -1620,6 +1635,12 @@
     background-color: var(--cs-color-surface-raised);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--cs-color-surface-raised) 80%, transparent);
+    }
+  }
+  .bg-surface-raised\/90 {
+    background-color: var(--cs-color-surface-raised);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--cs-color-surface-raised) 90%, transparent);
     }
   }
   .bg-transparent {
@@ -2437,6 +2458,10 @@
     --tw-duration: var(--cs-motion-duration-fast);
     transition-duration: var(--cs-motion-duration-fast);
   }
+  .duration-\[calc\(var\(--cs-motion-duration-slow\)\*2\)\] {
+    --tw-duration: calc(var(--cs-motion-duration-slow) * 2);
+    transition-duration: calc(var(--cs-motion-duration-slow) * 2);
+  }
   .ease-\(--cs-motion-ease-out\) {
     --tw-ease: var(--cs-motion-ease-out);
     transition-timing-function: var(--cs-motion-ease-out);
@@ -3124,6 +3149,9 @@
   .data-selected\:outline-fg[data-selected] {
     outline-color: var(--cs-color-fg);
   }
+  .data-\[cursor\=hidden\]\:cursor-none[data-cursor="hidden"] {
+    cursor: none;
+  }
   .data-\[included\=false\]\:opacity-60[data-included="false"] {
     opacity: 60%;
   }
@@ -3132,6 +3160,9 @@
   }
   .data-\[size\=xl\]\:\[--avatar-cell\:9rem\][data-size="xl"] {
     --avatar-cell: 9rem;
+  }
+  .data-\[state\=covered\]\:opacity-100[data-state="covered"] {
+    opacity: 100%;
   }
   .data-\[state\=locked\]\:text-fg-muted[data-state="locked"] {
     color: var(--cs-color-fg-muted);
@@ -3143,6 +3174,12 @@
     background-color: var(--cs-color-accent);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--cs-color-accent) 15%, transparent);
+    }
+  }
+  .data-\[status\=active\]\:bg-accent\/20[data-status="active"] {
+    background-color: var(--cs-color-accent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--cs-color-accent) 20%, transparent);
     }
   }
   .data-\[status\=active\]\:text-fg[data-status="active"] {
@@ -3187,6 +3224,15 @@
       border-color: color-mix(in oklab, var(--cs-color-accent-alt) 50%, transparent);
     }
   }
+  .data-\[tone\=accent\]\:border-accent-alt[data-tone="accent"] {
+    border-color: var(--cs-color-accent-alt);
+  }
+  .data-\[tone\=accent\]\:text-accent-alt[data-tone="accent"] {
+    color: var(--cs-color-accent-alt);
+  }
+  .data-\[tone\=danger\]\:border-danger[data-tone="danger"] {
+    border-color: var(--cs-color-danger);
+  }
   .data-\[tone\=danger\]\:border-danger\/50[data-tone="danger"] {
     border-color: var(--cs-color-danger);
     @supports (color: color-mix(in lab, red, red)) {
@@ -3195,6 +3241,18 @@
   }
   .data-\[tone\=danger\]\:text-danger[data-tone="danger"] {
     color: var(--cs-color-danger);
+  }
+  .data-\[tone\=installed\]\:border-status-installed[data-tone="installed"] {
+    border-color: var(--cs-color-status-installed);
+  }
+  .data-\[tone\=installed\]\:text-status-installed[data-tone="installed"] {
+    color: var(--cs-color-status-installed);
+  }
+  .data-\[tone\=warning\]\:border-warning[data-tone="warning"] {
+    border-color: var(--cs-color-warning);
+  }
+  .data-\[tone\=warning\]\:text-warning[data-tone="warning"] {
+    color: var(--cs-color-warning);
   }
   @media (prefers-reduced-motion: reduce) {
     .motion-reduce\:animate-none {

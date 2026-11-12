@@ -70,8 +70,10 @@ fn act(intents: Vec<Intent>) {
                     false
                 }
                 Intent::Console => {
-                    tracing::info!("console mode isn't in the native app yet (#92)");
-                    false
+                    // A second `caskade --console` (#107): a one-off start,
+                    // not the toggle, so it isn't remembered.
+                    crate::console::request_console();
+                    true
                 }
             };
             if raise {

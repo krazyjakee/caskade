@@ -8,7 +8,7 @@
 
 use crate::ui::{Svg, icons};
 use blitz_dom::{BaseDocument, LocalName, NodeId};
-use caskade_ui_i18n::tp;
+use caskade_ui_i18n::{t, tp};
 use dioxus_native::NodeHandle;
 use dioxus_native::prelude::dioxus_html::input_data::MouseButton;
 use dioxus_native::prelude::*;
@@ -86,6 +86,16 @@ pub fn WindowControls() -> Element {
                     }
                 },
                 Svg { icon: icons::MINUS, class: "size-4", stroke_width: 1.75 }
+            }
+            // Console mode (#107): fullscreen, for a controller.
+            button {
+                "data-part": "console",
+                r#type: "button",
+                tabindex: "-1",
+                "aria-label": t!("Console mode"),
+                class: "{neutral}",
+                onclick: move |_| crate::console::set_mode(crate::console::Mode::Console, true),
+                Svg { icon: icons::GAMEPAD_2, class: "size-4", stroke_width: 1.75 }
             }
             button {
                 "data-part": "maximize",

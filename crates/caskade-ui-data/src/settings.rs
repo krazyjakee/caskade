@@ -50,6 +50,20 @@ impl Settings {
         Self::new(services.settings.clone(), services.accounts.clone())
     }
 
+    /// Whether Caskade starts in console mode (#107): by how it was started
+    /// (`--console`, `CASKADE_CONSOLE`, gamescope) and `core.console`.
+    pub async fn starts_in_console(
+        &self,
+        startup: &caskade_app::commands::console::Startup,
+    ) -> bool {
+        caskade_app::commands::console::starts_in_console(startup, &self.settings).await
+    }
+
+    /// Remembers the mode chosen with the toggle, for `auto` starts (#107).
+    pub async fn remember_console(&self, active: bool) -> std::result::Result<(), String> {
+        caskade_app::commands::console::remember(&self.settings, active).await
+    }
+
     /// The accounts, for Settings → Accounts and My profile.
     pub fn accounts(&self) -> crate::accounts::Accounts {
         crate::accounts::Accounts::new(self.accounts.clone())

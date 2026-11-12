@@ -18,7 +18,125 @@ pub const ANATOMY: &[Entry] = &[
     TYPE_SEARCH,
     NOTIFICATIONS,
     NOTIFICATION,
+    CONSOLE_SHELL,
+    CONSOLE_SIDEBAR,
+    CONSOLE_TOPBAR,
+    HINT_BAR,
+    GAME_CURTAIN,
 ];
+
+pub const CONSOLE_SHELL: Entry = Entry {
+    parts: &[("main", "The column right of the sidebar.")],
+    contains: &[
+        "backdrop",
+        "console-sidebar",
+        "console-topbar",
+        "view",
+        "hint-bar",
+    ],
+    container: true,
+    ..Entry::new(
+        "console-shell",
+        "ConsoleShell (apps/native/src/frame/console.rs)",
+        Source::App,
+        "Console mode's window (`[data-mode=\"console\"]` on the root): the console sidebar, top bar and view, and the button-hint bar. `data-cursor` is `hidden` while the pointer rests.",
+    )
+};
+
+pub const CONSOLE_SIDEBAR: Entry = Entry {
+    parts: &[
+        ("brand", "The logo and name."),
+        ("nav", "The links."),
+        (
+            "nav-item",
+            "A link; the current one has `data-status=\"active\"`.",
+        ),
+        ("icon", "A link's icon."),
+        ("label", "A link's text."),
+        (
+            "sub-nav",
+            "The links under a link: the Library's filters, open (`data-open`) while the Library is.",
+        ),
+        (
+            "sub-item",
+            "A filter; the current one has `data-status=\"active\"`.",
+        ),
+        ("count", "How many games a filter has."),
+        ("plugin-nav", "Plugin views that show in console mode."),
+        ("leave", "Goes back to desktop mode."),
+    ],
+    slots: &["plugin-nav"],
+    ..Entry::new(
+        "console-sidebar",
+        "ConsoleSidebar (apps/native/src/frame/console.rs)",
+        Source::App,
+        "Console mode's navigation: big targets.",
+    )
+};
+
+pub const CONSOLE_TOPBAR: Entry = Entry {
+    parts: &[
+        ("actions", "The items at the end of the bar."),
+        ("activity", "The link to Activity."),
+        (
+            "job-count",
+            "The number of running jobs; `data-status` is `active` or `needs-user`.",
+        ),
+        (
+            "notification-count",
+            "The number of unread notifications, apart from the jobs.",
+        ),
+        (
+            "avatar",
+            "The signed-in account's button, which opens the account menu (an `avatar` inside).",
+        ),
+    ],
+    contains: &["search", "select", "avatar"],
+    ..Entry::new(
+        "console-topbar",
+        "ConsoleTopbar (apps/native/src/frame/console.rs)",
+        Source::App,
+        "Console mode's top bar: search and activity.",
+    )
+};
+
+pub const HINT_BAR: Entry = Entry {
+    parts: &[
+        (
+            "hint",
+            "One button and what it does; `data-action` is the action (`confirm`, `back`, `tab.next`, …).",
+        ),
+        (
+            "glyph",
+            "The button's label; face buttons carry `data-tone` (`installed`, `danger`, `accent`, `warning`).",
+        ),
+        ("label", "What the button does."),
+        ("clock", "The time."),
+    ],
+    ..Entry::new(
+        "hint-bar",
+        "HintBar (apps/native/src/console/hint_bar.rs)",
+        Source::App,
+        "What each controller button does where focus is. `data-glyphs` is the controller family in hand: `xbox`, `playstation`, `nintendo`, `generic`, or `keyboard`.",
+    )
+};
+
+pub const GAME_CURTAIN: Entry = Entry {
+    parts: &[
+        ("title", "The game's title."),
+        (
+            "hint",
+            "The guide button, which opens the quick menu over it.",
+        ),
+    ],
+    states: &[("data-state", &["covered", "open"])],
+    ..Entry::new(
+        "game-curtain",
+        "GameCurtain (apps/native/src/frame/console.rs)",
+        Source::App,
+        "Console mode's black screen behind a running game: it fades in when a game starts, so the game's window takes over without Caskade minimizing, and fades out when the last game exits. Always present in console mode; `data-state` is `covered` while it is down.",
+    )
+};
 
 pub const APP_SHELL: Entry = Entry {
     parts: &[("main", "The column right of the sidebar.")],

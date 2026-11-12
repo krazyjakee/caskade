@@ -5,6 +5,7 @@
 //! shell is #107, first-run setup `crate::onboarding` (#97), the account gate and menu `crate::accounts` (#106), plugins' links and slots #109.
 
 mod anatomy;
+mod console;
 mod error;
 mod notifications;
 mod search;
@@ -41,6 +42,8 @@ pub fn Frame(
         return rsx! {};
     }
     rsx! {
+        // Console mode or the desktop (#107), decided before anything shows.
+        crate::console::ModeRoot {
         ErrorBoundary { handle_error: error::app_crash,
             RouterRoot { start,
                 ToastRegion {
@@ -67,7 +70,30 @@ pub fn Frame(
                 }
             }
         }
+        }
     }
+}
+
+/// View (Select) switches between the shells, anywhere (#107).
+#[component]
+fn ModeActions() -> Element {
+    let console = crate::console::is_console();
+    crate::input::use_input_action(
+        caskade_ui_input::Action::View,
+        crate::input::Bind {
+            label: Some(if console {
+                caskade_ui_i18n::t!("Desktop mode")
+            } else {
+                caskade_ui_i18n::t!("Console mode")
+            }),
+            ..crate::input::Bind::default()
+        },
+        || {
+            crate::console::toggle();
+            true
+        },
+    );
+    rsx! {}
 }
 
 #[component]
@@ -78,7 +104,16 @@ fn Shell() -> Element {
     // Keyed by visit, so each view enters again on navigation.
     let key = router.key();
     let drag = window::use_drag();
+    // Console mode swaps the shell; the routes and views stay the same.
+    if crate::console::is_console() {
+        return rsx! {
+            ModeActions {}
+            console::ConsoleShell { view_key: key }
+            console::GameCurtain {}
+        };
+    }
     rsx! {
+        ModeActions {}
         div {
             "data-cs": "app-shell",
             class: "relative flex h-screen flex-col overflow-clip",

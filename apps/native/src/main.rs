@@ -15,6 +15,8 @@ mod accounts;
 // Activity's jobs (#101).
 mod activity;
 mod anatomy;
+// Console mode, for a TV and a pad (#107).
+mod console;
 // The data hooks (#89); the views (#96 onwards) use them.
 // Collections and a collection's page (#102).
 mod collections;

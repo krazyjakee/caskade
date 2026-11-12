@@ -36,6 +36,9 @@ pub enum Request {
     Relabel,
     /// Apply the look waiting in `theme` (#90).
     Restyle,
+    /// Console mode's window (#107): fullscreen, or back to its desktop
+    /// size and place.
+    Fullscreen(bool),
 }
 
 /// What a close request of the main window does.
@@ -175,6 +178,13 @@ impl<S: Shell> Loop<S> {
                         window.focus_window();
                     }
                 }
+                Request::Fullscreen(on) => {
+                    if let Some(window) = crate::shell::main_window() {
+                        window.set_fullscreen(on.then_some(
+                            dioxus_native::winit::monitor::Fullscreen::Borderless(None),
+                        ));
+                    }
+                }
                 Request::Relabel => crate::tray::relabel(),
                 Request::Restyle => {
                     if crate::theme::apply_pending(&mut self.doc.borrow_mut())
@@ -228,6 +238,10 @@ impl<S: Shell> ApplicationHandler for Loop<S> {
         self.main.get_or_insert(window_id);
         // Files dragged onto the window (#99); a file list it asked for is
         // its own, not the shell's.
+        // Console mode's curtain lifts when Caskade has focus again (#107).
+        if let WindowEvent::Focused(focused) = event {
+            let _ = crate::console::focus_changes().send(focused);
+        }
         if crate::drops::follow(event_loop, &event)
             && matches!(event, WindowEvent::DataTransferReceived { .. })
         {

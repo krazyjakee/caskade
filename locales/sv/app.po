@@ -1523,6 +1523,7 @@ msgstr "<{duration}"
 
 #. The guide button's name comes first
 #: apps/desktop/src/shell/console/GameCurtain.tsx
+#: apps/native/src/frame/console.rs
 msgid "<0>{guide}</0> opens the quick menu"
 msgstr "<0>{guide}</0> öppnar snabbmenyn"
 
@@ -2975,6 +2976,7 @@ msgid "Back"
 msgstr "Tillbaka"
 
 #: apps/desktop/src/shell/console/ConsoleShell.tsx
+#: apps/native/src/frame/console.rs
 msgctxt "pad action"
 msgid "Back"
 msgstr "Tillbaka"
@@ -4470,6 +4472,7 @@ msgstr "Anslutningar"
 
 #. The console-mode sidebar's navigation
 #: apps/desktop/src/shell/console/ConsoleSidebar.tsx
+#: apps/native/src/frame/console.rs
 msgid "Console"
 msgstr "Konsol"
 
@@ -4484,8 +4487,9 @@ msgstr "Konsoltillbehör"
 #: apps/desktop/src/shell/AppShell.tsx
 #: apps/desktop/src/shell/console/ModeToggle.tsx
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-#: apps/native/src/onboarding/questions.rs apps/native/src/settings/addons.rs
-#: apps/native/src/settings/general.rs
+#: apps/native/src/frame/mod.rs apps/native/src/frame/topbar.rs
+#: apps/native/src/frame/window.rs apps/native/src/onboarding/questions.rs
+#: apps/native/src/settings/addons.rs apps/native/src/settings/general.rs
 msgid "Console mode"
 msgstr "Konsolläge"
 
@@ -4539,6 +4543,7 @@ msgstr "anslutning av handkontroller"
 
 #. The console hint bar's list of buttons and what they do
 #: apps/desktop/src/shell/console/HintBar.tsx
+#: apps/native/src/console/hint_bar.rs
 msgid "Controls"
 msgstr "Kontroller"
 
@@ -5128,6 +5133,7 @@ msgstr "Helskärm i skrivbordsläge"
 #: apps/desktop/src/components/addons/AddonDetails.tsx
 #: apps/desktop/src/shell/AppShell.tsx
 #: apps/desktop/src/shell/console/ConsoleSidebar.tsx
+#: apps/native/src/frame/console.rs apps/native/src/frame/mod.rs
 #: apps/native/src/settings/addons.rs
 msgid "Desktop mode"
 msgstr "Skrivbordsläge"
@@ -5809,7 +5815,7 @@ msgstr "Avsluta stream"
 msgid "End the stream? The game stops on the other device, and progress it hasn't saved is lost."
 msgstr "Avsluta streamen? Spelet stoppas på den andra enheten, och framsteg som inte har sparats går förlorade."
 
-#: apps/desktop/src/shell/console/glyphs.ts
+#: apps/desktop/src/shell/console/glyphs.ts apps/native/src/console/hint_bar.rs
 msgctxt "keyboard key"
 msgid "Enter"
 msgstr "Enter"
@@ -5888,7 +5894,7 @@ msgstr "likvärdigt resultat"
 msgid "Errors"
 msgstr "Fel"
 
-#: apps/desktop/src/shell/console/glyphs.ts
+#: apps/desktop/src/shell/console/glyphs.ts apps/native/src/console/hint_bar.rs
 msgctxt "keyboard key"
 msgid "Esc"
 msgstr "Esc"
@@ -6812,6 +6818,7 @@ msgid "grid view"
 msgstr "rutnätsvy"
 
 #: apps/desktop/src/shell/console/GameCurtain.tsx
+#: apps/native/src/frame/console.rs
 msgctxt "pad button"
 msgid "Guide"
 msgstr "Guide"
@@ -9297,7 +9304,8 @@ msgstr "Nästa {0}."
 #: apps/desktop/src/components/ShelfRow.tsx
 #: apps/desktop/src/shell/console/ConsoleShell.tsx
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
-#: apps/native/src/home/shelf_row.rs apps/native/src/library/grid.rs
+#: apps/native/src/frame/console.rs apps/native/src/home/shelf_row.rs
+#: apps/native/src/library/grid.rs
 msgid "Next page"
 msgstr "Nästa sida"
 
@@ -10723,12 +10731,12 @@ msgstr "prestanda, rörelse"
 msgid "Permissions"
 msgstr "Behörigheter"
 
-#: apps/desktop/src/shell/console/glyphs.ts
+#: apps/desktop/src/shell/console/glyphs.ts apps/native/src/console/hint_bar.rs
 msgctxt "keyboard key"
 msgid "PgDn"
 msgstr "PgDn"
 
-#: apps/desktop/src/shell/console/glyphs.ts
+#: apps/desktop/src/shell/console/glyphs.ts apps/native/src/console/hint_bar.rs
 msgctxt "keyboard key"
 msgid "PgUp"
 msgstr "PgUp"
@@ -11027,7 +11035,8 @@ msgstr "Spelare"
 #: apps/desktop/src/shell/console/GameCurtain.tsx
 #: apps/desktop/src/views/game/GameView.tsx
 #: apps/desktop/src/views/settings/EmulatorSettings.tsx
-#: apps/native/src/game/page.rs apps/native/src/settings/emulation/mod.rs
+#: apps/native/src/frame/console.rs apps/native/src/game/page.rs
+#: apps/native/src/settings/emulation/mod.rs
 msgid "Playing"
 msgstr "Spelar"
 
@@ -11253,7 +11262,8 @@ msgstr "Föregående bokstav"
 #: apps/desktop/src/components/ShelfRow.tsx
 #: apps/desktop/src/shell/console/ConsoleShell.tsx
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
-#: apps/native/src/home/shelf_row.rs apps/native/src/library/grid.rs
+#: apps/native/src/frame/console.rs apps/native/src/home/shelf_row.rs
+#: apps/native/src/library/grid.rs
 msgid "Previous page"
 msgstr "Föregående sida"
 
@@ -13144,7 +13154,7 @@ msgstr "Välj"
 #. Hint bar: confirm the focused item
 #: apps/desktop/src/shell/accounts/AccountPicker.tsx
 #: apps/desktop/src/shell/console/ConsoleShell.tsx
-#: apps/native/src/accounts/picker.rs
+#: apps/native/src/accounts/picker.rs apps/native/src/frame/console.rs
 msgctxt "pad action"
 msgid "Select"
 msgstr "Välj"
@@ -13931,12 +13941,13 @@ msgstr "Startar uppdateringen…"
 #: apps/desktop/src/views/library/StartingMark.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/desktop/src/views/settings/streaming/StreamingSettings.tsx
-#: apps/native/src/flows/streaming.rs apps/native/src/game/launch.rs
-#: apps/native/src/game/page.rs apps/native/src/game/ports.rs
-#: apps/native/src/game_menu/play.rs apps/native/src/game_menu/quick_look.rs
-#: apps/native/src/library/web.rs apps/native/src/settings/addons.rs
-#: apps/native/src/settings/backup.rs apps/native/src/settings/streaming.rs
-#: apps/native/src/ui/game_card.rs apps/native/src/ui/game_row.rs
+#: apps/native/src/flows/streaming.rs apps/native/src/frame/console.rs
+#: apps/native/src/game/launch.rs apps/native/src/game/page.rs
+#: apps/native/src/game/ports.rs apps/native/src/game_menu/play.rs
+#: apps/native/src/game_menu/quick_look.rs apps/native/src/library/web.rs
+#: apps/native/src/settings/addons.rs apps/native/src/settings/backup.rs
+#: apps/native/src/settings/streaming.rs apps/native/src/ui/game_card.rs
+#: apps/native/src/ui/game_row.rs
 msgid "Starting…"
 msgstr "Startar…"
 
