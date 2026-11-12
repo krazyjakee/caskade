@@ -132,8 +132,6 @@ caskade-test-desktop = { path = "../../crates/caskade-test-desktop" }
 caskade-share = { path = "../../crates/caskade-share" }
 # Settings → Backup's tests: backups over a fixture library (#105).
 caskade-backup = { path = "../../crates/caskade-backup" }
-# Console mode's e2e: a fake emulator for its ROM game (#107).
-caskade-emulation-fixtures = { path = "../../crates/caskade-emulation-fixtures" }
 
 [lints]
 workspace = true

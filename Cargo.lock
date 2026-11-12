@@ -2081,7 +2081,6 @@ dependencies = [
  "caskade-app",
  "caskade-backup",
  "caskade-core",
- "caskade-emulation-fixtures",
  "caskade-input",
  "caskade-installer",
  "caskade-player",

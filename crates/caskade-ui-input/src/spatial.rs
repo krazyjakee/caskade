@@ -489,19 +489,6 @@ impl<N: Copy + Eq + Hash> Spatial<N> {
         self.start_in(tree, within)
     }
 
-    /// Where focus starts in the view (the `main` focus section) when the
-    /// window has no overlay: `None` when there's no view to start in (an
-    /// overlay, a screen without one), `Some(None)` while the view has
-    /// nothing to focus yet.
-    pub fn view_entry<T: FocusTree<Node = N> + ?Sized>(&self, tree: &T) -> Option<Option<N>> {
-        let within = scope(tree);
-        if within != tree.root() {
-            return None;
-        }
-        let main = first_where(tree, within, "data-focus-section", "main")?;
-        Some(self.start_in(tree, main))
-    }
-
     /// The remembered focus in `within`, else its default, else its first
     /// focusable.
     pub fn start_in<T: FocusTree<Node = N> + ?Sized>(&self, tree: &T, within: N) -> Option<N> {
