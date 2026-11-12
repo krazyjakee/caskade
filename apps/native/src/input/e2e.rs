@@ -131,6 +131,9 @@ struct Driver {
 }
 
 impl Driver {
+    /// Reads the window. A window busy drawing (the first library frame on
+    /// a CPU renderer takes seconds under CI's Xvfb) answers late: the
+    /// driver waits as long as a step may, not less.
     fn probe(&mut self) -> Result<Probe, String> {
         let (reply, answer) = mpsc::channel();
         asks()
@@ -138,8 +141,8 @@ impl Driver {
             .send(reply)
             .map_err(|_| "the window is gone".to_owned())?;
         let probe = answer
-            .recv_timeout(Duration::from_secs(5))
-            .map_err(|_| "the window didn't answer".to_owned())?;
+            .recv_timeout(WAIT)
+            .map_err(|_| format!("the window didn't answer for {} s", WAIT.as_secs()))?;
         self.last = probe.clone();
         Ok(probe)
     }
