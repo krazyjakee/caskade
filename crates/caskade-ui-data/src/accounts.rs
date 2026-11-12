@@ -12,7 +12,8 @@ use caskade_core::error::ErrorReport;
 /// The types the panels show.
 pub use caskade_app::commands::accounts::AccountList;
 pub use caskade_core::accounts::{
-    Account, AccountAccess, AccountRole, AccountUpdate, NewAccount, Permissions, PinCheck,
+    Account, AccountAccess, AccountRole, AccountUpdate, AgeRestriction, NewAccount, Permissions,
+    PinCheck,
 };
 
 type Result<T> = std::result::Result<T, ErrorReport>;
@@ -58,6 +59,36 @@ impl Accounts {
     /// Sets `id`'s PIN, or removes it with `None`.
     pub async fn set_pin(&self, id: &str, pin: Option<String>) -> Result<Account> {
         commands::account_set_pin(&self.accounts, id, pin).await
+    }
+
+    /// Signs out, to the account picker.
+    pub async fn sign_out(&self) -> Result<()> {
+        commands::account_sign_out(&self.accounts).await
+    }
+
+    /// Whether the signed-in account's age limit holds `game_id` back
+    /// (#209): what an admin's PIN would approve.
+    pub async fn age_restriction(&self, game_id: &str) -> Result<Option<AgeRestriction>> {
+        caskade_app::commands::launch::game_age_check(&self.accounts, game_id).await
+    }
+
+    /// An admin's `pin` approves `game_id` for `account_id`: once, or for
+    /// good with `permanent`.
+    pub async fn approve_play(
+        &self,
+        game_id: &str,
+        account_id: &str,
+        pin: String,
+        permanent: bool,
+    ) -> Result<PinCheck> {
+        caskade_app::commands::launch::game_age_approve(
+            &self.accounts,
+            game_id,
+            account_id,
+            pin,
+            permanent,
+        )
+        .await
     }
 
     /// Whether `pin` is any admin's; never which.

@@ -916,10 +916,12 @@ msgid "{name} wants to pair"
 msgstr "{name} vill parkoppla"
 
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
+#: apps/native/src/accounts/menu.rs
 msgid "{name}, account"
 msgstr "{name}, konto"
 
 #: apps/desktop/src/shell/accounts/AccountPicker.tsx
+#: apps/native/src/accounts/picker.rs
 msgid "{name}, PIN locked"
 msgstr "{name}, låst med PIN"
 
@@ -940,6 +942,7 @@ msgid "{name}: now {now}, peak {peak}, low {low}, {missed} missed"
 msgstr "{name}: nu {now}, topp {peak}, lägst {low}, {missed} missade"
 
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
+#: apps/native/src/accounts/menu.rs
 msgid "{name}'s account"
 msgstr "{name}s konto"
 
@@ -1924,6 +1927,7 @@ msgid "Accept selected ({count})"
 msgstr "Godkänn valda ({count})"
 
 #: apps/desktop/src/shell/accounts/AccountPicker.tsx
+#: apps/native/src/accounts/picker.rs
 msgid "Accounts"
 msgstr "Konton"
 
@@ -2329,7 +2333,7 @@ msgstr "Anpassa temat efter tycke och smak."
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/accounts/menu.rs apps/native/src/settings/accounts.rs
 msgctxt "account role"
 msgid "Admin"
 msgstr "Administratör"
@@ -2338,8 +2342,7 @@ msgstr "Administratör"
 msgid "Admin approval isn't available here"
 msgstr "Administratörsgodkännande är inte tillgängligt här"
 
-#: apps/desktop/src/views/game/AgeGate.tsx
-#: apps/native/src/flows/tool_request.rs apps/native/src/game_menu/play.rs
+#: apps/desktop/src/views/game/AgeGate.tsx apps/native/src/ui/age_lock.rs
 msgid "Admin PIN needed"
 msgstr "Administratörens PIN krävs"
 
@@ -2399,6 +2402,7 @@ msgid "All"
 msgstr "Alla"
 
 #: apps/desktop/src/shell/accounts/AccountPicker.tsx
+#: apps/native/src/accounts/picker.rs
 msgid "All accounts"
 msgstr "Alla konton"
 
@@ -2470,7 +2474,7 @@ msgstr "Hämtar också matchade spel igen från metadataservern och ersätter de
 msgid "Also keep backups on"
 msgstr "Behåll även säkerhetskopior på"
 
-#: apps/desktop/src/views/game/AgeGate.tsx
+#: apps/desktop/src/views/game/AgeGate.tsx apps/native/src/accounts/age_gate.rs
 msgid "Always allow this game for this account"
 msgstr "Tillåt alltid det här spelet för det här kontot"
 
@@ -2491,16 +2495,16 @@ msgstr "Bärnsten"
 msgid "An admin changes everything, other accounts included."
 msgstr "En administratör kan ändra allt, även andra konton."
 
-#: apps/desktop/src/views/game/AgeGate.tsx
+#: apps/desktop/src/views/game/AgeGate.tsx apps/native/src/accounts/age_gate.rs
 msgid "An admin PIN is needed to play {game}"
 msgstr "En administratörs-PIN krävs för att spela {game}"
 
 #. {rating} is an age rating, e.g. PEGI 18
-#: apps/desktop/src/views/game/AgeGate.tsx
+#: apps/desktop/src/views/game/AgeGate.tsx apps/native/src/accounts/age_gate.rs
 msgid "An admin PIN is needed to play {game}, rated {rating}"
 msgstr "En administratörs-PIN krävs för att spela {game}, klassat {rating}"
 
-#: apps/desktop/src/views/game/AgeGate.tsx
+#: apps/desktop/src/views/game/AgeGate.tsx apps/native/src/accounts/age_gate.rs
 msgid "An admin PIN is needed to play {game}, which is unrated"
 msgstr "En administratörs-PIN krävs för att spela {game}, som saknar åldersklassning"
 
@@ -2694,11 +2698,11 @@ msgstr "Program"
 msgid "Apply"
 msgstr "Verkställ"
 
-#: apps/desktop/src/views/game/AgeGate.tsx
+#: apps/desktop/src/views/game/AgeGate.tsx apps/native/src/accounts/age_gate.rs
 msgid "Approval duration"
 msgstr "Hur länge godkännandet gäller"
 
-#: apps/desktop/src/views/game/AgeGate.tsx
+#: apps/desktop/src/views/game/AgeGate.tsx apps/native/src/accounts/age_gate.rs
 msgid "Approve {game} for {account}."
 msgstr "Godkänn {game} för {account}."
 
@@ -3517,6 +3521,7 @@ msgid "Caskade couldn't check whether this device lets others play"
 msgstr "Caskade kunde inte kontrollera om den här enheten låter andra spela"
 
 #: apps/desktop/src/shell/accounts/AccountGate.tsx
+#: apps/native/src/accounts/mod.rs
 msgid "Caskade couldn't check who is signed in"
 msgstr "Caskade kunde inte kontrollera vem som är inloggad"
 
@@ -5756,6 +5761,7 @@ msgid "Enter {name}'s current PIN"
 msgstr "Ange nuvarande PIN för {name}"
 
 #: apps/desktop/src/shell/accounts/AccountPicker.tsx
+#: apps/native/src/accounts/picker.rs
 msgid "Enter {name}'s PIN"
 msgstr "Ange PIN för {name}"
 
@@ -8965,8 +8971,8 @@ msgstr "Flyttar…"
 
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
 #: apps/desktop/src/views/settings/accounts/ProfileSettings.tsx
-#: apps/desktop/src/views/SettingsView.tsx apps/native/src/settings/accounts.rs
-#: apps/native/src/settings/mod.rs
+#: apps/desktop/src/views/SettingsView.tsx apps/native/src/accounts/menu.rs
+#: apps/native/src/settings/accounts.rs apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "My profile"
 msgstr "Min profil"
@@ -9789,6 +9795,7 @@ msgid "Not updating: the last reading is from {when}. Trying again."
 msgstr "Uppdateras inte: den senaste avläsningen är från {when}. Försöker igen."
 
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
+#: apps/native/src/accounts/menu.rs
 msgid "Not while a game is running."
 msgstr "Inte medan ett spel körs."
 
@@ -13005,6 +13012,7 @@ msgstr "Välj"
 #. Hint bar: confirm the focused item
 #: apps/desktop/src/shell/accounts/AccountPicker.tsx
 #: apps/desktop/src/shell/console/ConsoleShell.tsx
+#: apps/native/src/accounts/picker.rs
 msgctxt "pad action"
 msgid "Select"
 msgstr "Välj"
@@ -13698,7 +13706,7 @@ msgstr "Delas upp i argument som i ett skal, men inget skal körs. Sätt citatte
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
 #: apps/desktop/src/views/settings/accounts/AccountEditor.tsx
 #: apps/desktop/src/views/settings/accounts/AccountsSettings.tsx
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/accounts/menu.rs apps/native/src/settings/accounts.rs
 msgctxt "account role"
 msgid "Standard"
 msgstr "Standard"
@@ -14125,6 +14133,7 @@ msgid "Submitting…"
 msgstr "Skickar in…"
 
 #: apps/desktop/src/shell/accounts/AccountMenu.tsx
+#: apps/native/src/accounts/menu.rs
 msgid "Switch account"
 msgstr "Byt konto"
 
@@ -15277,7 +15286,7 @@ msgstr "Okänd säkerhet"
 msgid "Unknown error"
 msgstr "Okänt fel"
 
-#: apps/desktop/src/views/game/AgeGate.tsx
+#: apps/desktop/src/views/game/AgeGate.tsx apps/native/src/accounts/age_gate.rs
 msgid "Unlock this time"
 msgstr "Lås upp den här gången"
 
@@ -16166,6 +16175,7 @@ msgid "Who uses Caskade here, and what each can change."
 msgstr "Vem som använder Caskade här, och vad var och en kan ändra."
 
 #: apps/desktop/src/shell/accounts/AccountPicker.tsx
+#: apps/native/src/accounts/picker.rs
 msgid "Who's playing?"
 msgstr "Vem spelar?"
 

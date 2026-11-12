@@ -361,6 +361,7 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                         p { "data-part": "meta", class: "mt-2 text-sm text-fg-muted",
                             "{meta}"
                             super::media::AgeRating { game_id: game.game.id.clone() }
+                            crate::accounts::AgeLock { game_id: game.game.id.clone(), separated: true }
                         }
                         p { "data-part": "meta", class: "mt-3 flex items-center gap-2 text-fg-muted",
                             Svg { icon: icons::CLOCK, class: "size-4" }

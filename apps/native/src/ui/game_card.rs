@@ -130,6 +130,8 @@ pub struct CardGame {
     /// The other device it was last played on, in place of the subtitle
     /// (Home's Recently Played).
     pub played_on: Option<String>,
+    /// The signed-in account's age limit holds it back (#106).
+    pub admin_pin_needed: bool,
 }
 
 impl CardGame {
@@ -148,6 +150,7 @@ impl CardGame {
             favorite: game.favorite,
             playtime_ms: game.playtime_ms,
             last_played_ms: game.last_played_at_ms,
+            admin_pin_needed: game.admin_pin_needed,
             ..Self::default()
         }
     }
@@ -255,6 +258,10 @@ pub fn GameCard(
                 if variant != CardVariant::Library {
                     div { class: "absolute top-2 left-2",
                         StatusBadge { part: "badge", status: game.status }
+                    }
+                } else if game.admin_pin_needed {
+                    span { class: "absolute top-2 left-2 rounded-control bg-surface-base/90 px-2 py-1",
+                        super::AgeLockLabel {}
                     }
                 }
                 if starting {

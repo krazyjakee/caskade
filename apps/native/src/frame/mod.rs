@@ -2,7 +2,7 @@
 //! sidebar, the top bar with the search, the page the router shows, the
 //! status bar, toasts, the type-to-search overlay and the window's own
 //! title bar; a view that fails shows its error in place. Console mode's
-//! shell is #107, the account menu #106, plugins' links and slots #109.
+//! shell is #107, the account gate and menu `crate::accounts` (#106), plugins' links and slots #109.
 
 mod anatomy;
 mod error;
@@ -44,6 +44,8 @@ pub fn Frame(
         ErrorBoundary { handle_error: error::app_crash,
             RouterRoot { start,
                 ToastRegion {
+                    // Nobody signed in: the account picker instead (#106).
+                    crate::accounts::AccountGate {
                     type_search::TypeSearchRoot {
                         // Pairing, remote play and stream requests (#108).
                         crate::flows::Hosts {}
@@ -54,6 +56,7 @@ pub fn Frame(
                         crate::game_menu::GameMenuHost {
                             Shell {}
                         }
+                    }
                     }
                 }
             }

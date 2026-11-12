@@ -206,6 +206,11 @@ fn WebTile(game: GameSummary, size: TileSize, index: usize) -> Element {
                     }
                 },
                 GameArt { part: "art", image: cover, class: "size-full" }
+                if game.admin_pin_needed {
+                    span { class: "absolute top-2 left-2 rounded-control bg-surface-base/90 px-2 py-1",
+                        crate::ui::AgeLockLabel {}
+                    }
+                }
                 p {
                     "data-part": "title",
                     class: "absolute inset-x-0 bottom-0 truncate bg-linear-to-t from-surface-base/90 to-transparent px-2.5 pt-6 pb-2 text-sm font-semibold opacity-0 transition-opacity duration-(--cs-motion-duration-fast) group-hover:opacity-100 group-data-focus-visible:opacity-100",

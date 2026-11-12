@@ -280,7 +280,7 @@ pub(crate) fn board_name(board: &str) -> String {
         .unwrap_or_else(|| board.to_uppercase())
 }
 
-fn rating_name(rating: &IgdbAgeRating) -> String {
+pub(crate) fn rating_name(rating: &IgdbAgeRating) -> String {
     format!("{} {}", board_name(&rating.board), rating.rating)
 }
 
@@ -294,6 +294,26 @@ pub fn shown_rating<'a>(ratings: &'a [IgdbAgeRating], board: &str) -> Option<&'a
         .or(ratings.first())
 }
 
+/// The rating board an admin prefers (Settings → Accounts), else PEGI.
+pub(crate) fn use_preferred_board() -> String {
+    let preferred = use_settings_query(
+        DataKey::Settings("core.accounts".to_owned()),
+        |settings| async move { settings.get("core.accounts").await },
+    );
+    preferred
+        .read()
+        .as_ref()
+        .and_then(|snapshot| snapshot.as_ref().ok())
+        .and_then(|snapshot| {
+            snapshot
+                .value
+                .get("ratingBoard")
+                .and_then(|board| board.as_str())
+                .map(str::to_owned)
+        })
+        .unwrap_or_else(|| DEFAULT_BOARD.to_owned())
+}
+
 /// A game's age rating, on the board an admin prefers (Settings →
 /// Accounts), every board's in its tooltip. Nothing for an unrated game.
 #[component]
@@ -305,22 +325,7 @@ pub fn AgeRating(game_id: String) -> Element {
             (data.age_ratings)(game_id.clone())
         })
     };
-    let preferred = use_settings_query(
-        DataKey::Settings("core.accounts".to_owned()),
-        |settings| async move { settings.get("core.accounts").await },
-    );
-    let board = preferred
-        .read()
-        .as_ref()
-        .and_then(|snapshot| snapshot.as_ref().ok())
-        .and_then(|snapshot| {
-            snapshot
-                .value
-                .get("ratingBoard")
-                .and_then(|board| board.as_str())
-                .map(str::to_owned)
-        })
-        .unwrap_or_else(|| DEFAULT_BOARD.to_owned());
+    let board = use_preferred_board();
     let list: Vec<IgdbAgeRating> = ratings
         .read()
         .as_ref()

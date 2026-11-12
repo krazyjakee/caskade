@@ -1,6 +1,7 @@
 //! Starting a game (#99, #100; the webview's `views/game/launch.tsx`,
 //! `GameMenuHost.tsx`'s `PlayRequest`, `components/LaunchChoiceDialog.tsx`):
-//! the entry Play starts, then what Play asks before it starts
+//! the entry Play starts, an admin's PIN when the account's age limit
+//! holds the game back (#106), then what Play asks before it starts
 //! (`crate::game::launch`: a newer release's offer, the game running on
 //! another device, the saves), the launch, a choice when the launch asks
 //! for one (a launch action, an emulator, a disc), stopping the game a
@@ -8,7 +9,8 @@
 //! release streamed from another device skips the offer, the warning and
 //! the saves, which are that device's.
 
-use crate::data::use_game;
+use crate::accounts::AgeGateDialog;
+use crate::data::{change, use_game};
 use crate::flows::streaming::{HostBusy, StopHostDialog};
 use crate::game::launch::{
     PlayingElsewhereDialog, SaveConflictDialog, UpdateOffer, WaitForSave, save_note,
@@ -17,6 +19,7 @@ use crate::game::launch::{
 use crate::ui::{Button, ButtonVariant, Dialog, RadioGroup, RadioOption};
 use caskade_app::commands::launch::LaunchOutcome;
 use caskade_app::commands::presence::PlayingElsewhere;
+use caskade_core::accounts::AgeRestriction;
 use caskade_core::emulation::ProfileRef;
 use caskade_core::launch::{LaunchChoice, LaunchPrompt};
 use caskade_core::saves::versions::{BeforePlay, SaveCheck, SaveVersion};
@@ -38,6 +41,9 @@ const ARRIVING_LOOKS: u32 = 30;
 enum Stage {
     /// Waiting for the game's details, to pick the entry.
     Waiting,
+    /// The account's age limit holds the game back: an admin's PIN, then
+    /// what comes next (#106).
+    Gate(Box<AgeRestriction>, Next),
     /// A step is asking the app.
     Checking,
     /// Update before playing?
@@ -53,6 +59,14 @@ enum Stage {
     /// The streaming device plays another game: stop it?
     HostBusy(HostBusy, LaunchChoice),
     Failed(String),
+}
+
+/// What an admin's PIN lets through: the rest of Play's steps, or the
+/// launch the core refused, again.
+#[derive(Clone, PartialEq)]
+enum Next {
+    Steps(String),
+    Launch(String, LaunchChoice),
 }
 
 /// Starts `game_id`'s entry `entry_id` (else the one Play starts), with
@@ -129,6 +143,7 @@ pub fn PlayRequest(
             let game_id = game_id.clone();
             let steps = steps.clone();
             spawn(async move {
+                let entry_for_gate = entry.clone();
                 let outcome = (steps.launch)(entry, choice.clone()).await;
                 if starting.peek().as_deref() == Some(game_id.as_str()) {
                     starting.set(None);
@@ -141,8 +156,12 @@ pub fn PlayRequest(
                     Ok(LaunchOutcome::Choose { prompt }) => {
                         stage.set(Stage::Choose(Box::new(prompt)))
                     }
-                    // The admin's PIN is #106's.
-                    Ok(LaunchOutcome::AgeRestricted { .. }) => fail(t!("Admin PIN needed")),
+                    // The core refused it (an approval lapsed, or the
+                    // check was skipped): ask, then launch again.
+                    Ok(LaunchOutcome::AgeRestricted { restriction }) => stage.set(Stage::Gate(
+                        Box::new(restriction),
+                        Next::Launch(entry_for_gate.clone(), choice),
+                    )),
                     Ok(LaunchOutcome::HostBusy { busy }) => stage.set(Stage::HostBusy(
                         HostBusy {
                             device: busy.device,
@@ -279,15 +298,43 @@ pub fn PlayRequest(
         });
     }
 
-    // Once, when the entry is known (or it's clear there's none).
-    if !*started.peek() && *stage.peek() == Stage::Waiting {
-        if let Some(entry) = entry.clone() {
-            started.set(true);
+    // Play's steps after the age limit: a release streamed from another
+    // device skips the update, the warning and the saves.
+    let proceed = {
+        let first_choice = first_choice.clone();
+        use_callback(move |entry: String| {
             if streamed {
                 launch((entry, first_choice.clone()));
             } else {
                 check_update(entry);
             }
+        })
+    };
+    // An admin's PIN first when the account's age limit asks for one
+    // (#209), before an update or a download; the launch is checked anyway.
+    let check_age = {
+        let accounts = crate::accounts::use_accounts();
+        let game_id = game_id.clone();
+        use_callback(move |entry: String| {
+            stage.set(Stage::Checking);
+            let accounts = accounts.clone();
+            let game_id = game_id.clone();
+            spawn(async move {
+                match change(async move { accounts.age_restriction(&game_id).await }).await {
+                    Ok(Some(restriction)) => {
+                        stage.set(Stage::Gate(Box::new(restriction), Next::Steps(entry)))
+                    }
+                    _ => proceed(entry),
+                }
+            });
+        })
+    };
+
+    // Once, when the entry is known (or it's clear there's none).
+    if !*started.peek() && *stage.peek() == Stage::Waiting {
+        if let Some(entry) = entry.clone() {
+            started.set(true);
+            check_age(entry);
         } else if loaded {
             started.set(true);
             fail(t!("It has nothing installed that can launch."));
@@ -297,6 +344,16 @@ pub fn PlayRequest(
     let entry_now = entry.clone().unwrap_or_default();
     match stage() {
         Stage::Waiting | Stage::Checking | Stage::Launching => rsx! {},
+        Stage::Gate(restriction, next) => rsx! {
+            AgeGateDialog {
+                restriction: *restriction,
+                on_close: move |_| give_up(),
+                on_approved: move |_| match next.clone() {
+                    Next::Steps(entry) => proceed(entry),
+                    Next::Launch(entry, choice) => launch((entry, choice)),
+                },
+            }
+        },
         Stage::Update(update) => {
             let entry = entry_now.clone();
             rsx! {

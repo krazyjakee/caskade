@@ -10,10 +10,8 @@
 
 use caskade_core::error::ErrorReport;
 use caskade_ui_data::accounts::{
-    Account, AccountAccess, AccountList, AccountRole, AccountUpdate, Accounts, NewAccount,
-    Permissions,
+    Account, AccountAccess, AccountRole, AccountUpdate, Accounts, NewAccount, Permissions,
 };
-use caskade_ui_data::keys::Key as DataKey;
 use caskade_ui_i18n::{t, tp};
 use dioxus_native::prelude::*;
 use serde_json::Value;
@@ -23,7 +21,8 @@ use super::pin::{PinSetting, SetPin, sentence};
 use super::state::use_settings_section;
 use super::sync::SectionSync;
 use super::unsaved::{UnsavedForm, UnsavedHint, use_unsaved_changes};
-use crate::data::{Query, change, use_settings, use_settings_query};
+use crate::accounts::use_account_list;
+use crate::data::{change, use_settings};
 use crate::flows::pin_pad::Check;
 use crate::game::{BOARDS, DEFAULT_BOARD, board_name};
 use crate::ui::icons::{
@@ -39,14 +38,6 @@ use crate::ui::{
 /// The settings section that holds the preferred rating board.
 const ACCOUNTS_SETTINGS: &str = "core.accounts";
 const NO_LIMIT: &str = "none";
-
-/// The accounts, and who is signed in; again after every account change.
-fn use_account_list() -> Query<AccountList> {
-    use_settings_query(
-        DataKey::Settings(ACCOUNTS_SETTINGS.to_owned()),
-        |settings| async move { settings.accounts().list().await },
-    )
-}
 
 fn use_accounts() -> Accounts {
     use_settings().accounts()

@@ -11,6 +11,7 @@
 // The gallery (#93) and the views (#96 onwards) use them.
 #![allow(dead_code)]
 
+mod age_lock;
 mod avatar;
 mod button;
 mod checkbox;
@@ -44,6 +45,7 @@ mod text_field;
 mod toast;
 mod tooltip;
 
+pub use age_lock::AgeLockLabel;
 #[allow(unused_imports)]
 pub use avatar::{
     Avatar, AvatarInfo, AvatarPicker, AvatarSize, DEFAULT_AVATAR, avatar_info, avatars, initials,

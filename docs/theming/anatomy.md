@@ -1523,7 +1523,7 @@ Contains: [`button`](#button)
 
 ## `account-picker`
 
-Who is playing: the accounts to sign in as, at start and after Switch account, and the PIN pad for a locked one. `data-step` is `accounts` or `pin`. Rendered by AccountPicker (app).
+Who is playing: the accounts to sign in as, at start and after Switch account, and the PIN pad for a locked one. `data-step` is `accounts` or `pin`. Rendered by AccountPicker (apps/native/src/accounts/picker.rs); in the webview, AccountPicker (app).
 
 Root: `[data-cs="account-picker"]`
 
@@ -1566,7 +1566,7 @@ State on the root:
 
 ## `account-menu`
 
-The head of the menu the topbar's avatar opens: who is signed in. Its actions are the `menu`'s items. Rendered by AccountMenu (app).
+The head of the menu the topbar's avatar opens: who is signed in. Its actions are the `menu`'s items. Rendered by AccountMenu (apps/native/src/accounts/menu.rs); in the webview, AccountMenu (app).
 
 Root: `[data-cs="account-menu"]`
 

@@ -1095,8 +1095,20 @@ impl PairRequestHost for FakeStreamHost {
 #[derive(Clone)]
 enum HostShown {
     Stream(StreamPairing),
-    Stop { launching: bool },
+    Stop {
+        launching: bool,
+    },
     Tool(Box<caskade_core::launch::LaunchService>),
+    /// A tool the age limit holds back: the launcher, the accounts it asks,
+    /// the release and the tool.
+    GatedTool(
+        Box<(
+            caskade_core::launch::LaunchService,
+            caskade_ui_data::accounts::Accounts,
+            String,
+            String,
+        )>,
+    ),
     Remote(RemotePlays),
 }
 static HOST_SHOWN: Mutex<Option<HostShown>> = Mutex::new(None);
@@ -1125,6 +1137,11 @@ fn host_app() -> Element {
         let launch = (**launch).clone();
         use_context_provider(move || launch);
     }
+    if let HostShown::GatedTool(gated) = &shown {
+        let (launch, accounts) = (gated.0.clone(), gated.1.clone());
+        use_context_provider(move || launch);
+        use_context_provider(move || accounts);
+    }
     rsx! {
         style { {include_str!("../../assets/app.css")} }
         InputRoot {
@@ -1147,6 +1164,14 @@ fn host_app() -> Element {
                             entry_id: "no-such-entry",
                             action_id: "defrag",
                             name: "Defragmenter",
+                            on_close: |_| host_heard("closed"),
+                        }
+                    },
+                    HostShown::GatedTool(gated) => rsx! {
+                        ToolRequest {
+                            entry_id: gated.2.clone(),
+                            action_id: gated.3.clone(),
+                            name: "Settings tool",
                             on_close: |_| host_heard("closed"),
                         }
                     },
@@ -1311,6 +1336,104 @@ fn a_tool_that_cant_start_says_why() {
     assert!(!window.text("[data-cs=tool-failed] p").is_empty());
     window.press("#tool-failed-ok");
     assert_eq!(host_heard_all(), ["closed"]);
+}
+
+#[test]
+fn a_tool_the_age_limit_holds_back_asks_for_an_admins_pin_then_runs() {
+    use caskade_core::accounts::{AccountAccess, AccountRole, NewAccount, Permissions};
+    use caskade_core::model::{
+        ActionKind, ActionTracking, Game, GameAction, GameEntry, InstallLocation, InstallState,
+        SourceId,
+    };
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let dir = tempfile::tempdir().unwrap();
+    let (launch, accounts, entry, tool) = caskade_app::runtime::block_on(async {
+        let store = caskade_core::db::LibraryStore::in_memory().await.unwrap();
+        let accounts = caskade_core::accounts::AccountService::open(
+            store.clone(),
+            caskade_core::bus::Bus::default(),
+        )
+        .await
+        .unwrap();
+        let admin = accounts.signed_in().unwrap();
+        accounts
+            .set_pin(&admin.id, Some("2468".into()))
+            .await
+            .unwrap();
+        let kit = accounts
+            .create(NewAccount {
+                name: "Kit".into(),
+                avatar: crate::ui::DEFAULT_AVATAR.into(),
+                access: AccountAccess {
+                    role: AccountRole::Standard,
+                    permissions: Permissions::default(),
+                    max_age: Some(12),
+                    unrated_needs_pin: true,
+                },
+                pin: None,
+            })
+            .await
+            .unwrap();
+        // An unrated game, whose tool runs a program that's always there.
+        let game = Game::new("Grown-up Game");
+        store.upsert_game(&game).await.unwrap();
+        let program = LaunchSpec::Executable {
+            path: "/bin/true".into(),
+            args: Vec::new(),
+            cwd: None,
+            env: Default::default(),
+        };
+        let mut entry = GameEntry::new(&game.id, SourceId::new("fixture"), "release".to_owned());
+        entry.state = InstallState::Installed;
+        entry.location = Some(InstallLocation::External {
+            path: dir.path().into(),
+        });
+        entry.launch = Some(program.clone());
+        store.upsert_entry(&entry).await.unwrap();
+        let tool = store
+            .save_game_action(&GameAction {
+                id: caskade_core::model::new_id(),
+                entry_id: entry.id.clone(),
+                name: "Settings tool".into(),
+                kind: ActionKind::Utility,
+                target: program,
+                tracking: ActionTracking::default(),
+                proton: None,
+            })
+            .await
+            .unwrap();
+        accounts.sign_in(&kit.id, None).await.unwrap();
+        let launch = caskade_core::launch::LaunchService::new(store)
+            .with_aliases(None)
+            .with_play_gate(std::sync::Arc::new(accounts.clone()));
+        (launch, accounts, entry.id, tool.id)
+    });
+    let handle = caskade_ui_data::accounts::Accounts::new(accounts);
+    let mut window = open_host(HostShown::GatedTool(Box::new((
+        launch, handle, entry, tool,
+    ))));
+    // Held back: the admin's PIN first, nothing started yet.
+    window.until("the age gate", |w| w.find("[data-cs=pin-pad]").is_some());
+    assert!(
+        window
+            .text("[role=dialog] h2")
+            .contains("An admin PIN is needed to play Grown-up Game")
+    );
+    assert!(host_heard_all().is_empty());
+    window.focus("[data-cs=pin-pad] [data-part=field]");
+    window.type_text("0000");
+    window.key(Key::Named(NamedKey::Enter));
+    window.until("refused", |w| {
+        w.text("[data-cs=pin-pad] [data-part=message]")
+            .contains("That PIN isn't right.")
+    });
+    assert!(host_heard_all().is_empty());
+    window.focus("[data-cs=pin-pad] [data-part=field]");
+    window.type_text("2468");
+    window.key(Key::Named(NamedKey::Enter));
+    // Approved: the tool runs once.
+    window.until("it ran", |_| host_heard_all() == ["closed"]);
+    assert!(window.find("[data-cs=tool-failed]").is_none());
 }
 
 #[test]

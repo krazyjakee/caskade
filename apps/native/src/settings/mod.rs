@@ -39,7 +39,7 @@ mod sync;
 #[cfg(test)]
 mod tests;
 mod torrent;
-mod unsaved;
+pub(crate) mod unsaved;
 
 #[allow(unused_imports)]
 pub use drafts::{DraftField, DraftSlider};

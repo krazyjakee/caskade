@@ -361,6 +361,9 @@ fn Suggestion(
                     }
                 }
             }
+            if game.admin_pin_needed {
+                crate::ui::AgeLockLabel {}
+            }
             StatusBadge { status }
         }
     }

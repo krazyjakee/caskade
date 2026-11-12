@@ -157,6 +157,9 @@ pub fn GameRow(
             if starting {
                 span { "data-part": "starting", class: "shrink-0 text-xs text-fg-muted", {t!("Starting…")} }
             }
+            if game.admin_pin_needed {
+                super::AgeLockLabel {}
+            }
             if game.favorite {
                 span {
                     "data-part": "favorite",

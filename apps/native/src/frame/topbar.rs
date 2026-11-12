@@ -1,5 +1,5 @@
 //! The top bar (`shell/Topbar.tsx`, `ActivityLink.tsx`): the search, the
-//! Activity button and, where Caskade draws its own title bar, the window's
+//! Activity button, the account menu (#106) and, where Caskade draws its own title bar, the window's
 //! controls. Dragging anywhere but a control moves the window, and a double
 //! click maximizes it (`window.rs`).
 
@@ -64,6 +64,7 @@ pub fn Topbar() -> Element {
             super::search::SearchBox {}
             div { "data-part": "actions", class: "ml-auto flex items-center gap-4",
                 ActivityLink {}
+                crate::accounts::AccountMenu {}
             }
             super::window::WindowControls {}
             if let Some(anchor) = menu() {

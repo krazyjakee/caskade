@@ -203,6 +203,7 @@ pub fn QuickLook(target: Target) -> Element {
                     if let Some(platform) = platform {
                         span { "data-part": "platform", "{platform}" }
                     }
+                    crate::accounts::AgeLock { game_id: target.game_id.clone() }
                 }
                 h2 { "data-part": "title", class: "font-display text-2xl font-semibold", "{target.title}" }
                 div { "data-part": "actions", class: "flex flex-wrap gap-2",

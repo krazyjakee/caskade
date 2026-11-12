@@ -10,6 +10,7 @@
 // What screen readers get, as text, for the tests (#83, #93).
 #[cfg(test)]
 mod a11y_snapshot;
+mod accounts;
 // The anatomy catalogue (#90); the components (#93) add to it.
 // Activity's jobs (#101).
 mod activity;

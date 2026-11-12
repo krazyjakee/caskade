@@ -150,6 +150,9 @@ pub fn Menu(
     /// What gets focus back when it closes: its trigger.
     #[props(default)]
     return_to: Option<NodeId>,
+    /// Shown above the items, not one of them: who a menu is about.
+    #[props(default)]
+    header: Option<Element>,
 ) -> Element {
     let input = use_input();
     let mut list = use_signal(|| None::<NodeHandle>);
@@ -174,6 +177,7 @@ pub fn Menu(
             return_to,
             data_cs: "menu",
             class: "z-40 min-w-56 max-w-80 rounded-control border border-border-strong bg-surface-overlay p-1 shadow-xl shadow-black/40 outline-none animate-enter",
+            {header}
             div {
                 "data-part": "list",
                 role: "menu",
