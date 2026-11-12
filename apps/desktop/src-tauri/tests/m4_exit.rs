@@ -2,8 +2,8 @@
 //! their folders work together, and a deliberately broken one (`crashy`)
 //! doesn't affect the app: its calls fail alone, its launch.before step is
 //! skipped, the circuit breaker turns it off with a notice, and launches,
-//! playtime and the other plugins carry on. Its UI half's placeholders are
-//! tested in Vitest (`apps/desktop/src/plugins/examples.test.tsx`).
+//! playtime and the other plugins carry on. Their UI (plugin API 0.2,
+//! #109) is drawn by their backends over typed IPC; crashy's fails alone.
 //! Needs Node with the workspace's packages and the wasm32-wasip2 target.
 #![cfg(unix)]
 
@@ -214,10 +214,12 @@ fn three_example_plugins_work_and_a_crashing_one_does_not_affect_the_app() {
             .unwrap();
     });
 
-    // The UI halves and backend calls, over typed IPC.
+    // What the plugins draw, and backend calls, over typed IPC (#109).
     let specta =
         tauri_specta::Builder::<MockRuntime>::new().commands(tauri_specta::collect_commands![
             caskade_desktop::commands::plugin_ui::plugins_ui,
+            caskade_desktop::commands::plugin_ui::plugins_drawn,
+            caskade_desktop::commands::plugin_ui::plugin_ui_render,
             caskade_desktop::commands::plugin_ui::plugin_request,
         ]);
     let app = mock_builder()
@@ -228,7 +230,10 @@ fn three_example_plugins_work_and_a_crashing_one_does_not_affect_the_app() {
     let window = tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
         .build()
         .unwrap();
-    let listed = invoke(&window, "plugins_ui", json!({})).unwrap();
+    // No 0.1 JavaScript halves: the three with UI are drawn by their backends.
+    let halves = invoke(&window, "plugins_ui", json!({})).unwrap();
+    assert_eq!(halves, json!([]));
+    let listed = invoke(&window, "plugins_drawn", json!({})).unwrap();
     let mut ui: Vec<&str> = listed
         .as_array()
         .unwrap()
@@ -244,6 +249,16 @@ fn three_example_plugins_work_and_a_crashing_one_does_not_affect_the_app() {
             "dev.caskade.playtime-stats"
         ]
     );
+    let render =
+        |window: &tauri::WebviewWindow<MockRuntime>, plugin: &str, slot: &str, id: &str| {
+            invoke(
+                window,
+                "plugin_ui_render",
+                json!({"pluginId": plugin, "slot": slot, "id": id, "context": {}}),
+            )
+        };
+    let stats = render(&window, "dev.caskade.playtime-stats", "views", "stats").unwrap();
+    assert!(stats.to_string().contains("No playtime yet"), "{stats}");
     let lookup = |window: &tauri::WebviewWindow<MockRuntime>| {
         invoke(
             window,
