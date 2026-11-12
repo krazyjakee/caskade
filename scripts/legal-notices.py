@@ -5,10 +5,14 @@ Inventories what the desktop app ships and writes one compact JSON file the UI
 imports (apps/desktop/src/views/settings/about/notices.generated.json):
 
 - Rust crates: `cargo metadata`, the normal (non-dev, non-build) dependency
-  graph of `caskade-desktop` for every target platform (a superset of what any
-  one platform's binary links).
-- JavaScript packages: `pnpm licenses list --prod` in apps/desktop (the UI
-  bundle, fonts included).
+  graphs of both binaries the bundles ship, `caskade-desktop` and
+  `caskade-native`, for every target platform (a superset of what any one
+  platform's binaries link).
+- JavaScript packages: the packages in the UI's production bundle, fonts
+  included (apps/desktop/scripts/shipped-packages.mjs builds it in memory).
+  Not `pnpm licenses list --prod`: that follows workspace packages' tooling
+  (`@caskade/i18n`'s Lingui CLI) and auto-installed peers (Lingui's Babel
+  macro) and lists hundreds of build-time packages that never ship (#130).
 - 7-Zip: the upstream License.txt of each pinned sidecar package the release
   builds bundle (scripts/7zz-pins.json), verified and cached by
   scripts/7zz-download.py (the first run downloads them).
@@ -27,7 +31,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "apps/desktop/src/views/settings/about/notices.generated.json"
-APP_CRATE = "caskade-desktop"
+# The binaries the bundles ship (#110 added the native one).
+APP_CRATES = ("caskade-desktop", "caskade-native")
 # The packages each release target bundles (release.yml's matrix).
 SEVEN_ZIP_PACKAGES = {"Linux": "linux-x64", "macOS": "macos-x64", "Windows": "windows-x64"}
 
@@ -124,8 +129,9 @@ def rust_packages():
     packages = {p["id"]: p for p in metadata["packages"]}
     members = set(metadata["workspace_members"])
     nodes = {n["id"]: n for n in metadata["resolve"]["nodes"]}
-    app = next(p["id"] for p in metadata["packages"] if p["name"] == APP_CRATE)
-    seen, stack = set(), [app]
+    apps = [p["id"] for p in metadata["packages"] if p["name"] in APP_CRATES]
+    assert len(apps) == len(APP_CRATES), f"missing one of {APP_CRATES}"
+    seen, stack = set(), list(apps)
     while stack:
         node = nodes[stack.pop()]
         for dep in node["deps"]:
@@ -152,21 +158,19 @@ def rust_packages():
 
 
 def js_packages():
-    listing = json.loads(run(["pnpm", "licenses", "list", "--prod", "--json"], cwd=ROOT / "apps/desktop"))
-    for expression, entries in listing.items():
-        for entry in entries:
-            if entry["name"].startswith("@caskade/"):
-                continue
-            for version, path in zip(entry["versions"], entry["paths"]):
-                yield {
-                    "name": entry["name"],
-                    "version": version,
-                    "license": expression,
-                    "repository": entry.get("homepage") or "",
-                    "authors": [entry["author"]] if entry.get("author") else [],
-                    "files": license_files(Path(path)),
-                    "ecosystem": "js",
-                }
+    shipped = json.loads(run(["node", "scripts/shipped-packages.mjs"], cwd=ROOT / "apps/desktop"))
+    for entry in shipped:
+        if entry["name"].startswith("@caskade/"):
+            continue
+        yield {
+            "name": entry["name"],
+            "version": entry["version"],
+            "license": entry["license"],
+            "repository": entry["repository"],
+            "authors": [entry["author"]] if entry.get("author") else [],
+            "files": license_files(Path(entry["path"])),
+            "ecosystem": "js",
+        }
 
 
 def seven_zip():

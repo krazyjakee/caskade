@@ -23,10 +23,10 @@ Run the generator after changing Rust or JavaScript dependencies (`Cargo.lock`, 
 python3 scripts/legal-notices.py
 ```
 
-It needs `cargo`, `pnpm` and installed `node_modules`, and reads the crates' sources from Cargo's registry, so build or `cargo fetch` first. It lists:
+It needs `cargo`, `node`, `pnpm` and installed `node_modules`, and reads the crates' sources from Cargo's registry, so build or `cargo fetch` first. It lists:
 
-- the Rust crates in the normal dependency graph of `caskade-desktop` for every target (`cargo metadata`), which covers what any platform's build links;
-- the JavaScript packages in `apps/desktop`'s production dependencies (`pnpm licenses list --prod`), fonts included;
+- the Rust crates in the normal dependency graphs of both binaries the bundles ship, `caskade-desktop` and `caskade-native`, for every target (`cargo metadata`), which covers what any platform's build links. The vendored Blitz crates (`vendor/blitz/crates`) carry no licence files; their texts come from other crates under the same licence;
+- the JavaScript packages in the UI's production bundle, fonts included: `apps/desktop/scripts/shipped-packages.mjs` builds it in memory and lists the package of every module and asset in it. `pnpm licenses list --prod` isn't used: it follows workspace packages' build tools and auto-installed peers, so it lists hundreds of packages that never ship;
 - the upstream `License.txt` of each 7-Zip package the release builds bundle, through `scripts/7zz-download.py` (the first run downloads and verifies the pinned packages into `target/sidecars/`).
 
 Each package keeps its licence expression, repository and the copyright lines of its licence files (its authors when it has none). Each licence's text is kept once, from the first package that ships it. The script prints the licences it found no text for (`missingTexts` in the output); a missing text that is the only choice for a package needs adding by hand before a release.
