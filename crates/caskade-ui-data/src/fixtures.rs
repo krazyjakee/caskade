@@ -217,6 +217,10 @@ pub struct Fixtures {
     /// A plugin host over this process's plugins folder
     /// ([`plugins_folder`]): none installed until a test adds one.
     pub plugins: Plugins,
+    /// Plugins' drawn UI (#109) over a fake, with nothing drawn until a test
+    /// puts plugins there ([`Fixtures::plugin_fake`]).
+    pub plugin_ui: crate::plugin_ui::PluginUi,
+    pub plugin_fake: std::sync::Arc<crate::plugin_ui::FakePluginUi>,
 }
 
 /// Where the fixture library's plugins are, one folder per process.
@@ -334,6 +338,12 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
         Some(refresh.clone() as std::sync::Arc<dyn crate::jobs::DetailsRefresh>),
     )
     .with_requests(requests.clone());
+    let plugin_fake = std::sync::Arc::new(crate::plugin_ui::FakePluginUi::new(Events::new(
+        Broadcast(events.clone()),
+    )));
+    let plugin_ui = crate::plugin_ui::PluginUi::new(Some(
+        plugin_fake.clone() as std::sync::Arc<dyn crate::plugin_ui::PluginUiSource>
+    ));
     let settings = Settings::new(service, accounts.clone());
     Ok(Fixtures {
         settings,
@@ -341,6 +351,8 @@ pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
         discovery,
         stores,
         plugins,
+        plugin_ui,
+        plugin_fake,
         addons,
         jobs,
         job_queue,

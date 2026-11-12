@@ -140,6 +140,8 @@ pub fn Sidebar() -> Element {
                     }
                 }
             }
+            // Plugins' views and items (#109).
+            crate::plugins::PluginNav { item_class: ITEM }
             hr { "data-part": "divider", class: "my-4 border-border" }
             nav { "data-part": "nav", class: "flex flex-col gap-1",
                 for index in 0..SECONDARY.len() {

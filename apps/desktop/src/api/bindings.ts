@@ -585,6 +585,24 @@ export const commands = {
 	 *  asks again after `LocaleChanged`.
 	 */
 	pluginMessages: (pluginId: string) => typedError<PluginMessages_Serialize, string>(__TAURI_INVOKE("plugin_messages", { pluginId })),
+	/**
+	 *  Enabled plugins whose backends draw their UI, with what they draw.
+	 *  Nothing runs: a contribution is drawn when it shows.
+	 */
+	pluginsDrawn: () => typedError<DrawnPlugin_Serialize[], string>(__TAURI_INVOKE("plugins_drawn")),
+	/**
+	 *  Draws contribution `id` of `slot` (`views` for a view) of plugin
+	 *  `plugin_id`: Caskade's components as a tree, checked before it's shown.
+	 *  `context` has the mode, the game in a game slot and the contribution's
+	 *  state.
+	 */
+	pluginUiRender: (pluginId: string, slot: string, id: string, context: Context_Deserialize) => typedError<Node_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("plugin_ui_render", { pluginId, slot, id, context })),
+	/**
+	 *  The user used `action` (a button's or a segmented control's, with its
+	 *  `value`; `run` for a game action or a command) in contribution `id` of
+	 *  `slot`. Answers the contribution's new state and a notice to show.
+	 */
+	pluginUiAct: (pluginId: string, slot: string, id: string, action: string, value: Value, context: Context_Deserialize) => typedError<Outcome_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("plugin_ui_act", { pluginId, slot, id, action, value, context })),
 	/**  Settings → Plugins "Load unpacked": debug builds only. */
 	pluginLoadUnpacked: (folder: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("plugin_load_unpacked", { folder })),
 	/**  Every scanner with its last scan, what it imports and any Flatpak hint. */
@@ -2181,6 +2199,13 @@ export type BackupTableRows = {
 	rows: number,
 };
 
+/**  A [`Node::Bars`] bar. */
+export type Bar = {
+	label: string,
+	value: number | null,
+	text: string,
+};
+
 /**  The check before a launch, and whether other devices could be asked. */
 export type BeforePlay = BeforePlay_Serialize | BeforePlay_Deserialize;
 
@@ -2647,6 +2672,12 @@ export type CatalogueView_Serialize = {
 	items: CatalogueItem_Serialize[],
 };
 
+/**  A [`Node::Segmented`] option. */
+export type Choice = {
+	value: string,
+	label: string,
+};
+
 export type Collection = Collection_Serialize | Collection_Deserialize;
 
 export type CollectionKind = CollectionKind_Serialize | CollectionKind_Deserialize;
@@ -2797,6 +2828,9 @@ export type ConsoleRequestEvent = {
 	active: boolean,
 };
 
+/**  Where a contribution is drawn, as `render` and `act` get it. */
+export type Context = Context_Serialize | Context_Deserialize;
+
 /**
  *  One value a script can read: its `{Placeholder}`, its environment
  *  variable and its value.
@@ -2805,6 +2839,36 @@ export type ContextValue = {
 	placeholder: string,
 	variable: string,
 	value: string,
+};
+
+/**  Where a contribution is drawn, as `render` and `act` get it. */
+export type Context_Deserialize = {
+	/**  `desktop` or `console`. */
+	mode?: Mode,
+	/**  The game, in a game slot (`game.details.tabs`, `game.actions`, …). */
+	gameId?: string | null,
+	/**
+	 *  That game's title, which the host fills in: the plugin needs no
+	 *  library access to name the game it's shown on.
+	 */
+	gameTitle?: string | null,
+	/**  What the plugin's last `act` returned as `state`, `null` before. */
+	state?: Value,
+};
+
+/**  Where a contribution is drawn, as `render` and `act` get it. */
+export type Context_Serialize = {
+	/**  `desktop` or `console`. */
+	mode: Mode,
+	/**  The game, in a game slot (`game.details.tabs`, `game.actions`, …). */
+	gameId?: string,
+	/**
+	 *  That game's title, which the host fills in: the plugin needs no
+	 *  library access to name the game it's shown on.
+	 */
+	gameTitle?: string,
+	/**  What the plugin's last `act` returned as `state`, `null` before. */
+	state: Value,
 };
 
 export type Contributes = Contributes_Serialize | Contributes_Deserialize;
@@ -3212,6 +3276,8 @@ export type DirListing_Serialize = {
 	places: Place[],
 };
 
+export type Direction = "column" | "row";
+
 /**  One disc of a multi-disc game. */
 export type DiscOption = {
 	index: number,
@@ -3346,6 +3412,27 @@ export type DownloadProgress_Serialize = {
 	received: number,
 	total: number | null,
 	error: string | null,
+};
+
+/**  An enabled plugin whose backend draws its UI (API 0.2, #109). */
+export type DrawnPlugin = DrawnPlugin_Serialize | DrawnPlugin_Deserialize;
+
+/**  An enabled plugin whose backend draws its UI (API 0.2, #109). */
+export type DrawnPlugin_Deserialize = {
+	id: string,
+	name: string,
+	version: string,
+	/**  What it may draw: the slots, views and commands of its manifest. */
+	contributes: UiContribution_Deserialize[],
+};
+
+/**  An enabled plugin whose backend draws its UI (API 0.2, #109). */
+export type DrawnPlugin_Serialize = {
+	id: string,
+	name: string,
+	version: string,
+	/**  What it may draw: the slots, views and commands of its manifest. */
+	contributes: UiContribution_Serialize[],
 };
 
 export type DropKind = "shortcut" | 
@@ -4516,6 +4603,8 @@ export type Game_Serialize = {
 
 /**  How the refresh of chosen games' details is going (#176). */
 export type GamesRefreshChanged = RefreshStatus;
+
+export type Gap = "none" | "small" | "medium" | "large";
 
 /**  Which button labels to show in hints. */
 export type GlyphFamily = "xbox" | "playstation" | "nintendo" | "generic";
@@ -6063,6 +6152,8 @@ export type MissingPlatform_Serialize = {
 	recommended: Recommendation | null,
 };
 
+export type Mode = "desktop" | "console";
+
 /**  A Caskade device on this network that isn't paired. */
 export type NearbyDevice = {
 	id: string,
@@ -6118,6 +6209,91 @@ export type NewAccount_Serialize = {
 	/**  4–8 digits. An admin made while standard accounts exist needs one. */
 	pin: string | null,
 };
+
+/**  One of Caskade's components, as a plugin asks for it. */
+export type Node = Node_Serialize | Node_Deserialize;
+
+/**  One of Caskade's components, as a plugin asks for it. */
+export type Node_Deserialize = 
+/**  Plain text, inline. */
+{ type: "text"; text: string } | 
+/**  A heading: level 2 (the default) or 3. */
+{ type: "heading"; text: string; level?: number } | 
+/**  A paragraph of inline text. */
+{ type: "paragraph"; text: string } | 
+/**  Secondary text, muted. */
+{ type: "note"; text: string } | 
+/**  Something that went wrong, announced (`role="alert"`). */
+{ type: "alert"; text: string } | 
+/**  Children in a row or a column. */
+{ type: "stack"; direction?: Direction; gap?: Gap; children: Node_Deserialize[] } | 
+/**  A labelled part of the contribution, which pad focus moves between. */
+{ type: "section"; label: string; children: Node_Deserialize[] } | 
+/**  Labelled values (a description list). */
+{ type: "stats"; label?: string | null; items: Stat[] } | 
+/**  One large value with what it is. */
+{ type: "tile"; value: string; label: string } | 
+/**
+ *  A bar per item, sized by `value` against the largest, with `text`
+ *  beside it; the values are text too, for screen readers.
+ */
+{ type: "bars"; label: string; items: Bar[] } | 
+/**  A table; `rowHeaders` makes each row's first cell its header. */
+{ type: "table"; caption: string; columns: string[]; rows: string[][]; rowHeaders?: boolean } | 
+/**  A list of nodes. */
+{ type: "list"; ordered?: boolean; items: Node_Deserialize[] } | 
+/**  A short status label. */
+{ type: "badge"; text: string; tone?: Tone } | 
+/**  How far something is: `value` of `max`. */
+{ type: "progress"; label: string; value: number | null; max: number | null } | 
+/**  A button that calls `act` with `action` and `value`. */
+{ type: "button"; label: string; action: string; value?: Value | null; variant?: Variant } | 
+/**
+ *  One of a few options; choosing one calls `act` with `action` and the
+ *  option's `value`. In console mode LB and RB move between options.
+ */
+{ type: "segmented"; label: string; action: string; value: string; options: Choice[] };
+
+/**  One of Caskade's components, as a plugin asks for it. */
+export type Node_Serialize = 
+/**  Plain text, inline. */
+{ type: "text"; text: string } | 
+/**  A heading: level 2 (the default) or 3. */
+{ type: "heading"; text: string; level: number } | 
+/**  A paragraph of inline text. */
+{ type: "paragraph"; text: string } | 
+/**  Secondary text, muted. */
+{ type: "note"; text: string } | 
+/**  Something that went wrong, announced (`role="alert"`). */
+{ type: "alert"; text: string } | 
+/**  Children in a row or a column. */
+{ type: "stack"; direction: Direction; gap: Gap; children: Node_Serialize[] } | 
+/**  A labelled part of the contribution, which pad focus moves between. */
+{ type: "section"; label: string; children: Node_Serialize[] } | 
+/**  Labelled values (a description list). */
+{ type: "stats"; label?: string; items: Stat[] } | 
+/**  One large value with what it is. */
+{ type: "tile"; value: string; label: string } | 
+/**
+ *  A bar per item, sized by `value` against the largest, with `text`
+ *  beside it; the values are text too, for screen readers.
+ */
+{ type: "bars"; label: string; items: Bar[] } | 
+/**  A table; `rowHeaders` makes each row's first cell its header. */
+{ type: "table"; caption: string; columns: string[]; rows: string[][]; rowHeaders: boolean } | 
+/**  A list of nodes. */
+{ type: "list"; ordered: boolean; items: Node_Serialize[] } | 
+/**  A short status label. */
+{ type: "badge"; text: string; tone: Tone } | 
+/**  How far something is: `value` of `max`. */
+{ type: "progress"; label: string; value: number | null; max: number | null } | 
+/**  A button that calls `act` with `action` and `value`. */
+{ type: "button"; label: string; action: string; value?: Value | null; variant: Variant } | 
+/**
+ *  One of a few options; choosing one calls `act` with `action` and the
+ *  option's `value`. In console mode LB and RB move between options.
+ */
+{ type: "segmented"; label: string; action: string; value: string; options: Choice[] };
 
 /**  The notes' change; empty clears them. */
 export type NotesEdit = {
@@ -6305,6 +6481,30 @@ export type OsCheck = {
 	id: string,
 	label: string,
 	sources: string[],
+};
+
+/**
+ *  What `act` returns: the contribution's new state (kept by Caskade and
+ *  passed to the next `render`), and a notice to show.
+ */
+export type Outcome = Outcome_Serialize | Outcome_Deserialize;
+
+/**
+ *  What `act` returns: the contribution's new state (kept by Caskade and
+ *  passed to the next `render`), and a notice to show.
+ */
+export type Outcome_Deserialize = {
+	state?: Value | null,
+	notice?: string | null,
+};
+
+/**
+ *  What `act` returns: the contribution's new state (kept by Caskade and
+ *  passed to the next `render`), and a notice to show.
+ */
+export type Outcome_Serialize = {
+	state?: Value,
+	notice?: string,
 };
 
 /**  Whether an owned release can be installed here. */
@@ -9103,6 +9303,12 @@ export type SourceReport_Serialize = {
 	error: SourceError | null,
 };
 
+/**  A [`Node::Stats`] row. */
+export type Stat = {
+	label: string,
+	value: string,
+};
+
 /**
  *  Fixed plan DSL: analysis describes operations; only the executor acts on them.
  * 
@@ -9981,6 +10187,8 @@ export type TitleLetter = {
 	offset: number,
 };
 
+export type Tone = "neutral" | "accent" | "success" | "warning" | "danger";
+
 /**
  *  A tool started, or the age limit holds the game back until an admin's
  *  PIN approves it (`game_age_approve`).
@@ -10154,6 +10362,8 @@ export type VariableInfo = {
 	aliases: string[],
 	description: string,
 };
+
+export type Variant = "secondary" | "primary";
 
 export type Verification = {
 	checkedFiles: number,

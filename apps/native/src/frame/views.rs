@@ -36,7 +36,10 @@ pub fn Outlet() -> Element {
         Route::Settings { tab, section } => rsx! {
             crate::settings::SettingsView { tab, section }
         },
-        Route::Plugin { .. } | Route::NotFound { .. } => placeholder(t!("Not found")),
+        Route::Plugin { plugin, view } => rsx! {
+            crate::plugins::PluginViewPage { plugin, view }
+        },
+        Route::NotFound { .. } => placeholder(t!("Not found")),
     }
 }
 

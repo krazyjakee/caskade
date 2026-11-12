@@ -108,6 +108,8 @@ fn library(with_romm: bool) -> Library {
                 refresh: fixtures.refresh,
                 requests: fixtures.requests,
             }),
+            plugin_ui: fixtures.plugin_ui,
+            plugin_fake: Some(fixtures.plugin_fake),
             events: fixtures.events,
         };
         Library {

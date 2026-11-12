@@ -190,6 +190,7 @@ pub enum Variant {
 
 /// Where a contribution is drawn, as `render` and `act` get it.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(rename_all = "camelCase")]
 pub struct Context {
     /// `desktop` or `console`.
@@ -198,8 +199,13 @@ pub struct Context {
     /// The game, in a game slot (`game.details.tabs`, `game.actions`, …).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub game_id: Option<String>,
+    /// That game's title, which the host fills in: the plugin needs no
+    /// library access to name the game it's shown on.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub game_title: Option<String>,
     /// What the plugin's last `act` returned as `state`, `null` before.
     #[serde(default)]
+    #[cfg_attr(feature = "specta", specta(type = serde_json::Value))]
     pub state: Value,
 }
 
@@ -215,9 +221,11 @@ pub enum Mode {
 /// What `act` returns: the contribution's new state (kept by Caskade and
 /// passed to the next `render`), and a notice to show.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Outcome {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[cfg_attr(feature = "specta", specta(type = Option<serde_json::Value>))]
     pub state: Option<Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notice: Option<String>,
@@ -749,6 +757,7 @@ mod tests {
         let context = Context {
             mode: Mode::Console,
             game_id: Some("g1".into()),
+            game_title: None,
             state: json!({"view": "table"}),
         };
         assert_eq!(

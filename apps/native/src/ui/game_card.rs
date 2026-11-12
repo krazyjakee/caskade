@@ -333,7 +333,10 @@ pub fn GameCard(
                     Svg { icon: HEART, class: "size-3.5 fill-accent-alt" }
                 }
             }
-            div { "data-part": "plugins", class: "contents" }
+            div { "data-part": "plugins", class: "contents",
+                // Plugins' badges and overlays (#109).
+                crate::plugins::CardExtras { game_id: game.id.clone() }
+            }
         }
     }
 }

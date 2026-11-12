@@ -63,6 +63,8 @@ pub fn Topbar() -> Element {
             },
             super::search::SearchBox {}
             div { "data-part": "actions", class: "ml-auto flex items-center gap-4",
+                // Plugins' items (#109).
+                crate::plugins::TopbarItems {}
                 ActivityLink {}
                 crate::accounts::AccountMenu {}
             }

@@ -89,13 +89,15 @@ impl Changed {
             // A dev theme recompiled, or a plugin bringing themes came or
             // went.
             Event::ThemeReloaded(_) => Self::only(Key::Themes),
-            // Themes come with plugins too.
-            Event::PluginsChanged(_) | Event::PluginDisabled(_) | Event::PluginReloaded(_) => {
-                Self::Keys {
-                    keys: vec![Key::Plugins, Key::Themes],
-                    all_games: false,
-                }
-            }
+            // Themes come with plugins too; plugins' titles and drawn UI
+            // follow the language (#109).
+            Event::PluginsChanged(_)
+            | Event::PluginDisabled(_)
+            | Event::PluginReloaded(_)
+            | Event::LocaleChanged(_) => Self::Keys {
+                keys: vec![Key::Plugins, Key::Themes],
+                all_games: false,
+            },
             _ => Self::Nothing,
         }
     }

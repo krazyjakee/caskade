@@ -392,7 +392,7 @@ fn every_page_of_the_webview_opens() {
         ("/settings?tab=devices", "Settings"),
         ("/activity?tab=notifications", "No notifications yet."),
         ("/activity?tab=jobs", "Jobs"),
-        ("/plugins/dev.me/x", "Not found"),
+        ("/plugins/dev.me/x", "This plugin view isn't available."),
         ("/nowhere", "Not found"),
     ] {
         window.go(href);

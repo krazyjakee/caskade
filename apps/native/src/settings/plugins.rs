@@ -3,8 +3,10 @@
 //! may do in a few words, turning them on and off, reviewing what one asks
 //! for before it's allowed or installed from a folder, its details, and
 //! uninstalling. A right click offers a row's buttons. The add-ons
-//! catalogue follows (`addons.rs`). Plugins' own settings pages are UI
-//! modules the native app doesn't run yet (#109).
+//! catalogue follows (`addons.rs`), then each enabled plugin's settings:
+//! its own `settings.pages`, drawn by its backend (#109), or the page made
+//! from its settings schema. A 0.1 plugin's JavaScript UI doesn't run here,
+//! and its row says so.
 
 use caskade_ui_data::ErrorReport;
 use caskade_ui_data::plugins::{LibraryAccess, PluginStatus, PluginSummary, Plugins};
@@ -467,6 +469,7 @@ pub fn PluginsSettings() -> Element {
                 }
             }
             super::addons::AddonCatalogue {}
+            PluginSettingsPages {}
             if let Some(current) = review() {
                 ReviewDialog {
                     plugin: current.plugin.clone(),
@@ -614,6 +617,11 @@ fn PluginRow(
                 } else {
                     p { class: "mt-2 text-sm text-danger", {problems(&plugin.errors)} }
                 }
+                if plugin.has_ui {
+                    p { "data-part": "old-ui", class: "mt-2 text-xs text-warning",
+                        {t!("Its UI was made for plugin API 0.1, which this app doesn't run. Its other parts still work; ask its author for an update.")}
+                    }
+                }
                 if let Some(error) = &plugin.last_error {
                     p { class: "mt-2 text-xs text-warning", "{error}" }
                 }
@@ -666,6 +674,53 @@ fn PluginRow(
                         checked: on,
                         disabled: plugin.status == PluginStatus::Invalid || pending(),
                         on_change: move |enabled: bool| toggle(enabled),
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Each enabled plugin's settings, as the webview's `PluginSettingsPages`:
+/// its own `settings.pages` drawn by its backend (#109), or else the page
+/// made from its settings schema; nothing when none has any.
+#[component]
+fn PluginSettingsPages() -> Element {
+    let list = use_plugins_query(|plugins| async move { plugins.list().await });
+    let pages = crate::plugins::use_slot("settings.pages");
+    let read = list.read();
+    let Some(Ok(installed)) = &*read else {
+        return rsx! {};
+    };
+    let shown: Vec<PluginSummary> = installed
+        .iter()
+        .filter(|plugin| {
+            matches!(plugin.status, PluginStatus::Enabled | PluginStatus::Active)
+                && (plugin
+                    .contributes
+                    .as_ref()
+                    .is_some_and(|contributes| contributes.settings.is_some())
+                    || pages.iter().any(|page| page.plugin == plugin.id))
+        })
+        .cloned()
+        .collect();
+    rsx! {
+        for plugin in shown {
+            div { key: "{plugin.id}", "data-part": "plugin-settings", "data-plugin": "{plugin.id}",
+                if !pages.iter().any(|page| page.plugin == plugin.id)
+                    && plugin.settings_error.is_none()
+                {
+                    super::SchemaSettings {
+                        namespace: format!("plugins.{}", plugin.id),
+                        title: plugin.name.clone(),
+                        icon: Some(crate::ui::icons::PUZZLE),
+                    }
+                } else {
+                    SettingsSection { title: plugin.name.clone(), icon: Some(crate::ui::icons::PUZZLE),
+                        if let Some(error) = &plugin.settings_error {
+                            p { role: "alert", class: "mt-3 text-sm text-danger", "{error}" }
+                        }
+                        crate::plugins::SettingsPages { plugin: plugin.id.clone() }
                     }
                 }
             }

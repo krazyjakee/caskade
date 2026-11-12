@@ -37,6 +37,11 @@ pub struct DataSource {
     /// requests, for tests.
     #[cfg_attr(not(test), allow(dead_code))]
     pub job_fakes: Option<JobFakes>,
+    /// Plugins' drawn UI (#109).
+    pub plugin_ui: caskade_ui_data::plugin_ui::PluginUi,
+    /// The fixtures' fake plugins' UI, for tests.
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub plugin_fake: Option<std::sync::Arc<caskade_ui_data::plugin_ui::FakePluginUi>>,
     pub events: broadcast::Sender<Event>,
 }
 
@@ -64,6 +69,8 @@ impl DataSource {
             addons: Addons::of(services, crate::shell::sink()),
             jobs: Jobs::of(services, crate::shell::sink()),
             job_fakes: None,
+            plugin_ui: caskade_ui_data::plugin_ui::PluginUi::of(services),
+            plugin_fake: None,
             events: crate::shell::events().clone(),
         })
     }
@@ -88,6 +95,8 @@ impl DataSource {
                 refresh: fixtures.refresh,
                 requests: fixtures.requests,
             }),
+            plugin_ui: fixtures.plugin_ui,
+            plugin_fake: Some(fixtures.plugin_fake),
             events: fixtures.events,
         })
     }
@@ -351,6 +360,26 @@ pub fn use_install_requests_query()
     });
     reload_on(&source, DataKey::Jobs, resource);
     resource
+}
+
+/// What enabled plugins draw (#109), loaded again when a plugin or the
+/// language changes (`Key::Plugins`).
+pub fn use_plugin_contributions() -> Query<Vec<caskade_ui_data::plugin_ui::Contribution>> {
+    let source = use_context::<DataSource>();
+    let plugin_ui = source.plugin_ui.clone();
+    let resource = use_resource(move || {
+        let plugin_ui = plugin_ui.clone();
+        change(async move { Ok(plugin_ui.contributions().await) })
+    });
+    reload_on(&source, DataKey::Plugins, resource);
+    resource
+}
+
+/// Plugins' drawn UI, for drawing a contribution and its actions.
+pub fn use_plugin_ui() -> caskade_ui_data::plugin_ui::PluginUi {
+    try_use_context::<DataSource>()
+        .map(|source| source.plugin_ui)
+        .unwrap_or_default()
 }
 
 /// Jobs, for a view's actions; `None` before the data source.

@@ -29,6 +29,7 @@ pub mod labels;
 pub mod library;
 mod manual;
 pub mod pairing;
+pub mod plugin_ui;
 pub mod plugins;
 pub mod romm;
 pub mod scripts;

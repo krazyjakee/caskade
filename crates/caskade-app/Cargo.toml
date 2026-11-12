@@ -29,6 +29,8 @@ arboard = { version = "3.6", default-features = false }
 caskade-input = { path = "../caskade-input" }
 # Plugins, their UI and the themes they bundle.
 caskade-plugin-host = { path = "../caskade-plugin-host" }
+# The UI plugins draw from API 0.2 (#109).
+caskade-plugin-ui = { path = "../caskade-plugin-ui", features = ["specta"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 specta = { version = "=2.0.0-rc.26", features = ["derive"] }

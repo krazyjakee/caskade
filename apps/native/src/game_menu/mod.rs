@@ -369,7 +369,18 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
         paired,
         ..menu::Facts::default()
     };
-    let items = menu::items(&target, &facts);
+    let mut items = menu::items(&target, &facts);
+    // Plugins' game actions (#109), for the whole game only.
+    let plugin_actions = crate::plugins::use_slot("game.actions");
+    let plugin_ui = crate::data::use_plugin_ui();
+    let toasts = crate::ui::use_toasts();
+    if target.entry_id.is_none() && !plugin_actions.is_empty() {
+        items.push(crate::ui::MenuEntry::Separator);
+        items.push(crate::ui::MenuEntry::Section {
+            title: Some(caskade_ui_i18n::tp!("game menu section", "Plugins")),
+            items: crate::plugins::game_actions(&plugin_actions),
+        });
+    }
     let running = menu::running(&target, &facts).map(|session| session.id.clone());
     let favorite = game.as_ref().map(|game| game.game.favorite);
     let uninstalls = entries.iter().any(EntryView::managed);
@@ -532,6 +543,16 @@ fn OpenMenu(target: Target, anchor: Anchor, failure: Option<String>) -> Element 
                                 fail(report);
                             }
                         });
+                    } else if let Some(action) = plugin_actions
+                        .iter()
+                        .find(|action| other == format!("plugin:{}/{}", action.plugin, action.id))
+                    {
+                        crate::plugins::run_action(
+                            plugin_ui.clone(),
+                            action.clone(),
+                            Some(target.game_id.clone()),
+                            toasts,
+                        );
                     } else if let Some(entry_id) = other.strip_prefix("uninstall:") {
                         let location = entries
                             .iter()

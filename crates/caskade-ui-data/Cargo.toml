@@ -17,6 +17,8 @@ caskade-discovery = { path = "../caskade-discovery" }
 caskade-sources = { path = "../caskade-sources" }
 # Themes bundled by plugins, for Appearance's list (`themes.rs`, #104).
 caskade-plugin-host = { path = "../caskade-plugin-host" }
+# The UI plugins draw from API 0.2 (#109).
+caskade-plugin-ui = { path = "../caskade-plugin-ui" }
 # One-off shares' types (ShareRecord, ShareInfo, ShareItem) for the share
 # flows' data handle (`shares.rs`, #108).
 caskade-share = { path = "../caskade-share" }

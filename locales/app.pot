@@ -383,6 +383,7 @@ msgid "{0}% of players"
 msgstr ""
 
 #: apps/desktop/src/plugins/GameSlots.tsx
+#: apps/native/src/plugins/mod.rs
 msgid "{action} failed: {error}"
 msgstr ""
 
@@ -880,6 +881,7 @@ msgid "{name} (unavailable)"
 msgstr ""
 
 #: apps/desktop/src/plugins/PluginBoundary.tsx
+#: apps/native/src/plugins/mod.rs
 msgid "{name} couldn't show this part."
 msgstr ""
 
@@ -1056,6 +1058,11 @@ msgstr ""
 
 #: apps/desktop/src/plugins/PluginProvider.tsx
 msgid "{plugin} was turned off: {reason}"
+msgstr ""
+
+#. A plugin's message: the plugin's name, then what it said
+#: apps/native/src/plugins/mod.rs
+msgid "{plugin}: {message}"
 msgstr ""
 
 #: apps/desktop/src/plugins/PluginProvider.tsx
@@ -1273,6 +1280,7 @@ msgid "{title} isn't available in console mode."
 msgstr ""
 
 #: apps/desktop/src/plugins/PluginViews.tsx
+#: apps/native/src/plugins/mod.rs
 msgid "{title} isn't available in desktop mode."
 msgstr ""
 
@@ -6435,6 +6443,7 @@ msgid "From a plugin"
 msgstr ""
 
 #: apps/desktop/src/plugins/GameSlots.tsx
+#: apps/native/src/plugins/mod.rs
 msgid "From plugins"
 msgstr ""
 
@@ -7996,6 +8005,10 @@ msgstr ""
 msgid "its UI module has no definePlugin() default export"
 msgstr ""
 
+#: apps/native/src/settings/plugins.rs
+msgid "Its UI was made for plugin API 0.1, which this app doesn't run. Its other parts still work; ask its author for an update."
+msgstr ""
+
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
 #: apps/native/src/library/web.rs
 msgid "Its web version is removed: the offline copy and the progress saved in the game window are deleted, with its play sessions. The game's other versions stay in your library."
@@ -8668,6 +8681,7 @@ msgstr ""
 #: apps/native/src/frame/notifications.rs
 #: apps/native/src/game/editor/artwork.rs
 #: apps/native/src/game/editor/mod.rs
+#: apps/native/src/plugins/mod.rs
 #: apps/native/src/settings/appearance.rs
 msgid "Loading…"
 msgstr ""
@@ -11356,6 +11370,7 @@ msgid "Plugin notifications"
 msgstr ""
 
 #: apps/desktop/src/plugins/GameSlots.tsx
+#: apps/native/src/plugins/mod.rs
 msgid "Plugin tabs"
 msgstr ""
 
@@ -11363,12 +11378,14 @@ msgstr ""
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/plugins/PluginViews.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
+#: apps/native/src/plugins/mod.rs
 #: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/backup.rs
 msgid "Plugins"
 msgstr ""
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/mod.rs
 msgctxt "game menu section"
 msgid "Plugins"
 msgstr ""
@@ -15403,6 +15420,7 @@ msgid "This part of Caskade didn't start this session. Restarting Caskade may fi
 msgstr ""
 
 #: apps/desktop/src/plugins/PluginViews.tsx
+#: apps/native/src/plugins/mod.rs
 msgid "This plugin view isn't available."
 msgstr ""
 

@@ -260,3 +260,82 @@ fn an_invalid_plugin_says_why() {
         Some("true")
     );
 }
+
+#[test]
+fn a_0_1_plugins_ui_says_it_needs_an_update_and_a_drawn_page_shows() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    // A 0.1 plugin with a JavaScript UI half (#109): it doesn't run here.
+    let mut old = reader();
+    old["id"] = json!("dev.example.old-ui");
+    old["name"] = json!("Old UI");
+    old["ui"] = json!("dist/ui.js");
+    let old_folder = write_plugin("old-ui", old);
+    std::fs::write(old_folder.join("dist/ui.js"), b"export default {};").unwrap();
+    // A 0.2 plugin whose backend draws its own settings page.
+    let drawn = json!({
+        "id": "dev.example.drawn",
+        "name": "Drawn Settings",
+        "version": "1.0.0",
+        "api": "^0.2",
+        "backend": "dist/backend.wasm",
+        "activation": ["onRequest"],
+        "contributes": {"slots": [{"slot": "settings.pages", "id": "page", "title": "Options"}]}
+    });
+    let _gone = Gone(vec![old_folder, write_plugin("drawn", drawn)]);
+    // Listing reads the folders again, so the host knows it.
+    caskade_app::runtime::block_on(source().plugins.list()).unwrap();
+    caskade_app::runtime::block_on(source().plugins.set_enabled("dev.example.drawn", true))
+        .unwrap();
+    let fake = source().plugin_fake.as_ref().unwrap();
+    fake.set_plugins(vec![caskade_ui_data::plugin_ui::DrawnPlugin {
+        id: "dev.example.drawn".into(),
+        name: "Drawn Settings".into(),
+        version: "1.0.0".into(),
+        contributes: vec![caskade_ui_data::plugin_ui::UiContribution {
+            slot: "settings.pages".into(),
+            id: "page".into(),
+            title: Some("Options".into()),
+            modes: Vec::new(),
+        }],
+    }]);
+    fake.draw(
+        "dev.example.drawn",
+        "settings.pages",
+        "page",
+        "*",
+        Ok(vec![caskade_ui_data::plugin_ui::ui::note(
+            "Nothing to set yet.",
+        )]),
+    );
+    struct Clean;
+    impl Drop for Clean {
+        fn drop(&mut self) {
+            let fake = source().plugin_fake.as_ref().unwrap();
+            fake.clear();
+            fake.set_plugins(Vec::new());
+        }
+    }
+    let _clean = Clean;
+    let mut window = plugins("Old UI");
+    let old = row(&window, "Old UI");
+    let notice = window
+        .find_in(old, "data-part", "old-ui")
+        .expect("the notice");
+    assert!(
+        window
+            .text(notice)
+            .contains("Its UI was made for plugin API 0.1, which this app doesn't run."),
+        "{}",
+        window.text(notice)
+    );
+    window.settle_until("the drawn page", |window| {
+        window
+            .find_all("data-part", "plugin-settings")
+            .into_iter()
+            .any(|section| {
+                window.attr(section, "data-plugin").as_deref() == Some("dev.example.drawn")
+                    && window.text(section).contains("Nothing to set yet.")
+            })
+    });
+}

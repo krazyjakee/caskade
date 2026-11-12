@@ -53,8 +53,11 @@ pub fn Frame(
                         crate::activity::JobQuestionHost {}
                         // Install requests waiting for the user (#101).
                         crate::activity::InstallIngress {}
-                        crate::game_menu::GameMenuHost {
-                            Shell {}
+                        // What plugins draw (#109), for every slot.
+                        crate::plugins::PluginRoot {
+                            crate::game_menu::GameMenuHost {
+                                Shell {}
+                            }
                         }
                     }
                     }

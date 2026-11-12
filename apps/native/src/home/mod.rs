@@ -265,6 +265,7 @@ pub fn HomeView() -> Element {
                 released_only: true,
             }
             // Plugins' home.sections (#109).
+            crate::plugins::HomeSections {}
         }
     }
 }

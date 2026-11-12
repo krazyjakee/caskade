@@ -108,6 +108,8 @@ variant of the component, such as the library's card.
 - [`account-profile`](#account-profile): Settings → My profile: the signed-in account's own name, avatar and PIN.
 - [`addon-catalogue`](#addon-catalogue): Settings → Plugins' catalogue of curated plugins and themes: what each means here, searchable and by kind, from the last fetch when offline.
 - [`addon-details`](#addon-details): A catalogue add-on's details: screenshots, description as text, compatibility, the release an install gets, and installing, updating, applying and removing it.
+- [`plugin-ui`](#plugin-ui): What a plugin draws in a slot or view (plugin API 0.2): Caskade's components as the plugin's backend asked for them.
+- [`plugin-error`](#plugin-error): In place of a plugin's slot or view that failed to draw; it holds focus, so a pad can move on.
 - [`achievements`](#achievements): A game page's achievements: one store account's set at a time, its counts and how its last fetch went, and every achievement with its state, progress, unlock time, rarity and points where the service gives them. Hidden achievements stay concealed until unlocked or revealed.
 - [`achievement-summary`](#achievement-summary): A game's achievement counts in its hero, across its sets; pressing it moves to the achievements.
 - [`romm`](#romm): Settings → RomM servers: the server list, the selected server's editor, downloads and the cache.
@@ -1670,6 +1672,42 @@ State on the root:
 - `data-state`: `available`, `installed`, `updateAvailable`, `incompatible`
 
 Contains: [`button`](#button), [`checkbox`](#checkbox)
+
+## `plugin-ui`
+
+What a plugin draws in a slot or view (plugin API 0.2): Caskade's components as the plugin's backend asked for them. Rendered by PluginTree (apps/native/src/plugins/tree.rs); in the webview, PluginTree (app).
+
+Root: `[data-cs="plugin-ui"]`
+
+| Part | Selector | What it is |
+| --- | --- | --- |
+| `text` | `[data-cs="plugin-ui"] [data-part="text"]` | Plain text. |
+| `heading` | `[data-cs="plugin-ui"] [data-part="heading"]` | A heading (`h2`, or `h3` at level 3). |
+| `paragraph` | `[data-cs="plugin-ui"] [data-part="paragraph"]` | A paragraph. |
+| `note` | `[data-cs="plugin-ui"] [data-part="note"]` | Secondary text, muted. |
+| `alert` | `[data-cs="plugin-ui"] [data-part="alert"]` | Something that went wrong, announced. |
+| `stack` | `[data-cs="plugin-ui"] [data-part="stack"]` | Children in a column or a row (`data-direction`). |
+| `section` | `[data-cs="plugin-ui"] [data-part="section"]` | A labelled part that pad focus moves between. |
+| `stats` | `[data-cs="plugin-ui"] [data-part="stats"]` | Labelled values (a description list). |
+| `tile` | `[data-cs="plugin-ui"] [data-part="tile"]` | One large value with what it is. |
+| `value` | `[data-cs="plugin-ui"] [data-part="value"]` | A tile's value. |
+| `label` | `[data-cs="plugin-ui"] [data-part="label"]` | A tile's label. |
+| `bars` | `[data-cs="plugin-ui"] [data-part="bars"]` | A bar chart, with each value as text. |
+| `bar` | `[data-cs="plugin-ui"] [data-part="bar"]` | One bar. |
+| `table` | `[data-cs="plugin-ui"] [data-part="table"]` | A table. |
+| `list` | `[data-cs="plugin-ui"] [data-part="list"]` | A list. |
+| `badge` | `[data-cs="plugin-ui"] [data-part="badge"]` | A short status label (`data-tone`). |
+| `progress` | `[data-cs="plugin-ui"] [data-part="progress"]` | A progress bar. |
+| `button` | `[data-cs="plugin-ui"] [data-part="button"]` | A button that tells the plugin (a `button`). |
+| `segmented` | `[data-cs="plugin-ui"] [data-part="segmented"]` | One of a few options that tells the plugin (a `segmented`). |
+
+Contains: [`button`](#button), [`segmented`](#segmented)
+
+## `plugin-error`
+
+In place of a plugin's slot or view that failed to draw; it holds focus, so a pad can move on. Rendered by Placeholder (apps/native/src/plugins/mod.rs); in the webview, PluginBoundary (app).
+
+Root: `[data-cs="plugin-error"]`
 
 ## `achievements`
 

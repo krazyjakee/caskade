@@ -1345,6 +1345,36 @@
       },
       "interaction": []
     },
+    "plugin-ui": {
+      "parts": [
+        "text",
+        "heading",
+        "paragraph",
+        "note",
+        "alert",
+        "stack",
+        "section",
+        "stats",
+        "tile",
+        "value",
+        "label",
+        "bars",
+        "bar",
+        "table",
+        "list",
+        "badge",
+        "progress",
+        "button",
+        "segmented"
+      ],
+      "states": {},
+      "interaction": []
+    },
+    "plugin-error": {
+      "parts": [],
+      "states": {},
+      "interaction": []
+    },
     "achievements": {
       "parts": [
         "refresh",

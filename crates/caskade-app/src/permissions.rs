@@ -89,6 +89,9 @@ pub fn access(command: &str) -> Option<Access> {
         | "emulator_setup_jobs"
         | "plugins_list"
         | "plugins_ui"
+        // Plugins' own UI from API 0.2 (#109): which draw, and drawing one.
+        | "plugins_drawn"
+        | "plugin_ui_render"
         | "plugin_messages"
         | "rom_scanners_list"
         | "rom_scan_get"
@@ -216,6 +219,8 @@ pub fn access(command: &str) -> Option<Access> {
         | "game_age_approve"
         | "guide_stop_game"
         | "plugin_request"
+        // A plugin's button or game action (#109), like `plugin_request`.
+        | "plugin_ui_act"
         | "game_igdb_set"
         | "game_igdb_rematch"
         | "game_igdb_refresh"

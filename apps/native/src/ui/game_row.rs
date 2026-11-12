@@ -172,7 +172,10 @@ pub fn GameRow(
             if game.storage_unavailable {
                 span { "data-part": "storage-availability", class: "shrink-0 text-[10px] text-warning", {t!("Managed copy unavailable")} }
             }
-            div { "data-part": "plugins", class: "contents" }
+            div { "data-part": "plugins", class: "contents",
+                // Plugins' badges (#109).
+                crate::plugins::RowBadges { game_id: game.id.clone() }
+            }
             }
             div { class: "flex min-w-0 shrink-0",
                 StatusBadge { part: "badge", status: game.status }

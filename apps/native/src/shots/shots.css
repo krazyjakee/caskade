@@ -896,6 +896,9 @@
   .basis-full {
     flex-basis: 100%;
   }
+  .border-collapse {
+    border-collapse: collapse;
+  }
   .-translate-x-1\/2 {
     --tw-translate-x: calc(calc(1 / 2 * 100%) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
@@ -984,6 +987,9 @@
   .grid-cols-\[auto_1fr\] {
     grid-template-columns: auto 1fr;
   }
+  .grid-cols-\[minmax\(0\,12rem\)_1fr_auto\] {
+    grid-template-columns: minmax(0,12rem) 1fr auto;
+  }
   .grid-cols-\[repeat\(auto-fill\,minmax\(11rem\,1fr\)\)\] {
     grid-template-columns: repeat(auto-fill,minmax(11rem,1fr));
   }
@@ -1007,6 +1013,9 @@
   }
   .flex-col {
     flex-direction: column;
+  }
+  .flex-row {
+    flex-direction: row;
   }
   .flex-nowrap {
     flex-wrap: nowrap;
@@ -1049,6 +1058,9 @@
   }
   .justify-items-start {
     justify-items: start;
+  }
+  .gap-0 {
+    gap: 0px;
   }
   .gap-0\.5 {
     gap: calc(calc(0.25rem * var(--cs-density-scale)) * 0.5);

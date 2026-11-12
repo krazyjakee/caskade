@@ -6,7 +6,7 @@ use caskade_plugin_host::{HostError, PluginHost, PluginPreview, PluginSummary};
 /// A plugin host's failure as a command's error. The host's text names
 /// plugins by id, so it goes in the detail. Its core and I/O errors are
 /// transparent: their causes don't include them, so they're reported here.
-fn failure(error: HostError) -> CommandError {
+pub(crate) fn failure(error: HostError) -> CommandError {
     let detail = error.to_string();
     let (code, summary) = match error {
         HostError::Core(error) => return report(error),

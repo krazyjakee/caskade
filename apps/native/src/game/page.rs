@@ -530,6 +530,8 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
             }
             super::ports::PortsPanel { game_id: game.game.id.clone() }
             super::achievements::GameAchievements { game_id: game.game.id.clone() }
+            // Plugins' actions, tabs and panels (#109).
+            crate::plugins::GameDetails { game_id: game.game.id.clone() }
             Sessions { sessions }
             super::igdb::IgdbPanel {
                 game_id: game.game.id.clone(),

@@ -381,7 +381,7 @@ msgstr "{0}, ärvt"
 msgid "{0}% of players"
 msgstr "{0} % av spelarna"
 
-#: apps/desktop/src/plugins/GameSlots.tsx
+#: apps/desktop/src/plugins/GameSlots.tsx apps/native/src/plugins/mod.rs
 msgid "{action} failed: {error}"
 msgstr "{action} misslyckades: {error}"
 
@@ -878,7 +878,7 @@ msgstr "{name} (inte tillgängligt, visas på engelska)"
 msgid "{name} (unavailable)"
 msgstr "{name} (otillgänglig)"
 
-#: apps/desktop/src/plugins/PluginBoundary.tsx
+#: apps/desktop/src/plugins/PluginBoundary.tsx apps/native/src/plugins/mod.rs
 msgid "{name} couldn't show this part."
 msgstr "{name} kunde inte visa den här delen."
 
@@ -1058,6 +1058,13 @@ msgstr "Detaljer för {plugin}"
 #: apps/desktop/src/plugins/PluginProvider.tsx
 msgid "{plugin} was turned off: {reason}"
 msgstr "{plugin} stängdes av: {reason}"
+
+#. A plugin's message: the plugin's name, then what it said
+#: apps/native/src/plugins/mod.rs
+#, fuzzy
+#| msgid "{plugin} details"
+msgid "{plugin}: {message}"
+msgstr "Detaljer för {plugin}"
 
 #: apps/desktop/src/plugins/PluginProvider.tsx
 msgid "{plugin}: rebuild failed: {error}"
@@ -1278,7 +1285,7 @@ msgstr "{title} körs på {device}"
 msgid "{title} isn't available in console mode."
 msgstr "{title} är inte tillgängligt i konsolläge."
 
-#: apps/desktop/src/plugins/PluginViews.tsx
+#: apps/desktop/src/plugins/PluginViews.tsx apps/native/src/plugins/mod.rs
 msgid "{title} isn't available in desktop mode."
 msgstr "{title} är inte tillgängligt i skrivbordsläge."
 
@@ -6271,7 +6278,7 @@ msgctxt "theme source"
 msgid "From a plugin"
 msgstr "Från ett tillägg"
 
-#: apps/desktop/src/plugins/GameSlots.tsx
+#: apps/desktop/src/plugins/GameSlots.tsx apps/native/src/plugins/mod.rs
 msgid "From plugins"
 msgstr "Från tillägg"
 
@@ -7776,6 +7783,10 @@ msgstr "Dess profiler försvinner med den, och plattformar som spelade med den b
 msgid "its UI module has no definePlugin() default export"
 msgstr "dess UI-modul har ingen definePlugin()-standardexport"
 
+#: apps/native/src/settings/plugins.rs
+msgid "Its UI was made for plugin API 0.1, which this app doesn't run. Its other parts still work; ask its author for an update."
+msgstr ""
+
 #: apps/desktop/src/views/library/web/RemoveWebGame.tsx
 #: apps/native/src/library/web.rs
 msgid "Its web version is removed: the offline copy and the progress saved in the game window are deleted, with its play sessions. The game's other versions stay in your library."
@@ -8423,7 +8434,7 @@ msgstr "Läser in din profil…"
 #: apps/desktop/src/views/settings/appearance/ThemePicker.tsx
 #: apps/desktop/src/views/StoreView.tsx apps/native/src/frame/notifications.rs
 #: apps/native/src/game/editor/artwork.rs apps/native/src/game/editor/mod.rs
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/plugins/mod.rs apps/native/src/settings/appearance.rs
 msgid "Loading…"
 msgstr "Läser in…"
 
@@ -11019,7 +11030,7 @@ msgstr "Tilläggsmapp"
 msgid "Plugin notifications"
 msgstr "Tilläggsaviseringar"
 
-#: apps/desktop/src/plugins/GameSlots.tsx
+#: apps/desktop/src/plugins/GameSlots.tsx apps/native/src/plugins/mod.rs
 msgid "Plugin tabs"
 msgstr "Tilläggsflikar"
 
@@ -11027,11 +11038,13 @@ msgstr "Tilläggsflikar"
 #: apps/desktop/src/components/addons/AddonCatalogue.tsx
 #: apps/desktop/src/plugins/PluginViews.tsx
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
-#: apps/native/src/settings/addons.rs apps/native/src/settings/backup.rs
+#: apps/native/src/plugins/mod.rs apps/native/src/settings/addons.rs
+#: apps/native/src/settings/backup.rs
 msgid "Plugins"
 msgstr "Tillägg"
 
 #: apps/desktop/src/components/gameMenu/GameMenu.tsx
+#: apps/native/src/game_menu/mod.rs
 msgctxt "game menu section"
 msgid "Plugins"
 msgstr "Tillägg"
@@ -14924,7 +14937,7 @@ msgstr "Den här parkopplingslänken har gått ut. Skapa en ny på den andra enh
 msgid "This part of Caskade didn't start this session. Restarting Caskade may fix it."
 msgstr "Den här delen av Caskade startade inte under den här sessionen. Det kan hjälpa att starta om Caskade."
 
-#: apps/desktop/src/plugins/PluginViews.tsx
+#: apps/desktop/src/plugins/PluginViews.tsx apps/native/src/plugins/mod.rs
 msgid "This plugin view isn't available."
 msgstr "Den här tilläggsvyn är inte tillgänglig."
 
