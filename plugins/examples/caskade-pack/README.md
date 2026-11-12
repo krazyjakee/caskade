@@ -20,9 +20,9 @@ It also shows how a plugin is translated (#219), into Swedish:
   setting (whether its plan ranks above the built-in installers) and its
   **About game packs** game action, by their English text. The host reads
   it; `locales/dev.caskade.example.pack.pot` is the template.
-- The UI half (`src/index.tsx`) registers the action with `ctx.i18n.t`.
-- The backend's error messages follow `host.locale` (`api: ^0.1.1`), from
-  a table that mirrors their `sv.po` entries.
+- The backend answers the action (`ui.act` with `run`, plugin API 0.2,
+  #109) with a notice, and its error messages come from the same catalog
+  through `host.message`.
 
 After changing a text, run
 `node ../../../packages/create-plugin/templates/extract-messages.mjs`

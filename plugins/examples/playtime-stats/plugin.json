@@ -2,13 +2,17 @@
   "$schema": "https://caskade.dev/schemas/plugin.json",
   "id": "dev.caskade.playtime-stats",
   "name": "Playtime stats",
-  "version": "0.1.0",
-  "api": "^0.1",
-  "description": "Where your playtime goes: your most played games, and a note when a session ends.",
+  "version": "0.2.0",
+  "api": "^0.2",
+  "description": "Where your playtime goes: your most played games, and your last session.",
   "author": "Caskade",
-  "ui": "dist/ui.js",
-  "permissions": {},
+  "backend": "dist/backend.wasm",
+  "permissions": {
+    "library": "read"
+  },
+  "activation": ["onView:stats", "onEvent:game.exited"],
   "contributes": {
-    "views": [{ "id": "stats", "title": "Playtime stats", "modes": ["desktop", "console"] }]
+    "views": [{ "id": "stats", "title": "Playtime stats", "modes": ["desktop", "console"] }],
+    "hooks": ["game.exited"]
   }
 }

@@ -12,8 +12,9 @@
 // - src/: `t("…")`, `t("…", values, { context: "…" })`,
 //   `plural(count, "One …", "{n} …")`, `<Trans>…</Trans>` and
 //   `<Trans message="…" context="…" />`;
-// - backend/src/: `tr("…")`, for the messages a backend carries itself
-//   (it reads the language with `host::locale()`).
+// - backend/src/: the Rust SDK's `t("…")`, `tf("…", …)`, `tc("context",
+//   "…")` and `plural("One …", "{count} …", n)` (plugin API 0.2), and
+//   `tr("…")` or `host::message("…", …)` for a backend without the SDK.
 // Only string literals count. Translations stay when a catalog is merged;
 // new messages come in empty and removed ones go.
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
@@ -104,10 +105,18 @@ for (const path of files(join(root, "src"), [".ts", ".tsx", ".js", ".jsx", ".mts
     message(attribute("message") ?? children, { where, context: attribute("context") });
   }
 }
+const rust = String.raw`"((?:[^"\\]|\\.)*)"`;
 for (const path of files(join(root, "backend/src"), [".rs"])) {
   const text = readFileSync(path, "utf8");
-  for (const match of text.matchAll(/\btr\(\s*"((?:[^"\\]|\\.)*)"/g))
-    message(JSON.parse(`"${match[1]}"`), { where: relative(root, path) });
+  const where = relative(root, path);
+  for (const match of text.matchAll(new RegExp(String.raw`\b(?:t|tf|tr|message)\(\s*${rust}`, "g")))
+    message(JSON.parse(`"${match[1]}"`), { where });
+  for (const match of text.matchAll(new RegExp(String.raw`\btc\(\s*${rust}\s*,\s*${rust}`, "g")))
+    message(JSON.parse(`"${match[2]}"`), { where, context: JSON.parse(`"${match[1]}"`) });
+  for (const match of text.matchAll(
+    new RegExp(String.raw`\bplural\(\s*${rust}\s*,\s*${rust}`, "g"),
+  ))
+    message(JSON.parse(`"${match[1]}"`), { where, plural: JSON.parse(`"${match[2]}"`) });
 }
 
 // PO text.

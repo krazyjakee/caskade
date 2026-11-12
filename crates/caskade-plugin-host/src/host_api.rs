@@ -32,6 +32,10 @@ enum Query {
         query: Option<String>,
         #[serde(default)]
         limit: Option<u32>,
+        /// `title` (the default), `recent`, `playtime`, `added`,
+        /// `released` or `popular` (#109).
+        #[serde(default)]
+        sort: caskade_core::model::GameSort,
     },
     Game(String),
 }
@@ -161,10 +165,11 @@ impl host::Host for State {
             serde_json::from_str(&request).map_err(|error| failed("bad_request", error))?;
         let store = &self.services.store;
         let answer = match query {
-            Query::Games { query, limit } => {
+            Query::Games { query, limit, sort } => {
                 let page = store
                     .list_games(&ListGames {
                         query,
+                        sort,
                         limit: limit.unwrap_or(50).min(500),
                         ..ListGames::default()
                     })

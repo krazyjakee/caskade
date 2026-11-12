@@ -1,4 +1,7 @@
-/** `@caskade/sdk`: what a plugin's UI half imports. Inside
+/** `@caskade/sdk`: what a 0.1 plugin's UI half imports. Deprecated: from
+ * plugin API 0.2 a plugin's backend draws its UI (#109; `docs/plugins`,
+ * "Migrating from 0.1"). UI halves keep working in the webview until the
+ * native app replaces it. Inside
  * Caskade the import map resolves it to the app's own instance, so plugins
  * share one React tree and one SDK. Its version is the `caskade:plugin` WIT
  * version (§4.4). */

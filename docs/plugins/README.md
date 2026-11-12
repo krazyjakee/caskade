@@ -6,16 +6,19 @@ are in the [tech spec](../TECH-SPEC.md).
 
 ## Folder layout
 
-A plugin is a folder with a `plugin.json` and up to two halves:
+A plugin is a folder with a `plugin.json` and a backend, which from plugin
+API 0.2 also draws its UI:
 
 ```
 dev.example.howlongtobeat/
 ├── plugin.json
 ├── dist/
-│   ├── ui.js            # UI half: an ES module (#127)
-│   └── backend.wasm     # backend half: a WebAssembly component
+│   └── backend.wasm     # the backend: a WebAssembly component
 └── locales/             # optional: <lang>.po translations (#219)
 ```
+
+A 0.1 plugin may also have `dist/ui.js`, a JavaScript UI half (#127), now
+deprecated ([UI half (0.1)](#ui-half-01-deprecated)).
 
 Caskade looks for plugin folders in `<app data>/plugins/`. Each folder is
 validated on its own, so one broken plugin never hides the others. Reading
@@ -257,7 +260,8 @@ enabled again.
   drive letter's colon is not a suffix. Nothing else is visible, except
   the plugin's private data folder at `/data`.
 - **`library`:** `read` allows `library-query`; `write` also allows
-  `library-update`.
+  `library-update`. A list can be sorted (`{"games": {"sort": "playtime",
+  "limit": 10}}`, since 0.2.0).
 - **`process`:** only plugins with `process: true` may change what runs:
   a launch command's `program`, `args`, `env`, `cwd` or `emulation` in
   `launch.before`, and an imported game's `install_dir`, `launch`,
@@ -349,9 +353,10 @@ Rust SDK re-exports as `ui`, with builders (`ui::heading`, `ui::button`,
 - **What draws.** Only the slots and views `plugin.json` declares. Caskade
   calls `render(slot, id, context)` when one shows: `slot` is the slot
   (`views` for a view), `id` the contribution's, and `context` is
-  `{"mode": "desktop" | "console", "gameId"?: "…", "state": …}`. Game slots
-  get the game. Titles come from `plugin.json`, translated by the plugin's
-  catalog.
+  `{"mode": "desktop" | "console", "gameId"?: "…", "gameTitle"?: "…",
+  "state": …}`. Game slots get the game, and the host names it, so a plugin
+  needs no library access to show the game it's on. Titles come from
+  `plugin.json`, translated by the plugin's catalog.
 - **What the user does.** A `button` or `segmented` control names an
   `action`. Using it calls `act(slot, id, action, value, context)`, which
   returns `{"state"?: …, "notice"?: "…"}`. Caskade keeps `state` for that
@@ -414,6 +419,14 @@ impl Plugin for Stats {
 The manifest asks for `"api": "^0.2"`, names a `backend` and no `ui`
 module. Slots and views need the backend that draws them.
 
+Where each slot shows: `views` as a page with a sidebar link,
+`sidebar.items` and `topbar.items` in the frame, `home.sections` at the end
+of Home, `game.details.tabs`, `game.details.panels` and `game.actions` on a
+game's page (actions in its menu too), `game.card.badges` and
+`game.card.overlay` on library cards (badges on list rows), and
+`settings.pages` in the plugin's section of Settings → Plugins. `commands`
+and `notifications` are declared but not shown anywhere yet.
+
 ### Console mode
 
 Console mode (#148) is the same app on a TV with a controller: a fullscreen
@@ -465,7 +478,8 @@ update. To move a plugin to 0.2:
 ## UI half (0.1, deprecated)
 
 This is how 0.1 plugins drew their UI. It still works in the webview app
-until BLITZ-33; new plugins use [UI (0.2)](#ui-02).
+until BLITZ-33; new plugins use [UI (0.2)](#ui-02). `@caskade/sdk` stays at
+0.1.1 as this deprecated layer; the scaffolder no longer writes UI halves.
 
 A UI half is one ES module whose default export is `definePlugin(...)`.
 Inside Caskade, `react`, `react-dom`, `react/jsx-runtime`, `@caskade/sdk`

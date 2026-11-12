@@ -1,8 +1,9 @@
 # Playtime stats
 
-A UI-only plugin that asks for no permissions.
+Where your playtime goes (plugin API 0.2, #109). Its backend draws the view
+with Caskade's components and asks only to read the library.
 
-- **Playtime stats view** in the sidebar: total hours across your most played games, and a bar chart of the top ten. Bars use the theme's accent, and each shows its game and hours on hover. A **Table** toggle shows the same data as a table.
-- **When a session ends** (`game.exited`), a notice says "Played <title> for <n>m". The title comes from `ctx.library.game`.
+- **Playtime stats view** in the sidebar, in desktop and console mode: total hours across your most played games, then a bar chart of the top ten, each bar with its game and hours as text. **Show as** switches to a table; in console mode LB and RB do too. The choice is the view's state, which `act` returns and `render` reads.
+- **Last session**: when a game exits (`game.exited`), the backend keeps its title and length, and the view shows them.
 
-It uses `useGames({ sort: "playtime", limit: 10 })` from `@caskade/sdk`. Its CSS is styled only with the theme's `--cs-*` tokens.
+It reads the library with `library-query` sorted by playtime (`library: read`).

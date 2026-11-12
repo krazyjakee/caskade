@@ -10,7 +10,7 @@ msgstr ""
 msgid "Installs .cpk game packs and finds them on download pages."
 msgstr ""
 
-#: plugin.json src/index.tsx
+#: plugin.json
 msgid "About game packs"
 msgstr ""
 
@@ -24,10 +24,6 @@ msgstr ""
 
 #: plugin.json
 msgid "Rank a pack's own install plan above the built-in installers."
-msgstr ""
-
-#: src/index.tsx
-msgid "Caskade installs .cpk game packs: drop one on the library, or paste a link to its page on {host}."
 msgstr ""
 
 #: backend/src/lib.rs
@@ -52,4 +48,8 @@ msgstr ""
 
 #: backend/src/lib.rs
 msgid "a pack is a file of known size"
+msgstr ""
+
+#: backend/src/lib.rs
+msgid "Caskade installs .cpk game packs: drop one on the library, or paste a link to its page on {host}."
 msgstr ""

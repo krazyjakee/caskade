@@ -1,7 +1,13 @@
-//! HowLongToBeat (#133): looks a title up on howlongtobeat.com through
-//! `wasi:http` (the `network` permission allows that one host) and keeps the
-//! answer in the plugin's key-value store.
-use caskade_plugin_sdk::{Error, Plugin, host, json};
+//! HowLongToBeat (#133; plugin API 0.2 since #109): a game page tab with how
+//! long the game takes to beat. It looks the title up on howlongtobeat.com
+//! through `wasi:http` (the `network` permission allows that one host),
+//! keeps the answer in the plugin's key-value store, and draws the times
+//! with Caskade's components.
+use caskade_plugin_sdk::{
+    Error, Plugin, host,
+    i18n::{t, tf},
+    json, ui,
+};
 use serde::{Deserialize, Serialize};
 
 mod http;
@@ -68,7 +74,10 @@ fn search(title: &str) -> Result<Option<Times>, Error> {
     let (status, text) = http::post_json(&settings.endpoint, &body.to_string())
         .map_err(|message| Error::new("http", message))?;
     if status != 200 {
-        return Err(Error::new("http", format!("HowLongToBeat answered {status}")));
+        return Err(Error::new(
+            "http",
+            format!("HowLongToBeat answered {status}"),
+        ));
     }
     let search: Search = json::from_str(&text)?;
     let wanted = title.to_lowercase();
@@ -85,23 +94,73 @@ fn search(title: &str) -> Result<Option<Times>, Error> {
     }))
 }
 
+/// The times for `title`, from the plugin's store, else looked up and
+/// kept.
+fn lookup(title: &str) -> Result<Option<Times>, Error> {
+    let key = format!("times:{}", title.trim().to_lowercase());
+    if let Some(cached) = host::kv_json::<Option<Times>>(&key)? {
+        return Ok(cached);
+    }
+    let found = search(title.trim())?;
+    host::set_kv_json(&key, &found)?;
+    Ok(found)
+}
+
+fn hours_text(value: Option<f64>) -> String {
+    match value {
+        Some(hours) => tf("{hours} h", &[("hours", &hours.to_string())]),
+        None => "—".to_owned(),
+    }
+}
+
 struct HowLongToBeat;
 
 impl Plugin for HowLongToBeat {
+    /// The game page's "How long to beat" tab (plugin API 0.2, #109).
+    fn render(slot: &str, id: &str, context: &ui::Context) -> Result<Vec<ui::Node>, Error> {
+        if (slot, id) != ("game.details.tabs", "hltb") {
+            return Err(Error::new("no_ui", format!("no {slot} {id}")));
+        }
+        let Some(title) = &context.game_title else {
+            return Ok(vec![ui::note(t("This game has no title to look up."))]);
+        };
+        let times = match lookup(title) {
+            Ok(times) => times,
+            Err(error) => {
+                return Ok(vec![ui::alert(tf(
+                    "HowLongToBeat couldn't be reached: {error}",
+                    &[("error", &error.message)],
+                ))]);
+            }
+        };
+        let Some(times) = times else {
+            return Ok(vec![ui::note(tf(
+                "HowLongToBeat has no times for {title}.",
+                &[("title", title)],
+            ))]);
+        };
+        Ok(vec![ui::section(
+            tf("How long to beat {title}", &[("title", &times.title)]),
+            [
+                ui::stats([
+                    (t("Main story"), hours_text(times.main_hours)),
+                    (t("Main + extras"), hours_text(times.extras_hours)),
+                    (t("Completionist"), hours_text(times.completionist_hours)),
+                ]),
+                ui::note(tf(
+                    "From howlongtobeat.com: {title}",
+                    &[("title", &times.title)],
+                )),
+            ],
+        )])
+    }
+
+    /// `lookup {"title"}`: the times as JSON, for scripts and tests.
     fn request(method: &str, payload: &str) -> Result<String, Error> {
         match method {
             "lookup" => {
                 let Lookup { title } = json::from_str(payload)?;
-                let key = format!("times:{}", title.trim().to_lowercase());
-                let times = match host::kv_json::<Option<Times>>(&key)? {
-                    Some(cached) => cached,
-                    None => {
-                        let found = search(title.trim())?;
-                        host::set_kv_json(&key, &found)?;
-                        found
-                    }
-                };
-                json::to_string(&times)
+                json::to_string(&lookup(&title)?)
             }
             _ => Err(Error::unknown_method(method)),
         }

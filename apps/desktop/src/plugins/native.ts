@@ -10,7 +10,15 @@ import { type PluginSlot, type PluginUiApi, pluginSlots } from "./types";
  * over `caskade-plugin://` and routes backend calls. */
 export const nativePlugins: PluginUiApi = {
   async list() {
-    return (await unwrap(commands.pluginsUi())).map((plugin) => ({
+    // 0.1 JavaScript halves, then 0.2 plugins their backends draw (#109).
+    const [halves, drawn] = await Promise.all([
+      unwrap(commands.pluginsUi()),
+      unwrap(commands.pluginsDrawn()),
+    ]);
+    return [
+      ...halves,
+      ...drawn.map((plugin) => ({ ...plugin, entry: "", style: null, drawn: true })),
+    ].map((plugin) => ({
       ...plugin,
       contributes: plugin.contributes.flatMap(({ slot, id, title, modes }) =>
         pluginSlots.includes(slot as PluginSlot)
@@ -18,6 +26,14 @@ export const nativePlugins: PluginUiApi = {
           : [],
       ),
     }));
+  },
+  async render(pluginId, slot, id, context) {
+    return unwrap(commands.pluginUiRender(pluginId, slot, id, context));
+  },
+  async act(pluginId, slot, id, action, value, context) {
+    return unwrap(
+      commands.pluginUiAct(pluginId, slot, id, action, (value ?? null) as Value, context),
+    );
   },
   async installed() {
     return (await unwrap(commands.pluginsList())).map((plugin) => ({

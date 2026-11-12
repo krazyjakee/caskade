@@ -190,6 +190,12 @@ pub fn pack(folder: &Path, kind: AddonKind) -> Result<Packed, String> {
             super::validate::RESERVED_PROVIDER
         ));
     }
+    if kind == AddonKind::Plugin && !text("ui").is_empty() && draws_ui(&text("api")) {
+        return Err(format!(
+            "{}: plugin API 0.2 plugins draw their UI from their backend; remove “ui” (#109)",
+            manifest_path.display()
+        ));
+    }
     if kind == AddonKind::Plugin {
         // What the manifest points at must be in the package.
         for key in ["ui", "backend"] {
@@ -765,4 +771,10 @@ async fn fetch(url: &str, max: u64) -> Result<Vec<u8>, String> {
     }
     #[cfg(not(feature = "net"))]
     Err("fetching over HTTP needs the net feature".to_owned())
+}
+
+/// Whether a plugin's `api` range targets plugin API 0.2 or later, whose
+/// UI its backend draws (#109).
+fn draws_ui(api: &str) -> bool {
+    semver::VersionReq::parse(api).is_ok_and(|api| api.matches(&semver::Version::new(0, 2, 0)))
 }

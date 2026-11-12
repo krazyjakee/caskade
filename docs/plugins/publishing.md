@@ -24,6 +24,7 @@ What a package holds is decided by its kind. A plugin package holds `plugin.json
 The package is refused if:
 
 - `plugin.json` names a `ui` or `backend` file that hasn't been built
+- `plugin.json` asks for plugin API 0.2 (`"api": "^0.2"`) and names a `ui` module: from 0.2 the backend draws the UI (#109)
 - it holds a link
 - it holds something that looks like a credential: `.env`, `.npmrc`, key and certificate files, private keys, minisign or Tauri signing keys, or common token prefixes
 

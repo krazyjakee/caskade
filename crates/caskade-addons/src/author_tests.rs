@@ -167,6 +167,27 @@ fn a_plugin_providing_metadata_is_refused_and_other_providers_are_declared() {
 }
 
 #[test]
+fn a_0_2_plugin_naming_a_javascript_ui_is_refused() {
+    let temp = tempfile::tempdir().unwrap();
+    let folder = temp.path().join("stats");
+    plugin_folder(&folder, "0.2.0");
+    let mut manifest: Value =
+        serde_json::from_slice(&std::fs::read(folder.join("plugin.json")).unwrap()).unwrap();
+    manifest["api"] = json!("^0.2");
+    write(&folder, &[("plugin.json", manifest.to_string().as_bytes())]);
+    // From plugin API 0.2 the backend draws the UI (#109).
+    let refused = author::pack(&folder, AddonKind::Plugin).unwrap_err();
+    assert!(
+        refused.contains("draw their UI from their backend"),
+        "{refused}"
+    );
+    // A deprecated 0.1 UI half still packs.
+    manifest["api"] = json!("^0.1");
+    write(&folder, &[("plugin.json", manifest.to_string().as_bytes())]);
+    assert!(author::pack(&folder, AddonKind::Plugin).is_ok());
+}
+
+#[test]
 fn permission_words_follow_the_manifest() {
     assert_eq!(
         permission_words(&json!({"permissions": {

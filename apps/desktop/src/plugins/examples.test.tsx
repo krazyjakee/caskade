@@ -1,188 +1,166 @@
-// #133: the example plugins' UI halves (plugins/examples/), built with
-// @caskade/vite-plugin and rendered through the loader with the app's React.
-// Their backends are tested in crates/caskade-plugin-host/tests/examples.rs.
-import {
-  type GameQuery,
-  type GamesQuery,
-  HostScope,
-  type HostServices,
-  type PluginGame,
-  type PluginMessages,
-} from "@caskade/sdk";
-import { caskadePlugin } from "@caskade/vite-plugin";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+// #133, #109: the example plugins' UI in the webview. From plugin API 0.2
+// their backends draw it (plugins/examples/*/backend); here a fake host
+// answers with the trees they draw, and the loader registers them through
+// the drawn path. What the backends really draw is tested in
+// crates/caskade-plugin-host/tests/examples.rs; the native app's drawing in
+// apps/native/src/plugins/tests.rs.
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { build, type Rolldown } from "vite";
 import { afterEach, expect, it } from "vitest";
-import { readText } from "../../../../packages/create-plugin/testing.mjs";
+import type { Node_Serialize as UiNode } from "../api/bindings";
 import { fakeLayout, fakeViewport, renderApp } from "../test/harness";
 import { PluginGameDetails } from "./GameSlots";
 import { PluginLoader } from "./loader";
 import { PluginSlot } from "./PluginSlot";
 import { PluginRegistry, PluginRegistryContext } from "./registry";
-import { exposeSharedModules, sharedModules } from "./shared";
-import { appExports, importMap, shimSource } from "./sharedExports";
-import type { PluginEvent, PluginUiApi, UiPlugin } from "./types";
+import type { PluginUiApi, UiPlugin } from "./types";
 
 afterEach(cleanup);
 
-const examples = new URL("../../../../plugins/examples/", import.meta.url).pathname;
-const dataUrl = (source: string) =>
-  `data:text/javascript;base64,${btoa(unescape(encodeURIComponent(source)))}`;
+const drawn = (id: string, name: string, contributes: UiPlugin["contributes"]): UiPlugin => ({
+  id,
+  name,
+  version: "0.2.0",
+  entry: "",
+  drawn: true,
+  contributes,
+});
 
-async function load(example: string) {
-  const output = (await build({
-    root: `${examples.replace(/\/$/, "")}/${example}`,
-    configFile: false,
-    logLevel: "silent",
-    plugins: [caskadePlugin()],
-    build: { write: false },
-  })) as Rolldown.RolldownOutput | Rolldown.RolldownOutput[];
-  const ui = (Array.isArray(output) ? output : [output])
-    .flatMap((result) => result.output)
-    .find((file) => file.fileName === "ui.js");
-  if (ui?.type !== "chunk") throw new Error("no ui.js");
-  exposeSharedModules();
-  const shims = Object.fromEntries(
-    Object.keys(importMap().imports).map((specifier) => [
-      specifier,
-      dataUrl(
-        shimSource(specifier, appExports[specifier] ?? Object.keys(sharedModules[specifier] ?? {})),
-      ),
-    ]),
-  );
-  return ui.code.replace(/from "([^"]+)"/g, (whole, specifier: string) =>
-    shims[specifier] ? `from "${shims[specifier]}"` : whole,
-  );
+const stats = drawn("dev.caskade.playtime-stats", "Playtime stats", [
+  { slot: "views", id: "stats", title: "Playtime stats", modes: ["desktop", "console"] },
+]);
+
+/** Playtime stats' view, as its backend draws it. */
+function playtime(view: string): UiNode[] {
+  return [
+    {
+      type: "section",
+      label: "Most played",
+      children: [
+        { type: "tile", value: "53 h", label: "across your 2 most played games" },
+        {
+          type: "segmented",
+          label: "Show as",
+          action: "view",
+          value: view,
+          options: [
+            { value: "chart", label: "Chart" },
+            { value: "table", label: "Table" },
+          ],
+        },
+        view === "table"
+          ? {
+              type: "table",
+              caption: "Most played games",
+              columns: ["Game", "Hours played"],
+              rows: [
+                ["Celeste", "40.0"],
+                ["Hades", "12.5"],
+              ],
+              rowHeaders: true,
+            }
+          : {
+              type: "bars",
+              label: "Most played games, hours played",
+              items: [
+                { label: "Celeste", value: 40, text: "40 h" },
+                { label: "Hades", value: 12.5, text: "13 h" },
+              ],
+            },
+      ],
+    },
+  ];
 }
 
-const game = (id: string, title: string, hours: number): PluginGame => ({
-  id,
-  title,
-  platform: "PC",
-  status: "installed",
-  favorite: false,
-  playtimeSeconds: hours * 3600,
-  lastPlayedAt: null,
-  description: "",
-  tags: [],
-});
-const library = [game("g1", "Celeste", 40), game("g2", "Hades", 12.5), game("g3", "Unplayed", 0)];
+interface Call {
+  kind: "render" | "act";
+  plugin: string;
+  slot: string;
+  id: string;
+  action?: string;
+  value?: unknown;
+  gameId?: string | null;
+}
 
-function fixture(plugin: UiPlugin, answer: unknown) {
-  const listeners = new Set<(event: PluginEvent) => void>();
-  const requests: unknown[] = [];
+/** A host with `plugins`, drawing with `draw` and answering `act` with
+ * `answer`; every call is recorded. */
+function host(
+  plugins: UiPlugin[],
+  draw: (call: Call, state: unknown) => UiNode[] | Promise<UiNode[]>,
+  answer: (call: Call) => { state?: unknown; notice?: string } = (call) => ({
+    state: { view: call.value },
+  }),
+) {
+  const calls: Call[] = [];
   const api: PluginUiApi = {
-    list: async () => [plugin],
+    list: async () => plugins,
     installed: async () => [],
-    request: async (_id, method, payload) => {
-      requests.push({ method, payload });
-      return answer;
-    },
-    subscribe: async (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
+    request: async () => null,
+    subscribe: async () => () => {},
     settings: {
       get: async () => ({ revision: 0, value: {} }),
       set: async (_id, value, revision) => ({ revision: revision + 1, value }),
     },
+    render: async (plugin, slot, id, context) => {
+      const call: Call = { kind: "render", plugin, slot, id, gameId: context.gameId ?? null };
+      calls.push(call);
+      return draw(call, context.state);
+    },
+    act: async (plugin, slot, id, action, value, context) => {
+      const call: Call = { kind: "act", plugin, slot, id, action, value, gameId: context.gameId };
+      calls.push(call);
+      return answer(call) as Awaited<ReturnType<NonNullable<PluginUiApi["act"]>>>;
+    },
   };
-  const emit = (event: PluginEvent) => {
-    for (const listener of listeners) listener(event);
-  };
-  return { api, requests, emit };
+  return { api, calls };
 }
 
-const host: HostServices = {
-  useGame: (id): GameQuery => ({
-    data: library.find((item) => item.id === id) ?? null,
-    isPending: false,
-    error: null,
-  }),
-  useGames: (options): GamesQuery => ({
-    data: [...library]
-      .sort((a, b) => b.playtimeSeconds - a.playtimeSeconds)
-      .slice(0, options?.limit ?? 100),
-    isPending: false,
-    error: null,
-  }),
-};
-
-async function show(example: string, api: PluginUiApi, slot: "views" | "game.details.tabs") {
-  const code = await load(example);
+async function loaded(api: PluginUiApi) {
   const registry = new PluginRegistry();
-  const loader = new PluginLoader(
-    api,
-    registry,
-    () => import(/* @vite-ignore */ dataUrl(code)),
-    document,
-    async (id) => library.find((item) => item.id === id) ?? null,
-  );
-  await loader.loadAll();
+  await new PluginLoader(api, registry).loadAll();
   expect(registry.listNotices()).toEqual([]);
-  render(
-    <QueryClientProvider client={new QueryClient()}>
-      <HostScope.Provider value={host}>
-        <PluginRegistryContext.Provider value={registry}>
-          <PluginSlot slot={slot}>
-            {({ contribution }) => {
-              const Component = (contribution as { component: (props: { gameId: string }) => null })
-                .component;
-              return <Component gameId="g1" />;
-            }}
-          </PluginSlot>
-        </PluginRegistryContext.Provider>
-      </HostScope.Provider>
-    </QueryClientProvider>,
-  );
   return registry;
 }
 
-it("playtime-stats charts the most played games and notes finished sessions", async () => {
-  const plugin: UiPlugin = {
-    id: "dev.caskade.playtime-stats",
-    name: "Playtime stats",
-    version: "0.1.0",
-    entry: "caskade-plugin://dev.caskade.playtime-stats/dist/ui.js",
-    contributes: [{ slot: "views", id: "stats", title: "Playtime stats" }],
-  };
-  const { api, emit } = fixture(plugin, null);
-  const registry = await show("playtime-stats", api, "views");
+function show(
+  registry: PluginRegistry,
+  slots: readonly ("views" | "home.sections" | "game.details.panels" | "game.details.tabs")[],
+) {
+  render(
+    <PluginRegistryContext.Provider value={registry}>
+      {slots.map((slot) => (
+        <PluginSlot key={slot} slot={slot}>
+          {({ contribution }) => {
+            const Component = (contribution as { component: (props: { gameId: string }) => null })
+              .component;
+            return <Component gameId="g1" />;
+          }}
+        </PluginSlot>
+      ))}
+    </PluginRegistryContext.Provider>,
+  );
+}
+
+it("a drawn view charts, and its segmented control brings the table (playtime-stats)", async () => {
+  const { api, calls } = host([stats], (_call, state) =>
+    playtime((state as { view?: string } | null)?.view ?? "chart"),
+  );
+  show(await loaded(api), ["views"]);
   const bars = await screen.findByRole("list", { name: "Most played games, hours played" });
   const rows = within(bars).getAllByRole("listitem");
   expect(rows.map((row) => row.textContent)).toEqual(["Celeste40 h", "Hades13 h"]);
   expect(screen.getByText("53 h")).toBeTruthy();
-  fireEvent.click(screen.getByRole("button", { name: "Table" }));
-  expect(screen.getByRole("table", { name: "Most played games" })).toBeTruthy();
-
-  await act(async () => {
-    emit({ name: "game.exited", payload: { gameId: "g2", durationMs: 25 * 60_000 } });
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  });
-  expect(registry.listNotices().at(-1)?.message).toBe("Played Hades for 25m");
+  fireEvent.click(screen.getByRole("radio", { name: "Table" }));
+  await screen.findByRole("table", { name: "Most played games" });
+  expect(calls.filter((call) => call.kind === "act")).toEqual([
+    expect.objectContaining({ slot: "views", id: "stats", action: "view", value: "table" }),
+  ]);
 });
 
-it("playtime-stats works in console mode by pad alone (#152)", async () => {
-  const plugin: UiPlugin = {
-    id: "dev.caskade.playtime-stats",
-    name: "Playtime stats",
-    version: "0.1.0",
-    entry: "caskade-plugin://dev.caskade.playtime-stats/dist/ui.js",
-    contributes: [
-      { slot: "views", id: "stats", title: "Playtime stats", modes: ["desktop", "console"] },
-    ],
-  };
-  const { api } = fixture(plugin, null);
-  const registry = new PluginRegistry();
-  const code = await load("playtime-stats");
-  await new PluginLoader(
-    api,
-    registry,
-    () => import(/* @vite-ignore */ dataUrl(code)),
-    document,
-  ).loadAll();
-  expect(registry.listNotices()).toEqual([]);
+it("a drawn view works in console mode by pad alone (#152)", async () => {
+  const { api } = host([stats], (_call, state) =>
+    playtime((state as { view?: string } | null)?.view ?? "chart"),
+  );
+  const registry = await loaded(api);
   const undoLayout = fakeLayout();
   fakeViewport();
   try {
@@ -193,194 +171,90 @@ it("playtime-stats works in console mode by pad alone (#152)", async () => {
     act(() => link.focus());
     app.pad.press("confirm");
     await screen.findByRole("list", { name: "Most played games, hours played" });
-    // Its LB/RB binding, through the SDK, switches chart and table.
+    // LB/RB move its segmented control.
     app.pad.press("tab.next");
     await screen.findByRole("table", { name: "Most played games" });
-    expect(document.querySelector('[data-cs="hint-bar"]')?.textContent).toContain("Chart or table");
     app.pad.press("tab.prev");
     await screen.findByRole("list", { name: "Most played games, hours played" });
-    // Its own buttons are reachable and pressable.
-    for (let i = 0; i < 40 && document.activeElement?.textContent !== "Table"; i++) {
-      const before = document.activeElement;
-      app.pad.press("nav.down");
-      await waitFor(() => expect(document.activeElement).not.toBe(before));
-    }
-    expect(document.activeElement?.textContent).toBe("Table");
-    app.pad.press("confirm");
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Table" }).getAttribute("aria-pressed")).toBe(
-        "true",
-      ),
-    );
   } finally {
     undoLayout();
   }
 });
 
-it("howlongtobeat shows the backend's times for the game's title", async () => {
-  const plugin: UiPlugin = {
-    id: "dev.caskade.howlongtobeat",
-    name: "HowLongToBeat",
-    version: "0.1.0",
-    entry: "caskade-plugin://dev.caskade.howlongtobeat/dist/ui.js",
-    contributes: [{ slot: "game.details.tabs", id: "hltb", title: "How long to beat" }],
-  };
-  const { api, requests } = fixture(plugin, {
-    title: "Celeste",
-    mainHours: 8,
-    extrasHours: 11.5,
-    completionistHours: null,
-  });
-  await show("howlongtobeat", api, "game.details.tabs");
-  const times = await screen.findByRole("region", { name: "How long to beat Celeste" });
-  expect(within(times).getByText("8 h")).toBeTruthy();
-  expect(within(times).getByText("11.5 h")).toBeTruthy();
-  expect(within(times).getByText("—")).toBeTruthy();
-  expect(requests).toEqual([{ method: "lookup", payload: { title: "Celeste" } }]);
+it("a drawn game tab is drawn for its game (howlongtobeat)", async () => {
+  const hltb = drawn("dev.caskade.howlongtobeat", "HowLongToBeat", [
+    { slot: "game.details.tabs", id: "hltb", title: "How long to beat" },
+  ]);
+  const { api, calls } = host([hltb], () => [
+    {
+      type: "stats",
+      items: [
+        { label: "Main story", value: "8 h" },
+        { label: "Completionist", value: "41 h" },
+      ],
+    },
+    { type: "note", text: "From howlongtobeat.com: Celeste" },
+  ]);
+  show(await loaded(api), ["game.details.tabs"]);
+  await screen.findByText("From howlongtobeat.com: Celeste");
+  expect(screen.getByText("Main story").nextElementSibling?.textContent).toBe("8 h");
+  expect(calls[0]).toEqual(
+    expect.objectContaining({ slot: "game.details.tabs", id: "hltb", gameId: "g1" }),
+  );
 });
 
-it("a crashing plugin shows placeholders while the others keep rendering", async () => {
-  const stats: UiPlugin = {
-    id: "dev.caskade.playtime-stats",
-    name: "Playtime stats",
-    version: "0.1.0",
-    entry: "playtime-stats",
-    contributes: [{ slot: "views", id: "stats", title: "Playtime stats" }],
-  };
-  const crashy: UiPlugin = {
-    id: "dev.caskade.crashy",
-    name: "Crashy",
-    version: "0.1.0",
-    entry: "crashy",
-    contributes: [
-      { slot: "views", id: "broken", title: "Crashy" },
-      { slot: "home.sections", id: "broken", title: "Crashy" },
-      { slot: "game.details.panels", id: "broken" },
-    ],
-  };
-  const code = { "playtime-stats": await load("playtime-stats"), crashy: await load("crashy") };
-  const { api } = fixture(stats, null);
-  api.list = async () => [crashy, stats];
-  const registry = new PluginRegistry();
-  await new PluginLoader(
-    api,
-    registry,
-    (entry) => import(/* @vite-ignore */ dataUrl(code[entry as keyof typeof code])),
-  ).loadAll();
-  expect(registry.listNotices()).toEqual([]);
+it("a plugin that fails to draw shows placeholders while the others keep drawing (crashy)", async () => {
+  const crashy = drawn("dev.caskade.crashy", "Crashy", [
+    { slot: "views", id: "broken", title: "Crashy" },
+    { slot: "home.sections", id: "broken", title: "Crashy" },
+    { slot: "game.details.panels", id: "broken" },
+  ]);
+  const { api } = host([crashy, stats], (call) => {
+    if (call.plugin === crashy.id) throw new Error("crashy failed to draw");
+    return playtime("chart");
+  });
+  const registry = await loaded(api);
   const errors = console.error;
   console.error = () => {};
   try {
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <HostScope.Provider value={host}>
-          <PluginRegistryContext.Provider value={registry}>
-            {(["views", "home.sections", "game.details.panels"] as const).map((slot) => (
-              <PluginSlot key={slot} slot={slot}>
-                {({ contribution }) => {
-                  const Component = (
-                    contribution as { component: (props: { gameId: string }) => null }
-                  ).component;
-                  return <Component gameId="g1" />;
-                }}
-              </PluginSlot>
-            ))}
-          </PluginRegistryContext.Provider>
-        </HostScope.Provider>
-      </QueryClientProvider>,
-    );
+    show(registry, ["views", "home.sections", "game.details.panels"]);
     await screen.findByRole("list", { name: "Most played games, hours played" });
-    const placeholders = screen
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole("alert")
+          .filter((element) => element.dataset.plugin === "dev.caskade.crashy"),
+      ).toHaveLength(3),
+    );
+    const placeholder = screen
       .getAllByRole("alert")
-      .filter((element) => element.dataset.plugin === "dev.caskade.crashy");
-    expect(placeholders).toHaveLength(3);
-    expect(placeholders[0]?.textContent).toBe("Crashy couldn't show this part.");
+      .find((element) => element.dataset.plugin === "dev.caskade.crashy");
+    expect(placeholder?.textContent).toBe("Crashy couldn't show this part.");
   } finally {
     console.error = errors;
   }
 });
 
-/** caskade-pack's Swedish catalog as the host sends it (`plugin_messages`). */
-function swedishPack(): PluginMessages {
-  // Vitest serves this file from `/@fs/<path>`; read it from the disk.
-  const po = readText(examples.replace(/^\/@fs(?=\/)/, ""), "caskade-pack/locales/sv.po");
-  const messages = [...po.matchAll(/^msgid (".+")\nmsgstr (".+")$/gm)].map((match) => ({
-    context: null,
-    id: JSON.parse(match[1] ?? '""') as string,
-    translations: [JSON.parse(match[2] ?? '""') as string],
-  }));
-  return {
-    locale: "sv",
-    messages,
-    plurals: Array.from({ length: 200 }, (_, n) => (n === 1 ? 0 : 1)),
-  };
-}
-
-it("caskade-pack's game action shows in Swedish and follows a language switch (#219)", async () => {
-  const plugin: UiPlugin = {
-    id: "dev.caskade.example.pack",
-    name: "Caskade-paket (exempel)",
-    version: "0.2.0",
-    entry: "caskade-plugin://dev.caskade.example.pack/dist/ui.js",
-    contributes: [{ slot: "game.actions", id: "about-packs", title: "Om spelpaket" }],
-  };
-  const { api } = fixture(plugin, null);
-  let catalog: PluginMessages | null = swedishPack();
-  api.messages = async () => catalog ?? { locale: "en", messages: [], plurals: [] };
-  const code = await load("caskade-pack");
-  const registry = new PluginRegistry();
-  const loader = new PluginLoader(api, registry, () => import(/* @vite-ignore */ dataUrl(code)));
-  await loader.loadAll();
-  expect(registry.listNotices()).toEqual([]);
+it("a drawn game action runs for its game and its notice shows (caskade-pack)", async () => {
+  const pack = drawn("dev.caskade.example.pack", "Caskade Pack (example)", [
+    { slot: "game.actions", id: "about-packs", title: "About game packs" },
+  ]);
+  const { api, calls } = host(
+    [pack],
+    () => [],
+    () => ({ notice: "Caskade installs .cpk game packs." }),
+  );
+  const registry = await loaded(api);
   render(
-    <QueryClientProvider client={new QueryClient()}>
-      <HostScope.Provider value={host}>
-        <PluginRegistryContext.Provider value={registry}>
-          <PluginGameDetails gameId="g1" />
-        </PluginRegistryContext.Provider>
-      </HostScope.Provider>
-    </QueryClientProvider>,
+    <PluginRegistryContext.Provider value={registry}>
+      <PluginGameDetails gameId="g1" />
+    </PluginRegistryContext.Provider>,
   );
-  fireEvent.click(await screen.findByRole("button", { name: "Om spelpaket" }));
+  fireEvent.click(screen.getByRole("button", { name: "About game packs" }));
   await waitFor(() =>
-    expect(registry.listNotices().at(-1)?.message).toBe(
-      "Caskade installerar .cpk-spelpaket: släpp ett på biblioteket, eller klistra in en länk till dess sida på games.example.com.",
-    ),
+    expect(registry.listNotices().at(-1)?.message).toBe("Caskade installs .cpk game packs."),
   );
-
-  // The language changed: the app activates the plugin again with its new
-  // catalog (English here: no messages), and the action follows.
-  catalog = null;
-  await act(async () => {
-    await loader.reloadAll();
-  });
-  await screen.findByRole("button", { name: "About game packs" });
-  expect(screen.queryByRole("button", { name: "Om spelpaket" })).toBeNull();
-});
-
-it("a plugin whose catalog can't be fetched shows English (#219)", async () => {
-  const plugin: UiPlugin = {
-    id: "dev.caskade.example.pack",
-    name: "Caskade Pack (example)",
-    version: "0.2.0",
-    entry: "caskade-plugin://dev.caskade.example.pack/dist/ui.js",
-    contributes: [{ slot: "game.actions", id: "about-packs", title: "About game packs" }],
-  };
-  const { api } = fixture(plugin, null);
-  api.messages = async () => {
-    throw new Error("no catalog");
-  };
-  const code = await load("caskade-pack");
-  const registry = new PluginRegistry();
-  const errors = console.error;
-  console.error = () => {};
-  try {
-    await new PluginLoader(api, registry, () => import(/* @vite-ignore */ dataUrl(code))).loadAll();
-  } finally {
-    console.error = errors;
-  }
-  expect(registry.listNotices()).toEqual([]);
-  expect(registry.list("game.actions").map((item) => item.contribution.title)).toEqual([
-    "About game packs",
+  expect(calls).toEqual([
+    expect.objectContaining({ kind: "act", action: "run", value: null, gameId: "g1" }),
   ]);
 });

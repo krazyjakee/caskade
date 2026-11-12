@@ -2,12 +2,12 @@
 // `pnpm create caskade-plugin` / `just plugin-new` (#130).
 //
 //   create-caskade-plugin [folder] [--id dev.example.hello] [--name "Hello"]
-//                         [--ui | --no-ui] [--backend | --no-backend]
-//                         [--sdk <caskade checkout>] [--yes]
+//                         [--ui | --no-ui] [--sdk <caskade checkout>] [--yes]
 //
-// Missing answers are asked for on a terminal; --yes takes the defaults
-// (both halves). --sdk links the unpublished @caskade packages and the Rust
-// SDK from a Caskade checkout.
+// Every plugin has a Rust backend; --ui (the default) adds a view it draws
+// with Caskade's components (plugin API 0.2, #109). Missing answers are
+// asked for on a terminal; --yes takes the defaults. --sdk links the
+// unpublished Rust SDK from a Caskade checkout.
 
 import { basename, resolve } from "node:path";
 import { stdin, stdout } from "node:process";
@@ -50,7 +50,7 @@ async function main() {
   const options = parse(process.argv.slice(2));
   if (options.help) {
     console.log(
-      "Usage: create-caskade-plugin [folder] [--id <reverse-dns>] [--name <name>] [--ui|--no-ui] [--backend|--no-backend] [--sdk <caskade checkout>] [--yes]",
+      "Usage: create-caskade-plugin [folder] [--id <reverse-dns>] [--name <name>] [--ui|--no-ui] [--sdk <caskade checkout>] [--yes]",
     );
     return;
   }
@@ -73,10 +73,9 @@ async function main() {
         "Use reverse-DNS, lowercase (e.g. dev.example.hello)",
         `dev.example.${slug(name)}`,
       );
-    const ui = options.ui ?? (await yesNo("UI half (React views, tabs, panels)", true));
-    const backend = options.backend ?? (await yesNo("Backend half (Rust, sandboxed)", true));
+    const ui = options.ui ?? (await yesNo("A view, drawn by the backend", true));
     const dir = resolve(options.dir ?? slug(name));
-    const files = generate({ id, name, ui, backend, dir, sdk: options.sdk });
+    const files = generate({ id, name, ui, backend: options.backend, dir, sdk: options.sdk });
     console.log(`Created ${id} in ${dir}:`);
     for (const file of files) console.log(`  ${file}`);
     console.log(`\nNext: cd ${dir} && npm run build && caskade dev .`);

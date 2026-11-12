@@ -17,7 +17,9 @@ pub fn post_json(url: &str, body: &str) -> Result<(u16, String), String> {
     };
     let (authority, path) = rest
         .split_once('/')
-        .map_or((rest, "/".to_owned()), |(authority, path)| (authority, format!("/{path}")));
+        .map_or((rest, "/".to_owned()), |(authority, path)| {
+            (authority, format!("/{path}"))
+        });
     let headers = Fields::from_list(&[
         ("content-type".to_owned(), b"application/json".to_vec()),
         ("accept".to_owned(), b"application/json".to_vec()),
@@ -27,8 +29,12 @@ pub fn post_json(url: &str, body: &str) -> Result<(u16, String), String> {
     let request = OutgoingRequest::new(headers);
     request.set_method(&Method::Post).map_err(|()| "method")?;
     request.set_scheme(Some(&scheme)).map_err(|()| "scheme")?;
-    request.set_authority(Some(authority)).map_err(|()| "authority")?;
-    request.set_path_with_query(Some(&path)).map_err(|()| "path")?;
+    request
+        .set_authority(Some(authority))
+        .map_err(|()| "authority")?;
+    request
+        .set_path_with_query(Some(&path))
+        .map_err(|()| "path")?;
     let outgoing = request.body().map_err(|()| "request body taken")?;
     {
         let stream = outgoing.write().map_err(|()| "request stream taken")?;

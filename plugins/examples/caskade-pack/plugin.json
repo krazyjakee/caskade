@@ -2,10 +2,9 @@
   "$schema": "https://caskade.dev/schemas/plugin.json",
   "id": "dev.caskade.example.pack",
   "name": "Caskade Pack (example)",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Installs .cpk game packs and finds them on download pages.",
-  "api": "^0.1.1",
-  "ui": "dist/ui.js",
+  "api": "^0.2",
   "backend": "dist/backend.wasm",
   "permissions": {
     "network": ["games.example.com"]

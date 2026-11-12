@@ -48,6 +48,8 @@ import { FolderBrowser } from "./components/pathBrowser/FolderBrowser";
 import { StoreLinks } from "./components/StoreLinks";
 import { PadSource } from "./input";
 import { games as mockGames } from "./mocks/games";
+import { DrawnTree } from "./plugins/drawn";
+import { PluginBoundary } from "./plugins/PluginBoundary";
 import { PluginRegistry, PluginRegistryContext } from "./plugins/registry";
 import type { UiPlugin } from "./plugins/types";
 import { AppShell } from "./shell/AppShell";
@@ -694,6 +696,75 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
 
   it("renders the error shown in place of a failed view", () => {
     render(<AppCrash error={new Error("Bad game data")} />);
+    expect(survey(seen)).toEqual([]);
+  });
+
+  it("renders a plugin's drawn UI, every component, and its placeholder (#109)", () => {
+    const errors = console.error;
+    console.error = () => {};
+    try {
+      render(
+        <>
+          <DrawnTree
+            busy={false}
+            act={() => {}}
+            nodes={[
+              { type: "heading", text: "Most played", level: 2 },
+              { type: "paragraph", text: "Where your playtime goes." },
+              { type: "note", text: "From howlongtobeat.com" },
+              { type: "alert", text: "It couldn't be reached." },
+              {
+                type: "stack",
+                direction: "row",
+                gap: "small",
+                children: [
+                  { type: "text", text: "Short" },
+                  { type: "badge", text: "New", tone: "accent" },
+                  { type: "button", label: "Refresh", action: "refresh", variant: "primary" },
+                ],
+              },
+              {
+                type: "section",
+                label: "Times",
+                children: [
+                  { type: "stats", items: [{ label: "Main story", value: "8 h" }] },
+                  { type: "tile", value: "53 h", label: "in total" },
+                ],
+              },
+              {
+                type: "bars",
+                label: "Hours played",
+                items: [{ label: "Celeste", value: 40, text: "40 h" }],
+              },
+              {
+                type: "table",
+                caption: "Most played",
+                columns: ["Game", "Hours"],
+                rows: [["Celeste", "40"]],
+                rowHeaders: true,
+              },
+              { type: "list", ordered: false, items: [{ type: "text", text: "One" }] },
+              { type: "progress", label: "Downloading", value: 2, max: 8 },
+              {
+                type: "segmented",
+                label: "Show as",
+                action: "view",
+                value: "chart",
+                options: [
+                  { value: "chart", label: "Chart" },
+                  { value: "table", label: "Table" },
+                ],
+              },
+            ]}
+          />
+          <PluginBoundary plugin={{ id: "dev.caskade.crashy", name: "Crashy" }}>
+            <Broken />
+          </PluginBoundary>
+        </>,
+      );
+    } finally {
+      console.error = errors;
+    }
     expect(survey(seen)).toEqual([]);
   });
 
@@ -1419,3 +1490,8 @@ describe("the shell's catalogued anatomy, and the app-only parts of shared compo
     expect(missing).toEqual([]);
   });
 });
+
+/** A plugin contribution that fails to draw (#109). */
+function Broken(): never {
+  throw new Error("crashy failed to draw");
+}

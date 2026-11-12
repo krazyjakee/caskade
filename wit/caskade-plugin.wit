@@ -67,8 +67,10 @@ interface host {
     plural: func(one: string, other: string, count: u64, context: option<string>) -> string;
 
     /// Reads the library; needs `library: read` (or `write`). `request` is
-    /// JSON: `{"games": {"query": "…", "limit": 50}}` lists games, and
-    /// `{"game": "<id>"}` returns one. Answers are JSON.
+    /// JSON: `{"games": {"query": "…", "limit": 50, "sort": "playtime"}}`
+    /// lists games (`sort` since 0.2.0: `title`, `recent`, `playtime`,
+    /// `added`, `released` or `popular`), and `{"game": "<id>"}` returns
+    /// one. Answers are JSON.
     library-query: func(request: string) -> result<string, plugin-error>;
 
     /// Changes the library; needs `library: write`. `request` is JSON:

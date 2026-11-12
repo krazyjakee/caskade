@@ -10,11 +10,11 @@
 //! writes the files. Pages are fetched through `wasi:http`, so only hosts
 //! in its `network` permission are reachable.
 //!
-//! Its messages show in the language Caskade is in (#219): the backend
-//! asks the host with `host.locale` and picks its translation from
-//! [`SV`]. The manifest's and the UI half's texts come from
-//! `locales/sv.po`, which the host reads; a backend can't read files, so it
-//! carries its own.
+//! Its texts show in the language Caskade is in (#219): the manifest's
+//! come from `locales/sv.po`, which the host reads, and the backend's from
+//! the same catalog through `host.message` (plugin API 0.2, #109). Its game
+//! action, "About game packs", runs here too (`ui.act` with `run`), and
+//! answers with a notice.
 
 wit_bindgen::generate!({
     path: "../../../../wit",
@@ -23,6 +23,7 @@ wit_bindgen::generate!({
 
         world pack {
             include caskade:plugin/plugin@0.2.0;
+            export caskade:plugin/ui@0.2.0;
             export caskade:plugin/install-handler@0.2.0;
             export caskade:plugin/url-resolver@0.2.0;
         }
@@ -47,38 +48,11 @@ fn error(code: &str, message: impl Into<String>) -> PluginError {
     }
 }
 
-/// The backend's messages in Swedish, by their English text. The same
-/// entries are in `locales/sv.po`, so translators see them in one place.
-const SV: &[(&str, &str)] = &[
-    (
-        "the pack ends in the middle of an entry",
-        "paketet tar slut mitt i en post",
-    ),
-    (
-        "a pack holds at most 4096 entries",
-        "ett paket rymmer högst 4096 poster",
-    ),
-    ("an entry name isn't UTF-8", "ett postnamn är inte UTF-8"),
-    (
-        "{path} runs past the end of the pack",
-        "{path} går förbi slutet av paketet",
-    ),
-    ("the pack is empty", "paketet är tomt"),
-    (
-        "a pack is a file of known size",
-        "ett paket är en fil med känd storlek",
-    ),
-];
-
-/// `english` in the language Caskade shows text in, with `{path}` filled
-/// in after the lookup, so a translation can move it.
+/// `english` from the plugin's catalog in the language Caskade shows text
+/// in, with `{path}` filled in after the lookup, so a translation can move
+/// it.
 fn tr(english: &str, path: &str) -> String {
-    let locale = host::locale();
-    let translated = match locale.split('-').next() {
-        Some("sv") => SV.iter().find(|(id, _)| *id == english).map(|(_, sv)| *sv),
-        _ => None,
-    };
-    translated.unwrap_or(english).replace("{path}", path)
+    host::message(english, None).replace("{path}", path)
 }
 
 /// Whether the user prefers packs (`preferPacks` in its settings, on by
@@ -283,7 +257,48 @@ fn get(url: &str) -> Result<String, String> {
     Ok(String::from_utf8_lossy(&page).into_owned())
 }
 
-/// The `plugin` world asks for these; this plugin has no hooks or UI.
+/// Its one game action (#109): what game packs are, as a notice.
+impl exports::caskade::plugin::ui::Guest for Pack {
+    fn render(slot: String, id: String, _context: String) -> Result<String, PluginError> {
+        Err(error("no_ui", format!("this plugin draws no {slot} {id}")))
+    }
+
+    fn act(
+        slot: String,
+        id: String,
+        action: String,
+        _value: String,
+        _context: String,
+    ) -> Result<String, PluginError> {
+        if (slot.as_str(), id.as_str(), action.as_str()) != ("game.actions", "about-packs", "run") {
+            return Err(error("unknown_method", action));
+        }
+        let notice = host::message(
+            "Caskade installs .cpk game packs: drop one on the library, or paste a link to its page on {host}.",
+            None,
+        )
+        .replace("{host}", "games.example.com");
+        Ok(format!(r#"{{"notice": {}}}"#, json_string(&notice)))
+    }
+}
+
+/// `text` as a JSON string.
+fn json_string(text: &str) -> String {
+    let mut out = String::with_capacity(text.len() + 2);
+    out.push('"');
+    for c in text.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            c if (c as u32) < 0x20 => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c => out.push(c),
+        }
+    }
+    out.push('"');
+    out
+}
+
+/// The `plugin` world asks for these; this plugin has no hooks.
 impl exports::caskade::plugin::hooks::Guest for Pack {
     fn on_event(_name: String, _payload: String) {}
 

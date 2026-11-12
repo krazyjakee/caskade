@@ -1,20 +1,24 @@
 //! #133: the example plugins (`plugins/examples/`) install from their
 //! folders, ask for exactly what their manifests declare, and work: GameMode
 //! wraps a real fixture launch in (a fake) `gamemoderun`, HowLongToBeat looks a
-//! title up on a local mock server and caches it, Playtime stats installs as
-//! a UI-only plugin (its view is tested in Vitest). Needs Node with the
-//! workspace's packages and the wasm32-wasip2 target.
+//! title up on a local mock server, caches it and draws its game tab,
+//! Playtime stats draws the most played games and the last session, Caskade
+//! Pack's game action answers in Swedish, and Crashy's broken UI is
+//! contained (plugin API 0.2's drawn UI, #109). Needs Node and the
+//! wasm32-wasip2 target.
 
 use caskade_core::{
     bus::Bus,
     db::LibraryStore,
     launch::{LaunchBefore, LaunchCommand, LaunchService},
-    model::{Game, GameEntry, InstallLocation, InstallState, LaunchSpec, SourceId},
+    model::{Game, GameEntry, InstallLocation, InstallState, LaunchSpec, PlaySession, SourceId},
     settings::SettingsService,
 };
 use caskade_plugin_host::{
-    HostOptions, Limits, Manifest, PluginHooks, PluginHost, PluginServices, settings_namespace,
+    HostError, HostOptions, Limits, Manifest, PluginHooks, PluginHost, PluginServices,
+    settings_namespace,
 };
+use caskade_plugin_ui::{Context, Node};
 use serde_json::{Value, json};
 use std::{
     collections::BTreeMap,
@@ -41,7 +45,13 @@ fn built() -> &'static Path {
     BUILT.get_or_init(|| {
         let status = Command::new("node")
             .arg(examples().join("build.mjs"))
-            .args(["gamemode", "howlongtobeat", "playtime-stats"])
+            .args([
+                "gamemode",
+                "howlongtobeat",
+                "playtime-stats",
+                "caskade-pack",
+                "crashy",
+            ])
             .env(
                 "CARGO_TARGET_DIR",
                 Path::new(env!("CARGO_TARGET_TMPDIR")).join("plugin-guest"),
@@ -59,12 +69,7 @@ fn built() -> &'static Path {
 fn copy(example: &str, into: &Path, change: impl FnOnce(&mut Value)) -> PathBuf {
     let from = built().join(example);
     let to = into.join(example);
-    for file in [
-        "plugin.json",
-        "dist/ui.js",
-        "dist/ui.css",
-        "dist/backend.wasm",
-    ] {
+    for file in ["plugin.json", "dist/backend.wasm", "locales/sv.po"] {
         if from.join(file).is_file() {
             std::fs::create_dir_all(to.join(file).parent().unwrap()).unwrap();
             std::fs::copy(from.join(file), to.join(file)).unwrap();
@@ -136,8 +141,12 @@ async fn install(s: &Setup, folder: &Path) -> String {
     installed.id
 }
 
-#[tokio::test]
-async fn playtime_stats_installs_as_a_ui_only_plugin_asking_for_nothing() {
+fn texts(tree: &[Node]) -> String {
+    serde_json::to_string(tree).unwrap()
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn playtime_stats_draws_the_most_played_games_and_the_last_session() {
     let s = setup().await;
     let folder = copy("playtime-stats", s.temp.path(), |_| {});
     let id = install(&s, &folder).await;
@@ -148,8 +157,135 @@ async fn playtime_stats_installs_as_a_ui_only_plugin_asking_for_nothing() {
         .into_iter()
         .find(|plugin| plugin.id == id)
         .unwrap();
-    assert!(summary.has_ui && !summary.has_backend);
-    assert_eq!(summary.permissions, Some(Default::default()));
+    // Plugin API 0.2: no JavaScript half, a backend that reads the library.
+    assert!(!summary.has_ui && summary.has_backend);
+    assert_eq!(
+        summary.permissions.as_ref().map(|grants| grants.library),
+        Some(caskade_plugin_host::manifest::LibraryAccess::Read)
+    );
+    let view = |state: Value| {
+        let host = s.host.clone();
+        let id = id.clone();
+        async move {
+            host.ui_render(
+                &id,
+                "views",
+                "stats",
+                &Context {
+                    state,
+                    ..Context::default()
+                },
+            )
+            .await
+            .unwrap()
+        }
+    };
+    let empty = texts(&view(Value::Null).await);
+    assert!(empty.contains("No playtime yet"), "{empty}");
+
+    // Two hours of Celeste.
+    let game = Game::new("Celeste");
+    s.store.upsert_game(&game).await.unwrap();
+    let entry = GameEntry::new(&game.id, SourceId::new("fixture"), "fixture");
+    s.store.upsert_entry(&entry).await.unwrap();
+    let session = s
+        .store
+        .start_session(&PlaySession::new(&game.id, &entry.id, 1_000))
+        .await
+        .unwrap();
+    s.store
+        .finish_session(&session.id, 7_201_000, 7_200_000)
+        .await
+        .unwrap();
+    let chart = view(Value::Null).await;
+    let text = texts(&chart);
+    assert!(
+        text.contains(r#""type":"bars""#) && text.contains("Celeste") && text.contains("2.0 h"),
+        "{text}"
+    );
+    // The segmented control's state brings the table.
+    let outcome = s
+        .host
+        .ui_act(
+            &id,
+            "views",
+            "stats",
+            "view",
+            &json!("table"),
+            &Context::default(),
+        )
+        .await
+        .unwrap();
+    let table = texts(&view(outcome.state.unwrap()).await);
+    assert!(table.contains(r#""type":"table""#), "{table}");
+
+    // The last session, kept when a game exits.
+    let exited = json!({"version": 1, "data": {
+        "gameId": game.id, "entryId": entry.id, "sessionId": session.id,
+        "startedAtMs": 1_000, "endedAtMs": 7_201_000, "durationMs": 720_000
+    }})
+    .to_string();
+    s.host.event(&id, "game.exited", &exited).await.unwrap();
+    let last = texts(&view(Value::Null).await);
+    assert!(last.contains("Last session: Celeste, 12 min"), "{last}");
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn caskade_packs_game_action_answers_in_swedish() {
+    let s = setup().await;
+    let folder = copy("caskade-pack", s.temp.path(), |_| {});
+    let id = install(&s, &folder).await;
+    s.host.pin_locale(Some("sv"));
+    let outcome = s
+        .host
+        .ui_act(
+            &id,
+            "game.actions",
+            "about-packs",
+            "run",
+            &Value::Null,
+            &Context {
+                game_id: Some("g1".into()),
+                ..Context::default()
+            },
+        )
+        .await
+        .unwrap();
+    assert_eq!(
+        outcome.notice.as_deref(),
+        Some(
+            "Caskade installerar .cpk-spelpaket: släpp ett på biblioteket, eller klistra in en länk till dess sida på games.example.com."
+        )
+    );
+    s.host.pin_locale(Some("en"));
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn crashys_broken_ui_fails_alone() {
+    let s = setup().await;
+    let folder = copy("crashy", s.temp.path(), |_| {});
+    let id = install(&s, &folder).await;
+    let context = Context::default();
+    // A trap, a tree Caskade refuses, and an error: each an error the app
+    // shows as Crashy's placeholder.
+    assert!(matches!(
+        s.host.ui_render(&id, "views", "broken", &context).await,
+        Err(HostError::Call { .. })
+    ));
+    assert!(matches!(
+        s.host
+            .ui_render(&id, "home.sections", "broken", &context)
+            .await,
+        Err(HostError::BadUi { .. })
+    ));
+    assert!(matches!(
+        s.host
+            .ui_render(&id, "game.details.panels", "broken", &context)
+            .await,
+        Err(HostError::Plugin { .. })
+    ));
+    // It still answers afterwards.
+    assert_eq!(s.host.request(&id, "ping", "").await.unwrap(), "\"pong\"");
 }
 
 #[tokio::test]
@@ -333,6 +469,36 @@ async fn howlongtobeat_looks_titles_up_on_its_allowed_host_and_caches_them() {
     );
     assert_eq!(hits.load(Ordering::SeqCst), 1);
 
+    // The game page's tab (#109): the host names the game, the backend draws
+    // its times from the cache.
+    let game = Game::new("Celeste");
+    s.store.upsert_game(&game).await.unwrap();
+    let tab = s
+        .host
+        .ui_render(
+            &id,
+            "game.details.tabs",
+            "hltb",
+            &Context {
+                game_id: Some(game.id.clone()),
+                ..Context::default()
+            },
+        )
+        .await
+        .unwrap();
+    let text = texts(&tab);
+    for shown in [
+        "How long to beat Celeste",
+        "Main story",
+        "8 h",
+        "11.5 h",
+        "41 h",
+        "From howlongtobeat.com: Celeste",
+    ] {
+        assert!(text.contains(shown), "{shown} in {text}");
+    }
+    assert_eq!(hits.load(Ordering::SeqCst), 1);
+
     // Another host is refused by the network permission.
     s.settings
         .set(
@@ -347,5 +513,25 @@ async fn howlongtobeat_looks_titles_up_on_its_allowed_host_and_caches_them() {
             .request(&id, "lookup", &json!({"title": "Hades"}).to_string())
             .await
             .is_err()
+    );
+    // The tab says so instead of failing.
+    let hades = Game::new("Hades");
+    s.store.upsert_game(&hades).await.unwrap();
+    let tab = s
+        .host
+        .ui_render(
+            &id,
+            "game.details.tabs",
+            "hltb",
+            &Context {
+                game_id: Some(hades.id.clone()),
+                ..Context::default()
+            },
+        )
+        .await
+        .unwrap();
+    assert!(
+        matches!(&tab[0], Node::Alert { text } if text.starts_with("HowLongToBeat couldn't be reached")),
+        "{tab:?}"
     );
 }

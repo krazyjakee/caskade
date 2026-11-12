@@ -38,6 +38,22 @@ impl PluginHost {
         Ok(())
     }
 
+    /// `context` with its game's title, for a game slot.
+    async fn with_title(&self, context: &Context) -> Context {
+        let mut context = context.clone();
+        if let (Some(game), None) = (&context.game_id, &context.game_title) {
+            context.game_title = self
+                .services()
+                .store
+                .game(game)
+                .await
+                .ok()
+                .flatten()
+                .map(|game| game.title);
+        }
+        context
+    }
+
     fn bad(id: &str, error: impl std::fmt::Display) -> HostError {
         HostError::BadUi {
             id: id.to_owned(),
@@ -55,7 +71,8 @@ impl PluginHost {
         context: &Context,
     ) -> Result<Vec<Node>> {
         self.declared(id, slot, contribution)?;
-        let context = serde_json::to_string(context).map_err(|error| Self::bad(id, error))?;
+        let context = self.with_title(context).await;
+        let context = serde_json::to_string(&context).map_err(|error| Self::bad(id, error))?;
         let answer = self
             .call(id, async |instance| {
                 instance.ui_render(slot, contribution, &context).await
@@ -78,7 +95,8 @@ impl PluginHost {
         context: &Context,
     ) -> Result<Outcome> {
         self.declared(id, slot, contribution)?;
-        let context = serde_json::to_string(context).map_err(|error| Self::bad(id, error))?;
+        let context = self.with_title(context).await;
+        let context = serde_json::to_string(&context).map_err(|error| Self::bad(id, error))?;
         let value = value.to_string();
         let answer = self
             .call(id, async |instance| {

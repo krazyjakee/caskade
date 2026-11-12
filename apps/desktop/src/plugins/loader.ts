@@ -8,6 +8,7 @@ import {
 import { t } from "@lingui/core/macro";
 import { errorMessage } from "../api/reply";
 import { effectSubscription } from "../api/subscription";
+import { drawnDefinition } from "./drawn";
 import type { PluginRegistry } from "./registry";
 import { pluginSettingsNamespace } from "./settingsNamespace";
 import type { PluginEventName, PluginUiApi, UiPlugin } from "./types";
@@ -48,8 +49,11 @@ export class PluginLoader {
     this.active.set(plugin.id, loaded);
     try {
       if (plugin.style) loaded.dispose.push(this.style(plugin));
+      // A 0.2 plugin's backend draws its UI (#109): nothing to import.
       const [module, i18n] = await Promise.all([
-        this.importModule(plugin.entry),
+        plugin.drawn
+          ? { default: drawnDefinition(plugin, this.api) }
+          : this.importModule(plugin.entry),
         this.catalog(plugin),
       ]);
       const definition = module.default as PluginDefinition | undefined;

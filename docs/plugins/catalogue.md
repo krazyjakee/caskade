@@ -39,7 +39,7 @@ Publishing the curated origin is a release step for the maintainer; see [Publish
       "releases": [
         {
           "version": "0.1.0",
-          "api": "^0.1",
+          "api": "^0.2",
           "os": ["linux", "windows", "macos"],
           "modes": ["desktop", "console"],
           "permissions": ["library.read"],
@@ -145,7 +145,7 @@ Screenshots load through `addons_media(id, index)`. The artwork cache downloads 
 
 ### Permissions
 
-**A first plugin install** comes back as `needsReview` with the plugin's preview: its permissions, contributions and whether it has a UI half. The UI shows the existing review, and only an install with `accept` enables the plugin and grants what it asks.
+**A first plugin install** comes back as `needsReview` with the plugin's preview: its permissions, contributions and whether it has a (deprecated, plugin API 0.1) JavaScript UI half. The UI shows the existing review, and only an install with `accept` enables the plugin and grants what it asks.
 
 **An update** keeps the user's grant. If the new version asks for more, the plugin host's own rule leaves it **off and waiting for consent** (`needsConsent`, Settings → Plugins); nothing new is granted silently.
 

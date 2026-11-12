@@ -3,8 +3,10 @@ export declare function validId(id: string): boolean;
 export interface GenerateOptions {
   id: string;
   name: string;
+  /** A view the backend draws. */
   ui: boolean;
-  backend: boolean;
+  /** May only be true: from plugin API 0.2 every plugin has a backend. */
+  backend?: boolean;
   /** Must not exist or be empty. */
   dir: string;
   /** A Caskade checkout to link the unpublished SDK packages from. */
