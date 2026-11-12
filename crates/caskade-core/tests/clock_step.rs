@@ -13,7 +13,7 @@ use caskade_core::{
 };
 use std::{
     process::{Child, Command, Stdio},
-    time::{Duration, SystemTime},
+    time::{Duration, Instant, SystemTime},
 };
 use sysinfo::{Pid, ProcessRefreshKind, ProcessesToUpdate, System};
 
@@ -47,17 +47,24 @@ fn step(seconds: i64) {
 struct Stepped(i64);
 
 impl Stepped {
+    /// Steps the clock by `seconds` and checks the step Caskade sees: the
+    /// wall clock's change less the time the step itself took, which the
+    /// monotonic clock measures. PowerShell can take most of a minute to
+    /// start on a CI runner, which once read as a 643 s step (#134).
     fn by(seconds: i64) -> Self {
-        let before = SystemTime::now();
+        let (wall, monotonic) = (SystemTime::now(), Instant::now());
         step(seconds);
+        let took = monotonic.elapsed().as_secs_f64();
         let stepped = Self(seconds);
-        let moved = match SystemTime::now().duration_since(before) {
+        let changed = match SystemTime::now().duration_since(wall) {
             Ok(ahead) => ahead.as_secs_f64(),
             Err(behind) => -behind.duration().as_secs_f64(),
         };
+        let moved = changed - took;
+        println!("stepped {seconds} s in {took:.1} s: the clock moved {moved:.1} s");
         assert!(
             (moved - seconds as f64).abs() < 30.0,
-            "asked for {seconds} s, moved {moved} s"
+            "asked for {seconds} s, moved {moved} s (the wall clock {changed} s in {took} s)"
         );
         stepped
     }

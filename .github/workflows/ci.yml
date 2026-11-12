@@ -175,10 +175,13 @@ jobs:
       # The system clock stepped for real, here where nothing else is running:
       # Stop and session recovery still know the game. The same selection as
       # above, so nothing is built again.
+      # The time service stops first, so a resync can't land in the step
+      # (#134).
       - name: A real clock step
         env:
           CASKADE_TEST_NATIVE: "1"
         run: >-
+          { sudo systemctl stop chrony systemd-timesyncd 2>/dev/null || true; } &&
           cargo test -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-app -p caskade-ui-data -p caskade-ui-input -p caskade-ui-i18n -p caskade-ui-theme -p caskade-player -p caskade-desktop -p caskade-native -p caskade-input
           -p caskade-plugin-host -p caskade-theme -p caskade-component-cache
           -p caskade-jobs -p caskade-plugin-sdk -p caskade-sync -p caskade-i18n
@@ -315,10 +318,14 @@ jobs:
         env:
           CASKADE_TEST_NATIVE: "1"
         run: "cargo test -p caskade-streaming --test it --locked windows_elevation:: -- --ignored --nocapture"
+      # The time service stops first, so a resync can't land in the step
+      # (#134).
       - name: A real clock step
         env:
           CASKADE_TEST_NATIVE: "1"
-        run: "cargo test -p caskade-core --test it --locked clock_step:: -- --ignored --nocapture"
+        run: |
+          net stop w32time || true
+          cargo test -p caskade-core --test it --locked clock_step:: -- --ignored --nocapture
       - name: Device detection from the real registry
         run: "cargo test -p caskade-core --test it --locked device_defaults::windows_ -- --nocapture"
       # A real program's saves in the real %APPDATA% and Documents, to a

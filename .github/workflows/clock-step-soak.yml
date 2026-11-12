@@ -1,0 +1,39 @@
+name: clock-step-soak
+# Temporary (#134): the windows-elevation job's real clock step, 20 times on
+# 20 runners, to show it no longer fails on the runner's clock. Removed once
+# it has passed.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  clock-step:
+    strategy:
+      fail-fast: false
+      matrix:
+        run: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: windows-elevation
+          save-if: false
+      - name: A real clock step
+        env:
+          CASKADE_TEST_NATIVE: "1"
+        run: |
+          net stop w32time || true
+          cargo test -p caskade-core --test it --locked clock_step:: -- --ignored --nocapture
