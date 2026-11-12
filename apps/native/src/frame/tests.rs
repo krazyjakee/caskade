@@ -155,6 +155,18 @@ impl Window {
         })
     }
 
+    /// Every element under `root` whose `name` attribute is `value`.
+    pub(crate) fn find_all_in(&self, root: NodeId, name: &str, value: &str) -> Vec<NodeId> {
+        let doc = self.doc.inner.borrow();
+        self.find_all(name, value)
+            .into_iter()
+            .filter(|&node| {
+                std::iter::successors(Some(node), |&id| doc.get_node(id).and_then(|n| n.parent))
+                    .any(|id| id == root)
+            })
+            .collect()
+    }
+
     pub(crate) fn find(&self, name: &str, value: &str) -> Option<NodeId> {
         self.find_all(name, value).into_iter().next()
     }
@@ -371,7 +383,7 @@ fn every_page_of_the_webview_opens() {
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open();
     for (href, shows) in [
-        ("/", "Home"),
+        ("/", "Welcome back"),
         ("/store?tab=upcoming", "Store"),
         ("/games/abc?from=%2F", "Game"),
         ("/store/games/1001", "Game"),

@@ -721,6 +721,9 @@
   .min-h-12 {
     min-height: calc(calc(0.25rem * var(--cs-density-scale)) * 12);
   }
+  .min-h-64 {
+    min-height: calc(calc(0.25rem * var(--cs-density-scale)) * 64);
+  }
   .min-h-full {
     min-height: 100%;
   }
@@ -1652,6 +1655,9 @@
   }
   .p-8 {
     padding: calc(calc(0.25rem * var(--cs-density-scale)) * 8);
+  }
+  .p-10 {
+    padding: calc(calc(0.25rem * var(--cs-density-scale)) * 10);
   }
   .p-12 {
     padding: calc(calc(0.25rem * var(--cs-density-scale)) * 12);

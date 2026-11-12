@@ -72,6 +72,14 @@ pub fn run(out: &Path, themes_folder: Option<&Path>) -> Result<(), String> {
             crate::frame::shot::screen,
             Some(crate::frame::shot::ready),
         )?;
+        render(
+            out,
+            &themes,
+            &info.id,
+            "home",
+            crate::frame::shot::home,
+            Some(crate::frame::shot::home_ready),
+        )?;
     }
     Ok(())
 }

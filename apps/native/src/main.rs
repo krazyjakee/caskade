@@ -29,6 +29,7 @@ mod gallery;
 mod game;
 // Games' menus, quick looks and the dialogs they open (#99).
 mod game_menu;
+mod home;
 mod i18n;
 mod input;
 mod launch;

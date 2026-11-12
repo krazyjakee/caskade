@@ -1362,6 +1362,7 @@ msgstr[1] ""
 
 #. Home's header: the library's total playtime and the games running now
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "{total} total · {active} running"
 msgstr ""
 
@@ -3202,6 +3203,7 @@ msgid "Browse for {label}"
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "Browse library →"
 msgstr ""
 
@@ -4564,6 +4566,7 @@ msgid "Continue"
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "Continue Playing"
 msgstr ""
 
@@ -4711,6 +4714,7 @@ msgid "Could not load the list."
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "Could not load these games."
 msgstr ""
 
@@ -4728,6 +4732,7 @@ msgid "Could not load your collections."
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "Could not load your recent activity."
 msgstr ""
 
@@ -7038,7 +7043,6 @@ msgstr ""
 #: apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
 #: apps/native/src/frame/sidebar.rs
-#: apps/native/src/frame/views.rs
 #: apps/native/src/game/back.rs
 #: apps/native/src/settings/general.rs
 msgctxt "navigation"
@@ -8182,11 +8186,13 @@ msgstr ""
 
 #. Home: the paired device a game's latest session was played on
 #: apps/desktop/src/views/home/PlayedOn.tsx
+#: apps/native/src/home/mod.rs
 msgid "Last played on {device}"
 msgstr ""
 
 #. Home: a game's latest session was played on a device this one isn't paired with
 #: apps/desktop/src/views/home/PlayedOn.tsx
+#: apps/native/src/home/mod.rs
 msgid "Last played on another device"
 msgstr ""
 
@@ -8592,6 +8598,7 @@ msgid "Loading plugins…"
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "Loading recent games…"
 msgstr ""
 
@@ -9453,6 +9460,7 @@ msgstr ""
 #: apps/desktop/src/components/ShelfRow.tsx
 #: apps/desktop/src/shell/console/ConsoleShell.tsx
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
+#: apps/native/src/home/shelf_row.rs
 #: apps/native/src/library/grid.rs
 msgid "Next page"
 msgstr ""
@@ -9757,6 +9765,7 @@ msgid "No selectable options were supplied. Leave this job waiting or cancel it 
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "No sessions yet. Pick something from your library."
 msgstr ""
 
@@ -10612,6 +10621,7 @@ msgstr ""
 #. Button hint: a pad's Start opens the focused item's menu
 #: apps/desktop/src/views/CollectionsView.tsx
 #: apps/desktop/src/views/library/GameActions.tsx
+#: apps/native/src/home/mod.rs
 #: apps/native/src/library/grid.rs
 msgid "Options"
 msgstr ""
@@ -11449,6 +11459,7 @@ msgstr ""
 #: apps/desktop/src/components/ShelfRow.tsx
 #: apps/desktop/src/shell/console/ConsoleShell.tsx
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
+#: apps/native/src/home/shelf_row.rs
 #: apps/native/src/library/grid.rs
 msgid "Previous page"
 msgstr ""
@@ -11786,6 +11797,7 @@ msgid "Recently added"
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "Recently Added"
 msgstr ""
 
@@ -11798,6 +11810,7 @@ msgid "Recently played"
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "Recently Played"
 msgstr ""
 
@@ -11813,6 +11826,7 @@ msgid "Recently released"
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "Recently Released"
 msgstr ""
 
@@ -12529,6 +12543,7 @@ msgid "Results for “{query}”"
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "Resume · View details"
 msgstr ""
 
@@ -16257,6 +16272,7 @@ msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
 #: apps/desktop/src/views/StoreView.tsx
+#: apps/native/src/home/mod.rs
 msgid "View all →"
 msgstr ""
 
@@ -16426,6 +16442,7 @@ msgid "Weekly"
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
+#: apps/native/src/home/mod.rs
 msgid "Welcome back"
 msgstr ""
 

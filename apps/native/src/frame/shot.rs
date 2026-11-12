@@ -1,7 +1,8 @@
 //! The `shell` reference screen (#96): the real frame, over the fixture
-//! library, open on the library's grid, for the theme screenshots
-//! (`crate::shots`). Its data loads after the first render, so the shot
-//! waits until the grid's cards are there ([`ready`]).
+//! library, open on the library's grid, and `home` (#98), open on Home, for
+//! the theme screenshots (`crate::shots`). Their data loads after the first
+//! render, so a shot waits until the cards are there ([`ready`],
+//! [`home_ready`]).
 
 use crate::data::{DataSource, use_data_source};
 use crate::input::InputRoot;
@@ -14,6 +15,15 @@ use std::sync::OnceLock;
 static SOURCE: OnceLock<DataSource> = OnceLock::new();
 
 pub fn screen() -> Element {
+    framed("/library?filter=all&sort=title&layout=grid")
+}
+
+/// The `home` reference screen (#98): the same frame opened on Home.
+pub fn home() -> Element {
+    framed("/")
+}
+
+fn framed(start: &'static str) -> Element {
     use_data_source(|| {
         SOURCE
             .get_or_init(|| {
@@ -26,7 +36,7 @@ pub fn screen() -> Element {
     });
     rsx! {
         InputRoot {
-            super::Frame { start: "/library?filter=all&sort=title&layout=grid" }
+            super::Frame { start }
         }
     }
 }
@@ -38,4 +48,15 @@ pub fn ready(doc: &BaseDocument) -> bool {
         found |= node.attr(LocalName::from("data-index")).is_some();
     });
     found
+}
+
+/// Whether Home has its data: its shelves show games.
+pub fn home_ready(doc: &BaseDocument) -> bool {
+    let mut cards = 0;
+    let mut hero = false;
+    doc.visit(|_, node| {
+        cards += usize::from(node.attr(LocalName::from("data-cs")) == Some("game-card"));
+        hero |= node.attr(LocalName::from("data-part")) == Some("eyebrow");
+    });
+    hero && cards >= 24
 }

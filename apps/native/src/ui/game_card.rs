@@ -127,6 +127,9 @@ pub struct CardGame {
     pub stores: Option<usize>,
     /// The managed copy is unavailable (`data-storage-status`).
     pub storage_unavailable: bool,
+    /// The other device it was last played on, in place of the subtitle
+    /// (Home's Recently Played).
+    pub played_on: Option<String>,
 }
 
 impl CardGame {
@@ -264,7 +267,9 @@ pub fn GameCard(
             }
             div { class: "flex min-w-0 shrink-0 flex-col gap-1 px-3 py-2.5",
                 p { "data-part": "title", class: "truncate text-sm font-semibold", "{game.title}" }
-                if variant != CardVariant::Recent && let Some(subtitle) = &game.subtitle {
+                if let Some(played_on) = &game.played_on {
+                    p { "data-part": "played-on", title: "{played_on}", class: "truncate text-xs text-fg-subtle", "{played_on}" }
+                } else if variant != CardVariant::Recent && let Some(subtitle) = &game.subtitle {
                     p { "data-part": "subtitle", class: "truncate text-xs text-fg-subtle", "{subtitle}" }
                 }
                 if variant != CardVariant::Library && variant != CardVariant::Web {

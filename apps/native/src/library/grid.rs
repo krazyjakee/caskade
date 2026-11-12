@@ -525,14 +525,24 @@ fn card_node(doc: &BaseDocument, scroller: NodeId, index: usize) -> Option<NodeI
 pub const LIST_COLUMNS: &str = "minmax(0,1fr) 7.5rem 7.5rem 5rem 5.5rem 2rem";
 
 /// One game: a card in the grid, a row in the list (`ui::GameCard`,
-/// `ui::GameRow`, #93).
+/// `ui::GameRow`, #93), and the card on Home's shelves (the webview's
+/// `LibraryCard`, everywhere).
 #[component]
-fn Game(
+pub(crate) fn Game(
     game: GameSummary,
     index: usize,
-    list: bool,
-    focused: Signal<Option<usize>>,
-    open: Option<EventHandler<String>>,
+    #[props(default)] list: bool,
+    /// The grid's focused game, kept as focus moves.
+    #[props(default)]
+    focused: Option<Signal<Option<usize>>>,
+    #[props(default)] open: Option<EventHandler<String>>,
+    /// The other device it was last played on, in place of its platform
+    /// (Home's Recently Played).
+    #[props(default)]
+    show_played_on: bool,
+    /// A pad starts on the first one (the grid's; a shelf's isn't).
+    #[props(default = true)]
+    focus_first: bool,
 ) -> Element {
     let menus = crate::game_menu::use_game_menus();
     let target = crate::game_menu::Target {
@@ -569,7 +579,9 @@ fn Game(
         }
     };
     let on_focus = move |_| {
-        if *focused.peek() != Some(index) {
+        if let Some(mut focused) = focused
+            && *focused.peek() != Some(index)
+        {
             focused.set(Some(index));
         }
     };
@@ -636,7 +648,7 @@ fn Game(
     let starting = menus.is_some_and(|menus| menus.starting(&game.id));
     let focus_key = format!("game-{}", game.id);
     // A pad starts on the first game.
-    let first = (index == 0).then_some("true");
+    let first = (focus_first && index == 0).then_some("true");
     let card = if list {
         let icon = art::url(game.icon.as_ref(), Variant::Icon);
         rsx! {
@@ -671,9 +683,13 @@ fn Game(
         }
     } else {
         let cover = art::url(game.cover.as_ref(), Variant::Card);
+        let mut card = CardGame::from_summary(&game, cover);
+        if show_played_on {
+            card.played_on = crate::home::played_on_label(game.last_played_on.as_ref());
+        }
         rsx! {
             GameCard {
-                game: CardGame::from_summary(&game, cover),
+                game: card,
                 index,
                 selected,
                 starting,

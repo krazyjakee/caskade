@@ -76,11 +76,13 @@ pub fn art_url_card(art: Option<&caskade_core::model::Artwork>) -> Option<String
 }
 pub use anatomy::ANATOMY;
 pub(crate) use bulk_edit::{ListInput, TextAreaField, field_label};
+pub(crate) use grid::Game as LibraryCard;
 #[allow(unused_imports)]
 pub use grid::{Events, VirtualLibrary};
 #[allow(unused_imports)]
 pub use view::{DropInstall, LibraryView};
 pub use window::Layout;
+pub(crate) use window::{GRID_GAP, GRID_ROW, MIN_CARD};
 
 /// A Unix time in milliseconds on the user's clock.
 pub fn local_date_time(ms: i64) -> caskade_ui_i18n::intl::DateTime {

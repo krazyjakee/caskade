@@ -815,7 +815,7 @@ State on the root:
 
 ## `shelf-row`
 
-A row of game cards that pages with LB/RB (Home's shelves). Rendered by ShelfRow (app).
+A row of game cards that pages with LB/RB (Home's shelves). Rendered by ShelfRow (apps/native/src/home/shelf_row.rs); in the webview, ShelfRow (app).
 
 Root: `[data-cs="shelf-row"]`
 

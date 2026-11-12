@@ -1361,7 +1361,7 @@ msgstr[0] "Välj alla # spel"
 msgstr[1] "Välj alla # spel"
 
 #. Home's header: the library's total playtime and the games running now
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "{total} total · {active} running"
 msgstr "{total} totalt · {active} körs"
 
@@ -3151,7 +3151,7 @@ msgstr "Bläddra"
 msgid "Browse for {label}"
 msgstr "Bläddra efter {label}"
 
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "Browse library →"
 msgstr "Bläddra i biblioteket →"
 
@@ -4455,7 +4455,7 @@ msgstr "Konsolläge, fönster och startval"
 msgid "Continue"
 msgstr "Fortsätt"
 
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "Continue Playing"
 msgstr "Fortsätt spela"
 
@@ -4599,7 +4599,7 @@ msgstr "Kunde inte läsa in spelen."
 msgid "Could not load the list."
 msgstr "Kunde inte läsa in listan."
 
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "Could not load these games."
 msgstr "Kunde inte läsa in de här spelen."
 
@@ -4615,7 +4615,7 @@ msgstr "Kunde inte läsa in det här spelet"
 msgid "Could not load your collections."
 msgstr "Kunde inte läsa in dina samlingar."
 
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "Could not load your recent activity."
 msgstr "Kunde inte läsa in din senaste aktivitet."
 
@@ -6869,8 +6869,8 @@ msgstr "Högre ser skarpare ut och kräver ett snabbare nätverk."
 #. The sidebar link to the home view
 #: apps/desktop/src/shell/nav.ts apps/desktop/src/views/game/origin.ts
 #: apps/desktop/src/views/settings/GeneralSettings.tsx
-#: apps/native/src/frame/sidebar.rs apps/native/src/frame/views.rs
-#: apps/native/src/game/back.rs apps/native/src/settings/general.rs
+#: apps/native/src/frame/sidebar.rs apps/native/src/game/back.rs
+#: apps/native/src/settings/general.rs
 msgctxt "navigation"
 msgid "Home"
 msgstr "Hem"
@@ -7968,14 +7968,14 @@ msgid "Last played"
 msgstr "Senast spelat"
 
 #. Home: the paired device a game's latest session was played on
-#: apps/desktop/src/views/home/PlayedOn.tsx
+#: apps/desktop/src/views/home/PlayedOn.tsx apps/native/src/home/mod.rs
 #, fuzzy
 #| msgid "Play on {device}"
 msgid "Last played on {device}"
 msgstr "Spela på {device}"
 
 #. Home: a game's latest session was played on a device this one isn't paired with
-#: apps/desktop/src/views/home/PlayedOn.tsx
+#: apps/desktop/src/views/home/PlayedOn.tsx apps/native/src/home/mod.rs
 #, fuzzy
 #| msgid "Set up from another device"
 msgid "Last played on another device"
@@ -8364,7 +8364,7 @@ msgstr "Läser in aviseringar…"
 msgid "Loading plugins…"
 msgstr "Läser in tillägg…"
 
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "Loading recent games…"
 msgstr "Läser in senaste spel…"
 
@@ -9193,7 +9193,7 @@ msgstr "Nästa {0}."
 #: apps/desktop/src/components/ShelfRow.tsx
 #: apps/desktop/src/shell/console/ConsoleShell.tsx
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
-#: apps/native/src/library/grid.rs
+#: apps/native/src/home/shelf_row.rs apps/native/src/library/grid.rs
 msgid "Next page"
 msgstr "Nästa sida"
 
@@ -9490,7 +9490,7 @@ msgstr "Inga skript körs vid start."
 msgid "No selectable options were supplied. Leave this job waiting or cancel it in Activity."
 msgstr "Inga valbara alternativ angavs. Låt jobbet vänta eller avbryt det i Aktivitet."
 
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "No sessions yet. Pick something from your library."
 msgstr "Inga sessioner än. Välj något från ditt bibliotek."
 
@@ -10314,7 +10314,7 @@ msgstr "Valfritt. Ett kommando att köra först; om det misslyckas startar inte 
 
 #. Button hint: a pad's Start opens the focused item's menu
 #: apps/desktop/src/views/CollectionsView.tsx
-#: apps/desktop/src/views/library/GameActions.tsx
+#: apps/desktop/src/views/library/GameActions.tsx apps/native/src/home/mod.rs
 #: apps/native/src/library/grid.rs
 msgid "Options"
 msgstr "Alternativ"
@@ -11123,7 +11123,7 @@ msgstr "Föregående bokstav"
 #: apps/desktop/src/components/ShelfRow.tsx
 #: apps/desktop/src/shell/console/ConsoleShell.tsx
 #: apps/desktop/src/views/library/VirtualLibrary.tsx
-#: apps/native/src/library/grid.rs
+#: apps/native/src/home/shelf_row.rs apps/native/src/library/grid.rs
 msgid "Previous page"
 msgstr "Föregående sida"
 
@@ -11444,7 +11444,7 @@ msgctxt "library sort"
 msgid "Recently added"
 msgstr "Nyligen tillagda"
 
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "Recently Added"
 msgstr "Nyligen tillagda"
 
@@ -11455,7 +11455,7 @@ msgctxt "library sort"
 msgid "Recently played"
 msgstr "Nyligen spelade"
 
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "Recently Played"
 msgstr "Nyligen spelade"
 
@@ -11470,7 +11470,7 @@ msgstr "Nyligen spelade"
 msgid "Recently released"
 msgstr "Nyligen släppta"
 
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "Recently Released"
 msgstr "Nyligen släppta"
 
@@ -12164,7 +12164,7 @@ msgstr "Resultat"
 msgid "Results for “{query}”"
 msgstr "Resultat för ”{query}”"
 
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "Resume · View details"
 msgstr "Fortsätt · Visa detaljer"
 
@@ -15776,7 +15776,7 @@ msgid "Videos"
 msgstr "Videor"
 
 #: apps/desktop/src/views/home/HomeView.tsx
-#: apps/desktop/src/views/StoreView.tsx
+#: apps/desktop/src/views/StoreView.tsx apps/native/src/home/mod.rs
 msgid "View all →"
 msgstr "Visa alla →"
 
@@ -15942,7 +15942,7 @@ msgstr "Webbplats"
 msgid "Weekly"
 msgstr "Varje vecka"
 
-#: apps/desktop/src/views/home/HomeView.tsx
+#: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "Welcome back"
 msgstr "Välkommen tillbaka"
 

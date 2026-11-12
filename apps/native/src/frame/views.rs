@@ -5,7 +5,7 @@
 
 use crate::router::{LibraryRoute, Route, use_router};
 use caskade_core::model::GameFilter;
-use caskade_ui_i18n::{t, tp};
+use caskade_ui_i18n::t;
 use dioxus_native::prelude::*;
 
 /// The page the router shows.
@@ -14,11 +14,9 @@ pub fn Outlet() -> Element {
     let router = use_router();
     let route = router.route();
     match route {
-        Route::Home => placeholder(tp!(
-            note = "The sidebar link to the home view",
-            "navigation",
-            "Home"
-        )),
+        Route::Home => rsx! {
+            crate::home::HomeView {}
+        },
         Route::Library(library) => rsx! {
             Library { library }
         },
