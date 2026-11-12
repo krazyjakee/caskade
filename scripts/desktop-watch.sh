@@ -36,6 +36,20 @@ windows() { # top-level windows, by id and name
   [ -n "$display" ] || return 0
   xwininfo -display "$display" -root -children 2>/dev/null | grep -E '^ +0x' | awk '{print $1}' || true
 }
+# A new window's name, class and process, read while it's there: a window
+# a test opens can be gone by the end.
+describe() {
+  local id pid
+  while read -r id; do
+    grep -q "^$id " "$work/described" 2>/dev/null && continue
+    pid=$(xprop -display "$display" -id "$id" _NET_WM_PID 2>/dev/null | awk '{print $NF}')
+    printf '%s %s %s pid %s: %s\n' "$id" \
+      "$(xprop -display "$display" -id "$id" WM_NAME 2>/dev/null | cut -d= -f2-)" \
+      "$(xprop -display "$display" -id "$id" WM_CLASS 2>/dev/null | cut -d= -f2-)" \
+      "${pid:-?}" \
+      "$(tr '\0' ' ' <"/proc/${pid:-0}/cmdline" 2>/dev/null | cut -c1-200)" >>"$work/described"
+  done
+}
 items | sort -u >"$work/items.before"
 windows | sort -u >"$work/windows.before"
 monitor_pid=
@@ -49,7 +63,7 @@ fi
 (
   while :; do
     items >>"$work/items.during"
-    windows >>"$work/windows.during"
+    windows | tee -a "$work/windows.during" | sort -u | comm -13 "$work/windows.before" - | describe
     sleep 0.2
   done
 ) &
@@ -69,6 +83,7 @@ echo "desktop-watch: display ${display:-none}, bus ${bus:-none}; command exited 
 echo "  tray icons added: $(printf '%s' "$new_items" | grep -c . || true)"
 [ -z "$new_items" ] || printf '    %s\n' $new_items
 echo "  top-level windows added: $(printf '%s' "$new_windows" | grep -c . || true)"
+[ -z "$new_windows" ] || sed 's/^/    /' "$work/described" 2>/dev/null || true
 echo "  notifications sent: ${notifications:-0}"
 rm -rf "$work"
 if [ -n "$new_items" ] || [ -n "$new_windows" ] || [ "${notifications:-0}" != 0 ]; then

@@ -66,7 +66,7 @@ pub async fn copy_path(entry_id: String) -> Result<(), ErrorReport> {
     crate::data::change(async move {
         let path =
             caskade_app::commands::library::game_entry_path(&services.store, &entry_id).await?;
-        caskade_app::commands::clipboard::clipboard_write_text(path).map_err(failed)
+        crate::paste::copy_text(path).map_err(failed)
     })
     .await
 }

@@ -72,6 +72,19 @@ pub fn follow(event: &WindowEvent) -> bool {
     true
 }
 
+/// Puts `text` on the clipboard, for the Copy buttons. Unit tests copy to
+/// [`tests::copied`] instead: the system clipboard is the display's, which
+/// is the developer's desktop when the tests run there (#122).
+pub fn copy_text(text: String) -> Result<(), String> {
+    #[cfg(test)]
+    {
+        *tests::COPIED.lock().unwrap_or_else(|e| e.into_inner()) = Some(text);
+        Ok(())
+    }
+    #[cfg(not(test))]
+    caskade_app::commands::clipboard::clipboard_write_text(text)
+}
+
 /// What a paste can install, as the webview's `installationText`: one
 /// http(s) URL without credentials, a magnet link with a BitTorrent info
 /// hash, or an absolute path; no line breaks, at most 32 KiB.
@@ -122,6 +135,13 @@ pub mod tests {
     use super::*;
 
     static CLIPBOARD: Mutex<Option<String>> = Mutex::new(None);
+    /// What the Copy buttons last copied.
+    pub(super) static COPIED: Mutex<Option<String>> = Mutex::new(None);
+
+    #[allow(dead_code, reason = "for tests that check a Copy button")]
+    pub fn copied() -> Option<String> {
+        COPIED.lock().unwrap_or_else(|e| e.into_inner()).clone()
+    }
 
     /// What a paste reads in tests; `None` reads nothing.
     pub fn set_clipboard(text: Option<&str>) {

@@ -218,7 +218,7 @@ pub fn ShareGameDialog(
                     id: "share-copy",
                     icon: COPY,
                     "data-focus-default": "true",
-                    on_press: move |_| copied.set(caskade_app::commands::clipboard::clipboard_write_text(copy_link.clone()).is_ok()),
+                    on_press: move |_| copied.set(crate::paste::copy_text(copy_link.clone()).is_ok()),
                     if copied() { {t!("Copied")} } else { {tp!("button", "Copy")} }
                 }
             }

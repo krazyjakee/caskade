@@ -24,7 +24,8 @@ def main():
                 if name.is_absolute() or '..' in name.parts:raise RuntimeError('unsafe builder ZIP')
             archive.extractall(tools)
     env=os.environ|{'WINEPREFIX':str(CACHE/'prefix'),'WINEDEBUG':'-all','WINEDLLOVERRIDES':'winemenubuilder.exe=d'}
-    def wine(argv,cwd=None):subprocess.run(['xvfb-run','-a','wine',*map(str,argv)],cwd=cwd,env=env,check=True,timeout=180)
+    # A desktop of its own (#122): xvfb-run alone leaves Wine on the developer's session bus.
+    def wine(argv,cwd=None):subprocess.run([str(ROOT/'scripts/private-desktop.sh'),'--','wine',*map(str,argv)],cwd=cwd,env=env,check=True,timeout=180)
     if not (CACHE/'prefix/drive_c/windows/mono').exists():wine(['msiexec','/i',win(mono),'/qn','/norestart'])
     build=CACHE/'build';build.mkdir(exist_ok=True)
     wine([win(tools/'candle.exe'),'-nologo','-ext',win(tools/'WixBalExtension.dll'),'-dPayload='+win(FIX/pins['payload']),'-out',win(build/'bundle.wixobj'),win(SRC/'bundle.wxs')],build)

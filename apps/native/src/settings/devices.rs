@@ -722,7 +722,7 @@ fn NearbySection(devices: DeviceSync) -> Element {
                                         let url = info.url.clone();
                                         link.set(Some(info));
                                         // Through the core: the clipboard is the app's.
-                                        copied.set(Some(caskade_app::commands::clipboard::clipboard_write_text(url).is_ok()));
+                                        copied.set(Some(crate::paste::copy_text(url).is_ok()));
                                     },
                                 );
                             }

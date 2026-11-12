@@ -44,8 +44,12 @@ def winpath(path):
 def wine(args, cwd=None):
     if os.name == 'nt':
         return run(args, cwd)
-    env = os.environ | {'WINEPREFIX': str(CACHE / 'wine'), 'WINEDEBUG': '-all'}
-    return run(['xvfb-run', '-a', 'wine', *args], cwd, env)
+    # A desktop of its own (#122): xvfb-run alone leaves Wine on the
+    # developer's session bus, and winemenubuilder would add menu entries.
+    env = os.environ | {'WINEPREFIX': str(CACHE / 'wine'), 'WINEDEBUG': '-all',
+                        'WINEDLLOVERRIDES': 'winemenubuilder.exe=d'}
+    desktop = str(ROOT / 'scripts/private-desktop.sh')
+    return run([desktop, '--', 'wine', *args], cwd, env)
 
 
 def download(name, prepare):

@@ -76,7 +76,16 @@ exec "$3" 1.0
         ),
         ("XDG_CURRENT_DESKTOP".into(), "X-Generic".into()),
         ("DE".into(), "generic".into()),
-        ("DISPLAY".into(), ":0".into()),
+        // xdg-open's generic dispatch wants a graphical session, but this
+        // one must not be the developer's (#122): a display, Wayland
+        // socket and session bus that don't exist, so a fallback (a
+        // browser) can't open anywhere.
+        ("DISPLAY".into(), ":caskade-test-none".into()),
+        ("WAYLAND_DISPLAY".into(), "caskade-test-none".into()),
+        (
+            "DBUS_SESSION_BUS_ADDRESS".into(),
+            "unix:path=/nonexistent/caskade-test-bus".into(),
+        ),
         ("HOME".into(), temp.path().to_string_lossy().into_owned()),
     ]);
     let mut config = fast_config();

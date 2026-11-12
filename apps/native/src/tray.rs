@@ -256,8 +256,14 @@ mod linux {
         .is_ok()
     }
 
-    /// Starts GTK on a thread of its own (once); whether it runs.
+    /// Starts GTK on a thread of its own (once); whether it runs. Never in
+    /// unit tests: GTK would open its display and session bus, which are the
+    /// developer's desktop when the tests run there (#122). Without it, the
+    /// tray, dialogs and GTK settings act as with no GTK.
     pub fn start_gtk() -> bool {
+        if cfg!(test) {
+            return false;
+        }
         let mut gtk = GTK.lock().unwrap_or_else(|e| e.into_inner());
         if let Some(running) = *gtk {
             return running;

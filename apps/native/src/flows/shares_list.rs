@@ -121,7 +121,7 @@ fn ShareRow(shares: Shares, share: ShareRecord) -> Element {
                                 let (shares, id) = (shares.clone(), id.clone());
                                 run(Box::pin(async move {
                                     let link = shares.link(&id).await?;
-                                    Ok(caskade_app::commands::clipboard::clipboard_write_text(link).is_ok())
+                                    Ok(crate::paste::copy_text(link).is_ok())
                                 }))
                             }
                         },
