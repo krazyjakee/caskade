@@ -55,6 +55,8 @@ const SETTLE_FRAMES: u32 = 6;
 /// And at most this long while the dispatcher still has focus to place.
 const MAX_FRAMES: u32 = 30;
 const FRAME: Duration = Duration::from_millis(16);
+/// The longest a pad action waits for the window's layout to catch up.
+const STALE_WAIT: Duration = Duration::from_millis(250);
 
 /// The window's input state, for views: the context [`InputRoot`] provides.
 #[derive(Clone)]
@@ -88,6 +90,12 @@ struct Inner {
     /// Real key and pointer events the root heard, for the e2e report.
     keys: Cell<u64>,
     pointers: Cell<u64>,
+    /// Pad actions heard, and how many of them were a held direction's
+    /// repeats, for the e2e report.
+    pad_actions: Cell<u64>,
+    repeats: Cell<u64>,
+    /// Actions handled (after any wait for the layout).
+    handled: Cell<u64>,
     frames: Cell<bool>,
     back: RefCell<Option<Rc<dyn Fn()>>>,
     details: RefCell<Option<OpenDetails>>,
@@ -120,6 +128,9 @@ impl Input {
                 synthetic: Cell::new(false),
                 keys: Cell::new(0),
                 pointers: Cell::new(0),
+                pad_actions: Cell::new(0),
+                repeats: Cell::new(0),
+                handled: Cell::new(0),
                 frames: Cell::new(false),
                 back: RefCell::new(None),
                 details: RefCell::new(None),
@@ -365,6 +376,16 @@ impl Input {
         self.inner.root.borrow().clone()
     }
 
+    /// Whether the document changed since it was last styled and laid out:
+    /// boxes read now are the old ones.
+    fn stale(&self) -> bool {
+        self.read(|doc| {
+            let root = doc.root_element();
+            root.has_dirty_descendants() || root.has_damaged_descendants()
+        })
+        .unwrap_or(false)
+    }
+
     /// Runs `work` with the document borrowed.
     pub(crate) fn read<T>(&self, work: impl FnOnce(&BaseDocument) -> T) -> Option<T> {
         let root = self.handle()?;
@@ -435,11 +456,17 @@ impl Input {
                 text: collapse(ui.text(ui.root())),
                 keyboard: 0,
                 pointer: 0,
+                actions: 0,
+                repeats: 0,
+                handled: 0,
             }
         });
         let mut probe = read.unwrap_or_default();
         probe.keyboard = self.inner.keys.get();
         probe.pointer = self.inner.pointers.get();
+        probe.actions = self.inner.pad_actions.get();
+        probe.repeats = self.inner.repeats.get();
+        probe.handled = self.inner.handled.get();
         probe
     }
 
@@ -727,7 +754,24 @@ pub fn InputRoot(
         let worker = input.clone();
         spawn(async move {
             while let Some(job) = queue.recv().await {
+                // A move is worked out from the layout. Right after the view
+                // changed, before the renderer laid it out again, that's the
+                // old one (on a slow device the sidebar's Library was skipped
+                // while its counts came in): a pad action waits for the next
+                // layout, briefly.
+                let action = matches!(job, Job::Action(..));
+                if action {
+                    let mut waited = Duration::ZERO;
+                    while waited < STALE_WAIT && worker.stale() {
+                        let _ = caskade_app::runtime::spawn(tokio::time::sleep(FRAME)).await;
+                        waited += FRAME;
+                    }
+                }
                 worker.run(job);
+                if action {
+                    let handled = &worker.inner.handled;
+                    handled.set(handled.get() + 1);
+                }
             }
         });
         // Pads, through the app's events.
@@ -740,6 +784,11 @@ pub fn InputRoot(
                 match events.recv().await {
                     Ok(AppEvent::InputActionEvent(event)) => {
                         let action = event.0;
+                        let heard = &pads.inner;
+                        heard.pad_actions.set(heard.pad_actions.get() + 1);
+                        if action.repeat {
+                            heard.repeats.set(heard.repeats.get() + 1);
+                        }
                         pads.send(action.action, InputSource::Pad, Some(action.glyphs));
                     }
                     Ok(_) | Err(RecvError::Lagged(_)) => {}

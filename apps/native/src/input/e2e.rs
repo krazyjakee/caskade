@@ -38,6 +38,9 @@ const PRESS: Duration = Duration::from_millis(60);
 const SETTLE: Duration = Duration::from_millis(250);
 const WAIT: Duration = Duration::from_secs(20);
 const SEEK_LIMIT: usize = 40;
+/// The longest a press waits for the window to handle it (an action
+/// nothing takes still counts as handled; this is for a busy window).
+const HANDLED: Duration = Duration::from_secs(2);
 
 /// Whether this run is driven by a script.
 pub fn enabled() -> bool {
@@ -69,6 +72,12 @@ pub struct Probe {
     pub text: String,
     pub keyboard: u64,
     pub pointer: u64,
+    /// Pad actions the window heard, and the held directions' repeats
+    /// among them.
+    pub actions: u64,
+    pub repeats: u64,
+    /// Actions the window has handled, any kind.
+    pub handled: u64,
 }
 
 type Asks = async_mpsc::UnboundedReceiver<mpsc::Sender<Probe>>;
@@ -147,11 +156,18 @@ impl Driver {
         Ok(probe)
     }
 
-    fn press(&self, action: &str) -> Result<(), String> {
+    fn press(&mut self, action: &str) -> Result<(), String> {
         let button = button(action).ok_or_else(|| format!("no button for {action:?}"))?;
+        let before = self.probe()?.handled;
         self.pads.inject(Raw::Pressed(PAD, button));
         std::thread::sleep(PRESS);
         self.pads.inject(Raw::Released(PAD, button));
+        // The window handles an action once its layout has caught up (a
+        // slow device takes longer): the next step reads what it did.
+        let deadline = Instant::now() + HANDLED;
+        while self.probe()?.handled == before && Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(20));
+        }
         std::thread::sleep(SETTLE);
         Ok(())
     }
@@ -198,22 +214,30 @@ impl Driver {
                 // Where focus went, to tell a layout's path from a missing
                 // control.
                 let mut path: Vec<String> = Vec::new();
+                let mut before = self.probe()?;
                 for _ in 0..SEEK_LIMIT {
-                    let focused = self.probe()?.focused;
+                    let focused = before.focused.clone();
                     if focused.contains(text) {
                         return Ok(());
                     }
-                    if path.last() != Some(&focused) {
-                        path.push(focused);
+                    let shown = format!("{focused:?}");
+                    if path.last() != Some(&shown) {
+                        path.push(shown);
                     }
                     self.press(direction)?;
+                    let after = self.probe()?;
+                    // One press is one action: anything else is the
+                    // driver's or the pad layer's, not the layout's.
+                    let actions = after.actions.saturating_sub(before.actions);
+                    if actions != 1 {
+                        let repeats = after.repeats.saturating_sub(before.repeats);
+                        path.push(format!("({actions} actions, {repeats} repeats)"));
+                    }
+                    before = after;
                 }
                 Err(format!(
                     "never reached {text:?}; focus went {}",
-                    path.iter()
-                        .map(|focused| format!("{focused:?}"))
-                        .collect::<Vec<_>>()
-                        .join(" → ")
+                    path.join(" → ")
                 ))
             }
             "seek-section" => {

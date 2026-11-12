@@ -551,3 +551,84 @@ fn switching_language_updates_the_open_guide_menu_without_a_restart() {
     window.settle();
     assert_eq!(window.focused(), "Return to game");
 }
+
+/// Grows the sidebar below: Library comes in between Home and Store.
+static GROW: tokio::sync::Notify = tokio::sync::Notify::const_new();
+
+fn growing_app() -> Element {
+    rsx! {
+        InputRoot { console: true, Growing {} }
+    }
+}
+
+#[component]
+fn Growing() -> Element {
+    let mut grown = use_signal(|| false);
+    use_future(move || async move {
+        GROW.notified().await;
+        grown.set(true);
+    });
+    let labels: &[&str] = if grown() {
+        &["Home", "Library", "Store"]
+    } else {
+        &["Home", "Store"]
+    };
+    rsx! {
+        div { "data-focus-section": "sidebar",
+            for (i, label) in labels.iter().enumerate() {
+                button { key: "{label}", style: at(0, i as u32 * 50, 200, 40), "{label}" }
+            }
+        }
+        div { "data-focus-section": "main",
+            button { style: at(300, 0, 140, 40), "Card" }
+        }
+    }
+}
+
+#[test]
+fn a_pad_move_waits_for_the_layout_of_what_just_changed() {
+    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = Window::open_with(growing_app);
+    // The first press focuses the view; left goes to the sidebar's Home.
+    window.pad(Action::NavDown);
+    window.pad(Action::NavLeft);
+    assert_eq!(window.focused(), "Home");
+    // The sidebar changes, and a press comes before the window is laid out
+    // again (a slow device): the move is worked out on the new layout.
+    GROW.notify_one();
+    blitz_dom::Document::poll(&mut window.doc, None);
+    std::thread::sleep(Duration::from_millis(20));
+    blitz_dom::Document::poll(&mut window.doc, None);
+    let _ = crate::shell::events().send(caskade_app::events::Event::InputActionEvent(
+        InputActionEvent(InputAction {
+            action: Action::NavDown,
+            source: Source::Pad,
+            repeat: false,
+            glyphs: GlyphFamily::Xbox,
+        }),
+    ));
+    for _ in 0..3 {
+        blitz_dom::Document::poll(&mut window.doc, None);
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    window.settle();
+    assert_eq!(window.focused(), "Library");
+}
+
+#[test]
+fn focus_handed_back_to_a_control_that_went_does_nothing() {
+    use caskade_ui_input::dispatch::Ui;
+    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let window = Window::open();
+    let card = window.find("Card 5");
+    let mut doc = window.doc.inner.borrow_mut();
+    // The view drew again: the control focus would go back to is gone.
+    let _ = doc.mutate().remove_and_drop_node(card);
+    let mut ui = super::doc::BlitzUi::new(&mut doc, None);
+    ui.ring = true;
+    let before = ui.focused();
+    ui.focus(card, true);
+    assert_eq!(ui.focused(), before, "focus stays where it was");
+}

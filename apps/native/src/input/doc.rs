@@ -99,6 +99,11 @@ impl<'d> BlitzUi<'d> {
     }
 
     fn set_attr(&mut self, node: NodeId, name: &str, value: Option<&str>) {
+        // A node gone from the document (focus handed back to a control the
+        // view has since drawn again) has nothing to mark.
+        if self.doc.get_node(node).is_none() {
+            return;
+        }
         let name = QualName::new(None, ns!(), LocalName::from(name));
         let mut mutator = self.doc.mutate();
         match value {
@@ -206,6 +211,13 @@ impl Ui for BlitzUi<'_> {
     }
 
     fn focus(&mut self, node: NodeId, instant: bool) {
+        if !self
+            .doc
+            .get_node(node)
+            .is_some_and(|found| found.flags.is_in_document())
+        {
+            return;
+        }
         let from = self.focused();
         if from != Some(node) {
             self.doc.set_focus_to(node);
