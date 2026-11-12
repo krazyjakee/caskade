@@ -366,7 +366,11 @@ fn SettingsContent(asked: &'static str, sub: Option<String>) -> Element {
         },
     );
     let searching = !query().trim().is_empty();
-    // LB/RB move between the sections, in place.
+    // LB/RB move between the sections, in place; focus follows to the new
+    // section's tab when it was on a tab (the webview's `useScreenTabs`),
+    // whenever the panel comes.
+    let tabs = use_signal(Vec::<(&'static str, blitz_dom::NodeId)>::new);
+    let tab_input = use_input();
     let order = shown.clone();
     let at = order.iter().position(|id| *id == tab).unwrap_or(0);
     let count = order.len().max(1);
@@ -379,7 +383,18 @@ fn SettingsContent(asked: &'static str, sub: Option<String>) -> Element {
                 (at + count - 1) % count
             };
             if let Some(next) = order.get(next) {
+                let focused = tab_input.read(|doc| doc.get_focussed_node_id()).flatten();
+                let known = tabs.peek();
+                let on_tab = known.iter().any(|(_, node)| Some(*node) == focused);
+                let to = known
+                    .iter()
+                    .find(|(id, _)| id == next)
+                    .map(|(_, node)| *node);
+                drop(known);
                 go(next, None);
+                if on_tab && let Some(to) = to {
+                    tab_input.focus(to);
+                }
             }
         })
     };
@@ -420,7 +435,7 @@ fn SettingsContent(asked: &'static str, sub: Option<String>) -> Element {
                     }
                     // Out of the way while search results stand in for it.
                     if !searching {
-                        SectionList { shown: shown.clone(), tab, on_open: move |next: &'static str| go(next, None) }
+                        SectionList { shown: shown.clone(), tab, tabs, on_open: move |next: &'static str| go(next, None) }
                     }
                 }
                 div {
@@ -444,10 +459,11 @@ fn SettingsContent(asked: &'static str, sub: Option<String>) -> Element {
 fn SectionList(
     shown: Vec<&'static str>,
     tab: &'static str,
+    /// Each section's tab, for LB/RB's focus.
+    tabs: Signal<Vec<(&'static str, blitz_dom::NodeId)>>,
     on_open: EventHandler<&'static str>,
 ) -> Element {
     let input = use_input();
-    let tabs = use_signal(Vec::<(&'static str, blitz_dom::NodeId)>::new);
     let groups: Vec<(&Group, Vec<&'static Section>)> = GROUPS
         .iter()
         .map(|group| {

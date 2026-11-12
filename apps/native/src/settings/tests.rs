@@ -239,13 +239,17 @@ fn opens_a_section_in_place_by_click_arrows_and_a_pads_bumpers() {
     });
     window.key(Key::Named(NamedKey::Home));
     window.settle_until("General", |window| selected_tab(window).trim() == "General");
-    // A pad's RB and LB.
+    // A pad's RB and LB; focus on a tab follows to the new one (it doesn't
+    // wait for the panel: a slow device's console e2e lost it).
+    let focused = |window: &Window| window.doc.inner.borrow().get_focussed_node_id();
     window.pad(caskade_ui_input::Action::TabNext);
     window.settle_until("Appearance", |window| {
         selected_tab(window).trim() == "Appearance"
     });
+    assert_eq!(focused(&window), Some(tab(&window, "Appearance")));
     window.pad(caskade_ui_input::Action::TabPrev);
     window.settle_until("General", |window| selected_tab(window).trim() == "General");
+    assert_eq!(focused(&window), Some(tab(&window, "General")));
 }
 
 /// The schema sections render from the core's own schemas: a row per
