@@ -294,6 +294,13 @@ export const commands = {
 	moveGame: (entryId: string, targetRootId: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("move_game", { entryId, targetRootId })),
 	jobGet: (id: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("job_get", { id })),
 	jobCancel: (id: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("job_cancel", { id })),
+	/**
+	 *  Pauses an install or update while it downloads: it stops, keeps what
+	 *  it downloaded, and stays paused across restarts until resumed (#131).
+	 */
+	jobPause: (id: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("job_pause", { id })),
+	/**  Resumes a paused job from where its download stopped. */
+	jobResume: (id: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("job_resume", { id })),
 	/**  Takes a finished job out of Activity. Its files stay. */
 	jobRemove: (id: string) => typedError<null, string>(__TAURI_INVOKE("job_remove", { id })),
 	chooseInstallFiles: () => typedError<string[], string>(__TAURI_INVOKE("choose_install_files")),
@@ -5537,7 +5544,12 @@ export type JobSnapshot_Serialize = {
 	updatedAtMs: number,
 };
 
-export type JobStatus = "queued" | "downloading" | "installing" | "needsUser" | "completed" | "failed" | "cancelled";
+export type JobStatus = "queued" | "downloading" | "installing" | "needsUser" | 
+/**
+ *  Stopped by the user with its download kept, to resume later; kept
+ *  across a restart (#131).
+ */
+"paused" | "completed" | "failed" | "cancelled";
 
 /**  How the last backup went. */
 export type LastBackup = LastBackup_Serialize | LastBackup_Deserialize;

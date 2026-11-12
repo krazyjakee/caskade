@@ -474,3 +474,27 @@ it("says Add game takes magnet links and .torrent files, and installs a magnet l
     expect(install).toHaveBeenCalledWith({ type: "url", value: magnet }, undefined),
   );
 });
+
+it("a download paused in the native app resumes or cancels (#131)", () => {
+  const resume = vi.fn();
+  const cancel = vi.fn();
+  render(
+    <JobCard
+      job={fixtureJob({ status: "paused" })}
+      busy={false}
+      cancel={cancel}
+      remove={vi.fn()}
+      retry={vi.fn()}
+      resume={resume}
+      openQuestion={vi.fn()}
+    />,
+  );
+  const card = screen.getByRole("article");
+  expect(card.getAttribute("data-status")).toBe("paused");
+  expect(within(card).getByText("Paused")).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Resume" }));
+  expect(resume).toHaveBeenCalledOnce();
+  fireEvent.click(screen.getByRole("button", { name: "Cancel job" }));
+  expect(cancel).toHaveBeenCalledOnce();
+  expect(screen.queryByRole("button", { name: /Retry/ })).toBeNull();
+});

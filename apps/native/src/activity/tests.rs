@@ -1,7 +1,8 @@
 //! Activity's jobs (#101), ported from the webview's `activity`,
 //! `JobRecovery` and `RefreshCard` tests over the fixtures' fake job queue
-//! and details refresh: jobs show live progress, cancel, remove and retry
-//! (as before or another install way); a followed job's question is
+//! and details refresh: jobs show live progress, pause and resume a
+//! download (#131), cancel, remove and retry (as before or another install
+//! way); a followed job's question is
 //! answered; a failed install says why and recovers; the details refresh's
 //! card cancels, retries the failed games and continues the rest.
 
@@ -187,6 +188,111 @@ fn an_install_shows_live_progress_and_cancels() {
         window.find("data-cs", "activity-job").is_none()
             && window.find("data-part", "empty").is_some()
     });
+}
+
+/// The menu item `text` of the open menu.
+fn menu_item(window: &Window, text: &str) -> Option<blitz_dom::NodeId> {
+    window
+        .find_all("role", "menuitem")
+        .into_iter()
+        .find(|&item| window.text(item).trim() == text)
+}
+
+#[test]
+fn a_download_pauses_and_resumes_by_mouse_keyboard_pad_and_menu() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _clean = Clean;
+    let (queue, _) = fakes();
+    queue.put(job("j1", json!({})));
+    let mut window = activity();
+    window.settle_until("the job", |window| {
+        window.find("data-cs", "activity-job").is_some()
+    });
+    let paused = |window: &Window| {
+        window
+            .attr(card(window, "Celeste"), "data-status")
+            .as_deref()
+            == Some("paused")
+    };
+    let running = |window: &Window| {
+        window
+            .attr(card(window, "Celeste"), "data-status")
+            .as_deref()
+            != Some("paused")
+    };
+    // The mouse: Pause beside Cancel job.
+    let pause = button_in(&window, card(&window, "Celeste"), "Pause");
+    window.click(pause);
+    window.settle_until("paused", |window| {
+        paused(window) && fakes().0.calls() == ["pause j1"]
+    });
+    // Paused: the bar stays where it stopped, and it can still be cancelled.
+    let celeste = card(&window, "Celeste");
+    assert!(window.text(celeste).contains("Paused"));
+    let bar = window.get("aria-label", "Celeste progress");
+    assert_eq!(window.attr(bar, "aria-valuenow").as_deref(), Some("25"));
+    button_in(&window, celeste, "Cancel job");
+    assert!(
+        window
+            .find_all("data-cs", "button")
+            .into_iter()
+            .all(
+                |button| !inside(&window, button, celeste) || window.text(button).trim() != "Pause"
+            )
+    );
+    // The keyboard: Enter on Resume.
+    let resume = button_in(&window, celeste, "Resume");
+    press(&mut window, resume);
+    window.settle_until("resumed", |_| {
+        fakes().0.calls().last().map(String::as_str) == Some("resume j1")
+    });
+    queue.put(job("j1", json!({"revision": 5})));
+    window.settle_until("downloading again", running);
+    // The pad: A on Pause.
+    let pause = button_in(&window, card(&window, "Celeste"), "Pause");
+    window.focus(pause);
+    window.pad(Action::Confirm);
+    window.settle_until("paused by pad", |window| {
+        paused(window) && fakes().0.calls().last().map(String::as_str) == Some("pause j1")
+    });
+    // The right-click menu offers Resume, and not Pause.
+    window.right_click(card(&window, "Celeste"));
+    window.settle_until("its menu", |window| menu_item(window, "Resume").is_some());
+    assert!(menu_item(&window, "Pause").is_none());
+    let resume = menu_item(&window, "Resume").unwrap();
+    window.click(resume);
+    window.settle_until("resumed from the menu", |_| {
+        fakes().0.calls().last().map(String::as_str) == Some("resume j1")
+    });
+    queue.put(job("j1", json!({"revision": 9})));
+    window.settle_until("downloading once more", running);
+    // A running download's menu has Pause.
+    window.right_click(card(&window, "Celeste"));
+    window.settle_until("its menu", |window| menu_item(window, "Pause").is_some());
+    let pause = menu_item(&window, "Pause").unwrap();
+    window.click(pause);
+    window.settle_until("paused from the menu", |window| {
+        paused(window) && fakes().0.calls().len() == 5
+    });
+    // An install from a folder has nothing to download: no Pause.
+    queue.put(job(
+        "j2",
+        json!({"title": "Local Game", "input": "/games/local", "status": "installing", "phase": "install"}),
+    ));
+    window.settle_until("the local job", |window| {
+        window
+            .find_all("data-cs", "activity-job")
+            .into_iter()
+            .any(|card| window.text(card).contains("Local Game"))
+    });
+    let local = card(&window, "Local Game");
+    assert!(
+        window
+            .find_all("data-cs", "button")
+            .into_iter()
+            .all(|button| !inside(&window, button, local) || window.text(button).trim() != "Pause")
+    );
 }
 
 #[test]

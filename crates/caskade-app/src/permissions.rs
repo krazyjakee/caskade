@@ -195,6 +195,8 @@ pub fn access(command: &str) -> Option<Access> {
         | "remove_from_collection"
         | "dismiss_install_request"
         | "job_cancel"
+        // Stops a download, keeping it, like a cancel (#131).
+        | "job_pause"
         // Takes a finished job out of Activity; its files stay.
         | "job_remove"
         | "verify_game"
@@ -351,7 +353,8 @@ pub fn access(command: &str) -> Option<Access> {
         | "manual_game_add"
         // A fan port of a game: an install into the game.
         | "game_port_install" => Install,
-        "job_answer" | "job_retry" | "job_recover" => Job,
+        // Resuming runs the job again, as a retry does (#131).
+        "job_answer" | "job_retry" | "job_recover" | "job_resume" => Job,
         "backup_status" | "backup_plan" => Open,
         // Game streaming (#257): its state is a read; hosting installs a
         // program and changes the system with an administrator prompt.

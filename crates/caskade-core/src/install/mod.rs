@@ -23,6 +23,7 @@ mod move_location;
 #[cfg(feature = "net")]
 pub mod nearby;
 mod operations;
+mod pause;
 mod peer;
 mod recovery;
 mod remove;
@@ -99,6 +100,8 @@ struct Job {
     peer_fetcher: Option<Arc<dyn peer::PeerFetcher>>,
     /// The library game the install becomes a release of; a retry keeps it.
     attach: Option<AttachTo>,
+    /// Stopping to pause, not to cancel (#131).
+    pausing: bool,
 }
 
 /// A run's input, downloaded or read, and what installing it needs.
@@ -342,6 +345,7 @@ impl InstallService {
                 peer: None,
                 peer_fetcher: None,
                 attach: None,
+                pausing: false,
             },
         );
         self.publish(&snapshot);
@@ -786,13 +790,21 @@ impl InstallService {
         Ok(())
     }
 
-    /// Cancels a queued or running job.
+    /// Cancels a queued, running or paused job.
     pub fn cancel(&self, id: &str) -> Result<JobSnapshot> {
-        let (cancel, active) = lock(&self.inner.jobs)
-            .get(id)
-            .map(|job| (job.cancel.clone(), job.active))
+        let (cancel, active, paused) = lock(&self.inner.jobs)
+            .get_mut(id)
+            .map(|job| {
+                // A cancel while pausing wins.
+                job.pausing = false;
+                let paused = job.snapshot.status == JobStatus::Paused;
+                (job.cancel.clone(), job.active, paused)
+            })
             .ok_or_else(|| Error::Invalid(crate::tr!("This job is no longer in Activity.")))?;
         cancel.cancel();
+        if paused {
+            self.forget_paused(id);
+        }
         self.update(id, |job| {
             if !active && !job.status.is_finished() {
                 job.status = JobStatus::Cancelled;

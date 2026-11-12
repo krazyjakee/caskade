@@ -26,6 +26,12 @@ it("installs through the launcher and waits for it, with a way out", async () =>
   expect(screen.getByText(/Library refreshed/)).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Install with Steam" }));
   expect(await screen.findByText("Waiting for Steam to finish installing it.")).toBeTruthy();
+  // Caskade can't pause Steam's download, and says so (#131).
+  expect(
+    screen.getByText(
+      "To pause or cancel it, use Steam: Caskade can't pause a store's own download.",
+    ),
+  ).toBeTruthy();
   expect(api.calls).toContain("install g1-owned");
   fireEvent.click(screen.getByRole("button", { name: "Stop waiting" }));
   await screen.findByRole("button", { name: "Install with Steam" });

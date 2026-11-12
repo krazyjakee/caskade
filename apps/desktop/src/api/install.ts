@@ -1,6 +1,14 @@
 /** Activity view projection. Native answers use opaque backend choice IDs;
  * the UI never submits a plan, executable or arbitrary installation path. */
-export type JobStatus = "queued" | "running" | "needs_user" | "completed" | "failed" | "cancelled";
+export type JobStatus =
+  | "queued"
+  | "running"
+  | "needs_user"
+  /** A download paused in the native app (#131); it can resume or be cancelled. */
+  | "paused"
+  | "completed"
+  | "failed"
+  | "cancelled";
 export interface JobChoice {
   id: string;
   label: string;
@@ -88,6 +96,8 @@ export interface InstallApi {
   remove(jobId: string): Promise<void>;
   /** Without a strategy, the job runs again as it ran before. */
   retry(jobId: string, strategyId?: string): Promise<JobSnapshot>;
+  /** Goes on with a paused download from where it stopped (#131). */
+  resume(jobId: string): Promise<JobSnapshot>;
   answer(jobId: string, questionId: string, choiceId: string): Promise<void>;
   /** Recovers a failed or cancelled install or update (#158). */
   recover(jobId: string, recovery: JobRecovery): Promise<JobSnapshot>;
@@ -107,7 +117,10 @@ export function mergeJobs(current: JobSnapshot[] = [], incoming: JobSnapshot[]):
 export const canRemove = (job: JobSnapshot) =>
   job.status === "failed" || job.status === "cancelled";
 export const isActiveJob = (job: JobSnapshot) =>
-  job.status === "running" || job.status === "queued" || job.status === "needs_user";
+  job.status === "running" ||
+  job.status === "queued" ||
+  job.status === "needs_user" ||
+  job.status === "paused";
 /** A failed or cancelled install, update or copy from another device can
  * run again; a copy goes on from what arrived (#233). */
 export const canRetry = (job: JobSnapshot) =>

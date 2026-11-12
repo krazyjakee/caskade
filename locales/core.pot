@@ -1912,6 +1912,7 @@ msgstr ""
 
 #: crates/caskade-core/src/install/mod.rs
 #: crates/caskade-core/src/install/operations.rs
+#: crates/caskade-core/src/install/pause.rs
 #: crates/caskade-core/src/install/peer.rs
 #: crates/caskade-core/src/install/recovery.rs
 #: crates/caskade-core/src/install/roms.rs
@@ -2052,6 +2053,14 @@ msgstr ""
 
 #: crates/caskade-core/src/install/operations.rs
 msgid "managed directory escapes its root"
+msgstr ""
+
+#: crates/caskade-core/src/install/pause.rs
+msgid "Only a download can be paused; this job isn't downloading."
+msgstr ""
+
+#: crates/caskade-core/src/install/pause.rs
+msgid "Only a paused job can be resumed."
 msgstr ""
 
 #: crates/caskade-core/src/install/peer.rs

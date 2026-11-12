@@ -664,6 +664,48 @@ fn an_owned_release_installs_through_its_store() {
 }
 
 #[test]
+fn a_stores_own_download_says_to_pause_it_in_the_launcher() {
+    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _runtime = caskade_app::runtime::handle().enter();
+    use caskade_core::store_accounts::{OwnedInstallState, OwnedRelease};
+    let _script = page_script(PageScript {
+        owned: vec![OwnedRelease {
+            entry_id: "owned-1".to_owned(),
+            store_account_id: "steam-me".to_owned(),
+            provider: "steam".to_owned(),
+            provider_name: "Steam".to_owned(),
+            account_name: "me".to_owned(),
+            product_id: "1".to_owned(),
+            title: "Fixture Game 0001".to_owned(),
+            state: OwnedInstallState::Installing {
+                launcher: "Steam".to_owned(),
+                since_ms: 1,
+            },
+            refreshed_at_ms: None,
+        }],
+        ..PageScript::default()
+    });
+    let mut window = open("/games/fixture-0");
+    window.settle_until("the owned release", |window| {
+        window.find("data-part", "owned-release").is_some()
+    });
+    let owned = window.get("data-part", "owned-release");
+    let text = window.text(owned);
+    assert!(
+        text.contains("Waiting for Steam to finish installing it."),
+        "{text}"
+    );
+    // Caskade can't pause Steam's download, and says so (#131).
+    let note = window
+        .find_in(owned, "data-part", "pause-elsewhere")
+        .expect("the pause note");
+    assert_eq!(
+        window.text(note).trim(),
+        "To pause or cancel it, use Steam: Caskade can't pause a store's own download."
+    );
+}
+
+#[test]
 fn a_copy_on_another_device_copies_here_or_plays_there() {
     let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
     let _runtime = caskade_app::runtime::handle().enter();

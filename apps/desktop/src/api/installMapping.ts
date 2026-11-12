@@ -52,6 +52,7 @@ export interface RawJobSnapshot {
     | "downloading"
     | "installing"
     | "needsUser"
+    | "paused"
     | "completed"
     | "failed"
     | "cancelled";

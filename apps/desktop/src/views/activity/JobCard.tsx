@@ -2,7 +2,7 @@ import { Button } from "@caskade/ui";
 import type { MessageDescriptor } from "@lingui/core";
 import { msg, plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { ListChecks, RotateCcw, Trash2, X } from "lucide-react";
+import { ListChecks, Play, RotateCcw, Trash2, X } from "lucide-react";
 import { useId } from "react";
 import { Disclosure, DisclosurePanel, Heading } from "react-aria-components";
 import { canRemove, canRetry, isActiveJob, type JobSnapshot } from "../../api/install";
@@ -16,6 +16,10 @@ const statusLabels: Record<JobSnapshot["status"], MessageDescriptor> = {
   queued: msg({ message: "Queued", comment: "A background job's status" }),
   running: msg({ message: "In progress", comment: "A background job's status" }),
   needs_user: msg({ message: "Needs your attention", comment: "A background job's status" }),
+  paused: msg({
+    message: "Paused",
+    comment: "A download the user paused; it goes on from where it stopped when resumed",
+  }),
   completed: msg({ message: "Completed", comment: "A background job's status" }),
   failed: msg({ message: "Failed", comment: "A background job's status" }),
   cancelled: msg({ message: "Cancelled", context: "job status" }),
@@ -26,6 +30,7 @@ export function JobCard({
   cancel,
   remove,
   retry,
+  resume,
   openQuestion,
 }: {
   job: JobSnapshot;
@@ -35,6 +40,8 @@ export function JobCard({
   remove: () => void;
   /** Without a strategy, the job runs again as it ran before. */
   retry: (strategyId?: string) => void;
+  /** Goes on with a paused download (#131). */
+  resume?: () => void;
   openQuestion: () => void;
 }) {
   const { t } = useLingui();
@@ -52,6 +59,10 @@ export function JobCard({
       ? formatSize(completed)
       : plural(completed, { one: "# file", other: "# files" });
   const title = job.title;
+  const resumeLabel = t({
+    message: "Resume",
+    comment: "Goes on with a paused download from where it stopped",
+  });
   const removeLabel = t({
     message: "Remove",
     comment: "Takes a failed or cancelled job out of Activity; its files stay",
@@ -65,6 +76,14 @@ export function JobCard({
             label: t`Review choices`,
             icon: ListChecks,
             onAction: openQuestion,
+          },
+        job.status === "paused" &&
+          resume && {
+            id: "resume",
+            label: resumeLabel,
+            icon: Play,
+            isDisabled: busy,
+            onAction: resume,
           },
         isActiveJob(job) && {
           id: "cancel",
@@ -120,6 +139,11 @@ export function JobCard({
           {job.status === "needs_user" && job.question && (
             <Button data-spatial="focusable" variant="primary" onPress={openQuestion}>
               <Trans>Review choices</Trans>
+            </Button>
+          )}
+          {job.status === "paused" && resume && (
+            <Button data-spatial="focusable" variant="primary" onPress={resume} isDisabled={busy}>
+              <Play className="size-4" /> {resumeLabel}
             </Button>
           )}
           {isActiveJob(job) && (

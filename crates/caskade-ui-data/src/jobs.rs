@@ -1,6 +1,7 @@
 //! Jobs for Activity (#101): installs, downloads, moves, copies and the
 //! other background jobs, live from `JobChanged` (`Key::Jobs`): listing,
-//! cancelling, removing, retrying (as before or another way), answering a
+//! cancelling, pausing and resuming downloads (#131), removing, retrying
+//! (as before or another way), answering a
 //! job's question and recovering a failed one; through the app layer's
 //! commands as the webview's `api/installNative.ts` does.
 //!
@@ -30,6 +31,10 @@ type Result<T> = std::result::Result<T, String>;
 pub trait JobQueue: Send + Sync {
     fn list(&self) -> Vec<JobSnapshot>;
     fn cancel(&self, id: &str) -> Result<JobSnapshot>;
+    /// Pauses a download, keeping it (#131).
+    async fn pause(&self, id: &str) -> Result<JobSnapshot>;
+    /// Resumes a paused download from where it stopped.
+    async fn resume(&self, id: &str) -> Result<JobSnapshot>;
     /// Takes a finished job out of Activity; its files stay.
     fn remove(&self, id: &str) -> Result<()>;
     /// Runs a failed or cancelled job again: as before, or with the
@@ -51,6 +56,12 @@ impl JobQueue for InstallQueue {
     }
     fn cancel(&self, id: &str) -> Result<JobSnapshot> {
         commands::job_cancel(&self.0, id.to_owned())
+    }
+    async fn pause(&self, id: &str) -> Result<JobSnapshot> {
+        commands::job_pause(&self.0, id.to_owned()).await
+    }
+    async fn resume(&self, id: &str) -> Result<JobSnapshot> {
+        commands::job_resume(&self.0, id.to_owned()).await
     }
     fn remove(&self, id: &str) -> Result<()> {
         commands::job_remove(&self.0, id.to_owned())
@@ -163,6 +174,14 @@ impl Jobs {
         self.queue()?.cancel(id)
     }
 
+    pub async fn pause(&self, id: &str) -> Result<JobSnapshot> {
+        self.queue()?.pause(id).await
+    }
+
+    pub async fn resume(&self, id: &str) -> Result<JobSnapshot> {
+        self.queue()?.resume(id).await
+    }
+
     pub fn remove(&self, id: &str) -> Result<()> {
         self.queue()?.remove(id)
     }
@@ -242,7 +261,7 @@ impl PartialEq for Jobs {
 }
 
 /// Jobs a test puts in place, and what Activity asked of them: `cancel
-/// <id>`, `remove <id>`, `retry <id> <candidate>`, `answer <id> <index>`,
+/// <id>`, `pause <id>`, `resume <id>`, `remove <id>`, `retry <id> <candidate>`, `answer <id> <index>`,
 /// `recover <id> <how>`. Every change is announced as
 /// the install service announces its own.
 pub struct FakeQueue {
@@ -317,6 +336,14 @@ impl JobQueue for FakeQueue {
     fn cancel(&self, id: &str) -> Result<JobSnapshot> {
         self.called(format!("cancel {id}"));
         self.with(id, |job| job.status = JobStatus::Cancelled)
+    }
+    async fn pause(&self, id: &str) -> Result<JobSnapshot> {
+        self.called(format!("pause {id}"));
+        self.with(id, |job| job.status = JobStatus::Paused)
+    }
+    async fn resume(&self, id: &str) -> Result<JobSnapshot> {
+        self.called(format!("resume {id}"));
+        self.with(id, |job| job.status = JobStatus::Queued)
     }
     fn remove(&self, id: &str) -> Result<()> {
         self.called(format!("remove {id}"));

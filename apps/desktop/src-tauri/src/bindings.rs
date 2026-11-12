@@ -105,6 +105,8 @@ pub fn builder() -> Builder<tauri::Wry> {
             crate::commands::install::move_game,
             crate::commands::install::job_get,
             crate::commands::install::job_cancel,
+            crate::commands::install::job_pause,
+            crate::commands::install::job_resume,
             crate::commands::install::job_remove,
             crate::commands::install::choose_install_files,
             crate::commands::install::choose_install_folder,

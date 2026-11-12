@@ -62,6 +62,10 @@ pub fn status(status: JobStatus) -> String {
             t!(note = "A background job's status", "In progress")
         }
         JobStatus::NeedsUser => t!(note = "A background job's status", "Needs your attention"),
+        JobStatus::Paused => t!(
+            note = "A download the user paused; it goes on from where it stopped when resumed",
+            "Paused"
+        ),
         JobStatus::Completed => t!(note = "A background job's status", "Completed"),
         JobStatus::Failed => t!(note = "A background job's status", "Failed"),
         JobStatus::Cancelled => tp!("job status", "Cancelled"),
@@ -74,6 +78,7 @@ pub fn status_name(status: JobStatus) -> &'static str {
         JobStatus::Queued => "queued",
         JobStatus::Downloading | JobStatus::Installing => "running",
         JobStatus::NeedsUser => "needs_user",
+        JobStatus::Paused => "paused",
         JobStatus::Completed => "completed",
         JobStatus::Failed => "failed",
         JobStatus::Cancelled => "cancelled",
@@ -84,9 +89,22 @@ pub fn is_running(job: &JobSnapshot) -> bool {
     matches!(job.status, JobStatus::Downloading | JobStatus::Installing)
 }
 
-/// Running, queued or waiting for the user.
+/// Running, queued, paused or waiting for the user: it can be cancelled.
 pub fn is_active(job: &JobSnapshot) -> bool {
-    is_running(job) || matches!(job.status, JobStatus::Queued | JobStatus::NeedsUser)
+    is_running(job)
+        || matches!(
+            job.status,
+            JobStatus::Queued | JobStatus::NeedsUser | JobStatus::Paused
+        )
+}
+
+/// A download that can pause now (#131), or a paused one that can resume.
+pub fn can_pause(job: &JobSnapshot) -> bool {
+    job.can_pause()
+}
+
+pub fn can_resume(job: &JobSnapshot) -> bool {
+    job.status == JobStatus::Paused
 }
 
 /// A failed or cancelled job can be removed from Activity.

@@ -53,6 +53,7 @@ mod letter_tests;
 #[cfg(test)]
 mod migration_checksum_tests;
 mod paired_devices;
+mod paused_jobs;
 #[cfg(test)]
 mod platform_tests;
 mod playtime;

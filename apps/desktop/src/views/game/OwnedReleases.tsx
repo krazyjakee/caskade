@@ -63,6 +63,8 @@ export function OwnedReleases({
     <div data-part="owned" className="flex flex-col gap-2">
       {data.map((release, index) => {
         const note = describe(release);
+        // The launcher's download is its own (#131).
+        const launcher = release.state.type === "installing" ? release.state.launcher : null;
         const provider = release.providerName;
         const account = release.accountName;
         const refreshed =
@@ -85,6 +87,15 @@ export function OwnedReleases({
               </span>
             )}
             {note && <span className="text-xs text-fg-muted">{note}</span>}
+            {launcher && (
+              <span data-part="pause-elsewhere" className="text-xs text-fg-muted">
+                {t({
+                  message: `To pause or cancel it, use ${launcher}: Caskade can't pause a store's own download.`,
+                  comment:
+                    "A store's launcher (Steam, GOG Galaxy, the Epic Games Launcher) is installing a game",
+                })}
+              </span>
+            )}
             {release.state.type === "available" && (
               <Button
                 variant={primary && index === 0 ? "primary" : "secondary"}

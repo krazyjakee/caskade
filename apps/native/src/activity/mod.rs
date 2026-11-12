@@ -45,11 +45,13 @@ pub fn JobsPanel() -> Element {
         };
         busy.set(true);
         failed.set(None);
-        let follows = matches!(action, CardAction::Retry(_));
+        let follows = matches!(action, CardAction::Retry(_) | CardAction::Resume);
         let job = id.clone();
         spawn(async move {
             let outcome: Result<(), ErrorReport> = change(async move {
                 let result = match action {
+                    CardAction::Pause => handle.pause(&job).await.map(|_| ()),
+                    CardAction::Resume => handle.resume(&job).await.map(|_| ()),
                     CardAction::Cancel => handle.cancel(&job).map(|_| ()),
                     CardAction::Remove => handle.remove(&job),
                     CardAction::Retry(candidate) => handle.retry(&job, candidate).await.map(|_| ()),

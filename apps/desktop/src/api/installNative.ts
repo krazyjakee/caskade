@@ -11,6 +11,7 @@ export interface InstallTransport {
   jobCancel(id: string): Promise<Reply<RawJobSnapshot>>;
   jobRemove(id: string): Promise<Reply<null>>;
   jobRetry(id: string, candidateIndex: number | null): Promise<Reply<RawJobSnapshot>>;
+  jobResume(id: string): Promise<Reply<RawJobSnapshot>>;
   jobRecover(id: string, recovery: JobRecovery): Promise<Reply<RawJobSnapshot>>;
   jobAnswer(
     id: string,
@@ -54,6 +55,9 @@ export function createInstallApi(
       const candidate = strategyId === undefined ? null : index(strategyId);
       return mapJob(await unwrap(transport.jobRetry(id, candidate)));
     },
+    async resume(id) {
+      return mapJob(await unwrap(transport.jobResume(id)));
+    },
     async recover(id, recovery) {
       return mapJob(await unwrap(transport.jobRecover(id, recovery)));
     },
@@ -90,6 +94,10 @@ export function createNativeInstallApi(): InstallApi {
       jobRetry: (id, index) => {
         check();
         return commands.jobRetry(id, index);
+      },
+      jobResume: (id) => {
+        check();
+        return commands.jobResume(id);
       },
       jobRecover: (id, recovery) => {
         check();

@@ -1,6 +1,7 @@
 //! A job in Activity (#101), as the webview's `JobCard`, `ProgressLine` and
 //! `JobRecovery`: its kind, phase, status and progress; Review choices,
-//! Cancel job, Retry (as before or another install way) and Remove; why a
+//! Pause and Resume a download (#131), Cancel job, Retry (as before or
+//! another install way) and Remove; why a
 //! failed install stopped and what can be done; verification results,
 //! warnings, dependencies and the install ways the installer weighed. A
 //! right click offers the card's buttons.
@@ -15,12 +16,18 @@ use dioxus_native::prelude::*;
 use super::labels;
 use crate::data::change;
 use crate::flows::paths::{PathRequest, PickKind, use_path_picker};
-use crate::ui::icons::{FOLDER_SEARCH, HARD_DRIVE, LIST_CHECKS, ROTATE_CCW, TIMER_OFF, TRASH, X};
+use crate::ui::icons::{
+    FOLDER_SEARCH, HARD_DRIVE, LIST_CHECKS, PAUSE, PLAY, ROTATE_CCW, TIMER_OFF, TRASH, X,
+};
 use crate::ui::{Button, ButtonSize, ButtonVariant, Dialog, Menu, MenuEntry, MenuItem};
 
 /// What a card asks Activity to do.
 #[derive(Clone, Debug, PartialEq)]
 pub enum CardAction {
+    /// Pause a download, keeping it (#131).
+    Pause,
+    /// Go on with a paused download.
+    Resume,
     Cancel,
     Remove,
     /// Again as before, or with the install way at this index.
@@ -94,6 +101,26 @@ pub fn JobCard(job: JobSnapshot, busy: bool, on_action: EventHandler<CardAction>
         item.icon = Some(LIST_CHECKS);
         items.push(MenuEntry::Item(item));
     }
+    let pause_label = t!(
+        note = "Stops a download for now, keeping what it downloaded",
+        "Pause"
+    );
+    let resume_label = t!(
+        note = "Goes on with a paused download from where it stopped",
+        "Resume"
+    );
+    if labels::can_resume(&job) {
+        let mut item = MenuItem::new("resume", resume_label.clone());
+        item.icon = Some(PLAY);
+        item.disabled = busy;
+        items.push(MenuEntry::Item(item));
+    }
+    if labels::can_pause(&job) {
+        let mut item = MenuItem::new("pause", pause_label.clone());
+        item.icon = Some(PAUSE);
+        item.disabled = busy;
+        items.push(MenuEntry::Item(item));
+    }
     if labels::is_active(&job) {
         let mut item = MenuItem::new("cancel", t!("Cancel job"));
         item.icon = Some(X);
@@ -151,6 +178,12 @@ pub fn JobCard(job: JobSnapshot, busy: bool, on_action: EventHandler<CardAction>
         .map(|progress| progress.message.clone())
         .filter(|message| !message.is_empty())
         .unwrap_or_else(|| t!("Working…"));
+    // A paused download keeps its bar, standing still.
+    let message = if labels::can_resume(&job) {
+        labels::status(job.status)
+    } else {
+        message
+    };
     let kind_line = if labels::phase_differs(&job) {
         format!("{} · {}", labels::kind(job.kind), labels::phase(job.phase))
     } else {
@@ -184,6 +217,8 @@ pub fn JobCard(job: JobSnapshot, busy: bool, on_action: EventHandler<CardAction>
                         menu.set(None);
                         on_action.call(match id.as_str() {
                             "review" => CardAction::Review,
+                            "pause" => CardAction::Pause,
+                            "resume" => CardAction::Resume,
                             "cancel" => CardAction::Cancel,
                             "remove" => CardAction::Remove,
                             "retry" => CardAction::Retry(None),
@@ -205,6 +240,28 @@ pub fn JobCard(job: JobSnapshot, busy: bool, on_action: EventHandler<CardAction>
                             variant: ButtonVariant::Primary,
                             on_press: move |_| on_action.call(CardAction::Review),
                             {t!("Review choices")}
+                        }
+                    }
+                    if labels::can_resume(&job) {
+                        Button {
+                            id: "job-{job.id}-resume",
+                            "data-spatial": "focusable",
+                            variant: ButtonVariant::Primary,
+                            icon: Some(PLAY),
+                            disabled: busy,
+                            on_press: move |_| on_action.call(CardAction::Resume),
+                            "{resume_label}"
+                        }
+                    }
+                    if labels::can_pause(&job) {
+                        Button {
+                            id: "job-{job.id}-pause",
+                            "data-spatial": "focusable",
+                            variant: ButtonVariant::Ghost,
+                            icon: Some(PAUSE),
+                            disabled: busy,
+                            on_press: move |_| on_action.call(CardAction::Pause),
+                            "{pause_label}"
                         }
                     }
                     if labels::is_active(&job) {
@@ -243,7 +300,7 @@ pub fn JobCard(job: JobSnapshot, busy: bool, on_action: EventHandler<CardAction>
                     {t!("Target: {targetDir}", targetDir = target.to_string_lossy().into_owned())}
                 }
             }
-            if labels::is_running(&job) {
+            if labels::is_running(&job) || (labels::can_resume(&job) && progress.is_some()) {
                 ProgressLine {
                     label: t!("{title} progress", title = job.title.clone()),
                     status: message,

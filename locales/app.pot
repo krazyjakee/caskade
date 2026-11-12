@@ -11121,6 +11121,17 @@ msgstr ""
 msgid "Patterns"
 msgstr ""
 
+#. Stops a download for now, keeping what it downloaded
+#: apps/native/src/activity/card.rs
+msgid "Pause"
+msgstr ""
+
+#. A download the user paused; it goes on from where it stopped when resumed
+#: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/labels.rs
+msgid "Paused"
+msgstr ""
+
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/settings/search.rs
 msgid "peer downloads"
@@ -12796,6 +12807,12 @@ msgstr ""
 #: apps/native/src/library/view.rs
 #: apps/native/src/store/view.rs
 msgid "Results for “{query}”"
+msgstr ""
+
+#. Goes on with a paused download from where it stopped
+#: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/card.rs
+msgid "Resume"
 msgstr ""
 
 #: apps/desktop/src/views/home/HomeView.tsx
@@ -15827,6 +15844,12 @@ msgstr ""
 #: apps/desktop/src/views/settings/backup/BackupSettings.tsx
 #: apps/native/src/settings/backup.rs
 msgid "To move to another computer, copy a backup there, install Caskade, and restore it from here. Games keep their place in your library; Caskade finds their folders again when you scan, or you can point it at them."
+msgstr ""
+
+#. A store's launcher (Steam, GOG Galaxy, the Epic Games Launcher) is installing a game
+#: apps/desktop/src/views/game/OwnedReleases.tsx
+#: apps/native/src/game/elsewhere.rs
+msgid "To pause or cancel it, use {launcher}: Caskade can't pause a store's own download."
 msgstr ""
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx

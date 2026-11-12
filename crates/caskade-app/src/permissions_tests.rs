@@ -171,6 +171,7 @@ fn each_group_is_allowed_for_admins_refused_without_it_and_allowed_once_granted(
         ("rom_scan_start", json!({})),
         ("romm_sync", json!({})),
         ("job_retry", json!({"id": "missing"})),
+        ("job_resume", json!({"id": "missing"})),
     ];
     // Reading, always allowed.
     let reads = [

@@ -10711,6 +10711,17 @@ msgstr "Klistra in en parkopplingslänk från en annan enhet"
 msgid "Patterns"
 msgstr "Mönster"
 
+#. Stops a download for now, keeping what it downloaded
+#: apps/native/src/activity/card.rs
+msgid "Pause"
+msgstr ""
+
+#. A download the user paused; it goes on from where it stopped when resumed
+#: apps/desktop/src/views/activity/JobCard.tsx
+#: apps/native/src/activity/labels.rs
+msgid "Paused"
+msgstr ""
+
 #: apps/desktop/src/views/settings/searchIndex.ts
 #: apps/native/src/settings/search.rs
 msgid "peer downloads"
@@ -12305,6 +12316,13 @@ msgstr "Resultat"
 #: apps/native/src/store/view.rs
 msgid "Results for “{query}”"
 msgstr "Resultat för ”{query}”"
+
+#. Goes on with a paused download from where it stopped
+#: apps/desktop/src/views/activity/JobCard.tsx apps/native/src/activity/card.rs
+#, fuzzy
+#| msgid "Results"
+msgid "Resume"
+msgstr "Resultat"
 
 #: apps/desktop/src/views/home/HomeView.tsx apps/native/src/home/mod.rs
 msgid "Resume · View details"
@@ -15205,6 +15223,12 @@ msgstr "Titel för {rom}"
 #: apps/native/src/settings/backup.rs
 msgid "To move to another computer, copy a backup there, install Caskade, and restore it from here. Games keep their place in your library; Caskade finds their folders again when you scan, or you can point it at them."
 msgstr "För att flytta till en annan dator kopierar du dit en säkerhetskopia, installerar Caskade och återställer den härifrån. Spelen behåller sin plats i ditt bibliotek; Caskade hittar deras mappar igen när du söker, eller så kan du peka ut dem."
+
+#. A store's launcher (Steam, GOG Galaxy, the Epic Games Launcher) is installing a game
+#: apps/desktop/src/views/game/OwnedReleases.tsx
+#: apps/native/src/game/elsewhere.rs
+msgid "To pause or cancel it, use {launcher}: Caskade can't pause a store's own download."
+msgstr ""
 
 #: apps/desktop/src/views/settings/appearance/CustomCssEditor.tsx
 #: apps/native/src/settings/appearance.rs

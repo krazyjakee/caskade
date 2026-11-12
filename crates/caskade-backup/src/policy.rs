@@ -29,6 +29,10 @@ pub const EXCLUDED_TABLES: &[(&str, &str)] = &[
         "icon_checks",
         "which executables were read for icons: a restore without the icons must read them again",
     ),
+    (
+        "paused_jobs",
+        "paused installs, whose downloads stay in this machine's storage",
+    ),
 ];
 
 /// Settings keys (exact, or a prefix ending in `.`) deleted from the

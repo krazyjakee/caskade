@@ -48,6 +48,10 @@ pub const GAMEPAD: Icon = Icon(&[
 ]);
 
 pub const PLAY: Icon = Icon(&["M6 3 20 12 6 21z"]);
+pub const PAUSE: Icon = Icon(&[
+    "M15 3h2a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z",
+    "M7 3h2a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z",
+]);
 pub const ELLIPSIS: Icon = Icon(&[
     "M12 11a1 1 0 1 0 0 2a1 1 0 1 0 0-2z",
     "M19 11a1 1 0 1 0 0 2a1 1 0 1 0 0-2z",

@@ -271,6 +271,16 @@ pub fn start(core: Core, shell: Shell) -> Services {
             (None, None, None)
         }
     };
+    // Installs paused before the last exit are listed again, paused (#131).
+    if let Some(install) = install.clone() {
+        let launch = launch.clone();
+        crate::runtime::spawn(async move {
+            let restored = install.restore_paused(Some(launch)).await;
+            if restored > 0 {
+                tracing::info!(restored, "paused installs restored");
+            }
+        });
+    }
     let mut discovery_controller =
         crate::discovery::DiscoveryController::new(discovery.clone(), settings.clone());
     if let Some(source) = &storage_source {

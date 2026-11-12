@@ -24,10 +24,10 @@ use std::path::{Path, PathBuf};
 /// What an update job updates, kept for its restarts.
 #[derive(Clone)]
 pub(super) struct UpdateTarget {
-    entry_id: String,
+    pub(super) entry_id: String,
     /// The release being installed.
-    version: String,
-    launch: LaunchService,
+    pub(super) version: String,
+    pub(super) launch: LaunchService,
 }
 
 /// Where updates set the old version aside, inside the root.

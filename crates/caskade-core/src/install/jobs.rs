@@ -29,6 +29,9 @@ pub enum JobStatus {
     Downloading,
     Installing,
     NeedsUser,
+    /// Stopped by the user with its download kept, to resume later; kept
+    /// across a restart (#131).
+    Paused,
     Completed,
     Failed,
     Cancelled,
@@ -103,6 +106,14 @@ pub struct JobSnapshot {
 }
 
 impl JobSnapshot {
+    /// An install or update downloading, or queued to download: it can
+    /// pause (#131).
+    pub fn can_pause(&self) -> bool {
+        matches!(self.kind, JobKind::Install | JobKind::Update)
+            && matches!(self.status, JobStatus::Queued | JobStatus::Downloading)
+            && caskade_installer::pipeline::input::downloads(&self.input)
+    }
+
     /// A new job, queued now.
     pub(super) fn queued(
         kind: JobKind,

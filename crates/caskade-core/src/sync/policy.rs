@@ -699,6 +699,10 @@ pub const TABLES: &[Rule] = &[
         "activity feed, read state and failures belong to this device",
     ),
     local(
+        "paused_jobs",
+        "paused installs and their downloads belong to this device's storage",
+    ),
+    local(
         "notification_members",
         "notification targets and entry bindings belong to this device",
     ),

@@ -219,9 +219,11 @@ impl InstallService {
     }
     pub(super) fn end_operation(&self, id: &str, result: Result<()>, cancelled: bool) {
         self.sync_plans(id);
-        if let Some(job) = lock(&self.inner.jobs).get_mut(id) {
+        // Stopped to pause (#131): paused, with its download kept.
+        let paused = lock(&self.inner.jobs).get_mut(id).is_some_and(|job| {
             job.active = false;
-        }
+            std::mem::take(&mut job.pausing) && cancelled
+        });
         let (unclassified, retry) = match &result {
             Err(error) if !cancelled => {
                 let unclassified = self.unclassified(id, error);
@@ -235,7 +237,11 @@ impl InstallService {
         };
         let ended = self.update(id, |job| {
             if !job.status.is_finished() {
-                if cancelled {
+                if paused {
+                    job.status = JobStatus::Paused;
+                    job.question = None;
+                    job.failure = None;
+                } else if cancelled {
                     job.status = JobStatus::Cancelled;
                     job.question = None;
                     job.failure = None;

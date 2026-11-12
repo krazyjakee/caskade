@@ -37,6 +37,21 @@ pub fn job_cancel(state: &InstallService, id: String) -> Result<JobSnapshot, Str
     state.cancel(&id).map_err(|error| error.to_string())
 }
 
+/// Pauses an install or update while it downloads: it stops, keeps what
+/// it downloaded, and stays paused across restarts until resumed (#131).
+pub async fn job_pause(state: &InstallService, id: String) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("job_pause", serde_json::Value::default)
+        .map_err(|refusal| refusal.summary)?;
+    state.pause(&id).await.map_err(|error| error.to_string())
+}
+
+/// Resumes a paused job from where its download stopped.
+pub async fn job_resume(state: &InstallService, id: String) -> Result<JobSnapshot, String> {
+    crate::permissions::enforce("job_resume", || serde_json::json!({ "id": id }))
+        .map_err(|refusal| refusal.summary)?;
+    state.resume(&id).await.map_err(|error| error.to_string())
+}
+
 /// Takes a finished job out of Activity. Its files stay.
 pub fn job_remove(state: &InstallService, id: String) -> Result<(), String> {
     crate::permissions::enforce("job_remove", serde_json::Value::default)

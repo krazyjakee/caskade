@@ -6,7 +6,7 @@ use crate::model::{GameEntry, LaunchSpec};
 use std::path::{Component, Path, PathBuf};
 
 /// What an install attached to an existing game does after installing.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct AttachTo {
     /// The library game the install becomes a release of. When it is gone
     /// by the time the install finishes, the install gets a game of its own.
@@ -22,7 +22,7 @@ pub struct AttachTo {
 }
 
 /// A file copied into an install.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct PlacedFile {
     pub source: PathBuf,
     /// The folder inside the install it goes in, relative; empty for the

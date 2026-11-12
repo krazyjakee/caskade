@@ -126,6 +126,16 @@ pub fn OwnedReleases(game_id: String, primary: bool) -> Element {
                     if let Some(note) = describe(&release.state) {
                         span { class: "text-xs text-fg-muted", "{note}" }
                     }
+                    // The launcher's download is its own (#131).
+                    if let OwnedInstallState::Installing { launcher, .. } = &release.state {
+                        span { "data-part": "pause-elsewhere", class: "text-xs text-fg-muted",
+                            {t!(
+                                note = "A store's launcher (Steam, GOG Galaxy, the Epic Games Launcher) is installing a game",
+                                "To pause or cancel it, use {launcher}: Caskade can't pause a store's own download.",
+                                launcher = launcher.clone()
+                            )}
+                        }
+                    }
                     if let OwnedInstallState::Available { launcher } = &release.state {
                         Button {
                             "data-part": "install",

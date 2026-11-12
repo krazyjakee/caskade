@@ -60,6 +60,27 @@ pub fn job_cancel(
     app::job_cancel(&state, id)
 }
 
+/// Pauses an install or update while it downloads: it stops, keeps what
+/// it downloaded, and stays paused across restarts until resumed (#131).
+#[tauri::command]
+#[specta::specta]
+pub async fn job_pause(
+    state: tauri::State<'_, InstallService>,
+    id: String,
+) -> Result<JobSnapshot, String> {
+    app::job_pause(&state, id).await
+}
+
+/// Resumes a paused job from where its download stopped.
+#[tauri::command]
+#[specta::specta]
+pub async fn job_resume(
+    state: tauri::State<'_, InstallService>,
+    id: String,
+) -> Result<JobSnapshot, String> {
+    app::job_resume(&state, id).await
+}
+
 /// Takes a finished job out of Activity. Its files stay.
 #[tauri::command]
 #[specta::specta]

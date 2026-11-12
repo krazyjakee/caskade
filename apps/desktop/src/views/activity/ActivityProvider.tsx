@@ -88,7 +88,8 @@ const ignore = () => {};
  * puts it off. */
 export const useFollowJob = () => useContext(FollowContext)?.follow ?? ignore;
 
-const settled = new Set<JobSnapshot["status"]>(["completed", "failed", "cancelled"]);
+// A paused download waits for the user, like a finished job.
+const settled = new Set<JobSnapshot["status"]>(["completed", "failed", "cancelled", "paused"]);
 
 export function useJobs() {
   const api = useInstallApi();
@@ -115,6 +116,7 @@ export function useJobActions() {
         | { type: "cancel"; jobId: string }
         | { type: "remove"; jobId: string }
         | { type: "retry"; jobId: string; strategyId?: string }
+        | { type: "resume"; jobId: string }
         | { type: "answer"; jobId: string; questionId: string; choiceId: string },
     ) => {
       if (action.type === "cancel") await api.cancel(action.jobId);
@@ -127,7 +129,10 @@ export function useJobActions() {
       } else if (action.type === "answer")
         await api.answer(action.jobId, action.questionId, action.choiceId);
       else {
-        const job = await api.retry(action.jobId, action.strategyId);
+        const job =
+          action.type === "resume"
+            ? await api.resume(action.jobId)
+            : await api.retry(action.jobId, action.strategyId);
         client.setQueryData<JobSnapshot[]>(activityKey, (current) => mergeJobs(current, [job]));
       }
     },
