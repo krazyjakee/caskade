@@ -1,6 +1,8 @@
 //! Original bounded reader of Ubisoft's configurations cache. Wire field facts:
 //! Playnite UplayLibrary/Models/LocalCache.cs (MIT); YAML layout:
 //! ProductSchema.cs (MIT), BoilR uplay/platform.rs (Apache-2.0). No code ported.
+use crate::parsers::{Limits, protobuf::preflight};
+use prost::Message;
 use serde::Deserialize;
 use std::{collections::BTreeMap, io};
 fn invalid(s: impl ToString) -> io::Error {
@@ -17,71 +19,26 @@ pub struct ConfigurationCache {
     pub games: Vec<CacheTitle>,
     pub warnings: Vec<String>,
 }
-enum Value<'a> {
-    Integer(u64),
-    Bytes(&'a [u8]),
-    Other,
+#[derive(Clone, PartialEq, prost::Message)]
+struct Cache {
+    #[prost(message, repeated, tag = "1")]
+    records: Vec<Record>,
 }
-fn integer(bytes: &[u8], pos: &mut usize) -> io::Result<u64> {
-    let mut value = 0;
-    for shift in (0..70).step_by(7) {
-        let b = *bytes
-            .get(*pos)
-            .ok_or_else(|| invalid("truncated cache varint"))?;
-        *pos += 1;
-        if shift == 63 && b > 1 {
-            return Err(invalid("cache varint overflow"));
-        }
-        value |= u64::from(b & 127) << shift;
-        if b & 128 == 0 {
-            return Ok(value);
-        }
-    }
-    Err(invalid("cache varint overflow"))
+#[derive(Clone, PartialEq, prost::Message)]
+struct Record {
+    #[prost(uint64, tag = "1")]
+    id: u64,
+    #[prost(uint64, tag = "2")]
+    install_id: u64,
+    #[prost(bytes = "vec", optional, tag = "3")]
+    configuration: Option<Vec<u8>>,
 }
-fn fields<'a>(bytes: &'a [u8], count: &mut usize) -> io::Result<Vec<(u32, Value<'a>)>> {
-    let mut pos = 0;
-    let mut fields = Vec::new();
-    while pos < bytes.len() {
-        *count += 1;
-        if *count > 50_000 {
-            return Err(invalid("cache field budget"));
-        }
-        let key = integer(bytes, &mut pos)?;
-        let number = key >> 3;
-        if number == 0 || number > 0x1fff_ffff {
-            return Err(invalid("invalid cache field number"));
-        }
-        let value = match key & 7 {
-            0 => Value::Integer(integer(bytes, &mut pos)?),
-            wire @ (1 | 2 | 5) => {
-                let len = match wire {
-                    1 => 8,
-                    5 => 4,
-                    _ => usize::try_from(integer(bytes, &mut pos)?).map_err(invalid)?,
-                };
-                if len > 1 << 20 {
-                    return Err(invalid("cache field exceeds 1 MiB"));
-                }
-                let end = pos
-                    .checked_add(len)
-                    .ok_or_else(|| invalid("cache length overflow"))?;
-                let data = bytes
-                    .get(pos..end)
-                    .ok_or_else(|| invalid("truncated cache field"))?;
-                pos = end;
-                if wire == 2 {
-                    Value::Bytes(data)
-                } else {
-                    Value::Other
-                }
-            }
-            _ => return Err(invalid("unsupported cache wire type")),
-        };
-        fields.push((number as u32, value));
-    }
-    Ok(fields)
-}
+const LIMITS: Limits = Limits {
+    max_input_bytes: 8 << 20,
+    max_string_bytes: 1 << 20,
+    max_nodes: 50_000,
+    max_depth: 1,
+};
 #[derive(Default, Deserialize)]
 #[serde(default)]
 struct Product {
@@ -205,30 +162,19 @@ pub fn parse_configurations(bytes: &[u8]) -> io::Result<ConfigurationCache> {
         }
         return Ok(result);
     }
-    let mut count = 0;
-    for (number, value) in fields(bytes, &mut count)? {
-        let Value::Bytes(record) = value else {
-            continue;
-        };
-        if number != 1 {
-            continue;
-        }
+    // Records are the only nested messages (kind 1).
+    preflight(bytes, 0, 0, &mut 0, &LIMITS, |kind, field| {
+        (kind == 0 && field == 1).then_some(1)
+    })
+    .map_err(invalid)?;
+    let cache = Cache::decode(bytes).map_err(invalid)?;
+    for record in cache.records {
         if result.games.len() + result.warnings.len() >= 10_000 {
             return Err(invalid("cache record budget"));
         }
-        let mut id = 0;
-        let mut install_id = 0;
-        let mut yaml = None;
-        for (number, value) in fields(record, &mut count)? {
-            match (number, value) {
-                (1, Value::Integer(v)) => id = v,
-                (2, Value::Integer(v)) => install_id = v,
-                (3, Value::Bytes(v)) => yaml = Some(v),
-                _ => {}
-            }
-        }
-        if let Some(yaml) = yaml {
-            match title(yaml, id, install_id) {
+        let (id, install_id) = (record.id, record.install_id);
+        if let Some(yaml) = record.configuration {
+            match title(&yaml, id, install_id) {
                 Ok(Some(game)) => result.games.push(game),
                 Ok(None) => {}
                 Err(e) => result

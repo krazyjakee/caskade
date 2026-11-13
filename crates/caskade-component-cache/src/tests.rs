@@ -118,3 +118,22 @@ fn keys_are_random_and_never_printed() {
     assert_eq!(format!("{a:?}"), "CacheKey(..)");
     assert_eq!(CacheKey::from_bytes(a.to_bytes()).to_bytes(), a.to_bytes());
 }
+
+#[test]
+fn the_wasmtime_version_is_the_pinned_one() {
+    let pin = format!("wasmtime = {{ version = \"={}\"", wasmtime_version());
+    assert!(include_str!("../Cargo.toml").contains(&pin), "{pin}");
+}
+
+#[test]
+fn keys_round_trip_through_hex() {
+    let key = CacheKey::generate().unwrap();
+    let text = key.to_hex();
+    assert_eq!(text.len(), 64);
+    assert_eq!(
+        CacheKey::from_hex(&text).unwrap().to_bytes(),
+        key.to_bytes()
+    );
+    assert!(CacheKey::from_hex(&text[1..]).is_none());
+    assert!(CacheKey::from_hex(&"zz".repeat(32)).is_none());
+}

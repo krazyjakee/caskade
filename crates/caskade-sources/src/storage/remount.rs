@@ -69,8 +69,7 @@ impl Remounts {
             }
             Ok(())
         })
-        .await
-        .map_err(|e| StorageError::Invalid(e.to_string()))?
+        .await?
     }
     pub async fn resolve(&self, root: &StorageRoot) -> Result<StorageRoot> {
         let (previous, env, config) = (root.clone(), self.env.clone(), self.config.clone());
@@ -113,8 +112,7 @@ impl Remounts {
                 }
                 Ok(candidates.into_iter().next())
             })
-            .await
-            .map_err(|e| StorageError::Invalid(e.to_string()))??;
+            .await??;
         match candidate {
             None => Ok(root.clone()),
             Some(path) => self

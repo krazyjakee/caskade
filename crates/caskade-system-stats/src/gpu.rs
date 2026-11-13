@@ -12,7 +12,7 @@ use super::{GpuSample, GpuSamples, GpuVendor};
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
-use std::process::{Child, Command, Stdio};
+use std::process::{Child, Stdio};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -274,7 +274,7 @@ const SMI_RETRY: Duration = Duration::from_secs(30);
 
 impl NvidiaSmi {
     fn start() -> std::io::Result<Self> {
-        let mut command = Command::new("nvidia-smi");
+        let mut command = caskade_core::quiet::command("nvidia-smi");
         caskade_core::managed::outside_own_appimage(&mut command);
         command
             .args([
@@ -286,12 +286,6 @@ impl NvidiaSmi {
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
             .stderr(Stdio::null());
-        #[cfg(windows)]
-        {
-            use std::os::windows::process::CommandExt;
-            // CREATE_NO_WINDOW: no console flashes up.
-            command.creation_flags(0x0800_0000);
-        }
         let mut child = command.spawn()?;
         let Some(stdout) = child.stdout.take() else {
             let _ = child.kill();

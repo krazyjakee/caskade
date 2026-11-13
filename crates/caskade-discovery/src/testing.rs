@@ -1,7 +1,6 @@
 //! Shared deterministic host seams for source and orchestrator tests (#65).
-use crate::env::{Clock, DriveProvider, Volume};
+use crate::env::Clock;
 use std::{
-    io,
     sync::{Arc, Mutex},
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
@@ -40,33 +39,5 @@ impl Clock for FakeClock {
     }
     fn monotonic(&self) -> Duration {
         self.state.lock().expect("fake clock poisoned").1
-    }
-}
-
-#[derive(Debug, Default, Clone)]
-pub struct FakeDrives {
-    volumes: Vec<Volume>,
-    error: Option<(io::ErrorKind, String)>,
-}
-impl FakeDrives {
-    pub fn new(volumes: Vec<Volume>) -> Self {
-        Self {
-            volumes,
-            error: None,
-        }
-    }
-    pub fn failing(kind: io::ErrorKind, message: impl Into<String>) -> Self {
-        Self {
-            volumes: vec![],
-            error: Some((kind, message.into())),
-        }
-    }
-}
-impl DriveProvider for FakeDrives {
-    fn volumes(&self) -> io::Result<Vec<Volume>> {
-        match &self.error {
-            Some((kind, message)) => Err(io::Error::new(*kind, message.clone())),
-            None => Ok(self.volumes.clone()),
-        }
     }
 }

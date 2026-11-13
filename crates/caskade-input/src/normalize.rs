@@ -62,9 +62,6 @@ pub struct Timing {
     pub engage: f32,
     /// ...until it comes back inside this (hysteresis).
     pub release: f32,
-    /// Select and Start pressed together count as `guide`: Steam Input
-    /// (Steam Deck game mode) keeps the real guide button for itself.
-    pub guide_chord: bool,
 }
 
 impl Default for Timing {
@@ -74,7 +71,6 @@ impl Default for Timing {
             interval: Duration::from_millis(90),
             engage: 0.6,
             release: 0.4,
-            guide_chord: true,
         }
     }
 }
@@ -140,7 +136,6 @@ impl Normalizer {
                 Vec::new()
             }
             Raw::Pressed(pad, button) => {
-                let chord = self.timing.guide_chord;
                 let state = self.pad(pad);
                 let glyphs = state.glyphs;
                 let other_held = match button {
@@ -148,7 +143,10 @@ impl Normalizer {
                     Button::Start => std::mem::replace(&mut state.start, true) || state.select,
                     _ => false,
                 };
-                if chord && other_held {
+                // Select and Start pressed together count as `guide`: Steam
+                // Input (Steam Deck game mode) keeps the real guide button
+                // for itself.
+                if other_held {
                     return vec![self.fire(pad, Action::Guide, false)];
                 }
                 match direction(button) {
@@ -455,16 +453,6 @@ mod tests {
         assert_eq!(
             run.feed(30, Raw::Pressed(1, Button::Start)),
             [(Action::Menu, false)]
-        );
-        let mut off = Normalizer::new(Timing {
-            guide_chord: false,
-            ..Timing::default()
-        });
-        let now = run.at(0);
-        off.feed(Raw::Pressed(1, Button::Select), now);
-        assert_eq!(
-            off.feed(Raw::Pressed(1, Button::Start), now)[0].action,
-            Action::Menu
         );
     }
 

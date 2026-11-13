@@ -26,7 +26,7 @@ pub use compat::{
     ItemState, ReasonCode, evaluate, evaluate_entry,
 };
 pub use service::{CatalogueService, CatalogueStatus};
-pub use validate::{MAX_CATALOGUE_BYTES, MAX_SIGNATURE_BYTES, parse};
+pub(crate) use validate::parse;
 
 use serde::{Deserialize, Serialize};
 use specta::Type;

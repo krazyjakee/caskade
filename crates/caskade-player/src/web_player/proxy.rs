@@ -435,8 +435,10 @@ impl Handler {
             }
         })
         .await;
-        if !matches!(stored, Ok(Ok(()))) {
-            tracing::warn!("a web game file couldn't be kept");
+        match stored {
+            Ok(Ok(())) => {}
+            Ok(Err(error)) => tracing::warn!(%error, "a web game file couldn't be kept"),
+            Err(error) => tracing::warn!(%error, "a web game file couldn't be kept"),
         }
         // The body is whole now: hyper drops the connection on a response
         // with a length and a chunked encoding both (CloudFront chunks its

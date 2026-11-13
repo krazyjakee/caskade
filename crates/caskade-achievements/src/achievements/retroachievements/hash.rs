@@ -118,7 +118,7 @@ pub async fn hash_file(path: &Path, rule: Rule) -> Result<String, HashError> {
             .file_stem()
             .and_then(|name| name.to_str())
             .ok_or_else(|| HashError::Read("no file name".into()))?;
-        return Ok(hex(Md5::digest(name.as_bytes()).as_slice()));
+        return Ok(format!("{:x}", Md5::digest(name.as_bytes())));
     }
     if path
         .extension()
@@ -138,10 +138,13 @@ pub async fn hash_file(path: &Path, rule: Rule) -> Result<String, HashError> {
     if size > MAX_ROM {
         return Err(HashError::TooLarge);
     }
-    let bytes = tokio::fs::read(path)
-        .await
-        .map_err(|error| HashError::Read(error.to_string()))?;
-    hash_bytes(&bytes, rule)
+    let path = path.to_path_buf();
+    caskade_jobs::blocking("Hashing a ROM", move || {
+        let bytes = std::fs::read(path).map_err(|error| HashError::Read(error.to_string()))?;
+        hash_bytes(&bytes, rule)
+    })
+    .await
+    .map_err(|error| HashError::Read(error.to_string()))?
 }
 
 /// The RetroAchievements hash of a ROM's bytes under `rule`.
@@ -169,7 +172,7 @@ pub fn hash_bytes(bytes: &[u8], rule: Rule) -> Result<String, HashError> {
         Rule::N64 => n64_big_endian(bytes).into(),
         Rule::Arcade | Rule::Unsupported => return Err(HashError::UnsupportedSystem),
     };
-    Ok(hex(Md5::digest(&body).as_slice()))
+    Ok(format!("{:x}", Md5::digest(&body)))
 }
 
 /// An N64 ROM in big-endian order: `.z64` as it is, `.v64` (byte-swapped
@@ -186,8 +189,4 @@ fn n64_big_endian(bytes: &[u8]) -> Vec<u8> {
             .collect(),
         _ => bytes.to_vec(),
     }
-}
-
-fn hex(bytes: &[u8]) -> String {
-    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
 }

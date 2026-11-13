@@ -333,14 +333,14 @@ pub fn run(options: Options) -> Result<i32, String> {
     load(&webview, &start).map_err(|error| error.to_string())?;
     // A webview that lost its processes would stay white (#3).
     {
-        use crate::recovery::{Policy, Step as Recover, failure_of, log};
+        use crate::recovery::{Policy, Step as Recover, log};
         let fails = event_loop.create_proxy();
         let policy = std::cell::RefCell::new(Policy::default());
         let watched = crate::recovery::watch_player(&webview, move |failed| {
             log("game window", &failed);
             let event = match policy
                 .borrow_mut()
-                .next(failure_of(failed.kind), std::time::Instant::now())
+                .next(failed.kind, std::time::Instant::now())
             {
                 Recover::Wait => return,
                 Recover::Reload => UserEvent::Reload,
@@ -467,7 +467,9 @@ pub fn run(options: Options) -> Result<i32, String> {
                         session.set_mode(proxy::Mode::Check);
                         bar.checking();
                         clear_cache(&webview);
-                        let _ = load(&webview, &start);
+                        if let Err(error) = load(&webview, &start) {
+                            tracing::warn!(%error, "the game couldn't load to be checked");
+                        }
                         let checks = checks.clone();
                         gtk::glib::timeout_add_local_once(
                             std::time::Duration::from_secs(CHECK_SECONDS),
@@ -481,7 +483,9 @@ pub fn run(options: Options) -> Result<i32, String> {
                         session.set_mode(proxy::Mode::Capture);
                         bar.capturing();
                         // In its page again: some games play only there.
-                        let _ = load(&webview, &page);
+                        if let Err(error) = load(&webview, &page) {
+                            tracing::warn!(%error, "the game's page couldn't load");
+                        }
                     }
                     (Step::Checked, bar::Action::Primary | bar::Action::SaveAnyway) => {
                         save();

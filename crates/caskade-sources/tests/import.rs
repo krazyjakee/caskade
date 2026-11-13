@@ -590,37 +590,6 @@ async fn delta_updates_partial_membership_and_removes_without_erasing_library_re
 }
 
 #[tokio::test]
-async fn every_builtin_family_has_a_bus_adapter_and_disabled_sources_are_inert() {
-    let store = LibraryStore::in_memory().await.unwrap();
-    let bus = Bus::default();
-    let config = caskade_discovery::Config {
-        sources: caskade_discovery::SourceSelection::only([]),
-        ..Default::default()
-    };
-    caskade_sources::register(
-        &bus,
-        store,
-        HostEnv::fixture(machine("linux-integration")).unwrap(),
-        &config,
-    );
-    let providers = bus.library_sources();
-    let expected: BTreeSet<_> = caskade_discovery::types::builtin_sources()
-        .iter()
-        .map(|s| s.id().to_string())
-        .collect();
-    assert_eq!(
-        providers
-            .iter()
-            .map(|s| s.id().to_string())
-            .collect::<BTreeSet<_>>(),
-        expected
-    );
-    for provider in providers {
-        assert!(provider.scan().await.unwrap().is_empty());
-    }
-}
-
-#[tokio::test]
 async fn seed_preference_round_trips_through_the_shared_settings_service() {
     use caskade_core::settings::SettingsService;
     use caskade_sources::{IMPORT_SETTINGS, import_options, register_settings};

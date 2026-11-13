@@ -9,10 +9,12 @@ publish = false
 [features]
 default = ["net"]
 # Fetching the catalogue and add-on downloads, with caskade-core's `net`.
-net = ["caskade-core/net", "dep:reqwest"]
+net = ["caskade-core/net", "dep:reqwest", "dep:caskade-jobs"]
 
 [dependencies]
 caskade-core = { path = "../caskade-core", default-features = false }
+caskade-jobs = { path = "../caskade-jobs", optional = true }
+base64 = "0.22"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 specta = { version = "=2.0.0-rc.26", features = ["derive", "serde_json"] }

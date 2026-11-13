@@ -1,6 +1,6 @@
 # caskade-sources
 
-Discovery-backed `LibrarySource` providers and the D5 library importer. This
+The discovery service and the D5 library importer. This
 crate contains integration policy; discovery remains a read-only scanner and
 core owns the domain, SQLite transactions, process tracking and hook bus.
 
@@ -12,7 +12,7 @@ use caskade_discovery::{Cancel, Config, HostEnv};
 let bus = Bus::default();
 let config = Config::default();
 caskade_sources::register_settings(&settings)?;
-let sources = caskade_sources::register(&bus, store, HostEnv::live(), &config);
+let sources = caskade_sources::DiscoveryService::new(store, bus, HostEnv::live());
 let options = caskade_sources::import_options(&settings).await?;
 let outcome = sources.scan(&config, &options, &Cancel::new()).await?;
 // Show outcome.import.review rather than importing Maybe results implicitly.
@@ -22,9 +22,8 @@ watch.stop().await;
 # Ok(()) }
 ```
 
-`register` registers one bus provider per discovery family. Providers support
-bounded async scans; watching goes through the aggregate service. It scans families
-together with discovery's budgets, exclusions, identity merging and host gates.
+`DiscoveryService` scans and watches discovery's built-in sources together,
+with discovery's budgets, exclusions, identity merging and host gates.
 Blocking scans and watcher initialization run away from the async/UI thread.
 Use injected `HostEnv`/sources for tests; no global runtime or database exists.
 

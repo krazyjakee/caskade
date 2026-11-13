@@ -219,11 +219,3 @@ pub fn builtin_sources() -> &'static [&'static dyn Source] {
         &crate::deep::Deep,
     ]
 }
-
-/// The built-in source with this id.
-pub fn find_source(id: &str) -> Option<&'static dyn Source> {
-    builtin_sources()
-        .iter()
-        .copied()
-        .find(|source| source.id().as_str() == id)
-}

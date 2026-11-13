@@ -59,12 +59,16 @@ fn varint(bytes: &[u8], pos: &mut usize) -> Result<u64> {
     }
     Err(ParseError::Invalid("protobuf varint".into()))
 }
-fn preflight(
+/// Walks a message before prost allocates it, within `limits`. `children`
+/// names the message kind of a length-delimited field of a `kind` message,
+/// or `None` for plain bytes; the top-level message is kind 0.
+pub(crate) fn preflight(
     bytes: &[u8],
     kind: u8,
     depth: usize,
     count: &mut usize,
     limits: &Limits,
+    children: fn(u8, u64) -> Option<u8>,
 ) -> Result<()> {
     limits.check(depth, limits.max_depth.min(128), "nesting depth")?;
     let mut pos: usize = 0;
@@ -90,15 +94,8 @@ fn preflight(
         let end = pos.checked_add(n).ok_or(ParseError::Truncated(pos))?;
         let data = bytes.get(pos..end).ok_or(ParseError::Truncated(pos))?;
         if key & 7 == 2 {
-            let child_kind = match (kind, field) {
-                (0, 1) => Some(1), // ProductDb -> ProductInstall
-                (1, 3) => Some(2), // ProductInstall -> UserSettings
-                (1, 4) => Some(3), // ProductInstall -> CachedProductState
-                (3, 1) => Some(4), // CachedProductState -> BaseProductState
-                _ => None,
-            };
-            if let Some(child_kind) = child_kind {
-                preflight(data, child_kind, depth + 1, count, limits)?;
+            if let Some(child_kind) = children(kind, field) {
+                preflight(data, child_kind, depth + 1, count, limits, children)?;
             } else {
                 limits.check(n, limits.max_string_bytes, "protobuf field bytes")?;
             }
@@ -109,6 +106,14 @@ fn preflight(
 }
 pub fn parse_product_db(bytes: &[u8], limits: &Limits) -> Result<ProductDb> {
     limits.input(bytes)?;
-    preflight(bytes, 0, 0, &mut 0, limits)?;
+    preflight(bytes, 0, 0, &mut 0, limits, |kind, field| {
+        match (kind, field) {
+            (0, 1) => Some(1), // ProductDb -> ProductInstall
+            (1, 3) => Some(2), // ProductInstall -> UserSettings
+            (1, 4) => Some(3), // ProductInstall -> CachedProductState
+            (3, 1) => Some(4), // CachedProductState -> BaseProductState
+            _ => None,
+        }
+    })?;
     ProductDb::decode(bytes).map_err(|e| ParseError::Invalid(e.to_string()))
 }

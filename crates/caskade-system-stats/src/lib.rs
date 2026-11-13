@@ -17,8 +17,10 @@ mod probe;
 #[cfg(test)]
 mod tests;
 
-pub use aggregate::{Aggregator, RawDisk, RawInterface, classify_interface};
-pub use probe::{NativeProbe, Probe, Readings};
+use aggregate::{Aggregator, classify_interface};
+pub use aggregate::{RawDisk, RawInterface};
+use probe::NativeProbe;
+pub use probe::{Probe, Readings};
 
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -29,12 +31,12 @@ use tokio::sync::broadcast;
 use tokio::time::MissedTickBehavior;
 
 /// Time between samples.
-pub const INTERVAL: Duration = Duration::from_secs(1);
+const INTERVAL: Duration = Duration::from_secs(1);
 /// Samples kept: a minute at [`INTERVAL`].
 pub const HISTORY: usize = 60;
 /// How long a watch lasts without being renewed. It covers a webview that
 /// reloads or crashes without giving its watch back.
-pub const LEASE: Duration = Duration::from_secs(30);
+const LEASE: Duration = Duration::from_secs(30);
 
 /// The history so far and how it is sampled.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]

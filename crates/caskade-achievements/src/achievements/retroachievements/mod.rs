@@ -38,6 +38,7 @@ use caskade_core::{
 use serde::Deserialize;
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap},
+    sync::Arc,
     time::{Duration, Instant},
 };
 use tokio_util::sync::CancellationToken;
@@ -52,12 +53,15 @@ pub const KEY_PAGE: &str = "https://retroachievements.org/settings";
 /// A system's game list is asked for again after this long.
 const LIST_TTL: Duration = Duration::from_secs(24 * 60 * 60);
 
+/// A system's games with their hashes, shared by every link that reads it.
+type Games = Arc<Vec<ListedGame>>;
+
 /// RetroAchievements through its web API.
 pub struct RetroAchievements {
     base: Url,
     media: String,
     /// Each system's games with their hashes, as last fetched.
-    lists: tokio::sync::Mutex<HashMap<u32, (Instant, Vec<ListedGame>)>>,
+    lists: tokio::sync::Mutex<HashMap<u32, (Instant, Games)>>,
 }
 
 impl Default for RetroAchievements {
@@ -99,7 +103,7 @@ impl RetroAchievements {
     }
 
     /// The games of `console` with their hashes, cached for a day.
-    async fn games(&self, console: u32, key: &str) -> Result<Vec<ListedGame>, ProviderError> {
+    async fn games(&self, console: u32, key: &str) -> Result<Games, ProviderError> {
         let mut lists = self.lists.lock().await;
         if let Some((at, games)) = lists.get(&console)
             && at.elapsed() < LIST_TTL
@@ -107,13 +111,14 @@ impl RetroAchievements {
             return Ok(games.clone());
         }
         let console_id = console.to_string();
-        let games: Vec<ListedGame> = self
-            .get(
+        let games: Games = Arc::new(
+            self.get(
                 "API_GetGameList.php",
                 key,
                 &[("i", &console_id), ("h", "1"), ("f", "1")],
             )
-            .await?;
+            .await?,
+        );
         lists.insert(console, (Instant::now(), games.clone()));
         Ok(games)
     }

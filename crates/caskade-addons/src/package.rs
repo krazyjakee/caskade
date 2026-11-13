@@ -103,11 +103,7 @@ pub fn verify(archive: &Path, release: &CatalogueRelease) -> std::result::Result
             caskade_core::tr!("the download's size doesn't match the catalogue"),
         ));
     }
-    let digest: String = hasher
-        .finalize()
-        .iter()
-        .map(|b| format!("{b:02x}"))
-        .collect();
+    let digest = format!("{:x}", hasher.finalize());
     if digest != release.artifact.sha256 {
         return Err(PackageError::new(
             AddonFailure::Integrity,
@@ -115,6 +111,20 @@ pub fn verify(archive: &Path, release: &CatalogueRelease) -> std::result::Result
         ));
     }
     Ok(())
+}
+
+/// [`verify`] on a blocking worker: it hashes up to the archive's size.
+#[cfg(feature = "net")]
+async fn verify_blocking(
+    archive: &Path,
+    release: &CatalogueRelease,
+) -> std::result::Result<(), PackageError> {
+    let (archive, release) = (archive.to_path_buf(), release.clone());
+    caskade_jobs::blocking("Checking add-on download", move || {
+        verify(&archive, &release)
+    })
+    .await
+    .map_err(|error| PackageError::new(AddonFailure::Storage, error.to_string()))?
 }
 
 /// Downloads `release`'s archive to `<dir>/<sha256>.zip`, stopping at the
@@ -130,7 +140,7 @@ pub async fn download(
     use tokio::io::AsyncWriteExt;
     tokio::fs::create_dir_all(dir).await?;
     let archive = dir.join(format!("{}.zip", release.artifact.sha256));
-    if archive.is_file() && verify(&archive, release).is_ok() {
+    if archive.is_file() && verify_blocking(&archive, release).await.is_ok() {
         progress(release.artifact.size);
         return Ok(archive);
     }
@@ -194,13 +204,7 @@ pub async fn download(
     }
     file.sync_all().await?;
     drop(file);
-    let checked = {
-        let (partial, release) = (partial.clone(), release.clone());
-        tokio::task::spawn_blocking(move || verify(&partial, &release))
-            .await
-            .map_err(|error| PackageError::new(AddonFailure::Storage, error.to_string()))?
-    };
-    if let Err(error) = checked {
+    if let Err(error) = verify_blocking(&partial, release).await {
         let _ = tokio::fs::remove_file(&partial).await;
         return Err(error);
     }

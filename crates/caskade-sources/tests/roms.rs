@@ -87,12 +87,6 @@ async fn a_library_update_imports_the_thousand_file_tree() {
     assert_eq!(source.id(), caskade_core::emulation::ROMS_SOURCE.as_str());
     let mut events = bus.stream();
     let watch = source.watch(&bus);
-    // #135: library updates find it in the provider registry.
-    assert!(
-        bus.library_sources()
-            .iter()
-            .any(|registered| registered.id() == "roms" && registered.imports_itself())
-    );
     let started = Instant::now();
     bus.emit(Event::LibraryScanCompleted { sources: vec![] });
     let counts = tokio::time::timeout(Duration::from_secs(30), async {

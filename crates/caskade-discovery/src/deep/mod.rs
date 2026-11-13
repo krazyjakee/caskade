@@ -2,13 +2,18 @@
 //!
 //! Walks are confined to explicit roots, never follow directory links, check
 //! cancellation between entries, and classify bounded inventories without
-//! executing candidates. `scan_with_options` exposes progress and Caskade root
-//! handoffs for a storage adapter; the built-in source returns external games.
+//! executing candidates. `scan_with_options` exposes progress and the Caskade
+//! storage roots it finds; the built-in source returns external games and
+//! reports those roots as warnings.
 mod control;
 mod executable;
 mod walk;
 
-use crate::{HostEnv, env::VolumeKind, types::*};
+use crate::{
+    DeepScans, HostEnv,
+    env::{Volume, VolumeKind},
+    types::*,
+};
 use std::{collections::BTreeSet, path::PathBuf};
 
 pub const ID: SourceId = SourceId::new("deep");
@@ -86,47 +91,16 @@ pub fn scan_with_options(
             "deep scan limits exceed safety bounds",
         ));
     }
-    let deep = &ctx.config().deep;
-    let mut phases = Vec::new();
-    if !deep.folders.is_empty() {
-        phases.push((ScanKind::CustomFolders, deep.folders.clone()));
-    }
-    if deep.external_drives {
-        let volumes = env
-            .volumes()
-            .map_err(|e| SourceError::io(env.fs_root(), e))?;
-        phases.push((
-            ScanKind::ExternalDrives,
-            volumes
-                .into_iter()
-                .filter(|v| v.kind == VolumeKind::Removable)
-                .map(|v| v.root)
-                .collect(),
-        ));
-    }
-    if deep.portable {
-        phases.push((
-            ScanKind::Portable,
-            vec![env.home().join("Applications"), env.home().join("Games")],
-        ));
-    }
-    if deep.wine_prefixes {
-        phases.push((ScanKind::WinePrefixes, vec![env.home().to_path_buf()]));
-    }
-    if deep.full_disk {
-        let mut roots = env
-            .volumes()
-            .map_err(|e| SourceError::io(env.fs_root(), e))?
-            .into_iter()
-            .map(|v| v.root)
-            .collect::<Vec<_>>();
-        if roots.is_empty() {
+    let phases = roots(env, &ctx.config().deep, || {
+        env.volumes().map_err(|e| SourceError::io(env.fs_root(), e))
+    })?;
+    let mut report = Report::default();
+    for (kind, mut roots) in phases {
+        // No volumes listed: the full-disk scan starts at the filesystem
+        // root, which is never watched.
+        if kind == ScanKind::FullDisk && roots.is_empty() {
             roots.push(env.fs_root().to_path_buf());
         }
-        phases.push((ScanKind::FullDisk, roots));
-    }
-    let mut report = Report::default();
-    for (kind, roots) in phases {
         ctx.check()?;
         let mut control = control::Control::new(env, ctx, options, kind, progress);
         let mut seen = BTreeSet::new();
@@ -195,37 +169,67 @@ fn external_xbox(
         .collect();
     let external = env
         .clone()
-        .with_drives(std::sync::Arc::new(crate::testing::FakeDrives::new(
-            volumes,
-        )));
+        .with_drives(std::sync::Arc::new(crate::env::FixedDrives::new(volumes)));
     report
         .games
         .extend(crate::sources::xbox::Xbox.scan(&external, ctx)?);
     control.check()
 }
 
-/// Config-aware watch roots, including folders outside the home directory.
-pub fn watch_paths(env: &HostEnv, config: &crate::Config) -> Vec<WatchPath> {
-    let deep = &config.deep;
-    let mut roots = deep.folders.clone();
+/// The roots of each enabled scan kind. `volumes` is read only for the
+/// kinds that need it.
+fn roots(
+    env: &HostEnv,
+    deep: &DeepScans,
+    volumes: impl Fn() -> Result<Vec<Volume>, SourceError>,
+) -> Result<Vec<(ScanKind, Vec<PathBuf>)>, SourceError> {
+    let mut phases = Vec::new();
+    if !deep.folders.is_empty() {
+        phases.push((ScanKind::CustomFolders, deep.folders.clone()));
+    }
+    if deep.external_drives {
+        phases.push((
+            ScanKind::ExternalDrives,
+            volumes()?
+                .into_iter()
+                .filter(|v| v.kind == VolumeKind::Removable)
+                .map(|v| v.root)
+                .collect(),
+        ));
+    }
     if deep.portable {
-        roots.extend([env.home().join("Applications"), env.home().join("Games")]);
+        phases.push((
+            ScanKind::Portable,
+            vec![env.home().join("Applications"), env.home().join("Games")],
+        ));
     }
     if deep.wine_prefixes {
-        roots.push(env.home().to_path_buf());
+        phases.push((ScanKind::WinePrefixes, vec![env.home().to_path_buf()]));
     }
-    if deep.external_drives || deep.full_disk {
-        roots.extend(
-            env.volumes()
-                .unwrap_or_default()
-                .into_iter()
-                .filter(|v| deep.full_disk || v.kind == VolumeKind::Removable)
-                .take(256)
-                .map(|v| v.root),
-        );
+    if deep.full_disk {
+        phases.push((
+            ScanKind::FullDisk,
+            volumes()?.into_iter().map(|v| v.root).collect(),
+        ));
     }
-    let roots: BTreeSet<_> = roots
+    Ok(phases)
+}
+
+/// Config-aware watch roots, including folders outside the home directory.
+pub fn watch_paths(env: &HostEnv, config: &crate::Config) -> Vec<WatchPath> {
+    // At most 256 drives.
+    let volumes = || {
+        Ok(env
+            .volumes()
+            .unwrap_or_default()
+            .into_iter()
+            .take(256)
+            .collect())
+    };
+    let roots: BTreeSet<_> = roots(env, &config.deep, volumes)
+        .unwrap_or_default()
         .into_iter()
+        .flat_map(|(_, roots)| roots)
         .filter_map(|p| env.resolve_path(&p).ok())
         .collect();
     roots

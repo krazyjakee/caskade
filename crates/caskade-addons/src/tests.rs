@@ -1,6 +1,7 @@
 //! The add-on catalogue (#181): bounded validation, compatibility,
 //! signatures, the offline snapshot and refreshes from a local server.
 use super::*;
+use crate::validate::MAX_CATALOGUE_BYTES;
 use url::Url;
 
 const CATALOGUE: &[u8] = include_bytes!("testdata/catalogue.json");

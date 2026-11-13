@@ -69,10 +69,6 @@ pub enum SourceSelection {
 }
 
 impl SourceSelection {
-    pub fn all() -> Self {
-        Self::All
-    }
-
     pub fn only<I: IntoIterator<Item = SourceId>>(ids: I) -> Self {
         Self::Only(ids.into_iter().collect())
     }
@@ -295,9 +291,13 @@ impl Source for StaticSource {
     fn watch_paths(&self, env: &HostEnv) -> Vec<crate::types::WatchPath> {
         self.0.watch_paths(env)
     }
+    fn launcher_locations(&self, env: &HostEnv) -> Vec<PathBuf> {
+        self.0.launcher_locations(env)
+    }
 }
 
-pub(crate) fn builtin() -> Vec<Arc<dyn Source>> {
+/// The built-in sources, in priority order.
+pub fn builtin() -> Vec<Arc<dyn Source>> {
     builtin_sources()
         .iter()
         .map(|source| Arc::new(StaticSource(*source)) as Arc<dyn Source>)

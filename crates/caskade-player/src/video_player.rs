@@ -198,14 +198,14 @@ pub fn run(options: Options) -> Result<i32, String> {
     let webview = builder.build(&window).map_err(|error| error.to_string())?;
     // A webview that lost its processes would stay black: close (#3).
     {
-        use crate::recovery::{Policy, Step, failure_of, log};
+        use crate::recovery::{Policy, Step, log};
         let fails = event_loop.create_proxy();
         let policy = std::cell::RefCell::new(Policy::default());
         let watched = crate::recovery::watch_player(&webview, move |failed| {
             log("video window", &failed);
             let step = policy
                 .borrow_mut()
-                .next(failure_of(failed.kind), std::time::Instant::now());
+                .next(failed.kind, std::time::Instant::now());
             if step != Step::Wait {
                 let _ = fails.send_event(UserEvent::Close);
             }

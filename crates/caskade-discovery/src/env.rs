@@ -12,7 +12,7 @@ pub use folders::KnownFolder;
 use crate::{
     OperatingSystem,
     registry::{EmptyRegistry, Registry},
-    testing::{FakeClock, FakeDrives},
+    testing::FakeClock,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -118,13 +118,32 @@ pub fn network_filesystem(filesystem: &str) -> bool {
     )
 }
 
-/// A volume list read once; see [`HostEnv::with_volume_snapshot`].
-struct SnapshotDrives(Result<Vec<Volume>, (io::ErrorKind, String)>);
-impl DriveProvider for SnapshotDrives {
+/// A fixed volume list, or a fixed error.
+#[derive(Debug, Default, Clone)]
+pub struct FixedDrives {
+    volumes: Vec<Volume>,
+    error: Option<(io::ErrorKind, String)>,
+}
+impl FixedDrives {
+    pub fn new(volumes: Vec<Volume>) -> Self {
+        Self {
+            volumes,
+            error: None,
+        }
+    }
+    pub fn failing(kind: io::ErrorKind, message: impl Into<String>) -> Self {
+        Self {
+            volumes: vec![],
+            error: Some((kind, message.into())),
+        }
+    }
+}
+impl DriveProvider for FixedDrives {
     fn volumes(&self) -> io::Result<Vec<Volume>> {
-        self.0
-            .clone()
-            .map_err(|(kind, message)| io::Error::new(kind, message))
+        match &self.error {
+            Some((kind, message)) => Err(io::Error::new(*kind, message.clone())),
+            None => Ok(self.volumes.clone()),
+        }
     }
 }
 
@@ -302,7 +321,7 @@ impl HostEnv {
                 })
                 .collect::<io::Result<Vec<_>>>()?
         };
-        env.drives = Arc::new(FakeDrives::new(volumes));
+        env.drives = Arc::new(FixedDrives::new(volumes));
         env.registry = Arc::new(crate::registry::WineRegistry::from_fixture(
             env.fixture_root.as_deref().expect("fixture scenario"),
             crate::registry::Limits::default(),
@@ -323,7 +342,7 @@ impl HostEnv {
             folders: BTreeMap::new(),
             xdg_data_dirs: vec![],
             clock: Arc::new(LiveClock::default()),
-            drives: Arc::new(FakeDrives::default()),
+            drives: Arc::new(FixedDrives::default()),
             registry: Arc::new(EmptyRegistry),
             wine_drives: None,
         }
@@ -388,11 +407,11 @@ impl HostEnv {
     /// on. A scan or merge asks for the volumes once per game path; the
     /// mount table doesn't change under it in a way that matters.
     pub fn with_volume_snapshot(&self) -> Self {
-        let volumes = self
-            .drives
-            .volumes()
-            .map_err(|error| (error.kind(), error.to_string()));
-        self.clone().with_drives(Arc::new(SnapshotDrives(volumes)))
+        let drives = match self.drives.volumes() {
+            Ok(volumes) => FixedDrives::new(volumes),
+            Err(error) => FixedDrives::failing(error.kind(), error.to_string()),
+        };
+        self.clone().with_drives(Arc::new(drives))
     }
     pub fn registry(&self) -> &dyn Registry {
         &*self.registry

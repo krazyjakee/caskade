@@ -74,16 +74,6 @@ impl PrivateDesktop {
         &self.display
     }
 
-    /// The bus's address.
-    pub fn bus(&self) -> &str {
-        &self.bus
-    }
-
-    /// The runtime folder (`XDG_RUNTIME_DIR`), private to the desktop.
-    pub fn runtime(&self) -> PathBuf {
-        self.dir.path().join("runtime")
-    }
-
     /// The environment a program on this desktop gets: the display, the
     /// bus, the runtime folder, `PATH`, and accessibility off (its bus would
     /// be started on demand).
@@ -92,7 +82,10 @@ impl PrivateDesktop {
             ("PATH", std::env::var("PATH").unwrap_or_default()),
             ("DISPLAY", self.display.clone()),
             ("DBUS_SESSION_BUS_ADDRESS", self.bus.clone()),
-            ("XDG_RUNTIME_DIR", self.runtime().display().to_string()),
+            (
+                "XDG_RUNTIME_DIR",
+                self.dir.path().join("runtime").display().to_string(),
+            ),
             ("NO_AT_BRIDGE", "1".into()),
             ("GTK_A11Y", "none".into()),
         ]
@@ -276,7 +269,7 @@ fn output(program: &str, args: &[&str]) -> String {
 
 /// What the login sessions use: their displays and their buses' sockets.
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
-pub struct LoginSessions {
+struct LoginSessions {
     /// X displays (`:0`) and Wayland sockets (`wayland-0`).
     pub displays: Vec<String>,
     /// Session bus socket paths.
@@ -286,7 +279,7 @@ pub struct LoginSessions {
 /// The login sessions of this machine, read without starting anything:
 /// `loginctl`'s graphical sessions, this user's bus (`/run/user/<uid>/bus`)
 /// and the bus the user's service manager hands out.
-pub fn login_sessions() -> LoginSessions {
+fn login_sessions() -> LoginSessions {
     let mut sessions = LoginSessions::default();
     for line in output("loginctl", &["list-sessions", "--no-legend"]).lines() {
         let Some(id) = line.split_whitespace().next() else {
@@ -353,7 +346,7 @@ pub fn guard(display: Option<&str>, bus: Option<&str>) -> Result<(), String> {
 }
 
 /// [`guard`] against `sessions`.
-pub fn guard_against(
+fn guard_against(
     sessions: &LoginSessions,
     display: Option<&str>,
     bus: Option<&str>,
@@ -387,16 +380,6 @@ pub fn guard_against(
     } else {
         Err(problems.join("; "))
     }
-}
-
-/// [`guard`] on this process's own `DISPLAY`, `WAYLAND_DISPLAY` and
-/// `DBUS_SESSION_BUS_ADDRESS`: for a harness about to hand them on.
-pub fn guard_this_process() -> Result<(), String> {
-    let display = std::env::var("DISPLAY").ok();
-    let wayland = std::env::var("WAYLAND_DISPLAY").ok();
-    let bus = std::env::var("DBUS_SESSION_BUS_ADDRESS").ok();
-    guard(display.as_deref(), bus.as_deref())?;
-    guard(wayland.as_deref(), None)
 }
 
 #[cfg(test)]

@@ -392,13 +392,12 @@ fn command_target(env: &HostEnv, command: &str) -> Option<LaunchTarget> {
 /// Whether two physical paths name the same folder, ignoring case and a
 /// trailing separator (Windows paths are case-insensitive).
 pub(crate) fn same_dir(a: &Path, b: &Path) -> bool {
-    let norm = |path: &Path| {
-        path.to_string_lossy()
-            .replace('\\', "/")
-            .trim_end_matches('/')
-            .to_lowercase()
-    };
-    norm(a) == norm(b)
+    normalized(&a.to_string_lossy()) == normalized(&b.to_string_lossy())
+}
+
+/// A path with `/` separators, no trailing one, lowercased.
+pub(crate) fn normalized(path: &str) -> String {
+    path.replace('\\', "/").trim_end_matches('/').to_lowercase()
 }
 
 /// Bounds for a macOS bundle's `Info.plist`.

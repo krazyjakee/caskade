@@ -95,7 +95,7 @@ original test support; parser provenance belongs in the crate's THIRD-PARTY.md.
 
 The CLI's explicit `dump --anonymize [--root <scenario>] <new-directory>` operation
 exports allowlisted launcher metadata into this machine layout. The library entry
-is `dump::dump_anonymized(&HostEnv, &Path) -> Result<DumpReport>`; the report lists
+is `dump::dump_anonymized(&HostEnv, &Path) -> Result<DumpReport>` (`cli` feature); the report lists
 all output paths, bytes and warnings. Existing destinations are refused. A failure
 removes the staging directory and publishes no partial dump.
 

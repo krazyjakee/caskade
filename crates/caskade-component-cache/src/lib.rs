@@ -49,6 +49,21 @@ impl CacheKey {
     pub fn to_bytes(&self) -> [u8; 32] {
         self.0
     }
+    /// The key as 64 lowercase hex digits, for storing as text.
+    pub fn to_hex(&self) -> String {
+        hex(&self.0)
+    }
+    /// A key [`Self::to_hex`] wrote; `None` for anything else.
+    pub fn from_hex(text: &str) -> Option<Self> {
+        if text.len() != 64 {
+            return None;
+        }
+        let mut key = [0u8; 32];
+        for (index, byte) in key.iter_mut().enumerate() {
+            *byte = u8::from_str_radix(text.get(index * 2..index * 2 + 2)?, 16).ok()?;
+        }
+        Some(Self(key))
+    }
 }
 
 impl std::fmt::Debug for CacheKey {
@@ -126,8 +141,8 @@ impl ComponentCache {
     }
 
     /// The same cache, as a build of another wasmtime version would see it.
-    #[doc(hidden)]
-    pub fn with_wasmtime_version(mut self, version: &str) -> Self {
+    #[cfg(test)]
+    fn with_wasmtime_version(mut self, version: &str) -> Self {
         self.wasmtime_version = version.to_owned();
         self
     }
@@ -237,7 +252,7 @@ fn load(engine: &Engine, artifact: Trusted<'_>) -> wasmtime::Result<Component> {
 
 /// The wasmtime version these artifacts are for.
 pub fn wasmtime_version() -> &'static str {
-    // wasmtime pins it exactly in Cargo.toml (`=50.0.1`).
+    // Cargo.toml pins wasmtime exactly; a test checks the two agree.
     "50.0.1"
 }
 

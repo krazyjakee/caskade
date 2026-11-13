@@ -9,7 +9,7 @@ use crate::{
 };
 use globset::{GlobBuilder, GlobMatcher};
 use std::{
-    collections::{BTreeMap, BTreeSet},
+    collections::{BTreeMap, BTreeSet, HashMap},
     path::{Path, PathBuf},
 };
 
@@ -42,6 +42,7 @@ pub fn merge(
     let globs = ExclusionGlobs::new(&config.exclusions.paths)?;
     let data = crate::data::Data::builtin()?;
     let redists = caskade_installer::redist::RedistTable::default();
+    let mut managed = HashMap::new();
     let mut records = Vec::new();
     for mut entry in entries {
         let mut ids: BTreeSet<_> = entry
@@ -75,7 +76,7 @@ pub fn merge(
             }
         }
         let paths = anchors(env, &entry, !ids.is_empty());
-        if builtin_excluded(env, &entry, &paths, &ids, data, &redists) {
+        if builtin_excluded(env, &entry, &paths, &ids, data, &redists, &mut managed) {
             continue;
         }
         records.push(Record { entry, ids, paths });
@@ -375,6 +376,18 @@ fn enrich(entries: &mut [DetectedGame]) {
         }
     }
 }
+/// Whether `dir` holds a Caskade install manifest. Anchors share most of
+/// their ancestors, so one merge asks each directory once.
+fn managed_dir(env: &HostEnv, dir: &Path, managed: &mut HashMap<PathBuf, bool>) -> bool {
+    if let Some(&known) = managed.get(dir) {
+        return known;
+    }
+    let found = env
+        .resolve_path(&dir.join(".caskade/install.json"))
+        .is_ok_and(|p| p.is_file());
+    managed.insert(dir.to_path_buf(), found);
+    found
+}
 fn builtin_excluded(
     env: &HostEnv,
     entry: &DetectedGame,
@@ -382,14 +395,16 @@ fn builtin_excluded(
     ids: &BTreeSet<UriIdentity>,
     data: &crate::data::Data,
     redists: &caskade_installer::redist::RedistTable,
+    managed: &mut HashMap<PathBuf, bool>,
 ) -> bool {
     if entry.evidence.iter().any(|e| matches!(e, Evidence::Rule { rule, .. } if matches!(rule.as_str(),"category.launcher"|"category.emulator"|"category.redist"|"category.driver"|"category.sdk"|"category.tool"))) { return true; }
     if entry.ids.iter().any(|id| matches!(id,ExternalId::Steam { app_id } if data.steam_tools.tools.iter().any(|t| t.app_id == *app_id))) { return true; }
     if paths.iter().any(|anchor| {
-        anchor.path.path.ancestors().any(|dir| {
-            env.resolve_path(&dir.join(".caskade/install.json"))
-                .is_ok_and(|p| p.is_file())
-        })
+        anchor
+            .path
+            .path
+            .ancestors()
+            .any(|dir| managed_dir(env, dir, managed))
     }) {
         return true;
     }

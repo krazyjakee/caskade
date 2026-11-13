@@ -237,10 +237,4 @@ async fn aliased_proton_manifest_retargets_alias_and_keeps_every_persisted_path_
             .unwrap()
             .contains(root.path.to_str().unwrap())
     );
-    let games = caskade_core::bus::LibrarySource::scan(&source)
-        .await
-        .unwrap();
-    assert_eq!(games.len(), 1);
-    assert_eq!(games[0].key, id);
-    assert_eq!(games[0].install_dir, Some(new));
 }

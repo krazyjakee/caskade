@@ -165,16 +165,6 @@ pub struct AchievementSet {
     pub achievements: Vec<Achievement>,
 }
 
-/// A game's achievement counts, without the achievements: cards, lists.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct AchievementSummary {
-    pub game_id: String,
-    pub sets: u32,
-    pub unlocked: u32,
-    pub total: u32,
-}
-
 /// What an achievement service supplies.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]

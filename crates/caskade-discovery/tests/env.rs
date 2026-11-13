@@ -2,9 +2,9 @@
 use crate::fixtures::write;
 use caskade_discovery::{
     OperatingSystem,
-    env::{HostEnv, KnownFolder, Volume, VolumeKind},
+    env::{FixedDrives, HostEnv, KnownFolder, Volume, VolumeKind},
     registry::{RegistryHive, RegistryKey, RegistryView},
-    testing::{FakeClock, FakeDrives},
+    testing::FakeClock,
 };
 use std::{
     ffi::OsString,
@@ -314,12 +314,12 @@ fn drive_enumeration_and_failures_are_injected() {
     }];
     assert_eq!(
         env.clone()
-            .with_drives(Arc::new(FakeDrives::new(drives.clone())))
+            .with_drives(Arc::new(FixedDrives::new(drives.clone())))
             .volumes()
             .unwrap(),
         drives
     );
-    let failure = env.with_drives(Arc::new(FakeDrives::failing(
+    let failure = env.with_drives(Arc::new(FixedDrives::failing(
         io::ErrorKind::PermissionDenied,
         "injected",
     )));

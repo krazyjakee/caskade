@@ -9,6 +9,7 @@ pub mod classify;
 pub mod data;
 #[cfg(feature = "deep")]
 pub mod deep;
+#[cfg(feature = "cli")]
 pub mod dump;
 pub mod env;
 pub mod error;

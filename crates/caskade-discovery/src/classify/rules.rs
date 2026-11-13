@@ -1,5 +1,5 @@
 use super::{Classification, Metadata, Verdict};
-use crate::{ClassifierConfig, Error, Evidence, data::Data};
+use crate::{ClassifierConfig, Error, Evidence, data::Data, sources::normalized};
 use globset::{GlobBuilder, GlobMatcher};
 use serde::Deserialize;
 use std::{collections::BTreeSet, path::PathBuf, sync::OnceLock};
@@ -95,9 +95,6 @@ fn rules() -> crate::Result<&'static Rules> {
         })
         .as_ref()
         .map_err(|e| Error::Usage(format!("invalid classifier rules: {e}")))
-}
-fn normalized(path: &str) -> String {
-    path.replace('\\', "/").trim_end_matches('/').to_lowercase()
 }
 fn location(path: &std::path::Path) -> String {
     let path = path.to_string_lossy().replace('\\', "/");

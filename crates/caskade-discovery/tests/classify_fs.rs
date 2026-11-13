@@ -15,7 +15,7 @@ const ICON: &[u8] = &[
 ];
 fn host() -> HostCaps {
     toml::from_str(include_str!(
-        "../../caskade-installer/tests/hosts/linux.toml"
+        "../../caskade-installer/data/hosts/linux.toml"
     ))
     .unwrap()
 }

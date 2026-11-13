@@ -3,7 +3,7 @@
 //! [`Library`] keeps the last scan per source. Rescanning a few sources
 //! merges all entries again and returns a [`ScanDelta`] against the previous
 //! groups. [`Debouncer`] coalesces bursts of file events per source. The
-//! `watch` feature adds [`watch`], which drives both from `notify` events
+//! `watch` feature adds [`watch_with_sources`], which drives both from `notify` events
 //! on every source's watch paths and polls sources without any (registry
 //! sources) at the refresh interval.
 
@@ -13,11 +13,11 @@ mod notify_watch;
 
 pub use diff::diff;
 #[cfg(feature = "watch")]
-pub use notify_watch::{Watcher, watch, watch_with_sources};
+pub use notify_watch::{Watcher, watch_with_sources};
 
 use crate::{
     env::HostEnv,
-    orchestrator::{Config, builtin, collect, group},
+    orchestrator::{Config, collect, group},
     types::{
         Cancel, DetectedGame, GameGroup, LauncherStatus, ScanDelta, ScanReport, Source, SourceId,
         SourceReport,
@@ -29,7 +29,7 @@ use std::{
     time::Duration,
 };
 
-/// Timing and resource bounds for [`watch`].
+/// Timing and resource bounds for [`watch_with_sources`].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WatchOptions {
     /// Quiet time after a source's last event before it is rescanned.
@@ -69,11 +69,6 @@ pub struct Library {
 }
 
 impl Library {
-    /// An empty library over the built-in sources.
-    pub fn new(env: HostEnv, config: Config) -> Self {
-        Self::with_sources(env, config, builtin())
-    }
-
     /// An empty library over the given sources, in priority order.
     pub fn with_sources(env: HostEnv, config: Config, sources: Vec<Arc<dyn Source>>) -> Self {
         Self {

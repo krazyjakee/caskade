@@ -1,3 +1,4 @@
+#![cfg(feature = "cli")]
 //! Only synthetic machines are read. No real launcher directories are inspected.
 use crate::fixtures;
 use caskade_discovery::{

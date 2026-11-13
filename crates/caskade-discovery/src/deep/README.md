@@ -3,7 +3,7 @@ removable drives, portable games, arbitrary home Wine prefixes, or full disk.
 The `Deep` source exposes their games through the regular scan and merge API.
 
 `scan_with_options(env, ctx, options, progress)` also returns managed Caskade
-roots for a future storage adapter. A valid `.caskade/root.json` stops descent;
+roots, which the built-in source reports as warnings. A valid `.caskade/root.json` stops descent;
 its games are not turned into external games. `watch_paths(env, config)` returns
 the roots selected by the configuration, including custom folders outside home.
 

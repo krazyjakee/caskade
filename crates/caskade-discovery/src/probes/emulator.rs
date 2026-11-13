@@ -11,7 +11,7 @@ pub struct EmulatorCandidate {
     pub application: Application,
 }
 /// Emulator-only Desktop Entries are handed off by category. Shortcuts have no
-/// category: the future emulator consumer supplies executable leaf names from
+/// category: the emulator consumer supplies executable leaf names from
 /// its definitions, rather than this module inventing emulator identity rules.
 pub fn emulator_candidates(
     env: &HostEnv,

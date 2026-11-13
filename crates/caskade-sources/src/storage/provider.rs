@@ -3,22 +3,33 @@ use super::{
     StorageScanReport, StorageSource,
     identity::{check, importable, prepare},
 };
-use async_trait::async_trait;
 use caskade_core::{
-    bus::{Event, LibrarySource, SourceCount},
+    bus::{Event, SourceCount},
     install::{STORAGE_SOURCE, from_manifest},
     model::{GameEntry, InstallLocation, StorageRoot},
 };
-use caskade_discovery::{DetectedGame, GameRuntime, InstallState, LaunchTarget, TrackingHint};
+use caskade_discovery::InstallState;
 use caskade_installer::{
     exec::CancellationToken, manifest::RootManifest, reconcile::ReconcileStatus,
 };
-use std::{collections::BTreeSet, path::Path};
+use std::collections::BTreeSet;
 
 impl StorageSource {
     /// Register/adopt a physical RootManifest through core StorageService
     /// first. This method reconciles and imports that registered root only.
     pub async fn adopt_root(
+        &self,
+        root: &StorageRoot,
+        cancel: CancellationToken,
+    ) -> Result<StorageRootReport> {
+        let report = self.adopt(root, cancel).await?;
+        self.scan_completed(report.imported()).await;
+        Ok(report)
+    }
+
+    /// [`Self::adopt_root`] without the completion event, so a refresh of
+    /// several roots emits one.
+    async fn adopt(
         &self,
         root: &StorageRoot,
         cancel: CancellationToken,
@@ -43,8 +54,7 @@ impl StorageSource {
             }
             Ok(())
         })
-        .await
-        .map_err(|e| StorageError::Invalid(e.to_string()))??;
+        .await??;
         let hint_error = if let Some(remounts) = &self.remounts {
             remounts.remember(root).await.err()
         } else {
@@ -155,14 +165,6 @@ impl StorageSource {
                 }
             }
         }
-        self.bus
-            .emit_and_wait(Event::LibraryScanCompleted {
-                sources: vec![SourceCount {
-                    source: STORAGE_SOURCE.to_string(),
-                    count: report.imported() as u32,
-                }],
-            })
-            .await;
         Ok(report)
     }
 
@@ -187,7 +189,7 @@ impl StorageSource {
                     }
                 }
             }
-            let result = self.adopt_root(&root, cancel.clone()).await;
+            let result = self.adopt(&root, cancel.clone()).await;
             check(&cancel)?;
             match result {
                 Ok(scanned) => report.roots.push(scanned),
@@ -199,15 +201,19 @@ impl StorageSource {
                 }),
             }
         }
+        self.scan_completed(report.imported()).await;
+        Ok(report)
+    }
+
+    async fn scan_completed(&self, imported: usize) {
         self.bus
             .emit_and_wait(Event::LibraryScanCompleted {
                 sources: vec![SourceCount {
                     source: STORAGE_SOURCE.to_string(),
-                    count: report.imported() as u32,
+                    count: imported as u32,
                 }],
             })
             .await;
-        Ok(report)
     }
 
     async fn existing_copy(
@@ -243,39 +249,6 @@ impl StorageSource {
     }
 }
 
-#[async_trait]
-impl LibrarySource for StorageSource {
-    fn id(&self) -> &str {
-        "caskade-storage"
-    }
-    async fn scan(&self) -> std::result::Result<Vec<DetectedGame>, String> {
-        let report = self
-            .refresh(CancellationToken::new())
-            .await
-            .map_err(|e| e.to_string())?;
-        let mut games = Vec::new();
-        for root in report.roots {
-            for game in root.games {
-                if let (Some(game_id), Some(entry_id)) = (game.game_id, game.entry_id) {
-                    let entry = self
-                        .store
-                        .get_entry(&entry_id)
-                        .await
-                        .map_err(|e| e.to_string())?
-                        .ok_or("imported entry disappeared")?;
-                    let game = self
-                        .store
-                        .game(&game_id)
-                        .await
-                        .map_err(|e| e.to_string())?
-                        .ok_or("imported game disappeared")?;
-                    games.push(detected(&root.root.path, &game.title, entry));
-                }
-            }
-        }
-        Ok(games)
-    }
-}
 fn status(status: ReconcileStatus) -> StorageGameStatus {
     match status {
         ReconcileStatus::Unchanged => StorageGameStatus::Unchanged,
@@ -284,52 +257,4 @@ fn status(status: ReconcileStatus) -> StorageGameStatus {
         ReconcileStatus::Pinned => StorageGameStatus::Pinned,
         ReconcileStatus::Failed => StorageGameStatus::Failed,
     }
-}
-fn detected(root: &Path, title: &str, entry: GameEntry) -> DetectedGame {
-    let base = match &entry.location {
-        Some(InstallLocation::Managed { rel_dir, .. }) => root.join(rel_dir),
-        _ => root.to_path_buf(),
-    };
-    let mut game = DetectedGame::new(STORAGE_SOURCE, entry.external_id, title);
-    game.ids = entry.ids;
-    game.install_dir = Some(base.clone());
-    game.state = entry.state;
-    game.size = entry.size;
-    game.tracking = entry.tracking.or_else(|| {
-        Some(TrackingHint {
-            install_dir: Some(base.clone()),
-            ..Default::default()
-        })
-    });
-    game.runtime = entry.runtime;
-    if let GameRuntime::Windows {
-        prefix: Some(prefix),
-        ..
-    } = &mut game.runtime
-    {
-        prefix.path = base.join(&prefix.path);
-    }
-    game.launch = entry
-        .launch
-        .into_iter()
-        .filter_map(|spec| match spec {
-            caskade_core::model::LaunchSpec::Executable {
-                path,
-                args,
-                cwd,
-                env,
-            } => Some(LaunchTarget::Exec {
-                program: base.join(path),
-                args,
-                cwd: cwd.map(|p| base.join(p)),
-                env,
-            }),
-            caskade_core::model::LaunchSpec::Uri { uri } => Some(LaunchTarget::Uri { uri }),
-            caskade_core::model::LaunchSpec::Flatpak { app_id, args } => {
-                Some(LaunchTarget::Flatpak { app_id, args })
-            }
-            _ => None,
-        })
-        .collect();
-    game
 }

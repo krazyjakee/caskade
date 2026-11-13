@@ -93,17 +93,13 @@ pub struct Packed {
 
 impl Packed {
     pub fn sha256(&self) -> String {
-        hex(&Sha256::digest(&self.archive))
+        format!("{:x}", Sha256::digest(&self.archive))
     }
 
     /// `<id>-<version>.zip`.
     pub fn file_name(&self) -> String {
         format!("{}-{}.zip", self.id, self.version)
     }
-}
-
-fn hex(bytes: &[u8]) -> String {
-    bytes.iter().map(|b| format!("{b:02x}")).collect()
 }
 
 /// A plugin manifest's permissions as catalogue words: `library.read`,

@@ -1,14 +1,14 @@
 # Managed storage source
 
-`StorageSource` implements the bus `LibrarySource` contract for `caskade-storage`.
-Construct it with the library store, bus and an injected `Arc<Reconciler>`,
-then call `register()` to register the provider. `refresh(token)` scans roots
-already registered by core `StorageService`. After registering/adopting a root,
-call `adopt_root(&StorageRoot, token)` to reconcile and import it immediately.
+`StorageSource` imports managed installs as the `caskade-storage` source.
+Construct it with the library store, bus and an injected `Arc<Reconciler>`.
+`refresh(token)` scans roots already registered by core `StorageService` and
+emits one `library.scan.completed`. After registering/adopting a root, call
+`adopt_root(&StorageRoot, token)` to reconcile and import it immediately.
 
 For automatic drive-letter/mount recovery, configure
-`StorageSource::new(...).with_remounts(storage_service, env, &paths)` and then
-call `source.register()`. Restore the root catalogue before the first refresh.
+`StorageSource::new(...).with_remounts(storage_service, env, &paths)`.
+Restore the root catalogue before the first refresh.
 The injected host environment supplies current volumes. The bounded
 `config/storage-volume-hints.json` stores only each root's volume-relative
 folder, outside SQLite; recovery checks that exact folder on at most 128 mounts

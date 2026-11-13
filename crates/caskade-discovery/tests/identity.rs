@@ -46,7 +46,7 @@ fn case_policy_comes_from_longest_matching_volume() {
     let special = env.fs_root().join("insensitive");
     let root = env.fs_root().to_path_buf();
     let env = env.with_drives(std::sync::Arc::new(
-        caskade_discovery::testing::FakeDrives::new(vec![
+        caskade_discovery::env::FixedDrives::new(vec![
             caskade_discovery::env::Volume {
                 root,
                 kind: caskade_discovery::env::VolumeKind::Fixed,

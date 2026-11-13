@@ -9,11 +9,12 @@ rust-version.workspace = true
 # RetroAchievements); without it, only what is cached.
 [features]
 default = ["net"]
-net = ["caskade-core/net", "dep:flate2", "dep:reqwest"]
+net = ["caskade-core/net", "dep:flate2", "dep:reqwest", "dep:caskade-jobs"]
 
 [dependencies]
 caskade-core = { path = "../caskade-core", default-features = false }
 caskade-discovery = { path = "../caskade-discovery", default-features = false }
+caskade-jobs = { path = "../caskade-jobs", optional = true }
 async-trait = "0.1"
 flate2 = { version = "1", default-features = false, features = ["rust_backend"], optional = true }
 md5 = { package = "md-5", version = "0.10" }

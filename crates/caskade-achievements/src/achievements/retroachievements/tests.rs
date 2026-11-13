@@ -18,10 +18,7 @@ use wiremock::{
 };
 
 fn md5(bytes: &[u8]) -> String {
-    Md5::digest(bytes)
-        .iter()
-        .map(|b| format!("{b:02x}"))
-        .collect()
+    format!("{:x}", Md5::digest(bytes))
 }
 
 #[test]
@@ -228,6 +225,18 @@ impl AccountAccess for Access {
     }
 }
 
+/// `game_id`'s release links, as the store has them.
+async fn links(store: &LibraryStore, game_id: &str) -> Vec<AchievementLink> {
+    let ids: Vec<String> = store
+        .entries_for_game(game_id)
+        .await
+        .unwrap()
+        .into_iter()
+        .map(|entry| entry.id)
+        .collect();
+    store.achievement_links(&ids).await.unwrap()
+}
+
 /// An emulated game on `platform` with these ROM files.
 async fn emulated(
     store: &LibraryStore,
@@ -300,7 +309,7 @@ async fn releases_link_only_by_a_verified_hash_and_can_be_linked_by_hand() {
     assert_eq!(sets[0].product_id, "1446");
     assert_eq!(sets[0].sync.status, SetStatus::Ready);
     assert_eq!((sets[0].unlocked, sets[0].hardcore_unlocked), (1, Some(1)));
-    let link = service.links(&smb).await.unwrap().remove(0);
+    let link = links(&store, &smb).await.remove(0);
     assert!(matches!(link.method, LinkMethod::Hash { .. }));
 
     // The same title in another revision isn't the same game.
@@ -322,15 +331,15 @@ async fn releases_link_only_by_a_verified_hash_and_can_be_linked_by_hand() {
             .unwrap()
             .is_empty()
     );
-    unresolved("another revision", &service.links(&rev).await.unwrap()[0]);
+    unresolved("another revision", &links(&store, &rev).await[0]);
     // A hash two games share, a disc system and a release whose ROMs are
     // two games stay unresolved.
     let (twin, _) = emulated(&store, "Twin", "nintendo_nes", &[shared]).await;
     service.refresh_game(&twin, None, &cancel).await.unwrap();
-    unresolved("more than one", &service.links(&twin).await.unwrap()[0]);
+    unresolved("more than one", &links(&store, &twin).await[0]);
     let (psx, _) = emulated(&store, "Disc game", "sony_playstation", &[disc]).await;
     service.refresh_game(&psx, None, &cancel).await.unwrap();
-    unresolved("by hand", &service.links(&psx).await.unwrap()[0]);
+    unresolved("by hand", &links(&store, &psx).await[0]);
     let (two, _) = emulated(
         &store,
         "Two games",
@@ -339,7 +348,7 @@ async fn releases_link_only_by_a_verified_hash_and_can_be_linked_by_hand() {
     )
     .await;
     service.refresh_game(&two, None, &cancel).await.unwrap();
-    unresolved("different", &service.links(&two).await.unwrap()[0]);
+    unresolved("different", &links(&store, &two).await[0]);
 
     // Linked by hand, the revision shows the set; clearing it undoes that.
     store
@@ -355,7 +364,7 @@ async fn releases_link_only_by_a_verified_hash_and_can_be_linked_by_hand() {
     let sets = service.refresh_game(&rev, None, &cancel).await.unwrap();
     assert_eq!(sets.len(), 1);
     assert!(matches!(
-        service.links(&rev).await.unwrap()[0].method,
+        links(&store, &rev).await[0].method,
         LinkMethod::Manual
     ));
     assert!(store.delete_achievement_link(&rev_entry, ID).await.unwrap());
@@ -406,7 +415,7 @@ async fn refreshing_the_account_links_the_library_and_fetches_its_sets() {
     assert_eq!(set.unlocked, 1);
     assert!(service.sets(&homebrew, None).await.unwrap().is_empty());
     assert!(matches!(
-        service.links(&homebrew).await.unwrap()[0].method,
+        links(&store, &homebrew).await[0].method,
         LinkMethod::Unresolved { .. }
     ));
     // Unreachable: the refresh says so and keeps what was known.

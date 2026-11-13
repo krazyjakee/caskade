@@ -340,8 +340,6 @@ async fn each_account_and_store_keeps_its_own_set_and_viewers_see_their_own() {
         .find(|set| set.account.provider == "steam")
         .unwrap();
     assert_eq!(kid_steam.sync.status, SetStatus::NotFetched);
-    let summary = s.service.summary(&game, Some(&admin.id)).await.unwrap();
-    assert_eq!((summary.sets, summary.unlocked, summary.total), (2, 1, 3));
 }
 
 #[tokio::test]

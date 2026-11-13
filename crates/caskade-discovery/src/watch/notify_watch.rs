@@ -5,7 +5,7 @@ use super::{Debouncer, Library, WatchOptions};
 use crate::{
     Error,
     env::HostEnv,
-    orchestrator::{Config, builtin},
+    orchestrator::Config,
     types::{Cancel, ScanDelta, Source, SourceId},
 };
 use notify::{EventKind, RecursiveMode};
@@ -56,17 +56,9 @@ impl Drop for Watcher {
     }
 }
 
-/// Scans every built-in source once (the first delta holds every game),
-/// then rescans a source after its files change and calls `on_delta` with
-/// each non-empty delta, on a background thread.
-pub fn watch<F>(env: HostEnv, config: Config, on_delta: F) -> crate::Result<Watcher>
-where
-    F: FnMut(ScanDelta) + Send + 'static,
-{
-    watch_with_sources(env, config, WatchOptions::default(), builtin(), on_delta)
-}
-
-/// [`watch`] over the given sources with explicit options.
+/// Scans every given source once (the first delta holds every game), then
+/// rescans a source after its files change and calls `on_delta` with each
+/// non-empty delta, on a background thread.
 pub fn watch_with_sources<F>(
     env: HostEnv,
     config: Config,

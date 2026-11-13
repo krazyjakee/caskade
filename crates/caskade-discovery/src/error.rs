@@ -11,6 +11,7 @@ pub enum Error {
     Data(#[from] crate::data::DataError),
     #[error(transparent)]
     Io(#[from] std::io::Error),
+    #[cfg(feature = "cli")]
     #[error(transparent)]
     Dump(#[from] crate::dump::DumpError),
     #[error("{0}")]

@@ -11,7 +11,7 @@
 //! takes exactly its releases' sets along.
 
 mod db;
-pub use db::{AchievementStore, Applied as AchievementsApplied};
+pub use db::AchievementStore;
 mod model;
 pub use caskade_core::bus::NewUnlocks;
 pub use model::*;
@@ -159,6 +159,13 @@ struct Candidate {
     entries: Vec<String>,
 }
 
+/// One game's releases and their links, read once for linking and for
+/// finding its candidates.
+struct Releases {
+    entries: Vec<GameEntry>,
+    links: Vec<AchievementLink>,
+}
+
 impl Achievements {
     pub fn new(store: LibraryStore, bus: Bus, accounts: Arc<dyn AccountAccess>) -> Self {
         Self {
@@ -209,22 +216,13 @@ impl Achievements {
     /// The sets `game_id` has for `viewer` (a local account; `None`: every
     /// account's), with their achievements as last fetched.
     pub async fn sets(&self, game_id: &str, viewer: Option<&str>) -> Result<Vec<AchievementSet>> {
+        let accounts = self.inner.accounts.accounts().await?;
+        let releases = self.releases(game_id).await?;
         let mut sets = vec![];
-        for candidate in self.candidates(game_id, viewer).await? {
+        for candidate in self.candidates(&releases, &accounts, viewer) {
             sets.push(self.view(&candidate).await?);
         }
         Ok(sets)
-    }
-
-    /// Counts for each game, as cards and lists show them.
-    pub async fn summary(&self, game_id: &str, viewer: Option<&str>) -> Result<AchievementSummary> {
-        let sets = self.sets(game_id, viewer).await?;
-        Ok(AchievementSummary {
-            game_id: game_id.into(),
-            sets: sets.len() as u32,
-            unlocked: sets.iter().map(|set| set.unlocked).sum(),
-            total: sets.iter().map(|set| set.total).sum(),
-        })
     }
 
     /// Fetches every set of `game_id` that `viewer` sees, then answers them.
@@ -235,9 +233,12 @@ impl Achievements {
         viewer: Option<&str>,
         cancel: &CancellationToken,
     ) -> Result<Vec<AchievementSet>> {
-        self.link_releases(game_id, viewer, cancel).await?;
+        let accounts = self.inner.accounts.accounts().await?;
+        let mut releases = self.releases(game_id).await?;
+        self.link_releases(&mut releases, &accounts, viewer, cancel)
+            .await?;
         let mut sets = vec![];
-        for candidate in self.candidates(game_id, viewer).await? {
+        for candidate in self.candidates(&releases, &accounts, viewer) {
             if cancel.is_cancelled() {
                 break;
             }
@@ -283,11 +284,13 @@ impl Achievements {
     ) -> std::result::Result<(), ProviderError> {
         let other = |error: caskade_core::Error| ProviderError::Other(error.to_string());
         self.inner.accounts.credentials(account).await?;
+        let accounts = self.inner.accounts.accounts().await.map_err(other)?;
         let mut fetched = false;
         let mut failed = None;
         for game_id in self.inner.store.games_with_entries().await.map_err(other)? {
+            let mut releases = self.releases(&game_id).await.map_err(other)?;
             let linking = self
-                .link_releases(&game_id, None, cancel)
+                .link_releases(&mut releases, &accounts, None, cancel)
                 .await
                 .map_err(other)?;
             if let Some(FetchError::Provider(error)) = linking
@@ -295,7 +298,7 @@ impl Achievements {
             {
                 return Err(error);
             }
-            for candidate in self.candidates(&game_id, None).await.map_err(other)? {
+            for candidate in self.candidates(&releases, &accounts, None) {
                 if candidate.account.id != account.id {
                     continue;
                 }
@@ -332,10 +335,11 @@ impl Achievements {
     /// link yet, or an unresolved one older than a week, with the first
     /// connected account of its service `viewer` sees. A link the user set
     /// is never replaced. A failure (offline, signed out) links nothing now
-    /// and is answered.
+    /// and is answered. Saved links are added to `releases`.
     async fn link_releases(
         &self,
-        game_id: &str,
+        releases: &mut Releases,
+        accounts: &[StoreAccount],
         viewer: Option<&str>,
         cancel: &CancellationToken,
     ) -> Result<Option<FetchError>> {
@@ -344,10 +348,7 @@ impl Achievements {
             return Ok(None);
         }
         let store = &self.inner.store;
-        let entries = store.entries_for_game(game_id).await?;
-        let ids: Vec<String> = entries.iter().map(|entry| entry.id.clone()).collect();
-        let links = store.achievement_links(&ids).await?;
-        let accounts = self.inner.accounts.accounts().await?;
+        let Releases { entries, links } = releases;
         let now = caskade_core::now_ms();
         for linker in linkers {
             let provider = linker.provider();
@@ -397,39 +398,36 @@ impl Achievements {
                         (String::new(), LinkMethod::Unresolved { reason })
                     }
                 };
-                store
-                    .save_achievement_link(&AchievementLink {
-                        entry_id: entry.id.clone(),
-                        provider: provider.clone(),
-                        product_id,
-                        method,
-                        linked_at_ms: now,
-                    })
-                    .await?;
+                let link = AchievementLink {
+                    entry_id: entry.id.clone(),
+                    provider: provider.clone(),
+                    product_id,
+                    method,
+                    linked_at_ms: now,
+                };
+                store.save_achievement_link(&link).await?;
+                links.retain(|old| !(old.entry_id == link.entry_id && old.provider == provider));
+                links.push(link);
             }
         }
         Ok(None)
     }
 
-    /// Links of `game_id`'s releases, verified, set by hand or unresolved
-    /// with why: what the game page shows and lets the user change.
-    pub async fn links(&self, game_id: &str) -> Result<Vec<AchievementLink>> {
-        let store = &self.inner.store;
-        let ids: Vec<String> = store
-            .entries_for_game(game_id)
-            .await?
-            .into_iter()
-            .map(|entry| entry.id)
-            .collect();
-        store.achievement_links(&ids).await
+    /// A game's releases and their links.
+    async fn releases(&self, game_id: &str) -> Result<Releases> {
+        let entries = self.inner.store.entries_for_game(game_id).await?;
+        let ids: Vec<String> = entries.iter().map(|entry| entry.id.clone()).collect();
+        let links = self.inner.store.achievement_links(&ids).await?;
+        Ok(Releases { entries, links })
     }
 
-    /// Which accounts' sets `game_id` has, by its releases' identities.
-    async fn candidates(&self, game_id: &str, viewer: Option<&str>) -> Result<Vec<Candidate>> {
-        let entries = self.inner.store.entries_for_game(game_id).await?;
-        let entry_ids: Vec<String> = entries.iter().map(|entry| entry.id.clone()).collect();
-        let links = self.inner.store.achievement_links(&entry_ids).await?;
-        let accounts = self.inner.accounts.accounts().await?;
+    /// Which of `accounts`' sets a game has, by its releases' identities.
+    fn candidates(
+        &self,
+        releases: &Releases,
+        accounts: &[StoreAccount],
+        viewer: Option<&str>,
+    ) -> Vec<Candidate> {
         let mut found: BTreeMap<(String, String), Candidate> = BTreeMap::new();
         for account in accounts {
             if viewer.is_some_and(|viewer| {
@@ -443,8 +441,8 @@ impl Achievements {
             let Some(provider) = self.provider(&account.provider) else {
                 continue;
             };
-            for entry in &entries {
-                for product in products(provider.as_ref(), entry, &links) {
+            for entry in &releases.entries {
+                for product in products(provider.as_ref(), entry, &releases.links) {
                     found
                         .entry((account.id.clone(), product.clone()))
                         .or_insert_with(|| Candidate {
@@ -457,7 +455,7 @@ impl Achievements {
                 }
             }
         }
-        Ok(found.into_values().collect())
+        found.into_values().collect()
     }
 
     async fn view(&self, candidate: &Candidate) -> Result<AchievementSet> {
@@ -718,12 +716,23 @@ impl Achievements {
                 return;
             }
         };
+        let accounts = match self.inner.accounts.accounts().await {
+            Ok(accounts) => accounts,
+            Err(error) => {
+                tracing::warn!(%error, "background achievement refresh failed");
+                return;
+            }
+        };
         let mut budget = BACKGROUND_SETS;
         for game in games {
-            let Ok(candidates) = self.candidates(&game, None).await else {
-                continue;
+            let releases = match self.releases(&game).await {
+                Ok(releases) => releases,
+                Err(error) => {
+                    tracing::warn!(%error, %game, "background achievement refresh failed");
+                    continue;
+                }
             };
-            for candidate in candidates {
+            for candidate in self.candidates(&releases, &accounts, None) {
                 if budget == 0 {
                     return;
                 }
@@ -739,13 +748,19 @@ impl Achievements {
                             && sync.retry_at_ms.is_none_or(|at| at <= now)
                     }
                     Ok(None) => true,
-                    Err(_) => false,
+                    Err(error) => {
+                        tracing::warn!(%error, %game, "background achievement refresh failed");
+                        false
+                    }
                 };
                 if due && candidate.account.enabled {
                     budget -= 1;
-                    let _ = self
+                    if let Err(error) = self
                         .refresh(&game, &candidate, &CancellationToken::new())
-                        .await;
+                        .await
+                    {
+                        tracing::warn!(%error, %game, "background achievement refresh failed");
+                    }
                 }
             }
         }

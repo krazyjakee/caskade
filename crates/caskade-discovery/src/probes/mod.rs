@@ -1,4 +1,4 @@
-//! Reusable read-only OS probes for discovery and future emulator detection.
+//! Reusable read-only OS probes for discovery and emulator detection.
 //! All paths and variables come from HostEnv; no command, shell, application,
 //! Flatpak portal or Windows Shell object is ever invoked. See README.md for
 //! the stable consumer contract and feature availability.

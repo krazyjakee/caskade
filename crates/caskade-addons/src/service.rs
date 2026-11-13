@@ -3,9 +3,9 @@
 //! with one that does too. A refresh is one GET of the catalogue and one of
 //! its signature; it sends nothing about the user or their library.
 
-use super::{Catalogue, parse};
 #[cfg(feature = "net")]
-use super::{MAX_CATALOGUE_BYTES, MAX_SIGNATURE_BYTES};
+use super::validate::MAX_CATALOGUE_BYTES;
+use super::{Catalogue, parse};
 use caskade_core::{Error, Result};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -14,6 +14,10 @@ use std::{
     sync::{Arc, RwLock},
 };
 use url::Url;
+
+/// The largest signature read.
+#[cfg(feature = "net")]
+const MAX_SIGNATURE_BYTES: usize = 4 << 10;
 
 const SNAPSHOT_FILE: &str = "catalogue.snapshot.json";
 /// Where older versions kept the same things, in three files.
@@ -87,35 +91,20 @@ pub struct CatalogueService {
 /// minisign text, as is or base64-wrapped as Tauri's keys and signatures
 /// are.
 fn minisign_text(text: &str) -> String {
-    use base64_decode::decode;
+    use base64::Engine;
     let text = text.trim();
     if text.starts_with("untrusted comment:") {
         return text.to_owned();
     }
-    decode(text).unwrap_or_else(|| text.to_owned())
-}
-
-/// A tiny standard-base64 decoder: the keys and signatures are short.
-mod base64_decode {
-    pub fn decode(text: &str) -> Option<String> {
-        const ALPHABET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        let mut out = Vec::new();
-        let (mut buffer, mut bits) = (0u32, 0);
-        for byte in text
-            .bytes()
-            .filter(|b| !b.is_ascii_whitespace() && *b != b'=')
-        {
-            let value = ALPHABET.iter().position(|c| *c == byte)? as u32;
-            buffer = (buffer << 6) | value;
-            bits += 6;
-            if bits >= 8 {
-                bits -= 8;
-                out.push((buffer >> bits) as u8);
-                buffer &= (1 << bits) - 1;
-            }
-        }
-        String::from_utf8(out).ok()
-    }
+    let packed: String = text
+        .chars()
+        .filter(|c| !c.is_ascii_whitespace() && *c != '=')
+        .collect();
+    base64::engine::general_purpose::STANDARD_NO_PAD
+        .decode(packed)
+        .ok()
+        .and_then(|bytes| String::from_utf8(bytes).ok())
+        .unwrap_or_else(|| text.to_owned())
 }
 
 fn verify(
@@ -416,13 +405,15 @@ async fn get(
     let mut body = Vec::new();
     while let Some(chunk) = response.chunk().await.map_err(fail)? {
         if body.len() + chunk.len() > max {
-            return Err((
-                Error::Invalid(caskade_core::tr!(
-                    "the catalogue is larger than {mib} MiB",
-                    mib = MAX_CATALOGUE_BYTES >> 20
-                )),
-                false,
-            ));
+            let message = if max == MAX_SIGNATURE_BYTES {
+                caskade_core::tr!(
+                    "the catalogue's signature is larger than {kib} KiB",
+                    kib = max >> 10
+                )
+            } else {
+                caskade_core::tr!("the catalogue is larger than {mib} MiB", mib = max >> 20)
+            };
+            return Err((Error::Invalid(message), false));
         }
         body.extend_from_slice(&chunk);
     }

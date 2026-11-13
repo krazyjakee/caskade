@@ -23,6 +23,8 @@ pub enum StorageError {
     Executor(#[from] caskade_installer::exec::ExecError),
     #[error(transparent)]
     Io(#[from] std::io::Error),
+    #[error("storage task: {0}")]
+    Task(#[from] tokio::task::JoinError),
     #[error("storage scan cancelled")]
     Cancelled,
     #[error("invalid storage adoption: {0}")]
@@ -107,11 +109,5 @@ impl StorageSource {
             paths.config.clone(),
         )));
         self
-    }
-
-    /// Register this configured instance as a bus library provider. Call
-    /// builders before registration so the provider retains remount support.
-    pub fn register(&self) {
-        self.bus.register_library_source(Arc::new(self.clone()));
     }
 }

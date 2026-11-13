@@ -19,40 +19,27 @@
 //!
 //! WebView2 reports failures on Windows; WebKitGTK reports its web process
 //! exiting or going unresponsive on Linux. A main-window failure on the GPU
-//! renderer Caskade picked (the Tauri adapter's `webkit.rs`) restarts on WebKit's own instead
-//! of reloading (#72).
+//! renderer Caskade picked ([`crate::webkit`]) restarts on WebKit's own
+//! instead of reloading (#72).
 
 // Elsewhere nothing reports a failure, so recovery never runs.
 #![cfg_attr(not(any(windows, target_os = "linux")), allow(dead_code))]
 
+use caskade_webview2::Kind;
 use std::path::PathBuf;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 /// Renderer failures a page survives by reloading, within [`RELOAD_WINDOW`].
-pub const RELOADS: usize = 3;
-pub const RELOAD_WINDOW: Duration = Duration::from_secs(120);
+const RELOADS: usize = 3;
+const RELOAD_WINDOW: Duration = Duration::from_secs(120);
 /// How long a renderer stays unresponsive before the page reloads: a long
 /// task (a big library rendering, a heavy game) gets this long to finish.
-pub const HANG_GRACE: Duration = Duration::from_secs(20);
+const HANG_GRACE: Duration = Duration::from_secs(20);
 /// Unresponsive reports further apart than this start a new hang.
 const HANG_GAP: Duration = Duration::from_secs(30);
 /// Restarts Caskade makes on its own within [`RESTART_WINDOW`].
 pub const RESTARTS: usize = 2;
-pub const RESTART_WINDOW: Duration = Duration::from_secs(600);
-
-/// What went wrong with a page's processes.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Failure {
-    /// The page's renderer exited.
-    RendererExited,
-    /// The page's renderer stopped answering.
-    RendererUnresponsive,
-    /// The browser process exited: the webview is gone.
-    BrowserExited,
-    /// A process the webview recovers from by itself (GPU, utility, a
-    /// frame's renderer).
-    Other,
-}
+const RESTART_WINDOW: Duration = Duration::from_secs(600);
 
 /// What to do about a failure.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -74,12 +61,15 @@ pub struct Policy {
 }
 
 impl Policy {
-    pub fn next(&mut self, failure: Failure, now: Instant) -> Step {
+    pub fn next(&mut self, failure: Kind, now: Instant) -> Step {
         match failure {
-            Failure::Other => Step::Wait,
-            Failure::BrowserExited => Step::Restart,
-            Failure::RendererExited => self.reload(now),
-            Failure::RendererUnresponsive => {
+            // The webview starts these again by itself.
+            Kind::FrameRendererExited | Kind::GpuExited | Kind::UtilityExited | Kind::Other => {
+                Step::Wait
+            }
+            Kind::BrowserExited => Step::Restart,
+            Kind::RendererExited => self.reload(now),
+            Kind::RendererUnresponsive => {
                 let since = match self.hang {
                     Some((since, last)) if now.saturating_duration_since(last) <= HANG_GAP => since,
                     _ => now,
@@ -121,10 +111,7 @@ impl Restarts {
     /// Records a restart at `now` and says whether it may go ahead.
     pub fn claim(&self, now: SystemTime) -> bool {
         let now = millis(now);
-        let mut recent = recent(
-            &std::fs::read_to_string(&self.file).unwrap_or_default(),
-            now,
-        );
+        let mut recent = self.recent(now);
         if recent.len() >= RESTARTS {
             return false;
         }
@@ -135,12 +122,16 @@ impl Restarts {
     /// Records a restart the user asked for: it always goes ahead.
     pub fn record(&self, now: SystemTime) {
         let now = millis(now);
-        let mut recent = recent(
-            &std::fs::read_to_string(&self.file).unwrap_or_default(),
-            now,
-        );
+        let mut recent = self.recent(now);
         recent.push(now);
         let _ = self.write(&recent);
+    }
+
+    fn recent(&self, now: u64) -> Vec<u64> {
+        recent(
+            &std::fs::read_to_string(&self.file).unwrap_or_default(),
+            now,
+        )
     }
 
     fn write(&self, times: &[u64]) -> bool {
@@ -166,19 +157,6 @@ fn recent(text: &str, now: u64) -> Vec<u64> {
 fn millis(at: SystemTime) -> u64 {
     at.duration_since(UNIX_EPOCH)
         .map_or(0, |since| since.as_millis() as u64)
-}
-
-/// The [`Failure`] a WebView2 process failure is.
-pub fn failure_of(kind: caskade_webview2::Kind) -> Failure {
-    use caskade_webview2::Kind;
-    match kind {
-        Kind::RendererExited => Failure::RendererExited,
-        Kind::RendererUnresponsive => Failure::RendererUnresponsive,
-        Kind::BrowserExited => Failure::BrowserExited,
-        Kind::FrameRendererExited | Kind::GpuExited | Kind::UtilityExited | Kind::Other => {
-            Failure::Other
-        }
-    }
 }
 
 /// Logs a webview process failure in `window`, with what WebView2 says.
@@ -279,7 +257,7 @@ mod tests {
     fn a_renderer_that_exits_reloads_the_page() {
         let mut policy = Policy::default();
         assert_eq!(
-            policy.next(Failure::RendererExited, Instant::now()),
+            policy.next(Kind::RendererExited, Instant::now()),
             Step::Reload
         );
     }
@@ -288,14 +266,13 @@ mod tests {
     fn a_lost_browser_process_restarts() {
         let mut policy = Policy::default();
         assert_eq!(
-            policy.next(Failure::BrowserExited, Instant::now()),
+            policy.next(Kind::BrowserExited, Instant::now()),
             Step::Restart
         );
     }
 
     #[test]
     fn processes_the_webview_restarts_itself_are_left_alone() {
-        use caskade_webview2::Kind;
         let mut policy = Policy::default();
         for kind in [
             Kind::FrameRendererExited,
@@ -303,7 +280,7 @@ mod tests {
             Kind::UtilityExited,
             Kind::Other,
         ] {
-            assert_eq!(policy.next(failure_of(kind), Instant::now()), Step::Wait);
+            assert_eq!(policy.next(kind, Instant::now()), Step::Wait);
         }
     }
 
@@ -313,18 +290,18 @@ mod tests {
         let mut policy = Policy::default();
         for second in 0..RELOADS as u64 {
             assert_eq!(
-                policy.next(Failure::RendererExited, at(start, second)),
+                policy.next(Kind::RendererExited, at(start, second)),
                 Step::Reload
             );
         }
         assert_eq!(
-            policy.next(Failure::RendererExited, at(start, 10)),
+            policy.next(Kind::RendererExited, at(start, 10)),
             Step::Restart
         );
         // Long after, a failure is a new one.
         assert_eq!(
             policy.next(
-                Failure::RendererExited,
+                Kind::RendererExited,
                 at(start, 10 + RELOAD_WINDOW.as_secs())
             ),
             Step::Reload
@@ -335,7 +312,7 @@ mod tests {
     fn a_hang_gets_time_to_pass_before_the_page_reloads() {
         let start = Instant::now();
         let mut policy = Policy::default();
-        let hung = Failure::RendererUnresponsive;
+        let hung = Kind::RendererUnresponsive;
         assert_eq!(policy.next(hung, at(start, 0)), Step::Wait);
         assert_eq!(policy.next(hung, at(start, 10)), Step::Wait);
         assert_eq!(policy.next(hung, at(start, 20)), Step::Reload);
@@ -347,7 +324,7 @@ mod tests {
     fn hangs_far_apart_are_separate() {
         let start = Instant::now();
         let mut policy = Policy::default();
-        let hung = Failure::RendererUnresponsive;
+        let hung = Kind::RendererUnresponsive;
         assert_eq!(policy.next(hung, at(start, 0)), Step::Wait);
         assert_eq!(policy.next(hung, at(start, 15)), Step::Wait);
         // More than HANG_GAP without a report: that hang passed.

@@ -11,8 +11,7 @@ async fn automatic_remount_uses_volume_relative_hint_and_physical_identity_after
     };
     use caskade_discovery::{
         HostEnv,
-        env::{Volume, VolumeKind},
-        testing::FakeDrives,
+        env::{FixedDrives, Volume, VolumeKind},
     };
     struct Writable;
     impl RootProbe for Writable {
@@ -44,7 +43,7 @@ async fn automatic_remount_uses_volume_relative_hint_and_physical_identity_after
     };
     let env = HostEnv::fixture(&machine)
         .unwrap()
-        .with_drives(Arc::new(FakeDrives::new(vec![volume(old_volume.clone())])));
+        .with_drives(Arc::new(FixedDrives::new(vec![volume(old_volume.clone())])));
     let store = LibraryStore::open_default(&paths).await.unwrap();
     let settings = SettingsService::new(store.clone());
     settings.register_core(&paths).unwrap();
@@ -98,7 +97,7 @@ async fn automatic_remount_uses_volume_relative_hint_and_physical_identity_after
         .unwrap();
     let env = HostEnv::fixture(&machine)
         .unwrap()
-        .with_drives(Arc::new(FakeDrives::new(vec![
+        .with_drives(Arc::new(FixedDrives::new(vec![
             volume(new_volume.clone()),
             volume(other),
         ])));
@@ -145,8 +144,7 @@ async fn ambiguous_or_traversing_remount_hints_never_choose_a_copy_or_rewrite_it
     };
     use caskade_discovery::{
         HostEnv,
-        env::{Volume, VolumeKind},
-        testing::FakeDrives,
+        env::{FixedDrives, Volume, VolumeKind},
     };
     struct Writable;
     impl RootProbe for Writable {
@@ -178,7 +176,7 @@ async fn ambiguous_or_traversing_remount_hints_never_choose_a_copy_or_rewrite_it
     let old = fs::canonicalize(machine.join("root/mnt/old")).unwrap();
     let env = HostEnv::fixture(&machine)
         .unwrap()
-        .with_drives(Arc::new(FakeDrives::new(vec![volume(old.clone())])));
+        .with_drives(Arc::new(FixedDrives::new(vec![volume(old.clone())])));
     let store = LibraryStore::in_memory().await.unwrap();
     let settings = SettingsService::new(store.clone());
     settings.register_core(&paths).unwrap();
@@ -219,7 +217,7 @@ async fn ambiguous_or_traversing_remount_hints_never_choose_a_copy_or_rewrite_it
         .unwrap();
     let env = HostEnv::fixture(&machine)
         .unwrap()
-        .with_drives(Arc::new(FakeDrives::new(vec![
+        .with_drives(Arc::new(FixedDrives::new(vec![
             volume(first.clone()),
             volume(second),
         ])));

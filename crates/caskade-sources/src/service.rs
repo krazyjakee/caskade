@@ -27,7 +27,7 @@ pub struct ScanOutcome {
 }
 impl DiscoveryService {
     pub fn new(store: LibraryStore, bus: Bus, env: HostEnv) -> Self {
-        Self::with_sources(store, bus, env, crate::adapter::sources())
+        Self::with_sources(store, bus, env, caskade_discovery::orchestrator::builtin())
     }
     pub fn with_sources(
         store: LibraryStore,
@@ -143,19 +143,4 @@ impl DiscoveryService {
         })
         .await?)
     }
-}
-
-/// Register one bus provider per source family and return the aggregate
-/// import service. The caller owns its scan/watch lifecycle and settings.
-pub fn register(bus: &Bus, store: LibraryStore, env: HostEnv, config: &Config) -> DiscoveryService {
-    let sources = crate::adapters(&env, config);
-    for source in &sources {
-        bus.register_library_source(source.clone());
-    }
-    DiscoveryService::with_sources(
-        store,
-        bus.clone(),
-        env,
-        sources.into_iter().map(|s| s.source.clone()).collect(),
-    )
 }

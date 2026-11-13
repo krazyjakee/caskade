@@ -1,6 +1,5 @@
-//! Discovery-backed library providers and imports.
+//! The discovery service and library imports.
 //! No global state, filesystem mutations in launcher data or ambient scans.
-mod adapter;
 pub mod emulation;
 mod import;
 mod progress;
@@ -12,10 +11,9 @@ pub mod storage;
 pub mod tools;
 mod watch;
 
-pub use adapter::{DiscoverySource, adapters};
 pub use import::{ImportOptions, ImportOutcome, ImportedGame, SkippedEntry};
 pub use roms::RomsSource;
-pub use service::{DiscoveryService, ScanOutcome, register};
+pub use service::{DiscoveryService, ScanOutcome};
 pub use settings::{IMPORT_SETTINGS, ImportSettings, import_options, register_settings};
 pub use watch::DiscoveryWatch;
 

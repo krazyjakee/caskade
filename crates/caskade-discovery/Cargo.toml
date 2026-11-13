@@ -17,7 +17,8 @@ macos-sources = []
 deep = ["caskade-installer/linux-formats"]
 watch = ["dep:notify"]
 sqlite = ["dep:rusqlite"]
-cli = ["dep:clap", "dep:tracing-subscriber"]
+# The CLI binary and the fixture dump it exports (#70).
+cli = ["dep:clap", "dep:tracing-subscriber", "dep:sha1"]
 
 [dependencies]
 caskade-jobs = { path = "../caskade-jobs" }
@@ -55,7 +56,7 @@ quick-xml = "0.42"
 prost = "0.14"
 encoding_rs = "0.8"
 # Recomputes appinfo.vdf hashes after anonymising a dump (#70).
-sha1 = "0.10.6"
+sha1 = { version = "0.10.6", optional = true }
 directories = "6"
 sysinfo = { version = "=0.38.4", default-features = false, features = ["disk"] }
 notify = { version = "8", default-features = false, features = ["macos_kqueue"], optional = true }

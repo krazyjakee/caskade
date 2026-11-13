@@ -3,12 +3,13 @@
 //! WebView2 runs a page in processes of its own (browser, renderer, GPU,
 //! utilities) and reports each one that fails through `ProcessFailed`.
 //! Neither wry nor Tauri listens for it, so a webview that loses its browser
-//! process stays white for good. The desktop app's `webview_recovery`
-//! decides what to do; this crate only subscribes and describes the failure,
+//! process stays white for good. caskade-player's `recovery` decides what
+//! to do; this crate only subscribes and describes the failure,
 //! keeping the COM calls, which are all `unsafe`, out of the adapter (whose
 //! lints forbid unsafe code).
 //!
-//! Windows only: elsewhere the crate is empty.
+//! The subscription is Windows only; elsewhere the crate has just the
+//! failure types.
 
 #![deny(unsafe_code)]
 

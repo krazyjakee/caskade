@@ -357,7 +357,5 @@ fn builtin_sources_have_unique_ids_and_hosts() {
     for source in builtin_sources() {
         assert!(ids.insert(source.id()), "duplicate {}", source.id());
         assert_ne!(source.hosts(), OsSet::NONE, "{}", source.id());
-        assert!(find_source(source.id().as_str()).is_some());
     }
-    assert!(find_source("no.such.source").is_none());
 }

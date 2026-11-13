@@ -13,9 +13,7 @@ use std::collections::HashSet;
 use url::Url;
 
 /// The largest catalogue read.
-pub const MAX_CATALOGUE_BYTES: usize = 4 << 20;
-/// The largest signature read.
-pub const MAX_SIGNATURE_BYTES: usize = 4 << 10;
+pub(crate) const MAX_CATALOGUE_BYTES: usize = 4 << 20;
 const MAX_PACKAGES: usize = 1000;
 const MAX_RELEASES: usize = 50;
 const MAX_SCREENSHOTS: usize = 8;
