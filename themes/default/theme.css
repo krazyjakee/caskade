@@ -95,8 +95,12 @@
       color-mix(in oklab, var(--cs-color-accent-alt) 10%, transparent),
       transparent 70%
     );
-  /* A pixel or two per step at 4K: 4 frames a second instead of 60. */
-  animation: cs-nebula 30s steps(120) infinite;
+  /* On the grid's clock: steps() applies to each keyframe interval, so 24
+     in each half of 40s is the grid's 48 in 40s, and both layers change on
+     the same frame, one repaint a step. The 30s steps(120) this replaced
+     drew eight frames a second, plus the grid's own (#148). A glow moves
+     a few pixels a step, too soft to see jump. */
+  animation: cs-nebula 40s steps(24) infinite;
   animation-play-state: var(--cs-motion-ambient);
 }
 
