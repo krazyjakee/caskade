@@ -75,6 +75,13 @@ const ASYNC_WORKERS: usize = 4;
 static KEEPER: OnceLock<shell::Keeper> = OnceLock::new();
 
 fn main() {
+    // Before any thread exists, so none keeps a malloc arena of its own: by
+    // default glibc gives every thread one (up to eight per core), and the
+    // freed memory they hold made the tray-idle app on a real library
+    // several hundred MB larger (#111). The Tauri shell did this; the
+    // native app it started didn't.
+    caskade_malloc::limit_arenas();
+    caskade_malloc::trim_every(std::time::Duration::from_secs(60));
     // These entry points must run before the app's runtime or event loop.
     // The streaming host starts this executable directly on Windows.
     #[cfg(windows)]
