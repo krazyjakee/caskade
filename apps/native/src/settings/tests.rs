@@ -252,6 +252,25 @@ fn opens_a_section_in_place_by_click_arrows_and_a_pads_bumpers() {
     assert_eq!(focused(&window), Some(tab(&window, "General")));
 }
 
+#[test]
+fn navigating_from_the_sidebar_puts_pad_focus_on_the_open_settings_tab() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = Window::open();
+    let settings = window
+        .find_all("href", "/settings")
+        .into_iter()
+        .next()
+        .expect("Settings in the sidebar");
+    window.focus(settings);
+    window.pad(Action::Confirm);
+    window.settle_until("focus in Settings", |window| {
+        window
+            .find("id", "settings-tab-general")
+            .is_some_and(|general| window.focused() == Some(general))
+    });
+}
+
 /// The schema sections render from the core's own schemas: a row per
 /// field, titled as the schema titles it.
 #[test]

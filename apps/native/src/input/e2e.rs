@@ -78,6 +78,8 @@ pub struct Probe {
     pub repeats: u64,
     /// Actions the window has handled, any kind.
     pub handled: u64,
+    /// Focus placement state, included in a failed wait's diagnostics.
+    pub focus_debug: String,
 }
 
 type Asks = async_mpsc::UnboundedReceiver<mpsc::Sender<Probe>>;
@@ -181,8 +183,8 @@ impl Driver {
             if Instant::now() > deadline {
                 let page: String = self.last.text.chars().take(400).collect();
                 return Err(format!(
-                    "timed out waiting for {what}; focus is on {:?}; the window reads {page:?}",
-                    self.last.focused
+                    "timed out waiting for {what}; focus is on {:?}; {}; the window reads {page:?}",
+                    self.last.focused, self.last.focus_debug
                 ));
             }
             std::thread::sleep(Duration::from_millis(200));

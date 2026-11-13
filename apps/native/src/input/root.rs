@@ -405,7 +405,7 @@ impl Input {
 
     /// The window as the e2e driver reads it.
     fn probe(&self) -> super::e2e::Probe {
-        let read = self.with_ui(|ui, _| {
+        let read = self.with_ui(|ui, dispatcher| {
             use caskade_ui_input::FocusTree;
             let collapse = |text: String| text.split_whitespace().collect::<Vec<_>>().join(" ");
             let focused = caskade_ui_input::dispatch::Ui::focused(ui);
@@ -448,6 +448,17 @@ impl Input {
                 actions: 0,
                 repeats: 0,
                 handled: 0,
+                focus_debug: format!(
+                    "pending={}, waiting={}, frames={}, entered={:?}, default={:?}",
+                    dispatcher.pending(),
+                    dispatcher.waiting_for_view(),
+                    self.inner.frames.get(),
+                    dispatcher.entered().map(|node| ui.text(node)),
+                    dispatcher
+                        .spatial
+                        .view_default(ui)
+                        .map(|node| ui.text(node)),
+                ),
             }
         });
         let mut probe = read.unwrap_or_default();
@@ -711,12 +722,12 @@ pub fn use_input_action(action: Action, bind: Bind, run: impl FnMut() -> bool + 
 /// the view's entry when it's new: a view calls this with its location.
 pub fn use_focus_location(key: String) {
     let input = use_input();
-    let last: Rc<RefCell<Option<String>>> = use_hook(|| Rc::new(RefCell::new(None)));
-    let changed = last.borrow().as_deref() != Some(key.as_str());
-    if changed {
-        *last.borrow_mut() = Some(key.clone());
+    // Notify after the view has rendered. During render the previous
+    // view can still be mounted, so its default could settle before the
+    // new view is drawn on a slow renderer.
+    use_effect(use_reactive!(|key| {
         input.navigated(key);
-    }
+    }));
 }
 
 /// The element around the views that the input layer works through; pad
@@ -744,7 +755,7 @@ pub fn InputRoot(
                 // while its counts came in): a pad action waits for the next
                 // layout, briefly.
                 let action = matches!(job, Job::Action(..));
-                if action {
+                if action || matches!(job, Job::Navigated(_)) {
                     let mut waited = Duration::ZERO;
                     while waited < STALE_WAIT && worker.stale() {
                         crate::data::sleep(FRAME).await;
