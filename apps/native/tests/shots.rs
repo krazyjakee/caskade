@@ -13,6 +13,9 @@
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+#[path = "shots/borders.rs"]
+mod borders;
+
 /// A pixel differs when a channel moves by more than this (anti-aliasing
 /// and rounding differ a little between CPUs).
 const TOLERANCE: u8 = 24;
@@ -81,6 +84,10 @@ fn every_theme_renders_the_reference_screens_as_before() {
         .expect("the native binary runs");
     let log = String::from_utf8_lossy(&output.stderr);
     assert!(output.status.success(), "{log}");
+    assert!(
+        !log.contains("A path contains NaN"),
+        "the reference screens emitted invalid drawing paths:\n{log}"
+    );
     let rendered = pngs(&out);
     for theme in [
         "caskade.default",

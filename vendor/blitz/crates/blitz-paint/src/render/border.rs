@@ -236,6 +236,13 @@ impl ElementCx<'_, '_> {
         let mut borders: SmallVec<[(Color, BezPath); 8]> = SmallVec::new();
 
         for &edge in &[Edge::Top, Edge::Right, Edge::Bottom, Edge::Left] {
+            // A solid style can still have zero width (for example, after a
+            // CSS reset). Such an edge has no area and must not generate a
+            // degenerate path that can poison the other edges' shared fill.
+            if self.edge_width(edge) <= 0.0 {
+                continue;
+            }
+
             let (color, edge_style) = match edge {
                 Edge::Top => (&border.border_top_color, border.border_top_style),
                 Edge::Right => (&border.border_right_color, border.border_right_style),

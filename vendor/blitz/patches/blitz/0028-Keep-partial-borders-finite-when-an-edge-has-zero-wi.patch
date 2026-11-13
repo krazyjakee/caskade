@@ -1,0 +1,74 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Fri, 13 Nov 2026 02:55:37 +0000
+Subject: [PATCH] Keep partial borders finite when an edge has zero width
+
+Skip zero-width edges before painting, and give a rounded corner entirely to the adjacent nonzero edge. This avoids invalid geometry both for empty borders and for visible rounded edges beside a missing edge.
+
+The corner-angle limits match the fix proposed in DioxusLabs/blitz#902 for #837; no fractional-layout rounding changes are included.
+---
+ packages/blitz-paint/src/kurbo_css/css_box.rs | 20 ++++++++++++++++++-
+ packages/blitz-paint/src/render/border.rs     |  7 +++++++
+ 2 files changed, 26 insertions(+), 1 deletion(-)
+
+diff --git a/packages/blitz-paint/src/kurbo_css/css_box.rs b/packages/blitz-paint/src/kurbo_css/css_box.rs
+index 211bf9d..c922726 100644
+--- a/packages/blitz-paint/src/kurbo_css/css_box.rs
++++ b/packages/blitz-paint/src/kurbo_css/css_box.rs
+@@ -1,5 +1,5 @@
+ use kurbo::{Arc, BezPath, Insets, PathEl, Point, Rect, Shape as _, Vec2};
+-use std::{f64::consts::FRAC_PI_2, f64::consts::PI};
++use std::f64::consts::{FRAC_PI_2, FRAC_PI_4, PI};
+ 
+ use super::non_uniform_radii::NonUniformRoundedRectRadii;
+ use super::{Corner, CssBoxKind, Direction, Edge, add_insets, get_corner_insets};
+@@ -627,6 +627,16 @@ impl BuildBezpath for BezPath {
+ 
+ /// Get the start angle of the arc based on the border width and the radii
+ fn start_angle(bt_width: f64, br_width: f64, radii: Vec2) -> f64 {
++    // Give the entire corner to the side with width. Otherwise the ratio
++    // below becomes inf / inf or 0 / 0 and corrupts a visible neighbour's
++    // path too (DioxusLabs/blitz#837, also addressed by PR #902).
++    match (bt_width == 0.0, br_width == 0.0) {
++        (true, true) => return FRAC_PI_4,
++        (true, false) => return FRAC_PI_2,
++        (false, true) => return 0.0,
++        (false, false) => {}
++    }
++
+     // slope of the border intersection split
+     let w = bt_width / br_width;
+     let x = radii.y / (w * radii.x);
+@@ -766,6 +776,14 @@ mod tests {
+         assert!((start_angle(4.0, 1.0, Vec2 { x: 1.0, y: 2.0 }) - 0.643501).abs() < 1e-5);
+     }
+ 
++    #[test]
++    fn handles_zero_width_sides() {
++        let radii = Vec2::new(8.0, 8.0);
++        assert_eq!(start_angle(0.0, 1.0, radii), FRAC_PI_2);
++        assert_eq!(start_angle(1.0, 0.0, radii), 0.0);
++        assert_eq!(start_angle(0.0, 0.0, radii), FRAC_PI_4);
++    }
++
+     /// Regression test: when `k == radii.y / (w * radii.x)` is exactly 2 the
+     /// old closed form evaluated `0 / 0` and produced `NaN`, corrupting the
+     /// corner arc. This happens for ordinary elliptical corners such as an
+diff --git a/packages/blitz-paint/src/render/border.rs b/packages/blitz-paint/src/render/border.rs
+index 83c7d12..5ee2454 100644
+--- a/packages/blitz-paint/src/render/border.rs
++++ b/packages/blitz-paint/src/render/border.rs
+@@ -236,6 +236,13 @@ impl ElementCx<'_, '_> {
+         let mut borders: SmallVec<[(Color, BezPath); 8]> = SmallVec::new();
+ 
+         for &edge in &[Edge::Top, Edge::Right, Edge::Bottom, Edge::Left] {
++            // A solid style can still have zero width (for example, after a
++            // CSS reset). Such an edge has no area and must not generate a
++            // degenerate path that can poison the other edges' shared fill.
++            if self.edge_width(edge) <= 0.0 {
++                continue;
++            }
++
+             let (color, edge_style) = match edge {
+                 Edge::Top => (&border.border_top_color, border.border_top_style),
+                 Edge::Right => (&border.border_right_color, border.border_right_style),

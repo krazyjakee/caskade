@@ -1,5 +1,5 @@
 use kurbo::{Arc, BezPath, Insets, PathEl, Point, Rect, Shape as _, Vec2};
-use std::{f64::consts::FRAC_PI_2, f64::consts::PI};
+use std::f64::consts::{FRAC_PI_2, FRAC_PI_4, PI};
 
 use super::non_uniform_radii::NonUniformRoundedRectRadii;
 use super::{Corner, CssBoxKind, Direction, Edge, add_insets, get_corner_insets};
@@ -627,6 +627,16 @@ impl BuildBezpath for BezPath {
 
 /// Get the start angle of the arc based on the border width and the radii
 fn start_angle(bt_width: f64, br_width: f64, radii: Vec2) -> f64 {
+    // Give the entire corner to the side with width. Otherwise the ratio
+    // below becomes inf / inf or 0 / 0 and corrupts a visible neighbour's
+    // path too (DioxusLabs/blitz#837, also addressed by PR #902).
+    match (bt_width == 0.0, br_width == 0.0) {
+        (true, true) => return FRAC_PI_4,
+        (true, false) => return FRAC_PI_2,
+        (false, true) => return 0.0,
+        (false, false) => {}
+    }
+
     // slope of the border intersection split
     let w = bt_width / br_width;
     let x = radii.y / (w * radii.x);
@@ -764,6 +774,14 @@ mod tests {
     fn should_solve_properly() {
         // 0.643501
         assert!((start_angle(4.0, 1.0, Vec2 { x: 1.0, y: 2.0 }) - 0.643501).abs() < 1e-5);
+    }
+
+    #[test]
+    fn handles_zero_width_sides() {
+        let radii = Vec2::new(8.0, 8.0);
+        assert_eq!(start_angle(0.0, 1.0, radii), FRAC_PI_2);
+        assert_eq!(start_angle(1.0, 0.0, radii), 0.0);
+        assert_eq!(start_angle(0.0, 0.0, radii), FRAC_PI_4);
     }
 
     /// Regression test: when `k == radii.y / (w * radii.x)` is exactly 2 the
