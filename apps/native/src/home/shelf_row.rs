@@ -41,10 +41,12 @@ pub fn ShelfRow(
     let input = use_input();
     let mut me = use_signal(|| None::<NodeId>);
     let mut items = use_signal(|| None::<NodeHandle>);
-    // Measured once laid out; a render after a scroll measures again.
+    // Measured once laid out; a render after a scroll or a resized window
+    // (once laid out: #146) measures again.
     let mut laid_out = use_signal(|| 0u32);
     let _ = laid_out();
     let _ = input.scrolled();
+    let _ = input.resized();
     let width = items
         .read()
         .as_ref()

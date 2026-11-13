@@ -189,6 +189,22 @@ impl Frame {
         row * self.columns()
     }
 
+    /// Where to scroll once the columns changed (#146): game `first` (the
+    /// first one shown before) at the top, unless that hides game
+    /// `focused`; then the focused game's row at the top.
+    pub fn anchored_top(&self, first: usize, focused: Option<usize>) -> f64 {
+        let top = self.top_of(first);
+        let row = self.layout.row_height();
+        let hidden = |index: usize| {
+            let at = self.layout.rows_top() + (index / self.columns()) as f64 * row;
+            at < top + self.layout.rows_top() || at + row > top + self.height
+        };
+        match focused.filter(|&index| index < self.total && hidden(index)) {
+            Some(index) => self.top_of(index),
+            None => top,
+        }
+    }
+
     /// Games per screen: whole rows that fit, at least one.
     pub fn per_page(&self) -> usize {
         let rows = ((self.height - self.layout.rows_top()) / self.layout.row_height()).floor();
@@ -233,6 +249,24 @@ mod tests {
         let end = grid(10_000, frame.content_height() - 800.0);
         assert_eq!(*end.window().unwrap().end(), 1999);
         assert_eq!(grid(0, 0.0).window(), None);
+    }
+
+    #[test]
+    fn new_columns_keep_the_first_game_shown_at_the_top_and_focus_in_view() {
+        // Five columns became three (a narrower window): game 500 was
+        // first shown, at row 100; it's on row 166 now.
+        let narrow = Frame {
+            width: 560.0,
+            ..grid(10_000, 312.0 * 100.0)
+        };
+        assert_eq!(narrow.columns(), 3);
+        assert_eq!(narrow.anchored_top(500, None), 312.0 * 166.0);
+        // A focused game on screen from there changes nothing.
+        assert_eq!(narrow.anchored_top(500, Some(503)), 312.0 * 166.0);
+        // One that would be below the screen comes to the top instead.
+        assert_eq!(narrow.anchored_top(500, Some(512)), 312.0 * 170.0);
+        // And one above it.
+        assert_eq!(narrow.anchored_top(500, Some(10)), 312.0 * 3.0);
     }
 
     #[test]

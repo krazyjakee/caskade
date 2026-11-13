@@ -68,6 +68,8 @@ pub struct Input {
     /// event for a scroll made from code, so views that follow scrolling
     /// (a long list's window) read this too.
     scrolled: Signal<u64>,
+    /// Bumped once the window's new size or scale is laid out (#146).
+    resized: Signal<u64>,
 }
 
 /// What opening a game's details does.
@@ -142,6 +144,7 @@ impl Input {
             changed: Signal::new(0),
             keyboard: Signal::new(None),
             scrolled: Signal::new(0),
+            resized: Signal::new(0),
         }
     }
 
@@ -321,6 +324,15 @@ impl Input {
         *self.scrolled.read()
     }
 
+    /// Changes each time the window's new size or scale has been laid out
+    /// (#146): views that size themselves from their boxes (the library's
+    /// columns, a shelf's cards) measure again then. Not at the resize
+    /// itself: until the renderer lays the window out, boxes are the old
+    /// size.
+    pub fn resized(&self) -> u64 {
+        *self.resized.read()
+    }
+
     pub fn bindings(&self) -> Rc<RefCell<Bindings<NodeId>>> {
         self.inner.dispatcher.borrow().bindings()
     }
@@ -370,12 +382,27 @@ impl Input {
 
     /// Whether the document changed since it was last styled and laid out:
     /// boxes read now are the old ones.
-    fn stale(&self) -> bool {
+    pub(crate) fn stale(&self) -> bool {
         self.read(|doc| {
             let root = doc.root_element();
             root.has_dirty_descendants() || root.has_damaged_descendants()
         })
         .unwrap_or(false)
+    }
+
+    /// Whether the document is laid out at the window's size: the root
+    /// element is the window's CSS size (`html` is `height: 100%`). No
+    /// document yet reads as laid out.
+    fn laid_out_to_window(&self) -> bool {
+        self.read(|doc| {
+            let viewport = doc.viewport();
+            let scale = viewport.scale_f64();
+            let (width, height) = viewport.window_size;
+            let size = doc.root_element().final_layout().size;
+            (f64::from(size.width) - f64::from(width) / scale).abs() < 1.0
+                && (f64::from(size.height) - f64::from(height) / scale).abs() < 1.0
+        })
+        .unwrap_or(true)
     }
 
     /// Runs `work` with the document borrowed.
@@ -456,6 +483,7 @@ impl Input {
                 actions: 0,
                 repeats: 0,
                 handled: 0,
+                grid: None,
                 focus_debug: format!(
                     "pending={}, waiting={}, frames={}, stale={}, entered={:?}, default={:?}, scope={:?}, entry={:?}, focused_box={:?}, left={:?}",
                     dispatcher.pending(),
@@ -476,6 +504,9 @@ impl Input {
             }
         });
         let mut probe = read.unwrap_or_default();
+        probe.grid = self
+            .read(|doc| crate::library::probe_grid(doc, doc.root_element().id))
+            .flatten();
         probe.keyboard = self.inner.keys.get();
         probe.pointer = self.inner.pointers.get();
         probe.actions = self.inner.pad_actions.get();
@@ -819,6 +850,7 @@ pub fn InputRoot(
         }
         input
     });
+    use_resized(&input);
     if input.inner.dispatcher.borrow().console != console {
         input.set_console(console);
     }
@@ -886,6 +918,44 @@ pub fn InputRoot(
             }
         }
     }
+}
+
+/// Bumps [`Input::resized`] after the window resizes or changes scale, once
+/// the new size is laid out: a frame or a few later, and at most once per
+/// wait however many resize events a drag sends meanwhile. Nothing runs
+/// between resizes.
+fn use_resized(input: &Input) {
+    let waiting = use_hook(|| Rc::new(Cell::new(false)));
+    // Without a window (headless tests) there are no window events; that
+    // stays so for the document's life, so the hook is always or never
+    // called.
+    if try_consume_context::<std::sync::Arc<dyn dioxus_native::winit::window::Window>>().is_none() {
+        return;
+    }
+    let input = input.clone();
+    dioxus_native::use_window_event(move |event, _| {
+        use dioxus_native::winit::event::WindowEvent;
+        if !matches!(
+            event,
+            WindowEvent::SurfaceResized(_) | WindowEvent::ScaleFactorChanged { .. }
+        ) || waiting.replace(true)
+        {
+            return;
+        }
+        let input = input.clone();
+        let waiting = waiting.clone();
+        spawn(async move {
+            for _ in 0..MAX_FRAMES {
+                crate::data::sleep(FRAME).await;
+                if input.laid_out_to_window() {
+                    break;
+                }
+            }
+            waiting.set(false);
+            let mut resized = input.resized;
+            resized += 1;
+        });
+    });
 }
 
 /// Text the user edits, which a paste belongs to: a field, a select, an

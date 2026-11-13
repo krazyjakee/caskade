@@ -4,6 +4,7 @@ mod anatomy;
 mod art;
 pub mod bench;
 mod grid;
+pub(crate) use grid::{GridProbe, probe as probe_grid};
 // The library view around the grid (#99).
 mod view;
 // Making and editing collections; the library saves its view as one (#99).

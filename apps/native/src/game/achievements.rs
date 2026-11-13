@@ -581,7 +581,8 @@ fn Row(
 }
 
 /// The game page moved (a wheel turned over it): rows waiting to come near
-/// the screen look again. The input layer's own scrolls say so too.
+/// the screen look again. The input layer's own scrolls and a resized
+/// window say so too.
 #[derive(Clone, Copy)]
 pub struct PageMoved(pub Signal<u64>);
 
@@ -594,6 +595,7 @@ fn use_near() -> (Signal<bool>, Signal<Option<NodeHandle>>) {
     let row = use_signal(|| None::<NodeHandle>);
     use_effect(move || {
         let _ = input.scrolled();
+        let _ = input.resized();
         if let Some(moved) = moved {
             let _ = (moved.0)();
         }

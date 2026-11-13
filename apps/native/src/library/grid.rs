@@ -98,8 +98,10 @@ pub fn VirtualLibrary(
     let mut total = use_signal(|| None::<usize>);
     let mut scroller = use_signal(|| None::<NodeHandle>);
     let mut focused = use_signal(|| None::<usize>);
-    // Bumped by scroll events and window resizes.
+    // Bumped by scroll events, and to look again a frame later.
     let mut moved = use_signal(|| 0u64);
+    // The columns and the first game shown, as last rendered.
+    let shown: Rc<std::cell::Cell<Option<(usize, usize)>>> = use_hook(Rc::default);
     // A game to focus once its card is mounted.
     let pending_focus: Rc<RefCell<Option<usize>>> = use_hook(Rc::default);
     // Renders spent waiting for it to mount.
@@ -132,8 +134,10 @@ pub fn VirtualLibrary(
 
     // The scroller's size and offset, as last laid out. Programmatic
     // scrolls (the input layer's, this grid's) subscribe through
-    // `scrolled`; the others through `moved`.
+    // `scrolled`, a resized window through `resized` (once laid out: #146);
+    // the others through `moved`.
     let _ = input.scrolled();
+    let _ = input.resized();
     let _ = moved();
     let _ = loaded();
     let (width, height, scroll_top) = scroller
@@ -186,6 +190,47 @@ pub fn VirtualLibrary(
         scroll_top,
     };
     let focus = focused();
+
+    // The columns changed (the window resized, #146): every row holds
+    // other games now. The game first shown stays at the top, or the
+    // focused one in view, once the new rows are laid out; focus inside
+    // comes back to its card (its row mounts anew).
+    let now = (frame.columns(), frame.first_shown());
+    let before = shown.replace((width > 0.0).then_some(now));
+    if let Some((_, first)) = before.filter(|&(columns, _)| columns != now.0 && width > 0.0) {
+        let focus_inside = scroller.peek().as_ref().is_some_and(|handle| {
+            let doc = handle.doc();
+            let mut at = doc.get_focussed_node_id();
+            while let Some(node) = at {
+                if node == handle.node_id() {
+                    return true;
+                }
+                at = doc.get_node(node).and_then(|node| node.parent);
+            }
+            false
+        });
+        let pending_focus = pending_focus.clone();
+        let input = input.clone();
+        spawn(async move {
+            for _ in 0..30 {
+                crate::data::sleep(std::time::Duration::from_millis(16)).await;
+                if !input.stale() {
+                    break;
+                }
+            }
+            let Some(handle) = scroller.peek().clone() else {
+                return;
+            };
+            let Some(frame) = current_frame(&handle, layout, *total.peek()) else {
+                return;
+            };
+            scroll_to(&handle, frame.anchored_top(first, focus), &input);
+            if let Some(index) = focus.filter(|_| focus_inside) {
+                *pending_focus.borrow_mut() = Some(index);
+                moved += 1;
+            }
+        });
+    }
 
     // The pages the mounted rows need (the first one to learn the total);
     // the far ones are let go.
@@ -505,6 +550,70 @@ pub fn VirtualLibrary(
             }
         }
     }
+}
+
+/// The grid's shape as laid out, for the end-to-end harness (#146): `None`
+/// without a library grid in the document.
+pub(crate) fn probe(doc: &blitz_dom::BaseDocument, from: blitz_dom::NodeId) -> Option<GridProbe> {
+    use crate::input::find_attr;
+    let grid = find_attr(doc, from, "data-cs", "virtual-library")?;
+    let node = doc.get_node(grid)?;
+    let layout = Layout::parse(node.attr(blitz_dom::LocalName::from("data-layout"))?);
+    let rect = doc.get_client_bounding_rect(grid)?;
+    let holder = find_attr(doc, grid, "data-part", "rows")?;
+    let content = doc.get_client_bounding_rect(holder)?.height;
+    let rows: Vec<_> = doc
+        .get_node(holder)?
+        .children
+        .iter()
+        .copied()
+        .filter(|&row| {
+            doc.get_node(row)
+                .and_then(|row| row.attr(blitz_dom::LocalName::from("data-part")))
+                == Some("virtual-row")
+        })
+        .collect();
+    let cards = |row| doc.get_node(row).map_or(&[][..], |node| &node.children[..]);
+    let narrowest = rows
+        .iter()
+        .flat_map(|&row| cards(row).iter())
+        .filter_map(|&card| doc.get_client_bounding_rect(card))
+        .map(|card| card.width)
+        .fold(f64::INFINITY, f64::min);
+    let mut frame = Frame {
+        layout,
+        total: 0,
+        width: rect.width,
+        height: rect.height,
+        scroll_top: node.scroll_offset().y,
+    };
+    // The total, from the rows' height: whole rows of the fitting columns.
+    frame.total = (content / layout.row_height()).round() as usize * frame.columns();
+    Some(GridProbe {
+        width: rect.width,
+        height: rect.height,
+        columns: rows.first().map_or(0, |&row| cards(row).len()),
+        fitting_columns: frame.columns(),
+        narrowest,
+        rows: rows.len(),
+        fitting_rows: frame.window().map_or(0, |window| window.count()),
+    })
+}
+
+/// What [`probe`] reads.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct GridProbe {
+    /// The scroller's size.
+    pub width: f64,
+    pub height: f64,
+    /// Cards in the first mounted row, and the columns its width fits.
+    pub columns: usize,
+    pub fitting_columns: usize,
+    /// The narrowest mounted card.
+    pub narrowest: f64,
+    /// Rows mounted, and the rows its height shows with the overscan.
+    pub rows: usize,
+    pub fitting_rows: usize,
 }
 
 /// The frame as last laid out, outside a render.

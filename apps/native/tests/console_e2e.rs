@@ -77,6 +77,48 @@ fn a_scripted_pad_drives_the_native_app_with_no_key_or_pointer_event() {
     run(&desktop, temp.path(), SCRIPT, &[], &[]);
 }
 
+/// #146: the library's grid follows its window as it resizes, without a
+/// scroll or a page change: as many columns as its width fits (cards no
+/// narrower than the minimum) and the rows its height shows mounted, as a
+/// window manager's resize changes them.
+const RESIZE_SCRIPT: &str = "\
+# Fixtures mode opens on Home: the sidebar's Library.
+wait-text Welcome back
+seek-section nav.left sidebar
+seek nav.up Library
+press confirm
+wait-text All Games
+# Its All Games: more games than any row holds.
+seek-section nav.left sidebar
+seek nav.down All Games
+press confirm
+resize 1440x1000
+grid-fits 6
+resize 1000x1000
+grid-fits 3
+resize 1000x600
+grid-fits 3
+resize 1800x1000
+grid-fits 7
+";
+
+#[test]
+#[ignore = "drives the built app on a private Xvfb display and bus: run with -- --ignored"]
+fn the_library_grid_follows_its_window_as_it_resizes() {
+    let desktop = PrivateDesktop::start();
+    let temp = tempfile::tempdir().unwrap();
+    run(
+        &desktop,
+        temp.path(),
+        RESIZE_SCRIPT,
+        &[],
+        &[
+            ("CASKADE_FIXTURES", OsStr::new("1")),
+            ("CASKADE_FIXTURE_COUNT", OsStr::new("100")),
+        ],
+    );
+}
+
 /// A profile under `home`, as `directories` puts Caskade's folders on
 /// Linux with the run's XDG variables.
 fn paths(home: &Path) -> AppPaths {
@@ -241,7 +283,7 @@ press back
 wait-text Welcome back
 seek-section nav.left sidebar
 seek nav.up Home
-seek nav.down Library
+seek nav.up Library
 press confirm
 wait-text Save as collection
 # The Library's filters are under its link in the sidebar.

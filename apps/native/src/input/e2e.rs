@@ -22,6 +22,11 @@
 //! - `wait-event <event>`: `game-started`, `game-exited` or
 //!   `settings-changed` happens, or the window is in console mode
 //!   (`console-on`) or out of it (`console-off`, #107).
+//! - `resize <width>x<height>`: asks the window for that size (logical
+//!   pixels), as a window manager would resize it.
+//! - `grid-fits <columns>`: the library's grid shows `<columns>` cards a
+//!   row, which is what its width fits, with cards no narrower than the
+//!   grid's minimum, and the rows its height shows mounted (#146).
 //! - `sleep <ms>`.
 
 use caskade_app::events::Event as AppEvent;
@@ -80,6 +85,8 @@ pub struct Probe {
     pub handled: u64,
     /// Focus placement state, included in a failed wait's diagnostics.
     pub focus_debug: String,
+    /// The library's grid, when one is shown (#146).
+    pub grid: Option<crate::library::GridProbe>,
 }
 
 type Asks = async_mpsc::UnboundedReceiver<mpsc::Sender<Probe>>;
@@ -183,8 +190,8 @@ impl Driver {
             if Instant::now() > deadline {
                 let page: String = self.last.text.chars().take(400).collect();
                 return Err(format!(
-                    "timed out waiting for {what}; focus is on {:?}; {}; the window reads {page:?}",
-                    self.last.focused, self.last.focus_debug
+                    "timed out waiting for {what}; focus is on {:?}; {}; grid {:?}; the window reads {page:?}",
+                    self.last.focused, self.last.focus_debug, self.last.grid
                 ));
             }
             std::thread::sleep(Duration::from_millis(200));
@@ -294,6 +301,29 @@ impl Driver {
                         Err(_) => std::thread::sleep(Duration::from_millis(50)),
                     }
                 }
+            }
+            "resize" => {
+                let (width, height) = rest
+                    .split_once('x')
+                    .and_then(|(w, h)| Some((w.parse::<f64>().ok()?, h.parse::<f64>().ok()?)))
+                    .ok_or("resize <width>x<height>")?;
+                let window = crate::shell::main_window().ok_or("no main window")?;
+                let _ = window.request_surface_size(
+                    dioxus_native::winit::dpi::LogicalSize::new(width, height).into(),
+                );
+                Ok(())
+            }
+            "grid-fits" => {
+                let columns: usize = rest.parse().map_err(|_| "grid-fits <columns>")?;
+                self.until(&format!("a grid of {columns} columns that fits"), |probe| {
+                    probe.grid.as_ref().is_some_and(|grid| {
+                        grid.columns == columns
+                            && grid.fitting_columns == columns
+                            && grid.narrowest >= crate::library::MIN_CARD - 0.5
+                            // The focused game's row may be mounted besides.
+                            && (grid.fitting_rows..=grid.fitting_rows + 1).contains(&grid.rows)
+                    })
+                })
             }
             "sleep" => {
                 let ms: u64 = rest.parse().map_err(|_| "sleep <ms>")?;
