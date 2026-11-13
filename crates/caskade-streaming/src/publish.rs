@@ -219,8 +219,11 @@ pub trait Target: Send + Sync {
     /// Whether the host answers now.
     fn ready(&self) -> bool;
     async fn api(&self) -> Result<HostApi>;
+    /// Drops the client `api` keeps, after a call through it failed: the
+    /// host may have new credentials or a new certificate.
+    fn forget_api(&self) {}
     /// The host runs in a Flatpak sandbox: commands leave it.
-    fn flatpak(&self) -> bool;
+    async fn flatpak(&self) -> bool;
 }
 
 #[async_trait::async_trait]
@@ -233,8 +236,12 @@ impl Target for StreamingHost {
         StreamingHost::api(self).await
     }
 
-    fn flatpak(&self) -> bool {
-        self.host_is_flatpak()
+    fn forget_api(&self) {
+        StreamingHost::forget_api(self);
+    }
+
+    async fn flatpak(&self) -> bool {
+        self.host_is_flatpak().await
     }
 }
 
@@ -296,10 +303,10 @@ impl Publisher {
         *caskade_core::lock(&self.inner.batches)
     }
 
-    fn caskade(&self) -> Caskade {
+    async fn caskade(&self) -> Caskade {
         Caskade {
             program: self.inner.program.clone(),
-            flatpak_host: self.inner.target.flatpak(),
+            flatpak_host: self.inner.target.flatpak().await,
         }
     }
 
@@ -375,7 +382,9 @@ impl Publisher {
         }
         let offers = self.offers().await?;
         let api = self.inner.target.api().await?;
-        let published = sync(&api, &self.caskade(), &offers).await?;
+        let published = sync(&api, &self.caskade().await, &offers)
+            .await
+            .inspect_err(|_| self.inner.target.forget_api())?;
         *caskade_core::lock(&self.inner.batches) += 1;
         if published != Published::default() {
             tracing::info!(
@@ -390,7 +399,9 @@ impl Publisher {
     /// Removes Caskade's apps from the host (hosting off).
     pub async fn withdraw(&self) -> Result<usize> {
         let api = self.inner.target.api().await?;
-        withdraw(&api, &self.caskade()).await
+        withdraw(&api, &self.caskade().await)
+            .await
+            .inspect_err(|_| self.inner.target.forget_api())
     }
 
     /// Publishes a moment after the library or the active account changes,

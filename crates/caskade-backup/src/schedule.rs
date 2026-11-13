@@ -58,6 +58,17 @@ pub struct BackupSettings {
     pub keep_on_device: Option<String>,
 }
 
+impl BackupSettings {
+    /// The backup folder these settings choose, `default` when they name none.
+    pub(crate) fn destination_or(self, default: PathBuf) -> PathBuf {
+        if self.destination.trim().is_empty() {
+            default
+        } else {
+            PathBuf::from(self.destination)
+        }
+    }
+}
+
 impl Default for BackupSettings {
     fn default() -> Self {
         Self {
@@ -216,12 +227,9 @@ impl Backups {
 
     /// The backup folder the settings choose.
     pub async fn destination(&self) -> PathBuf {
-        let settings = self.settings().await;
-        if settings.destination.trim().is_empty() {
-            self.default_destination()
-        } else {
-            PathBuf::from(settings.destination)
-        }
+        self.settings()
+            .await
+            .destination_or(self.default_destination())
     }
 
     /// What Settings → Backup shows.
@@ -285,6 +293,8 @@ impl Backups {
         self.publish().await;
         let progress: ProgressFn = Arc::new({
             let this = self.clone();
+            // Only the job changes while it runs: the rest is read once.
+            let shown = self.changes.borrow().clone();
             let last = Arc::new(std::sync::Mutex::new((std::time::Instant::now(), None)));
             move |progress: Progress| {
                 let mut last = caskade_core::lock(&last);
@@ -295,12 +305,15 @@ impl Backups {
                     return;
                 }
                 *last = (now, Some(progress.phase));
-                if let Some(job) = caskade_core::lock(&this.job).as_mut() {
+                let running = caskade_core::lock(&this.job).as_mut().map(|job| {
                     job.1.progress = Some(progress);
-                }
-                let this = this.clone();
-                if let Ok(runtime) = tokio::runtime::Handle::try_current() {
-                    runtime.spawn(async move { this.publish().await });
+                    job.1.clone()
+                });
+                if let Some(shown) = &shown {
+                    this.changes.send_replace(Some(BackupStatus {
+                        running,
+                        ..shown.clone()
+                    }));
                 }
             }
         });
@@ -410,16 +423,16 @@ impl Backups {
 
     /// [`Backups::inspect`], shown as a job.
     pub async fn inspect_job(&self, archive: &Path) -> Result<Inspection, BackupError> {
-        self.job(BackupJobKind::Inspect, |progress, cancel| async move {
-            restore::inspect(&self.paths, archive, &cancel, &progress).await
+        self.job(BackupJobKind::Inspect, |progress, cancel| {
+            self.inspect(archive, progress, cancel)
         })
         .await
     }
 
     /// [`Backups::stage_restore`], shown as a job.
     pub async fn restore_job(&self, options: RestoreOptions) -> Result<Journal, BackupError> {
-        self.job(BackupJobKind::Restore, |progress, cancel| async move {
-            restore::stage(&self.paths, &options, &cancel, &progress).await
+        self.job(BackupJobKind::Restore, |progress, cancel| {
+            self.stage_restore(options, progress, cancel)
         })
         .await
     }

@@ -388,28 +388,13 @@ impl Shares {
                 )
             }
         };
-        let now = caskade_core::now_ms();
-        let row = ShareRow {
-            id: caskade_core::model::new_id(),
-            kind: kind.into(),
+        self.start(ShareRow {
             game_id,
             entry_id,
-            title,
-            size: i64::try_from(size).unwrap_or(i64::MAX),
-            root: None,
-            extras_root: None,
-            grant: caskade_sync::Grant::generate().to_hex(),
-            created_at_ms: now,
-            expires_at_ms: expiry.duration().map(|until| {
-                now.saturating_add(i64::try_from(until.as_millis()).unwrap_or(i64::MAX))
-            }),
-            stopped_at_ms: None,
             details_json: serde_json::to_string(&details)?,
-        };
-        store.insert_share(&row).await?;
-        self.run(row.clone());
-        self.changed();
-        self.record(row).await
+            ..super::new_row(kind, title, i64::try_from(size).unwrap_or(i64::MAX), expiry)
+        })
+        .await
     }
 
     /// `game_id`'s web release with its offline copy, and the copy's folder.

@@ -6,6 +6,7 @@
 //! - [`Catalog`] is one language's translations: lookups by context, plural
 //!   forms from the `Plural-Forms` header, fuzzy and empty entries left out
 //!   so their English shows.
+//! - [`catalogs`] reads the catalogs a theme or plugin ships.
 //! - [`Translations`] is a domain's bundled catalogs and its active
 //!   language, switched at run time from any thread.
 //! - [`locale`] normalizes BCP 47 and POSIX tags, reads the OS's languages
@@ -26,6 +27,7 @@
 //! `caskade_core::i18n`.
 
 pub mod catalog;
+pub mod catalogs;
 #[cfg(feature = "extract")]
 pub mod extract;
 pub mod format;
@@ -57,6 +59,11 @@ pub mod bundled {
 pub fn lint(text: &str) -> Result<Vec<String>, CatalogError> {
     let po = po::Po::parse(text).map_err(CatalogError::Parse)?;
     let forms = po.plural_forms().map_err(CatalogError::Plural)?;
+    Ok(lint_po(&po, &forms))
+}
+
+/// [`lint`] on a parsed catalog and its plural forms.
+pub fn lint_po(po: &po::Po, forms: &plural::PluralForms) -> Vec<String> {
     let mut problems = Vec::new();
     for message in &po.messages {
         if message.is_fuzzy() {
@@ -90,7 +97,7 @@ pub fn lint(text: &str) -> Result<Vec<String>, CatalogError> {
             }
         }
     }
-    Ok(problems)
+    problems
 }
 
 #[cfg(test)]

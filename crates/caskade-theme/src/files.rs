@@ -25,12 +25,8 @@ impl DirFiles {
         Self { root: root.into() }
     }
 
-    pub fn root(&self) -> &Path {
-        &self.root
-    }
-
     /// The file `path` names, if it is a plain file inside the folder.
-    pub fn locate(&self, path: &str) -> Option<PathBuf> {
+    fn locate(&self, path: &str) -> Option<PathBuf> {
         let mut file = self.root.clone();
         for segment in path.split('/') {
             let part = Path::new(segment);

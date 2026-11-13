@@ -153,15 +153,6 @@ pub fn detect(probe: &Probe<'_>) -> Option<Existing> {
 
 /// This system's probe.
 pub fn detect_here() -> Option<Existing> {
-    let runs = |program: &str, args: &[&str]| {
-        caskade_core::quiet::command(program)
-            .args(args)
-            .stdin(std::process::Stdio::null())
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .status()
-            .is_ok_and(|status| status.success())
-    };
     let os = caskade_core::emulation::host_os();
     let root = match os {
         OperatingSystem::Windows => PathBuf::from(r"C:\"),
@@ -174,7 +165,7 @@ pub fn detect_here() -> Option<Existing> {
             .or_else(|| std::env::var_os("USERPROFILE"))
             .map(PathBuf::from)
             .unwrap_or_default(),
-        runs: &runs,
+        runs: &|program, args| crate::util::runs_quietly(program, args),
     })
 }
 

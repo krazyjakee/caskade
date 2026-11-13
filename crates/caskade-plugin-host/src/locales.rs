@@ -13,7 +13,11 @@ use crate::{
     manifest::{Manifest, ManifestError},
     read, write,
 };
-use caskade_i18n::{Catalog, locale, plural::PluralForms, po::Po};
+use caskade_i18n::{
+    Catalog,
+    catalogs::{LocaleCatalogs, PO_MAX, TOO_LARGE},
+    locale,
+};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -25,8 +29,6 @@ use std::{
 
 /// The folder in a plugin that holds its catalogs.
 pub const LOCALES: &str = "locales";
-/// The largest catalog read.
-const PO_MAX: u64 = 1 << 20;
 /// The most catalogs read from one plugin.
 const CATALOGS_MAX: usize = 100;
 /// Counts the UI's plural table covers; see [`PluginMessages::plurals`].
@@ -54,19 +56,12 @@ impl Language {
     }
 }
 
-struct Loaded {
-    locale: String,
-    catalog: Catalog,
-    po: Po,
-    plurals: PluralForms,
-}
-
 /// A plugin's catalogs, read from its `locales/` folder.
 #[derive(Default)]
 pub struct PluginLocales {
     /// (file name, text) of each catalog read, to tell when they changed.
     sources: Vec<(String, String)>,
-    catalogs: Vec<Loaded>,
+    catalogs: LocaleCatalogs,
     problems: Vec<ManifestError>,
 }
 
@@ -79,10 +74,7 @@ impl PartialEq for PluginLocales {
 impl std::fmt::Debug for PluginLocales {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("PluginLocales")
-            .field(
-                "locales",
-                &self.catalogs.iter().map(|c| &c.locale).collect::<Vec<_>>(),
-            )
+            .field("locales", &self.catalogs.available())
             .field("problems", &self.problems)
             .finish()
     }
@@ -117,10 +109,8 @@ impl PluginLocales {
                 locales.problems.push(problem(&name, "is not a plain file"));
                 continue;
             }
-            if size > PO_MAX {
-                locales
-                    .problems
-                    .push(problem(&name, "is larger than 1 MiB"));
+            if size > PO_MAX as u64 {
+                locales.problems.push(problem(&name, TOO_LARGE));
                 continue;
             }
             match std::fs::read_to_string(entry.path()) {
@@ -133,41 +123,13 @@ impl PluginLocales {
 
     /// Adds one catalog, `name` being its file name (`sv.po`).
     fn add(&mut self, name: &str, text: String) {
-        let stem = name.strip_suffix(".po").unwrap_or(name);
-        let Some(tag) = locale::normalize(stem) else {
-            self.problems.push(problem(
-                name,
-                "is not named after a language: use its BCP 47 tag, like sv.po or pt-BR.po",
-            ));
-            return;
-        };
-        let loaded = Po::parse(&text)
-            .map_err(|error| error.to_string())
-            .and_then(|po| {
-                let plurals = po.plural_forms().map_err(|e| e.to_string())?;
-                let catalog = Catalog::from_po(&po).map_err(|e| e.to_string())?;
-                Ok((po, plurals, catalog))
-            });
-        match loaded {
-            Ok((po, plurals, catalog)) => {
-                // Readable, but some translations would show wrong text.
-                if let Ok(found) = caskade_i18n::lint(&text) {
-                    self.problems
-                        .extend(found.into_iter().map(|found| problem(name, found)));
-                }
-                self.catalogs.push(Loaded {
-                    locale: tag,
-                    catalog,
-                    po,
-                    plurals,
-                });
-            }
+        match self.catalogs.add(name, &text) {
+            Ok(found) => self
+                .problems
+                .extend(found.into_iter().map(|found| problem(name, found))),
             Err(error) => {
                 tracing::warn!(file = name, %error, "a plugin's translation catalog couldn't be read");
-                self.problems.push(problem(
-                    name,
-                    format!("can't be read, so its English shows: {error}"),
-                ));
+                self.problems.push(problem(name, error));
             }
         }
         self.sources.push((name.to_owned(), text));
@@ -179,30 +141,16 @@ impl PluginLocales {
         &self.problems
     }
 
-    /// The languages there are catalogs for.
-    pub fn available(&self) -> Vec<&str> {
-        self.catalogs.iter().map(|c| c.locale.as_str()).collect()
-    }
-
-    /// The catalog `locale` falls back to (`pt-BR`, then `pt`), if any.
-    fn catalog(&self, locale: &str) -> Option<&Loaded> {
-        let available = self.available();
-        let chosen = locale::negotiate([locale], &available)?;
-        self.catalogs.iter().find(|c| c.locale == chosen)
-    }
-
     /// `text` in `locale`, or `text` itself.
     pub fn text(&self, locale: &str, text: &str) -> String {
-        self.catalog(locale)
-            .and_then(|loaded| loaded.catalog.get(None, text))
-            .unwrap_or(text)
-            .to_owned()
+        self.catalogs.text(locale, text)
     }
 
     /// `text` in `context` and `locale`, or `text` itself (`host.message`,
     /// #109).
     pub fn message(&self, locale: &str, context: Option<&str>, text: &str) -> String {
-        self.catalog(locale)
+        self.catalogs
+            .get(locale)
             .and_then(|loaded| loaded.catalog.get(context, text))
             .unwrap_or(text)
             .to_owned()
@@ -218,7 +166,8 @@ impl PluginLocales {
         other: &str,
         count: u64,
     ) -> String {
-        self.catalog(locale)
+        self.catalogs
+            .get(locale)
             .and_then(|loaded| loaded.catalog.get_plural(context, one, count))
             .unwrap_or(if count == 1 { one } else { other })
             .to_owned()
@@ -228,7 +177,7 @@ impl PluginLocales {
     /// view and command titles and the settings schema's titles and
     /// descriptions. Only for showing; ids and everything else stay.
     pub fn translate_manifest(&self, locale: &str, manifest: &mut Manifest) {
-        let Some(loaded) = self.catalog(locale) else {
+        let Some(loaded) = self.catalogs.get(locale) else {
             return;
         };
         let catalog = &loaded.catalog;
@@ -260,7 +209,7 @@ impl PluginLocales {
 
     /// A settings schema's titles and descriptions in `locale`.
     pub fn translate_schema(&self, locale: &str, schema: &mut Value) {
-        if let Some(loaded) = self.catalog(locale) {
+        if let Some(loaded) = self.catalogs.get(locale) {
             translate_schema(&loaded.catalog, schema);
         }
     }
@@ -268,7 +217,7 @@ impl PluginLocales {
     /// The catalog for `locale`, for the plugin's UI half; English (no
     /// messages) when it has none.
     pub fn messages(&self, locale: &str) -> PluginMessages {
-        let Some(loaded) = self.catalog(locale) else {
+        let Some(loaded) = self.catalogs.get(locale) else {
             return PluginMessages {
                 locale: locale::SOURCE.to_owned(),
                 messages: Vec::new(),

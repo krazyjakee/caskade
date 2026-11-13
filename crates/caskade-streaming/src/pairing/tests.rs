@@ -255,7 +255,7 @@ fn moonlights_identity_and_hosts_round_trip_through_its_settings() {
         .lines()
         .find_map(|line| line.strip_prefix("2\\srvcert="))
         .unwrap();
-    assert_eq!(qt_bytes(srvcert).as_deref(), Some(SERVER_CERT));
+    assert_eq!(qt_text(srvcert).as_deref(), Some(SERVER_CERT));
     // Moonlight's own lines stay.
     assert!(again.contains("latestsupportedversion-v1=99.99.99.99"));
     assert_eq!(Identity::from_settings(&again), Some(identity()));

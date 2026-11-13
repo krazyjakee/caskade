@@ -67,6 +67,7 @@ pub mod share;
 pub mod swarm;
 #[cfg(feature = "test-utils")]
 pub mod testing;
+mod ticket;
 
 pub use device::{DeviceInfo, DeviceKind, DeviceOs};
 pub use endpoint::{

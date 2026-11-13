@@ -4,6 +4,7 @@
 //! `$CONFIGURATION_DIRECTORY/sunshine` (Caskade sets the variable), on
 //! Windows `config` beside the program.
 
+use crate::util::write_atomically;
 use caskade_core::Result;
 use std::path::{Path, PathBuf};
 
@@ -70,23 +71,6 @@ const WINDOWS: &str = "dd_configuration_option = ensure_active\n\
      dd_hdr_option = auto\n\
      gamepad_driver = vigembus\n";
 
-/// The device name as one line of `sunshine.conf`: printable, at most 64
-/// characters, and never empty.
-fn clean_name(name: &str) -> String {
-    let name: String = name
-        .chars()
-        .filter(|c| !c.is_control())
-        .take(64)
-        .collect::<String>()
-        .trim()
-        .to_owned();
-    if name.is_empty() {
-        "Caskade".to_owned()
-    } else {
-        name
-    }
-}
-
 /// `sunshine.conf`: no tray icon or notifications, the web API on this
 /// computer only, no UPnP (the stream stays on the local network) and no
 /// pre-release notices.
@@ -98,7 +82,7 @@ pub fn render(config: &HostConfig) -> String {
          origin_web_ui_allowed = pc\n\
          upnp = disabled\n\
          notify_pre_releases = disabled\n{}",
-        clean_name(&config.name),
+        crate::util::device_name(&config.name),
         if config.windows { WINDOWS } else { "" }
     )
 }
@@ -115,15 +99,6 @@ pub fn write(files: &HostFiles, config: &HostConfig) -> Result<()> {
     if !files.apps().exists() {
         write_atomically(&files.apps(), EMPTY_APPS.as_bytes())?;
     }
-    Ok(())
-}
-
-fn write_atomically(path: &Path, bytes: &[u8]) -> Result<()> {
-    let mut part = path.as_os_str().to_owned();
-    part.push(".part");
-    let part = PathBuf::from(part);
-    std::fs::write(&part, bytes)?;
-    std::fs::rename(&part, path)?;
     Ok(())
 }
 

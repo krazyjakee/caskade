@@ -6,17 +6,15 @@
 //! A catalog that can't be read is a problem `caskade-theme lint` reports,
 //! but the theme still applies, in English. No catalogs means English.
 use crate::{Files, Problem};
-use caskade_i18n::{Catalog, locale};
+use caskade_i18n::catalogs::{LocaleCatalogs, PO_MAX, TOO_LARGE};
 
 /// Where a theme keeps its catalogs.
 const FOLDER: &str = "locales/";
-/// The largest catalog read.
-const PO_MAX: usize = 1 << 20;
 
 /// A theme's catalogs by language.
 #[derive(Clone, Debug, Default)]
 pub struct Locales {
-    catalogs: Vec<(String, Catalog)>,
+    catalogs: LocaleCatalogs,
 }
 
 impl Locales {
@@ -29,41 +27,25 @@ impl Locales {
             let Some(name) = path.strip_prefix(FOLDER) else {
                 continue;
             };
-            let Some(stem) = name.strip_suffix(".po") else {
-                continue;
-            };
-            if stem.contains('/') {
+            if !name.ends_with(".po") || name.contains('/') {
                 continue;
             }
-            let Some(tag) = locale::normalize(stem) else {
-                problems.push(Problem::new(
-                    &path,
-                    "is not named after a language: use its BCP 47 tag, like sv.po or pt-BR.po",
-                ));
-                continue;
-            };
             let Some(bytes) = files.read(&path) else {
                 continue;
             };
             if bytes.len() > PO_MAX {
-                problems.push(Problem::new(&path, "is larger than 1 MiB"));
+                problems.push(Problem::new(&path, TOO_LARGE));
                 continue;
             }
             let Ok(text) = String::from_utf8(bytes) else {
                 problems.push(Problem::new(&path, "is not UTF-8"));
                 continue;
             };
-            match Catalog::parse(&text) {
-                Ok(catalog) => {
-                    if let Ok(found) = caskade_i18n::lint(&text) {
-                        problems.extend(found.into_iter().map(|found| Problem::new(&path, found)));
-                    }
-                    locales.catalogs.push((tag, catalog));
+            match locales.catalogs.add(name, &text) {
+                Ok(found) => {
+                    problems.extend(found.into_iter().map(|found| Problem::new(&path, found)))
                 }
-                Err(error) => problems.push(Problem::new(
-                    &path,
-                    format!("can't be read, so its English shows: {error}"),
-                )),
+                Err(problem) => problems.push(Problem::new(&path, problem)),
             }
         }
         (locales, problems)
@@ -71,16 +53,11 @@ impl Locales {
 
     /// The languages there are catalogs for.
     pub fn available(&self) -> Vec<&str> {
-        self.catalogs.iter().map(|(tag, _)| tag.as_str()).collect()
+        self.catalogs.available()
     }
 
     /// `text` in `locale` (falling back from `pt-BR` to `pt`), or `text`.
     pub fn text(&self, locale: &str, text: &str) -> String {
-        let available = self.available();
-        locale::negotiate([locale], &available)
-            .and_then(|chosen| self.catalogs.iter().find(|(tag, _)| tag == chosen))
-            .and_then(|(_, catalog)| catalog.get(None, text))
-            .unwrap_or(text)
-            .to_owned()
+        self.catalogs.text(locale, text)
     }
 }

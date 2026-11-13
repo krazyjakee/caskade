@@ -179,8 +179,9 @@ user: a missing folder or a full disk becomes the last outcome
 at most every 100 ms per phase), the last outcome, when the next automatic
 backup is due, the default folder, a staged restore and how the restore
 before this start ended (`set_last_restore`, from `restore::take_outcome`).
-`cancel()` stops the job. `inspect_job` and `restore_job` are inspect and
-stage as jobs.
+`cancel()` stops the job. `inspect_job` and `restore_job` are
+`Backups::inspect` and `Backups::stage_restore` as jobs, under a "Checking
+a backup" or "Restoring a backup" activity.
 
 In the app, `commands/backup.rs` forwards the status as `BackupChanged`
 and supervises `watch`. `backup_status` and `backup_plan` are reads; the
@@ -200,7 +201,7 @@ Restore and restart. `api/backup.ts` falls back to an in-memory fixture
 
 ## On another device (#243)
 
-`backup::peers::PeerBackups` (`net` feature) keeps backups on another of the
+`backup::peers::PeerBackups` keeps backups on another of the
 user's devices, so losing a drive doesn't lose the library, without a cloud.
 
 - **Sending.** `core.backups.keepOnDevice` names a paired device (Settings →

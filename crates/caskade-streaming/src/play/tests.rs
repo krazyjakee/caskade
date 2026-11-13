@@ -372,6 +372,6 @@ async fn an_asleep_host_is_woken_and_one_that_cant_be_says_so() {
     let (read, _) = listener.recv_from(&mut packet).await.unwrap();
     assert_eq!(
         packet[..read],
-        gamestream::magic_packet([0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc])
+        caskade_core::remote_play::magic_packet([0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc])
     );
 }

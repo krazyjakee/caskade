@@ -11,17 +11,16 @@
 //! A link is a credential: only [`ShareLink::to_url`] writes it out.
 //! Neither `Debug` nor anything else prints the grant.
 
-use std::collections::BTreeSet;
 use std::fmt;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use iroh::{EndpointAddr, EndpointId, TransportAddr};
+use iroh::{EndpointAddr, EndpointId};
 use iroh_tickets::{ParseError, Ticket};
-use serde::{Deserialize, Serialize};
 
 use crate::error::Error;
 use crate::grant::Grant;
+use crate::ticket::{self, LinkTicket};
 
 /// The URL a share link is sent as.
 pub const SHARE_PREFIX: &str = "caskade://receive?t=";
@@ -32,56 +31,43 @@ const MAX_LINK: usize = 4096;
 /// A share link: where the sharer is, the share's grant, and when the link
 /// expires (`None`: until the sharer stops sharing).
 #[derive(Clone, PartialEq, Eq)]
-pub struct ShareLink {
-    addr: EndpointAddr,
-    grant: Grant,
-    /// Seconds since the Unix epoch.
-    expires_at: Option<u64>,
-}
+pub struct ShareLink(LinkTicket<Option<u64>>);
 
 impl ShareLink {
     /// A link to `addr` opening with `grant`, expiring at `expires_at`.
     pub fn new(addr: EndpointAddr, grant: Grant, expires_at: Option<SystemTime>) -> Self {
-        Self {
+        Self(LinkTicket {
             addr,
             grant,
             expires_at: expires_at.map(|at| {
                 at.duration_since(UNIX_EPOCH)
                     .map_or(0, |since| since.as_secs())
             }),
-        }
+        })
     }
 
     pub fn addr(&self) -> &EndpointAddr {
-        &self.addr
+        &self.0.addr
     }
 
     pub fn peer(&self) -> EndpointId {
-        self.addr.id
+        self.0.addr.id
     }
 
     pub fn grant(&self) -> Grant {
-        self.grant
+        self.0.grant
     }
 
     /// When the link stops working; `None` until the sharer stops it.
     pub fn expires_at(&self) -> Option<SystemTime> {
-        self.expires_at
+        self.0
+            .expires_at
             .map(|at| UNIX_EPOCH + Duration::from_secs(at))
     }
 
     /// Whether the link says it has expired by `now`.
     pub fn expired(&self, now: SystemTime) -> bool {
         self.expires_at().is_some_and(|at| now >= at)
-    }
-
-    /// Whether the link can reach the sharer through a relay, besides its
-    /// direct addresses (game files never take that path).
-    pub fn has_relay(&self) -> bool {
-        self.addr
-            .addrs
-            .iter()
-            .any(|addr| matches!(addr, TransportAddr::Relay(_)))
     }
 
     /// The `caskade://receive?t=…` URL.
@@ -93,67 +79,25 @@ impl ShareLink {
     /// whitespace and case don't matter). [`Error::NotALink`] otherwise,
     /// with nothing quoted: the text is a credential.
     pub fn parse(text: &str) -> Result<Self, Error> {
-        let text = text.trim();
-        if text.len() > MAX_LINK {
-            return Err(Error::NotALink);
-        }
-        let ticket = strip_prefix_ignore_case(text, SHARE_PREFIX).unwrap_or(text);
-        let ticket = ticket.split(['&', '#']).next().unwrap_or_default();
-        Self::decode_string(&ticket.to_ascii_lowercase()).map_err(|_| Error::NotALink)
+        ticket::parse(text, SHARE_PREFIX, MAX_LINK)
     }
-}
-
-fn strip_prefix_ignore_case<'a>(text: &'a str, prefix: &str) -> Option<&'a str> {
-    let head = text.get(..prefix.len())?;
-    head.eq_ignore_ascii_case(prefix)
-        .then(|| &text[prefix.len()..])
-}
-
-#[derive(Serialize, Deserialize)]
-enum Wire {
-    V1 {
-        id: EndpointId,
-        addrs: BTreeSet<TransportAddr>,
-        grant: [u8; 32],
-        expires_at: Option<u64>,
-    },
 }
 
 impl Ticket for ShareLink {
     const KIND: &'static str = "caskadeshare";
 
     fn encode_bytes(&self) -> Vec<u8> {
-        postcard::to_stdvec(&Wire::V1 {
-            id: self.addr.id,
-            addrs: self.addr.addrs.clone(),
-            grant: *self.grant.as_bytes(),
-            expires_at: self.expires_at,
-        })
-        .expect("a share link serializes")
+        self.0.encode()
     }
 
     fn decode_bytes(bytes: &[u8]) -> Result<Self, ParseError> {
-        let Wire::V1 {
-            id,
-            addrs,
-            grant,
-            expires_at,
-        } = postcard::from_bytes(bytes)?;
-        Ok(Self {
-            addr: EndpointAddr { id, addrs },
-            grant: Grant::from_bytes(grant),
-            expires_at,
-        })
+        LinkTicket::decode(bytes).map(Self)
     }
 }
 
 impl fmt::Debug for ShareLink {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("ShareLink")
-            .field("peer", &self.addr.id)
-            .field("addrs", &self.addr.addrs.len())
-            .field("expires_at", &self.expires_at)
-            .finish_non_exhaustive()
+        self.0.debug(f, "ShareLink")
     }
 }
 
@@ -168,6 +112,8 @@ impl FromStr for ShareLink {
 #[cfg(test)]
 mod tests {
     use std::net::SocketAddr;
+
+    use iroh::TransportAddr;
 
     use super::*;
 
@@ -193,15 +139,23 @@ mod tests {
             let ticket = url.strip_prefix(SHARE_PREFIX).unwrap();
             assert_eq!(ShareLink::parse(&format!("  {ticket}\n")).unwrap(), link);
             assert_eq!(ShareLink::parse(&url.to_uppercase()).unwrap(), link);
-            assert!(link.has_relay());
         }
     }
 
     #[test]
     fn other_text_and_pairing_links_are_not_share_links() {
         let long = format!("{}{}", link(None).to_url(), "a".repeat(MAX_LINK));
-        for text in ["", "hello", "caskade://receive?t=", "caskade://receive?t=caskadesharezz", &long] {
-            assert!(matches!(ShareLink::parse(text), Err(Error::NotALink)), "{text}");
+        for text in [
+            "",
+            "hello",
+            "caskade://receive?t=",
+            "caskade://receive?t=caskadesharezz",
+            &long,
+        ] {
+            assert!(
+                matches!(ShareLink::parse(text), Err(Error::NotALink)),
+                "{text}"
+            );
         }
         let pairing = crate::PairingLink::new(
             link(None).addr().clone(),

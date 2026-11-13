@@ -4,8 +4,8 @@
 //! backups.
 
 use caskade_core::{
-    Error, Result,
-    romm::secrets::{MemorySecrets, SecretStore},
+    Result,
+    secrets::{Keychain, MemorySecrets, SecretStore},
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -54,7 +54,7 @@ impl HostSecrets {
     /// The OS keychain, under [`KEYCHAIN_SERVICE`].
     pub fn keychain() -> Self {
         Self {
-            store: Arc::new(Keychain),
+            store: Arc::new(Keychain::new(KEYCHAIN_SERVICE)),
         }
     }
 
@@ -99,59 +99,5 @@ impl HostSecrets {
         self.store
             .set(EXISTING, &serde_json::to_string(credentials)?)
             .await
-    }
-}
-
-/// The OS keychain, on a blocking thread (the platform APIs may wait on
-/// D-Bus or a system prompt).
-struct Keychain;
-
-fn keychain(error: keyring::Error) -> Error {
-    Error::Invalid(caskade_core::tr!("system keychain: {error}", error = error))
-}
-
-async fn on_thread<T: Send + 'static>(
-    work: impl FnOnce() -> Result<T> + Send + 'static,
-) -> Result<T> {
-    tokio::task::spawn_blocking(work)
-        .await
-        .map_err(|error| Error::Io(std::io::Error::other(error)))?
-}
-
-#[async_trait::async_trait]
-impl SecretStore for Keychain {
-    async fn get(&self, account: &str) -> Result<Option<String>> {
-        let account = account.to_owned();
-        on_thread(move || {
-            let entry = keyring::Entry::new(KEYCHAIN_SERVICE, &account).map_err(keychain)?;
-            match entry.get_password() {
-                Ok(secret) => Ok(Some(secret)),
-                Err(keyring::Error::NoEntry) => Ok(None),
-                Err(error) => Err(keychain(error)),
-            }
-        })
-        .await
-    }
-
-    async fn set(&self, account: &str, secret: &str) -> Result<()> {
-        let (account, secret) = (account.to_owned(), secret.to_owned());
-        on_thread(move || {
-            keyring::Entry::new(KEYCHAIN_SERVICE, &account)
-                .and_then(|entry| entry.set_password(&secret))
-                .map_err(keychain)
-        })
-        .await
-    }
-
-    async fn delete(&self, account: &str) -> Result<()> {
-        let account = account.to_owned();
-        on_thread(move || {
-            let entry = keyring::Entry::new(KEYCHAIN_SERVICE, &account).map_err(keychain)?;
-            match entry.delete_credential() {
-                Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
-                Err(error) => Err(keychain(error)),
-            }
-        })
-        .await
     }
 }

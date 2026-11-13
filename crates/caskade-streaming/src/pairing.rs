@@ -12,7 +12,13 @@
 //! and later); each side proves it knows it, and signs a secret with its
 //! certificate's key. A mismatch is a wrong code.
 
-use super::api;
+pub use super::util::device_name;
+use super::{
+    api,
+    host::{HTTP_PORT, HTTPS_PORT},
+    hosts::qt_text,
+    util::{invalid, tag, url_host},
+};
 use aes::{
     Aes128,
     cipher::{BlockDecrypt, BlockEncrypt, KeyInit, generic_array::GenericArray},
@@ -42,35 +48,6 @@ impl std::fmt::Debug for Identity {
     }
 }
 
-/// A Qt settings `@ByteArray(...)` value, its escapes undone.
-pub fn qt_bytes(value: &str) -> Option<String> {
-    let inner = value
-        .strip_prefix("\"@ByteArray(")
-        .and_then(|v| v.strip_suffix(")\""))
-        .or_else(|| {
-            value
-                .strip_prefix("@ByteArray(")
-                .and_then(|v| v.strip_suffix(')'))
-        })?;
-    let mut out = String::new();
-    let mut chars = inner.chars();
-    while let Some(c) = chars.next() {
-        if c != '\\' {
-            out.push(c);
-            continue;
-        }
-        match chars.next() {
-            Some('n') => out.push('\n'),
-            Some('r') => out.push('\r'),
-            Some('t') => out.push('\t'),
-            Some('0') => out.push('\0'),
-            Some(other) => out.push(other),
-            None => out.push('\\'),
-        }
-    }
-    Some(out)
-}
-
 /// `text` as a quoted Qt settings `@ByteArray(...)` value.
 pub fn qt_byte_array(text: &str) -> String {
     let escaped = text
@@ -81,6 +58,16 @@ pub fn qt_byte_array(text: &str) -> String {
 }
 
 impl Identity {
+    /// Its certificate and key, for TLS client authentication.
+    pub fn client_auth(&self) -> Result<(CertificateDer<'static>, PrivateKeyDer<'static>)> {
+        Ok((
+            der(&self.cert_pem)?,
+            PrivateKeyDer::Pkcs8(
+                PrivatePkcs8KeyDer::from_pem_slice(self.key_pem.as_bytes()).map_err(invalid)?,
+            ),
+        ))
+    }
+
     /// From a client state file; `None` until Moonlight made one.
     pub fn from_settings(settings: &str) -> Option<Self> {
         let mut general = false;
@@ -96,8 +83,8 @@ impl Identity {
             };
             match key {
                 "uniqueid" => unique_id = Some(value.to_owned()),
-                "certificate" => cert_pem = qt_bytes(value),
-                "key" => key_pem = qt_bytes(value),
+                "certificate" => cert_pem = qt_text(value),
+                "key" => key_pem = qt_text(value),
                 _ => {}
             }
         }
@@ -120,17 +107,6 @@ pub enum Paired {
     Declined,
     /// Nobody entered the code before the request expired.
     Expired,
-}
-
-fn invalid(error: impl std::fmt::Display) -> Error {
-    Error::Invalid(error.to_string())
-}
-
-fn tag<'a>(xml: &'a str, name: &str) -> Option<&'a str> {
-    let open = format!("<{name}>");
-    let start = xml.find(&open)? + open.len();
-    let end = xml[start..].find(&format!("</{name}>"))? + start;
-    Some(xml[start..end].trim())
 }
 
 fn hex(bytes: &[u8]) -> String {
@@ -226,13 +202,17 @@ pub struct Endpoint {
 
 impl Endpoint {
     pub fn new(address: &str) -> Result<Self> {
-        let host = match address.parse::<std::net::IpAddr>() {
-            Ok(std::net::IpAddr::V6(ip)) => format!("[{ip}]"),
-            _ => address.to_owned(),
-        };
+        Self::at(address, HTTP_PORT, HTTPS_PORT)
+    }
+
+    /// The host at `address`, answering on ports `http` and `https`.
+    pub fn at(address: &str, http: u16, https: u16) -> Result<Self> {
+        let host = url_host(address);
         Ok(Self {
-            http: format!("http://{host}:47989/").parse().map_err(invalid)?,
-            https: format!("https://{host}:47984/").parse().map_err(invalid)?,
+            http: format!("http://{host}:{http}/").parse().map_err(invalid)?,
+            https: format!("https://{host}:{https}/")
+                .parse()
+                .map_err(invalid)?,
         })
     }
 }
@@ -253,23 +233,6 @@ pub struct Pairing<'a> {
 /// The OS's name for this computer.
 pub fn this_host_name() -> Option<String> {
     sysinfo::System::host_name()
-}
-
-/// A device name as a pairing request carries it: printable, at most 64
-/// characters, never empty.
-pub fn device_name(name: &str) -> String {
-    let name: String = name
-        .chars()
-        .filter(|c| !c.is_control())
-        .take(64)
-        .collect::<String>()
-        .trim()
-        .to_owned();
-    if name.is_empty() {
-        "Caskade".to_owned()
-    } else {
-        name
-    }
 }
 
 impl Pairing<'_> {
@@ -415,16 +378,7 @@ impl Pairing<'_> {
         }
 
         // 5: the same over TLS, each side with its certificate.
-        let tls = api::pinned_tls(
-            server_der,
-            Some((
-                der(&self.identity.cert_pem)?,
-                PrivateKeyDer::Pkcs8(
-                    PrivatePkcs8KeyDer::from_pem_slice(self.identity.key_pem.as_bytes())
-                        .map_err(invalid)?,
-                ),
-            )),
-        )?;
+        let tls = api::pinned_tls(server_der, Some(self.identity.client_auth()?))?;
         let secure = reqwest::Client::builder()
             .pool_max_idle_per_host(0)
             .use_preconfigured_tls(tls)

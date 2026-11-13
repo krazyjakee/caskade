@@ -12,13 +12,9 @@ use caskade_core::{Error, Result};
 use sha2::{Digest, Sha256};
 use std::path::Path;
 
-fn hex(bytes: &[u8]) -> String {
-    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
-}
-
 /// Whether `bytes` are the pinned installer.
 pub fn genuine(bytes: &[u8]) -> bool {
-    hex(&Sha256::digest(bytes)) == GAMEPAD_DRIVER_SHA256
+    format!("{:x}", Sha256::digest(bytes)) == GAMEPAD_DRIVER_SHA256
 }
 
 /// Downloads the installer beside the host's staging folder, unless a

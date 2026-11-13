@@ -87,18 +87,34 @@ pub async fn open_port(relays: &Relays) -> Option<OpenPort> {
     Some(OpenPort { port, public })
 }
 
-/// A builder for an endpoint with this device's key and no relay transport,
-/// on `port` over IPv4 (a router's mapping is for that port) and any over
-/// IPv6. Keep it the only way a transfer's endpoint is made.
-pub(crate) fn on_port(identity: &Identity, port: u16) -> Builder {
-    Endpoint::builder(presets::Minimal)
+/// A builder for an endpoint with no relay transport and no address lookup,
+/// with `identity`'s key (a throwaway one when `None`, for tests), on
+/// loopback only when `loopback`. Keep it the only way a transfer's endpoint
+/// is made: game files never pass through a relay.
+pub(crate) fn relay_free(identity: Option<&Identity>, loopback: bool) -> Builder {
+    let mut builder = Endpoint::builder(presets::Minimal)
         .relay_mode(RelayMode::Disabled)
-        .clear_address_lookup()
+        .clear_address_lookup();
+    if loopback {
+        builder = builder
+            .clear_ip_transports()
+            .bind_addr(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0))
+            .expect("127.0.0.1 is a valid bind address");
+    }
+    if let Some(identity) = identity {
+        builder = builder.secret_key(identity.secret_key().clone());
+    }
+    builder
+}
+
+/// A [`relay_free`] builder with this device's key, on `port` over IPv4 (a
+/// router's mapping is for that port) and any over IPv6.
+pub(crate) fn on_port(identity: &Identity, port: u16) -> Builder {
+    relay_free(Some(identity), false)
         .clear_ip_transports()
         .bind_addr(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, port))
         .and_then(|builder| builder.bind_addr(SocketAddrV6::new(Ipv6Addr::UNSPECIFIED, 0, 0, 0)))
         .expect("unspecified addresses are valid bind addresses")
-        .secret_key(identity.secret_key().clone())
 }
 
 /// Binds `builder` on a port an endpoint just closed. The system may take a

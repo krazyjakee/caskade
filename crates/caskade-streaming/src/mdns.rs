@@ -5,7 +5,8 @@
 //! is the host's OS host name; its name in Caskade comes from
 //! `/serverinfo`.
 
-use caskade_core::{Error, Result};
+use crate::util::invalid;
+use caskade_core::Result;
 use hickory_proto::{
     op::{Message, MessageType, OpCode, Query},
     rr::{Name, RData, RecordType},
@@ -29,10 +30,6 @@ pub struct Found {
     pub address: IpAddr,
     /// Its HTTP port (`/serverinfo`).
     pub port: u16,
-}
-
-fn invalid(error: impl std::fmt::Display) -> Error {
-    Error::Invalid(error.to_string())
 }
 
 /// The question.

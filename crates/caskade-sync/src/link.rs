@@ -29,7 +29,6 @@ use std::time::{Duration, Instant};
 use futures_util::StreamExt as _;
 use iroh::endpoint::{Connection, PathEvent};
 use iroh::{Endpoint, EndpointId, TransportAddr};
-use serde::Serialize;
 use tokio::sync::broadcast;
 
 /// How long a relay path may hear nothing before it stops counting. Each end
@@ -41,8 +40,7 @@ const RELAY_SILENCE: Duration = Duration::from_secs(12);
 const RELAY_CHECK: Duration = Duration::from_secs(2);
 
 /// How a device is reached.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Link {
     /// No open connection.
     Offline,
@@ -63,7 +61,7 @@ pub struct LinkChanged {
 
 /// The link a path to `addr` gives, from its address alone (see
 /// [`Links::classify`] for the local network as this device sees it).
-pub fn classify(addr: &TransportAddr) -> Link {
+fn classify(addr: &TransportAddr) -> Link {
     match addr {
         TransportAddr::Relay(_) => Link::Relay,
         TransportAddr::Ip(addr) if is_local(addr.ip()) => Link::Lan,
@@ -196,7 +194,7 @@ impl Links {
 
     /// The link `connection`'s selected path gives, or [`Link::Offline`] when
     /// it has none (it's closed, or nothing is selected yet).
-    pub fn of(&self, connection: &Connection) -> Link {
+    fn of(&self, connection: &Connection) -> Link {
         if connection.close_reason().is_some() {
             return Link::Offline;
         }
@@ -220,18 +218,8 @@ impl Links {
         last.get(&peer).copied()
     }
 
-    /// Every device with an open connection and its best link.
-    pub fn all(&self) -> Vec<(EndpointId, Link)> {
-        let inner = self.inner.lock().unwrap_or_else(|e| e.into_inner());
-        inner
-            .iter()
-            .map(|(peer, connections)| (*peer, best(Some(connections))))
-            .filter(|(_, link)| *link != Link::Offline)
-            .collect()
-    }
-
     /// Changes as they happen. A receiver that falls behind gets
-    /// `RecvError::Lagged` and can read [`Links::all`] again.
+    /// `RecvError::Lagged` and can read [`Links::get`] again.
     pub fn subscribe(&self) -> broadcast::Receiver<LinkChanged> {
         self.events.subscribe()
     }
@@ -375,7 +363,6 @@ mod tests {
             .map(|event| event.link)
             .collect();
         assert_eq!(seen, [Link::Relay, Link::Lan, Link::Relay, Link::Offline]);
-        assert!(links.all().is_empty());
         // The last link it had open stays known once it closed.
         assert_eq!(links.last(peer), Some(Link::Relay));
         assert_eq!(links.last(iroh::SecretKey::generate().public()), None);

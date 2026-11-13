@@ -22,11 +22,7 @@ mod tests;
 
 use caskade_core::{Error, Result};
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::BTreeSet,
-    path::{Path, PathBuf},
-    sync::Arc,
-};
+use std::{collections::BTreeSet, path::PathBuf, sync::Arc};
 
 /// A set of administrator steps Caskade knows.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -159,21 +155,6 @@ pub enum Outcome {
     Refused,
 }
 
-impl Outcome {
-    /// For people, when it didn't go through.
-    pub fn message(&self) -> Option<String> {
-        match self {
-            Self::Cancelled => Some(caskade_core::tr!(
-                "The administrator step was cancelled, so nothing changed."
-            )),
-            Self::Refused => Some(caskade_core::tr!(
-                "The administrator step wasn't allowed, so nothing changed. It needs an administrator's password."
-            )),
-            Self::NothingToDo | Self::Done(_) => None,
-        }
-    }
-}
-
 /// Runs plans and their undos, keeping their records in
 /// `<data>/elevation/<plan>.json`.
 #[derive(Clone)]
@@ -267,16 +248,14 @@ impl Elevation {
             };
         }
         std::fs::create_dir_all(&self.records)?;
-        write_atomically(&path, &serde_json::to_vec_pretty(record)?)
+        crate::util::write_atomically(&path, serde_json::to_vec_pretty(record)?)
     }
 
     /// Makes `plan`'s changes that aren't there yet, behind one prompt.
     /// A cancelled or refused prompt, or failed steps, change nothing.
     pub async fn apply(&self, plan: Plan) -> Result<Outcome> {
         let this = self.clone();
-        tokio::task::spawn_blocking(move || this.apply_blocking(plan))
-            .await
-            .map_err(|error| Error::Invalid(error.to_string()))?
+        tokio::task::spawn_blocking(move || this.apply_blocking(plan)).await?
     }
 
     fn apply_blocking(&self, plan: Plan) -> Result<Outcome> {
@@ -326,9 +305,7 @@ impl Elevation {
     /// what was there before it stays.
     pub async fn undo(&self, plan: Plan) -> Result<Outcome> {
         let this = self.clone();
-        tokio::task::spawn_blocking(move || this.undo_blocking(plan))
-            .await
-            .map_err(|error| Error::Invalid(error.to_string()))?
+        tokio::task::spawn_blocking(move || this.undo_blocking(plan)).await?
     }
 
     fn undo_blocking(&self, plan: Plan) -> Result<Outcome> {
@@ -373,13 +350,4 @@ impl Elevation {
         self.save(plan, &record)?;
         Ok(Outcome::Done(removed))
     }
-}
-
-fn write_atomically(path: &Path, bytes: &[u8]) -> Result<()> {
-    let mut part = path.as_os_str().to_owned();
-    part.push(".part");
-    let part = PathBuf::from(part);
-    std::fs::write(&part, bytes)?;
-    std::fs::rename(&part, path)?;
-    Ok(())
 }

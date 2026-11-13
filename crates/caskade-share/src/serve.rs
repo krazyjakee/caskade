@@ -68,7 +68,7 @@ impl Shares {
         else {
             return session.end().await;
         };
-        let name: String = name.chars().filter(|c| !c.is_control()).take(64).collect();
+        let name = caskade_sync::device::clean_name(&name);
         let Ok(Some(row)) = self.inner.store.share(&id).await else {
             return session.end().await;
         };
@@ -103,7 +103,6 @@ impl Shares {
             return session.end().await;
         }
 
-        // Receiving: wait for the files, saying how far the reading got.
         let ready = loop {
             let state = prepared.borrow_and_update().clone();
             match state {
@@ -146,13 +145,7 @@ impl Shares {
         let (out, mut outgoing) = mpsc::unbounded_channel();
         let providers = self.join(&id, peer, out).await;
         self.changed();
-        let own = self
-            .inner
-            .devices
-            .link_addr(Duration::ZERO)
-            .await
-            .map(|addr| addr.ip_addrs().copied().collect())
-            .unwrap_or_default();
+        let own = self.own_addrs().await;
         let opening = [
             Message::Offer {
                 root: ready.root.clone(),

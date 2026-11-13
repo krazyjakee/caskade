@@ -56,6 +56,28 @@ pub fn is_link(text: &str) -> bool {
     ShareLink::parse(text).is_ok()
 }
 
+/// A new share's row: a fresh id and grant, running from now until `expiry`.
+fn new_row(kind: &str, title: String, size: i64, expiry: ShareExpiry) -> ShareRow {
+    let now = caskade_core::now_ms();
+    ShareRow {
+        id: caskade_core::model::new_id(),
+        kind: kind.into(),
+        game_id: None,
+        entry_id: None,
+        title,
+        size,
+        root: None,
+        extras_root: None,
+        grant: Grant::generate().to_hex(),
+        created_at_ms: now,
+        expires_at_ms: expiry
+            .duration()
+            .map(|until| now.saturating_add(i64::try_from(until.as_millis()).unwrap_or(i64::MAX))),
+        stopped_at_ms: None,
+        details_json: "{}".into(),
+    }
+}
+
 /// How long a link may last.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
 #[serde(rename_all = "camelCase")]
@@ -248,9 +270,11 @@ impl Shares {
     /// returns the share; its link is [`Shares::link`]. Its files are read
     /// in the background meanwhile.
     pub async fn share(&self, entry_id: &str, expiry: ShareExpiry) -> Result<ShareRecord> {
+        let release = self.inner.store.get_entry(entry_id).await?;
         // An emulated release goes as its ROM, never its folder (#279).
-        if let Some(release) = self.inner.store.get_entry(entry_id).await?
-            && caskade_core::transfer::rom::emulated(&release)
+        if release
+            .as_ref()
+            .is_some_and(caskade_core::transfer::rom::emulated)
         {
             let item = ShareItem::Rom {
                 entry_id: entry_id.to_owned(),
@@ -258,31 +282,24 @@ impl Shares {
             return self.share_item(item, expiry, "").await;
         }
         let (_, title, _, _) = self.inner.transfers.source(entry_id).await?;
-        let entry = self.inner.store.get_entry(entry_id).await?.ok_or_else(|| {
+        let entry = release.ok_or_else(|| {
             Error::Invalid(caskade_core::tr!(
                 "that game isn't installed on this device"
             ))
         })?;
-        let now = caskade_core::now_ms();
-        let row = ShareRow {
-            id: caskade_core::model::new_id(),
-            kind: "game".into(),
-            game_id: Some(entry.game_id.clone()),
+        let size = entry
+            .size
+            .map_or(0, |size| i64::try_from(size).unwrap_or(i64::MAX));
+        self.start(ShareRow {
+            game_id: Some(entry.game_id),
             entry_id: Some(entry_id.to_owned()),
-            title,
-            size: entry
-                .size
-                .map_or(0, |size| i64::try_from(size).unwrap_or(i64::MAX)),
-            root: None,
-            extras_root: None,
-            grant: Grant::generate().to_hex(),
-            created_at_ms: now,
-            expires_at_ms: expiry.duration().map(|until| {
-                now.saturating_add(i64::try_from(until.as_millis()).unwrap_or(i64::MAX))
-            }),
-            stopped_at_ms: None,
-            details_json: "{}".into(),
-        };
+            ..new_row("game", title, size, expiry)
+        })
+        .await
+    }
+
+    /// Saves `row` and starts sharing it.
+    async fn start(&self, row: ShareRow) -> Result<ShareRecord> {
         self.inner.store.insert_share(&row).await?;
         self.run(row.clone());
         self.changed();

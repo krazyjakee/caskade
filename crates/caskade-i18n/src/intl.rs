@@ -153,12 +153,6 @@ fn data(locale: &str) -> &'static Data {
     }
 }
 
-/// Whether `locale` has data here, rather than US English's.
-pub fn supported(locale: &str) -> bool {
-    let language = locale.split(['-', '_']).next().unwrap_or("");
-    matches!(language.to_ascii_lowercase().as_str(), "en" | "sv")
-}
-
 /// `value` rounded half away from zero to `digits` decimals, as `Intl`
 /// rounds, as integer and fraction digits.
 fn digits(value: f64, min: usize, max: usize) -> (bool, String, String) {

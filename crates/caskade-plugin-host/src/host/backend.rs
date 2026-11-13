@@ -16,7 +16,7 @@ impl PluginHost {
     /// Drops the plugin's running backend and compiled component and
     /// compiles the backend file again, so a broken rebuild reports its
     /// error now. A dev plugin turned off this session is turned back on.
-    pub async fn reload_backend(&self, id: &str) -> Result<()> {
+    pub(crate) async fn reload_backend(&self, id: &str) -> Result<()> {
         caskade_jobs::global()
             .run("Reloading plugin", self.reload_backend_queued(id))
             .await
@@ -78,15 +78,18 @@ impl PluginHost {
             .store
             .get_setting(KEY)
             .await?
-            .and_then(|value| value.as_str().and_then(decode_key));
+            .and_then(|value| {
+                value
+                    .as_str()
+                    .and_then(caskade_component_cache::CacheKey::from_hex)
+            });
         let key = match stored {
             Some(key) => key,
             None => {
                 let key = caskade_component_cache::CacheKey::generate()?;
-                let text: String = key.to_bytes().iter().map(|b| format!("{b:02x}")).collect();
                 self.services
                     .store
-                    .set_setting(KEY, &serde_json::Value::String(text))
+                    .set_setting(KEY, &serde_json::Value::String(key.to_hex()))
                     .await?;
                 key
             }
@@ -232,16 +235,4 @@ impl PluginHost {
             .await?;
         Self::answered(id, answer)
     }
-}
-
-/// A 32-byte cache key stored as 64 hex digits.
-fn decode_key(text: &str) -> Option<caskade_component_cache::CacheKey> {
-    if text.len() != 64 {
-        return None;
-    }
-    let mut key = [0u8; 32];
-    for (index, byte) in key.iter_mut().enumerate() {
-        *byte = u8::from_str_radix(text.get(index * 2..index * 2 + 2)?, 16).ok()?;
-    }
-    Some(caskade_component_cache::CacheKey::from_bytes(key))
 }

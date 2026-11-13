@@ -11,6 +11,7 @@ use crate::{
     PluginServices,
     capabilities::Grant,
     locales::{Language, PluginLocales, PluginMessages},
+    lock,
     manifest::{Contributes, MANIFEST, Manifest, ManifestError, Permissions},
     read,
     runtime::{CallError, Instance, Limits, Runtime},
@@ -22,7 +23,7 @@ use specta::Type;
 use std::{
     collections::BTreeMap,
     path::{Path, PathBuf},
-    sync::{Arc, RwLock},
+    sync::{Arc, Mutex, RwLock},
 };
 use wasmtime::component::Component;
 
@@ -137,6 +138,14 @@ struct Live {
     last_error: Option<String>,
 }
 
+/// What a summary last read from a plugin's `Live`.
+#[derive(Default, Clone)]
+struct Seen {
+    active: bool,
+    failures: u32,
+    last_error: Option<String>,
+}
+
 struct Entry {
     folder: PathBuf,
     manifest: std::result::Result<Manifest, Vec<ManifestError>>,
@@ -147,6 +156,8 @@ struct Entry {
     enabled: bool,
     needs_consent: bool,
     live: tokio::sync::Mutex<Live>,
+    /// Shown while a call holds `live`.
+    seen: Mutex<Seen>,
 }
 
 impl Entry {
@@ -157,62 +168,67 @@ impl Entry {
         Some(manifest)
     }
 
-    /// The plugin as Settings lists it, its texts in `locale`.
+    /// The plugin as Settings lists it, its texts in `locale`. Without
+    /// `live` (a call holds it), its state as the last summary saw it.
     fn summary(&self, id: &str, live: Option<&Live>, locale: &str) -> PluginSummary {
-        let active = live.is_some_and(|live| live.instance.is_some());
-        let (failures, last_error) = live
-            .map(|live| (live.failures, live.last_error.clone()))
-            .unwrap_or_default();
-        let folder = self.folder.to_string_lossy().into_owned();
-        let warnings = self.locales.problems().to_vec();
-        let translated = self.translated(locale);
-        match (translated, &self.manifest) {
-            (Some(manifest), _) => PluginSummary {
-                id: manifest.id.clone(),
-                name: manifest.name.clone(),
-                version: Some(manifest.version.to_string()),
-                description: manifest.description.clone(),
-                author: manifest.author.clone(),
-                folder,
-                status: if active {
-                    PluginStatus::Active
-                } else if self.needs_consent {
-                    PluginStatus::NeedsConsent
-                } else if self.enabled {
-                    PluginStatus::Enabled
-                } else {
-                    PluginStatus::Disabled
-                },
-                errors: Vec::new(),
-                permissions: Some(manifest.permissions.clone()),
-                contributes: Some(manifest.contributes.clone()),
-                has_ui: manifest.ui.is_some(),
-                has_backend: manifest.backend.is_some(),
-                failures,
-                last_error,
-                settings_error: None,
-                dev: self.dev,
-                warnings,
+        let Seen {
+            active,
+            failures,
+            last_error,
+        } = match live {
+            Some(live) => {
+                let seen = Seen {
+                    active: live.instance.is_some(),
+                    failures: live.failures,
+                    last_error: live.last_error.clone(),
+                };
+                *lock(&self.seen) = seen.clone();
+                seen
+            }
+            None => lock(&self.seen).clone(),
+        };
+        let invalid = PluginSummary {
+            id: id.to_owned(),
+            name: id.to_owned(),
+            version: None,
+            description: None,
+            author: None,
+            folder: self.folder.to_string_lossy().into_owned(),
+            status: PluginStatus::Invalid,
+            errors: self.manifest.clone().err().unwrap_or_default(),
+            permissions: None,
+            contributes: None,
+            has_ui: false,
+            has_backend: false,
+            failures,
+            last_error,
+            settings_error: None,
+            dev: self.dev,
+            warnings: self.locales.problems().to_vec(),
+        };
+        let Some(manifest) = self.translated(locale) else {
+            return invalid;
+        };
+        PluginSummary {
+            id: manifest.id,
+            name: manifest.name,
+            version: Some(manifest.version.to_string()),
+            description: manifest.description,
+            author: manifest.author,
+            status: if active {
+                PluginStatus::Active
+            } else if self.needs_consent {
+                PluginStatus::NeedsConsent
+            } else if self.enabled {
+                PluginStatus::Enabled
+            } else {
+                PluginStatus::Disabled
             },
-            (None, errors) => PluginSummary {
-                id: id.to_owned(),
-                name: id.to_owned(),
-                version: None,
-                description: None,
-                author: None,
-                folder,
-                status: PluginStatus::Invalid,
-                errors: errors.clone().err().unwrap_or_default(),
-                permissions: None,
-                contributes: None,
-                has_ui: false,
-                has_backend: false,
-                failures,
-                last_error,
-                settings_error: None,
-                dev: self.dev,
-                warnings,
-            },
+            permissions: Some(manifest.permissions),
+            contributes: Some(manifest.contributes),
+            has_ui: manifest.ui.is_some(),
+            has_backend: manifest.backend.is_some(),
+            ..invalid
         }
     }
 }
@@ -272,10 +288,7 @@ fn plugin_folders(root: &Path) -> Vec<PathBuf> {
 
 impl PluginHost {
     pub fn new(services: PluginServices, options: HostOptions) -> Result<Self> {
-        let runtime = Runtime::new(options.limits.clone()).map_err(|source| HostError::Call {
-            id: String::new(),
-            source,
-        })?;
+        let runtime = Runtime::new(options.limits.clone()).map_err(std::io::Error::other)?;
         Ok(Self {
             runtime: Arc::new(runtime),
             services: Arc::new(services),
@@ -304,19 +317,23 @@ impl PluginHost {
             .collect();
         // Dev folders first: a dev copy wins over an installed one.
         let dev: Vec<PathBuf> = read(&self.dev_folders).clone();
-        let folders: Vec<PathBuf> = dev
-            .iter()
-            .cloned()
-            .chain(
-                self.options
-                    .folders
-                    .iter()
-                    .flat_map(|root| plugin_folders(root)),
-            )
-            .collect();
+        let (roots, listed) = (self.options.folders.clone(), dev.clone());
+        let read_folders = caskade_jobs::blocking("Reading plugin files", move || {
+            listed
+                .into_iter()
+                .chain(roots.iter().flat_map(|root| plugin_folders(root)))
+                .map(|folder| {
+                    let manifest = Manifest::read(&folder);
+                    let locales = PluginLocales::read(&folder);
+                    (folder, manifest, locales)
+                })
+                .collect::<Vec<_>>()
+        });
+        let folders = read_folders
+            .await
+            .map_err(|error| std::io::Error::other(error.to_string()))?;
         let mut found: BTreeMap<String, Arc<Entry>> = BTreeMap::new();
-        for folder in folders {
-            let manifest = Manifest::read(&folder);
+        for (folder, manifest, locales) in folders {
             let mut key = match &manifest {
                 Ok(manifest) => manifest.id.clone(),
                 Err(_) => folder_name(&folder),
@@ -351,7 +368,6 @@ impl PluginHost {
                     },
                     Err(_) => (false, false),
                 };
-                let locales = PluginLocales::read(&folder);
                 let previous = read(&self.entries).get(&key).cloned();
                 let entry = match previous {
                     Some(previous)
@@ -372,6 +388,7 @@ impl PluginHost {
                         enabled,
                         needs_consent,
                         live: tokio::sync::Mutex::default(),
+                        seen: Mutex::default(),
                     }),
                 };
                 found.insert(key, entry);
@@ -420,8 +437,9 @@ impl PluginHost {
         let mut summaries = Vec::with_capacity(entries.len());
         let locale = self.language.current();
         for (id, entry) in entries {
-            let live = entry.live.lock().await;
-            summaries.push(self.with_settings(entry.summary(&id, Some(&live), &locale)));
+            // Never waits for a call to finish.
+            let live = entry.live.try_lock().ok();
+            summaries.push(self.with_settings(entry.summary(&id, live.as_deref(), &locale)));
         }
         summaries
     }
@@ -498,7 +516,7 @@ impl PluginHost {
     }
 
     /// Loads `folder` (a plugin folder) in place for this session (#131).
-    pub async fn add_dev_folder(&self, folder: &Path) -> Result<()> {
+    pub(crate) async fn add_dev_folder(&self, folder: &Path) -> Result<()> {
         {
             let mut folders = write(&self.dev_folders);
             if !folders.iter().any(|known| known == folder) {
@@ -595,6 +613,7 @@ impl PluginHost {
             enabled,
             needs_consent: false,
             live: tokio::sync::Mutex::default(),
+            seen: Mutex::default(),
         });
         if enabled {
             // Keep a compiled component across the swap.

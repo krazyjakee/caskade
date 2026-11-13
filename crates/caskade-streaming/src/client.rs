@@ -10,6 +10,7 @@
 //! folder inside the app's own `~/.var/app/…` (the sandbox can't reach
 //! Caskade's), and it writes the settings that keep Moonlight quiet first.
 
+use crate::util::write_atomically;
 use caskade_core::{
     Error, Result,
     emulation::EmulatorInstall,
@@ -108,11 +109,7 @@ pub fn prepare_state(dir: &Path) -> Result<()> {
     };
     let updated = set_general(&text, &QUIET);
     if updated != text {
-        let mut part = settings.as_os_str().to_owned();
-        part.push(".part");
-        let part = PathBuf::from(part);
-        std::fs::write(&part, updated)?;
-        std::fs::rename(&part, &settings)?;
+        write_atomically(&settings, updated)?;
     }
     Ok(())
 }
@@ -252,6 +249,38 @@ impl StreamingClient {
         read().ok_or_else(|| Error::Invalid(caskade_core::tr!("streaming couldn't be set up")))
     }
 
+    /// The client's working directory, once it is installed.
+    pub async fn state(&self) -> Result<Option<PathBuf>> {
+        match self.installed().await? {
+            Some(install) => Ok(Some(self.state_dir(&install)?)),
+            None => Ok(None),
+        }
+    }
+
+    /// Fetches a paired host's app list into the client's state (skipped
+    /// while Moonlight runs for something else):
+    /// `moonlight list <host> --csv`, asked to quit (so it saves) after at
+    /// most 20 s, since it may wait on a game's box art for good.
+    pub async fn list(&self, address: &str) -> Result<()> {
+        let Ok(_busy) = self.busy.try_lock() else {
+            return Ok(());
+        };
+        let Some(install) = self.installed().await? else {
+            return Ok(());
+        };
+        let client = Client {
+            state: self.state_dir(&install)?,
+            install,
+        };
+        prepare_state(&client.state)?;
+        self.run_and_quit(
+            &client,
+            &["list".into(), address.into(), "--csv".into()],
+            Duration::from_secs(20),
+        )
+        .await
+    }
+
     /// Runs Moonlight with `args`, asks it to quit after `after` (so it
     /// saves its state) and waits for it.
     pub(crate) async fn run_and_quit(
@@ -311,7 +340,7 @@ impl StreamingClient {
         let _busy = self.busy.lock().await;
         let client = self.ensure(cancel).await?;
         let identity = self.identity(&client).await?;
-        let info = super::hosts::ask_server_info(address, super::hosts::HTTP_PORT)
+        let info = super::hosts::ask_server_info(address, super::host::HTTP_PORT)
             .await
             .ok_or_else(|| {
                 Error::Invalid(caskade_core::tr!(
@@ -341,7 +370,7 @@ impl StreamingClient {
                     server_cert_pem: server_cert_pem.clone(),
                 },
             );
-            write_atomically(&file, &updated)?;
+            write_atomically(&file, updated)?;
         }
         Ok(paired)
     }
@@ -350,7 +379,6 @@ impl StreamingClient {
     /// stream: a stream holds the client until it ends. Its state (this
     /// device's identity, paired devices, settings) is a folder the
     /// release doesn't ship, so it stays.
-    #[cfg(feature = "net")]
     pub async fn update(&self, cancel: &CancellationToken) -> Result<()> {
         let Ok(_busy) = self.busy.clone().try_lock_owned() else {
             return Err(Error::Invalid(caskade_core::tr!(
@@ -376,18 +404,8 @@ impl StreamingClient {
         let Ok(text) = std::fs::read_to_string(&file) else {
             return Ok(());
         };
-        write_atomically(&file, &super::pairing::forget_host(&text, host_id))
+        write_atomically(&file, super::pairing::forget_host(&text, host_id))
     }
-}
-
-#[cfg(feature = "net")]
-fn write_atomically(path: &Path, text: &str) -> Result<()> {
-    let mut part = path.as_os_str().to_owned();
-    part.push(".part");
-    let part = PathBuf::from(part);
-    std::fs::write(&part, text)?;
-    std::fs::rename(&part, path)?;
-    Ok(())
 }
 
 #[cfg(all(test, unix, feature = "net"))]

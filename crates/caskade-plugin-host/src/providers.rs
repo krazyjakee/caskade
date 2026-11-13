@@ -310,7 +310,7 @@ impl PluginHost {
     }
 
     /// `runner.prepare`; needs `process` (it decides what runs).
-    pub async fn runner_command(
+    pub(crate) async fn runner_command(
         &self,
         id: &str,
         runner_id: &str,

@@ -20,10 +20,10 @@ use std::{
 pub const HOST_API: semver::Version = semver::Version::new(0, 2, 0);
 
 /// [`HOST_API`] as the WIT package writes it.
-pub const HOST_API_TEXT: &str = "0.2.0";
+pub(crate) const HOST_API_TEXT: &str = "0.2.0";
 
 /// The last API of the previous minor, still accepted.
-pub const PREVIOUS_API: semver::Version = semver::Version::new(0, 1, 1);
+pub(crate) const PREVIOUS_API: semver::Version = semver::Version::new(0, 1, 1);
 
 /// The manifest file in a plugin folder.
 pub const MANIFEST: &str = "plugin.json";

@@ -163,6 +163,8 @@ async fn changes_reload_the_ui_and_backend_and_a_broken_build_reports_its_error(
     let s = setup().await;
     let folder = s.temp.path().join("work/my-plugin");
     write_plugin(&folder, &manifest("dev.test.mine", &[]));
+    // Left unwatched; the rest of the folder still reloads.
+    std::fs::create_dir_all(folder.join("node_modules/pkg")).unwrap();
     let mut stream = s.bus.stream();
     let _watch = dev::watch(
         s.host.clone(),

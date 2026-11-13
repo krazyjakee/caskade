@@ -2,30 +2,15 @@
 //! client's certificate and the host's pinned one
 //! (#264): whether it still knows this device, what it is playing, which
 //! games it offers, and to quit the game. Moonlight only streams.
-//!
-//! Also Wake-on-LAN, for a host that sleeps.
 
 use super::{
     api,
     pairing::{Endpoint, Identity},
+    util::{invalid, tag},
 };
 use caskade_core::{Error, Result, db::StreamApp};
-use rustls::pki_types::{CertificateDer, PrivateKeyDer, PrivatePkcs8KeyDer, pem::PemObject};
-use std::{
-    net::{IpAddr, Ipv4Addr, SocketAddr},
-    time::Duration,
-};
-
-fn invalid(error: impl std::fmt::Display) -> Error {
-    Error::Invalid(error.to_string())
-}
-
-fn tag<'a>(xml: &'a str, name: &str) -> Option<&'a str> {
-    let open = format!("<{name}>");
-    let start = xml.find(&open)? + open.len();
-    let end = xml[start..].find(&format!("</{name}>"))? + start;
-    Some(xml[start..end].trim())
-}
+use rustls::pki_types::{CertificateDer, pem::PemObject};
+use std::time::Duration;
 
 /// XML text with its entities undone.
 fn text(xml: &str) -> String {
@@ -89,12 +74,7 @@ impl HostLink {
     /// pairing recorded.
     pub fn new(endpoint: Endpoint, identity: &Identity, server_cert_pem: &str) -> Result<Self> {
         let server = CertificateDer::from_pem_slice(server_cert_pem.as_bytes()).map_err(invalid)?;
-        let client =
-            CertificateDer::from_pem_slice(identity.cert_pem.as_bytes()).map_err(invalid)?;
-        let key = PrivateKeyDer::Pkcs8(
-            PrivatePkcs8KeyDer::from_pem_slice(identity.key_pem.as_bytes()).map_err(invalid)?,
-        );
-        let tls = api::pinned_tls(server, Some((client, key)))?;
+        let tls = api::pinned_tls(server, Some(identity.client_auth()?))?;
         let client = reqwest::Client::builder()
             // The host closes idle connections.
             .pool_max_idle_per_host(0)
@@ -230,67 +210,6 @@ fn tls_failure(error: &reqwest::Error) -> bool {
     false
 }
 
-/// A Wake-on-LAN magic packet for `mac`.
-pub fn magic_packet(mac: [u8; 6]) -> [u8; 102] {
-    let mut packet = [0xff; 102];
-    for chunk in packet[6..].chunks_mut(6) {
-        chunk.copy_from_slice(&mac);
-    }
-    packet
-}
-
-/// The ports Moonlight sends magic packets to: the usual ones and the
-/// streaming ports, which a router may forward.
-pub const WAKE_PORTS: [u16; 6] = [7, 9, 47998, 47999, 48000, 48010];
-
-/// Where the magic packet for a host at `addresses` goes: every network's
-/// broadcast address and each address, on each of [`WAKE_PORTS`]. The
-/// all-networks address alone leaves by the default route, which on a machine
-/// with a second card or a VPN isn't the network the host sleeps on.
-pub fn wake_targets(addresses: &[IpAddr]) -> Vec<SocketAddr> {
-    targets_through(&network_broadcasts(), addresses)
-}
-
-fn targets_through(broadcasts: &[Ipv4Addr], addresses: &[IpAddr]) -> Vec<SocketAddr> {
-    std::iter::once(Ipv4Addr::BROADCAST)
-        .chain(broadcasts.iter().copied())
-        .map(IpAddr::V4)
-        .chain(addresses.iter().copied().filter(IpAddr::is_ipv4))
-        .flat_map(|address| WAKE_PORTS.map(|port| SocketAddr::new(address, port)))
-        .collect()
-}
-
-/// The broadcast address of each network this machine is on.
-fn network_broadcasts() -> Vec<Ipv4Addr> {
-    let mut broadcasts: Vec<Ipv4Addr> = netdev::get_interfaces()
-        .iter()
-        .filter(|interface| !interface.is_loopback())
-        .flat_map(|interface| interface.ipv4.iter().map(|net| net.broadcast()))
-        .collect();
-    broadcasts.sort();
-    broadcasts.dedup();
-    broadcasts
-}
-
-/// Sends the magic packet for `mac` to `targets`.
-pub async fn wake(mac: [u8; 6], targets: &[SocketAddr]) -> Result<()> {
-    let socket =
-        tokio::net::UdpSocket::bind(SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 0)).await?;
-    socket.set_broadcast(true)?;
-    let packet = magic_packet(mac);
-    let mut sent = false;
-    for target in targets {
-        sent |= socket.send_to(&packet, target).await.is_ok();
-    }
-    if sent {
-        Ok(())
-    } else {
-        Err(Error::Invalid(caskade_core::tr!(
-            "the wake-up message couldn't be sent"
-        )))
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -336,30 +255,5 @@ mod tests {
             status(r#"<root status_code="401" status_message="x"/>"#),
             Some(401)
         );
-    }
-
-    #[test]
-    fn magic_packets_repeat_the_mac_sixteen_times() {
-        let mac = [0xa4, 0xb1, 0xc1, 0x09, 0xdb, 0x98];
-        let packet = magic_packet(mac);
-        assert_eq!(&packet[..6], &[0xff; 6]);
-        assert!(packet[6..].chunks(6).all(|chunk| chunk == mac));
-        assert_eq!(packet[6..].chunks(6).count(), 16);
-    }
-
-    #[test]
-    fn a_wake_up_leaves_by_every_network_not_just_the_default_route() {
-        let targets = targets_through(
-            &[Ipv4Addr::new(192, 168, 77, 255)],
-            &[IpAddr::from([192, 168, 77, 12])],
-        );
-        for address in [
-            [255, 255, 255, 255],
-            [192, 168, 77, 255],
-            [192, 168, 77, 12],
-        ] {
-            let target = SocketAddr::new(IpAddr::from(address), 9);
-            assert!(targets.contains(&target), "{target} in {targets:?}");
-        }
     }
 }

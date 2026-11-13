@@ -167,34 +167,59 @@ pub fn verify(
     let mut done = 0u64;
     let mut buffer = vec![0u8; CHUNK];
     for file in &manifest.files {
-        let mut entry = archive.by_name(&file.path).map_err(|_| {
-            BackupError::Damaged(caskade_core::tr!("“{path}” is missing", path = file.path))
-        })?;
-        let mut hash = Sha256::new();
-        let mut size = 0u64;
-        // One byte more than claimed is enough to tell it lied.
-        let mut limited = (&mut entry).take(file.size.saturating_add(1));
-        loop {
-            if cancel.is_cancelled() {
-                return Err(BackupError::Cancelled);
-            }
-            let read = limited.read(&mut buffer).map_err(damaged_io)?;
-            if read == 0 {
-                break;
-            }
-            hash.update(&buffer[..read]);
-            size += read as u64;
-            done += read as u64;
-            report(done);
-        }
-        if size != file.size || format!("{:x}", hash.finalize()) != file.sha256 {
-            return Err(BackupError::Damaged(caskade_core::tr!(
-                "“{path}” doesn't match its checksum",
-                path = file.path
-            )));
-        }
+        copy_checked(
+            &mut archive,
+            file,
+            &mut std::io::sink(),
+            &mut buffer,
+            cancel,
+            &mut |read| {
+                done += read;
+                report(done);
+            },
+        )?;
     }
     Ok(manifest)
+}
+
+/// Reads `file` out of `archive` into `out` through `buffer`, telling
+/// `read` each chunk's size, and checks it against the manifest's size and
+/// checksum.
+pub(super) fn copy_checked<R: Read + Seek>(
+    archive: &mut ZipArchive<R>,
+    file: &FileEntry,
+    out: &mut impl Write,
+    buffer: &mut [u8],
+    cancel: &CancellationToken,
+    read: &mut dyn FnMut(u64),
+) -> Result<(), BackupError> {
+    let mut entry = archive.by_name(&file.path).map_err(|_| {
+        BackupError::Damaged(caskade_core::tr!("“{path}” is missing", path = file.path))
+    })?;
+    let mut hash = Sha256::new();
+    let mut size = 0u64;
+    // One byte more than claimed is enough to tell it lied.
+    let mut limited = (&mut entry).take(file.size.saturating_add(1));
+    loop {
+        if cancel.is_cancelled() {
+            return Err(BackupError::Cancelled);
+        }
+        let chunk = limited.read(buffer).map_err(damaged_io)?;
+        if chunk == 0 {
+            break;
+        }
+        hash.update(&buffer[..chunk]);
+        out.write_all(&buffer[..chunk])?;
+        size += chunk as u64;
+        read(chunk as u64);
+    }
+    if size != file.size || format!("{:x}", hash.finalize()) != file.sha256 {
+        return Err(BackupError::Damaged(caskade_core::tr!(
+            "“{path}” doesn't match its checksum",
+            path = file.path
+        )));
+    }
+    Ok(())
 }
 
 /// The manifest alone, checked for its format but not against the files.

@@ -54,7 +54,7 @@ pub const POINTS: [&str; 6] = [
 ];
 
 /// Consecutive failures that disable a plugin.
-pub const FAILURE_LIMIT: u32 = 3;
+pub(crate) const FAILURE_LIMIT: u32 = 3;
 
 /// The plugins currently on the bus.
 pub struct PluginHooks {

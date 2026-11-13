@@ -6,6 +6,7 @@ use super::{
     BackupError, Backups,
     archive::{self, Source},
     manifest::{Component, ComponentSummary, Exclusion, Manifest},
+    restore::join,
     snapshot,
 };
 use serde::{Deserialize, Serialize};
@@ -126,7 +127,7 @@ impl Backups {
                 (sizes, available, exists)
             })
             .await
-            .map_err(|error| BackupError::Io(std::io::Error::other(error)))?;
+            .map_err(join)?;
         if let Some(fake) = self.faults().available {
             available = Some(fake);
         }
@@ -223,15 +224,11 @@ impl Backups {
         if cancel.is_cancelled() {
             return Err(BackupError::Cancelled);
         }
-        let mut sources = Vec::new();
         let selected: Vec<Component> = std::iter::once(Component::Library)
             .chain(options.components.iter().copied())
             .collect::<BTreeSet<_>>()
             .into_iter()
             .collect();
-        for component in &selected {
-            sources.extend(files(&self.paths, *component, &snapshot.artwork, database));
-        }
         let manifest = Manifest {
             format: super::manifest::FORMAT,
             app_version: caskade_core::VERSION.to_owned(),
@@ -251,16 +248,22 @@ impl Backups {
             excluded: Exclusion::ALL.to_vec(),
             files: Vec::new(),
         };
-        let total: u64 = sources
-            .iter()
-            .filter_map(|s| std::fs::metadata(&s.file).ok())
-            .map(|m| m.len())
-            .sum();
         let budget = self.faults().disk_full_after;
         let (manifest, bytes) = caskade_jobs::blocking("Backing up", {
             let (partial, cancel, progress) =
                 (partial.to_owned(), cancel.clone(), progress.clone());
+            let (paths, artwork, database) =
+                (self.paths.clone(), snapshot.artwork, database.to_owned());
             move || -> Result<(Manifest, u64), BackupError> {
+                let sources: Vec<Source> = selected
+                    .iter()
+                    .flat_map(|component| files(&paths, *component, &artwork, &database))
+                    .collect();
+                let total: u64 = sources
+                    .iter()
+                    .filter_map(|s| std::fs::metadata(&s.file).ok())
+                    .map(|m| m.len())
+                    .sum();
                 let file = std::fs::OpenOptions::new()
                     .write(true)
                     .create_new(true)
@@ -284,7 +287,7 @@ impl Backups {
             }
         })
         .await
-        .map_err(|error| BackupError::Io(std::io::Error::other(error)))??;
+        .map_err(join)??;
         let verified = caskade_jobs::blocking("Checking the backup", {
             let (partial, cancel, progress) =
                 (partial.to_owned(), cancel.clone(), progress.clone());
@@ -300,7 +303,7 @@ impl Backups {
             }
         })
         .await
-        .map_err(|error| BackupError::Io(std::io::Error::other(error)))??;
+        .map_err(join)??;
         if verified != manifest {
             return Err(BackupError::Damaged(caskade_core::tr!(
                 "the backup read back differently from how it was written"

@@ -46,7 +46,7 @@ tracing = "0.1"
 async-trait = "0.1"
 # Dev mode watches plugin folders (#131).
 notify = { version = "8", default-features = false, features = ["macos_kqueue"] }
-tokio = { version = "1", features = ["sync", "time", "rt", "macros", "net"] }
+tokio = { version = "1", features = ["sync", "time", "rt", "macros", "net", "fs"] }
 
 [dev-dependencies]
 # `test_programs`: programs a test writes and runs without ETXTBSY (#118).

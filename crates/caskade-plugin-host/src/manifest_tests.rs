@@ -280,3 +280,11 @@ fn a_plugin_may_follow_achievement_fetches_but_not_unlock_announcements() {
     value["contributes"]["hooks"] = json!(["achievements.unlocked"]);
     assert_eq!(keys(value), ["contributes.hooks[0]"]);
 }
+
+#[test]
+fn the_api_version_text_matches_the_version_and_the_wit_package() {
+    // Export names are built from the text: a mismatch hides every export.
+    assert_eq!(HOST_API.to_string(), HOST_API_TEXT);
+    let wit = include_str!("../../../wit/caskade-plugin.wit");
+    assert!(wit.contains(&format!("package caskade:plugin@{HOST_API_TEXT};")));
+}

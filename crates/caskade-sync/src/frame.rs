@@ -35,16 +35,6 @@ impl FrameWriter {
     pub(crate) async fn write_raw(&mut self, line: &[u8]) -> Result<()> {
         self.send.write_all(line).await.map_err(Error::interrupted)
     }
-
-    /// Ends the stream and waits for the peer's transport to acknowledge
-    /// everything written. That is receipt, not reading: a close straight
-    /// afterwards can still discard data the peer hasn't read, so ending a
-    /// conversation goes through [`end_together`].
-    pub async fn finish(mut self) -> Result<()> {
-        self.send.finish().map_err(Error::interrupted)?;
-        self.send.stopped().await.map_err(Error::interrupted)?;
-        Ok(())
-    }
 }
 
 /// How much of what a peer still sends is read, and dropped, while waiting

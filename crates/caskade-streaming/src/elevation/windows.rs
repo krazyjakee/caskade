@@ -15,6 +15,7 @@
 //! the host program take the stream's ports.
 
 use super::{Change, Prompt, Request, Runner, Step};
+use crate::util::runs_quietly;
 use caskade_core::{Error, Result};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -237,11 +238,7 @@ fn sha256_file(path: &Path) -> std::io::Result<String> {
     let mut file = std::fs::File::open(path)?;
     let mut hasher = Sha256::new();
     std::io::copy(&mut file, &mut hasher)?;
-    Ok(hex(&hasher.finalize()))
-}
-
-fn hex(bytes: &[u8]) -> String {
-    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
+    Ok(format!("{:x}", hasher.finalize()))
 }
 
 /// Lists every file in the staged host (Caskade's own `.caskade` folder
@@ -264,7 +261,7 @@ pub fn write_manifest(staging: &Path) -> Result<String> {
     let at = staging.join(MANIFEST[0]).join(MANIFEST[1]);
     std::fs::create_dir_all(staging.join(MANIFEST[0]))?;
     std::fs::write(at, &bytes)?;
-    Ok(hex(&Sha256::digest(&bytes)))
+    Ok(format!("{:x}", Sha256::digest(&bytes)))
 }
 
 /// Copies the staged host into `target` and checks every copied file
@@ -273,7 +270,7 @@ pub fn write_manifest(staging: &Path) -> Result<String> {
 pub fn install_host(staging: &Path, expected: &str, target: &Path) -> Result<()> {
     let refuse = |why: &str| Error::Invalid(format!("the staged host was refused: {why}"));
     let bytes = std::fs::read(staging.join(MANIFEST[0]).join(MANIFEST[1]))?;
-    if hex(&Sha256::digest(&bytes)) != expected.to_ascii_lowercase() {
+    if format!("{:x}", Sha256::digest(&bytes)) != expected.to_ascii_lowercase() {
         return Err(refuse("the manifest changed"));
     }
     let manifest: Manifest = serde_json::from_slice(&bytes)?;
@@ -462,7 +459,17 @@ pub fn remove_host(target: &Path) -> Result<()> {
 /// `%ProgramFiles%\Caskade\Streaming\host`, with Program Files read from
 /// HKLM's 64-bit view (an environment variable the caller set could point
 /// anywhere).
+/// Asked once: Program Files doesn't move while Caskade runs.
 pub fn target() -> Option<PathBuf> {
+    static TARGET: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
+    if let Some(target) = TARGET.get() {
+        return Some(target.clone());
+    }
+    let target = read_target()?;
+    Some(TARGET.get_or_init(|| target).clone())
+}
+
+fn read_target() -> Option<PathBuf> {
     let output = caskade_core::quiet::command("reg.exe")
         .args([
             "query",
@@ -607,13 +614,7 @@ pub fn perform(args: &[String]) -> i32 {
         return USAGE;
     };
     perform_with(args, &target, &mut |program, args| {
-        caskade_core::quiet::command(program)
-            .args(args)
-            .stdin(std::process::Stdio::null())
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .status()
-            .is_ok_and(|status| status.success())
+        runs_quietly(program, args)
     })
 }
 
@@ -719,20 +720,10 @@ impl Default for WindowsRunner {
     }
 }
 
-fn quietly(program: &str, args: &[&str]) -> bool {
-    caskade_core::quiet::command(program)
-        .args(args)
-        .stdin(std::process::Stdio::null())
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null())
-        .status()
-        .is_ok_and(|status| status.success())
-}
-
 impl Runner for WindowsRunner {
     fn present(&self, change: Change) -> bool {
         let rule = |name: &str| {
-            quietly(
+            runs_quietly(
                 "netsh.exe",
                 &[
                     "advfirewall",
@@ -745,10 +736,10 @@ impl Runner for WindowsRunner {
         };
         match change {
             Change::HostProgram => target().is_some_and(|target| target.join(HOST_EXE).is_file()),
-            Change::Service => quietly("sc.exe", &["query", SERVICE]),
+            Change::Service => runs_quietly("sc.exe", &["query", SERVICE]),
             Change::FirewallTcp => rule(RULE_TCP),
             Change::FirewallUdp => rule(RULE_UDP),
-            Change::GamepadDriver => quietly("sc.exe", &["query", GAMEPAD_DRIVER_SERVICE]),
+            Change::GamepadDriver => runs_quietly("sc.exe", &["query", GAMEPAD_DRIVER_SERVICE]),
             Change::UdevRules | Change::ModulesLoad | Change::UhidLoaded => false,
         }
     }

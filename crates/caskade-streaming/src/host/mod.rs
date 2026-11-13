@@ -22,11 +22,17 @@
 //! copy the administrator step makes (§8.4); Caskade's own copy in `<data>`
 //! is only the staging. macOS hosts are not in this milestone.
 
+mod checks;
 pub mod config;
 pub mod process;
+#[cfg(feature = "net")]
+mod remote;
+mod watch;
 
 #[cfg(all(test, unix, feature = "net"))]
 mod tests;
+
+pub use checks::HostChecks;
 
 use super::secrets::{Credentials, HostSecrets};
 use crate::elevation::{Elevation, Outcome, Plan};
@@ -41,17 +47,19 @@ use process::{HostLaunch, HostRunner};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::{
-    collections::VecDeque,
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
-    time::{Duration, Instant},
+    time::Duration,
 };
 
 /// The managed tool that hosts.
 pub const TOOL: &str = "sunshine";
 /// The port the host answers `/serverinfo` on.
 pub const HTTP_PORT: u16 = 47989;
-const SETTINGS: &str = "core.streaming";
+/// The host's HTTPS port.
+pub const HTTPS_PORT: u16 = 47984;
+/// The streaming settings' namespace.
+pub(crate) const SETTINGS: &str = "core.streaming";
 
 /// Where hosting is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -85,111 +93,6 @@ pub struct HostStatus {
     /// It stays ready, so it works as soon as they can.
     #[serde(default)]
     pub unreachable: bool,
-}
-
-/// The categories Windows gives the networks this machine is on, one a
-/// line; `None` when it can't say.
-fn windows_network_category() -> Option<String> {
-    let mut command = caskade_core::quiet::command("powershell.exe");
-    command
-        .args([
-            "-NoProfile",
-            "-NonInteractive",
-            "-Command",
-            "(Get-NetConnectionProfile).NetworkCategory",
-        ])
-        .stdin(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null());
-    let output = command.output().ok()?;
-    let text = String::from_utf8_lossy(&output.stdout).into_owned();
-    (output.status.success() && !text.trim().is_empty()).then_some(text)
-}
-
-/// Whether any of these networks is one the firewall rules cover.
-fn network_lets_others_in(categories: &str) -> bool {
-    categories
-        .lines()
-        .any(|category| matches!(category.trim(), "Private" | "DomainAuthenticated"))
-}
-
-/// What this machine lets a host do (§4.4–4.5), looked at when it is ready
-/// and every [`Timing::look_every`] while it runs.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct HostChecks {
-    /// A screen to capture: a desktop session (Linux), always on Windows.
-    pub screen: bool,
-    /// Virtual pads: `/dev/uinput` writable (Linux), ViGEmBus running
-    /// (Windows).
-    pub pads: bool,
-    /// Windows lets other devices in: the firewall rules cover private and
-    /// domain networks, so a machine only on a public one can't be reached.
-    pub reachable: bool,
-}
-
-impl HostChecks {
-    /// This machine, looked at now.
-    pub fn here(os: OperatingSystem) -> Self {
-        match os {
-            OperatingSystem::Windows => Self {
-                screen: true,
-                pads: caskade_core::quiet::command("sc.exe")
-                    .args(["query", crate::elevation::windows::GAMEPAD_DRIVER_SERVICE])
-                    .stdin(std::process::Stdio::null())
-                    .stderr(std::process::Stdio::null())
-                    .output()
-                    .is_ok_and(|out| {
-                        out.status.success()
-                            && String::from_utf8_lossy(&out.stdout).contains("RUNNING")
-                    }),
-                reachable: windows_network_category()
-                    .is_none_or(|categories| network_lets_others_in(&categories)),
-            },
-            _ => Self {
-                screen: ["DISPLAY", "WAYLAND_DISPLAY"]
-                    .iter()
-                    .any(|var| std::env::var_os(var).is_some_and(|value| !value.is_empty())),
-                pads: std::fs::OpenOptions::new()
-                    .write(true)
-                    .open("/dev/uinput")
-                    .is_ok(),
-                reachable: true,
-            },
-        }
-    }
-
-    /// Everything works (tests).
-    pub fn fine(_: OperatingSystem) -> Self {
-        Self {
-            screen: true,
-            pads: true,
-            reachable: true,
-        }
-    }
-
-    /// What people are told, when anything is missing.
-    pub fn warning(self, os: OperatingSystem) -> Option<String> {
-        if !self.reachable {
-            return Some(caskade_core::tr!(
-                "Other devices can't reach this PC while Windows treats its network as public. Set the network to private in Windows Settings → Network & internet."
-            ));
-        }
-        if !self.screen {
-            return Some(caskade_core::tr!(
-                "This device has no screen for other devices to see. Connect a monitor or a display dummy plug."
-            ));
-        }
-        if !self.pads {
-            return Some(match os {
-                OperatingSystem::Windows => caskade_core::tr!(
-                    "Controllers on other devices won't work here: the controller driver isn't answering. Repair may fix it."
-                ),
-                _ => caskade_core::tr!(
-                    "Controllers on other devices won't work here until Repair sets them up."
-                ),
-            });
-        }
-        None
-    }
 }
 
 /// How switching hosting on or off ended.
@@ -233,10 +136,6 @@ impl Default for Timing {
     }
 }
 
-/// Restarts after this many crashes within [`CRASH_WINDOW`] stop.
-const CRASHES: usize = 5;
-const CRASH_WINDOW: Duration = Duration::from_secs(10 * 60);
-
 struct Inner {
     tools: ManagedTools,
     elevation: Elevation,
@@ -256,6 +155,8 @@ struct Inner {
     name: Mutex<String>,
     status: Mutex<HostStatus>,
     watch: Mutex<Option<tokio::task::JoinHandle<()>>>,
+    #[cfg(feature = "net")]
+    api: Mutex<remote::KeptApi>,
     /// One switch at a time.
     switching: tokio::sync::Mutex<()>,
 }
@@ -335,6 +236,8 @@ impl StreamingHost {
                     unreachable: false,
                 }),
                 watch: Mutex::default(),
+                #[cfg(feature = "net")]
+                api: Mutex::default(),
                 switching: tokio::sync::Mutex::new(()),
             }),
         }
@@ -417,11 +320,32 @@ impl StreamingHost {
             .hosting
     }
 
+    /// A user's own host ([`crate::existing`]), looked for on a blocking
+    /// thread: it runs programs.
+    async fn existing(&self) -> Option<crate::existing::Existing> {
+        let existing = self.inner.existing.clone();
+        tokio::task::spawn_blocking(move || existing())
+            .await
+            .ok()
+            .flatten()
+    }
+
     /// The host runs in a Flatpak sandbox (a user's own Flatpak Sunshine),
     /// so its apps' commands leave it with `flatpak-spawn --host`.
-    pub fn host_is_flatpak(&self) -> bool {
-        (self.inner.existing)()
+    pub async fn host_is_flatpak(&self) -> bool {
+        self.existing()
+            .await
             .is_some_and(|existing| existing.found == [crate::existing::Found::Flatpak])
+    }
+
+    /// Forgets the API client [`Self::api`] keeps.
+    pub(crate) fn forget_api(&self) {
+        #[cfg(feature = "net")]
+        {
+            let mut kept = caskade_core::lock(&self.inner.api);
+            kept.api = None;
+            kept.generation += 1;
+        }
     }
 
     /// Whether hosting goes through a user's own host (#258).
@@ -447,6 +371,7 @@ impl StreamingHost {
             .set(SETTINGS, serde_json::to_value(settings)?, None)
             .await
             .map_err(|error| Error::Invalid(error.to_string()))?;
+        self.forget_api();
         Ok(())
     }
 
@@ -509,7 +434,10 @@ impl StreamingHost {
     /// Writes the configuration and, the first time, the web credentials.
     /// `force` sets the credentials again (a repair): the host's copy may
     /// have drifted from the keychain's, or the keychain lost them.
+    /// The API client is made again afterwards: the credentials or the
+    /// certificate may be new.
     async fn configure(&self, program: &Path, force: bool) -> Result<Credentials> {
+        self.forget_api();
         let files = self.staged_files()?;
         let name = caskade_core::lock(&self.inner.name).clone();
         config::write(
@@ -549,6 +477,7 @@ impl StreamingHost {
                 )));
             }
         }
+        self.forget_api();
         Ok(credentials)
     }
 
@@ -563,7 +492,7 @@ impl StreamingHost {
             )));
         }
         // A user's own host: offer it instead of installing a second.
-        if self.inner.tools.managed(TOOL).await?.is_none() && (self.inner.existing)().is_some() {
+        if self.inner.tools.managed(TOOL).await?.is_none() && self.existing().await.is_some() {
             return Ok(HostOutcome::ExistingFound);
         }
         self.set_status(HostState::SettingUp, None, None);
@@ -613,8 +542,8 @@ impl StreamingHost {
         if self.existing_mode().await {
             // Only Caskade's apps go; the host and its other apps stay.
             let api = self.api().await?;
-            let caskade = crate::publish::Caskade::own(self.host_is_flatpak())?;
-            crate::publish::withdraw(&api, &caskade).await?;
+            let caskade = crate::publish::Caskade::own(self.host_is_flatpak().await)?;
+            self.checked(crate::publish::withdraw(&api, &caskade).await)?;
             self.set_mode(false, false).await?;
             self.set_status(HostState::Off, None, None);
             return Ok(HostOutcome::Off);
@@ -813,7 +742,9 @@ impl StreamingHost {
     #[cfg(feature = "net")]
     pub async fn use_existing(&self, credentials: Credentials) -> Result<HostOutcome> {
         let _switching = self.inner.switching.lock().await;
-        let cert = (self.inner.existing)()
+        let cert = self
+            .existing()
+            .await
             .and_then(|existing| existing.cert)
             .ok_or_else(|| {
                 Error::Invalid(caskade_core::tr!(
@@ -838,215 +769,6 @@ impl StreamingHost {
         self.set_mode(true, true).await?;
         self.set_status(HostState::Ready, Some(version), None);
         Ok(HostOutcome::On)
-    }
-
-    /// Starts it again after a pause, with its configuration rewritten.
-    async fn resume(&self) {
-        let prepared = async {
-            let program = self.program(false).await?;
-            if self.inner.os != OperatingSystem::Windows {
-                self.configure(&program, false).await?;
-            }
-            Ok::<_, Error>(program)
-        }
-        .await;
-        match prepared {
-            Ok(program) => self.run(&program).await,
-            Err(error) => {
-                tracing::warn!(%error, "streaming host not started");
-                self.set_status(HostState::NeedsAttention, None, Some(not_working()));
-            }
-        }
-    }
-
-    /// Starts the host and watches it.
-    async fn run(&self, program: &Path) {
-        let launch = match self.launch(program) {
-            Ok(launch) => launch,
-            Err(error) => {
-                tracing::warn!(%error, "streaming host not started");
-                self.set_status(HostState::NeedsAttention, None, Some(not_working()));
-                return;
-            }
-        };
-        let this = self.clone();
-        let watch = tokio::spawn(async move { this.watch(launch).await });
-        if let Some(old) = caskade_core::lock(&self.inner.watch).replace(watch) {
-            old.abort();
-        }
-    }
-
-    /// Starts, waits for it to answer, and restarts it after a crash.
-    async fn watch(&self, launch: HostLaunch) {
-        let mut crashes: VecDeque<Instant> = VecDeque::new();
-        loop {
-            self.set_status(HostState::Starting, None, None);
-            let runner = self.inner.runner.clone();
-            let started = {
-                let launch = launch.clone();
-                tokio::task::spawn_blocking(move || runner.start(&launch)).await
-            };
-            if !matches!(started, Ok(Ok(()))) {
-                tracing::warn!("streaming host didn't start");
-                self.set_status(HostState::NeedsAttention, None, Some(not_working()));
-                return;
-            }
-            match self.until_ready().await {
-                Ok(version) => self.set_ready(version).await,
-                Err(error) => {
-                    tracing::warn!(%error, "streaming host isn't answering");
-                    self.set_status(HostState::NeedsAttention, None, Some(not_working()));
-                    let runner = self.inner.runner.clone();
-                    let _ = tokio::task::spawn_blocking(move || runner.stop()).await;
-                    return;
-                }
-            }
-            // The network can change under a running host. A look is never
-            // waited for here, so a slow one can't hide a crash, and there
-            // is one at a time. Status reads get what the last one found.
-            let mut look: Option<tokio::task::JoinHandle<HostChecks>> = None;
-            let mut looked = Instant::now();
-            while self.inner.runner.running() {
-                tokio::time::sleep(self.inner.timing.watch_every).await;
-                if let Some(finished) = look.take_if(|look| look.is_finished())
-                    && let Ok(checks) = finished.await
-                {
-                    self.show_checks(checks);
-                }
-                if look.is_none() && looked.elapsed() >= self.inner.timing.look_every {
-                    looked = Instant::now();
-                    look = Some(self.look());
-                }
-            }
-            let now = Instant::now();
-            crashes.push_back(now);
-            while crashes
-                .front()
-                .is_some_and(|at| now.duration_since(*at) > CRASH_WINDOW)
-            {
-                crashes.pop_front();
-            }
-            tracing::warn!(
-                crashes = crashes.len(),
-                "streaming host stopped unexpectedly"
-            );
-            if crashes.len() >= CRASHES {
-                self.set_status(HostState::NeedsAttention, None, Some(not_working()));
-                return;
-            }
-            let wait = self.inner.timing.restart_after * 2u32.pow(crashes.len() as u32 - 1);
-            tokio::time::sleep(wait).await;
-        }
-    }
-
-    /// Waits for the started host to answer; its version.
-    async fn until_ready(&self) -> Result<Option<String>> {
-        #[cfg(feature = "net")]
-        {
-            let deadline = Instant::now() + self.inner.timing.ready_wait;
-            loop {
-                let answer = async { self.api().await?.version().await }.await;
-                match answer {
-                    Ok(version) => return Ok(Some(version)),
-                    // A refused sign-in won't change by waiting.
-                    Err(error @ Error::Forbidden(_)) => return Err(error),
-                    Err(_) if !self.inner.runner.running() => {
-                        return Err(Error::Invalid(not_working()));
-                    }
-                    Err(error) if Instant::now() >= deadline => return Err(error),
-                    Err(_) => tokio::time::sleep(Duration::from_millis(500)).await,
-                }
-            }
-        }
-        #[cfg(not(feature = "net"))]
-        Ok(None)
-    }
-
-    /// Stops watching and stops the host.
-    async fn halt(&self) {
-        if let Some(watch) = caskade_core::lock(&self.inner.watch).take() {
-            watch.abort();
-        }
-        let runner = self.inner.runner.clone();
-        let _ = tokio::task::spawn_blocking(move || runner.stop()).await;
-        self.set_status(HostState::Off, None, None);
-    }
-
-    /// When Caskade quits: the host stops with it (blocking). A window
-    /// closed to the tray doesn't quit, so the host keeps running.
-    pub fn shutdown(&self) {
-        if let Some(watch) = caskade_core::lock(&self.inner.watch).take() {
-            watch.abort();
-        }
-        if let Err(error) = self.inner.runner.stop() {
-            tracing::warn!(%error, "streaming host didn't stop");
-        }
-        self.set_status(HostState::Off, None, None);
-    }
-
-    /// This host's streaming id, as clients know it: its `/serverinfo`
-    /// `uniqueid`. `None` when it isn't answering.
-    #[cfg(feature = "net")]
-    pub async fn host_id(&self) -> Option<String> {
-        crate::hosts::ask_server_info("127.0.0.1", self.inner.http_port)
-            .await
-            .map(|info| info.id)
-    }
-
-    /// Devices waiting to pair (#263); expired ones are gone from the list.
-    #[cfg(feature = "net")]
-    pub async fn pair_requests(&self) -> Result<Vec<crate::api::PairRequest>> {
-        self.api().await?.pair_requests().await
-    }
-
-    /// Enters the code device `id` shows, naming it `name`.
-    #[cfg(feature = "net")]
-    pub async fn accept_pairing(&self, id: &str, pin: &str, name: &str) -> Result<()> {
-        let pin = pin.trim();
-        if pin.len() != 4 || !pin.bytes().all(|b| b.is_ascii_digit()) {
-            return Err(Error::Invalid(caskade_core::tr!("The code is four digits")));
-        }
-        self.api().await?.accept_pairing(id, pin, name.trim()).await
-    }
-
-    #[cfg(feature = "net")]
-    pub async fn decline_pairing(&self, id: &str) -> Result<()> {
-        self.api().await?.decline_pairing(id).await
-    }
-
-    /// The devices paired with this host.
-    #[cfg(feature = "net")]
-    pub async fn paired_devices(&self) -> Result<Vec<crate::api::PairedClient>> {
-        self.api().await?.paired_clients().await
-    }
-
-    #[cfg(feature = "net")]
-    pub async fn unpair(&self, uuid: &str) -> Result<()> {
-        self.api().await?.unpair(uuid).await
-    }
-
-    /// Forgets every paired device: each pairs again with a code.
-    #[cfg(feature = "net")]
-    pub async fn unpair_all(&self) -> Result<()> {
-        self.api().await?.unpair_all().await
-    }
-
-    /// The running host's API (publishing games, pairing).
-    #[cfg(feature = "net")]
-    pub async fn api(&self) -> Result<crate::api::HostApi> {
-        let (credentials, cert) = if self.existing_mode().await {
-            let cert = (self.inner.existing)()
-                .and_then(|existing| existing.cert)
-                .ok_or_else(|| Error::Invalid(not_working()))?;
-            (self.inner.secrets.existing().await?, cert)
-        } else {
-            (
-                self.inner.secrets.get().await?,
-                self.running_files()?.cert(),
-            )
-        };
-        let credentials = credentials.ok_or_else(|| Error::Invalid(not_working()))?;
-        crate::api::HostApi::with_cert_file(self.inner.api_base.clone(), credentials, &cert)
     }
 }
 

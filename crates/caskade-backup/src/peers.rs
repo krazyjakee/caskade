@@ -28,14 +28,14 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use specta::Type;
 
-use super::schedule::BackupSettings;
+use super::export::{EXTENSION, PREFIX};
+use super::schedule::{BackupSettings, NAMESPACE};
 use caskade_core::saves::versions::{BlobStore, hash_file};
 use caskade_core::settings::SettingsService;
 use caskade_core::sync::blobs::{BlobKind, BlobWriter};
 use caskade_core::sync::policy::Category;
 use caskade_core::{Error, Result};
 
-const SETTINGS: &str = "core.backups";
 const INDEX: &str = "index.json";
 
 /// A backup one device holds of another.
@@ -145,7 +145,7 @@ impl PeerBackups {
     }
 
     async fn settings(&self) -> BackupSettings {
-        self.inner.settings.read_or_default(SETTINGS).await
+        self.inner.settings.read_or_default(NAMESPACE).await
     }
 
     /// This device's newest verified backups, as many as the automatic set
@@ -153,11 +153,7 @@ impl PeerBackups {
     async fn own(&self) -> Vec<(PathBuf, Offer)> {
         let settings = self.settings().await;
         let keep = usize::try_from(settings.keep.max(1)).unwrap_or(usize::MAX);
-        let destination = if settings.destination.trim().is_empty() {
-            self.inner.default_destination.clone()
-        } else {
-            PathBuf::from(settings.destination)
-        };
+        let destination = settings.destination_or(self.inner.default_destination.clone());
         let inner = self.inner.clone();
         tokio::task::spawn_blocking(move || {
             let Ok(entries) = std::fs::read_dir(&destination) else {
@@ -167,7 +163,7 @@ impl PeerBackups {
                 .flatten()
                 .filter(|entry| {
                     let name = entry.file_name().to_string_lossy().into_owned();
-                    name.starts_with("caskade-backup-") && name.ends_with(".zip")
+                    name.starts_with(PREFIX) && name.ends_with(&format!(".{EXTENSION}"))
                 })
                 .filter_map(|entry| {
                     let meta = entry.metadata().ok().filter(|meta| meta.is_file())?;
@@ -301,7 +297,6 @@ impl PeerBackups {
                 size: offer.size,
                 created_ms: offer.created_ms,
             });
-            // The newest `keep` of each device.
             held.sort_by_key(|backup| std::cmp::Reverse(backup.created_ms));
             let mut counts: HashMap<String, usize> = HashMap::new();
             held.retain(|backup| {
@@ -339,6 +334,19 @@ impl PeerBackups {
     async fn serving(&self, hash: &str) -> Option<PathBuf> {
         if self.inner.store.has(hash) {
             return self.inner.store.path(hash);
+        }
+        // Read a chunk at a time: the hash already known, unless the file
+        // changed since.
+        let known = caskade_core::lock(&self.inner.hashes)
+            .iter()
+            .find(|(_, (_, _, known))| known == hash)
+            .map(|(path, (size, at, _))| (path.clone(), *size, *at));
+        if let Some((path, size, at)) = known
+            && tokio::fs::metadata(&path)
+                .await
+                .is_ok_and(|meta| meta.len() == size && meta.modified().ok() == Some(at))
+        {
+            return Some(path);
         }
         self.own()
             .await

@@ -28,7 +28,7 @@ use std::sync::{Arc, Mutex};
 use futures_util::StreamExt as _;
 pub use iroh::endpoint::Connection;
 use iroh::protocol::{AcceptError, ProtocolHandler};
-use iroh::{Endpoint, EndpointAddr, EndpointId, RelayMode, TransportAddr, endpoint::presets};
+use iroh::{Endpoint, EndpointAddr, EndpointId, TransportAddr};
 use iroh_blobs::api::blobs::{AddPathOptions, ExportMode, ExportOptions, ImportMode};
 use iroh_blobs::api::remote::GetProgressItem;
 use iroh_blobs::format::collection::Collection;
@@ -40,18 +40,16 @@ use iroh_blobs::provider::events::{
 use iroh_blobs::store::fs::FsStore;
 use iroh_blobs::store::fs::options::Options as StoreOptions;
 use iroh_blobs::store::{GcConfig, ProtectOutcome};
-use iroh_blobs::{BlobFormat, Hash, HashAndFormat};
-
-pub use iroh_blobs::BlobsProtocol;
+use iroh_blobs::{BlobFormat, BlobsProtocol, Hash, HashAndFormat};
 
 use crate::error::{Error, Result};
 use crate::identity::Identity;
-use crate::punch::{OpenPort, addrs_of, bind_again, on_port};
+use crate::punch::{OpenPort, addrs_of, bind_again, on_port, relay_free};
 
 /// Files one collection may hold.
 pub const MAX_FILES: usize = 1_000_000;
 
-fn store_error(error: impl std::fmt::Display) -> Error {
+pub(crate) fn store_error(error: impl std::fmt::Display) -> Error {
     Error::Copy {
         reason: error.to_string(),
     }
@@ -173,7 +171,7 @@ impl CopyStore {
     }
 
     /// The iroh-blobs store, opened the first time it's asked for.
-    async fn store(&self) -> Result<&FsStore> {
+    pub(crate) async fn store(&self) -> Result<&FsStore> {
         self.opened
             .get_or_try_init(|| async {
                 let started = self.collections.clone();
@@ -297,12 +295,6 @@ impl CopyStore {
             size: total,
             files: count,
         })
-    }
-
-    /// The iroh-blobs store, for this crate's other transfers (shares'
-    /// swarm, #249).
-    pub(crate) async fn blobs(&self) -> Result<&FsStore> {
-        self.store().await
     }
 
     /// Bytes of the collection `root` this store has, verified.
@@ -491,7 +483,7 @@ impl ProtocolHandler for OnRouter {
     }
 }
 
-fn parse(root: &str) -> Result<Hash> {
+pub(crate) fn parse(root: &str) -> Result<Hash> {
     Hash::from_str(root).map_err(|_| store_error("that isn't a collection"))
 }
 
@@ -727,22 +719,7 @@ impl DirectDialer {
     /// Binds one for `identity` (a throwaway key when `None`, for tests), on
     /// loopback only when `loopback`.
     pub async fn bind(identity: Option<&Identity>, loopback: bool) -> Result<Self> {
-        let mut builder = Endpoint::builder(presets::Minimal)
-            .relay_mode(RelayMode::Disabled)
-            .clear_address_lookup();
-        if loopback {
-            builder = builder
-                .clear_ip_transports()
-                .bind_addr(std::net::SocketAddrV4::new(
-                    std::net::Ipv4Addr::LOCALHOST,
-                    0,
-                ))
-                .expect("127.0.0.1 is a valid bind address");
-        }
-        if let Some(identity) = identity {
-            builder = builder.secret_key(identity.secret_key().clone());
-        }
-        let endpoint = builder
+        let endpoint = relay_free(identity, loopback)
             .bind()
             .await
             .map_err(|source| Error::Bind { source })?;

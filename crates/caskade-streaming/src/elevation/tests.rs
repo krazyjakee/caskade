@@ -126,11 +126,7 @@ async fn a_cancelled_refused_or_failed_prompt_changes_nothing() {
         *fake.fail.lock().unwrap() = fail;
         let outcome = elevation.apply(Plan::StreamingHost).await;
         match expected {
-            Some(expected) => {
-                let outcome = outcome.unwrap();
-                assert!(outcome.message().is_some());
-                assert_eq!(outcome, expected);
-            }
+            Some(expected) => assert_eq!(outcome.unwrap(), expected),
             None => assert!(outcome.is_err()),
         }
         assert_eq!(fake.requests.lock().unwrap().len(), 1, "one prompt");

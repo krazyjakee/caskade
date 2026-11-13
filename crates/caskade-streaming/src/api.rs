@@ -198,10 +198,6 @@ impl std::fmt::Debug for HostApi {
     }
 }
 
-fn net(error: reqwest::Error) -> Error {
-    caskade_core::error::net(error)
-}
-
 impl HostApi {
     /// A client for `base` that trusts only `cert` (DER).
     pub fn new(base: Url, credentials: Credentials, cert: CertificateDer<'static>) -> Result<Self> {
@@ -213,7 +209,7 @@ impl HostApi {
             .redirect(reqwest::redirect::Policy::none())
             .no_proxy()
             .build()
-            .map_err(net)?;
+            .map_err(caskade_core::error::net)?;
         Ok(Self {
             base,
             credentials,
@@ -244,7 +240,7 @@ impl HostApi {
             .header(reqwest::header::ACCEPT, "application/json")
             .send()
             .await
-            .map_err(net)?;
+            .map_err(caskade_core::error::net)?;
         match response.status() {
             status if status.is_success() => Ok(response),
             reqwest::StatusCode::UNAUTHORIZED | reqwest::StatusCode::FORBIDDEN => {
@@ -261,7 +257,7 @@ impl HostApi {
 
     async fn json<T: serde::de::DeserializeOwned>(&self, path: &str) -> Result<T> {
         let response = self.send(self.client.get(self.url(path)?)).await?;
-        let body = response.bytes().await.map_err(net)?;
+        let body = response.bytes().await.map_err(caskade_core::error::net)?;
         serde_json::from_slice(&body).map_err(|error| Error::Invalid(error.to_string()))
     }
 
@@ -285,14 +281,7 @@ impl HostApi {
     pub async fn add_app(&self, app: &App) -> Result<()> {
         let mut body = serde_json::to_value(app)?;
         body["index"] = serde_json::json!(-1);
-        self.send(
-            self.client
-                .post(self.url("api/apps")?)
-                .header(reqwest::header::CONTENT_TYPE, "application/json")
-                .body(serde_json::to_vec(&body)?),
-        )
-        .await?;
-        Ok(())
+        self.post_json("api/apps", body).await
     }
 
     /// Devices waiting to pair (Sunshine 2026.906 and later): they expire

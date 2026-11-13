@@ -20,8 +20,6 @@ caskade-sync = { path = "../caskade-sync", optional = true }
 async-trait = "0.1"
 # Game covers published to the host (`publish`); caskade-core's pin.
 image = { version = "=0.25.10", default-features = false, features = ["png", "jpeg", "webp", "ico"] }
-# The host's credentials, in the OS keychain (`secrets`).
-keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service", "crypto-rust"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"

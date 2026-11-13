@@ -7,13 +7,8 @@ rust-version.workspace = true
 # Integration tests are declared below, not discovered from tests/.
 autotests = false
 
-[features]
-default = ["net"]
-# Backups kept on another of the user's devices (`peers`).
-net = ["caskade-core/net"]
-
 [dependencies]
-caskade-core = { path = "../caskade-core", default-features = false }
+caskade-core = { path = "../caskade-core", default-features = false, features = ["net"] }
 caskade-jobs = { path = "../caskade-jobs" }
 async-trait = "0.1"
 # Free space at the destination, same as the core.

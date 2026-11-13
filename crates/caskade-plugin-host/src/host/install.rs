@@ -71,6 +71,7 @@ impl PluginHost {
             enabled: false,
             needs_consent: false,
             live: tokio::sync::Mutex::default(),
+            seen: std::sync::Mutex::default(),
         };
         let mut plugin = entry.summary(&id, None, &self.language.current());
         plugin.settings_error = entry
@@ -101,7 +102,7 @@ impl PluginHost {
         let source = folder.canonicalize()?;
         if target.exists() && target.canonicalize()? != source {
             self.deactivate(&manifest.id).await.ok();
-            std::fs::remove_dir_all(&target)?;
+            tokio::fs::remove_dir_all(&target).await?;
         }
         if !target.exists() {
             let (from, to) = (source.clone(), target.clone());
@@ -133,7 +134,7 @@ impl PluginHost {
             folder.parent() == Some(root.as_path())
         });
         if installed {
-            std::fs::remove_dir_all(&folder)?;
+            tokio::fs::remove_dir_all(&folder).await?;
         }
         if keep_data {
             // Not enabled and nothing granted: a reinstall is reviewed again.
@@ -159,7 +160,7 @@ impl PluginHost {
         }
         let data = self.options.data.join(id);
         if data.exists() {
-            std::fs::remove_dir_all(&data)?;
+            tokio::fs::remove_dir_all(&data).await?;
         }
         write(&self.entries).remove(id);
         write(&self.settings_errors).remove(id);

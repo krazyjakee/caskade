@@ -387,7 +387,7 @@ impl Shares {
     }
 
     /// This device's own direct addresses, for the share's other recipients.
-    async fn own_addrs(&self) -> Vec<SocketAddr> {
+    pub(super) async fn own_addrs(&self) -> Vec<SocketAddr> {
         self.inner
             .devices
             .link_addr(Duration::ZERO)
@@ -540,21 +540,18 @@ impl ShareFetcher {
     }
 
     /// Whether there's room for what's still to come, and the install.
-    fn room(&self, size: u64, have: u64, root: &Path) -> std::result::Result<(), FetchFailure> {
-        let incoming = &self.shares.inner.incoming_dir;
-        let _ = std::fs::create_dir_all(incoming);
-        let cache_free = fs2::available_space(incoming).unwrap_or(u64::MAX);
-        let root_free = fs2::available_space(root).unwrap_or(u64::MAX);
-        let to_come = size.saturating_sub(have);
-        let same_disk = fs2::total_space(incoming).ok() == fs2::total_space(root).ok()
-            && cache_free == root_free;
-        let short = if same_disk {
-            to_come.saturating_add(size).saturating_sub(root_free)
-        } else {
-            to_come
-                .saturating_sub(cache_free)
-                .max(size.saturating_sub(root_free))
-        };
+    async fn room(
+        &self,
+        size: u64,
+        have: u64,
+        root: &Path,
+    ) -> std::result::Result<(), FetchFailure> {
+        let (incoming, root) = (self.shares.inner.incoming_dir.clone(), root.to_owned());
+        let short = tokio::task::spawn_blocking(move || {
+            caskade_core::transfer::shortfall(&incoming, &root, size, have)
+        })
+        .await
+        .map_err(|error| FetchFailure::Failed(Error::Io(std::io::Error::other(error))))?;
         if short > 0 {
             return Err(FetchFailure::Failed(Error::Invalid(caskade_core::tr!(
                 "there isn't enough room for the game: {short} more is needed",
@@ -598,7 +595,7 @@ impl PeerFetcher for ShareFetcher {
             .await
             .unwrap_or(0)
             .min(offered.size);
-        self.room(offered.size, have, root)?;
+        self.room(offered.size, have, root).await?;
 
         if session.direct_path(PUNCH_WAIT).await.is_none() {
             session.close();
@@ -639,7 +636,6 @@ impl PeerFetcher for ShareFetcher {
                 .filter_map(|(id, addrs)| Some((id.parse::<EndpointId>().ok()?, addrs))),
         );
 
-        // Serves what it has to the share's other recipients meanwhile.
         {
             let mut received = lock(&shares.inner.received);
             let share = received
@@ -749,7 +745,7 @@ impl PeerFetcher for ShareFetcher {
         };
         let staging = shares.inner.incoming_dir.join(job);
         let folder = staging.join(caskade_core::transfer::folder_name(&target.title));
-        let _ = std::fs::remove_dir_all(&staging);
+        let _ = tokio::fs::remove_dir_all(&staging).await;
         let transfers = &shares.inner.transfers;
         let exported = if keep {
             transfers.export_copy(&offered.root, &folder).await
@@ -805,7 +801,6 @@ impl PeerFetcher for ShareFetcher {
         if release {
             let _ = shares.inner.transfers.release(&tag(job)).await;
         }
-        // It's here: a notification, opening the game.
         if let Some(bus) = shares.inner.bus.get() {
             let snapshot = shares.inner.install.job(job);
             bus.emit(caskade_core::bus::Event::ShareArrived {

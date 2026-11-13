@@ -9,13 +9,15 @@
 
 use super::{
     client::{SETTINGS_DIR, SETTINGS_FILE, StreamingClient},
-    gamestream::{self, HostLink},
-    hosts::{HTTP_PORT, PairedHost, StreamHosts, ask_server_info, paired_hosts},
+    gamestream::HostLink,
+    host::{HTTP_PORT, HTTPS_PORT, SETTINGS},
+    hosts::{PairedHost, StreamHosts, ask_server_info, paired_hosts},
     pairing::{Endpoint, Identity},
 };
 use async_trait::async_trait;
 use caskade_core::{
     launch::{ClientLine, HostBusy, LaunchError, StreamLauncher, StreamStart, WindowPlacement},
+    remote_play::{wake, wake_targets},
     settings::{SettingsService, StreamingSettings},
 };
 use std::{
@@ -26,9 +28,6 @@ use std::{
     time::{Duration, Instant},
 };
 use tokio_util::sync::CancellationToken;
-
-/// The host's HTTPS port.
-pub const HTTPS_PORT: u16 = 47984;
 
 /// How long things may take (shorter in tests).
 #[derive(Debug, Clone, Copy)]
@@ -90,19 +89,19 @@ fn refused(text: String) -> LaunchError {
     LaunchError::Refused(text)
 }
 
-fn not_paired(device: &str) -> LaunchError {
-    refused(caskade_core::tr!(
+fn not_paired(device: &str) -> String {
+    caskade_core::tr!(
         "{device} no longer knows this device. Pair them again in Settings → Streaming.",
         device = device
-    ))
+    )
 }
 
-fn not_offered(device: &str, game: &str) -> LaunchError {
-    refused(caskade_core::tr!(
+fn not_offered(device: &str, game: &str) -> String {
+    caskade_core::tr!(
         "{device} no longer offers {game}.",
         device = device,
         game = game
-    ))
+    )
 }
 
 fn launch_error(error: caskade_core::Error) -> LaunchError {
@@ -190,21 +189,6 @@ impl Streams {
         }
     }
 
-    fn endpoint(&self, address: &str) -> caskade_core::Result<Endpoint> {
-        let host = match address.parse::<IpAddr>() {
-            Ok(IpAddr::V6(ip)) => format!("[{ip}]"),
-            _ => address.to_owned(),
-        };
-        let (http, https) = self.inner.ports;
-        let invalid = |error: url::ParseError| caskade_core::Error::Invalid(error.to_string());
-        Ok(Endpoint {
-            http: format!("http://{host}:{http}/").parse().map_err(invalid)?,
-            https: format!("https://{host}:{https}/")
-                .parse()
-                .map_err(invalid)?,
-        })
-    }
-
     /// Where the host answers now: where it was last found, then each
     /// address it was paired or reached at. Wakes it when none answers
     /// and its MAC is known.
@@ -241,10 +225,10 @@ impl Streams {
             .inner
             .wake_to
             .clone()
-            .unwrap_or_else(|| gamestream::wake_targets(&ips));
+            .unwrap_or_else(|| wake_targets(&ips));
         let deadline = Instant::now() + self.inner.timing.wake;
         while Instant::now() < deadline {
-            if let Err(error) = gamestream::wake(mac, &targets).await {
+            if let Err(error) = wake(mac, &targets).await {
                 tracing::debug!(%error, "wake-up not sent");
             }
             tokio::time::sleep(self.inner.timing.poll).await;
@@ -285,8 +269,7 @@ impl Streams {
 
     /// The client's arguments for streaming `app` from `address`.
     async fn args(&self, address: &str, app: &str) -> Vec<OsString> {
-        let settings: StreamingSettings =
-            self.inner.settings.read_or_default("core.streaming").await;
+        let settings: StreamingSettings = self.inner.settings.read_or_default(SETTINGS).await;
         let mut args: Vec<OsString> = vec![
             "stream".into(),
             address.into(),
@@ -359,16 +342,9 @@ pub fn client_failure(line: &str, device: &str, game: &str) -> Option<String> {
         .or_else(|| line.find("Qt Fatal:"))?;
     let text = &line[at..];
     Some(if text.contains("Failed to find application") {
-        caskade_core::tr!(
-            "{device} no longer offers {game}.",
-            device = device,
-            game = game
-        )
+        not_offered(device, game)
     } else if text.contains("has not been paired") {
-        caskade_core::tr!(
-            "{device} no longer knows this device. Pair them again in Settings → Streaming.",
-            device = device
-        )
+        not_paired(device)
     } else if text.contains("Failed to start the specified application") {
         caskade_core::tr!(
             "{device} couldn't start {game}.",
@@ -424,14 +400,15 @@ impl StreamLauncher for Streams {
             .find(|record| record.id.eq_ignore_ascii_case(host));
         let device = self.device_name(record.as_ref(), host);
         let (Some(record), Some(identity)) = (record, Identity::from_settings(&settings)) else {
-            return Err(not_paired(&device));
+            return Err(refused(not_paired(&device)));
         };
         let Some(cert) = record.server_cert_pem.clone() else {
-            return Err(not_paired(&device));
+            return Err(refused(not_paired(&device)));
         };
         let address = self.reach(&record, &device).await?;
+        let (http, https) = self.inner.ports;
         let link = HostLink::new(
-            self.endpoint(&address).map_err(launch_error)?,
+            Endpoint::at(&address, http, https).map_err(launch_error)?,
             &identity,
             &cert,
         )
@@ -445,7 +422,7 @@ impl StreamLauncher for Streams {
         };
         let state = link.state().await.map_err(unreachable)?;
         if !state.paired {
-            return Err(not_paired(&device));
+            return Err(refused(not_paired(&device)));
         }
         let apps = link.apps().await.map_err(unreachable)?;
         let wanted = apps
@@ -456,7 +433,7 @@ impl StreamLauncher for Streams {
                     .find(|offered| offered.name.eq_ignore_ascii_case(app))
             })
             .cloned()
-            .ok_or_else(|| not_offered(&device, app))?;
+            .ok_or_else(|| refused(not_offered(&device, app)))?;
         if let Some(playing) = state.playing.filter(|playing| *playing != wanted.id) {
             if !stop_host {
                 return Err(LaunchError::HostBusy(Box::new(HostBusy {

@@ -30,6 +30,7 @@ pub mod publish;
 pub mod secrets;
 #[cfg(all(test, feature = "net"))]
 mod testing;
+mod util;
 
 pub use client::{Client, StreamingClient};
 pub use host::{HostOutcome, HostState, HostStatus, StreamingHost};

@@ -6,12 +6,16 @@
 //! Each is asked `/serverinfo` (no pairing needed) for its name, id and
 //! whether it is busy; one that doesn't answer is asleep when its MAC is
 //! known (Moonlight wakes it first), else unreachable. A paired host's apps
-//! become releases of library games ([`LibraryStore::sync_stream_apps`]),
+//! become releases of library games ([`LibraryStore::sync_stream_apps`]):
+//! the host is asked for them directly, and when it doesn't answer they are
 //! read from the client's state after `moonlight list` refreshed them.
 
 use super::{
     client::{SETTINGS_DIR, SETTINGS_FILE, StreamingClient},
+    host::{HTTP_PORT, SETTINGS},
     mdns,
+    pairing::Identity,
+    util::{tag, url_host},
 };
 use caskade_core::{
     Error, Result,
@@ -28,9 +32,6 @@ use std::{
     time::{Duration, Instant},
 };
 
-/// The port hosts answer `/serverinfo` on.
-pub const HTTP_PORT: u16 = 47989;
-const SETTINGS: &str = "core.streaming";
 /// Where the id of this device's own host stays across restarts. Never in a
 /// backup: restored on another PC, it would hide this one from it.
 pub const OWN_HOST_KEY: &str = "streaming.ownHost";
@@ -71,13 +72,6 @@ pub struct ServerInfo {
     pub busy: bool,
 }
 
-fn tag<'a>(xml: &'a str, name: &str) -> Option<&'a str> {
-    let open = format!("<{name}>");
-    let start = xml.find(&open)? + open.len();
-    let end = xml[start..].find(&format!("</{name}>"))? + start;
-    Some(xml[start..end].trim())
-}
-
 /// Reads `/serverinfo`'s answer.
 pub fn server_info(xml: &str) -> Option<ServerInfo> {
     let name = tag(xml, "hostname")?;
@@ -96,19 +90,25 @@ pub fn server_info(xml: &str) -> Option<ServerInfo> {
 
 /// Asks the host at `address` its `/serverinfo`, with a short timeout.
 pub async fn ask_server_info(address: &str, port: u16) -> Option<ServerInfo> {
-    let host = match address.parse::<IpAddr>() {
-        Ok(IpAddr::V6(ip)) => format!("[{ip}]"),
-        _ => address.to_owned(),
-    };
-    let url = format!(
-        "http://{host}:{port}/serverinfo?uniqueid=0123456789ABCDEF&uuid={}",
-        uuid::Uuid::new_v4().simple()
-    );
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(3))
         .no_proxy()
         .build()
         .ok()?;
+    ask_server_info_with(&client, address, port).await
+}
+
+/// [`ask_server_info`] through `client`.
+async fn ask_server_info_with(
+    client: &reqwest::Client,
+    address: &str,
+    port: u16,
+) -> Option<ServerInfo> {
+    let url = format!(
+        "http://{}:{port}/serverinfo?uniqueid=0123456789ABCDEF&uuid={}",
+        url_host(address),
+        uuid::Uuid::new_v4().simple()
+    );
     let body = client.get(url).send().await.ok()?.text().await.ok()?;
     server_info(&body)
 }
@@ -172,6 +172,11 @@ pub fn qt_raw_bytes(value: &str) -> Option<Vec<u8>> {
     Some(out)
 }
 
+/// A Qt settings `@ByteArray(...)` value holding text.
+pub fn qt_text(value: &str) -> Option<String> {
+    String::from_utf8(qt_raw_bytes(value)?).ok()
+}
+
 /// The paired hosts in a client state file (Qt settings: `N\key=value`).
 pub fn paired_hosts(settings: &str) -> Vec<PairedHost> {
     let mut in_hosts = false;
@@ -206,7 +211,7 @@ pub fn paired_hosts(settings: &str) -> Vec<PairedHost> {
                 entry.mac = qt_raw_bytes(value).and_then(|bytes| bytes.try_into().ok());
                 entry.wakeable = entry.mac.is_some();
             }
-            ["srvcert"] => entry.server_cert_pem = super::pairing::qt_bytes(value),
+            ["srvcert"] => entry.server_cert_pem = qt_text(value),
             ["apps", app, field] => {
                 let Ok(app) = app.parse::<u32>() else {
                     continue;
@@ -262,6 +267,9 @@ impl Default for HostTiming {
     }
 }
 
+/// A host's apps, and the device it is on.
+type MadeFrom = (Vec<StreamApp>, Option<String>);
+
 struct Inner {
     store: LibraryStore,
     bus: Bus,
@@ -275,6 +283,9 @@ struct Inner {
     apps_at: Mutex<HashMap<String, Instant>>,
     /// What each host last said it offers, asked directly.
     apps: Mutex<HashMap<String, Vec<StreamApp>>>,
+    /// What each host's releases were last made from (its apps, and the
+    /// device it is on): the library is written again only when it changes.
+    synced: Mutex<HashMap<String, MadeFrom>>,
     /// The client's state folder, when a test gives one.
     state: Option<std::path::PathBuf>,
     refreshing: tokio::sync::Mutex<()>,
@@ -338,6 +349,7 @@ impl StreamHosts {
                 hosts: Mutex::default(),
                 apps_at: Mutex::default(),
                 apps: Mutex::default(),
+                synced: Mutex::default(),
                 state: None,
                 refreshing: tokio::sync::Mutex::new(()),
                 devices: std::sync::OnceLock::new(),
@@ -370,7 +382,6 @@ impl StreamHosts {
         }
     }
 
-    /// Every host seen since Caskade started, by name.
     /// Names a host's games by its device's own copies when the host is a
     /// device paired through sync (#267). Set once, when devices exist.
     pub fn set_devices(&self, devices: caskade_core::devices::Devices) {
@@ -402,6 +413,7 @@ impl StreamHosts {
             .map(|device| device.id)
     }
 
+    /// Every host seen since Caskade started, by name.
     pub fn hosts(&self) -> Vec<StreamHost> {
         let mut hosts: Vec<StreamHost> = caskade_core::lock(&self.inner.hosts)
             .values()
@@ -440,31 +452,21 @@ impl StreamHosts {
     }
 
     async fn ask(&self, address: &str, port: u16) -> Option<ServerInfo> {
-        let host = match address.parse::<IpAddr>() {
-            Ok(IpAddr::V6(ip)) => format!("[{ip}]"),
-            _ => address.to_owned(),
-        };
-        let url = format!(
-            "http://{host}:{port}/serverinfo?uniqueid=0123456789ABCDEF&uuid={}",
-            uuid::Uuid::new_v4().simple()
-        );
-        let response = self.inner.http.get(url).send().await.ok()?;
-        let body = response.text().await.ok()?;
-        server_info(&body)
+        ask_server_info_with(&self.inner.http, address, port).await
     }
 
-    /// The client's paired hosts, when it is installed.
-    async fn paired(&self) -> Vec<PairedHost> {
+    /// The client's state file, when it is installed.
+    async fn client_settings(&self) -> Option<String> {
         let state = match &self.inner.state {
             Some(state) => state.clone(),
-            None => match self.inner.client.state().await {
-                Ok(Some(state)) => state,
-                _ => return Vec::new(),
-            },
+            None => self.inner.client.state().await.ok()??,
         };
-        let mut hosts = std::fs::read_to_string(state.join(SETTINGS_DIR).join(SETTINGS_FILE))
-            .map(|text| paired_hosts(&text))
-            .unwrap_or_default();
+        std::fs::read_to_string(state.join(SETTINGS_DIR).join(SETTINGS_FILE)).ok()
+    }
+
+    /// The paired hosts in the client's state file `settings`.
+    fn paired(&self, settings: Option<&str>) -> Vec<PairedHost> {
+        let mut hosts = settings.map(paired_hosts).unwrap_or_default();
         hosts.retain(|host| !self.is_own(&host.id));
         hosts
     }
@@ -503,6 +505,7 @@ impl StreamHosts {
     /// or someone pressed Look again.
     pub async fn look_again(&self) -> Result<()> {
         caskade_core::lock(&self.inner.apps_at).clear();
+        caskade_core::lock(&self.inner.synced).clear();
         self.refresh().await
     }
 
@@ -529,7 +532,8 @@ impl StreamHosts {
                 .into_iter()
                 .map(|address| (address, HTTP_PORT)),
         );
-        let paired = self.paired().await;
+        let client_settings = self.client_settings().await;
+        let paired = self.paired(client_settings.as_deref());
         candidates.extend(
             paired
                 .iter()
@@ -620,23 +624,22 @@ impl StreamHosts {
         if changed {
             self.inner.bus.emit(Event::StreamHostsChanged);
         }
-        self.library(&paired).await
+        self.library(&paired, client_settings.as_deref()).await
     }
 
     /// What `host` offers, from the host itself with the client's identity.
     /// `moonlight list` can wait on box art for good, and only a clean quit
     /// saves what it found, which Windows gives no way to ask of it.
-    async fn ask_for_apps(&self, host: &PairedHost, address: &str) -> Option<Vec<StreamApp>> {
-        let state = match &self.inner.state {
-            Some(state) => state.clone(),
-            None => self.inner.client.state().await.ok()??,
-        };
-        let settings =
-            std::fs::read_to_string(state.join(SETTINGS_DIR).join(SETTINGS_FILE)).ok()?;
-        let identity = super::pairing::Identity::from_settings(&settings)?;
+    async fn ask_for_apps(
+        &self,
+        host: &PairedHost,
+        identity: Option<&Identity>,
+        address: &str,
+    ) -> Option<Vec<StreamApp>> {
+        let identity = identity?;
         let endpoint = super::pairing::Endpoint::new(address).ok()?;
         let link =
-            super::gamestream::HostLink::new(endpoint, &identity, host.server_cert_pem.as_deref()?)
+            super::gamestream::HostLink::new(endpoint, identity, host.server_cert_pem.as_deref()?)
                 .ok()?;
         match link.apps().await {
             Ok(apps) => Some(apps),
@@ -656,8 +659,9 @@ impl StreamHosts {
     }
 
     /// Paired hosts' apps as library releases; a reachable host's list is
-    /// fetched again now and then.
-    async fn library(&self, paired: &[PairedHost]) -> Result<()> {
+    /// fetched again now and then. `settings` is the client's state file.
+    async fn library(&self, paired: &[PairedHost], settings: Option<&str>) -> Result<()> {
+        let identity = settings.and_then(Identity::from_settings);
         let reachable: Vec<&PairedHost> = paired
             .iter()
             .filter(|host| {
@@ -666,14 +670,15 @@ impl StreamHosts {
                     .is_some_and(|known| matches!(known.reach, HostReach::Ready | HostReach::Busy))
             })
             .collect();
-        let mut fetched = false;
+        // `moonlight list` rewrote the client's state file.
+        let mut listed = false;
         for host in reachable {
             let due = caskade_core::lock(&self.inner.apps_at)
                 .get(&host.id)
                 .is_none_or(|at| at.elapsed() >= self.inner.timing.apps_every);
             if let (true, Some(address)) = (due, &host.address) {
                 caskade_core::lock(&self.inner.apps_at).insert(host.id.clone(), Instant::now());
-                match self.ask_for_apps(host, address).await {
+                match self.ask_for_apps(host, identity.as_ref(), address).await {
                     Some(apps) => {
                         caskade_core::lock(&self.inner.apps).insert(host.id.clone(), apps);
                     }
@@ -681,13 +686,13 @@ impl StreamHosts {
                         if let Err(error) = self.inner.client.list(address).await {
                             tracing::debug!(%error, host = host.name, "app list not refreshed");
                         }
+                        listed = true;
                     }
                 }
-                fetched = true;
             }
         }
-        let paired = if fetched {
-            self.paired().await
+        let paired = if listed {
+            self.paired(self.client_settings().await.as_deref())
         } else {
             paired.to_vec()
         };
@@ -700,11 +705,19 @@ impl StreamHosts {
                 addresses.push(found);
             }
             let device = self.device_at(&addresses).await;
+            let made_from = (self.apps_of(host), device);
+            if caskade_core::lock(&self.inner.synced).get(&host.id) == Some(&made_from)
+                && self.releases_kept(&host.id, &made_from.0).await
+            {
+                continue;
+            }
+            let (apps, device) = &made_from;
             let sync = self
                 .inner
                 .store
-                .sync_stream_apps_from(&host.id, &self.apps_of(host), device.as_deref())
+                .sync_stream_apps_from(&host.id, apps, device.as_deref())
                 .await?;
+            caskade_core::lock(&self.inner.synced).insert(host.id.clone(), made_from);
             for game_id in sync.added {
                 self.inner.bus.emit(Event::LibraryGameAdded { game_id });
             }
@@ -716,6 +729,24 @@ impl StreamHosts {
             }
         }
         Ok(())
+    }
+
+    /// Whether the library still has a release for each of `apps` from
+    /// `host`, and no other: someone may have deleted one since.
+    async fn releases_kept(&self, host: &str, apps: &[StreamApp]) -> bool {
+        let Ok(entries) = self
+            .inner
+            .store
+            .entries_for_source(&format!("stream:{host}"))
+            .await
+        else {
+            return false;
+        };
+        let mut kept: Vec<&str> = entries.iter().map(|e| e.external_id.as_str()).collect();
+        let mut offered: Vec<&str> = apps.iter().map(|app| app.id.as_str()).collect();
+        kept.sort_unstable();
+        offered.sort_unstable();
+        kept == offered
     }
 
     /// Looks for hosts now and then, while Caskade runs.
@@ -731,61 +762,6 @@ impl StreamHosts {
                 }
             }
         })
-    }
-}
-
-impl StreamingClient {
-    /// The client's working directory, once it is installed.
-    pub async fn state(&self) -> Result<Option<std::path::PathBuf>> {
-        match self.installed().await? {
-            Some(install) => Ok(Some(self.state_dir(&install)?)),
-            None => Ok(None),
-        }
-    }
-
-    /// Fetches a paired host's app list into the client's state (skipped
-    /// while Moonlight runs for something else):
-    /// `moonlight list <host> --csv`, asked to quit (so it saves) after at
-    /// most 20 s, since it may wait on a game's box art for good.
-    pub async fn list(&self, address: &str) -> Result<()> {
-        let Ok(_busy) = self.busy.try_lock() else {
-            return Ok(());
-        };
-        let Some(install) = self.installed().await? else {
-            return Ok(());
-        };
-        let client = super::Client {
-            state: self.state_dir(&install)?,
-            install,
-        };
-        super::client::prepare_state(&client.state)?;
-        let mut command = tokio::process::Command::from(
-            self.command(&client, &["list".into(), address.into(), "--csv".into()])?,
-        );
-        command
-            .stdin(std::process::Stdio::null())
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .kill_on_drop(true);
-        let mut child = command.spawn()?;
-        if tokio::time::timeout(Duration::from_secs(20), child.wait())
-            .await
-            .is_err()
-        {
-            if let Some(pid) = child.id() {
-                let _ = tokio::process::Command::new("kill")
-                    .args(["-TERM", &pid.to_string()])
-                    .status()
-                    .await;
-            }
-            if tokio::time::timeout(Duration::from_secs(5), child.wait())
-                .await
-                .is_err()
-            {
-                let _ = child.kill().await;
-            }
-        }
-        Ok(())
     }
 }
 

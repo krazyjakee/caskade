@@ -201,18 +201,21 @@ impl Runtime {
             .wasm_component_model(true)
             .epoch_interruption(true)
             .parallel_compilation(false);
-        let engine = Engine::new(&config).map_err(|e| CallError::Instantiate(e.to_string()))?;
-        let mut linker = Linker::new(&engine);
-        wasmtime_wasi::p2::add_to_linker_async(&mut linker)
-            .map_err(|e| CallError::Instantiate(e.to_string()))?;
-        wasmtime_wasi_http::p2::add_only_http_to_linker_async(&mut linker)
-            .map_err(|e| CallError::Instantiate(e.to_string()))?;
-        Plugin::add_to_linker::<_, wasmtime::component::HasSelf<_>>(&mut linker, |state| state)
-            .map_err(|e| CallError::Instantiate(e.to_string()))?;
-        v0_1::Plugin::add_to_linker::<_, wasmtime::component::HasSelf<_>>(&mut linker, |state| {
-            state
-        })
-        .map_err(|e| CallError::Instantiate(e.to_string()))?;
+        let link = || -> wasmtime::Result<(Engine, Linker<State>)> {
+            let engine = Engine::new(&config)?;
+            let mut linker = Linker::new(&engine);
+            wasmtime_wasi::p2::add_to_linker_async(&mut linker)?;
+            wasmtime_wasi_http::p2::add_only_http_to_linker_async(&mut linker)?;
+            Plugin::add_to_linker::<_, wasmtime::component::HasSelf<_>>(&mut linker, |state| {
+                state
+            })?;
+            v0_1::Plugin::add_to_linker::<_, wasmtime::component::HasSelf<_>>(
+                &mut linker,
+                |state| state,
+            )?;
+            Ok((engine, linker))
+        };
+        let (engine, linker) = link().map_err(|e| CallError::Instantiate(e.to_string()))?;
         Ok(Self {
             ticker: std::sync::OnceLock::new(),
             engine,
@@ -225,7 +228,7 @@ impl Runtime {
     }
 
     /// Keeps compiled components in a verified on-disk cache from now on.
-    pub fn set_cache(&self, cache: caskade_component_cache::ComponentCache) {
+    pub(crate) fn set_cache(&self, cache: caskade_component_cache::ComponentCache) {
         *write(&self.cache) = Some(cache);
     }
 
@@ -306,7 +309,11 @@ impl Runtime {
         // A 0.2 backend, or else a 0.1 one.
         let started = match self.linker.instantiate_async(&mut store, component).await {
             Ok(instance) => match Plugin::new(&mut store, &instance) {
-                Ok(bindings) => Ok((instance, Bindings::Current(bindings), crate::HOST_API_TEXT)),
+                Ok(bindings) => Ok((
+                    instance,
+                    Bindings::Current(bindings),
+                    crate::manifest::HOST_API_TEXT,
+                )),
                 Err(current) => v0_1::Plugin::new(&mut store, &instance)
                     .map(|bindings| (instance, Bindings::V0_1(bindings), V0_1))
                     .map_err(|_| current),

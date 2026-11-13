@@ -179,10 +179,8 @@ impl Config {
                 .clear_address_lookup(),
         };
         #[cfg(feature = "test-utils")]
-        if let Relays::Local(map) = &reach.relays {
-            builder = builder
-                .relay_mode(RelayMode::Custom(map.clone()))
-                .ca_tls_config(iroh::tls::CaTlsConfig::insecure_skip_verify());
+        if let Relays::Local(_) = &reach.relays {
+            builder = reach.relays.on(builder).expect("a local relay is a relay");
         }
         builder = match reach.ip {
             Ip::Any { port: None } => builder,

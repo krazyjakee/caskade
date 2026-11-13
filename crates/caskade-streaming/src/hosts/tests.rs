@@ -299,7 +299,11 @@ async fn a_host_paired_with_itself_is_left_out_with_its_games() {
     let hosts = f.hosts.with_own_port(f.serverinfo.address().port());
     hosts.refresh().await.unwrap();
     assert_eq!(hosts.hosts(), []);
-    assert!(hosts.paired().await.is_empty());
+    assert!(
+        hosts
+            .paired(hosts.client_settings().await.as_deref())
+            .is_empty()
+    );
     let _ = &f.temp;
 }
 
@@ -328,7 +332,11 @@ async fn a_host_paired_with_itself_stays_left_out_after_a_restart() {
     f.serverinfo.reset().await;
     restarted.refresh().await.unwrap();
     assert_eq!(restarted.hosts(), []);
-    assert!(restarted.paired().await.is_empty());
+    assert!(
+        restarted
+            .paired(restarted.client_settings().await.as_deref())
+            .is_empty()
+    );
     let _ = &f.temp;
 }
 

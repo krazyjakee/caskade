@@ -6,7 +6,7 @@
 
 use crate::{
     manifest::{LibraryAccess, Manifest, Permissions, folder_mode},
-    outbound,
+    outbound::{self, Resolve, system_resolve},
 };
 use caskade_installer::fetch::grant::{entry_parts, host_matches, names_ip, public_ip};
 use std::{
@@ -20,7 +20,6 @@ use wasmtime_wasi_http::{Error, RequestOptions, Result as HttpResult, WasiBody, 
 /// subdomain of `*.domain`. Case-insensitive. An entry's port doesn't
 /// matter here; the installer's downloads follow the same rule.
 pub use caskade_installer::fetch::grant::host_allowed;
-pub use outbound::{Resolve, system_resolve};
 
 /// Whether an entry allows `port`: the port it names, or else 80 and 443.
 fn port_allowed(entry: &str, port: u16) -> bool {
@@ -33,7 +32,7 @@ fn port_allowed(entry: &str, port: u16) -> bool {
 
 /// Whether a backend may send a request to `host` on `port` (CSK-03): an
 /// entry must cover the host, and name the port unless it is 80 or 443.
-pub fn request_allowed(allowlist: &[String], host: &str, port: u16) -> bool {
+pub(crate) fn request_allowed(allowlist: &[String], host: &str, port: u16) -> bool {
     allowlist
         .iter()
         .any(|entry| host_matches(entry, host) && port_allowed(entry, port))
@@ -45,7 +44,7 @@ pub fn request_allowed(allowlist: &[String], host: &str, port: u16) -> bool {
 /// (`127.0.0.1:8384`, `[::1]`, `192.168.1.20`, or `localhost` for
 /// loopback) and allows the port. A granted name that resolves to the LAN
 /// (DNS rebinding included) is never connected to.
-pub fn address_allowed(allowlist: &[String], address: SocketAddr) -> bool {
+pub(crate) fn address_allowed(allowlist: &[String], address: SocketAddr) -> bool {
     public_ip(address.ip())
         || allowlist
             .iter()
@@ -62,7 +61,7 @@ pub struct FolderGrant {
 /// Resolves `fs` permissions such as `$HOME/ROMs:ro` against `home`.
 /// Entries that aren't absolute after expansion, or don't exist, are
 /// skipped with a warning.
-pub fn folder_grants(entries: &[String], home: Option<&Path>) -> Vec<FolderGrant> {
+pub(crate) fn folder_grants(entries: &[String], home: Option<&Path>) -> Vec<FolderGrant> {
     let mut grants = Vec::new();
     for entry in entries {
         let Some((path, read_only)) = folder_mode(entry) else {

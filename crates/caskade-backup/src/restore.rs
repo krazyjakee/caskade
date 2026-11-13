@@ -17,7 +17,6 @@ use super::{
 };
 use caskade_core::{AppPaths, db::LibraryStore};
 use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256};
 use specta::Type;
 use std::{
     collections::BTreeSet,
@@ -417,6 +416,7 @@ fn extract(
     let mut zip = zip::ZipArchive::new(fs::File::open(archive_path)?)
         .map_err(|_| BackupError::Damaged(caskade_core::tr!("the backup archive is damaged")))?;
     let mut done = 0u64;
+    let mut buffer = vec![0u8; 1024 * 1024];
     for file in manifest
         .files
         .iter()
@@ -445,39 +445,20 @@ fn extract(
         if let Some(parent) = target.parent() {
             fs::create_dir_all(parent)?;
         }
-        let mut entry = zip.by_name(&file.path).map_err(|_| {
-            BackupError::Damaged(caskade_core::tr!("“{path}” is missing", path = file.path))
-        })?;
         let partial = target.with_extension("caskade-partial");
         let mut out = fs::File::create(&partial)?;
-        let mut hash = Sha256::new();
-        let mut size = 0u64;
-        let mut buffer = vec![0u8; 1024 * 1024];
-        let mut limited = (&mut entry).take(file.size.saturating_add(1));
-        loop {
-            if cancel.is_cancelled() {
-                let _ = fs::remove_file(&partial);
-                return Err(BackupError::Cancelled);
-            }
-            let read = limited.read(&mut buffer)?;
-            if read == 0 {
-                break;
-            }
-            hash.update(&buffer[..read]);
-            out.write_all(&buffer[..read])?;
-            size += read as u64;
-            done += read as u64;
-            report(done);
+        let copied =
+            archive::copy_checked(&mut zip, file, &mut out, &mut buffer, cancel, &mut |read| {
+                done += read;
+                report(done);
+            });
+        if let Err(error) = copied {
+            drop(out);
+            let _ = fs::remove_file(&partial);
+            return Err(error);
         }
         out.sync_all()?;
         drop(out);
-        if size != file.size || format!("{:x}", hash.finalize()) != file.sha256 {
-            let _ = fs::remove_file(&partial);
-            return Err(BackupError::Damaged(caskade_core::tr!(
-                "“{path}” doesn't match its checksum",
-                path = file.path
-            )));
-        }
         fs::rename(&partial, &target)?;
     }
     Ok(())
@@ -768,6 +749,6 @@ fn move_path(from: &Path, to: &Path) -> std::io::Result<()> {
     }
 }
 
-fn join(error: tokio::task::JoinError) -> BackupError {
+pub(super) fn join(error: tokio::task::JoinError) -> BackupError {
     BackupError::Io(std::io::Error::other(error))
 }

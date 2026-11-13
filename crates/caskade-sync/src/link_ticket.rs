@@ -9,17 +9,16 @@
 //! A link's `Display` is the credential, because producing it is the point.
 //! Its `Debug` leaves the grant out.
 
-use std::collections::BTreeSet;
 use std::fmt;
 use std::str::FromStr;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use iroh::{EndpointAddr, EndpointId, TransportAddr};
+use iroh::{EndpointAddr, EndpointId};
 use iroh_tickets::{ParseError, Ticket};
-use serde::{Deserialize, Serialize};
 
 use crate::error::Error;
 use crate::grant::Grant;
+use crate::ticket::{self, LinkTicket};
 
 /// How long a pairing link works.
 pub const LINK_LIFETIME: Duration = Duration::from_secs(10 * 60);
@@ -30,39 +29,34 @@ pub const LINK_PREFIX: &str = "caskade://pair?t=";
 /// A pairing link: where the device is, a single-use grant, and when it
 /// expires.
 #[derive(Clone, PartialEq, Eq)]
-pub struct PairingLink {
-    addr: EndpointAddr,
-    grant: Grant,
-    /// Seconds since the Unix epoch.
-    expires_at: u64,
-}
+pub struct PairingLink(LinkTicket<u64>);
 
 impl PairingLink {
     /// A link to `addr` opening with `grant`, expiring at `expires_at`.
     pub fn new(addr: EndpointAddr, grant: Grant, expires_at: SystemTime) -> Self {
-        Self {
+        Self(LinkTicket {
             addr,
             grant,
             expires_at: expires_at
                 .duration_since(UNIX_EPOCH)
                 .map_or(0, |since| since.as_secs()),
-        }
+        })
     }
 
     pub fn addr(&self) -> &EndpointAddr {
-        &self.addr
+        &self.0.addr
     }
 
     pub fn peer(&self) -> EndpointId {
-        self.addr.id
+        self.0.addr.id
     }
 
     pub fn grant(&self) -> Grant {
-        self.grant
+        self.0.grant
     }
 
     pub fn expires_at(&self) -> SystemTime {
-        UNIX_EPOCH + Duration::from_secs(self.expires_at)
+        UNIX_EPOCH + Duration::from_secs(self.0.expires_at)
     }
 
     /// Whether the link says it has expired by `now`.
@@ -79,54 +73,19 @@ impl PairingLink {
     /// whitespace and case don't matter). [`Error::NotALink`] otherwise, with
     /// nothing quoted: the text is a credential.
     pub fn parse(text: &str) -> Result<Self, Error> {
-        let text = text.trim();
-        let ticket = strip_prefix_ignore_case(text, LINK_PREFIX).unwrap_or(text);
-        let ticket = ticket.split(['&', '#']).next().unwrap_or_default();
-        Self::decode_string(&ticket.to_ascii_lowercase()).map_err(|_| Error::NotALink)
+        ticket::parse(text, LINK_PREFIX, usize::MAX)
     }
-}
-
-fn strip_prefix_ignore_case<'a>(text: &'a str, prefix: &str) -> Option<&'a str> {
-    let head = text.get(..prefix.len())?;
-    head.eq_ignore_ascii_case(prefix)
-        .then(|| &text[prefix.len()..])
-}
-
-#[derive(Serialize, Deserialize)]
-enum Wire {
-    V1 {
-        id: EndpointId,
-        addrs: BTreeSet<TransportAddr>,
-        grant: [u8; 32],
-        expires_at: u64,
-    },
 }
 
 impl Ticket for PairingLink {
     const KIND: &'static str = "caskadepair";
 
     fn encode_bytes(&self) -> Vec<u8> {
-        postcard::to_stdvec(&Wire::V1 {
-            id: self.addr.id,
-            addrs: self.addr.addrs.clone(),
-            grant: *self.grant.as_bytes(),
-            expires_at: self.expires_at,
-        })
-        .expect("a pairing link serializes")
+        self.0.encode()
     }
 
     fn decode_bytes(bytes: &[u8]) -> Result<Self, ParseError> {
-        let Wire::V1 {
-            id,
-            addrs,
-            grant,
-            expires_at,
-        } = postcard::from_bytes(bytes)?;
-        Ok(Self {
-            addr: EndpointAddr { id, addrs },
-            grant: Grant::from_bytes(grant),
-            expires_at,
-        })
+        LinkTicket::decode(bytes).map(Self)
     }
 }
 
@@ -138,11 +97,7 @@ impl fmt::Display for PairingLink {
 
 impl fmt::Debug for PairingLink {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("PairingLink")
-            .field("peer", &self.addr.id)
-            .field("addrs", &self.addr.addrs.len())
-            .field("expires_at", &self.expires_at)
-            .finish_non_exhaustive()
+        self.0.debug(f, "PairingLink")
     }
 }
 
@@ -157,6 +112,8 @@ impl FromStr for PairingLink {
 #[cfg(test)]
 mod tests {
     use std::net::SocketAddr;
+
+    use iroh::TransportAddr;
 
     use super::*;
 

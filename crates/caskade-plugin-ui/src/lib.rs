@@ -264,14 +264,14 @@ pub fn parse(json: &str) -> Result<Vec<Node>, UiError> {
     let raw: Value =
         serde_json::from_str(json).map_err(|error| UiError(format!("not JSON: {error}")))?;
     depth(&raw, 0)?;
-    let nodes = match serde_json::from_value::<Tree>(raw.clone()) {
+    let nodes = match Tree::deserialize(&raw) {
         Ok(Tree::One(node)) => vec![*node],
         Ok(Tree::Many(nodes)) => nodes,
         Err(_) => explain(&raw)?,
     };
     let mut count = 0;
     for node in &nodes {
-        check(node, &mut count)?;
+        check(node, &mut count, 1)?;
     }
     Ok(nodes)
 }
@@ -348,11 +348,7 @@ fn number(value: f64) -> Result<(), UiError> {
     }
 }
 
-fn check(node: &Node, count: &mut usize) -> Result<(), UiError> {
-    check_at(node, count, 1)
-}
-
-fn check_at(node: &Node, count: &mut usize, level: usize) -> Result<(), UiError> {
+fn check(node: &Node, count: &mut usize, level: usize) -> Result<(), UiError> {
     *count += 1;
     if *count > MAX_NODES {
         return Err(UiError(format!("more than {MAX_NODES} nodes")));
@@ -363,7 +359,7 @@ fn check_at(node: &Node, count: &mut usize, level: usize) -> Result<(), UiError>
     let children = |children: &[Node], count: &mut usize| {
         children
             .iter()
-            .try_for_each(|child| check_at(child, count, level + 1))
+            .try_for_each(|child| check(child, count, level + 1))
     };
     match node {
         Node::Text { text: t }

@@ -27,7 +27,7 @@ impl Target for Fake {
     async fn api(&self) -> Result<HostApi> {
         Ok(self.api.clone())
     }
-    fn flatpak(&self) -> bool {
+    async fn flatpak(&self) -> bool {
         false
     }
 }
@@ -344,4 +344,46 @@ fn an_appimage_start_publishes_the_appimage_file() {
 fn caskade_names_this_program() {
     let own = Caskade::own(false).unwrap();
     assert_eq!(own.program, caskade_core::program::current().unwrap());
+}
+
+#[test]
+fn caskades_apps_are_told_by_their_command() {
+    use crate::{
+        api::App,
+        publish::{Caskade, Offer},
+    };
+    let caskade = Caskade {
+        program: "/opt/Caskade Games/caskade".into(),
+        flatpak_host: false,
+    };
+    let ours = caskade.app(&Offer::Game {
+        title: "Hades".into(),
+        game_id: "g1".into(),
+        image: None,
+    });
+    assert_eq!(
+        ours.cmd.as_deref(),
+        Some("\"/opt/Caskade Games/caskade\" --launch g1")
+    );
+    assert!(matches!(caskade.owns(&ours), Some(Offer::Game { game_id, .. }) if game_id == "g1"));
+    let console = caskade.app(&Offer::Console);
+    assert_eq!(console.cmd, None);
+    assert_eq!(caskade.owns(&console), Some(Offer::Console));
+    let theirs = App::command("Steam", "setsid steam steam://open/bigpicture");
+    assert_eq!(caskade.owns(&theirs), None);
+    // Another Caskade's (another install) isn't this one's.
+    let other = Caskade {
+        program: "/usr/bin/caskade".into(),
+        flatpak_host: false,
+    };
+    assert_eq!(caskade.owns(&other.app(&Offer::Console)), None);
+    // A Flatpak host's commands leave its sandbox.
+    let flatpak = Caskade {
+        flatpak_host: true,
+        ..caskade
+    };
+    assert_eq!(
+        flatpak.launch_command("g1"),
+        "flatpak-spawn --host \"/opt/Caskade Games/caskade\" --launch g1"
+    );
 }
