@@ -6,8 +6,8 @@ edition.workspace = true
 rust-version.workspace = true
 
 [features]
-# The extractor behind `just i18n` and the core's stale-template test; the
-# app doesn't need it.
+# The extractor and checks behind `just i18n` and `just i18n-check`, and
+# the stale-template tests; the app doesn't need them.
 extract = ["dep:proc-macro2", "dep:syn"]
 
 [dependencies]

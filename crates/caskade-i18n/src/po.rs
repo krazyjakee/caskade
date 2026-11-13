@@ -1,9 +1,11 @@
 //! Reading and writing PO and POT files (the GNU gettext text format).
 //!
 //! The reader keeps what translators and tools write around a message
-//! (comments, references, flags) so a catalog survives a merge; obsolete
-//! (`#~`) entries are dropped. The writer is canonical: writing what it
-//! read gives the same text back, so extraction twice changes nothing.
+//! (comments, references, flags) so a catalog survives a merge, and keeps
+//! obsolete (`#~`) entries apart: translations of messages the code no
+//! longer has, which a merge brings back if the message returns. The
+//! writer is canonical: writing what it read gives the same text back, so
+//! extraction twice changes nothing.
 
 use crate::plural::{PluralError, PluralForms};
 use std::collections::HashSet;
@@ -66,6 +68,10 @@ pub struct Po {
     /// The entry with an empty `msgid`: `Language`, `Plural-Forms`, …
     pub header: Option<Message>,
     pub messages: Vec<Message>,
+    /// Obsolete (`#~`) entries, written after the messages as `msgmerge`
+    /// does. Only their translator comments, `fuzzy` flag, previous text
+    /// and fields are written; lookups never see them.
+    pub obsolete: Vec<Message>,
 }
 
 /// Why a PO file couldn't be read.
@@ -108,11 +114,21 @@ impl Po {
     /// The PO text, in a canonical layout.
     pub fn write(&self) -> String {
         let mut out = String::new();
-        for (index, message) in self.header.iter().chain(&self.messages).enumerate() {
+        let entries = self
+            .header
+            .iter()
+            .chain(&self.messages)
+            .map(|message| (message, false))
+            .chain(self.obsolete.iter().map(|message| (message, true)));
+        for (index, (message, obsolete)) in entries.enumerate() {
             if index > 0 {
                 out.push('\n');
             }
-            write_message(&mut out, message);
+            if obsolete {
+                write_obsolete(&mut out, message);
+            } else {
+                write_message(&mut out, message);
+            }
         }
         out
     }
@@ -130,6 +146,7 @@ enum Field {
 struct Parser {
     po: Po,
     keys: HashSet<(Option<String>, String)>,
+    obsolete_keys: HashSet<(Option<String>, String)>,
     current: Message,
     /// Line of the current entry's first keyword.
     start: usize,
@@ -152,6 +169,35 @@ impl Parser {
                 self.finish(line_no)?;
                 continue;
             }
+            // An obsolete entry: `#~ msgid "…"`, `#~ "…"`, `#~| msgid "…"`.
+            let line = match line.strip_prefix("#~") {
+                Some(rest) if rest.starts_with('|') => {
+                    if self.has_keyword {
+                        self.finish(line_no)?;
+                    }
+                    self.comment(rest);
+                    self.obsolete = true;
+                    continue;
+                }
+                Some(rest) => {
+                    let rest = rest.trim();
+                    if rest.is_empty() {
+                        continue;
+                    }
+                    // A keyword may end the entry before: it's obsolete from
+                    // here on.
+                    let keyword = !rest.starts_with('"');
+                    if keyword
+                        && self.has_id
+                        && (rest.starts_with("msgctxt") || rest.starts_with("msgid "))
+                    {
+                        self.finish(line_no)?;
+                    }
+                    self.obsolete = true;
+                    rest
+                }
+                None => line,
+            };
             if let Some(rest) = line.strip_prefix('#') {
                 if self.has_keyword {
                     self.finish(line_no)?;
@@ -208,7 +254,7 @@ impl Parser {
                     .map(str::to_owned),
             ),
             Some('|') => message.previous.push(text.to_owned()),
-            _ => self.obsolete = true,
+            _ => {}
         }
     }
 
@@ -275,8 +321,8 @@ impl Parser {
         }
     }
 
-    /// Ends the current entry: a message, the header, or comments without
-    /// one (dropped, as are obsolete entries).
+    /// Ends the current entry: a message, the header, an obsolete entry,
+    /// or comments without one (dropped).
     fn finish(&mut self, line_no: usize) -> Result<(), ParseError> {
         let message = std::mem::take(&mut self.current);
         let (has_id, has_keyword, obsolete) = (self.has_id, self.has_keyword, self.obsolete);
@@ -284,7 +330,20 @@ impl Parser {
         self.has_keyword = false;
         self.obsolete = false;
         self.field = None;
-        if obsolete || !has_keyword {
+        if !has_keyword {
+            return Ok(());
+        }
+        if obsolete {
+            // Kept when it's whole; a second one with the same key adds
+            // nothing.
+            let key = (message.context.clone(), message.id.clone());
+            if has_id
+                && !message.translations.is_empty()
+                && !message.is_header()
+                && self.obsolete_keys.insert(key)
+            {
+                self.po.obsolete.push(message);
+            }
             return Ok(());
         }
         if !has_id {
@@ -368,6 +427,25 @@ fn quote(value: &str) -> String {
     out
 }
 
+/// An obsolete entry as `msgmerge` writes one: translator comments, the
+/// `fuzzy` flag and the previous text, then the fields behind `#~`.
+fn write_obsolete(out: &mut String, message: &Message) {
+    for comment in &message.translator_comments {
+        if comment.is_empty() {
+            out.push_str("#\n");
+        } else {
+            let _ = writeln!(out, "# {comment}");
+        }
+    }
+    if message.is_fuzzy() {
+        out.push_str("#, fuzzy\n");
+    }
+    for previous in &message.previous {
+        let _ = writeln!(out, "#~| {previous}");
+    }
+    write_fields(out, "#~ ", message);
+}
+
 fn write_message(out: &mut String, message: &Message) {
     for comment in &message.translator_comments {
         if comment.is_empty() {
@@ -388,19 +466,25 @@ fn write_message(out: &mut String, message: &Message) {
     for previous in &message.previous {
         let _ = writeln!(out, "#| {previous}");
     }
+    write_fields(out, "", message);
+}
+
+/// The context, English and translations, each line after `prefix`.
+fn write_fields(out: &mut String, prefix: &str, message: &Message) {
     if let Some(context) = &message.context {
-        write_field(out, "msgctxt", context);
+        write_field(out, prefix, "msgctxt", context);
     }
-    write_field(out, "msgid", &message.id);
+    write_field(out, prefix, "msgid", &message.id);
     match &message.plural {
         Some(plural) => {
-            write_field(out, "msgid_plural", plural);
+            write_field(out, prefix, "msgid_plural", plural);
             for (index, translation) in message.translations.iter().enumerate() {
-                write_field(out, &format!("msgstr[{index}]"), translation);
+                write_field(out, prefix, &format!("msgstr[{index}]"), translation);
             }
         }
         None => write_field(
             out,
+            prefix,
             "msgstr",
             message.translations.first().map_or("", String::as_str),
         ),
@@ -409,15 +493,15 @@ fn write_message(out: &mut String, message: &Message) {
 
 /// `keyword "value"`, or one line per `\n`-ended part when there are
 /// several, as gettext's tools write them.
-fn write_field(out: &mut String, keyword: &str, value: &str) {
+fn write_field(out: &mut String, prefix: &str, keyword: &str, value: &str) {
     let parts: Vec<&str> = value.split_inclusive('\n').collect();
     if parts.len() > 1 {
-        let _ = writeln!(out, "{keyword} \"\"");
+        let _ = writeln!(out, "{prefix}{keyword} \"\"");
         for part in parts {
-            let _ = writeln!(out, "{}", quote(part));
+            let _ = writeln!(out, "{prefix}{}", quote(part));
         }
     } else {
-        let _ = writeln!(out, "{keyword} {}", quote(value));
+        let _ = writeln!(out, "{prefix}{keyword} {}", quote(value));
     }
 }
 
@@ -488,8 +572,63 @@ msgstr ""
         let written = po.write();
         assert_eq!(Po::parse(&written).unwrap(), po);
         assert_eq!(Po::parse(&written).unwrap().write(), written);
-        // Obsolete entries are dropped.
-        assert!(!written.contains("Gone"));
+        // Obsolete entries stay, after the messages.
+        assert!(written.ends_with("#~ msgid \"Gone\"\n#~ msgstr \"Borta\"\n"));
+    }
+
+    #[test]
+    fn keeps_obsolete_entries_apart() {
+        let text = r##"msgid "Kept"
+msgstr "Behållen"
+
+# Checked by Anna.
+#, fuzzy
+#~| msgid "Old {name}"
+#~ msgctxt "verb"
+#~ msgid "Gone {name}"
+#~ msgstr "Borta {name}"
+
+#~ msgid "One file"
+#~ msgid_plural "# files"
+#~ msgstr[0] "En fil"
+#~ msgstr[1] "# filer"
+#~ msgid "Two\n"
+#~ "lines"
+#~ msgstr ""
+#~ "Två\n"
+#~ "rader"
+
+#~ msgid "One file"
+#~ msgid_plural "# files"
+#~ msgstr[0] "Dubblett"
+#~ msgstr[1] "Dubbletter"
+"##;
+        let po = Po::parse(text).unwrap();
+        assert_eq!(po.messages.len(), 1);
+        let ids: Vec<_> = po.obsolete.iter().map(|m| m.id.as_str()).collect();
+        // A second obsolete entry with the same key is dropped.
+        assert_eq!(ids, ["Gone {name}", "One file", "Two\nlines"]);
+        let gone = &po.obsolete[0];
+        assert_eq!(gone.context.as_deref(), Some("verb"));
+        assert_eq!(gone.translator_comments, ["Checked by Anna."]);
+        assert!(gone.is_fuzzy());
+        assert_eq!(gone.previous, ["msgid \"Old {name}\""]);
+        assert_eq!(gone.translations, ["Borta {name}"]);
+        assert_eq!(po.obsolete[1].plural.as_deref(), Some("# files"));
+        assert_eq!(po.obsolete[1].translations, ["En fil", "# filer"]);
+        assert_eq!(po.obsolete[2].translations, ["Två\nrader"]);
+        // Written back the same, but for the duplicate.
+        let written = po.write();
+        assert_eq!(Po::parse(&written).unwrap(), po);
+        assert!(written.contains(
+            "# Checked by Anna.\n#, fuzzy\n#~| msgid \"Old {name}\"\n#~ msgctxt \"verb\"\n"
+        ));
+        assert!(written.contains("#~ msgid \"\"\n#~ \"Two\\n\"\n#~ \"lines\"\n"));
+        assert!(!written.contains("Dubblett"));
+        // The same key may be a message and an obsolete entry.
+        assert!(
+            Po::parse("msgid \"a\"\nmsgstr \"b\"\n\n#~ msgid \"a\"\n#~ msgstr \"c\"\n").is_ok()
+        );
     }
 
     #[test]

@@ -1,5 +1,6 @@
 //! The core domain's template (#212): `locales/core.pot` matches the
-//! `tr!` calls in the core and the adapter, and extraction is stable.
+//! `tr!` calls in the Rust crates and the native app, and extraction is
+//! stable.
 
 use caskade_i18n::extract::CORE;
 use std::path::PathBuf;

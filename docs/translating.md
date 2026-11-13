@@ -10,29 +10,27 @@ Each domain is a group of messages with a template of its own, `locales/<domain>
 
 | Domain | File | What it covers |
 |---|---|---|
-| `ui` | `locales/<lang>/ui.po` | The shared components (`@caskade/ui`): buttons, badges, dialogs. Plugins and themes use them too. |
-| `app` | `locales/<lang>/app.po` | The rest of the interface: the library, game pages, Settings, first-run setup. The native app (the coming replacement for the webview) shares it, and `ui`: one translation serves both. |
+| `ui` | `locales/<lang>/ui.po` | The shared components (`apps/native/src/ui`): buttons, badges, dialogs. |
+| `app` | `locales/<lang>/app.po` | The rest of the interface: the library, game pages, Settings, first-run setup. |
 | `core` | `locales/<lang>/core.po` | Text from the Rust side: error messages, notifications, the tray menu. |
 
 Plugins and themes have a domain each, named after the plugin or theme, in their own folder's `locales/<lang>.po` (#219). Translate them like the app's.
 
 ## Starting a language
 
-With GNU gettext installed (`gettext` on Linux and Homebrew, MSYS2 on Windows), from the repository root:
+From the repository root:
 
 ```sh
-pnpm i18n:extract --add de   # starts locales/de/ui.po, app.po and core.po
-just i18n                    # brings core.po into the core's layout
+just i18n --add de   # starts locales/de/core.po, app.po and ui.po
 ```
 
-`msginit` fills in the language's header. Without gettext, copy each template to `locales/<lang>/<domain>.po` and fill in the header yourself:
+The new files' header has `Language: de` and English's `Plural-Forms`, which you then correct for your language:
 
 ```
-"Language: de\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 ```
 
-`Plural-Forms` says how many plural forms the language has and which one a count takes. Copy it from [the gettext manual's table](https://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html) or from Poedit's translation properties; a plural entry then needs one `msgstr[n]` per form. Swedish and German have two forms, Polish three, Japanese one.
+`Plural-Forms` says how many plural forms the language has and which one a count takes. Copy it from [the gettext manual's table](https://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html) or from Poedit's translation properties, then run `just i18n` again: a plural entry gets one `msgstr[n]` per form. Swedish and German have two forms, Polish three, Japanese one. (A language that has one of its files already gets the others with that file's `Plural-Forms`.)
 
 That's all it takes to ship a language: the build finds every folder in `locales/`, and the Language setting lists it with how much of it is translated. No code changes.
 
@@ -41,23 +39,23 @@ That's all it takes to ship a language: the build finds every folder in `locales
 Open the PO files in [Poedit](https://poedit.net), Lokalize, Gtranslator or any text editor.
 
 - The English is the `msgid`. A `msgctxt` tells apart the same English used for different things ("Home" the sidebar link, "Home" the folder). Comments starting with `#.` are notes from the developers, and `#:` names the file the text comes from.
-- Keep every placeholder the English has, in whatever order your language needs: `{name}`, `{0}` and `#` (the count, in plurals) are filled in when the text is shown. Don't translate what's inside the braces.
+- Keep every placeholder the English has, in whatever order your language needs: `{name}` and `#` (the count, in plurals) are filled in when the text is shown. Don't translate what's inside the braces.
 - Keep the tags around words, such as `<0>` and `</0>`: they become links or emphasis. Move them with the words they wrap.
 - In a plural entry, `msgstr[0]`, `msgstr[1]`, … follow the order of your `Plural-Forms`. A form that only ever means one may leave the count out ("En fil"); the others keep it.
-- An empty or fuzzy entry shows English. Poedit marks entries fuzzy when the English changed since they were translated: check the translation, then clear the flag.
+- An empty or fuzzy entry shows English. An entry is marked fuzzy when the English changed since it was translated: check the translation, then clear the flag.
 - `{{` and `}}` in the core's messages are literal braces.
+- Entries starting with `#~` are obsolete: their English is gone from the code. They keep their translation, which comes back if the message does; leave them be.
 
-When the code changes, the templates change with it. Run `pnpm i18n:extract` (and `just i18n` for `core.po`) after pulling, so your files get the new messages; the old translations stay.
+When the code changes, the templates change with it. Run `just i18n` after pulling, so your files get the new messages; the old translations stay.
 
 Swedish (`sv`) is the first language. Its first draft is machine-translated and needs a native speaker's review.
 
 ## Trying a language
 
-- In a browser, without building the app: `just web`, then open http://localhost:1420/?lang=sv (use your language's tag). The pseudo-locale `?lang=en-XA` shows every translatable text accented and lengthened, which finds text that isn't marked or doesn't fit.
 - In the app: `just dev`, then Settings → General → Language (first-run setup asks too). The language switches at once, the tray menu included.
-- In the native app: `CASKADE_LANG=sv cargo run -p caskade-native` (a debug build; `CASKADE_LANG=en-XA` for the pseudo-locale), or the Language setting. It picks up `app.po` and `ui.po` changes when rebuilt.
+- From a terminal: `CASKADE_LANG=sv cargo run -p caskade-native` (a debug build). `CASKADE_LANG=en-XA` is the pseudo-locale: every translatable text accented and lengthened, which finds text that isn't marked or doesn't fit.
 
-The interface picks up changes to `ui.po` and `app.po` when the page reloads; the core compiles `core.po` in, so restart `just dev` after changing it.
+The app compiles the catalogs in, so rebuild it after changing a PO file.
 
 ## Checking
 
@@ -65,13 +63,13 @@ The interface picks up changes to `ui.po` and `app.po` when the page reloads; th
 just i18n-check
 ```
 
-It runs what CI runs (the `frontend` and `rust` jobs of `.github/workflows/ci.yml`) and fails, naming the file, the line and the entry, on:
+It runs what CI runs (the `rust` job of `.github/workflows/ci.yml`) and fails, naming the file and the entry, on:
 
-- a template that doesn't match the code (run `just i18n`);
-- a PO file `msgfmt --check` rejects (a broken header, a missing plural form, a line ending that differs from the English);
-- a translation that drops, renames or adds a placeholder (`{name}`, `{0}`, `#`) or a tag (`<0>`, `</0>`).
+- a template or PO file that doesn't match the code (run `just i18n`);
+- a PO file `msgfmt --check` rejects (a broken header, a missing plural form, a line ending that differs from the English), plugins' and themes' included;
+- a translation that drops, renames or adds a placeholder (`{name}`, `#`) or a tag (`<0>`, `</0>`).
 
-Then it prints how much of each language is translated, per domain. `pnpm i18n:check` runs the webview's half (and every PO file) without Rust.
+Then it prints how much of each language is translated, per domain. It needs GNU gettext's `msgfmt` (`gettext` on Linux and Homebrew, MSYS2 on Windows).
 
 ## Sending a translation
 
@@ -81,9 +79,11 @@ Open a pull request with your `locales/<lang>/` files. Run `just i18n-check` fir
 
 Translators see only the English and what you add to it.
 
-- Add a translator comment when the English alone can leave someone guessing: what a placeholder holds, where the text appears, how much room it has, or whether a word is a verb or a noun. In the webview, `msg({ message: "Open", comment: "A button that opens the game's folder" })` or `t({ message, comment })` writes it as a `#.` line. Name placeholders by what fills them (`` t`Open ${{ title }}` `` gives `{title}`, not `{0}`).
-- Add a `msgctxt` only when the same English means different things in different places, so each needs its own translation: `context: "navigation"` in the webview, `trp!("folder browser place", "Home")` in the core. Two places that mean the same thing share one message. A context isn't a comment: changing it makes every translation of the message start over.
-- The core's extractor doesn't read Rust comments. Where the English alone is unclear there, word the context (`trp!`) for the translator.
-- Mark whole sentences, with placeholders, not pieces joined in code: word order differs between languages. Use plurals (`plural`, `trn!`) for counts, never `count === 1 ? … : …`.
-- In the native app (`apps/native`), mark text with `caskade_ui_i18n`'s `t!("Quick menu")`, `t!("Stop {title}", title = name)`, `tp!("size", "Unknown")`, `tn!("# game", "# games", count)` and `tnp!`, in the webview's syntax: `#` is the count, and a message the webview has keeps its exact English and context so its translations apply. `note = "…"` first adds a translator comment. Rich text goes through `trans!("<0>{guide}</0> opens the quick menu", guide = glyph; 0 => |inner| rsx! { kbd { {inner} } })`. A test fails on a text literal with words in `rsx!`. Errors, the tray and dialogs keep the core's `tr!`.
-- Run `just i18n` after changing marked text and commit the templates and PO files with the change; `just i18n-check` and CI fail on a stale template.
+- Mark the interface's text (`apps/native`) with `caskade_ui_i18n`'s `t!("Quick menu")`, `t!("Stop {title}", title = name)`, `tp!("size", "Unknown")`, `tn!("# game", "# games", count)` and `tnp!`, in ICU syntax: `#` is the count. Rich text goes through `trans!("<0>{guide}</0> opens the quick menu", guide = glyph; 0 => |inner| rsx! { kbd { {inner} } })`. A test fails on a text literal with words in `rsx!`. Errors, the tray and dialogs keep the core's `tr!`, `trn!`, `trp!` and `trnp!`, where `{n}` is the count.
+- English kept in one place and translated where it's shown (`caskade_ui_data::labels`) is marked with `t_noop!("…")`, which `just i18n` extracts like `t!`.
+- Add a translator comment when the English alone can leave someone guessing: what a placeholder holds, where the text appears, how much room it has, or whether a word is a verb or a noun. `note = "…"` first in a `t!` call writes it as a `#.` line. Name placeholders by what fills them (`{title}`, not `{0}`).
+- Add a `msgctxt` only when the same English means different things in different places, so each needs its own translation: `tp!("navigation", "Home")`, `trp!("folder browser place", "Home")`. Two places that mean the same thing share one message. A context isn't a comment: changing it makes every translation of the message start over (the old one stays as an obsolete entry).
+- The core's extractor doesn't read Rust comments, and `tr!` takes no note. Where the English alone is unclear there, word the context (`trp!`) for the translator.
+- Mark whole sentences, with placeholders, not pieces joined in code: word order differs between languages. Use plurals (`tn!`, `trn!`) for counts, never `if count == 1 { … } else { … }`.
+- A message used in `apps/native/src/ui` is the `ui` domain's, any other the `app` domain's; the UI looks both up, and `just i18n` moves a message's translation along when it changes domain.
+- Run `just i18n` after changing marked text and commit the templates and PO files with the change; `just i18n-check` and CI fail on a stale one.

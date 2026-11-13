@@ -40,6 +40,9 @@ pub(super) const NATIVE_KEYWORDS: &[(&str, Kind)] = &[
     ("tnp", Kind::new(true, true)),
     ("trans", Kind::new(false, false)),
     ("transp", Kind::new(true, false)),
+    // English marked where it's kept and translated where it's shown
+    // (`caskade_ui_data::labels`), as gettext's `N_`.
+    ("t_noop", Kind::new(false, false)),
 ];
 
 pub(super) struct Messages {

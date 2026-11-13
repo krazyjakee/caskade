@@ -12,16 +12,17 @@
 //! - [`locale`] normalizes BCP 47 and POSIX tags, reads the OS's languages
 //!   and negotiates one (`pt-BR`, then `pt`, then English).
 //! - [`format()`] fills `{name}` placeholders after the lookup.
-//! - [`message`] renders the webview's message syntax (Lingui's ICU:
-//!   `{name}`, `#`, plurals and selects), [`rich`] its numbered tags
-//!   (`<0>…</0>`), and [`pseudo`] the `en-XA` pseudo-locale, for the native
-//!   UI, which shares the `app` and `ui` domains.
-//! - [`intl`] writes numbers, sizes, durations and dates as the webview's
+//! - [`message`] renders the native UI's message syntax (ICU: `{name}`,
+//!   `#`, plurals and selects), [`rich`] its numbered tags (`<0>…</0>`),
+//!   and [`pseudo`] the `en-XA` pseudo-locale, for the native UI's `app`
+//!   and `ui` domains.
+//! - [`intl`] writes numbers, sizes, durations and dates as the browser's
 //!   `Intl` does.
 //! - [`bundled`] holds every `locales/<lang>/core.po`, listed at build time
 //!   (the native UI's `app` and `ui` catalogs are `caskade-ui-i18n`'s).
-//! - `extract` (feature `extract`) writes a domain's POT template from its
-//!   `tr!` calls and merges it into the catalogs: `just i18n`.
+//! - `extract` (feature `extract`) writes each domain's POT template from
+//!   its sources' macro calls, merges it into the catalogs and checks
+//!   them: `just i18n` and `just i18n-check`.
 //!
 //! The `tr!` macros themselves belong to each domain; the core's are in
 //! `caskade_core::i18n`.

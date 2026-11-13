@@ -1,5 +1,6 @@
-//! The native UI's text in Swedish and the pseudo-locale, and the proof
-//! that the move keeps translations: every Swedish translation of a
+//! The native UI's text in Swedish and the pseudo-locale, the committed
+//! templates and catalogs against its messages, and the proof that the
+//! catalogs keep their translations: every Swedish translation of a
 //! message the native UI uses resolves through its macros.
 
 use super::*;
@@ -15,7 +16,7 @@ fn root() -> &'static Path {
 }
 
 #[test]
-fn swedish_text_comes_from_the_webviews_catalogs() {
+fn swedish_text_comes_from_the_catalogs() {
     let _one = LANGUAGE.lock().unwrap_or_else(|e| e.into_inner());
     assert_eq!(set_language("sv"), "sv");
     assert_eq!(t!("Quick menu"), "Snabbmeny");
@@ -37,6 +38,23 @@ fn swedish_text_comes_from_the_webviews_catalogs() {
         tn!("# already has it", "# already have it", 2),
         "2 already have it"
     );
+}
+
+/// `locales/app.pot` and `ui.pot` list the native UI's messages, and every
+/// language's `app.po` and `ui.po` are merged with them: `just i18n` ran.
+/// A merge keeps every translation (obsolete when its message is gone), so
+/// a current catalog has lost none.
+#[test]
+fn the_committed_templates_and_catalogs_are_current() {
+    for domain in [caskade_i18n::extract::APP, caskade_i18n::extract::UI] {
+        for output in domain.outputs(root()).unwrap() {
+            assert!(
+                output.is_current(),
+                "{} is out of date: run `just i18n` and commit it",
+                output.path.display()
+            );
+        }
+    }
 }
 
 #[test]
@@ -130,7 +148,7 @@ fn numbers_sizes_and_durations_follow_the_language() {
 /// Literals the UI shows as they are in every language: the app's name.
 const NOT_TRANSLATED: &[(&str, &str)] = &[
     ("apps/native/src/main.rs", "Caskade"),
-    // The sidebar's brand, as the webview's (`Sidebar.tsx`).
+    // The sidebar's brand.
     ("apps/native/src/frame/sidebar.rs", "CASKADE"),
 ];
 
@@ -161,7 +179,7 @@ fn every_rsx_text_people_see_goes_through_a_macro() {
     );
 }
 
-/// The Language setting's choices: Swedish's share as the webview's build
+/// The Language setting's choices: Swedish's share as `just i18n-check`
 /// counts it, English's none, and languages by their own names.
 #[test]
 fn languages_name_themselves_and_count_their_translations() {

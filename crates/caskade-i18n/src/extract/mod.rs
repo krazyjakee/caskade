@@ -1,8 +1,12 @@
-//! Extraction: finds the `tr!`, `trn!`, `trp!` and `trnp!` calls (and
-//! their stored-message forms `msg!`, `msgn!`, `msgp!` and `msgnp!`) in a
-//! domain's Rust sources, writes its POT template and merges the template
-//! into each language's PO catalog, like `xgettext` and `msgmerge`, without
-//! gettext's tools.
+//! Extraction: finds each domain's marked messages in its Rust sources,
+//! writes its POT template and merges the template into each language's PO
+//! catalog, like `xgettext` and `msgmerge` (without fuzzy matching),
+//! without gettext's tools. The core's messages are its `tr!`, `trn!`,
+//! `trp!` and `trnp!` calls (and their stored-message forms `msg!`,
+//! `msgn!`, `msgp!` and `msgnp!`); the native UI's `app` and `ui` domains
+//! are its `t!`, `tn!`, `tp!`, `tnp!`, `trans!` and `transp!` calls, and
+//! the `t_noop!` English translated where it's shown.
+//! [`check_catalogs`] adds the translator checks behind `just i18n-check`.
 //!
 //! Sources are read as Rust tokens, so calls inside other macros'
 //! arguments (`format!`, `tracing::warn!`) count, comments don't, and
@@ -12,17 +16,60 @@
 //! moving code around doesn't make the template stale.
 
 use crate::po::{Message, Po};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::path::{Path, PathBuf};
 
+mod check;
 mod native;
 mod rsx;
 mod scan;
 
-pub use native::{NATIVE_SOURCES, native_messages, native_output, native_path};
+pub use check::{
+    Completion, catalog_problems, check_catalogs, completion, describe, entry_problems,
+    msgfmt_problems, package_catalogs,
+};
+pub use native::{NATIVE_SOURCES, UI_KIT, native_messages};
 pub use rsx::{rsx_literals, untranslated_rsx};
 use scan::Messages;
+
+/// How a domain's messages are marked, and the syntax their text is in.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Syntax {
+    /// The core's `tr!` family: `{name}` placeholders (`{{` and `}}` are
+    /// literal braces); a plural's count is `{n}`.
+    Rust,
+    /// The native UI's `t!` family: ICU (`{name}`, `#` for a plural's
+    /// count, `{n, plural, …}` and `{x, select, …}` inside a message) and
+    /// numbered tags (`<0>…</0>`).
+    Icu,
+}
+
+/// Which of its sources' messages a domain has.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Part {
+    All,
+    /// Those used in a file under this folder.
+    Within(&'static str),
+    /// Those not used in any file under this folder.
+    Outside(&'static str),
+}
+
+impl Part {
+    fn has(self, message: &Message) -> bool {
+        let within = |folder: &str| {
+            message
+                .references
+                .iter()
+                .any(|file| file.starts_with(folder))
+        };
+        match self {
+            Part::All => true,
+            Part::Within(folder) => within(folder),
+            Part::Outside(folder) => !within(folder),
+        }
+    }
+}
 
 /// A translation domain: where its messages are marked and where its
 /// template and catalogs live (`locales/<name>.pot`,
@@ -34,10 +81,17 @@ pub struct Domain {
     pub sources: &'static [&'static str],
     /// The template's first comment line.
     pub title: &'static str,
+    pub syntax: Syntax,
+    pub part: Part,
+    /// Domains whose catalogs in the same language a message new to this
+    /// one takes its translation from (`msgmerge`'s compendium): the native
+    /// UI looks `app` and `ui` up together, so a message moving between
+    /// them keeps its translation.
+    pub shares: &'static [&'static str],
 }
 
-/// The core's domain: the Rust crates, the Tauri adapter, the native app
-/// and the tray.
+/// The core's domain: the Rust crates, the native app's `tr!` calls and
+/// the tray.
 pub const CORE: Domain = Domain {
     name: "core",
     sources: &[
@@ -51,11 +105,42 @@ pub const CORE: Domain = Domain {
         "crates/caskade-app/src",
         "crates/caskade-player/src",
         "crates/caskade-ui-theme/src",
-        "apps/desktop/src-tauri/src",
+        "crates/caskade-ui-data/src",
         "apps/native/src",
     ],
-    title: "Caskade's core messages: the Rust crates, the Tauri adapter, the native app and the tray.",
+    title: "Caskade's core messages: the Rust crates, the native app's errors and dialogs, and the tray.",
+    syntax: Syntax::Rust,
+    part: Part::All,
+    shares: &[],
 };
+
+/// The native UI's text, but for its shared components'.
+pub const APP: Domain = Domain {
+    name: "app",
+    sources: NATIVE_SOURCES,
+    title: "Caskade's interface: the native app's text, but for its shared components'.",
+    syntax: Syntax::Icu,
+    part: Part::Outside(UI_KIT),
+    shares: &["ui"],
+};
+
+/// The native UI's shared components (`apps/native/src/ui`): buttons,
+/// badges, dialogs.
+pub const UI: Domain = Domain {
+    name: "ui",
+    sources: NATIVE_SOURCES,
+    title: "Caskade's shared components (apps/native/src/ui): buttons, badges, dialogs.",
+    syntax: Syntax::Icu,
+    part: Part::Within(UI_KIT),
+    shares: &["app"],
+};
+
+/// Every domain, in the order extraction writes them.
+pub const DOMAINS: [Domain; 3] = [CORE, APP, UI];
+
+/// The `Plural-Forms` of a catalog started without another of its
+/// language's to copy it from: English's, for the translator to correct.
+pub const DEFAULT_PLURAL_FORMS: &str = "nplurals=2; plural=(n != 1);";
 
 /// Why extraction failed.
 #[derive(Debug)]
@@ -108,36 +193,115 @@ impl Output {
     }
 }
 
+/// The translated languages: each folder of `locales/` with a catalog of
+/// any domain, sorted. The pseudo-locale has none: it's made from the
+/// English.
+pub fn languages(root: &Path) -> Result<Vec<String>, ExtractError> {
+    let mut languages = Vec::new();
+    for entry in sorted_entries(&root.join("locales"))? {
+        let has_catalog = DOMAINS
+            .iter()
+            .any(|domain| entry.join(format!("{}.po", domain.name)).is_file());
+        if let Some(name) = entry.file_name().and_then(|name| name.to_str())
+            && entry.is_dir()
+            && has_catalog
+            && name != crate::pseudo::LOCALE
+        {
+            languages.push(name.to_owned());
+        }
+    }
+    Ok(languages)
+}
+
+/// A catalog, or `None` when there's no such file.
+pub fn read_catalog(path: &Path) -> Result<Option<Po>, ExtractError> {
+    let text = match std::fs::read_to_string(path) {
+        Ok(text) => text,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => return Err(ExtractError::Io(path.to_owned(), error)),
+    };
+    Po::parse(&text)
+        .map(Some)
+        .map_err(|error| ExtractError::Catalog(path.to_owned(), error.to_string()))
+}
+
+/// An empty catalog for `language`, as `msginit` starts one: its
+/// `Plural-Forms` copied from another of the language's catalogs, else
+/// [`DEFAULT_PLURAL_FORMS`].
+pub fn start_catalog(root: &Path, language: &str) -> Result<Po, ExtractError> {
+    let mut plural_forms = None;
+    for domain in DOMAINS {
+        let path = domain.catalog_path(root, language);
+        if let Some(po) = read_catalog(&path)?
+            && let Some(forms) = po.header_field("Plural-Forms")
+        {
+            plural_forms = Some(forms.to_owned());
+            break;
+        }
+    }
+    let plural_forms = plural_forms.unwrap_or_else(|| DEFAULT_PLURAL_FORMS.to_owned());
+    let mut header = Message::new(None, "", None);
+    header.translations = vec![format!(
+        "Project-Id-Version: Caskade\nLanguage: {language}\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: {plural_forms}\n"
+    )];
+    Ok(Po {
+        header: Some(header),
+        ..Po::default()
+    })
+}
+
 impl Domain {
     /// `locales/<name>.pot`.
     pub fn template_path(&self, root: &Path) -> PathBuf {
         root.join("locales").join(format!("{}.pot", self.name))
     }
 
-    /// The domain's catalogs, `locales/<language>/<name>.po`, by language.
+    /// `locales/<language>/<name>.po`.
+    pub fn catalog_path(&self, root: &Path, language: &str) -> PathBuf {
+        root.join("locales")
+            .join(language)
+            .join(format!("{}.po", self.name))
+    }
+
+    /// The domain's catalogs on disk, by language.
     pub fn catalog_paths(&self, root: &Path) -> Result<Vec<PathBuf>, ExtractError> {
-        let locales = root.join("locales");
-        let mut paths = Vec::new();
-        for entry in sorted_entries(&locales)? {
-            let path = entry.join(format!("{}.po", self.name));
-            if entry.is_dir() && path.is_file() {
-                paths.push(path);
+        Ok(languages(root)?
+            .iter()
+            .map(|language| self.catalog_path(root, language))
+            .filter(|path| path.is_file())
+            .collect())
+    }
+
+    /// The domain's messages, from its sources under `root`: the core's in
+    /// the order the sources have them, the native UI's by English and
+    /// context.
+    pub fn messages(&self, root: &Path) -> Result<Vec<Message>, ExtractError> {
+        let messages = match self.syntax {
+            Syntax::Rust => {
+                let mut messages = Messages::default();
+                each_source(root, self.sources, false, |reference, text| {
+                    messages.scan(text, reference)
+                })?;
+                messages.list
             }
-        }
-        Ok(paths)
+            Syntax::Icu => native::scan_sorted(root, self.sources)?,
+        };
+        Ok(messages
+            .into_iter()
+            .filter(|message| self.part.has(message))
+            .collect())
     }
 
     /// The template, from the domain's sources under `root`.
     pub fn template(&self, root: &Path) -> Result<Po, ExtractError> {
-        let mut messages = Messages::default();
-        each_source(root, self.sources, false, |reference, text| {
-            messages.scan(text, reference)
-        })?;
         let mut header = Message::new(None, "", None);
+        let calls = match self.syntax {
+            Syntax::Rust => "the tr!, trn!, trp! and trnp! calls",
+            Syntax::Icu => "the t!, tn!, tp!, tnp!, trans!, transp! and t_noop! calls",
+        };
         header.translator_comments = vec![
             self.title.to_owned(),
-            "Generated by `just i18n` from the tr!, trn!, trp! and trnp! calls; don't edit."
-                .to_owned(),
+            format!("Generated by `just i18n` from {calls}; don't edit."),
         ];
         header.translations = vec![
             [
@@ -151,24 +315,44 @@ impl Domain {
         ];
         Ok(Po {
             header: Some(header),
-            messages: messages.list,
+            messages: self.messages(root)?,
+            obsolete: Vec::new(),
         })
     }
 
-    /// Everything extraction writes: the template, and each catalog merged
-    /// with it.
+    /// Everything extraction writes for the translated languages: the
+    /// template, and each language's catalog merged with it.
     pub fn outputs(&self, root: &Path) -> Result<Vec<Output>, ExtractError> {
+        self.outputs_for(root, &languages(root)?)
+    }
+
+    /// The template, and the catalog of each of `languages` merged with it;
+    /// a catalog the language lacks is started ([`start_catalog`]).
+    pub fn outputs_for(
+        &self,
+        root: &Path,
+        languages: &[String],
+    ) -> Result<Vec<Output>, ExtractError> {
         let template = self.template(root)?;
         let mut outputs = vec![Output {
             path: self.template_path(root),
             contents: template.write(),
         }];
-        for path in self.catalog_paths(root)? {
-            let text = std::fs::read_to_string(&path)
-                .map_err(|error| ExtractError::Io(path.clone(), error))?;
-            let catalog = Po::parse(&text)
-                .map_err(|error| ExtractError::Catalog(path.clone(), error.to_string()))?;
-            let merged = merge(&template, &catalog)
+        for language in languages {
+            let path = self.catalog_path(root, language);
+            let catalog = match read_catalog(&path)? {
+                Some(catalog) => catalog,
+                None => start_catalog(root, language)?,
+            };
+            let mut compendium = Vec::new();
+            for name in self.shares {
+                let shared = root
+                    .join("locales")
+                    .join(language)
+                    .join(format!("{name}.po"));
+                compendium.extend(read_catalog(&shared)?);
+            }
+            let merged = merge_with(&template, &catalog, &compendium)
                 .map_err(|error| ExtractError::Catalog(path.clone(), error))?;
             outputs.push(Output {
                 path,
@@ -180,32 +364,105 @@ impl Domain {
 }
 
 /// `catalog` updated to `template`, as `msgmerge` does without fuzzy
-/// matching: translations of messages still in the template stay (marked
-/// fuzzy when the English plural changed), new messages come in
-/// untranslated, and messages gone from the template go.
+/// matching or a compendium: see [`merge_with`].
 pub fn merge(template: &Po, catalog: &Po) -> Result<Po, String> {
+    merge_with(template, catalog, &[])
+}
+
+type Key<'a> = (Option<&'a str>, &'a str);
+
+/// Has a translation a lookup would show: not fuzzy, a form not empty.
+fn translated(message: &Message) -> bool {
+    !message.is_fuzzy() && message.translations.iter().any(|text| !text.is_empty())
+}
+
+/// `catalog` updated to `template`, as `msgmerge --compendium` does without
+/// fuzzy matching:
+///
+/// - a message still in the template keeps its translation, comments and
+///   flags (marked fuzzy when its English plural changed, or when it gained
+///   or lost its plural, keeping the first form);
+/// - an obsolete entry whose message is back is brought back;
+/// - a new message, or one still untranslated, takes the translation a
+///   `compendium` catalog (the same language's other domains) has for it,
+///   else comes in untranslated;
+/// - a translated message gone from the template becomes an obsolete
+///   (`#~`) entry, keeping its translation, translator comments and fuzzy
+///   flag; untranslated ones go.
+///
+/// References and notes for translators follow the template.
+pub fn merge_with(template: &Po, catalog: &Po, compendium: &[Po]) -> Result<Po, String> {
     let forms = catalog.plural_forms().map_err(|error| error.to_string())?;
-    let existing: HashMap<(Option<&str>, &str), &Message> = catalog
+    let active: HashMap<Key<'_>, &Message> = catalog
         .messages
         .iter()
         .map(|message| (message.key(), message))
         .collect();
+    let obsolete: HashMap<Key<'_>, &Message> = catalog
+        .obsolete
+        .iter()
+        .map(|message| (message.key(), message))
+        .collect();
+    let mut memory: HashMap<Key<'_>, &Message> = HashMap::new();
+    for found in compendium
+        .iter()
+        .flat_map(|po| po.messages.iter().chain(&po.obsolete))
+    {
+        let whole = found.plural.is_none() || found.translations.len() == forms.count;
+        if translated(found) && whole {
+            memory.entry(found.key()).or_insert(found);
+        }
+    }
     let messages = template
         .messages
         .iter()
         .map(|source| {
-            let mut merged = match existing.get(&source.key()) {
-                Some(old) if old.plural.is_some() == source.plural.is_some() => {
+            let remembered = memory
+                .get(&source.key())
+                .filter(|found| found.plural.is_some() == source.plural.is_some());
+            let mut merged = match active
+                .get(&source.key())
+                .or_else(|| obsolete.get(&source.key()))
+            {
+                Some(old) => {
                     let mut merged = (*old).clone();
-                    if old.plural != source.plural && !merged.is_fuzzy() {
+                    if old.plural.is_some() != source.plural.is_some() {
+                        let first = old.translations.first().cloned().unwrap_or_default();
+                        merged.translations = if source.plural.is_some() {
+                            vec![String::new(); forms.count]
+                        } else {
+                            vec![String::new()]
+                        };
+                        if let Some(slot) = merged.translations.first_mut() {
+                            slot.clone_from(&first);
+                        }
+                        if !first.is_empty() && !merged.is_fuzzy() {
+                            merged.flags.push("fuzzy".to_owned());
+                        }
+                    } else if old.plural != source.plural && !merged.is_fuzzy() {
                         merged.flags.push("fuzzy".to_owned());
+                    }
+                    let blank = merged.translations.iter().all(String::is_empty);
+                    if blank
+                        && !merged.is_fuzzy()
+                        && let Some(found) = remembered
+                    {
+                        merged.translations.clone_from(&found.translations);
                     }
                     merged
                 }
-                _ => {
+                None => {
                     let mut new = source.clone();
-                    if source.plural.is_some() {
-                        new.translations = vec![String::new(); forms.count];
+                    match remembered {
+                        Some(found) => {
+                            new.translations.clone_from(&found.translations);
+                            new.translator_comments
+                                .clone_from(&found.translator_comments);
+                        }
+                        None if source.plural.is_some() => {
+                            new.translations = vec![String::new(); forms.count];
+                        }
+                        None => {}
                     }
                     new
                 }
@@ -218,10 +475,50 @@ pub fn merge(template: &Po, catalog: &Po) -> Result<Po, String> {
             merged
         })
         .collect();
+    let current: HashSet<Key<'_>> = template.messages.iter().map(Message::key).collect();
+    let mut seen = HashSet::new();
+    let mut gone = Vec::new();
+    for old in catalog.messages.iter().chain(&catalog.obsolete) {
+        if current.contains(&old.key())
+            || old.translations.iter().all(String::is_empty)
+            || !seen.insert(old.key())
+        {
+            continue;
+        }
+        let mut entry = old.clone();
+        entry.references.clear();
+        entry.extracted_comments.clear();
+        entry.flags.retain(|flag| flag == "fuzzy");
+        gone.push(entry);
+    }
     Ok(Po {
         header: catalog.header.clone().or_else(|| template.header.clone()),
         messages,
+        obsolete: gone,
     })
+}
+
+/// The translations in `before` that `after` doesn't have: an entry with a
+/// translation (fuzzy too) whose context and English no message or
+/// obsolete entry of `after` has with a translation. A merge must never
+/// lose one; a changed context would.
+pub fn lost_translations(before: &Po, after: &Po) -> Vec<String> {
+    let kept: HashSet<Key<'_>> = after
+        .messages
+        .iter()
+        .chain(&after.obsolete)
+        .filter(|entry| entry.translations.iter().any(|text| !text.is_empty()))
+        .map(Message::key)
+        .collect();
+    before
+        .messages
+        .iter()
+        .chain(&before.obsolete)
+        .filter(|entry| {
+            entry.translations.iter().any(|text| !text.is_empty()) && !kept.contains(&entry.key())
+        })
+        .map(describe)
+        .collect()
 }
 
 fn reference(root: &Path, file: &Path) -> String {
@@ -302,10 +599,25 @@ mod tests {
             messages.scan(text, file)?;
         }
         Ok(Po {
-            header: None,
             messages: messages.list,
+            ..Po::default()
         })
     }
+
+    /// The `t!` family's messages, as the native UI's domains scan them.
+    fn extract_native(sources: &[(&str, &str)]) -> Po {
+        let mut messages = Messages::with(scan::NATIVE_KEYWORDS);
+        for (file, text) in sources {
+            messages.scan(text, file).unwrap();
+        }
+        Po {
+            messages: messages.list,
+            ..Po::default()
+        }
+    }
+
+    const SV_HEADER: &str =
+        "msgid \"\"\nmsgstr \"Language: sv\\nPlural-Forms: nplurals=2; plural=(n != 1);\\n\"\n\n";
 
     #[test]
     fn finds_every_kind_of_call() {
@@ -421,6 +733,10 @@ msgstr "Borta"
             .map(|message| message.id.as_str())
             .collect();
         assert_eq!(ids, ["Kept", "New", "One game"]);
+        // The message the code dropped keeps its translation, obsolete.
+        assert_eq!(merged.obsolete.len(), 1);
+        assert_eq!(merged.obsolete[0].id, "Gone");
+        assert_eq!(merged.obsolete[0].translations, ["Borta"]);
         let kept = &merged.messages[0];
         assert_eq!(kept.translations, ["Behållen"]);
         assert_eq!(kept.translator_comments, ["Translator's note."]);
@@ -445,5 +761,270 @@ msgstr "Borta"
         .unwrap();
         let merged = merge(&template, &catalog).unwrap();
         assert_eq!(merged.messages[0].translations, ["", "", ""]);
+    }
+
+    #[test]
+    fn merging_keeps_contexts_plurals_notes_and_tags() {
+        let template = extract_native(&[(
+            "apps/native/src/a.rs",
+            r##"fn a(n: u64) {
+                t!(note = "A button", "Open");
+                tp!("verb", "Open");
+                tn!("# game", "# games", n);
+                trans!("<0>{guide}</0> opens the quick menu", guide = g; 0 => |x| x);
+            }"##,
+        )]);
+        let catalog = Po::parse(&format!(
+            "{SV_HEADER}{}",
+            r##"# Checked by a native speaker.
+#. An old note
+#: apps/desktop/src/Old.tsx
+msgid "Open"
+msgstr "Öppna"
+
+msgctxt "verb"
+msgid "Open"
+msgstr "Öppna (verb)"
+
+msgid "# game"
+msgid_plural "# games"
+msgstr[0] "# spel"
+msgstr[1] "# spel"
+
+msgid "<0>{guide}</0> opens the quick menu"
+msgstr "<0>{guide}</0> öppnar snabbmenyn"
+"##
+        ))
+        .unwrap();
+        let merged = merge(&template, &catalog).unwrap();
+        let find = |context: Option<&str>, id: &str| {
+            merged
+                .messages
+                .iter()
+                .find(|message| message.key() == (context, id))
+                .unwrap()
+        };
+        let open = find(None, "Open");
+        assert_eq!(open.translations, ["Öppna"]);
+        assert_eq!(open.translator_comments, ["Checked by a native speaker."]);
+        // Notes and references follow the code.
+        assert_eq!(open.extracted_comments, ["A button"]);
+        assert_eq!(open.references, ["apps/native/src/a.rs"]);
+        assert_eq!(find(Some("verb"), "Open").translations, ["Öppna (verb)"]);
+        let games = find(None, "# game");
+        assert_eq!(games.plural.as_deref(), Some("# games"));
+        assert_eq!(games.translations, ["# spel", "# spel"]);
+        assert!(!games.is_fuzzy());
+        assert_eq!(
+            find(None, "<0>{guide}</0> opens the quick menu").translations,
+            ["<0>{guide}</0> öppnar snabbmenyn"]
+        );
+        assert!(merged.obsolete.is_empty());
+        assert!(lost_translations(&catalog, &merged).is_empty());
+    }
+
+    #[test]
+    fn messages_the_code_drops_stay_obsolete_and_come_back() {
+        let catalog = Po::parse(&format!(
+            "{SV_HEADER}{}",
+            r##"# Checked.
+#. A note
+#: apps/desktop/src/Old.tsx
+#, fuzzy, ts-format
+msgctxt "navigation"
+msgid "Library"
+msgstr "Bibliotek"
+
+msgid "One file"
+msgid_plural "# files"
+msgstr[0] "En fil"
+msgstr[1] "# filer"
+
+msgid "Untranslated"
+msgstr ""
+
+#~ msgid "Older"
+#~ msgstr "Äldre"
+"##
+        ))
+        .unwrap();
+        let empty = extract_native(&[]);
+        let gone = merge(&empty, &catalog).unwrap();
+        assert!(gone.messages.is_empty());
+        let ids: Vec<_> = gone
+            .obsolete
+            .iter()
+            .map(|entry| (entry.context.as_deref(), entry.id.as_str()))
+            .collect();
+        // Untranslated entries go; the rest keep their context.
+        assert_eq!(
+            ids,
+            [
+                (Some("navigation"), "Library"),
+                (None, "One file"),
+                (None, "Older")
+            ]
+        );
+        let library = &gone.obsolete[0];
+        assert_eq!(library.translator_comments, ["Checked."]);
+        assert!(library.references.is_empty() && library.extracted_comments.is_empty());
+        assert_eq!(library.flags, ["fuzzy"]);
+        assert_eq!(gone.obsolete[1].translations, ["En fil", "# filer"]);
+        assert!(lost_translations(&catalog, &gone).is_empty());
+        // Written and read back, it merges the same.
+        let reread = Po::parse(&gone.write()).unwrap();
+        assert_eq!(merge(&empty, &reread).unwrap().write(), gone.write());
+        // The code marks them again: their translations are back.
+        let back = extract_native(&[(
+            "apps/native/src/a.rs",
+            r##"fn a(n: u64) { tp!("navigation", "Library"); tn!("One file", "# files", n); }"##,
+        )]);
+        let revived = merge(&back, &reread).unwrap();
+        assert_eq!(revived.messages.len(), 2);
+        assert_eq!(revived.messages[0].translations, ["Bibliotek"]);
+        assert!(revived.messages[0].is_fuzzy());
+        assert_eq!(revived.messages[1].translations, ["En fil", "# filer"]);
+        assert_eq!(revived.messages[1].references, ["apps/native/src/a.rs"]);
+        let ids: Vec<_> = revived.obsolete.iter().map(|entry| &entry.id).collect();
+        assert_eq!(ids, ["Older"]);
+    }
+
+    #[test]
+    fn a_changed_context_is_a_lost_translation() {
+        let catalog = Po::parse(&format!(
+            "{SV_HEADER}msgctxt \"size\"\nmsgid \"Unknown\"\nmsgstr \"Okänd\"\n"
+        ))
+        .unwrap();
+        let mut renamed = catalog.clone();
+        renamed.messages[0].context = Some("game size".to_owned());
+        let lost = lost_translations(&catalog, &renamed);
+        assert_eq!(lost.len(), 1);
+        assert!(
+            lost[0].contains("size") && lost[0].contains("Unknown"),
+            "{lost:?}"
+        );
+        // Through a merge, the old context's translation stays obsolete.
+        let template = extract_native(&[(
+            "apps/native/src/a.rs",
+            r##"fn a() { tp!("game size", "Unknown"); }"##,
+        )]);
+        let merged = merge(&template, &catalog).unwrap();
+        assert_eq!(merged.messages[0].translations, [""]);
+        assert_eq!(merged.obsolete[0].context.as_deref(), Some("size"));
+        assert!(lost_translations(&catalog, &merged).is_empty());
+    }
+
+    #[test]
+    fn a_message_moving_between_domains_keeps_its_translation() {
+        let ui = Po::parse(&format!(
+            "{SV_HEADER}{}",
+            r##"msgid "Cancel"
+msgstr "Avbryt"
+
+msgid "# store"
+msgid_plural "# stores"
+msgstr[0] "# butik"
+msgstr[1] "# butiker"
+
+#~ msgid "More"
+#~ msgstr "Mer"
+
+#, fuzzy
+msgid "Guess"
+msgstr "Gissning"
+"##
+        ))
+        .unwrap();
+        let app = Po::parse(&format!("{SV_HEADER}msgid \"Cancel\"\nmsgstr \"\"\n")).unwrap();
+        let template = extract_native(&[(
+            "apps/native/src/a.rs",
+            r##"fn a(n: u64) { t!("Cancel"); t!("More"); t!("Guess"); tn!("# store", "# stores", n); }"##,
+        )]);
+        let merged = merge_with(&template, &app, std::slice::from_ref(&ui)).unwrap();
+        let translations: Vec<_> = merged
+            .messages
+            .iter()
+            .map(|message| (message.id.as_str(), message.translations.clone()))
+            .collect();
+        assert_eq!(
+            translations,
+            [
+                ("Cancel", vec!["Avbryt".to_owned()]),
+                ("More", vec!["Mer".to_owned()]),
+                // A guess isn't carried over.
+                ("Guess", vec![String::new()]),
+                (
+                    "# store",
+                    vec!["# butik".to_owned(), "# butiker".to_owned()]
+                ),
+            ]
+        );
+        // Merging again changes nothing.
+        let again = merge_with(&template, &merged, std::slice::from_ref(&ui)).unwrap();
+        assert_eq!(again.write(), merged.write());
+    }
+
+    #[test]
+    fn a_message_gaining_a_plural_keeps_its_translation_as_a_guess() {
+        let catalog =
+            Po::parse(&format!("{SV_HEADER}msgid \"# game\"\nmsgstr \"# spel\"\n")).unwrap();
+        let template = extract_native(&[(
+            "apps/native/src/a.rs",
+            r##"fn a(n: u64) { tn!("# game", "# games", n); }"##,
+        )]);
+        let merged = merge(&template, &catalog).unwrap();
+        let games = &merged.messages[0];
+        assert!(games.is_fuzzy());
+        assert_eq!(games.translations, ["# spel", ""]);
+        assert!(lost_translations(&catalog, &merged).is_empty());
+    }
+
+    #[test]
+    fn the_native_ui_splits_into_app_and_ui_by_folder() {
+        let messages = extract_native(&[
+            (
+                "apps/native/src/library/view.rs",
+                r##"fn a() { t!("Library"); t!("Cancel"); }"##,
+            ),
+            (
+                "apps/native/src/ui/dialog.rs",
+                r##"fn a() { t!("Cancel"); t!("Close"); }"##,
+            ),
+            (
+                "crates/caskade-ui-i18n/src/format.rs",
+                r##"fn a() { t!("Unknown"); }"##,
+            ),
+        ])
+        .messages;
+        let ids = |part: Part| {
+            messages
+                .iter()
+                .filter(|message| part.has(message))
+                .map(|message| message.id.as_str())
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(ids(APP.part), ["Library", "Unknown"]);
+        assert_eq!(ids(UI.part), ["Cancel", "Close"]);
+    }
+
+    #[test]
+    fn a_started_catalog_has_the_languages_header() {
+        let root = std::env::temp_dir().join(format!("caskade-i18n-start-{}", std::process::id()));
+        let sv = root.join("locales/sv");
+        std::fs::create_dir_all(&sv).unwrap();
+        std::fs::write(
+            sv.join("core.po"),
+            "msgid \"\"\nmsgstr \"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n==2 ? 1 : 2);\\n\"\n",
+        )
+        .unwrap();
+        std::fs::create_dir_all(root.join("locales/en-XA")).unwrap();
+        std::fs::write(root.join("locales/en-XA/app.po"), "").unwrap();
+        assert_eq!(languages(&root).unwrap(), ["sv"]);
+        let started = start_catalog(&root, "sv").unwrap();
+        assert_eq!(started.header_field("Language"), Some("sv"));
+        assert_eq!(started.plural_forms().unwrap().count, 3);
+        let new = start_catalog(&root, "de").unwrap();
+        assert_eq!(new.header_field("Plural-Forms"), Some(DEFAULT_PLURAL_FORMS));
+        let _ = std::fs::remove_dir_all(&root);
     }
 }

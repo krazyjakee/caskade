@@ -1,8 +1,8 @@
 //! The `en-XA` pseudo-locale: the English accented, bracketed and about
 //! 35 % longer, to find text that isn't marked and labels that overflow.
-//! The same transform as the webview's (Lingui's `pseudoLocalize` over the
-//! `pseudolocale` package, with `packages/i18n`'s options), applied to each
-//! text piece of a message, so both UIs show the same thing.
+//! The transform the retired webview used (Lingui's `pseudoLocalize` over
+//! the `pseudolocale` package), applied to each text piece of a message;
+//! its expected output below was recorded from it.
 
 /// The pseudo-locale's tag.
 pub const LOCALE: &str = "en-XA";
@@ -12,7 +12,7 @@ const PREPEND: &str = "[";
 const APPEND: &str = "]";
 const EXTEND: f64 = 0.35;
 const EXTEND_CHARACTER: char = '~';
-/// Marks a tag in the text while it's transformed, as Lingui does; it
+/// Marks a tag in the text while it's transformed, as Lingui did; it
 /// counts toward the length the padding is worked out from.
 const DELIMITER: &str = "%&&&%";
 
@@ -131,8 +131,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn matches_the_webviews_pseudo_locale() {
-        // Lingui's `pseudoLocalize` with packages/i18n's options, in Node.
+    fn matches_the_recorded_pseudo_locale() {
+        // Lingui's `pseudoLocalize` with the webview's options, recorded
+        // in Node before the webview went.
         assert_eq!(localize("Quick menu"), "[~Ǫũĩćķ ḿēńũ~]");
         assert_eq!(localize("Stop "), "[Śţōƥ ]");
         assert_eq!(

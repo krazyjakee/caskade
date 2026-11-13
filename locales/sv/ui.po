@@ -14,180 +14,327 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#. How many stores sell a game
+#: apps/native/src/ui/game_card.rs
+msgid "# store"
+msgid_plural "# stores"
+msgstr[0] "# butik"
+msgstr[1] "# butiker"
+
+#: apps/native/src/ui/age_lock.rs
+msgid "Admin PIN needed"
+msgstr "Administratörens PIN krävs"
+
+#: apps/native/src/ui/avatar.rs
 msgid "Alien"
 msgstr "Utomjording"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Astronaut"
 msgstr "Astronaut"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Atom"
 msgstr "Atom"
 
 #. A game that can be bought in a store
-#: packages/ui/src/StatusBadge.tsx apps/native/src/ui/status_badge.rs
+#: apps/native/src/ui/status_badge.rs
 msgid "Available to Buy"
 msgstr "Kan köpas"
 
 #. The picker of an account's picture
-#: packages/ui/src/Avatar.tsx apps/native/src/onboarding/account.rs
+#: apps/native/src/onboarding/account.rs
 #: apps/native/src/settings/accounts.rs
-#: apps/native/src/settings/search/search_index.rs apps/native/src/ui/avatar.rs
+#: apps/native/src/settings/search/search_index.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Avatar"
 msgstr "Avatar"
 
+#: apps/native/src/activity/refresh.rs
+#: apps/native/src/flows/add_game.rs
+#: apps/native/src/flows/folder_browser.rs
+#: apps/native/src/flows/manual_game.rs
+#: apps/native/src/flows/receive_share.rs
+#: apps/native/src/flows/share_game.rs
+#: apps/native/src/flows/storage.rs
+#: apps/native/src/flows/streaming.rs
+#: apps/native/src/game/editor/mod.rs
+#: apps/native/src/game/igdb.rs
+#: apps/native/src/game/launch.rs
+#: apps/native/src/game/ports.rs
+#: apps/native/src/game_menu/dialogs.rs
+#: apps/native/src/game_menu/play.rs
+#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/collection_dialog.rs
+#: apps/native/src/library/selection_bar.rs
+#: apps/native/src/library/web.rs
+#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/backup/restore.rs
+#: apps/native/src/settings/backup.rs
+#: apps/native/src/settings/emulation/emulators/emulator_editor.rs
+#: apps/native/src/settings/emulation/emulators/profile_editor.rs
+#: apps/native/src/settings/emulation/romm.rs
+#: apps/native/src/settings/plugins.rs
+#: apps/native/src/settings/reset.rs
+#: apps/native/src/settings/storage.rs
+#: apps/native/src/settings/stores.rs
+#: apps/native/src/settings/streaming/stream_from.rs
+#: apps/native/src/ui/dialog.rs
+msgid "Cancel"
+msgstr "Avbryt"
+
 #. The avatar showing the Caskade logo; usually kept as the brand name
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgctxt "avatar"
 msgid "Caskade"
 msgstr "Caskade"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Chip"
 msgstr "Chip"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/library/view.rs
+#: apps/native/src/ui/text_field.rs
+msgid "Clear search"
+msgstr "Rensa sökning"
+
+#: apps/native/src/ui/avatar.rs
 msgid "Comet"
 msgstr "Komet"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/text_field.rs
+msgid "Copy"
+msgstr "Kopiera"
+
+#: apps/native/src/ui/avatar.rs
 msgid "Crystal"
 msgstr "Kristall"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/text_field.rs
+msgid "Cut"
+msgstr "Klipp ut"
+
+#: apps/native/src/ui/avatar.rs
 msgid "Cyber cat"
 msgstr "Cyberkatt"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#. Closes a notification
+#: apps/native/src/activity/ingress.rs
+#: apps/native/src/library/view.rs
+#: apps/native/src/ui/toast.rs
+msgid "Dismiss"
+msgstr "Stäng"
+
+#: apps/native/src/ui/avatar.rs
 msgid "Droid"
 msgstr "Droid"
 
+#: apps/native/src/ui/text_field.rs
+msgid "Edit"
+msgstr "Redigera"
+
 #. A game played through an emulator
-#: packages/ui/src/StatusBadge.tsx apps/native/src/ui/status_badge.rs
+#: apps/native/src/ui/status_badge.rs
 msgid "Emulator"
 msgstr "Emulator"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Energy bolt"
 msgstr "Energiblixt"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#. A heart on a favourite game's card
+#: apps/native/src/library/web.rs
+#: apps/native/src/ui/game_card.rs
+#: apps/native/src/ui/game_row.rs
+msgid "Favorite"
+msgstr "Favorit"
+
+#: apps/native/src/ui/avatar.rs
 msgid "Flying saucer"
 msgstr "Flygande tefat"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Gamepad"
 msgstr "Handkontroll"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Ghost"
 msgstr "Spöke"
 
 #. Hides an error's technical details
-#: packages/ui/src/ErrorNotice.tsx apps/native/src/ui/error_notice.rs
+#: apps/native/src/ui/error_notice.rs
 msgid "Hide details"
 msgstr "Dölj detaljer"
 
 #. A game of a shared collection, on this device
-#: packages/ui/src/StatusBadge.tsx apps/native/src/flows/shares_common.rs
-#: apps/native/src/game/ports.rs apps/native/src/settings/addons.rs
+#: apps/native/src/flows/shares_common.rs
+#: apps/native/src/game/ports.rs
+#: apps/native/src/settings/addons.rs
 #: apps/native/src/settings/emulation/setup.rs
 #: apps/native/src/ui/status_badge.rs
 msgid "Installed"
 msgstr "Installerat"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/hero.rs
+msgid "Last played {lastPlayed}"
+msgstr "Senast spelat {lastPlayed}"
+
+#: apps/native/src/ui/game_card.rs
+#: apps/native/src/ui/game_row.rs
+msgid "Managed copy unavailable"
+msgstr "Den hanterade kopian är inte tillgänglig"
+
+#: apps/native/src/ui/avatar.rs
 msgid "Mech helmet"
 msgstr "Mechhjälm"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Moon"
 msgstr "Måne"
 
-#: packages/ui/src/StatusBadge.tsx apps/native/src/ui/status_badge.rs
+#. The button that opens more actions
+#. A button opening more actions
+#: apps/native/src/collections/page.rs
+#: apps/native/src/ui/hero.rs
+msgid "More"
+msgstr "Mer"
+
+#: apps/native/src/ui/hero.rs
+msgid "More launch options"
+msgstr "Fler startalternativ"
+
+#: apps/native/src/ui/status_badge.rs
 msgid "Not Installed"
 msgstr "Inte installerat"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#. A game of a shared collection a store account owns
+#. A store game the user already owns
+#: apps/native/src/flows/shares_common.rs
+#: apps/native/src/ui/game_card.rs
+msgid "Owned"
+msgstr "Ägs"
+
+#: apps/native/src/ui/text_field.rs
+msgid "Paste"
+msgstr "Klistra in"
+
+#: apps/native/src/ui/avatar.rs
 msgid "Portal"
 msgstr "Portal"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Pulsar"
 msgstr "Pulsar"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Radar"
 msgstr "Radar"
 
 #. The id an error's details are logged under
-#: packages/ui/src/ErrorNotice.tsx apps/native/src/ui/error_notice.rs
+#: apps/native/src/ui/error_notice.rs
 msgid "Reference: {reference}"
 msgstr "Referens: {reference}"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Ringed planet"
 msgstr "Planet med ringar"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Rocket"
 msgstr "Raket"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Satellite"
 msgstr "Satellit"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/settings/discovery.rs
+#: apps/native/src/settings/emulation/scanners/scan_review.rs
+#: apps/native/src/ui/text_field.rs
+msgid "Select all"
+msgstr "Markera alla"
+
+#: apps/native/src/ui/avatar.rs
 msgid "Sentinel eye"
 msgstr "Vaktöga"
 
 #. Shows an error's technical details
-#: packages/ui/src/ErrorNotice.tsx apps/native/src/ui/error_notice.rs
+#: apps/native/src/ui/error_notice.rs
 msgid "Show details"
 msgstr "Visa detaljer"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Spiral galaxy"
 msgstr "Spiralgalax"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Star"
 msgstr "Stjärna"
 
-#: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
+#: apps/native/src/ui/avatar.rs
 msgid "Starfighter"
 msgstr "Rymdjaktplan"
 
-#~ msgid "{playtimeHours}h"
-#~ msgstr "{playtimeHours} h"
+#. A game starting, before its title is known
+#. The Play button while the game starts
+#: apps/native/src/flows/streaming.rs
+#: apps/native/src/frame/console.rs
+#: apps/native/src/game/launch.rs
+#: apps/native/src/game/page.rs
+#: apps/native/src/game/ports.rs
+#: apps/native/src/game_menu/play.rs
+#: apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/library/web.rs
+#: apps/native/src/settings/addons/addon_details.rs
+#: apps/native/src/settings/backup.rs
+#: apps/native/src/settings/streaming/hosting.rs
+#: apps/native/src/ui/game_card.rs
+#: apps/native/src/ui/game_row.rs
+msgid "Starting…"
+msgstr "Startar…"
 
-#~ msgid "{playtimeHours}h played"
-#~ msgstr "{playtimeHours} h spelat"
+#: apps/native/src/activity/card.rs
+#: apps/native/src/activity/mod.rs
+#: apps/native/src/collections/list.rs
+#: apps/native/src/flows/storage.rs
+#: apps/native/src/frame/error.rs
+#: apps/native/src/frame/notifications.rs
+#: apps/native/src/game/achievements.rs
+#: apps/native/src/game/editor/mod.rs
+#: apps/native/src/game/page.rs
+#: apps/native/src/library/bulk_edit.rs
+#: apps/native/src/library/view.rs
+#: apps/native/src/onboarding/setup.rs
+#: apps/native/src/settings/addons/addon_details.rs
+#: apps/native/src/settings/devices/this_device.rs
+#: apps/native/src/settings/emulation/scanners.rs
+#: apps/native/src/settings/emulation/setup.rs
+#: apps/native/src/settings/general.rs
+#: apps/native/src/settings/streaming/stream_from.rs
+#: apps/native/src/store/view.rs
+#: apps/native/src/ui/failure.rs
+msgid "Try again"
+msgstr "Försök igen"
 
-#~ msgid "{sizeGb} GB"
-#~ msgstr "{sizeGb} GB"
+#: apps/native/src/ui/shelf.rs
+msgid "View All"
+msgstr "Visa alla"
 
-#~ msgid "# store"
-#~ msgid_plural "# stores"
-#~ msgstr[0] "# butik"
-#~ msgstr[1] "# butiker"
+#: apps/native/src/ui/hero.rs
+msgid "View Details"
+msgstr "Visa detaljer"
 
-#~ msgid "Last played {lastPlayed}"
-#~ msgstr "Senast spelat {lastPlayed}"
+#. Hours played, abbreviated
+#: apps/native/src/ui/game_card.rs
+msgid "{playtimeHours}h"
+msgstr "{playtimeHours} h"
 
-#~ msgid "More"
-#~ msgstr "Mer"
+#. Hours played
+#: apps/native/src/ui/hero.rs
+msgid "{playtimeHours}h played"
+msgstr "{playtimeHours} h spelat"
 
-#~ msgid "More launch options"
-#~ msgstr "Fler startalternativ"
-
-#~ msgid "Owned"
-#~ msgstr "Ägs"
-
-#~ msgid "View All"
-#~ msgstr "Visa alla"
-
-#~ msgid "View Details"
-#~ msgstr "Visa detaljer"
+#. A game's size on disk, in gigabytes
+#: apps/native/src/ui/game_card.rs
+#: apps/native/src/ui/hero.rs
+msgid "{sizeGb} GB"
+msgstr "{sizeGb} GB"

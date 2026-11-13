@@ -1,5 +1,6 @@
 //! Rich text: a translated message with numbered tags (`<0>…</0>`,
-//! `<1/>`), as Lingui's `<Trans>` writes them, into a tree the UI turns
+//! `<1/>`), the form the translations made for the webview's `<Trans>`
+//! carry, into a tree the UI turns
 //! into elements. The translation may move the tags with their words; a
 //! tag that isn't closed shows as text.
 

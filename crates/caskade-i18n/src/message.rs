@@ -1,6 +1,7 @@
-//! Messages in the webview's syntax (Lingui's ICU MessageFormat), so the
-//! native UI can share the `app` and `ui` domains' msgids and their
-//! translations: `{name}` placeholders, `#` for the count in a plural, and
+//! Messages in the native UI's syntax (the `app` and `ui` domains'), ICU
+//! MessageFormat as the retired webview's Lingui wrote it, so the
+//! translations made for it still apply: `{name}` placeholders, `#` for
+//! the count in a plural, and
 //! `{n, plural, one {…} other {…}}` / `{x, select, a {…} other {…}}`
 //! inside a message. Quoting is ICU's: `''` is an apostrophe, and an
 //! apostrophe before `{`, `}` (or `#` in a plural) quotes up to the next
@@ -33,18 +34,22 @@ pub fn parse(source: &str) -> Vec<Token> {
 }
 
 /// Parses one form of a gettext plural (`msgid_plural`), where `#` is the
-/// count, as Lingui writes its simple plurals.
+/// count.
 pub fn parse_counted(source: &str) -> Vec<Token> {
     parse_with(source, true)
 }
 
-fn parse_with(source: &str, counted: bool) -> Vec<Token> {
+/// Parses `source` (a gettext plural's form when `counted`), or `None`
+/// when it has a syntax error: for checking translations, where
+/// [`parse`] would show it as text.
+pub fn try_parse(source: &str, counted: bool) -> Option<Vec<Token>> {
     let chars: Vec<char> = source.chars().collect();
     let mut at = 0;
-    match parse_tokens(&chars, &mut at, counted, true) {
-        Some(tokens) if at == chars.len() => tokens,
-        _ => vec![Token::Text(source.to_owned())],
-    }
+    parse_tokens(&chars, &mut at, counted, true).filter(|_| at == chars.len())
+}
+
+fn parse_with(source: &str, counted: bool) -> Vec<Token> {
+    try_parse(source, counted).unwrap_or_else(|| vec![Token::Text(source.to_owned())])
 }
 
 fn parse_tokens(chars: &[char], at: &mut usize, in_plural: bool, top: bool) -> Option<Vec<Token>> {

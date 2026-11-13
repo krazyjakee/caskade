@@ -1,10 +1,9 @@
-//! The native UI's text (#91), free of any UI toolkit. The native UI shares
-//! the webview's `app` and `ui` domains: the same English, contexts and
-//! translations (`locales/<lang>/app.po`, `ui.po`), so no translator work
-//! is lost when the webview goes.
+//! The native UI's text (#91), free of any UI toolkit: the `app` and `ui`
+//! domains (`locales/<lang>/app.po`, `ui.po`), which kept the retired
+//! webview's English, contexts and translations.
 //!
 //! - [`t!`], [`tn!`], [`tp!`] and [`tnp!`] look a message up (the `app`
-//!   domain, then `ui`) and fill it in, in the webview's message syntax:
+//!   domain, then `ui`) and fill it in, in ICU message syntax:
 //!   `{name}` placeholders, `#` for a plural's count, and
 //!   `{n, plural, …}` / `{x, select, …}` inside a message. `note = "…"`
 //!   first gives translators a comment. [`rich`] keeps numbered tags
@@ -12,13 +11,15 @@
 //!   `trans!`).
 //! - [`set_language`] switches the language; in debug builds `en-XA` is
 //!   the pseudo-locale (accented, bracketed, longer).
-//! - [`format`] writes numbers, sizes, durations and dates as the webview
-//!   does, in the language in use.
+//! - [`format`] writes numbers, sizes, durations and dates in the language
+//!   in use.
 //! - [`set_observer`]: called on every lookup, so a UI can re-render what
 //!   read the language when it changes.
 //!
-//! `just i18n` lists these crates' messages in `locales/native.json`;
-//! `packages/i18n` adds them to the `app` and `ui` templates.
+//! `just i18n` (`caskade_i18n::extract`) writes their messages into the
+//! `app` and `ui` templates: those used under `apps/native/src/ui` are
+//! `ui`'s, the rest `app`'s. Lookups try both, so a message moving
+//! between them keeps its translation.
 
 use caskade_i18n::{Translations, locale, message, pseudo, translations};
 use std::sync::{LazyLock, OnceLock, RwLock};
@@ -29,7 +30,8 @@ pub use caskade_i18n::rich::Node;
 
 pub mod format;
 
-/// The `app` domain's catalogs: the webview's, which the native UI shares.
+/// The `app` domain's catalogs: the native UI's text, but for its shared
+/// components'.
 const APP_CATALOGS: &[(&str, &str)] = include!(concat!(env!("OUT_DIR"), "/app_catalogs.rs"));
 /// The `ui` domain's: the shared components'.
 const UI_CATALOGS: &[(&str, &str)] = include!(concat!(env!("OUT_DIR"), "/ui_catalogs.rs"));
@@ -100,7 +102,7 @@ pub fn set_language(language: &str) -> String {
 }
 
 /// How much of each language is translated, from 0 to 1, as of the build
-/// (every domain's messages, as the webview's `translated`).
+/// (every domain's messages, as `just i18n-check` counts them).
 const COMPLETENESS: &[(&str, f64)] = include!(concat!(env!("OUT_DIR"), "/completeness.rs"));
 
 /// How much of `tag` is translated, from 0 to 1; `None` for English and a
@@ -112,8 +114,7 @@ pub fn translated(tag: &str) -> Option<f64> {
         .map(|(_, share)| *share)
 }
 
-/// A language by its own name ("Svenska"), or its tag without data for it,
-/// as the webview's `languageName`.
+/// A language by its own name ("Svenska"), or its tag without data for it.
 pub fn language_name(tag: &str) -> String {
     intl::language_name(tag).map_or_else(|| tag.to_owned(), str::to_owned)
 }
@@ -130,8 +131,7 @@ pub fn language() -> String {
 }
 
 /// The language numbers and dates follow: the language's, in the OS's
-/// region when the OS speaks it (English in the UK has the UK's dates), as
-/// the webview's `formatLocale` does.
+/// region when the OS speaks it (English in the UK has the UK's dates).
 pub fn format_locale() -> String {
     let language = language();
     if is_pseudo(&language) {

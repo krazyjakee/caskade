@@ -1174,6 +1174,7 @@ msgid "The library database couldn't be read or written."
 msgstr "Biblioteksdatabasen kunde inte läsas eller skrivas."
 
 #: crates/caskade-core/src/error.rs
+#: crates/caskade-ui-data/src/streaming.rs
 msgid "This part of Caskade isn't available right now."
 msgstr "Den här delen av Caskade är inte tillgänglig just nu."
 
@@ -1906,6 +1907,7 @@ msgstr "programmet som utgåvan anger"
 #: crates/caskade-core/src/install/recovery.rs
 #: crates/caskade-core/src/install/roms.rs
 #: crates/caskade-app/src/commands/install.rs
+#: crates/caskade-ui-data/src/jobs.rs
 msgid "This job is no longer in Activity."
 msgstr "Det här jobbet finns inte längre i Aktivitet."
 
@@ -5092,6 +5094,17 @@ msgstr "det här kontot får inte installera paket, eller så kunde ingen lösen
 msgid "the package manager failed: {detail}"
 msgstr "pakethanteraren misslyckades: {detail}"
 
+#: crates/caskade-app/src/commands/app_update_tests.rs
+#: crates/caskade-app/src/recovery.rs
+#: apps/native/src/updater.rs
+msgid "Development builds don't update themselves."
+msgstr "Utvecklingsversioner uppdaterar sig inte själva."
+
+#: crates/caskade-app/src/commands/app_update_tests.rs
+#: crates/caskade-app/src/self_update.rs
+msgid "Couldn't check for updates: {error}"
+msgstr "Det gick inte att söka efter uppdateringar: {error}"
+
 #: crates/caskade-app/src/commands/backup.rs
 msgid "That isn't a backup in the backup folder."
 msgstr "Det är ingen säkerhetskopia i mappen för säkerhetskopior."
@@ -5153,6 +5166,7 @@ msgid "request is already being confirmed"
 msgstr "begäran håller redan på att bekräftas"
 
 #: crates/caskade-app/src/commands/install_requests.rs
+#: crates/caskade-ui-data/src/jobs/requests.rs
 msgid "unknown or expired request"
 msgstr "okänd eller utgången begäran"
 
@@ -5468,7 +5482,6 @@ msgid "Restore from backup…"
 msgstr "Återställ från säkerhetskopia…"
 
 #: crates/caskade-app/src/recovery.rs
-#: apps/desktop/src-tauri/src/webview_recovery.rs
 msgid "Quit"
 msgstr "Avsluta"
 
@@ -5509,20 +5522,9 @@ msgstr ""
 msgid "Try again"
 msgstr "Försök igen"
 
-#: crates/caskade-app/src/recovery.rs
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-#: apps/native/src/updater.rs
-msgid "Development builds don't update themselves."
-msgstr "Utvecklingsversioner uppdaterar sig inte själva."
-
 #: crates/caskade-app/src/self_update.rs
 msgid "The download is larger than expected."
 msgstr ""
-
-#: crates/caskade-app/src/self_update.rs
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Couldn't check for updates: {error}"
-msgstr "Det gick inte att söka efter uppdateringar: {error}"
 
 #: crates/caskade-app/src/self_update.rs
 msgid "The update feed isn't readable: {error}"
@@ -5537,7 +5539,6 @@ msgid "The new version has no download for this system yet."
 msgstr ""
 
 #: crates/caskade-app/src/self_update.rs
-#: apps/desktop/src-tauri/src/commands/app_update.rs
 msgid "Couldn't download the update: {error}"
 msgstr "Det gick inte att ladda ner uppdateringen: {error}"
 
@@ -5653,97 +5654,39 @@ msgstr "En inledande klammerparentes stängs aldrig."
 msgid "Line {line}: {problem}"
 msgstr "Rad {line}: {problem}"
 
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Caskade was installed as a system package: update it with your package manager."
-msgstr "Caskade installerades som ett systempaket: uppdatera det med din pakethanterare."
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-#: apps/native/src/updater.rs
-msgid "This copy of Caskade can't update itself: download the new version instead."
-msgstr "Den här kopian av Caskade kan inte uppdatera sig själv: ladda ner den nya versionen i stället."
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "The update feed's address is invalid: {error}"
-msgstr "Uppdateringsflödets adress är ogiltig: {error}"
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Downloading Caskade {version}"
-msgstr "Laddar ner Caskade {version}"
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Downloading Caskade {version} ({percent}%)"
-msgstr "Laddar ner Caskade {version} ({percent} %)"
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-msgid "Installing Caskade {version}"
-msgstr "Installerar Caskade {version}"
-
-#: apps/desktop/src-tauri/src/commands/app_update.rs
-#: apps/native/src/updater.rs
-msgid "Couldn't install the update: {error}"
-msgstr "Det gick inte att installera uppdateringen: {error}"
-
-#: apps/desktop/src-tauri/src/commands/console.rs
-#: apps/desktop/src-tauri/src/commands/guide.rs
-#: apps/native/src/input/guide.rs
-msgid "the main window is gone"
-msgstr "huvudfönstret finns inte längre"
-
-#: apps/desktop/src-tauri/src/commands/console.rs
-msgid "console mode isn't ready yet"
-msgstr "konsolläget är inte redo än"
-
-#: apps/desktop/src-tauri/src/commands/install_picker.rs
-#: apps/native/src/dialogs.rs
-msgid "selected path is not UTF-8"
-msgstr "den valda sökvägen är inte UTF-8"
-
-#: apps/desktop/src-tauri/src/commands/install_picker.rs
-msgid "The folder chooser closed without an answer."
-msgstr "Mappväljaren stängdes utan svar."
-
-#: apps/desktop/src-tauri/src/commands/install_picker.rs
-#: apps/native/src/dialogs.rs
-msgid "Choose games to install"
-msgstr "Välj spel att installera"
-
-#: apps/desktop/src-tauri/src/commands/install_picker.rs
-msgid "file dialog closed without a response"
-msgstr "fildialogen stängdes utan svar"
-
-#: apps/desktop/src-tauri/src/commands/install_picker.rs
-#: apps/native/src/dialogs.rs
-msgid "Choose game folder to install"
-msgstr "Välj spelmapp att installera"
-
-#: apps/desktop/src-tauri/src/commands/storage.rs
-msgid "Choose game storage location"
-msgstr "Välj lagringsplats för spel"
-
-#: apps/desktop/src-tauri/src/lib.rs
-msgid ""
-"Updating Caskade…\n"
-"\n"
-"Caskade restarts by itself once the update is installed."
+#: crates/caskade-ui-data/src/jobs/requests.rs
+#: crates/caskade-ui-data/src/jobs.rs
+msgid "Storage service is unavailable"
 msgstr ""
 
-#: apps/desktop/src-tauri/src/webview_recovery.rs
-msgid ""
-"Caskade's window stopped working and couldn't be brought back on its own. Restart Caskade to try again, or quit.\n"
-"\n"
-"Diagnostic logs: {logs}"
+#: crates/caskade-ui-data/src/plugin_ui.rs
+#: crates/caskade-ui-data/src/plugins.rs
+msgid "Plugins are unavailable in this session."
 msgstr ""
-"Caskades fönster slutade fungera och kunde inte återställas av sig självt. Starta om Caskade för att försöka igen, eller avsluta.\n"
-"\n"
-"Diagnostikloggar: {logs}"
 
-#: apps/desktop/src-tauri/src/webview_recovery.rs
-msgid "Restart Caskade"
-msgstr "Starta om Caskade"
+#: crates/caskade-ui-data/src/storage.rs
+msgid "Storage is unavailable. Open the Caskade desktop app to manage locations."
+msgstr ""
 
 #: apps/native/src/data/mod.rs
 msgid "Library discovery isn't available here."
 msgstr ""
+
+#: apps/native/src/dialogs.rs
+msgid "selected path is not UTF-8"
+msgstr "den valda sökvägen är inte UTF-8"
+
+#: apps/native/src/dialogs.rs
+msgid "Choose games to install"
+msgstr "Välj spel att installera"
+
+#: apps/native/src/dialogs.rs
+msgid "Choose game folder to install"
+msgstr "Välj spelmapp att installera"
+
+#: apps/native/src/input/guide.rs
+msgid "the main window is gone"
+msgstr "huvudfönstret finns inte längre"
 
 #: apps/native/src/input/guide.rs
 msgid "Caskade is starting"
@@ -5756,3 +5699,50 @@ msgstr "Redigera"
 #: apps/native/src/tray.rs
 msgid "Window"
 msgstr "Fönster"
+
+#: apps/native/src/updater.rs
+msgid "This copy of Caskade can't update itself: download the new version instead."
+msgstr "Den här kopian av Caskade kan inte uppdatera sig själv: ladda ner den nya versionen i stället."
+
+#: apps/native/src/updater.rs
+msgid "Couldn't install the update: {error}"
+msgstr "Det gick inte att installera uppdateringen: {error}"
+
+#~ msgid "Caskade was installed as a system package: update it with your package manager."
+#~ msgstr "Caskade installerades som ett systempaket: uppdatera det med din pakethanterare."
+
+#~ msgid "The update feed's address is invalid: {error}"
+#~ msgstr "Uppdateringsflödets adress är ogiltig: {error}"
+
+#~ msgid "Downloading Caskade {version}"
+#~ msgstr "Laddar ner Caskade {version}"
+
+#~ msgid "Downloading Caskade {version} ({percent}%)"
+#~ msgstr "Laddar ner Caskade {version} ({percent} %)"
+
+#~ msgid "Installing Caskade {version}"
+#~ msgstr "Installerar Caskade {version}"
+
+#~ msgid "console mode isn't ready yet"
+#~ msgstr "konsolläget är inte redo än"
+
+#~ msgid "The folder chooser closed without an answer."
+#~ msgstr "Mappväljaren stängdes utan svar."
+
+#~ msgid "file dialog closed without a response"
+#~ msgstr "fildialogen stängdes utan svar"
+
+#~ msgid "Choose game storage location"
+#~ msgstr "Välj lagringsplats för spel"
+
+#~ msgid ""
+#~ "Caskade's window stopped working and couldn't be brought back on its own. Restart Caskade to try again, or quit.\n"
+#~ "\n"
+#~ "Diagnostic logs: {logs}"
+#~ msgstr ""
+#~ "Caskades fönster slutade fungera och kunde inte återställas av sig självt. Starta om Caskade för att försöka igen, eller avsluta.\n"
+#~ "\n"
+#~ "Diagnostikloggar: {logs}"
+
+#~ msgid "Restart Caskade"
+#~ msgstr "Starta om Caskade"

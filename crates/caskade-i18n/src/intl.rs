@@ -1,6 +1,6 @@
-//! Numbers, sizes, durations, dates and times as the webview shows them
-//! (`apps/desktop/src/api/presentation.ts`, which uses the browser's
-//! `Intl`), for the native UI. The output matches `Intl`'s for each
+//! Numbers, sizes, durations, dates and times for the native UI, as the
+//! retired webview wrote them with the browser's `Intl` (ECMA-402), so
+//! both read the same. The output matches `Intl`'s for each
 //! language with data here: English (US, and the UK's dates and 24-hour
 //! clock) and Swedish. `intl_oracle.rs`, generated from Node's `Intl` by
 //! `scripts/intl-oracle.mjs`, checks it. Another language falls back to US
@@ -216,7 +216,7 @@ pub fn percent(locale: &str, value: f64) -> String {
 const SIZE_UNITS: [&str; 5] = ["kB", "MB", "GB", "TB", "PB"];
 
 /// A game's or a download's size: `1.5 GB`, `1,5 GB` in Swedish; `0.0 kB`
-/// at the least. (Units of 1024, named as the webview names them.)
+/// at the least. (Units of 1024, named as the webview named them.)
 pub fn size(locale: &str, bytes: u64) -> String {
     let mut value = bytes as f64 / 1024.0;
     let mut unit = 0;

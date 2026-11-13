@@ -1,10 +1,10 @@
 //! Lists every `locales/<lang>/app.po` and `ui.po` for the native UI, so a
 //! language's catalogs compile in as soon as its folder has them. This
 //! crate is the only one that embeds them: the core doesn't rebuild when
-//! the webview's text changes.
+//! the UI's text changes.
 //!
-//! It also counts how much of each language is translated, as the
-//! webview's build does (`packages/i18n`'s `completeness`), for the
+//! It also counts how much of each language is translated, as `just
+//! i18n-check` does (`caskade_i18n::extract::completion`), for the
 //! Language setting.
 
 use std::collections::HashSet;

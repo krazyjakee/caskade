@@ -122,7 +122,6 @@ msgstr "Läser installationsprogrammet"
         ] {
             sources(&crates.join(name), &mut text);
         }
-        sources(&crates.join("../apps/desktop/src-tauri/src"), &mut text);
         let flat = text.split_whitespace().collect::<Vec<_>>().join(" ");
         for (english, _) in LABELS {
             assert!(flat.contains(english), "nothing says {english:?} any more");

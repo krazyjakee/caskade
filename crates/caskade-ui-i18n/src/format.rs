@@ -1,7 +1,6 @@
-//! Numbers, sizes, durations and dates in the language in use, as the
-//! webview's `presentation.ts` writes them: [`intl`](crate::intl)'s
-//! formats, with the webview's messages around them. Dates are on the
-//! user's clock already: the caller converts from UTC.
+//! Numbers, sizes, durations and dates in the language in use:
+//! [`intl`](crate::intl)'s formats, with the UI's messages around them.
+//! Dates are on the user's clock already: the caller converts from UTC.
 
 use crate::intl::{self, Clock, DateTime};
 use crate::{format_locale, t, tp};
