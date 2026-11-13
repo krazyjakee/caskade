@@ -178,7 +178,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 ### Metadata and artwork
 
 - `Igdb` asks caskade-server (closed source, on Railway) by IGDB id and caches every answer, including not-found. Concurrent lookups share one request; failures pause all requests for a minute or `Retry-After` (up to 6 h). Cached answers carry a shape version so new fields are fetched once.
-- `Metadata` matches each game (RomM ROM, Hasheous, then the server's `/match` for store ids) and applies fields only where the game's value is empty or was written by the last apply. Runs retry with capped, jittered backoff.
+- `Metadata` matches each game (RomM's explicit IGDB id, then cached RomM ROM and game-file hashes through Hasheous, then Hasheous titles, then the server's `/match` for store ids) and applies fields only where the game's value is empty or was written by the last apply. Runs retry with capped, jittered backoff.
 - Fetched metadata and automatic artwork stay on each device, so a device fills in the games sync brings itself. A game from another device has no entries here until it's installed; it's matched by the IGDB id its devices matched it to (`LibraryStore::synced_igdb_id`, source `device`) when nothing here finds one and it has no store ids of its own here, else by the store ids in the identities its devices sent (`LibraryStore::synced_store_ids`); a hand-set match that arrives is applied like one made here. Sync wakes matching when games or hand-set matches arrive (`SyncService::on_games_arrived` → `Metadata::wake`, after a 5-second settle, one run for a burst, not during a failure's backoff); runs go 50 games at a time and only while online lookups are allowed.
 - `Hasheous` downloads the dumps the library needs and answers hash and title lookups offline.
 - The artwork cache downloads once, makes thumbnails and serves them over `caskade-asset://`. Page-only images download when the page opens.
@@ -195,7 +195,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 
 - Definitions in `caskade-sources/emulation/` describe detection, install sources per OS, setup steps, profiles, display flags, BIOS and save rules. `platforms.toml` maps platforms to IGDB, Hasheous and RomM ids and lists recommended emulators. Each definition's sources are recorded in `emulation/SOURCES.md`.
 - `managed` holds the shared steps: resolve (GitHub without the API, Dolphin's endpoint, a URL), download, unpack and swap carrying the user's files, Flatpak. `EmulatorSetup` and `ManagedTools` build on it. Removal deletes only what `.caskade/shipped.json` lists.
-- ROM scanners identify by hash; RomM is both a library source and a `BiosProvider`.
+- ROM scanners import games by filename; they do not compute or store ROM hashes. Metadata matching uses hashes already supplied by RomM (SHA-1, MD5 or CRC with size), without reading the ROM files. RomM is both a library source and a `BiosProvider`.
 - RomM server definitions sync between devices; their passwords and API tokens stay in each device's keychain. A server with no secret saved on this device for its address, or whose server refused the one it has (401/403), is `sign_in_needed` in `ServerStatus`: the panel offers Sign in (or Enter API token) instead of Sync now, and `romm::watch` doesn't sync it until a new secret is saved. Sync now still tries.
 
 ### Launching extras

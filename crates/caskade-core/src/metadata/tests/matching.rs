@@ -1,6 +1,120 @@
-//! Matching by store ids, Epic offers and Hasheous names, and what the game keeps.
+//! Matching by store ids, Epic offers and Hasheous hashes and names.
 
 use super::*;
+
+#[tokio::test]
+async fn rom_hashes_match_before_names_and_store_ids() {
+    for (title, fields, expected, source) in [
+        (
+            "Unknown SHA1",
+            json!({"sha1_hash": "3ECC30EA1BE47361CF44EE4E9C55BC0542AA41AF"}),
+            9331,
+            MatchSource::Hasheous,
+        ),
+        (
+            "Unknown MD5",
+            json!({"md5_hash": "18af7be2a83f4027b47acce509785508"}),
+            9331,
+            MatchSource::Hasheous,
+        ),
+        (
+            "Unknown CRC",
+            json!({"crc_hash": "8f5eb18", "fs_size_bytes": 23800}),
+            9331,
+            MatchSource::Hasheous,
+        ),
+        (
+            "Unknown disc",
+            json!({"files": [{"file_name": "disc.bin", "sha1_hash": "3ecc30ea1be47361cf44ee4e9c55bc0542aa41af", "category": "game"}]}),
+            9331,
+            MatchSource::Hasheous,
+        ),
+        // Both the title and Steam id identify Portal 2, but the ROM is Worms.
+        (
+            "Portal 2",
+            json!({"md5_hash": "18af7be2a83f4027b47acce509785508"}),
+            9331,
+            MatchSource::Hasheous,
+        ),
+        // The server's explicit match takes precedence over the hash.
+        (
+            "Unknown RomM",
+            json!({"igdb_id": 72, "md5_hash": "18af7be2a83f4027b47acce509785508"}),
+            72,
+            MatchSource::Romm,
+        ),
+        // A CRC collision of another size, a missing hash and a non-game
+        // file must all fall back to the title.
+        (
+            "Portal 2",
+            json!({"crc_hash": "8f5eb18", "fs_size_bytes": 1}),
+            72,
+            MatchSource::Hasheous,
+        ),
+        (
+            "Portal 2",
+            json!({"md5_hash": "00000000000000000000000000000000"}),
+            72,
+            MatchSource::Hasheous,
+        ),
+        (
+            "Portal 2",
+            json!({"files": [{"file_name": "manual.bin", "md5_hash": "18af7be2a83f4027b47acce509785508", "category": "manual"}]}),
+            72,
+            MatchSource::Hasheous,
+        ),
+    ] {
+        let dir = tempfile::tempdir().unwrap();
+        let server = server().await;
+        let hasheous = hasheous_with_worms(&dir.path().join("hasheous"), &server).await;
+        if title.starts_with("Unknown") {
+            assert!(hasheous.search(title, &[], 20).await.unwrap().is_empty());
+        }
+        let fixture = Fixture::with_hasheous(dir, server, hasheous).await;
+        let game = fixture.store.upsert_game(&Game::new(title)).await.unwrap();
+        let mut entry = GameEntry::new(&game.id, crate::romm::source_id("home"), "10");
+        entry.ids = vec![ExternalId::Steam { app_id: 620 }];
+        let entry = fixture.store.upsert_entry(&entry).await.unwrap();
+        let mut rom = json!({"id": 10, "platform_id": 1, "fs_name": "unknown.bin"});
+        rom.as_object_mut()
+            .unwrap()
+            .extend(fields.as_object().unwrap().clone());
+        fixture
+            .store
+            .save_romm_rom(&crate::romm::RommRom {
+                server_id: "home".into(),
+                rom_id: 10,
+                entry_id: entry.id,
+                game_id: game.id.clone(),
+                platform_id: "test".into(),
+                rom: serde_json::from_value(rom).unwrap(),
+                synced_target: crate::emulation::EmulatorTarget::PlatformDefault,
+                pinned: false,
+                orphaned: false,
+                cache: None,
+                cover_unavailable: None,
+            })
+            .await
+            .unwrap();
+
+        fixture.metadata.run().await.unwrap();
+        let found = fixture.metadata.game(&game.id).await.unwrap().unwrap();
+        assert_eq!(
+            (found.igdb_id, found.source),
+            (Some(expected), source),
+            "{title}: {fields}"
+        );
+        assert_eq!(fixture.requests("/match").await, 0);
+        assert_eq!(
+            fixture.game(&game.id).await.description,
+            if expected == 9331 {
+                "Worms from IGDB."
+            } else {
+                "Portal 2 from IGDB."
+            }
+        );
+    }
+}
 
 #[tokio::test]
 async fn store_ids_match_and_fill_the_game_in_once() {

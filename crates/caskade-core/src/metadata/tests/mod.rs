@@ -117,20 +117,42 @@ async fn server() -> MockServer {
     server
 }
 
-/// Serves a Windows dump with "Worms" (IGDB 9331) and indexes it.
+/// Indexes a Windows dump with "Worms" (9331, including ROM hashes) and
+/// "Portal 2" (72, title only).
 async fn hasheous_with_worms(dir: &std::path::Path, server: &MockServer) -> Hasheous {
     let game = json!({
         "Id": 1, "ObjectType": "Game", "Name": "Worms",
         "Metadata": [
             {"Source": "IGDB", "Id": "9331", "Status": "Mapped", "Link": "https://www.igdb.com/games/worms"}
         ],
-        "Attributes": []
+        "Attributes": [{"attributeName": "ROMs", "attributeType": "EmbeddedList", "Value": [{
+            "Name": "worms.bin", "Size": 23800, "Crc": "08F5EB18",
+            "Md5": "18af7be2a83f4027b47acce509785508",
+            "Sha1": "3ecc30ea1be47361cf44ee4e9c55bc0542aa41af"
+        }]}]
     });
     let mut writer = zip::ZipWriter::new(std::io::Cursor::new(Vec::new()));
     writer
         .start_file("Worms (1).json", zip::write::SimpleFileOptions::default())
         .unwrap();
     writer.write_all(game.to_string().as_bytes()).unwrap();
+    writer
+        .start_file(
+            "Portal 2 (2).json",
+            zip::write::SimpleFileOptions::default(),
+        )
+        .unwrap();
+    writer
+        .write_all(
+            json!({
+                "Id": 2, "ObjectType": "Game", "Name": "Portal 2",
+                "Metadata": [{"Source": "IGDB", "Id": "72", "Status": "Mapped"}],
+                "Attributes": []
+            })
+            .to_string()
+            .as_bytes(),
+        )
+        .unwrap();
     let zip = writer.finish().unwrap().into_inner();
     use md5::Digest;
     let md5: String = md5::Md5::digest(&zip)

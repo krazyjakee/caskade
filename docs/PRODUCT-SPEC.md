@@ -54,7 +54,7 @@ Choosing a game opens its quick look: a side panel in desktop mode, the page its
 
 ### 4.2 Game information
 
-- **IGDB metadata** through Caskade's metadata server: each game is matched by its RomM ROM, a Hasheous hash or name match, or its store ids (Steam, GOG, Epic and others); a game from another device that nothing here can match takes that device's match. It's then given a description, genres, tags, release date, alternative names, age ratings, cover, hero, icon, screenshots and videos. Answers are cached, so a matched library stays complete offline.
+- **IGDB metadata** through Caskade's metadata server: each game is matched by its RomM ROM, a Hasheous match by a hash supplied by RomM or by title, or its store ids (Steam, GOG, Epic and others); a game from another device that nothing here can match takes that device's match. It's then given a description, genres, tags, release date, alternative names, age ratings, cover, hero, icon, screenshots and videos. Answers are cached, so a matched library stays complete offline.
 - **Hasheous** data dumps identify ROMs and games by hash and title, offline.
 - **Games from your other devices** are matched and filled in on each device, with its own downloads, as soon as they arrive, while online lookups are on there. A match you chose by hand travels with the game.
 - **The IGDB panel** on a game page shows the match and changes it: search by title, type an id, mark "not on IGDB", rematch or refresh. While online lookups are off on this device it says so, and turns them on.
@@ -92,7 +92,7 @@ Choosing a game opens its quick look: a side panel in desktop mode, the page its
 
 - **21 emulators** are defined: RetroArch (with cores), ares, Azahar, Cemu, Dolphin, DuckStation, Flycast, gopher64, MAME, melonDS, Mesen, mGBA, PCSX2, PPSSPP, RMG, RPCS3, Ryujinx, shadPS4, xemu, Xenia and Ymir, across the platforms in `platforms.toml`.
 - **One-click setup**: Settings → Emulation lists the platforms in your library with no working emulator and installs the recommended one (a download before a Flatpak), skips its first-run wizard, points it at the BIOS folder, adds its profiles and makes it the platform's default. Installed emulators update like games.
-- **ROM scanners** turn ROM folders into library games, identified by hash where possible, with per-platform defaults and per-game overrides.
+- **ROM scanners** turn ROM folders into library games named from their filenames, with metadata matched by title, per-platform defaults and per-game overrides. RomM games can also match by their server-supplied ROM hashes.
 - **Profiles** set each emulator's arguments, and launches add fullscreen flags in console mode.
 - **BIOS** files missing for a platform come from your RomM server's firmware.
 - **RomM servers** are a library source: their ROMs, artwork and metadata sync into the library, and ROMs download on demand. Servers can be the same on your other devices, but each device signs in on its own: a server without a sign-in here, or whose sign-in the server refused, says so and offers Sign in, and waits for it instead of retrying in the background.
