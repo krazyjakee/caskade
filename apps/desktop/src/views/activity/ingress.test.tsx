@@ -29,6 +29,8 @@ it("accepts one HTTP URL or absolute path and leaves arbitrary clipboard text al
     "/one\n/two",
     "https://example.invalid/one\nhttps://example.invalid/two",
     "magnet:?dn=no-hash",
+    "magnet:?dn=Game#&xt=urn:btih:0123456789abcdef0123456789abcdef01234567",
+    "magnet:?dn=xt%3Durn%3Abtih%3A0123456789abcdef0123456789abcdef01234567",
   ])
     expect(installationText(text)).toBeNull();
   for (const text of [
@@ -37,19 +39,25 @@ it("accepts one HTTP URL or absolute path and leaves arbitrary clipboard text al
     "C:\\Games\\setup.exe",
     "\\\\server\\share\\game.7z",
     "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567&dn=Game",
+    "magnet:?dn=Game&xt=urn%3Abtih%3A0123456789abcdef0123456789abcdef01234567",
+    "magnet:?xt=urn:btmh:unsupported&xt=urn%3Abtih%3A0123456789abcdef0123456789abcdef01234567",
   ])
     expect(installationText(text)).toBe(text);
 });
-it("pasting outside a text field creates an inert request; only explicit confirmation starts it", async () => {
+it.each([
+  request.value,
+  "magnet:?dn=Game&xt=urn%3Abtih%3A0123456789abcdef0123456789abcdef01234567",
+])("pasting %s outside a text field waits for explicit confirmation", async (value) => {
   const backend = api();
+  vi.mocked(backend.request).mockResolvedValue({ ...request, value });
   render(
     <QueryClientProvider client={createLibraryQueryClient()}>
       <InstallIngress api={backend} />
     </QueryClientProvider>,
   );
-  fireEvent.paste(window, { clipboardData: { getData: () => request.value } });
+  fireEvent.paste(window, { clipboardData: { getData: () => value } });
   await screen.findByRole("dialog");
-  expect(backend.request).toHaveBeenCalledExactlyOnceWith(request.value);
+  expect(backend.request).toHaveBeenCalledExactlyOnceWith(value);
   expect(backend.confirm).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "Confirm installation" }));
   await waitFor(() => expect(backend.confirm).toHaveBeenCalledExactlyOnceWith("request-1"));

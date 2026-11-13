@@ -101,11 +101,15 @@ pub fn installation_text(value: &str) -> Option<String> {
             && url.password().is_none();
         return plain.then(|| text.to_owned());
     }
-    if let Some(query) = lower.strip_prefix("magnet:?") {
-        let hashed = query.split('&').any(|pair| {
-            pair.strip_prefix("xt=urn:btih:")
-                .and_then(|hash| hash.chars().next())
-                .is_some_and(|first| first.is_ascii_alphanumeric())
+    if lower.starts_with("magnet:?") {
+        let url = url::Url::parse(text).ok()?;
+        let hashed = url.query_pairs().any(|(key, value)| {
+            key.eq_ignore_ascii_case("xt")
+                && value
+                    .to_ascii_lowercase()
+                    .strip_prefix("urn:btih:")
+                    .and_then(|hash| hash.chars().next())
+                    .is_some_and(|first| first.is_ascii_alphanumeric())
         });
         return hashed.then(|| text.to_owned());
     }
@@ -151,6 +155,8 @@ pub mod tests {
             "  HTTP://example.com/a?b=c  ",
             "magnet:?xt=urn:btih:abcdef0123&dn=Game",
             "magnet:?dn=Game&xt=urn:btih:ABCDEF",
+            "magnet:?dn=Game&xt=urn%3Abtih%3A0123456789abcdef0123456789abcdef01234567",
+            "magnet:?xt=urn:btmh:unsupported&xt=urn%3Abtih%3A0123456789abcdef0123456789abcdef01234567",
             "/home/me/Games/Setup.exe",
             "C:\\Games\\Setup.exe",
             "d:/Games/setup.exe",
@@ -169,6 +175,8 @@ pub mod tests {
             "https://me@example.com/game.zip",
             "https://",
             "magnet:?dn=No%20hash",
+            "magnet:?dn=Game#&xt=urn:btih:0123456789abcdef0123456789abcdef01234567",
+            "magnet:?dn=xt%3Durn%3Abtih%3A0123456789abcdef0123456789abcdef01234567",
             "ftp://example.com/game.zip",
             "relative/path/game.zip",
             "https://example.com/a\nhttps://example.com/b",

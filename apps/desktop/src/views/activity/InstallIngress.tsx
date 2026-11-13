@@ -36,8 +36,13 @@ export function installationText(value: string): string | null {
       return null;
     }
   }
-  // A magnet link (#159) with a BitTorrent info hash.
-  if (/^magnet:\?/i.test(text)) return /[?&]xt=urn:btih:[a-z0-9]+/i.test(text) ? text : null;
+  // Decode query parameters; a hash in the fragment isn't a torrent source.
+  if (/^magnet:\?/i.test(text)) {
+    const hashed = [...new URL(text).searchParams].some(
+      ([key, value]) => key.toLowerCase() === "xt" && /^urn:btih:[a-z0-9]+/i.test(value),
+    );
+    return hashed ? text : null;
+  }
   return /^(\/|[a-z]:[\\/]|\\\\[^\\]+\\)/i.test(text) ? text : null;
 }
 export function InstallIngress({ api }: { api: InstallRequestApi }) {
