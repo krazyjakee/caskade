@@ -19,7 +19,7 @@ use caskade_ui_input::keys::{Modifiers as KeyModifiers, key_action, starts_typin
 use caskade_ui_input::spatial;
 use caskade_ui_input::{Action, GlyphFamily, InputSource};
 use dioxus_native::NodeHandle;
-use dioxus_native::prelude::dioxus_core::{ElementId, Runtime, spawn_forever};
+use dioxus_native::prelude::dioxus_core::{ElementId, Runtime, ScopeId};
 use dioxus_native::prelude::dioxus_html::PlatformEventData;
 use dioxus_native::prelude::*;
 use std::any::Any;
@@ -76,6 +76,8 @@ type OpenDetails = Rc<dyn Fn(String)>;
 type StartSearch = Rc<dyn Fn(String)>;
 
 struct Inner {
+    /// The input root owns its checks, even when a child starts them.
+    scope: ScopeId,
     dispatcher: RefCell<Dispatcher<NodeId>>,
     /// The root's mounted element, for the document.
     root: RefCell<Option<NodeHandle>>,
@@ -119,6 +121,7 @@ impl Input {
     fn new(console: bool, jobs: mpsc::UnboundedSender<Job>) -> Self {
         Self {
             inner: Rc::new(Inner {
+                scope: Runtime::current().current_scope_id(),
                 dispatcher: RefCell::new(Dispatcher::new(console)),
                 root: RefCell::new(None),
                 jobs,
@@ -454,7 +457,7 @@ impl Input {
                 repeats: 0,
                 handled: 0,
                 focus_debug: format!(
-                    "pending={}, waiting={}, frames={}, stale={}, entered={:?}, default={:?}, scope={:?}, entry={:?}",
+                    "pending={}, waiting={}, frames={}, stale={}, entered={:?}, default={:?}, scope={:?}, entry={:?}, focused_box={:?}, left={:?}",
                     dispatcher.pending(),
                     dispatcher.waiting_for_view(),
                     self.inner.frames.get(),
@@ -466,6 +469,9 @@ impl Input {
                         .map(|node| ui.text(node)),
                     (ui.attr(within, "data-cs"), ui.attr(within, "aria-label"), ui.rect(within)),
                     dispatcher.spatial.entry(ui).map(|node| ui.text(node)),
+                    focused.map(|node| ui.rect(node)),
+                    focused.and_then(|node| dispatcher.spatial.next(ui, node, spatial::Direction::Left))
+                        .map(|node| (ui.text(node), ui.rect(node))),
                 ),
             }
         });
@@ -612,7 +618,7 @@ impl Input {
         // Buttons, views and menus call settle too. Their scopes can go
         // away while these checks are pending; cancellation there would
         // leave `frames` set and prevent every later request from running.
-        spawn_forever(async move {
+        Runtime::current().spawn(self.inner.scope, async move {
             let mut frame = 0;
             loop {
                 crate::data::sleep(FRAME).await;

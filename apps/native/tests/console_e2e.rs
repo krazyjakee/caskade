@@ -178,8 +178,8 @@ fn run(
     .unwrap();
     assert_eq!(
         report["ok"], true,
-        "the run failed: {}; the log:\n{tail}",
-        report["failure"]
+        "the run failed: {}; steps: {}; the log:\n{tail}",
+        report["failure"], report["steps"]
     );
     assert!(status.success(), "{status}; the log:\n{tail}");
     assert_eq!(report["steps"].as_array().map(Vec::len), Some(steps));

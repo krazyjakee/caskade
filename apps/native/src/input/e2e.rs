@@ -253,8 +253,8 @@ impl Driver {
                     self.press(direction)?;
                 }
                 Err(format!(
-                    "never reached {section:?}; focus is on {:?}",
-                    self.last.focused
+                    "never reached {section:?}; focus is on {:?}; {}; actions={}, handled={}",
+                    self.last.focused, self.last.focus_debug, self.last.actions, self.last.handled
                 ))
             }
             "focus-is" => self.until(&format!("focus on {rest:?}"), |probe| probe.focused == rest),
