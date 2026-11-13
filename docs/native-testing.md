@@ -21,6 +21,12 @@ Nothing here reaches the internet or the developer's desktop: documents are
 headless, screenshots are CPU-rendered in memory, and window tests start
 their own display and bus.
 
+The [13 Nov rendering investigation](spikes/native-render-2026-11-13.md)
+records debug/release frame timings, motion controls, correctly sized
+scroll benchmarks and a private-window resize reproduction, with a short
+repeatable probe. These are exploratory measurements, not the hour-long
+all-process resource acceptance run.
+
 ## In CI
 
 `.github/workflows/ci.yml`, on master and on every pull request whose
