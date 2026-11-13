@@ -1,17 +1,19 @@
 # Testing the native UI
 
 How the native app (`apps/native`, Dioxus RSX on Blitz) is tested, what CI
-runs, and how to run the same locally. Layout advice is in
-[native-layout.md](native-layout.md); the architecture is in the
-[tech spec](TECH-SPEC.md).
+runs, and how to run the same locally. Which tests cover each view and flow
+by keyboard, pad, screen reader, language and theme, and what is left to
+real hardware, is the [acceptance matrix](native-acceptance.md) (#141).
+Layout advice is in [native-layout.md](native-layout.md); the architecture
+is in the [tech spec](TECH-SPEC.md).
 
 ## The layers
 
 | Layer | Where | What it covers |
 | --- | --- | --- |
-| Headless documents | `#[cfg(test)]` modules under `apps/native/src` (components in `ui/tests.rs`, the frame and its navigation in `frame/tests.rs` and `router/tests.rs`, the input layer, the library's virtual grid, theme, anatomy), `apps/native/tests/{layout,text_display,text_field,accessibility}.rs` | A `DioxusDocument` with no window: render, `poll` and `resolve`, then query the DOM, send `UiEvent`s (keys, pointer, wheel, IME) and read Blitz's AccessKit tree. Like Vitest for the webview. The library's tests open the real core and app layer on a 10,000-game fixture library, in memory. |
+| Headless documents | `#[cfg(test)]` modules under `apps/native/src` (components in `ui/tests/`, the frame and its navigation in `frame/tests.rs` and `router/tests.rs`, every page's AccessKit names in `frame/a11y_tests.rs`, a language switch and the pseudo-locale in the open frame in `frame/language_tests.rs`, each view's own tests, the input layer, the library's virtual grid, theme, anatomy), `apps/native/tests/{layout,text_display,text_field,accessibility}.rs` | A `DioxusDocument` with no window: render, `poll` and `resolve`, then query the DOM, send `UiEvent`s (keys, pointer, wheel, IME) and pad actions, and read Blitz's AccessKit tree. The library's tests open the real core and app layer on a 10,000-game fixture library, in memory. |
 | Crates below the UI | `crates/caskade-ui-data`, `-ui-input`, `-ui-i18n`, `-ui-theme`, `caskade-app`, `caskade-player` | The logic views use (data and paging, pad and keyboard rules, translations, appearance), tested as plain Rust. |
-| Screenshots | `apps/native/tests/shots.rs` and `shots/borders.rs` (`--features shots`) | Every reference screen in every valid theme, rendered with vello_cpu, against `tests/shots/*.png` (1% of pixels may differ); `shell` and `home` are the real frame over the fixture library, on the library's grid and on Home. Partial-border regressions check finite drawing paths before either backend and visible/missing edges on the CPU. `scripts/webkit-shots.py` and `compare-shots.py` set them beside WebKitGTK; the gaps are in [theming/blitz.md](theming/blitz.md). |
+| Screenshots | `apps/native/tests/shots.rs` and `shots/borders.rs` (`--features shots`) | Every reference screen and gallery page in every theme in `themes/` (the built-in ones, and the catalogue's Ember and Paper installed for the test), rendered with vello_cpu, against `tests/shots/*.png` (1% of pixels may differ); `shell` and `home` are the real frame over the fixture library, on the library's grid and on Home. Partial-border regressions check finite drawing paths before either backend and visible/missing edges on the CPU. `scripts/webkit-shots.py` and `compare-shots.py` set them beside WebKitGTK; the gaps are in [theming/blitz.md](theming/blitz.md). |
 | Against Chromium | `apps/native/tests/text_pixels.rs` (`--features shots`) | One page rendered by Blitz and, committed, by headless Chromium (`scripts/text-oracle.sh`), measured the same way: cut titles and placeholders (#80). Taffy's layout numbers from Chromium are in `tests/layout.rs`. |
 | The window | `apps/native/tests/smoke.rs`, `console_e2e.rs` (`#[ignore]`d) | The real binary on an Xvfb display and session bus of its own (`caskade-test-desktop`): the window restored, a web game and a video, a clean quit, crash restarts, a second start, and a scripted pad through the e2e harness (into the sidebar, a page and Back). Controller fixtures disable online metadata matching. |
 | Measurements | `apps/native/scripts/library-scroll.sh` | Frame times scrolling 10,000 games, on a private desktop. |
@@ -54,7 +56,10 @@ the token contracts; the `run-e2e` label too):
 | Rewrite the screenshots after a deliberate change | `just native-shots` |
 | Chromium's reference for `text_pixels` | `apps/native/scripts/text-oracle.sh` |
 | Run the app | `just dev` (native by default, your display; `just native` is also available) or `scripts/private-desktop.sh -- <binary>` |
-| Compare with legacy | `just legacy` (your display), or `caskade --legacy` from an installed bundle; quit native first on the same profile |
 
 A new test that starts the app uses `caskade_test_desktop::PrivateDesktop`;
 one that only renders uses a headless document.
+
+The webview (Tauri) app was removed in #143, so there is nothing left to
+compare with at run time: comparisons with it in the spikes and in
+`docs/manual-checks.md` are historical, made before then.

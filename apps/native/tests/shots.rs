@@ -1,6 +1,7 @@
 //! Every theme on the reference screens, rendered with vello_cpu (#90):
 //! `caskade-native --shots` renders each screen in each valid theme (the
-//! built-in ones and the catalogue's Ember, installed for the test), and
+//! built-in ones and the catalogue's Ember and Paper, installed for the
+//! test: every folder in `themes/`), and
 //! each must match its committed image in `tests/shots/` within a small
 //! tolerance. A change to how a theme looks updates the images:
 //!
@@ -24,6 +25,21 @@ const MAX_DIFFERING: f64 = 0.01;
 
 fn golden() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/shots")
+}
+
+/// Copies the theme folder `from` (fonts and images in folders of their
+/// own) to `to`.
+fn copy_folder(from: &Path, to: &Path) {
+    std::fs::create_dir_all(to).unwrap();
+    for entry in std::fs::read_dir(from).unwrap() {
+        let entry = entry.unwrap();
+        let path = entry.path();
+        if path.is_dir() {
+            copy_folder(&path, &to.join(entry.file_name()));
+        } else {
+            std::fs::copy(&path, to.join(entry.file_name())).unwrap();
+        }
+    }
 }
 
 fn pngs(folder: &Path) -> Vec<String> {
@@ -61,14 +77,12 @@ fn differing(a: &Path, b: &Path) -> f64 {
 fn every_theme_renders_the_reference_screens_as_before() {
     let temp = tempfile::tempdir().unwrap();
     let out = temp.path().join("out");
-    // Ember is the catalogue's: installed in the user's theme folder.
+    // Ember and Paper are the catalogue's: installed in the user's theme
+    // folder.
     let themes = temp.path().join("themes");
-    let ember = themes.join("ember");
-    std::fs::create_dir_all(&ember).unwrap();
-    let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../themes/ember");
-    for file in std::fs::read_dir(&source).unwrap() {
-        let file = file.unwrap();
-        std::fs::copy(file.path(), ember.join(file.file_name())).unwrap();
+    let catalogue = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../themes");
+    for theme in ["ember", "paper"] {
+        copy_folder(&catalogue.join(theme), &themes.join(theme));
     }
     let output = Command::new(env!("CARGO_BIN_EXE_caskade-native"))
         .arg("--shots")
@@ -89,13 +103,19 @@ fn every_theme_renders_the_reference_screens_as_before() {
         "the reference screens emitted invalid drawing paths:\n{log}"
     );
     let rendered = pngs(&out);
-    for theme in [
-        "caskade.default",
-        "caskade.cobalt",
-        "caskade.emerald",
-        "caskade.engage",
-        "dev.caskade.ember",
-    ] {
+    // Every theme in `themes/`, built in or the catalogue's.
+    let mut ids: Vec<String> = std::fs::read_dir(&catalogue)
+        .unwrap()
+        .flatten()
+        .filter_map(|folder| std::fs::read_to_string(folder.path().join("theme.json")).ok())
+        .map(|manifest| {
+            let manifest: serde_json::Value = serde_json::from_str(&manifest).unwrap();
+            manifest["id"].as_str().unwrap().to_owned()
+        })
+        .collect();
+    ids.sort();
+    assert!(ids.contains(&"caskade.default".to_owned()), "{ids:?}");
+    for theme in &ids {
         assert!(
             rendered
                 .iter()

@@ -185,6 +185,8 @@ fn DrawnOne(contribution: Contribution, game_id: Option<String>) -> Element {
         let contribution = contribution.clone();
         let game_id = game_id.clone();
         use_resource(move || {
+            // A language change asks for the drawing again (#141).
+            let _ = crate::i18n::LANGUAGE.read();
             let handle = handle.clone();
             let contribution = contribution.clone();
             let context = Context {

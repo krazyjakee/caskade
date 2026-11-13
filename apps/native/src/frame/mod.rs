@@ -19,6 +19,10 @@ mod views;
 pub mod window;
 
 #[cfg(test)]
+mod a11y_tests;
+#[cfg(test)]
+mod language_tests;
+#[cfg(test)]
 pub(crate) mod tests;
 
 use crate::router::{RouterRoot, use_router};

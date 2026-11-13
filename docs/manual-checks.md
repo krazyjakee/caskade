@@ -17,7 +17,14 @@ How to report:
   #11, Gitea #255 is #21); the "Which checks finish each issue" table maps
   the ones behind open checks.
 
-Use a build of the current `master` on every machine. Caskade's data folder
+Use a build of the current `master` on every machine: the native app,
+`caskade-native` (`cargo build -p caskade-native` for a debug build, `cargo
+build --release -p caskade-native` for a release one, or the installed
+bundle). There is no webview (Tauri) app since #143, and no `--legacy`
+switch: rows and results below that name the webview app are historical
+comparisons from before then, not acceptance for the final app. What the
+automated tests already prove, view by view, is in
+[native-acceptance.md](native-acceptance.md). Caskade's data folder
 is `~/.local/share/caskade` on Linux and `%APPDATA%\Caskade\Caskade\data` on
 Windows. Sync and streaming checks need the devices paired in Settings →
 Devices first, unless the check is about pairing.
@@ -151,9 +158,11 @@ macOS is M5.
 About 1½ hours. Needs: a Linux PC with no Sunshine installed (L3–L5), a
 debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
 
-- [ ] **L1.** The core's language list has no pseudo-locale, so this needs the
-  browser preview: run `VITE_CASKADE_FIXTURES=1 just web` and open a page with
-  `?lang=en-XA`. Go through every view in desktop and console
+- [ ] **L1.** The Language setting has no pseudo-locale, so this needs a
+  debug build: `cargo build -p caskade-native`, then
+  `CASKADE_LANG=en-XA CASKADE_FIXTURES=1 target/debug/caskade-native` (the
+  fixture library; leave out `CASKADE_FIXTURES=1` for your own). Go through
+  every view in desktop and console
   mode, open the dialogs (game menu, Add game, editor, move, uninstall,
   share), a card's quick look in console mode (X on a pad) and a plugin's
   tab. **Pass:** every text is accented and bracketed; nothing is plain
@@ -197,22 +206,19 @@ debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
   a local one with a test key (`scripts/addons/README.md`) and install an
   add-on from it. Publish a newer release to it ("Update a package" in
   `docs/plugins/publishing.md`), press Check for updates and update. Then
-  publish a release that can't start (a backend that isn't a component, as in
-  `commands/addon_smoke_tests.rs`) and update to that. **Pass:** the published
+  publish a release that can't start (a backend that isn't a component) and
+  update to that. **Pass:** the published
   catalogue lists Playtime stats, GameMode and Ember, and both install; the
   good update installs; the failed one says the previous version is back,
   settings are kept, and an update never adds permissions without asking.
   (#8)
 - [ ] **L8.** Idle memory, alongside the others: start an installed build
   (deb or AppImage) with your own library, leave it in the tray for an hour,
-  then add up RssAnon and VmSwap over every process the app runs: for the
-  native app (`caskade --native`, one process)
-  `grep -E 'RssAnon|VmSwap' /proc/$(pgrep -xo caskade-native)/status`; for
-  the webview app, the main process and its WebKit processes,
-  `for p in $(pgrep -xo caskade) $(pgrep -P $(pgrep -xo caskade)); do grep -E 'RssAnon|VmSwap' /proc/$p/status; done`.
-  **Pass:** the native app is under 250 MB and the webview app under 400 MB
-  with a library the size of 8,400 games. Record both in "Idle memory with a
-  large library". (#71, #111)
+  then add up RssAnon and VmSwap over the app's process and what it started
+  (the streaming host, if hosting is on):
+  `for p in $(pgrep -xo caskade-native) $(pgrep -P $(pgrep -xo caskade-native)); do grep -E 'RssAnon|VmSwap' /proc/$p/status; done`.
+  **Pass:** the native app is under 250 MB with a library the size of 8,400
+  games. Record it in "Idle memory with a large library". (#71, #111)
 - [ ] **L9.** Startup, once in an X11 session and once in a Wayland one,
   with an installed build (deb or AppImage). Settings → General → Startup:
   turn on Launch on system startup, set Open to Library, log out and in.
@@ -228,11 +234,10 @@ debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
   background permission once, and `~/.config/autostart/` gets an entry that
   runs `flatpak run … --login`; the rest as L9. (#114)
 - [ ] **L11.** The native app (#88), on a real Cinnamon desktop and then on
-  GNOME (with its AppIndicator extension) or KDE. In the Tauri app set
-  Settings → General → Close button to Hide to tray (the native app has no
-  Settings yet; both read the same settings), then quit it. Build
-  `cargo build --release -p caskade-native` and run
-  `target/release/caskade-native --register-links`. **Pass:** the tray icon
+  GNOME (with its AppIndicator extension) or KDE. Build
+  `cargo build --release -p caskade-native`, run
+  `target/release/caskade-native --register-links`, and set Settings →
+  General → Close button to Hide to tray. **Pass:** the tray icon
   is there; a left click on it, and its Show Caskade, show the window;
   closing the window hides it; starting it again shows the running one's
   window and returns at once;
@@ -240,9 +245,10 @@ debug build for L1 and L7 (`just dev`), and Sunshine installed by you for L6.
   window up and logs "deep link awaits confirmation"; Quit Caskade quits,
   five times in a row, with no "Cinnamon crashed". With Launch on system
   startup and Start minimized on, logging in starts it in the tray with no
-  window. Afterwards turn Launch on system startup off and on in the Tauri
-  app, delete `~/.local/share/applications/caskade-links.desktop`, and make
-  Caskade the `x-scheme-handler/caskade` default again
+  window. Afterwards, if you also have an installed bundle, turn Launch on
+  system startup off and on in it, delete
+  `~/.local/share/applications/caskade-links.desktop`, and make the bundle
+  the `x-scheme-handler/caskade` default again
   (`xdg-mime default <its .desktop file> x-scheme-handler/caskade`). (#88)
 
 ## One Windows PC
@@ -300,9 +306,9 @@ Sunshine installed (W8 installs one). To find a game's id, open
   and password, and add an app of your own. Then do L6's steps. **Pass:** as
   L6. (#24)
 - [ ] **W9.** Look over the game editor, selection and bulk edit, the
-  achievements panel and the shell in this WebView2 build. **Pass:** a
-  plugin's stylesheet loads, and scrolling or tabbing never pushes the shell
-  out of the window. (Clears no box: #8 lets this stay deferred.)
+  achievements panel and the shell in a release `caskade-native.exe` on
+  Windows hardware. **Pass:** a plugin's theme and drawn UI load, and
+  scrolling or tabbing never pushes the shell out of the window. (Clears no box: #8 lets this stay deferred.)
 - [ ] **W10.** Work through "Windows: a real XInput pad" under
   "Console mode on real hardware" below. **Pass:** every step as written; note
   whether the Xbox button brings Caskade to the front. (Clears no box: #8 lets
@@ -317,19 +323,19 @@ Sunshine installed (W8 installs one). To find a game's id, open
   off deletes the value. A debug build in the Windows 10 VM passed all of
   this except the installed build, Task Manager and the tray click (10 Nov,
   #114's comments). (#114)
-- [ ] **W12.** The native app (#88). Set Close button to Hide to tray in the
-  Tauri app, quit it, and run a release `caskade-native.exe` (built on
-  Windows with `cargo build --release -p caskade-native`, or cross-built)
-  with `--register-links`. **Pass:** its icon is in the notification area; a
+- [ ] **W12.** The native app (#88). Run a release `caskade-native.exe`
+  (built on Windows with `cargo build --release -p caskade-native`, or
+  cross-built for `x86_64-pc-windows-gnu`) with `--register-links`, and set
+  Settings → General → Close button to Hide to tray. **Pass:** its icon is in the notification area; a
   left click shows the window, a right click opens Show Caskade and Quit
   Caskade, and both do what they say; closing the window hides it; starting
   it again shows the running one's window; `start "" "caskade://install?url=https://example.com/game.zip"`
   brings it up. With Launch on system startup and Start minimized on, a
   sign-in leaves only its tray icon. The Windows 10 VM passed all of this but
-  the tray icon's click and menu (10 Nov, above). Afterwards turn Launch on
-  system startup off and on in the Tauri app, and set
-  `HKCU\Software\Classes\caskade\shell\open\command` back to
-  `"<install folder>\caskade.exe" "%1"`. (#88)
+  the tray icon's click and menu (10 Nov, above). Afterwards, if you also
+  have an installed bundle, turn Launch on system startup off and on in it,
+  and set `HKCU\Software\Classes\caskade\shell\open\command` back to the
+  bundle's exe followed by `"%1"`. (#88)
 
 ## One PC with your store accounts
 
@@ -565,7 +571,8 @@ About 2 hours. Needs: a Mac, plus the Linux and Windows PCs.
 
 - [ ] **M1.** Fill in the Linux ↔ macOS and Windows ↔ macOS rows of
   "Sync between real machines (#19)" below. (#19)
-- [ ] **M2.** Do W9's look-over in the Mac app (WKWebView). **Pass:** as W9.
+- [ ] **M2.** Do W9's look-over in a release `caskade-native` built on the
+  Mac. **Pass:** as W9.
   (Clears no box: #8 lets this stay deferred.)
 - [ ] **M3.** Use the Mac as a streaming client: S2, S3 and S8. **Pass:** as
   those. (#27, #28, #29)
@@ -576,18 +583,18 @@ About 2 hours. Needs: a Mac, plus the Linux and Windows PCs.
   Background, and Caskade starts at login in the menu bar with no window; the
   menu's Show or a Dock click shows it, on the Library. Turning the setting
   off removes the file. (#114)
-- [ ] **M5.** The native app (#88). Set Close button to Hide to tray in the
-  Tauri app and quit it, then build `cargo build --release -p caskade-native`
-  on the Mac and run `target/release/caskade-native`. **Pass:** the menu bar
+- [ ] **M5.** The native app (#88). Build `cargo build --release -p
+  caskade-native` on the Mac, run `target/release/caskade-native`, and set
+  Settings → General → Close button to Hide to tray. **Pass:** the menu bar
   has Caskade (About Caskade, Services, Hide Caskade, Hide Others, Show All,
   Quit Caskade), Edit and Window menus; the menu bar icon is a template
   image (it follows light and dark), and a click on it opens Show Caskade
   and Quit Caskade; closing the window hides it and Show brings it back;
   ⌘Q quits; starting it again shows the running one's window and returns.
   With Launch on system startup and Start minimized on, logging out and in
-  starts it with only the menu bar icon. Afterwards turn Launch on system
-  startup off and on in the Tauri app. `caskade://` links and self-update
-  need a native bundle, which isn't built yet. (#88)
+  starts it with only the menu bar icon. Afterwards, if you also have an
+  installed bundle, turn Launch on system startup off and on in it.
+  `caskade://` links and self-update need the bundle. (#88)
 
 ## Boxes no check here covers
 
@@ -847,11 +854,11 @@ VM runs on 6 and 7 Nov 2026 (Linux and Windows hosts, Windows 10 with ViGEmBus, 
 
 ### Console mode on real hardware (#153)
 
-CI proves console mode with a synthetic pad (`apps/desktop/src-tauri/tests/console_e2e.rs`, under Xvfb). These need real hardware: they are W10, H2 and H3 above. Issue numbers in this section are archived Gitea issues.
+CI proves console mode with a synthetic pad (`apps/native/tests/console_e2e.rs`, under Xvfb). These need real hardware: they are W10, H2 and H3 above. Issue numbers in this section are archived Gitea issues.
 
-Build: `pnpm tauri build --debug` (the AppImage or deb), or `just dev` on the device.
+Build: `just build-app` (the AppImage or deb), or `just dev` on the device.
 
-Build: `pnpm tauri build --debug` (the AppImage or deb), or `just dev` on the device.
+Build: `just build-app` (the AppImage or deb), or `just dev` on the device.
 
 #### Steam Deck game mode (gamescope)
 
@@ -906,7 +913,7 @@ On Windows 10 or 11 with an Xbox controller (USB or Bluetooth):
 
 On a desktop Linux session (GNOME or KDE), pair the controller over Bluetooth:
 
-1. `caskade --console` opens in console mode. The hint bar shows PlayStation
+1. `caskade-native --console` opens in console mode. The hint bar shows PlayStation
    glyphs (✕ ○ □ △, L1/R1).
 2. Repeat Steam Deck step 2. ✕ selects and ○ goes back.
 3. The PS button summons Caskade over a running game (Steam Deck step 4). On
@@ -935,9 +942,10 @@ newest one listed.
 
 The budget is the anonymous memory of every process the app runs, RssAnon
 plus VmSwap from `/proc/<pid>/status`, after an hour idle in the tray: with
-8,400 games under 250 MB for the native app (one process) and under 400 MB
-for the webview app, whose WebKit processes count too (#111).
-`WebKitWebProcess` was about 270 MB in the report that opened #71.
+8,400 games under 250 MB for the native app (#111). The webview app's rows
+below are a historical comparison from before #143 removed it (its budget
+was 400 MB, WebKit processes included; `WebKitWebProcess` was about 270 MB
+in the report that opened #71).
 
 To find what holds memory, run a copy of the library under Xvfb with
 jemalloc's profiler (`LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
