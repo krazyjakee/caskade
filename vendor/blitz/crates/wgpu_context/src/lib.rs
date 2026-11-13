@@ -16,7 +16,9 @@ mod util;
 pub use alpha_blitter::{AlphaConversion, AlphaConvertBlitter};
 pub use buffer_renderer::{BufferRenderer, BufferRendererConfig};
 pub use error::WgpuContextError;
-pub use surface_renderer::{SurfaceRenderer, SurfaceRendererConfiguration, TextureConfiguration};
+pub use surface_renderer::{
+    GetCurrentSurfaceTextureErr, SurfaceRenderer, SurfaceRendererConfiguration, TextureConfiguration,
+};
 pub use util::block_on_wgpu;
 
 /// A wgpu `Device`, it's associated `Queue`, and the `Adapter` and `Instance` used to create them

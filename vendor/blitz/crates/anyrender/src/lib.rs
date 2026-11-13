@@ -58,6 +58,11 @@ pub mod recording;
 pub use recording::Scene;
 pub mod dyn_scene;
 pub use dyn_scene::{DynPaintScene, DynScenePainter};
+pub mod backdrop;
+pub use backdrop::{
+    Backdrop, BackdropBlend, BackdropImage, BackdropLayer, BackdropLayerKind, BackdropMask,
+    BackdropMotion, BackdropShader, BackdropStop,
+};
 
 mod resource_id;
 pub use resource_id::ResourceId;
@@ -169,6 +174,45 @@ pub trait WindowRenderer: RenderContext {
     fn render_damage<F: FnOnce(&mut Self::ScenePainter<'_>)>(&mut self, damage: Rect, draw_fn: F) {
         let _ = damage;
         self.render(draw_fn)
+    }
+
+    /// Whether the renderer draws a [`Backdrop`] itself now: it is active,
+    /// on a GPU, and keeps the scene to composite over it. Defaults to
+    /// `false`, and the scene alone is drawn, over the base colour.
+    fn supports_backdrop(&self) -> bool {
+        false
+    }
+
+    /// Sets what is drawn beneath every frame from now on (`None`: the
+    /// scene alone, over the base colour), kept across suspend and resume.
+    /// While a backdrop is drawn the scene is drawn without the base colour,
+    /// over a transparent background. A renderer that can't draw backdrops
+    /// ignores it.
+    fn set_backdrop(&mut self, backdrop: Option<Backdrop>) {
+        let _ = backdrop;
+    }
+
+    /// When the backdrop next needs a frame of its own
+    /// ([`render_backdrop`](Self::render_backdrop)): now when it changed
+    /// since the last frame, a frame interval after the last one while it
+    /// moves, `None` when it is still (or not drawn).
+    fn backdrop_frame_due(&self) -> Option<std::time::Instant> {
+        None
+    }
+
+    /// Presents a frame of the backdrop at its current motion with the last
+    /// scene over it, without painting the scene again. `false` when it
+    /// can't (no backdrop, or no complete scene at the current size): the
+    /// caller renders a whole frame instead.
+    fn render_backdrop(&mut self) -> bool {
+        false
+    }
+
+    /// How many frames of the backdrop alone
+    /// ([`render_backdrop`](Self::render_backdrop)) have been presented, for
+    /// tests and measurements.
+    fn backdrop_frames(&self) -> u64 {
+        0
     }
 }
 

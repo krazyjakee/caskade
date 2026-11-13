@@ -45,6 +45,9 @@ pub struct Look {
     pub user_css: Option<String>,
     pub prefs: AppearanceSettings,
     pub prefers_reduced_motion: bool,
+    /// The theme's backdrop composition, drawn on the GPU (#149), or `None`
+    /// when its backdrop is CSS.
+    pub backdrop: Option<Arc<crate::backdrop::Prepared>>,
 }
 
 /// The theme service the net provider serves assets from.
@@ -57,6 +60,8 @@ static LAST: Mutex<Option<Look>> = Mutex::new(None);
 static PREFERS_LIGHT: Mutex<bool> = Mutex::new(false);
 /// The app's stylesheet when it isn't [`APP_CSS`]: the gallery's (#93).
 static APP_SHEET: OnceLock<&'static str> = OnceLock::new();
+/// Counts looks applied: the backdrop is read again after each.
+static GENERATION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 
 /// The window's documents get `css` as the app's stylesheet instead of
 /// [`APP_CSS`]: the gallery's, which has its pages' classes too. Before
@@ -73,11 +78,13 @@ struct Sheet {
     text: NodeId,
 }
 
-/// The theme's and the user's sheets (the app's never changes).
+/// The theme's and the user's sheets (the app's never changes), and the
+/// backdrop's (`backdrop::GPU_SHEET`, unlayered).
 #[derive(Clone, Copy)]
 struct Sheets {
     theme: Sheet,
     user: Sheet,
+    backdrop: Sheet,
 }
 
 /// The settings' appearance, or the defaults.
@@ -121,6 +128,7 @@ pub fn look(
         user_css,
         prefs,
         prefers_reduced_motion,
+        backdrop: crate::backdrop::prepare(themes, theme),
     }
 }
 
@@ -292,11 +300,16 @@ fn find_sheet(doc: &BaseDocument, head: NodeId, which: &str) -> Option<Sheet> {
 /// with its CSS.
 fn sheets(doc: &mut BaseDocument) -> Option<Sheets> {
     let head = doc.find_head_node()?.id;
-    if let (Some(theme), Some(user)) = (
+    if let (Some(theme), Some(user), Some(backdrop)) = (
         find_sheet(doc, head, "theme"),
         find_sheet(doc, head, "user"),
+        find_sheet(doc, head, "backdrop"),
     ) {
-        return Some(Sheets { theme, user });
+        return Some(Sheets {
+            theme,
+            user,
+            backdrop,
+        });
     }
     let mut mutator = doc.mutate();
     let mut sheet = |which: &str, css: &str| {
@@ -311,6 +324,7 @@ fn sheets(doc: &mut BaseDocument) -> Option<Sheets> {
     let sheets = Sheets {
         theme: sheet("theme", ""),
         user: sheet("user", ""),
+        backdrop: sheet("backdrop", ""),
     };
     drop(mutator);
     doc.upsert_stylesheet_for_node(app.style);
@@ -340,6 +354,33 @@ fn set_sheet(doc: &mut BaseDocument, sheet: Sheet, css: &str) {
     doc.mutate().set_node_text(sheet.text, css);
     // After the mutator's own pass, which reads the text as HTML.
     doc.upsert_stylesheet_for_node(sheet.style);
+}
+
+/// The backdrop composition of the look applied last.
+pub fn last_backdrop() -> Option<Arc<crate::backdrop::Prepared>> {
+    caskade_core::lock(&LAST)
+        .as_ref()
+        .and_then(|look| look.backdrop.clone())
+}
+
+/// Counts the looks applied so far.
+pub fn look_generation() -> u64 {
+    GENERATION.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+/// Gives the backdrop's sheet `css`; whether it changed (then the document
+/// needs resolving again).
+pub fn set_backdrop_sheet(doc: &mut BaseDocument, css: &str) -> bool {
+    let Some(sheets) = sheets(doc) else {
+        return false;
+    };
+    let same = doc
+        .get_node(sheets.backdrop.text)
+        .is_some_and(|text| text.text_data().is_some_and(|data| data.content == css));
+    if !same {
+        set_sheet(doc, sheets.backdrop, css);
+    }
+    !same
 }
 
 /// Applies `look` to `doc` (on the main thread).
@@ -402,6 +443,7 @@ pub fn apply(doc: &mut BaseDocument, look: &Look) {
         doc.mutate().set_attribute(root, qual("style"), &style);
     }
     *caskade_core::lock(&LAST) = Some(look.clone());
+    GENERATION.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
 }
 
 /// The fonts the tokens name, bundled as the webview bundles them
@@ -593,6 +635,7 @@ mod tests {
             user_css: None,
             prefs: AppearanceSettings::default(),
             prefers_reduced_motion: false,
+            backdrop: None,
         };
         // As the app does: before Dioxus builds the page.
         apply(&mut document.inner.borrow_mut(), &look);
@@ -648,6 +691,7 @@ mod tests {
             user_css: None,
             prefs: AppearanceSettings::default(),
             prefers_reduced_motion: true,
+            backdrop: None,
         };
         assert_eq!(look.prefs.motion, "system");
         apply(&mut document.inner.borrow_mut(), &look);

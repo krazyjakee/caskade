@@ -1,0 +1,335 @@
+{
+ "binarySha256": "3baafd635964812a5ae0c6e99bc26cc5e6e1b9533065e832498cc769369ccc45",
+ "adapter": "NVIDIA GeForce RTX 3090 (DiscreteGpu, Vulkan), driver NVIDIA 610.43.02",
+ "window": [
+  1440,
+  1000
+ ],
+ "display": "private Xvfb, no network",
+ "runs": {
+  "after-backdrop": {
+   "cpu%": 1.27,
+   "anonMiB": 110.9,
+   "frames": {
+    "seconds": 18.644024166977033,
+    "documentFramesPerSecond": 0.0,
+    "backdropFramesPerSecond": 0.21454595661192846,
+    "gpuBackdrop": true,
+    "released": false
+   },
+   "resolvesPerS": 0.0,
+   "docFrameCpu": null,
+   "docPresent": null,
+   "backdropFrameCpu": {
+    "n": 4,
+    "p50": 52.512,
+    "p95": 54.301
+   },
+   "backdropAcquire": {
+    "n": 4,
+    "p50": 0.042,
+    "p95": 0.045
+   },
+   "backdropEncode": {
+    "n": 4,
+    "p50": 0.053,
+    "p95": 0.064
+   },
+   "backdropPresent": {
+    "n": 4,
+    "p50": 52.411,
+    "p95": 54.211
+   },
+   "gpuScene": null,
+   "gpuBackdrop": null,
+   "gpuMiB": 145,
+   "hidden": {
+    "hiddenCpuPercent": 0.19200152957822417,
+    "hiddenAnonMiB": 105.24979440789474,
+    "hiddenFrames": {
+     "seconds": 19.740522859967314,
+     "documentFramesPerSecond": 0.0,
+     "backdropFramesPerSecond": 0.0,
+     "gpuBackdrop": true,
+     "released": true
+    },
+    "hiddenGpuMemoryMiB": 20
+   },
+   "games": 8466
+  },
+  "after-backdrop-full": {
+   "cpu%": 27.41,
+   "anonMiB": 110.6,
+   "frames": {
+    "seconds": 19.72331181098707,
+    "documentFramesPerSecond": 0.0,
+    "backdropFramesPerSecond": 5.982768063032239,
+    "gpuBackdrop": true,
+    "released": false
+   },
+   "resolvesPerS": 0.0,
+   "docFrameCpu": null,
+   "docPresent": null,
+   "backdropFrameCpu": {
+    "n": 119,
+    "p50": 44.572,
+    "p95": 47.528
+   },
+   "backdropAcquire": {
+    "n": 119,
+    "p50": 0.024,
+    "p95": 0.035
+   },
+   "backdropEncode": {
+    "n": 119,
+    "p50": 0.044,
+    "p95": 0.055
+   },
+   "backdropPresent": {
+    "n": 119,
+    "p50": 44.531,
+    "p95": 47.438
+   },
+   "gpuScene": null,
+   "gpuBackdrop": null,
+   "gpuMiB": 145,
+   "hidden": null,
+   "games": 8466
+  },
+  "after-backdrop-gpu": {
+   "cpu%": 28.89,
+   "anonMiB": 110.5,
+   "frames": {
+    "seconds": 20.81704684300348,
+    "documentFramesPerSecond": 0.0,
+    "backdropFramesPerSecond": 5.956656625465387,
+    "gpuBackdrop": true,
+    "released": false
+   },
+   "resolvesPerS": 0.0,
+   "docFrameCpu": null,
+   "docPresent": null,
+   "backdropFrameCpu": {
+    "n": 125,
+    "p50": 47.402,
+    "p95": 50.634
+   },
+   "backdropAcquire": {
+    "n": 125,
+    "p50": 0.024,
+    "p95": 0.035
+   },
+   "backdropEncode": {
+    "n": 125,
+    "p50": 0.059,
+    "p95": 0.076
+   },
+   "backdropPresent": {
+    "n": 125,
+    "p50": 47.344,
+    "p95": 50.573
+   },
+   "gpuScene": null,
+   "gpuBackdrop": {
+    "n": 125,
+    "p50": 0.117,
+    "p95": 0.151
+   },
+   "gpuMiB": 145,
+   "hidden": null,
+   "games": 8466
+  },
+  "after-home": {
+   "cpu%": 1.44,
+   "anonMiB": 108.9,
+   "frames": {
+    "seconds": 19.72390602499945,
+    "documentFramesPerSecond": 0.0,
+    "backdropFramesPerSecond": 0.20279958720803687,
+    "gpuBackdrop": true,
+    "released": false
+   },
+   "resolvesPerS": 0.0,
+   "docFrameCpu": null,
+   "docPresent": null,
+   "backdropFrameCpu": {
+    "n": 4,
+    "p50": 50.674,
+    "p95": 52.017
+   },
+   "backdropAcquire": {
+    "n": 4,
+    "p50": 0.037,
+    "p95": 0.04
+   },
+   "backdropEncode": {
+    "n": 4,
+    "p50": 0.059,
+    "p95": 0.067
+   },
+   "backdropPresent": {
+    "n": 4,
+    "p50": 50.573,
+    "p95": 51.918
+   },
+   "gpuScene": null,
+   "gpuBackdrop": null,
+   "gpuMiB": 145,
+   "hidden": {
+    "hiddenCpuPercent": 0.19203825127951996,
+    "hiddenAnonMiB": 103.76274671052632,
+    "hiddenFrames": {
+     "seconds": 19.736568049993366,
+     "documentFramesPerSecond": 0.0,
+     "backdropFramesPerSecond": 0.0,
+     "gpuBackdrop": true,
+     "released": true
+    },
+    "hiddenGpuMemoryMiB": 20
+   },
+   "games": 8466
+  },
+  "after-reduced": {
+   "cpu%": 0.18,
+   "anonMiB": 109.1,
+   "frames": {
+    "seconds": 20.810875944967847,
+    "documentFramesPerSecond": 0.0,
+    "backdropFramesPerSecond": 0.0,
+    "gpuBackdrop": true,
+    "released": false
+   },
+   "resolvesPerS": 0.0,
+   "docFrameCpu": null,
+   "docPresent": null,
+   "backdropFrameCpu": null,
+   "backdropAcquire": null,
+   "backdropEncode": null,
+   "backdropPresent": null,
+   "gpuScene": null,
+   "gpuBackdrop": null,
+   "gpuMiB": 113,
+   "hidden": null,
+   "games": 8466
+  },
+  "before-backdrop": {
+   "cpu%": 6.24,
+   "anonMiB": 112.2,
+   "frames": {
+    "seconds": 18.62844091502484,
+    "documentFramesPerSecond": 1.1809898692195877,
+    "backdropFramesPerSecond": 0.0,
+    "gpuBackdrop": false,
+    "released": false
+   },
+   "resolvesPerS": 1.15,
+   "docFrameCpu": {
+    "n": 23,
+    "p50": 49.0,
+    "p95": 54.0
+   },
+   "docPresent": {
+    "n": 23,
+    "p50": 46.0,
+    "p95": 50.0
+   },
+   "backdropFrameCpu": null,
+   "backdropAcquire": null,
+   "backdropEncode": null,
+   "backdropPresent": null,
+   "gpuScene": null,
+   "gpuBackdrop": null,
+   "gpuMiB": 145,
+   "hidden": {
+    "hiddenCpuPercent": 0.24017089465525734,
+    "hiddenAnonMiB": 106.88712993421052,
+    "hiddenFrames": {
+     "seconds": 19.726712369010784,
+     "documentFramesPerSecond": 0.0,
+     "backdropFramesPerSecond": 0.0,
+     "gpuBackdrop": false,
+     "released": true
+    },
+    "hiddenGpuMemoryMiB": 20
+   },
+   "games": 8466
+  },
+  "before-backdrop-gpu": {
+   "cpu%": 6.39,
+   "anonMiB": 112.1,
+   "frames": {
+    "seconds": 20.82440023700474,
+    "documentFramesPerSecond": 1.2005147670747927,
+    "backdropFramesPerSecond": 0.0,
+    "gpuBackdrop": false,
+    "released": false
+   },
+   "resolvesPerS": 1.2,
+   "docFrameCpu": {
+    "n": 25,
+    "p50": 48.0,
+    "p95": 53.0
+   },
+   "docPresent": {
+    "n": 25,
+    "p50": 45.0,
+    "p95": 49.0
+   },
+   "backdropFrameCpu": null,
+   "backdropAcquire": null,
+   "backdropEncode": null,
+   "backdropPresent": null,
+   "gpuScene": {
+    "n": 25,
+    "p50": 1.074,
+    "p95": 1.588
+   },
+   "gpuBackdrop": null,
+   "gpuMiB": 145,
+   "hidden": null,
+   "games": 8466
+  },
+  "before-home": {
+   "cpu%": 6.19,
+   "anonMiB": 111.8,
+   "frames": {
+    "seconds": 18.616829628008418,
+    "documentFramesPerSecond": 1.1817264507218626,
+    "backdropFramesPerSecond": 0.0,
+    "gpuBackdrop": false,
+    "released": false
+   },
+   "resolvesPerS": 1.15,
+   "docFrameCpu": {
+    "n": 23,
+    "p50": 49.0,
+    "p95": 55.0
+   },
+   "docPresent": {
+    "n": 23,
+    "p50": 46.0,
+    "p95": 51.0
+   },
+   "backdropFrameCpu": null,
+   "backdropAcquire": null,
+   "backdropEncode": null,
+   "backdropPresent": null,
+   "gpuScene": null,
+   "gpuBackdrop": null,
+   "gpuMiB": 145,
+   "hidden": {
+    "hiddenCpuPercent": 0.19178891144016183,
+    "hiddenAnonMiB": 106.95415296052632,
+    "hiddenFrames": {
+     "seconds": 19.753356513974722,
+     "documentFramesPerSecond": 0.0,
+     "backdropFramesPerSecond": 0.0,
+     "gpuBackdrop": false,
+     "released": true
+    },
+    "hiddenGpuMemoryMiB": 20
+   },
+   "games": 8466
+  }
+ }
+}

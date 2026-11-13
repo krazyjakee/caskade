@@ -1,0 +1,41 @@
+{
+  "$description": "Emerald's backdrop (#149): theme.css's flat near-black with an emerald light in the top left corner, and the drifting glows and grid (hidden by Emerald's tokens) it inherits from Nexus over it.",
+  "frameRate": 6,
+  "layers": [
+    {
+      "type": "radial",
+      "at": ["0%", "0%"],
+      "size": ["70%", "60%"],
+      "stops": [{ "color": "#19b85f24", "at": "0%" }, { "color": "transparent", "at": "65%" }]
+    },
+    {
+      "type": "grid",
+      "color": "{color.accent.alt}",
+      "cell": "{grid.size}",
+      "line": "1px",
+      "opacity": "{effect.grid.opacity}",
+      "mask": { "at": ["60%", "30%"], "size": ["80%", "70%"], "from": "20%", "to": "75%" },
+      "motion": { "type": "pan", "by": ["{grid.size}", "{grid.size}"], "period": "40s" }
+    },
+    {
+      "type": "radial",
+      "at": ["78%", "10.8%"],
+      "size": ["44.8%", "39.2%"],
+      "stops": [
+        { "color": "{color.accent}", "alpha": 0.22, "at": "0%" },
+        { "color": "transparent", "at": "70%" }
+      ],
+      "motion": { "type": "drift", "by": ["-3vw", "2vh"], "period": "40s" }
+    },
+    {
+      "type": "radial",
+      "at": ["16.4%", "89.2%"],
+      "size": ["39.2%", "33.6%"],
+      "stops": [
+        { "color": "{color.accent.alt}", "alpha": 0.1, "at": "0%" },
+        { "color": "transparent", "at": "70%" }
+      ],
+      "motion": { "type": "drift", "by": ["-3vw", "2vh"], "period": "40s" }
+    }
+  ]
+}

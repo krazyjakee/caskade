@@ -98,11 +98,13 @@ Two values are inline styles on `<html>`:
   (light themes) in OKLCH until it passes, and refused with a message if
   it can't.
 
-The app sets one more attribute itself: `data-paint="cpu"` when the webview
-paints on the CPU (WebKitGTK without GPU compositing). Ambient loops repaint
-the whole screen there, so the `paint-cpu` set pauses them
-(`--cs-motion-ambient: paused`) unless `data-motion` is `full`. A theme can
-select on it too, e.g. to swap an animated backdrop for a still one.
+The app sets one more attribute itself: `data-paint="cpu"` when the window
+paints on the CPU (WebKitGTK without GPU compositing, or the native app
+without a usable GPU). Ambient loops repaint the whole screen there, so the
+`paint-cpu` set pauses them (`--cs-motion-ambient: paused`) unless
+`data-motion` is `full`. A theme can select on it too, e.g. to swap an
+animated backdrop for a still one. The native app's backdrop is still there
+whatever the motion setting ([Backdrops](#backdrops-149)).
 
 Elements that take files dropped from the desktop (the library, path fields,
 the plugin list) carry `data-drop-zone`. While files are dragged over one it
@@ -141,6 +143,75 @@ element (the Paper theme lifts a hovered card) should leave console focus
 in place, or a scrolling parent cuts its edge:
 `[data-cs="game-card"]:not([data-mode="console"] *):focus-visible`.
 
+## Backdrops (#149)
+
+The native app draws the window's backdrop on the GPU, from data the theme
+gives in `backdrop.json`: a base colour and up to eight layers (linear and
+radial gradients, a grid, images, and the theme's own shaders), each with
+an opacity, a blend, an elliptical mask and a motion. The fields, units and
+limits are in [backdrop.md](backdrop.md) (generated). The built-in themes'
+files are examples: `themes/default/backdrop.json` is Nexus's panning grid
+and drifting glows.
+
+While a layer moves, the backdrop gets frames of its own at the file's
+`frameRate`: the window's last painted frame is composited over it, and
+nothing is resolved, laid out or painted. The built-in themes ask for 6 a
+second: their motion is a pixel or two a second, so each step is under a
+pixel. Frames are also kept within 1% of a core, presenting them included:
+where presenting is slow (a virtual display that copies each frame, a
+remote X connection) they come further apart. A still backdrop costs
+nothing after its first frame. Hidden in the tray or minimised, the window
+draws nothing at all and releases its GPU resources until it is shown
+again.
+
+- **Tokens.** Colours, numbers, lengths and durations may be `{token}`
+  references, read from `[data-cs="backdrop"]`'s computed style whenever the
+  look, the window's size or the shown view changes. Theme tokens, the
+  user's accent, colour scheme, UI scale (for `rem`) and the override sets
+  all reach the GPU this way: Reduce effects hides Nexus's grid through
+  `effect.grid.opacity`. `motion.ambient` set to `paused` (reduced motion,
+  or `data-paint="cpu"`) keeps the backdrop still at the start of every
+  motion.
+- **The anchor.** `[data-cs="backdrop"]` stays in the document as the
+  styling anchor. `display: none` or `visibility: hidden` on it hides the
+  layers (the base colour stays) and stops their frames; its `opacity`
+  multiplies them. While the GPU draws the backdrop, the document's own
+  `[data-cs="backdrop"]` isn't painted: its `background`, borders, shadows,
+  animations and `::before`/`::after` are ignored, as are `html` and
+  `body` backgrounds (the base colour, `{color.surface.base}` by default,
+  is the window's colour).
+- **Custom CSS** restyles a GPU backdrop through the same contract: tokens
+  (globally, or on `[data-cs="backdrop"]` alone) and the anchor's
+  `display`, `visibility` and `opacity`. A CSS `background` can't become a
+  GPU layer.
+- **Inheritance.** A chain shows the `backdrop.json` nearest its leaf, so a
+  theme that only changes tokens (Ember) shows Nexus's composition in its
+  colours. A theme whose `theme.css` restyles `[data-cs="backdrop"]` and
+  has no `backdrop.json` of its own stops the search: its CSS backdrop is
+  drawn, as below. To change an inherited composition, ship a whole
+  `backdrop.json`; layers aren't merged.
+- **CSS backdrops.** Without a usable GPU (the window draws on the CPU), on
+  macOS for now (the renderer doesn't keep the scene there), for a theme
+  with no composition (Paper), and in the webview, the theme's CSS backdrop
+  is drawn by the document, with its animations paused: the theme's look
+  at the start of its motion, with no ambient repaint loop. Keep a
+  `theme.css` backdrop that matches the composition's first frame: it is
+  the still form of the theme. Existing themes keep working unchanged; an
+  animated CSS backdrop is shown still until the theme adds a
+  `backdrop.json`.
+- **Shaders.** A `"type": "shader"` layer runs the theme's own WGSL
+  function from `assets/`, given the pixel, the backdrop's size, a looping
+  time and up to four colours and numbers (tokens, so the shader follows
+  the accent and Reduce effects). It is a pure function: no bindings or
+  textures, so it can't read the window or anything else. `caskade-theme
+  lint` validates it. It runs only when the backdrop moves, and one that
+  costs more than its GPU budget stops moving. Details in
+  [backdrop.md](backdrop.md#shaders).
+
+`CASKADE_BACKDROP=still` draws the CSS backdrop, still, on a GPU too, and
+`CASKADE_BACKDROP=css` draws it animated as before #149: both for
+comparing and measuring.
+
 ## Theme packages (#139)
 
 A theme is a folder: tokens, CSS, fonts and images, never code.
@@ -150,7 +221,8 @@ themes/neon/
 ├── theme.json   # required
 ├── tokens.json  # optional: DTCG overrides of declared tokens
 ├── theme.css    # optional: rules on anatomy selectors
-├── assets/      # images and fonts that theme.css and the previews use
+├── backdrop.json # optional: the backdrop the native app draws on the GPU (#149)
+├── assets/      # images and fonts that theme.css and the previews use, and backdrop shaders (.wgsl)
 └── locales/     # optional: <lang>.po translations of the name and description
 ```
 
@@ -200,6 +272,10 @@ broken theme never hides the others. The rules:
     and `@font-face`.
 - A `url()` must name an image or font under `assets/`. Remote, absolute
   and escaping URLs are refused.
+- `backdrop.json` must match its schema ([backdrop.md](backdrop.md)): known
+  fields, values of their type, declared tokens of the right type, images
+  and shaders that exist under `assets/`, and shaders that compile and
+  declare nothing but functions, structs and constants.
 - Scripts, HTML and binaries anywhere in the folder are refused.
 
 A theme compiles, together with everything it `extends`, into one

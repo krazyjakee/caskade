@@ -1,0 +1,341 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Fri, 13 Nov 2026 17:10:01 +0000
+Subject: [PATCH] Draw a renderer's backdrop on its own clock, and hook
+ embedders in before paint
+
+The shell asks the renderer when its backdrop next needs a frame
+(`backdrop_frame_due`) and presents it from `about_to_wait`
+(`render_backdrop`), without resolving, laying out or painting the
+document. Nothing is scheduled while the window is occluded, hidden or
+minimised, or while nothing visible moves.
+
+`WindowConfig::with_before_paint` runs an embedder's hook after the
+document is resolved and before each frame is painted, with the renderer
+and the animation clock: where an embedder keeps renderer state, such as
+the backdrop, in step with the document.
+
+dioxus-native's renderers forward the backdrop; vello_cpu draws none.
+`RendererOptions::allow_software_gpu` lets the gpu-cpu-fallback renderer
+draw through wgpu on a software adapter, to test the GPU path without a
+GPU.
+---
+ packages/blitz-shell/src/application.rs       | 11 +++
+ packages/blitz-shell/src/window.rs            | 84 ++++++++++++++++++-
+ packages/dioxus-native/src/dioxus_renderer.rs | 31 ++++++-
+ .../dioxus-native/src/fallback_renderer.rs    | 44 +++++++++-
+ 4 files changed, 164 insertions(+), 6 deletions(-)
+
+diff --git a/packages/blitz-shell/src/application.rs b/packages/blitz-shell/src/application.rs
+index 81ce20fa1..25518bff8 100644
+--- a/packages/blitz-shell/src/application.rs
++++ b/packages/blitz-shell/src/application.rs
+@@ -274,6 +274,17 @@ impl<Rend: WindowRenderer> ApplicationHandler for BlitzApplication<Rend> {
+                     next = Some(next.map_or(at, |next| next.min(at)));
+                 }
+             }
++            // The renderer's backdrop moves on its own clock: its frames
++            // are presented here, without a document redraw.
++            if let Some(at) = view.next_backdrop_frame {
++                if at <= now {
++                    view.render_backdrop_if_due();
++                    view.schedule_backdrop();
++                }
++                if let Some(at) = view.next_backdrop_frame {
++                    next = Some(next.map_or(at, |next| next.min(at)));
++                }
++            }
+         }
+         event_loop.set_control_flow(match next {
+             Some(at) => winit::event_loop::ControlFlow::WaitUntil(at),
+diff --git a/packages/blitz-shell/src/window.rs b/packages/blitz-shell/src/window.rs
+index efb919ea3..27c707a27 100644
+--- a/packages/blitz-shell/src/window.rs
++++ b/packages/blitz-shell/src/window.rs
+@@ -41,10 +41,18 @@ fn get_safe_area_insets(window: &dyn Window) -> PhysicalInsets<u32> {
+     window.safe_area()
+ }
+ 
++/// Runs after the document is resolved and before each frame is painted,
++/// with the window's renderer and the animation clock (seconds): an
++/// embedder that keeps renderer state in step with the document (such as a
++/// backdrop the renderer draws) updates it here. It may change the
++/// document, and then resolves it again at the time given.
++pub type BeforePaint<Rend> = Box<dyn FnMut(&mut blitz_dom::BaseDocument, &mut Rend, f64)>;
++
+ pub struct WindowConfig<Rend: WindowRenderer> {
+     doc: Box<dyn Document>,
+     pub(crate) attributes: WindowAttributes,
+     renderer: Rend,
++    before_paint: Option<BeforePaint<Rend>>,
+ }
+ 
+ impl<Rend: WindowRenderer> WindowConfig<Rend> {
+@@ -61,8 +69,18 @@ impl<Rend: WindowRenderer> WindowConfig<Rend> {
+             doc,
+             attributes,
+             renderer,
++            before_paint: None,
+         }
+     }
++
++    /// Calls `hook` before each frame is painted ([`BeforePaint`]).
++    pub fn with_before_paint(
++        mut self,
++        hook: impl FnMut(&mut blitz_dom::BaseDocument, &mut Rend, f64) + 'static,
++    ) -> Self {
++        self.before_paint = Some(Box::new(hook));
++        self
++    }
+ }
+ 
+ pub struct View<Rend: WindowRenderer> {
+@@ -102,8 +120,14 @@ pub struct View<Rend: WindowRenderer> {
+     /// An animation runs but its last frame changed nothing visible: the next
+     /// tick waits for this time instead of the next vsync.
+     pub next_animation_frame: Option<Instant>,
++    /// When the renderer's backdrop next needs a frame of its own
++    /// ([`WindowRenderer::backdrop_frame_due`]): the backdrop moves on its
++    /// own clock, without resolving or painting the document.
++    pub next_backdrop_frame: Option<Instant>,
+     /// `BLITZ_DAMAGE=0` turns damage-limited repaint off (for comparisons).
+     damage_enabled: bool,
++    /// The embedder's [`BeforePaint`] hook.
++    before_paint: Option<BeforePaint<Rend>>,
+     pub is_visible: bool,
+     pub safe_area_insets: PhysicalInsets<u32>,
+ 
+@@ -238,7 +262,9 @@ impl<Rend: WindowRenderer> View<Rend> {
+             animation_timer: None,
+             full_repaint: std::cell::Cell::new(true),
+             next_animation_frame: None,
++            next_backdrop_frame: None,
+             damage_enabled: std::env::var("BLITZ_DAMAGE").map_or(true, |v| v != "0"),
++            before_paint: config.before_paint,
+             keyboard_modifiers: Default::default(),
+             proxy: proxy.clone(),
+             window: winit_window.clone(),
+@@ -367,11 +393,15 @@ impl<Rend: WindowRenderer> View<Rend> {
+         #[cfg(feature = "custom-widget")]
+         inner.can_create_surfaces(&mut self.renderer as _);
+ 
+-        // The render surface covers the entire window, including the safe area
++        // The render surface covers the entire window, including the safe
++        // area; sized before the hook, so it sees the renderer's size.
+         self.renderer.set_size(
+             width + insets.left + insets.right,
+             height + insets.top + insets.bottom,
+         );
++        if let Some(hook) = &mut self.before_paint {
++            hook(&mut inner, &mut self.renderer, animation_time);
++        }
+ 
+         self.renderer.render(|scene| {
+             paint_scene(
+@@ -384,6 +414,8 @@ impl<Rend: WindowRenderer> View<Rend> {
+                 insets.top,
+             )
+         });
++        drop(inner);
++        self.schedule_backdrop();
+ 
+         self.waker = Some(create_waker(&self.proxy, window_id));
+         true
+@@ -439,6 +471,9 @@ impl<Rend: WindowRenderer> View<Rend> {
+ 
+         let mut inner = self.doc.inner_mut();
+         inner.resolve(animation_time);
++        if let Some(hook) = &mut self.before_paint {
++            hook(&mut inner, &mut self.renderer, animation_time);
++        }
+ 
+         // Unregister resources (e.g. textures) from dropped custom widget nodes
+         #[cfg(feature = "custom-widget")]
+@@ -511,6 +546,13 @@ impl<Rend: WindowRenderer> View<Rend> {
+ 
+         drop(inner);
+ 
++        // A changed backdrop is shown even when the document painted
++        // nothing; a moving one wakes for its next frame.
++        if !painted && is_visible && !is_blocked {
++            self.render_backdrop_if_due();
++        }
++        self.schedule_backdrop();
++
+         // Animations that only change in steps wake for their next step.
+         let next_change = next_change
+             .zip(self.animation_timer)
+@@ -528,6 +570,44 @@ impl<Rend: WindowRenderer> View<Rend> {
+         }
+     }
+ 
++    /// Whether the window can be seen: not occluded, minimised or hidden.
++    fn is_shown(&self) -> bool {
++        self.is_visible
++            && self.window.is_visible() != Some(false)
++            && self.window.is_minimized() != Some(true)
++    }
++
++    /// Asks the renderer when its backdrop next needs a frame, unless the
++    /// window can't be seen: hidden windows submit no ambient frames.
++    pub fn schedule_backdrop(&mut self) {
++        self.next_backdrop_frame = if self.is_shown() {
++            self.renderer.backdrop_frame_due()
++        } else {
++            None
++        };
++    }
++
++    /// Presents a frame of the backdrop alone, if one is due: the last
++    /// painted document is composited over it as it is, so nothing is
++    /// resolved, laid out or painted. Returns whether it presented one.
++    pub fn render_backdrop_if_due(&mut self) -> bool {
++        let due = self
++            .renderer
++            .backdrop_frame_due()
++            .is_some_and(|at| at <= Instant::now() + FRAME_INTERVAL / 4);
++        if !due || !self.is_shown() {
++            return false;
++        }
++        if self.renderer.render_backdrop() {
++            true
++        } else {
++            // No complete document frame to composite (a resize, a lost
++            // surface): paint one.
++            self.request_redraw();
++            false
++        }
++    }
++
+     pub fn pointer_coords(&self, position: PhysicalPosition<f64>) -> PointerCoords {
+         let inner = self.doc.inner();
+         let scale = inner.viewport().scale_f64();
+@@ -691,6 +771,8 @@ impl<Rend: WindowRenderer> View<Rend> {
+                 self.is_visible = !is_occluded;
+                 if self.is_visible {
+                     self.request_redraw();
++                } else {
++                    self.next_backdrop_frame = None;
+                 }
+             },
+             WindowEvent::SurfaceResized(physical_size) => {
+diff --git a/packages/dioxus-native/src/dioxus_renderer.rs b/packages/dioxus-native/src/dioxus_renderer.rs
+index 4154eb16a..6efded620 100644
+--- a/packages/dioxus-native/src/dioxus_renderer.rs
++++ b/packages/dioxus-native/src/dioxus_renderer.rs
+@@ -54,6 +54,11 @@ pub struct RendererOptions {
+     /// `gpu-cpu-fallback`).
+     #[cfg(feature = "gpu-cpu-fallback")]
+     pub cpu_only: bool,
++    /// Draw through wgpu on a software adapter (llvmpipe, lavapipe, WARP)
++    /// too, instead of falling back to the CPU renderer: for testing the
++    /// GPU path without a GPU (only with `gpu-cpu-fallback`).
++    #[cfg(feature = "gpu-cpu-fallback")]
++    pub allow_software_gpu: bool,
+ }
+ 
+ #[derive(Clone)]
+@@ -101,7 +106,11 @@ impl DioxusNativeWindowRenderer {
+                 if let Some(limits) = options.limits {
+                     inner_options = inner_options.limits(limits);
+                 }
+-                let inner_renderer = InnerRenderer::new(inner_options, options.cpu_only);
++                let inner_renderer = InnerRenderer::new(
++                    inner_options,
++                    options.cpu_only,
++                    options.allow_software_gpu,
++                );
+             } else if #[cfg(any(feature = "vello", feature = "vello-hybrid"))] {
+                 let mut inner_options: InnerRendererOptions = config.into();
+                 if let Some(features) = options.features {
+@@ -221,4 +230,24 @@ impl WindowRenderer for DioxusNativeWindowRenderer {
+     ) {
+         self.inner.borrow_mut().render_damage(damage, draw_fn)
+     }
++
++    fn supports_backdrop(&self) -> bool {
++        self.inner.borrow().supports_backdrop()
++    }
++
++    fn set_backdrop(&mut self, backdrop: Option<anyrender::Backdrop>) {
++        self.inner.borrow_mut().set_backdrop(backdrop)
++    }
++
++    fn backdrop_frame_due(&self) -> Option<std::time::Instant> {
++        self.inner.borrow().backdrop_frame_due()
++    }
++
++    fn render_backdrop(&mut self) -> bool {
++        self.inner.borrow_mut().render_backdrop()
++    }
++
++    fn backdrop_frames(&self) -> u64 {
++        self.inner.borrow().backdrop_frames()
++    }
+ }
+diff --git a/packages/dioxus-native/src/fallback_renderer.rs b/packages/dioxus-native/src/fallback_renderer.rs
+index 8693c58ad..6f5cdfb92 100644
+--- a/packages/dioxus-native/src/fallback_renderer.rs
++++ b/packages/dioxus-native/src/fallback_renderer.rs
+@@ -28,16 +28,17 @@ pub struct FallbackWindowRenderer {
+ }
+ 
+ impl FallbackWindowRenderer {
+-    /// Tries vello_hybrid with `options` first (refusing software adapters),
+-    /// or goes straight to vello_cpu when `cpu_only`.
+-    pub fn new(options: VelloHybridRendererOptions, cpu_only: bool) -> Self {
++    /// Tries vello_hybrid with `options` first (refusing software adapters
++    /// unless `allow_software`), or goes straight to vello_cpu when
++    /// `cpu_only`.
++    pub fn new(options: VelloHybridRendererOptions, cpu_only: bool, allow_software: bool) -> Self {
+         let mut cpu_config = RendererConfig::default();
+         cpu_config.base_color = Some(options.base_color);
+         let active = if cpu_only {
+             Active::Cpu(VelloCpuWindowRenderer::with_options(cpu_config.clone()))
+         } else {
+             Active::Gpu(VelloHybridWindowRenderer::with_options(
+-                options.allow_software_adapter(false),
++                options.allow_software_adapter(allow_software),
+             ))
+         };
+         Self {
+@@ -188,4 +189,39 @@ impl WindowRenderer for FallbackWindowRenderer {
+             Active::Cpu(r) => r.render_damage(damage, |p| draw_fn(&mut DynScenePainter::new(p))),
+         }
+     }
++
++    // vello_cpu draws no backdrop: the document's own is drawn instead.
++    fn supports_backdrop(&self) -> bool {
++        match &self.active {
++            Active::Gpu(r) => r.supports_backdrop(),
++            Active::Cpu(_) => false,
++        }
++    }
++
++    fn set_backdrop(&mut self, backdrop: Option<anyrender::Backdrop>) {
++        if let Active::Gpu(r) = &mut self.active {
++            r.set_backdrop(backdrop);
++        }
++    }
++
++    fn backdrop_frame_due(&self) -> Option<std::time::Instant> {
++        match &self.active {
++            Active::Gpu(r) => r.backdrop_frame_due(),
++            Active::Cpu(_) => None,
++        }
++    }
++
++    fn render_backdrop(&mut self) -> bool {
++        match &mut self.active {
++            Active::Gpu(r) => r.render_backdrop(),
++            Active::Cpu(_) => false,
++        }
++    }
++
++    fn backdrop_frames(&self) -> u64 {
++        match &self.active {
++            Active::Gpu(r) => r.backdrop_frames(),
++            Active::Cpu(_) => 0,
++        }
++    }
+ }

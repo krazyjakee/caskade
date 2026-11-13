@@ -139,8 +139,10 @@ impl GameWindow for NativeWindow {
 
     fn make_way(&self, way: Making) -> Result<(), String> {
         match way {
-            Making::Minimize => self.0.set_minimized(true),
-            Making::Hide => self.0.set_visible(false),
+            // Through the window's loop, which releases its GPU resources
+            // while it can't be seen (#149).
+            Making::Minimize => crate::launch::ask(crate::launch::Request::Minimize),
+            Making::Hide => crate::launch::ask(crate::launch::Request::Hide),
             Making::Stay | Making::Fade => {}
         }
         Ok(())

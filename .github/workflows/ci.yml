@@ -436,9 +436,11 @@ jobs:
       # The native app (#87): its window restored, a web game and a video in
       # their own wry windows, a clean quit. No window manager, so windows
       # go exactly where they ask. Then a scripted pad drives it through the
-      # e2e harness (#92). Each test starts its own Xvfb and session bus.
+      # e2e harness (#92), and the GPU backdrop moves without the document
+      # being painted (#149, on lavapipe). Each test starts its own Xvfb and
+      # session bus.
       - name: Native app smoke test and end to end
-        run: cargo test -p caskade-native --locked --test smoke --test console_e2e -- --ignored
+        run: cargo test -p caskade-native --locked --test smoke --test console_e2e --test backdrop -- --ignored
       # Every theme on the reference screens, rendered with vello_cpu,
       # against the committed images (#90); cut titles and placeholders
       # against Chromium's rendering (#80).

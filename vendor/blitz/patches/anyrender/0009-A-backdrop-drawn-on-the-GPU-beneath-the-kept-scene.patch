@@ -1,0 +1,2141 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Fri, 13 Nov 2026 17:10:01 +0000
+Subject: [PATCH] A backdrop drawn on the GPU beneath the kept scene
+
+`WindowRenderer` gains a backdrop: layers the renderer draws beneath the
+scene and animates on its own clock (`set_backdrop`, `backdrop_frame_due`,
+`render_backdrop`, `backdrop_frames`). Renderers that can't draw one keep
+the defaults, which draw the scene alone.
+
+vello_hybrid keeps the scene in its intermediate texture (drawn over a
+transparent background while a backdrop is set) and presents every frame
+through one full-surface WGSL pass that draws the base colour and the
+layers (linear and radial gradients, a grid, images, embedder WGSL
+functions) and composes the scene over them. A frame of the backdrop
+alone writes the layers' offsets and records that pass: no scene is
+built, encoded or rasterised. Embedder shaders are compiled into the pass
+inside a validation error scope (a failing one isn't drawn); their layers
+are drawn into a texture of their own only when the backdrop moves or
+changes, and timed with timestamp queries where the adapter has them, so a
+shader over its budget stops moving.
+
+wgpu_context's SurfaceRenderer can present a frame the embedder draws
+straight onto the surface (`present_with`).
+---
+ crates/anyrender/src/backdrop.rs              |  239 ++++
+ crates/anyrender/src/lib.rs                   |   44 +
+ crates/anyrender_vello_hybrid/Cargo.toml      |    9 +
+ crates/anyrender_vello_hybrid/src/backdrop.rs | 1062 +++++++++++++++++
+ .../anyrender_vello_hybrid/src/backdrop.wgsl  |  217 ++++
+ crates/anyrender_vello_hybrid/src/cpu_time.rs |   42 +
+ .../anyrender_vello_hybrid/src/gpu_timing.rs  |   19 +-
+ crates/anyrender_vello_hybrid/src/lib.rs      |    2 +
+ .../src/window_renderer.rs                    |  205 +++-
+ crates/wgpu_context/src/lib.rs                |    4 +-
+ crates/wgpu_context/src/surface_renderer.rs   |   56 +
+ 11 files changed, 1890 insertions(+), 9 deletions(-)
+ create mode 100644 crates/anyrender/src/backdrop.rs
+ create mode 100644 crates/anyrender_vello_hybrid/src/backdrop.rs
+ create mode 100644 crates/anyrender_vello_hybrid/src/backdrop.wgsl
+ create mode 100644 crates/anyrender_vello_hybrid/src/cpu_time.rs
+
+diff --git a/crates/anyrender/src/backdrop.rs b/crates/anyrender/src/backdrop.rs
+new file mode 100644
+index 0000000..beb7f63
+--- /dev/null
++++ b/crates/anyrender/src/backdrop.rs
+@@ -0,0 +1,239 @@
++//! A backdrop: layers a [`WindowRenderer`](crate::WindowRenderer) draws
++//! beneath the scene itself, on the GPU, and animates without the scene
++//! being painted again.
++//!
++//! The embedder describes the layers once, in surface pixels, and the
++//! renderer keeps the last scene it drew (a transparent texture). Every
++//! frame it presents is the backdrop with that scene composited over it,
++//! and a frame of the backdrop alone ([`render_backdrop`]) only advances its
++//! motion: nothing is painted, laid out or rasterised on the CPU.
++//!
++//! [`render_backdrop`]: crate::WindowRenderer::render_backdrop
++
++use kurbo::{Point, Rect, Vec2};
++use peniko::Color;
++use std::sync::Arc;
++use std::time::Duration;
++
++/// Most layers a backdrop draws; later ones are ignored.
++pub const MAX_BACKDROP_LAYERS: usize = 8;
++/// Most images a backdrop's layers use; layers with others are ignored.
++pub const MAX_BACKDROP_IMAGES: usize = 4;
++/// Most colour stops a gradient uses; later ones are ignored.
++pub const MAX_BACKDROP_STOPS: usize = 4;
++/// Most distinct shaders a backdrop's layers run; layers with others are
++/// ignored.
++pub const MAX_BACKDROP_SHADERS: usize = 2;
++/// Colours and numbers a shader layer passes its shader.
++pub const BACKDROP_SHADER_INPUTS: usize = 4;
++
++/// The input a [`BackdropShader`]'s function takes, as it is declared for
++/// it (`CsInput`).
++pub const BACKDROP_SHADER_INPUT: &str = "struct CsInput {
++    pixel: vec2<f32>,
++    size: vec2<f32>,
++    time: f32,
++    scale: f32,
++    colors: array<vec4<f32>, 4>,
++    numbers: vec4<f32>,
++}
++";
++
++/// What a renderer draws beneath every frame. Lengths and positions are in
++/// surface pixels.
++#[derive(Clone, Debug, PartialEq)]
++pub struct Backdrop {
++    /// Fills the whole surface first: the window's own background.
++    pub base: Color,
++    /// Where the layers are drawn (they're clipped to it).
++    pub area: Rect,
++    /// Multiplies every layer: the backdrop's own opacity. The base is
++    /// drawn at full opacity.
++    pub opacity: f32,
++    /// Drawn in order, each over the ones before.
++    pub layers: Vec<BackdropLayer>,
++    /// How often the backdrop needs a frame while something in it moves:
++    /// `None` keeps it still, at the start of every motion.
++    pub frame_interval: Option<Duration>,
++}
++
++impl Backdrop {
++    /// A backdrop of `base` alone.
++    pub fn flat(base: Color) -> Self {
++        Self {
++            base,
++            area: Rect::ZERO,
++            opacity: 1.0,
++            layers: Vec::new(),
++            frame_interval: None,
++        }
++    }
++
++    /// Whether any layer that can be seen moves, so the backdrop needs
++    /// frames of its own.
++    pub fn moves(&self) -> bool {
++        self.frame_interval.is_some()
++            && self.opacity > 0.0
++            && self
++                .layers
++                .iter()
++                .take(MAX_BACKDROP_LAYERS)
++                .any(|layer| layer.motion.is_some() && layer.opacity > 0.0)
++    }
++}
++
++/// One layer of a [`Backdrop`].
++#[derive(Clone, Debug, PartialEq)]
++pub struct BackdropLayer {
++    pub kind: BackdropLayerKind,
++    /// 0 hides the layer.
++    pub opacity: f32,
++    pub blend: BackdropBlend,
++    /// How the layer's content moves; its mask stays where it is.
++    pub motion: Option<BackdropMotion>,
++    /// Fades the layer out away from an ellipse's centre.
++    pub mask: Option<BackdropMask>,
++}
++
++/// What a layer draws.
++#[derive(Clone, Debug, PartialEq)]
++pub enum BackdropLayerKind {
++    /// A CSS `linear-gradient` over the area: `angle` in degrees, 0 pointing
++    /// up and 90 right, the gradient line as long as CSS makes it.
++    Linear {
++        angle: f32,
++        stops: Vec<BackdropStop>,
++    },
++    /// A CSS `radial-gradient` ellipse: stops are fractions of `radius`.
++    Radial {
++        center: Point,
++        radius: Vec2,
++        stops: Vec<BackdropStop>,
++    },
++    /// Lines `line` wide along the top and left of every `cell`, as the
++    /// two-gradient CSS grid draws them; `origin` is where a cell starts.
++    Grid {
++        color: Color,
++        cell: Vec2,
++        line: f32,
++        origin: Point,
++    },
++    /// An embedder's WGSL function over the area: the colour (straight
++    /// alpha) at each pixel, given a [`BACKDROP_SHADER_INPUT`] with `colors`
++    /// and `numbers`, `scale` and, as `time`, the layer's
++    /// [`BackdropMotion::Clock`].
++    Shader {
++        shader: BackdropShader,
++        colors: Vec<Color>,
++        numbers: [f32; BACKDROP_SHADER_INPUTS],
++        /// Surface pixels per CSS pixel.
++        scale: f32,
++    },
++    /// An image `size` large with its top left at `origin`, tiled in both
++    /// directions when `repeat`.
++    Image {
++        image: BackdropImage,
++        origin: Point,
++        size: Vec2,
++        repeat: bool,
++    },
++}
++
++/// A gradient's colour at `offset` (0 at its start, 1 at its end).
++#[derive(Clone, Copy, Debug, PartialEq)]
++pub struct BackdropStop {
++    pub offset: f32,
++    pub color: Color,
++}
++
++/// How a layer combines with the layers under it.
++#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
++pub enum BackdropBlend {
++    #[default]
++    Normal,
++    Multiply,
++    Screen,
++}
++
++/// How a layer's content moves.
++#[derive(Clone, Copy, Debug, PartialEq)]
++pub enum BackdropMotion {
++    /// Out by `by` and back again, eased, every `period`.
++    Drift { by: Vec2, period: Duration },
++    /// Steadily by `by` every `period`: for repeating content (a grid, a
++    /// tiled image), which the renderer wraps at its tile so it never jumps.
++    Pan { by: Vec2, period: Duration },
++    /// A shader's clock: its `time` (the offset's `x`, in seconds) runs
++    /// from 0 to `period`, then again.
++    Clock { period: Duration },
++}
++
++impl BackdropMotion {
++    /// The offset `elapsed` into the motion.
++    pub fn offset(&self, elapsed: Duration) -> Vec2 {
++        match *self {
++            BackdropMotion::Drift { by, period } => {
++                let phase = phase(elapsed, period);
++                by * ((1.0 - (std::f64::consts::TAU * phase).cos()) / 2.0)
++            }
++            BackdropMotion::Pan { by, period } if !period.is_zero() => {
++                by * (elapsed.as_secs_f64() / period.as_secs_f64())
++            }
++            BackdropMotion::Pan { .. } => Vec2::ZERO,
++            BackdropMotion::Clock { period } if !period.is_zero() => {
++                Vec2::new(elapsed.as_secs_f64() % period.as_secs_f64(), 0.0)
++            }
++            BackdropMotion::Clock { .. } => Vec2::ZERO,
++        }
++    }
++}
++
++fn phase(elapsed: Duration, period: Duration) -> f64 {
++    if period.is_zero() {
++        return 0.0;
++    }
++    (elapsed.as_secs_f64() / period.as_secs_f64()).fract()
++}
++
++/// An elliptical mask: opaque inside `from` (a fraction of `radius`),
++/// fading linearly to nothing at `to`.
++#[derive(Clone, Copy, Debug, PartialEq)]
++pub struct BackdropMask {
++    pub center: Point,
++    pub radius: Vec2,
++    pub from: f32,
++    pub to: f32,
++}
++
++/// A WGSL function from the embedder: `wgsl` declares `entry`, a
++/// `fn(CsInput) -> vec4<f32>`, and whatever it calls, with names that clash
++/// with nothing else (`CsInput` is declared by the renderer). It may declare
++/// no bindings or entry points. Shaders with the same `id` are the same.
++#[derive(Clone, Debug)]
++pub struct BackdropShader {
++    pub id: u64,
++    pub wgsl: Arc<str>,
++    pub entry: Arc<str>,
++}
++
++impl PartialEq for BackdropShader {
++    fn eq(&self, other: &Self) -> bool {
++        self.id == other.id
++    }
++}
++
++/// Decoded image pixels: RGBA8, premultiplied. Images with the same `id`
++/// are the same pixels, uploaded once.
++#[derive(Clone, Debug)]
++pub struct BackdropImage {
++    pub id: u64,
++    pub width: u32,
++    pub height: u32,
++    pub rgba: Arc<[u8]>,
++}
++
++impl PartialEq for BackdropImage {
++    fn eq(&self, other: &Self) -> bool {
++        self.id == other.id && self.width == other.width && self.height == other.height
++    }
++}
+diff --git a/crates/anyrender/src/lib.rs b/crates/anyrender/src/lib.rs
+index 35f6a26..140bbd6 100644
+--- a/crates/anyrender/src/lib.rs
++++ b/crates/anyrender/src/lib.rs
+@@ -58,6 +58,11 @@ pub mod recording;
+ pub use recording::Scene;
+ pub mod dyn_scene;
+ pub use dyn_scene::{DynPaintScene, DynScenePainter};
++pub mod backdrop;
++pub use backdrop::{
++    Backdrop, BackdropBlend, BackdropImage, BackdropLayer, BackdropLayerKind, BackdropMask,
++    BackdropMotion, BackdropShader, BackdropStop,
++};
+ 
+ mod resource_id;
+ pub use resource_id::ResourceId;
+@@ -170,6 +175,45 @@ pub trait WindowRenderer: RenderContext {
+         let _ = damage;
+         self.render(draw_fn)
+     }
++
++    /// Whether the renderer draws a [`Backdrop`] itself now: it is active,
++    /// on a GPU, and keeps the scene to composite over it. Defaults to
++    /// `false`, and the scene alone is drawn, over the base colour.
++    fn supports_backdrop(&self) -> bool {
++        false
++    }
++
++    /// Sets what is drawn beneath every frame from now on (`None`: the
++    /// scene alone, over the base colour), kept across suspend and resume.
++    /// While a backdrop is drawn the scene is drawn without the base colour,
++    /// over a transparent background. A renderer that can't draw backdrops
++    /// ignores it.
++    fn set_backdrop(&mut self, backdrop: Option<Backdrop>) {
++        let _ = backdrop;
++    }
++
++    /// When the backdrop next needs a frame of its own
++    /// ([`render_backdrop`](Self::render_backdrop)): now when it changed
++    /// since the last frame, a frame interval after the last one while it
++    /// moves, `None` when it is still (or not drawn).
++    fn backdrop_frame_due(&self) -> Option<std::time::Instant> {
++        None
++    }
++
++    /// Presents a frame of the backdrop at its current motion with the last
++    /// scene over it, without painting the scene again. `false` when it
++    /// can't (no backdrop, or no complete scene at the current size): the
++    /// caller renders a whole frame instead.
++    fn render_backdrop(&mut self) -> bool {
++        false
++    }
++
++    /// How many frames of the backdrop alone
++    /// ([`render_backdrop`](Self::render_backdrop)) have been presented, for
++    /// tests and measurements.
++    fn backdrop_frames(&self) -> u64 {
++        0
++    }
+ }
+ 
+ /// Abstraction for rendering a scene to an image buffer
+diff --git a/crates/anyrender_vello_hybrid/Cargo.toml b/crates/anyrender_vello_hybrid/Cargo.toml
+index 495935c..b046990 100644
+--- a/crates/anyrender_vello_hybrid/Cargo.toml
++++ b/crates/anyrender_vello_hybrid/Cargo.toml
+@@ -20,6 +20,8 @@ peniko = { workspace = true }
+ vello_gpu = { workspace = true }
+ vello_common = { workspace = true }
+ glifo = { workspace = true }
++# Why a backdrop shader isn't drawn or stops moving.
++log = "0.4"
+ wgpu = { workspace = true }
+ rustc-hash = { workspace = true }
+ wgpu_context = { workspace = true }
+@@ -28,5 +30,12 @@ futures-channel = { workspace = true }
+ [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+ pollster = { workspace = true }
+ 
++# The process's CPU time, which a backdrop's frames are kept within a share of.
++[target.'cfg(unix)'.dependencies]
++libc = "0.2"
++
++[target.'cfg(windows)'.dependencies]
++windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_System_Threading"] }
++
+ [target.'cfg(target_arch = "wasm32")'.dependencies]
+ wasm-bindgen-futures = { workspace = true }
+\ No newline at end of file
+diff --git a/crates/anyrender_vello_hybrid/src/backdrop.rs b/crates/anyrender_vello_hybrid/src/backdrop.rs
+new file mode 100644
+index 0000000..02266d3
+--- /dev/null
++++ b/crates/anyrender_vello_hybrid/src/backdrop.rs
+@@ -0,0 +1,1062 @@
++//! Draws an [`anyrender::Backdrop`] on the GPU beneath the cached scene
++//! (`backdrop.wgsl`). A frame of the backdrop alone writes the layers'
++//! motion offsets (a few dozen bytes) and records one or two passes: no
++//! scene is built, encoded or rasterised.
++//!
++//! Without embedder shaders, one pass draws the layers and composes the
++//! scene over them. With them (a theme's own WGSL), the layers are drawn
++//! into a texture of their own only when the backdrop moves or changes, and
++//! a document frame just composes it: a costly shader never runs per UI
++//! frame. Their pass is timed on the GPU where the device can: a shader
++//! over its budget stops moving (it stays at that frame), so an idle window
++//! can't keep the GPU busy. A shader that doesn't compile isn't drawn.
++
++use anyrender::backdrop::{
++    BACKDROP_SHADER_INPUT, BACKDROP_SHADER_INPUTS, MAX_BACKDROP_IMAGES, MAX_BACKDROP_LAYERS,
++    MAX_BACKDROP_SHADERS, MAX_BACKDROP_STOPS,
++};
++use anyrender::{
++    Backdrop, BackdropBlend, BackdropImage, BackdropLayer, BackdropLayerKind, BackdropShader,
++    BackdropStop,
++};
++use peniko::Color;
++use std::sync::Arc;
++use std::sync::atomic::{AtomicU8, Ordering};
++use std::time::{Duration, Instant};
++use wgpu::{
++    BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayout, BindGroupLayoutDescriptor,
++    BindGroupLayoutEntry, BindingResource, BindingType, Buffer, BufferBindingType,
++    BufferDescriptor, BufferUsages, CommandEncoder, Device, Extent3d, Features, FilterMode,
++    FragmentState, LoadOp, MapMode, MultisampleState, Operations, PipelineLayout,
++    PipelineLayoutDescriptor, PrimitiveState, QuerySet, QuerySetDescriptor, QueryType, Queue,
++    RenderPassColorAttachment, RenderPassDescriptor, RenderPassTimestampWrites, RenderPipeline,
++    RenderPipelineDescriptor, SamplerBindingType, SamplerDescriptor, ShaderModuleDescriptor,
++    ShaderSource, ShaderStages, StoreOp, Texture, TextureDescriptor, TextureDimension,
++    TextureFormat, TextureSampleType, TextureUsages, TextureView, TextureViewDescriptor,
++    TextureViewDimension, VertexState,
++};
++
++const HEADER_SIZE: usize = 128;
++const LAYER_SIZE: usize = 160;
++/// GPU time the embedder's shaders may take, per second of motion: 4% of
++/// the GPU. Over it (or over [`FRAME_BUDGET`] a frame), they stop moving.
++const SECOND_BUDGET: Duration = Duration::from_millis(40);
++const FRAME_BUDGET: Duration = Duration::from_millis(8);
++/// Frames timed before the budget is judged.
++const SAMPLES: u32 = 8;
++/// The share of a core the backdrop's own frames may use, presenting them
++/// included: frames that cost more come further apart than the backdrop
++/// asks. On a display that presents cheaply this never applies.
++const CPU_SHARE: f64 = 0.01;
++/// The longest the backdrop waits between frames for [`CPU_SHARE`].
++const LONGEST_INTERVAL: Duration = Duration::from_secs(10);
++
++/// [`CPU_SHARE`], or `ANYRENDER_BACKDROP_CPU_SHARE` (0–1) to test frames at
++/// their own rate where presenting is slow (Xvfb).
++fn cpu_share() -> f64 {
++    static SHARE: std::sync::OnceLock<f64> = std::sync::OnceLock::new();
++    *SHARE.get_or_init(|| {
++        std::env::var("ANYRENDER_BACKDROP_CPU_SHARE")
++            .ok()
++            .and_then(|share| share.parse::<f64>().ok())
++            .filter(|share| *share > 0.0 && *share <= 1.0)
++            .unwrap_or(CPU_SHARE)
++    })
++}
++
++/// [`SECOND_BUDGET`], or `ANYRENDER_BACKDROP_SHADER_BUDGET_MS` to test the
++/// watch without a costly shader.
++fn second_budget() -> Duration {
++    static BUDGET: std::sync::OnceLock<Duration> = std::sync::OnceLock::new();
++    *BUDGET.get_or_init(|| {
++        std::env::var("ANYRENDER_BACKDROP_SHADER_BUDGET_MS")
++            .ok()
++            .and_then(|ms| ms.parse::<f64>().ok())
++            .filter(|ms| ms.is_finite() && *ms >= 0.0)
++            .map_or(SECOND_BUDGET, |ms| Duration::from_secs_f64(ms / 1000.0))
++    })
++}
++
++/// The backdrop to draw and when its motion started.
++pub(crate) struct BackdropState {
++    pub backdrop: Backdrop,
++    started: Instant,
++    /// When a frame showing it was last presented, or `None` since it
++    /// changed.
++    pub last_frame: Option<Instant>,
++    /// Where shader layers stopped after going over their budget.
++    frozen_shaders: Option<Duration>,
++    /// What a frame of the backdrop alone costs the process in CPU time,
++    /// presenting it included (a moving average).
++    frame_cost: Option<Duration>,
++    /// The cost was logged as slowing the frames.
++    slowed: bool,
++}
++
++impl BackdropState {
++    pub fn new(backdrop: Backdrop, started: Option<Instant>) -> Self {
++        Self {
++            backdrop,
++            started: started.unwrap_or_else(Instant::now),
++            last_frame: None,
++            frozen_shaders: None,
++            frame_cost: None,
++            slowed: false,
++        }
++    }
++
++    /// Notes what a frame of the backdrop alone cost in CPU time.
++    pub fn note_cost(&mut self, cost: Duration) {
++        let average = match self.frame_cost {
++            None => cost,
++            Some(average) => average.mul_f64(0.8) + cost.mul_f64(0.2),
++        };
++        self.frame_cost = Some(average);
++        let interval = self.interval();
++        if !self.slowed
++            && let Some(asked) = self.backdrop.frame_interval
++            && interval > asked * 2
++        {
++            self.slowed = true;
++            log::info!(
++                "backdrop frames cost {:.1} ms of CPU each: one every {:.2} s instead of {:.2} s",
++                average.as_secs_f64() * 1000.0,
++                interval.as_secs_f64(),
++                asked.as_secs_f64()
++            );
++        }
++    }
++
++    /// The time between the backdrop's frames: as asked, or longer when
++    /// they'd use more than [`CPU_SHARE`] of a core.
++    fn interval(&self) -> Duration {
++        let asked = self.backdrop.frame_interval.unwrap_or(Duration::ZERO);
++        let afforded = self
++            .frame_cost
++            .map_or(Duration::ZERO, |cost| cost.div_f64(cpu_share()));
++        asked.max(afforded.min(LONGEST_INTERVAL))
++    }
++
++    pub fn started(&self) -> Instant {
++        self.started
++    }
++
++    fn frozen(&self, layer: &BackdropLayer) -> bool {
++        self.frozen_shaders.is_some() && matches!(layer.kind, BackdropLayerKind::Shader { .. })
++    }
++
++    /// Whether a layer that can be seen moves (and isn't stopped).
++    pub fn moves(&self) -> bool {
++        let backdrop = &self.backdrop;
++        backdrop.frame_interval.is_some()
++            && backdrop.opacity > 0.0
++            && backdrop
++                .layers
++                .iter()
++                .take(MAX_BACKDROP_LAYERS)
++                .any(|layer| layer.motion.is_some() && layer.opacity > 0.0 && !self.frozen(layer))
++    }
++
++    /// See [`anyrender::WindowRenderer::backdrop_frame_due`].
++    pub fn frame_due(&self) -> Option<Instant> {
++        let Some(last) = self.last_frame else {
++            return Some(Instant::now());
++        };
++        if !self.moves() {
++            return None;
++        }
++        Some(last + self.interval())
++    }
++
++    /// How far into its motion `layer` is at `now`.
++    fn elapsed(&self, layer: &BackdropLayer, now: Instant) -> Duration {
++        if self.backdrop.frame_interval.is_none() {
++            return Duration::ZERO;
++        }
++        match self.frozen_shaders {
++            Some(at) if self.frozen(layer) => at,
++            _ => now.saturating_duration_since(self.started),
++        }
++    }
++}
++
++/// The pipelines for one set of embedder shaders.
++struct Pipelines {
++    /// Their ids, in slot order.
++    shaders: Vec<u64>,
++    direct: RenderPipeline,
++    layers: RenderPipeline,
++    compose: RenderPipeline,
++}
++
++/// The backdrop's own texture while embedder shaders draw it.
++struct Cache {
++    size: (u32, u32),
++    _texture: Texture,
++    view: TextureView,
++    /// It holds the backdrop as last written.
++    valid: bool,
++}
++
++/// Times the layers pass on the GPU.
++struct Watch {
++    query: QuerySet,
++    resolve: Buffer,
++    readback: Buffer,
++    /// 0 idle, 1 recorded (to map after submit), 2 mapping, 3 mapped.
++    state: Arc<AtomicU8>,
++    samples: u32,
++    total: Duration,
++}
++
++/// The pipeline, buffers and images for drawing backdrops on one device.
++pub(crate) struct BackdropGpu {
++    format: TextureFormat,
++    layout: BindGroupLayout,
++    pipeline_layout: PipelineLayout,
++    pipelines: Pipelines,
++    /// Embedder shaders that didn't compile: never tried again.
++    refused: Vec<u64>,
++    header: Buffer,
++    layers: Buffer,
++    sampler: wgpu::Sampler,
++    /// The images in their slots, by id; unused slots hold a 1×1 texture.
++    images: Vec<(u64, Texture, TextureView)>,
++    empty: TextureView,
++    cache: Option<Cache>,
++    watch: Option<Watch>,
++    /// For the current scene texture, cache and images; rebuilt when any
++    /// changes. The layers pass, which draws into the cache, has its own
++    /// without it.
++    bind_group: Option<BindGroup>,
++    layers_bind_group: Option<BindGroup>,
++    /// The layers last written, to skip writing them again.
++    written: Option<Backdrop>,
++}
++
++/// `backdrop.wgsl` with `shaders` and the function that calls them.
++fn source(shaders: &[&BackdropShader]) -> String {
++    let mut calls = String::new();
++    let mut functions = String::new();
++    for (slot, shader) in shaders.iter().enumerate() {
++        calls.push_str(&format!(
++            "        case {slot}u: {{ return {}(input); }}\n",
++            shader.entry
++        ));
++        functions.push_str(&shader.wgsl);
++        functions.push('\n');
++    }
++    let theme = format!(
++        "{BACKDROP_SHADER_INPUT}\nfn cs_theme_shader(index: u32, input: CsInput) -> vec4<f32> {{\n    switch index {{\n{calls}        default: {{ return vec4<f32>(0.0); }}\n    }}\n}}\n\n{functions}"
++    );
++    include_str!("backdrop.wgsl").replace("// CS_THEME_SHADERS\n", &theme)
++}
++
++fn pipelines(
++    device: &Device,
++    layout: &PipelineLayout,
++    format: TextureFormat,
++    shaders: &[&BackdropShader],
++) -> Pipelines {
++    let module = device.create_shader_module(ShaderModuleDescriptor {
++        label: Some("Backdrop"),
++        source: ShaderSource::Wgsl(source(shaders).into()),
++    });
++    let pipeline = |entry: &str| {
++        device.create_render_pipeline(&RenderPipelineDescriptor {
++            label: Some("Backdrop"),
++            layout: Some(layout),
++            vertex: VertexState {
++                module: &module,
++                entry_point: Some("vs_main"),
++                compilation_options: Default::default(),
++                buffers: &[],
++            },
++            fragment: Some(FragmentState {
++                module: &module,
++                entry_point: Some(entry),
++                compilation_options: Default::default(),
++                targets: &[Some(wgpu::ColorTargetState {
++                    format,
++                    blend: None,
++                    write_mask: wgpu::ColorWrites::ALL,
++                })],
++            }),
++            primitive: PrimitiveState::default(),
++            depth_stencil: None,
++            multisample: MultisampleState::default(),
++            multiview_mask: None,
++            cache: None,
++        })
++    };
++    Pipelines {
++        shaders: shaders.iter().map(|shader| shader.id).collect(),
++        direct: pipeline("fs_main"),
++        layers: pipeline("fs_layers"),
++        compose: pipeline("fs_compose"),
++    }
++}
++
++impl BackdropGpu {
++    pub fn new(device: &Device, format: TextureFormat) -> Self {
++        let uniform = |binding| BindGroupLayoutEntry {
++            binding,
++            visibility: ShaderStages::FRAGMENT,
++            ty: BindingType::Buffer {
++                ty: BufferBindingType::Uniform,
++                has_dynamic_offset: false,
++                min_binding_size: None,
++            },
++            count: None,
++        };
++        let texture = |binding, filterable| BindGroupLayoutEntry {
++            binding,
++            visibility: ShaderStages::FRAGMENT,
++            ty: BindingType::Texture {
++                sample_type: TextureSampleType::Float { filterable },
++                view_dimension: TextureViewDimension::D2,
++                multisampled: false,
++            },
++            count: None,
++        };
++        let mut entries = vec![
++            uniform(0),
++            uniform(1),
++            texture(2, false),
++            BindGroupLayoutEntry {
++                binding: 3,
++                visibility: ShaderStages::FRAGMENT,
++                ty: BindingType::Sampler(SamplerBindingType::Filtering),
++                count: None,
++            },
++        ];
++        for slot in 0..MAX_BACKDROP_IMAGES as u32 {
++            entries.push(texture(4 + slot, true));
++        }
++        entries.push(texture(8, false));
++        let layout = device.create_bind_group_layout(&BindGroupLayoutDescriptor {
++            label: Some("Backdrop"),
++            entries: &entries,
++        });
++        let pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
++            label: Some("Backdrop"),
++            bind_group_layouts: &[Some(&layout)],
++            immediate_size: 0,
++        });
++        let pipelines = pipelines(device, &pipeline_layout, format, &[]);
++        let buffer = |label, size| {
++            device.create_buffer(&BufferDescriptor {
++                label: Some(label),
++                size: size as u64,
++                usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST,
++                mapped_at_creation: false,
++            })
++        };
++        let sampler = device.create_sampler(&SamplerDescriptor {
++            label: Some("Backdrop images"),
++            address_mode_u: wgpu::AddressMode::Repeat,
++            address_mode_v: wgpu::AddressMode::Repeat,
++            mag_filter: FilterMode::Linear,
++            min_filter: FilterMode::Linear,
++            ..Default::default()
++        });
++        let empty = image_texture(device, None, 1, 1).1;
++        Self {
++            format,
++            layout,
++            pipeline_layout,
++            pipelines,
++            refused: Vec::new(),
++            header: buffer("Backdrop header", HEADER_SIZE),
++            layers: buffer("Backdrop layers", LAYER_SIZE * MAX_BACKDROP_LAYERS),
++            sampler,
++            images: Vec::new(),
++            empty,
++            cache: None,
++            watch: None,
++            bind_group: None,
++            layers_bind_group: None,
++            written: None,
++        }
++    }
++
++    pub fn format(&self) -> TextureFormat {
++        self.format
++    }
++
++    /// The scene texture changed (a resize): bind the new one.
++    pub fn scene_changed(&mut self) {
++        self.unbind();
++    }
++
++    fn unbind(&mut self) {
++        self.bind_group = None;
++        self.layers_bind_group = None;
++    }
++
++    /// Compiles the embedder shaders `backdrop` uses, when they changed.
++    /// One that doesn't compile is refused and the rest compiled again.
++    fn compile(&mut self, device: &Device, backdrop: &Backdrop) {
++        loop {
++            let mut wanted: Vec<&BackdropShader> = Vec::new();
++            for layer in backdrop.layers.iter().take(MAX_BACKDROP_LAYERS) {
++                if let BackdropLayerKind::Shader { shader, .. } = &layer.kind
++                    && !self.refused.contains(&shader.id)
++                    && !wanted.iter().any(|known| known.id == shader.id)
++                    && wanted.len() < MAX_BACKDROP_SHADERS
++                {
++                    wanted.push(shader);
++                }
++            }
++            let ids: Vec<u64> = wanted.iter().map(|shader| shader.id).collect();
++            if ids == self.pipelines.shaders {
++                return;
++            }
++            let scope = device.push_error_scope(wgpu::ErrorFilter::Validation);
++            let compiled = pipelines(device, &self.pipeline_layout, self.format, &wanted);
++            #[cfg(not(target_arch = "wasm32"))]
++            let error = pollster::block_on(scope.pop());
++            // The web can't wait here: errors are wgpu's to report.
++            #[cfg(target_arch = "wasm32")]
++            let error = {
++                drop(scope.pop());
++                None::<wgpu::Error>
++            };
++            match error {
++                None => {
++                    self.pipelines = compiled;
++                    return;
++                }
++                Some(error) => {
++                    // Which one isn't known: refuse them all, the
++                    // renderer's own layers still draw.
++                    log::warn!("a backdrop shader didn't compile, so it isn't drawn: {error}");
++                    self.refused.extend(ids);
++                }
++            }
++        }
++    }
++
++    /// Reads the last timed layers pass, if it's back, and stops the
++    /// embedder shaders' motion once they cost more than their budget.
++    fn judge(&mut self, device: &Device, state: &mut BackdropState, now: Instant, period: f32) {
++        let Some(watch) = &mut self.watch else {
++            return;
++        };
++        if watch.state.load(Ordering::Acquire) == 2 {
++            let _ = device.poll(wgpu::PollType::Poll);
++        }
++        if watch.state.load(Ordering::Acquire) != 3 {
++            return;
++        }
++        let ticks = watch
++            .readback
++            .slice(..)
++            .get_mapped_range()
++            .ok()
++            .and_then(|data| {
++                let start = u64::from_le_bytes(data[0..8].try_into().ok()?);
++                let end = u64::from_le_bytes(data[8..16].try_into().ok()?);
++                end.checked_sub(start)
++            });
++        watch.readback.unmap();
++        watch.state.store(0, Ordering::Release);
++        let Some(ticks) = ticks else {
++            return;
++        };
++        let spent = Duration::from_nanos((ticks as f64 * f64::from(period)) as u64);
++        watch.samples += 1;
++        watch.total += spent;
++        if watch.samples < SAMPLES || state.frozen_shaders.is_some() {
++            return;
++        }
++        let mean = watch.total / watch.samples;
++        let per_second = state
++            .backdrop
++            .frame_interval
++            .map_or(Duration::ZERO, |interval| {
++                mean.mul_f64(1.0 / interval.as_secs_f64().max(1e-3))
++            });
++        watch.samples = 0;
++        watch.total = Duration::ZERO;
++        if mean > FRAME_BUDGET || per_second > second_budget() {
++            let at = now.saturating_duration_since(state.started());
++            log::warn!(
++                "the backdrop's shaders take {:.2} ms a frame ({:.1} ms a second): they stop moving",
++                mean.as_secs_f64() * 1000.0,
++                per_second.as_secs_f64() * 1000.0
++            );
++            state.frozen_shaders = Some(at);
++        }
++    }
++
++    /// After the frame `draw` recorded was submitted: reads its timing back.
++    pub fn after_submit(&mut self) {
++        let Some(watch) = &self.watch else {
++            return;
++        };
++        if watch.state.load(Ordering::Acquire) != 1 {
++            return;
++        }
++        watch.state.store(2, Ordering::Release);
++        let state = Arc::clone(&watch.state);
++        watch
++            .readback
++            .slice(..)
++            .map_async(MapMode::Read, move |result| {
++                state.store(if result.is_ok() { 3 } else { 0 }, Ordering::Release);
++            });
++    }
++
++    /// Records the passes that draw `state`'s backdrop and `scene` over it
++    /// into `target`, at `now`. `advance` moves embedder shaders' kept
++    /// backdrop on to `now`; a document frame leaves it as it is.
++    #[allow(clippy::too_many_arguments)]
++    pub fn draw(
++        &mut self,
++        device: &Device,
++        queue: &Queue,
++        encoder: &mut CommandEncoder,
++        state: &mut BackdropState,
++        now: Instant,
++        scene: &TextureView,
++        target: &TextureView,
++        size: (u32, u32),
++        unpremultiply: bool,
++        advance: bool,
++    ) {
++        self.compile(device, &state.backdrop);
++        let uses_cache = !self.pipelines.shaders.is_empty();
++        if self.written.as_ref() != Some(&state.backdrop) {
++            self.upload_images(device, queue, &state.backdrop);
++            let slots: Vec<u64> = self.images.iter().map(|(id, ..)| *id).collect();
++            queue.write_buffer(
++                &self.layers,
++                0,
++                &layers_bytes(&state.backdrop, &slots, &self.pipelines.shaders),
++            );
++            self.written = Some(state.backdrop.clone());
++            if let Some(cache) = &mut self.cache {
++                cache.valid = false;
++            }
++        }
++        if uses_cache {
++            if self.cache.as_ref().is_none_or(|cache| cache.size != size) {
++                let (texture, view) = render_texture(device, self.format, size);
++                self.cache = Some(Cache {
++                    size,
++                    _texture: texture,
++                    view,
++                    valid: false,
++                });
++                self.unbind();
++            }
++            if self.watch.is_none() && device.features().contains(Features::TIMESTAMP_QUERY) {
++                self.watch = Some(watch(device));
++            }
++        } else if self.cache.take().is_some() {
++            self.unbind();
++        }
++        let period = queue.get_timestamp_period();
++        self.judge(device, state, now, period);
++        let draw_layers =
++            uses_cache && (advance || self.cache.as_ref().is_some_and(|cache| !cache.valid));
++        if !uses_cache || draw_layers {
++            queue.write_buffer(
++                &self.header,
++                0,
++                &header_bytes(state, now, size, unpremultiply),
++            );
++        }
++        if self.bind_group.is_none() {
++            self.bind_group = Some(self.bind(device, scene, true));
++        }
++        if uses_cache && self.layers_bind_group.is_none() {
++            self.layers_bind_group = Some(self.bind(device, scene, false));
++        }
++        let (Some(bind_group), layers_bind_group) = (&self.bind_group, &self.layers_bind_group)
++        else {
++            return;
++        };
++        let pass = |encoder: &mut CommandEncoder,
++                    view: &TextureView,
++                    pipeline: &RenderPipeline,
++                    bind_group: &BindGroup,
++                    timestamps: Option<RenderPassTimestampWrites>| {
++            let mut pass = encoder.begin_render_pass(&RenderPassDescriptor {
++                label: Some("Backdrop"),
++                color_attachments: &[Some(RenderPassColorAttachment {
++                    view,
++                    depth_slice: None,
++                    resolve_target: None,
++                    ops: Operations {
++                        load: LoadOp::Clear(wgpu::Color::TRANSPARENT),
++                        store: StoreOp::Store,
++                    },
++                })],
++                depth_stencil_attachment: None,
++                timestamp_writes: timestamps,
++                occlusion_query_set: None,
++                multiview_mask: None,
++            });
++            pass.set_pipeline(pipeline);
++            pass.set_bind_group(0, bind_group, &[]);
++            pass.draw(0..3, 0..1);
++        };
++        if !uses_cache {
++            pass(encoder, target, &self.pipelines.direct, bind_group, None);
++            return;
++        }
++        if draw_layers
++            && let Some(cache) = &mut self.cache
++            && let Some(layers_bind_group) = layers_bind_group
++        {
++            // Timed unless the last timing is still on its way back.
++            let watch = self
++                .watch
++                .as_ref()
++                .filter(|watch| watch.state.load(Ordering::Acquire) == 0);
++            pass(
++                encoder,
++                &cache.view,
++                &self.pipelines.layers,
++                layers_bind_group,
++                watch.map(|watch| RenderPassTimestampWrites {
++                    query_set: &watch.query,
++                    beginning_of_pass_write_index: Some(0),
++                    end_of_pass_write_index: Some(1),
++                }),
++            );
++            if let Some(watch) = watch {
++                encoder.resolve_query_set(&watch.query, 0..2, &watch.resolve, 0);
++                encoder.copy_buffer_to_buffer(&watch.resolve, 0, &watch.readback, 0, 16);
++                watch.state.store(1, Ordering::Release);
++            }
++            cache.valid = true;
++        }
++        pass(encoder, target, &self.pipelines.compose, bind_group, None);
++    }
++
++    /// The bind group, with the backdrop's own texture bound when `cached`
++    /// (it can't be while it is drawn into).
++    fn bind(&self, device: &Device, scene: &TextureView, cached: bool) -> BindGroup {
++        let mut entries = vec![
++            BindGroupEntry {
++                binding: 0,
++                resource: self.header.as_entire_binding(),
++            },
++            BindGroupEntry {
++                binding: 1,
++                resource: self.layers.as_entire_binding(),
++            },
++            BindGroupEntry {
++                binding: 2,
++                resource: BindingResource::TextureView(scene),
++            },
++            BindGroupEntry {
++                binding: 3,
++                resource: BindingResource::Sampler(&self.sampler),
++            },
++        ];
++        for slot in 0..MAX_BACKDROP_IMAGES {
++            let view = self
++                .images
++                .get(slot)
++                .map_or(&self.empty, |(_, _, view)| view);
++            entries.push(BindGroupEntry {
++                binding: 4 + slot as u32,
++                resource: BindingResource::TextureView(view),
++            });
++        }
++        entries.push(BindGroupEntry {
++            binding: 8,
++            resource: BindingResource::TextureView(
++                self.cache
++                    .as_ref()
++                    .filter(|_| cached)
++                    .map_or(&self.empty, |cache| &cache.view),
++            ),
++        });
++        device.create_bind_group(&BindGroupDescriptor {
++            label: Some("Backdrop"),
++            layout: &self.layout,
++            entries: &entries,
++        })
++    }
++
++    /// Uploads the images `backdrop` uses that aren't in a slot yet,
++    /// dropping the ones it no longer uses.
++    fn upload_images(&mut self, device: &Device, queue: &Queue, backdrop: &Backdrop) {
++        let wanted = images(backdrop);
++        let same = wanted.len() == self.images.len()
++            && wanted
++                .iter()
++                .zip(&self.images)
++                .all(|(image, (id, ..))| image.id == *id);
++        if same {
++            return;
++        }
++        let mut kept = std::mem::take(&mut self.images);
++        for image in wanted {
++            match kept.iter().position(|(id, ..)| *id == image.id) {
++                Some(at) => self.images.push(kept.swap_remove(at)),
++                None => {
++                    let (texture, view) =
++                        image_texture(device, Some((queue, image)), image.width, image.height);
++                    self.images.push((image.id, texture, view));
++                }
++            }
++        }
++        self.unbind();
++    }
++}
++
++fn watch(device: &Device) -> Watch {
++    let buffer = |label, usage| {
++        device.create_buffer(&BufferDescriptor {
++            label: Some(label),
++            size: 16,
++            usage,
++            mapped_at_creation: false,
++        })
++    };
++    Watch {
++        query: device.create_query_set(&QuerySetDescriptor {
++            label: Some("Backdrop shaders' time"),
++            ty: QueryType::Timestamp,
++            count: 2,
++        }),
++        resolve: buffer(
++            "Backdrop shaders' time",
++            BufferUsages::QUERY_RESOLVE | BufferUsages::COPY_SRC,
++        ),
++        readback: buffer(
++            "Backdrop shaders' time read back",
++            BufferUsages::COPY_DST | BufferUsages::MAP_READ,
++        ),
++        state: Arc::new(AtomicU8::new(0)),
++        samples: 0,
++        total: Duration::ZERO,
++    }
++}
++
++/// A texture the backdrop is drawn into and read from.
++fn render_texture(
++    device: &Device,
++    format: TextureFormat,
++    (width, height): (u32, u32),
++) -> (Texture, TextureView) {
++    let texture = device.create_texture(&TextureDescriptor {
++        label: Some("Backdrop"),
++        size: Extent3d {
++            width: width.max(1),
++            height: height.max(1),
++            depth_or_array_layers: 1,
++        },
++        mip_level_count: 1,
++        sample_count: 1,
++        dimension: TextureDimension::D2,
++        format,
++        usage: TextureUsages::RENDER_ATTACHMENT | TextureUsages::TEXTURE_BINDING,
++        view_formats: &[],
++    });
++    let view = texture.create_view(&TextureViewDescriptor::default());
++    (texture, view)
++}
++
++/// The distinct images a backdrop's layers use, in slot order.
++fn images(backdrop: &Backdrop) -> Vec<&BackdropImage> {
++    let mut out: Vec<&BackdropImage> = Vec::new();
++    for layer in backdrop.layers.iter().take(MAX_BACKDROP_LAYERS) {
++        if let BackdropLayerKind::Image { image, .. } = &layer.kind
++            && !out.iter().any(|known| known.id == image.id)
++            && out.len() < MAX_BACKDROP_IMAGES
++            && image.rgba.len() == (image.width as usize) * (image.height as usize) * 4
++            && image.width > 0
++            && image.height > 0
++        {
++            out.push(image);
++        }
++    }
++    out
++}
++
++fn image_texture(
++    device: &Device,
++    data: Option<(&Queue, &BackdropImage)>,
++    width: u32,
++    height: u32,
++) -> (Texture, TextureView) {
++    let size = Extent3d {
++        width,
++        height,
++        depth_or_array_layers: 1,
++    };
++    let texture = device.create_texture(&TextureDescriptor {
++        label: Some("Backdrop image"),
++        size,
++        mip_level_count: 1,
++        sample_count: 1,
++        dimension: TextureDimension::D2,
++        // Not sRGB: colours stay gamma-encoded, as the scene's are.
++        format: TextureFormat::Rgba8Unorm,
++        usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
++        view_formats: &[],
++    });
++    let (queue, rgba): (Option<&Queue>, &[u8]) = match data {
++        Some((queue, image)) => (Some(queue), &image.rgba),
++        None => (None, &[]),
++    };
++    if let Some(queue) = queue {
++        queue.write_texture(
++            wgpu::TexelCopyTextureInfo {
++                texture: &texture,
++                mip_level: 0,
++                origin: wgpu::Origin3d::ZERO,
++                aspect: wgpu::TextureAspect::All,
++            },
++            rgba,
++            wgpu::TexelCopyBufferLayout {
++                offset: 0,
++                bytes_per_row: Some(width * 4),
++                rows_per_image: Some(height),
++            },
++            size,
++        );
++    }
++    let view = texture.create_view(&TextureViewDescriptor::default());
++    (texture, view)
++}
++
++/// A colour as the shader takes it: premultiplied, gamma-encoded sRGB.
++fn premultiplied(color: Color) -> [f32; 4] {
++    let [r, g, b, a] = color.components;
++    [r * a, g * a, b * a, a]
++}
++
++fn put_f32(out: &mut Vec<u8>, values: &[f32]) {
++    for value in values {
++        out.extend_from_slice(&value.to_le_bytes());
++    }
++}
++
++fn put_u32(out: &mut Vec<u8>, values: &[u32]) {
++    for value in values {
++        out.extend_from_slice(&value.to_le_bytes());
++    }
++}
++
++fn header_bytes(
++    state: &BackdropState,
++    now: Instant,
++    (width, height): (u32, u32),
++    unpremultiply: bool,
++) -> Vec<u8> {
++    let backdrop = &state.backdrop;
++    let mut out = Vec::with_capacity(HEADER_SIZE);
++    let area = backdrop.area.intersect(kurbo::Rect::new(
++        0.0,
++        0.0,
++        f64::from(width),
++        f64::from(height),
++    ));
++    put_f32(
++        &mut out,
++        &[
++            area.x0 as f32,
++            area.y0 as f32,
++            area.x1 as f32,
++            area.y1 as f32,
++        ],
++    );
++    put_f32(&mut out, &premultiplied(backdrop.base));
++    let count = backdrop.layers.len().min(MAX_BACKDROP_LAYERS) as u32;
++    put_u32(&mut out, &[count, u32::from(unpremultiply), 0, 0]);
++    put_f32(&mut out, &[backdrop.opacity.clamp(0.0, 1.0), 0.0, 0.0, 0.0]);
++    for slot in 0..MAX_BACKDROP_LAYERS {
++        let Some(layer) = backdrop.layers.get(slot) else {
++            put_f32(&mut out, &[0.0, 0.0]);
++            continue;
++        };
++        let mut offset = layer.motion.map_or(kurbo::Vec2::ZERO, |motion| {
++            motion.offset(state.elapsed(layer, now))
++        });
++        // Repeating content looks the same a tile on: wrapping there keeps
++        // the offset small enough for f32 however long the window is open.
++        let tile = match &layer.kind {
++            BackdropLayerKind::Grid { cell, .. } => Some(*cell),
++            BackdropLayerKind::Image {
++                size, repeat: true, ..
++            } => Some(*size),
++            _ => None,
++        };
++        if let Some(tile) = tile.filter(|tile| tile.x >= 1.0 && tile.y >= 1.0) {
++            offset = kurbo::Vec2::new(offset.x.rem_euclid(tile.x), offset.y.rem_euclid(tile.y));
++        }
++        put_f32(&mut out, &[offset.x as f32, offset.y as f32]);
++    }
++    debug_assert_eq!(out.len(), HEADER_SIZE);
++    out
++}
++
++fn stops(out: &mut Vec<u8>, stops: &[BackdropStop]) {
++    let stops = &stops[..stops.len().min(MAX_BACKDROP_STOPS)];
++    let mut offsets = [0.0f32; 4];
++    for (at, stop) in stops.iter().enumerate() {
++        offsets[at] = stop.offset;
++    }
++    put_f32(out, &offsets);
++    for at in 0..MAX_BACKDROP_STOPS {
++        let color = stops.get(at).map_or(Color::TRANSPARENT, |stop| stop.color);
++        put_f32(out, &premultiplied(color));
++    }
++}
++
++fn layers_bytes(backdrop: &Backdrop, slots: &[u64], shaders: &[u64]) -> Vec<u8> {
++    let mut out = Vec::with_capacity(LAYER_SIZE * MAX_BACKDROP_LAYERS);
++    let area = backdrop.area;
++    for layer in backdrop.layers.iter().take(MAX_BACKDROP_LAYERS) {
++        let blend = match layer.blend {
++            BackdropBlend::Normal => 0,
++            BackdropBlend::Multiply => 1,
++            BackdropBlend::Screen => 2,
++        };
++        let start = out.len();
++        let mut opacity = layer.opacity.clamp(0.0, 1.0);
++        match &layer.kind {
++            BackdropLayerKind::Linear { angle, stops: list } => {
++                let (sin, cos) = (angle.to_radians().sin(), angle.to_radians().cos());
++                let (w, h) = (area.width() as f32, area.height() as f32);
++                let length = (w * sin).abs() + (h * cos).abs();
++                let center = area.center();
++                let count = list.len().min(MAX_BACKDROP_STOPS) as u32;
++                put_u32(&mut out, &[0, blend, 0, count]);
++                put_f32(&mut out, &[center.x as f32, center.y as f32, sin, -cos]);
++                put_f32(&mut out, &[length.max(1e-3), 0.0, 0.0, 0.0]);
++                mask(&mut out, layer, opacity);
++                stops(&mut out, list);
++            }
++            BackdropLayerKind::Radial {
++                center,
++                radius,
++                stops: list,
++            } => {
++                let count = list.len().min(MAX_BACKDROP_STOPS) as u32;
++                put_u32(&mut out, &[1, blend, 0, count]);
++                put_f32(
++                    &mut out,
++                    &[
++                        center.x as f32,
++                        center.y as f32,
++                        radius.x as f32,
++                        radius.y as f32,
++                    ],
++                );
++                put_f32(&mut out, &[0.0; 4]);
++                mask(&mut out, layer, opacity);
++                stops(&mut out, list);
++            }
++            BackdropLayerKind::Grid {
++                color,
++                cell,
++                line,
++                origin,
++            } => {
++                if cell.x < 1.0 || cell.y < 1.0 {
++                    opacity = 0.0;
++                }
++                put_u32(&mut out, &[2, blend, 0, 0]);
++                put_f32(
++                    &mut out,
++                    &[cell.x.max(1.0) as f32, cell.y.max(1.0) as f32, *line, 0.0],
++                );
++                put_f32(&mut out, &[origin.x as f32, origin.y as f32, 0.0, 0.0]);
++                mask(&mut out, layer, opacity);
++                stops(
++                    &mut out,
++                    &[BackdropStop {
++                        offset: 0.0,
++                        color: *color,
++                    }],
++                );
++            }
++            BackdropLayerKind::Shader {
++                shader,
++                colors,
++                numbers,
++                scale,
++            } => {
++                let slot = shaders.iter().position(|id| *id == shader.id);
++                if slot.is_none() {
++                    opacity = 0.0;
++                }
++                put_u32(&mut out, &[4, blend, slot.unwrap_or(0) as u32, 0]);
++                put_f32(
++                    &mut out,
++                    &[
++                        area.x0 as f32,
++                        area.y0 as f32,
++                        area.width() as f32,
++                        area.height() as f32,
++                    ],
++                );
++                put_f32(&mut out, &[*scale, 0.0, 0.0, 0.0]);
++                mask(&mut out, layer, opacity);
++                put_f32(&mut out, numbers);
++                for at in 0..BACKDROP_SHADER_INPUTS {
++                    // Straight: the shader's own colours, as given.
++                    let color = colors.get(at).map_or(Color::TRANSPARENT, |color| *color);
++                    put_f32(&mut out, &color.components);
++                }
++            }
++            BackdropLayerKind::Image {
++                image,
++                origin,
++                size,
++                repeat,
++            } => {
++                let slot = slots.iter().position(|id| *id == image.id);
++                if slot.is_none() {
++                    opacity = 0.0;
++                }
++                put_u32(&mut out, &[3, blend, slot.unwrap_or(0) as u32, 0]);
++                put_f32(
++                    &mut out,
++                    &[
++                        origin.x as f32,
++                        origin.y as f32,
++                        size.x as f32,
++                        size.y as f32,
++                    ],
++                );
++                put_f32(&mut out, &[if *repeat { 1.0 } else { 0.0 }, 0.0, 0.0, 0.0]);
++                mask(&mut out, layer, opacity);
++                stops(&mut out, &[]);
++            }
++        }
++        debug_assert_eq!(out.len() - start, LAYER_SIZE);
++    }
++    out.resize(LAYER_SIZE * MAX_BACKDROP_LAYERS, 0);
++    out
++}
++
++fn mask(out: &mut Vec<u8>, layer: &anyrender::BackdropLayer, opacity: f32) {
++    match layer.mask {
++        Some(mask) => {
++            put_f32(
++                out,
++                &[
++                    mask.center.x as f32,
++                    mask.center.y as f32,
++                    mask.radius.x as f32,
++                    mask.radius.y as f32,
++                ],
++            );
++            put_f32(out, &[mask.from, mask.to, 1.0, opacity]);
++        }
++        None => {
++            put_f32(out, &[0.0; 4]);
++            put_f32(out, &[0.0, 0.0, 0.0, opacity]);
++        }
++    }
++}
+diff --git a/crates/anyrender_vello_hybrid/src/backdrop.wgsl b/crates/anyrender_vello_hybrid/src/backdrop.wgsl
+new file mode 100644
+index 0000000..1d3fd64
+--- /dev/null
++++ b/crates/anyrender_vello_hybrid/src/backdrop.wgsl
+@@ -0,0 +1,217 @@
++// The backdrop and the cached scene, composed in one pass straight onto the
++// surface (fs_main); or, with an embedder's shaders, the backdrop into a
++// texture of its own when it moves (fs_layers) and that texture and the
++// scene composed (fs_compose). Colours are premultiplied and gamma-encoded
++// sRGB, as Vello Hybrid's scene and CSS gradients interpolate them. Lengths
++// are surface pixels.
++//
++// The embedder's shaders and `cs_theme_shader`, which calls them, are added
++// where CS_THEME_SHADERS stands; `CsInput` is declared with them.
++
++struct Header {
++    // The surface's size, and the area the layers are clipped to.
++    area: vec4<f32>,
++    base: vec4<f32>,
++    // x: the layer count, y: 1 to un-premultiply the output.
++    counts: vec4<u32>,
++    // x: the backdrop's opacity.
++    opacity: vec4<f32>,
++    // Each layer's motion offset now: xy for layers 2n, zw for 2n + 1.
++    offsets: array<vec4<f32>, 4>,
++}
++
++struct Layer {
++    // x: kind (0 linear, 1 radial, 2 grid, 3 image, 4 shader), y: blend
++    // (0 normal, 1 multiply, 2 screen), z: image or shader slot, w: stop
++    // count.
++    kind: vec4<u32>,
++    // Linear: centre, direction. Radial: centre, radius. Grid: cell, line,
++    // repeat. Image: origin, size. Shader: the area's origin and size.
++    a: vec4<f32>,
++    // Linear: gradient length. Grid: origin. Image: x repeat. Shader: x
++    // scale.
++    b: vec4<f32>,
++    // Mask: centre, radius.
++    mask: vec4<f32>,
++    // Mask from, to, whether there's a mask; the layer's opacity.
++    mask_range: vec4<f32>,
++    // Stop offsets; a shader's numbers.
++    offsets: vec4<f32>,
++    // Premultiplied stop colours; a shader's colours, straight.
++    colors: array<vec4<f32>, 4>,
++}
++
++@group(0) @binding(0) var<uniform> header: Header;
++@group(0) @binding(1) var<uniform> layers: array<Layer, 8>;
++@group(0) @binding(2) var scene: texture_2d<f32>;
++@group(0) @binding(3) var image_sampler: sampler;
++@group(0) @binding(4) var image0: texture_2d<f32>;
++@group(0) @binding(5) var image1: texture_2d<f32>;
++@group(0) @binding(6) var image2: texture_2d<f32>;
++@group(0) @binding(7) var image3: texture_2d<f32>;
++// The backdrop as fs_layers last drew it.
++@group(0) @binding(8) var cached: texture_2d<f32>;
++
++// CS_THEME_SHADERS
++
++@vertex
++fn vs_main(@builtin(vertex_index) index: u32) -> @builtin(position) vec4<f32> {
++    // One triangle over the whole surface.
++    let x = f32((index << 1u) & 2u);
++    let y = f32(index & 2u);
++    return vec4<f32>(x * 2.0 - 1.0, 1.0 - y * 2.0, 0.0, 1.0);
++}
++
++fn offset(i: u32) -> vec2<f32> {
++    let pair = header.offsets[i / 2u];
++    if (i % 2u) == 0u {
++        return pair.xy;
++    }
++    return pair.zw;
++}
++
++fn gradient(i: u32, t: f32) -> vec4<f32> {
++    let count = layers[i].kind.w;
++    if count == 0u {
++        return vec4<f32>(0.0);
++    }
++    if t <= layers[i].offsets[0] {
++        return layers[i].colors[0];
++    }
++    for (var k = 1u; k < count; k++) {
++        let end = layers[i].offsets[k];
++        if t <= end {
++            let start = layers[i].offsets[k - 1u];
++            var f = 1.0;
++            if end > start {
++                f = (t - start) / (end - start);
++            }
++            return mix(layers[i].colors[k - 1u], layers[i].colors[k], f);
++        }
++    }
++    return layers[i].colors[count - 1u];
++}
++
++// How much of the pixel starting at `edge` (in a cell `cell` long) lines
++// `line` wide at the start of each cell cover.
++fn line_cover(edge: f32, cell: f32, line: f32) -> f32 {
++    let m = edge - floor(edge / cell) * cell;
++    let first = max(0.0, min(m + 1.0, line) - max(m, 0.0));
++    let next = max(0.0, min(m + 1.0, cell + line) - max(m, cell));
++    return clamp(first + next, 0.0, 1.0);
++}
++
++fn image(slot: u32, uv: vec2<f32>) -> vec4<f32> {
++    switch slot {
++        case 0u: { return textureSampleLevel(image0, image_sampler, uv, 0.0); }
++        case 1u: { return textureSampleLevel(image1, image_sampler, uv, 0.0); }
++        case 2u: { return textureSampleLevel(image2, image_sampler, uv, 0.0); }
++        default: { return textureSampleLevel(image3, image_sampler, uv, 0.0); }
++    }
++}
++
++fn layer(i: u32, pixel: vec2<f32>) -> vec4<f32> {
++    let p = pixel - offset(i);
++    let a = layers[i].a;
++    var color = vec4<f32>(0.0);
++    switch layers[i].kind.x {
++        case 0u: {
++            let t = dot(p - a.xy, a.zw) / layers[i].b.x + 0.5;
++            color = gradient(i, t);
++        }
++        case 1u: {
++            let t = length((p - a.xy) / max(a.zw, vec2<f32>(1e-3)));
++            color = gradient(i, t);
++        }
++        case 2u: {
++            // The pixel's left/top edge, relative to where a cell starts.
++            let edge = p - vec2<f32>(0.5) - layers[i].b.xy;
++            let x = line_cover(edge.x, a.x, a.z);
++            let y = line_cover(edge.y, a.y, a.z);
++            color = layers[i].colors[0] * (1.0 - (1.0 - x) * (1.0 - y));
++        }
++        case 3u: {
++            let uv = (p - a.xy) / max(a.zw, vec2<f32>(1e-3));
++            let inside = all(uv >= vec2<f32>(0.0)) && all(uv <= vec2<f32>(1.0));
++            let sampled = image(layers[i].kind.z, uv);
++            if layers[i].b.x > 0.5 || inside {
++                color = sampled;
++            }
++        }
++        case 4u: {
++            var input: CsInput;
++            input.pixel = pixel - a.xy;
++            input.size = a.zw;
++            input.time = offset(i).x;
++            input.scale = layers[i].b.x;
++            input.colors = layers[i].colors;
++            input.numbers = layers[i].offsets;
++            let straight = clamp(cs_theme_shader(layers[i].kind.z, input), vec4<f32>(0.0), vec4<f32>(1.0));
++            color = vec4<f32>(straight.rgb * straight.a, straight.a);
++        }
++        default: {}
++    }
++    var cover = layers[i].mask_range.w;
++    if layers[i].mask_range.z > 0.5 {
++        let mask = layers[i].mask;
++        let d = length((pixel - mask.xy) / max(mask.zw, vec2<f32>(1e-3)));
++        let inner = layers[i].mask_range.x;
++        let outer = layers[i].mask_range.y;
++        cover *= clamp((outer - d) / max(outer - inner, 1e-4), 0.0, 1.0);
++    }
++    return color * cover;
++}
++
++fn blend(source: vec4<f32>, under: vec4<f32>, mode: u32) -> vec4<f32> {
++    let alpha = source.a + under.a * (1.0 - source.a);
++    switch mode {
++        case 1u: {
++            let rgb = source.rgb * under.rgb + source.rgb * (1.0 - under.a)
++                + under.rgb * (1.0 - source.a);
++            return vec4<f32>(rgb, alpha);
++        }
++        case 2u: {
++            let rgb = source.rgb + under.rgb - source.rgb * under.rgb;
++            return vec4<f32>(rgb, alpha);
++        }
++        default: {
++            return source + under * (1.0 - source.a);
++        }
++    }
++}
++
++fn backdrop(pixel: vec2<f32>) -> vec4<f32> {
++    var color = header.base;
++    let area = header.area;
++    let inside = pixel.x >= area.x && pixel.y >= area.y && pixel.x < area.z && pixel.y < area.w;
++    if inside && header.opacity.x > 0.0 {
++        for (var i = 0u; i < header.counts.x; i++) {
++            color = blend(layer(i, pixel) * header.opacity.x, color, layers[i].kind.y);
++        }
++    }
++    return color;
++}
++
++fn compose(pixel: vec2<f32>, under: vec4<f32>) -> vec4<f32> {
++    let foreground = textureLoad(scene, vec2<i32>(pixel), 0);
++    var out = foreground + under * (1.0 - foreground.a);
++    if header.counts.y == 1u && out.a > 0.0 {
++        out = vec4<f32>(out.rgb / out.a, out.a);
++    }
++    return out;
++}
++
++@fragment
++fn fs_main(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
++    return compose(position.xy, backdrop(position.xy));
++}
++
++@fragment
++fn fs_layers(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
++    return backdrop(position.xy);
++}
++
++@fragment
++fn fs_compose(@builtin(position) position: vec4<f32>) -> @location(0) vec4<f32> {
++    return compose(position.xy, textureLoad(cached, vec2<i32>(position.xy), 0));
++}
+diff --git a/crates/anyrender_vello_hybrid/src/cpu_time.rs b/crates/anyrender_vello_hybrid/src/cpu_time.rs
+new file mode 100644
+index 0000000..9b1b53b
+--- /dev/null
++++ b/crates/anyrender_vello_hybrid/src/cpu_time.rs
+@@ -0,0 +1,42 @@
++//! The process's CPU time, to keep a backdrop's frames within their share
++//! of a core however much presenting a frame costs (a virtual display that
++//! copies every frame on the CPU, a remote X connection).
++
++use std::time::Duration;
++
++/// The CPU time every thread of the process has used, where the system
++/// says.
++pub(crate) fn process() -> Option<Duration> {
++    #[cfg(unix)]
++    {
++        let mut time = libc::timespec {
++            tv_sec: 0,
++            tv_nsec: 0,
++        };
++        // SAFETY: `clock_gettime` writes the given timespec, which lives
++        // for the call.
++        let read = unsafe { libc::clock_gettime(libc::CLOCK_PROCESS_CPUTIME_ID, &mut time) };
++        (read == 0).then(|| Duration::new(time.tv_sec as u64, time.tv_nsec as u32))
++    }
++    #[cfg(windows)]
++    {
++        use windows_sys::Win32::Foundation::FILETIME;
++        use windows_sys::Win32::System::Threading::{GetCurrentProcess, GetProcessTimes};
++        let mut times = [FILETIME {
++            dwLowDateTime: 0,
++            dwHighDateTime: 0,
++        }; 4];
++        let [created, exited, kernel, user] = &mut times;
++        // SAFETY: the pseudo-handle of the current process, and four
++        // FILETIMEs that live for the call.
++        let read = unsafe { GetProcessTimes(GetCurrentProcess(), created, exited, kernel, user) };
++        let ticks = |time: &FILETIME| {
++            (u64::from(time.dwHighDateTime) << 32) | u64::from(time.dwLowDateTime)
++        };
++        (read != 0).then(|| Duration::from_nanos((ticks(kernel) + ticks(user)) * 100))
++    }
++    #[cfg(not(any(unix, windows)))]
++    {
++        None
++    }
++}
+diff --git a/crates/anyrender_vello_hybrid/src/gpu_timing.rs b/crates/anyrender_vello_hybrid/src/gpu_timing.rs
+index 39f46d2..ee07ec2 100644
+--- a/crates/anyrender_vello_hybrid/src/gpu_timing.rs
++++ b/crates/anyrender_vello_hybrid/src/gpu_timing.rs
+@@ -69,24 +69,35 @@ impl GpuTimer {
+         self,
+         ready: mpsc::Receiver<Result<(), wgpu::BufferAsyncError>>,
+         period: f32,
++    ) {
++        self.print_as("gpu_frame", ready, period)
++    }
++
++    /// [`Self::print`] under another label: `gpu_backdrop` for the
++    /// backdrop's compose pass.
++    pub(crate) fn print_as(
++        self,
++        label: &str,
++        ready: mpsc::Receiver<Result<(), wgpu::BufferAsyncError>>,
++        period: f32,
+     ) {
+         if !matches!(ready.try_recv(), Ok(Ok(()))) {
+-            eprintln!("gpu_frame: timestamp readback unavailable");
++            eprintln!("{label}: timestamp readback unavailable");
+             return;
+         }
+         let Ok(data) = self.readback.slice(..).get_mapped_range() else {
+-            eprintln!("gpu_frame: mapped timestamp range unavailable");
++            eprintln!("{label}: mapped timestamp range unavailable");
+             return;
+         };
+         let start = u64::from_le_bytes(data[0..8].try_into().unwrap());
+         let end = u64::from_le_bytes(data[8..16].try_into().unwrap());
+         if let Some(ticks) = end.checked_sub(start) {
+             eprintln!(
+-                "gpu_frame: {:.6}ms",
++                "{label}: {:.6}ms",
+                 ticks as f64 * f64::from(period) / 1_000_000.0
+             );
+         } else {
+-            eprintln!("gpu_frame: timestamp order invalid");
++            eprintln!("{label}: timestamp order invalid");
+         }
+         drop(data);
+         self.readback.unmap();
+diff --git a/crates/anyrender_vello_hybrid/src/lib.rs b/crates/anyrender_vello_hybrid/src/lib.rs
+index c9e9346..06fcbd5 100644
+--- a/crates/anyrender_vello_hybrid/src/lib.rs
++++ b/crates/anyrender_vello_hybrid/src/lib.rs
+@@ -1,6 +1,8 @@
+ //! A [`vello_gpu`] backend for the [`anyrender`] 2D drawing abstraction
+ #![cfg_attr(docsrs, feature(doc_cfg))]
+ 
++mod backdrop;
++mod cpu_time;
+ mod filters;
+ #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+ mod gpu_timing;
+diff --git a/crates/anyrender_vello_hybrid/src/window_renderer.rs b/crates/anyrender_vello_hybrid/src/window_renderer.rs
+index 6ed964d..03f7ce9 100644
+--- a/crates/anyrender_vello_hybrid/src/window_renderer.rs
++++ b/crates/anyrender_vello_hybrid/src/window_renderer.rs
+@@ -18,6 +18,7 @@ use wgpu::{
+ };
+ use wgpu_context::{DeviceHandle, SurfaceRenderer, SurfaceRendererConfiguration, WGPUContext};
+ 
++use crate::backdrop::{BackdropGpu, BackdropState};
+ use crate::{ImageCache, VelloHybridScenePainter, scene::ImageManager};
+ 
+ /// Drive the wgpu init future. On wasm32 we spawn it onto the JS microtask
+@@ -40,6 +41,8 @@ struct ActiveRenderState {
+     depth_texture_view: TextureView,
+     texture_bindings: FxHashMap<ResourceId, TextureView>,
+     render_surface: SurfaceRenderer<'static>,
++    /// The backdrop's pipeline and resources on this device, once drawn.
++    backdrop_gpu: Option<BackdropGpu>,
+ }
+ 
+ /// Result of a successful asynchronous resume; both the active state and the
+@@ -197,6 +200,10 @@ pub struct VelloHybridWindowRenderer {
+     /// Measurement only (`ANYRENDER_FRAME_LIMIT_HZ`): when the last frame
+     /// was presented, to pace frames like vsync without a display.
+     last_present: Option<std::time::Instant>,
++    /// What is drawn beneath the scene (`set_backdrop`).
++    backdrop: Option<BackdropState>,
++    /// Frames of the backdrop alone presented so far.
++    backdrop_frames: u64,
+ }
+ impl VelloHybridWindowRenderer {
+     /// Why the last resume failed, if it did: then `complete_resume` returns
+@@ -226,6 +233,8 @@ impl VelloHybridWindowRenderer {
+             cached_images: ImageCache::default(),
+             has_full_frame: false,
+             last_present: None,
++            backdrop: None,
++            backdrop_frames: 0,
+         }
+     }
+ 
+@@ -238,8 +247,12 @@ impl VelloHybridWindowRenderer {
+ }
+ 
+ fn build_wgpu_context(config: &VelloHybridRendererOptions) -> WGPUContext {
+-    let features =
+-        config.features.unwrap_or_default() | Features::CLEAR_TEXTURE | Features::PIPELINE_CACHE;
++    // Timestamps (where the adapter has them) time a backdrop's embedder
++    // shaders, which stop moving over their budget.
++    let features = config.features.unwrap_or_default()
++        | Features::CLEAR_TEXTURE
++        | Features::PIPELINE_CACHE
++        | Features::TIMESTAMP_QUERY;
+     #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+     let features = if crate::gpu_timing::enabled() {
+         features | Features::TIMESTAMP_QUERY | Features::TIMESTAMP_QUERY_INSIDE_ENCODERS
+@@ -522,6 +535,7 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+                     depth_texture_view,
+                     render_surface,
+                     texture_bindings: FxHashMap::default(),
++                    backdrop_gpu: None,
+                 },
+             }));
+             on_ready();
+@@ -565,7 +579,16 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+     }
+ 
+     fn suspend(&mut self) {
++        // Dropped resources are reclaimed when the device is next polled:
++        // poll it once they're gone, so a hidden window holds none.
++        let device = match &self.render_state {
++            RenderState::Active(state) => Some(state.render_surface.device().clone()),
++            _ => None,
++        };
+         self.render_state = RenderState::Suspended;
++        if let Some(device) = device {
++            let _ = device.poll(wgpu::PollType::wait_indefinitely());
++        }
+         self.cached_images.clear();
+         self.has_full_frame = false;
+     }
+@@ -580,6 +603,9 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+             );
+             if let RenderState::Active(active) = &mut self.render_state {
+                 active.render_surface.resize(width, height);
++                if let Some(gpu) = &mut active.backdrop_gpu {
++                    gpu.scene_changed();
++                }
+                 active.depth_texture_view = VelloHybridRenderer::create_depth_texture_view(
+                     active.render_surface.device(),
+                     &RenderSize {
+@@ -617,6 +643,156 @@ impl WindowRenderer for VelloHybridWindowRenderer {
+             self.render_impl(None, draw_fn);
+         }
+     }
++
++    fn supports_backdrop(&self) -> bool {
++        // The scene is kept in the intermediate texture to compose it over
++        // the backdrop; without one (Apple) it goes straight to the surface.
++        match &self.render_state {
++            RenderState::Active(state) => state.render_surface.has_intermediate_texture(),
++            _ => false,
++        }
++    }
++
++    fn set_backdrop(&mut self, backdrop: Option<anyrender::Backdrop>) {
++        let was = self.backdrop.is_some();
++        self.backdrop = match (self.backdrop.take(), backdrop) {
++            (_, None) => None,
++            // The same backdrop goes on moving where it is.
++            (Some(current), Some(backdrop)) if current.backdrop == backdrop => Some(current),
++            // Another one keeps the motion's clock, so a restyle doesn't
++            // jump it back to its start.
++            (current, Some(backdrop)) => Some(BackdropState::new(
++                backdrop,
++                current.map(|current| current.started()),
++            )),
++        };
++        // The scene was drawn over the base colour, or without it.
++        if was != self.backdrop.is_some() {
++            self.has_full_frame = false;
++        }
++    }
++
++    fn backdrop_frame_due(&self) -> Option<std::time::Instant> {
++        if !self.supports_backdrop() {
++            return None;
++        }
++        self.backdrop.as_ref()?.frame_due()
++    }
++
++    fn render_backdrop(&mut self) -> bool {
++        if !(self.has_full_frame && self.supports_backdrop()) {
++            return false;
++        }
++        let (RenderState::Active(state), Some(backdrop)) =
++            (&mut self.render_state, &mut self.backdrop)
++        else {
++            return false;
++        };
++        let now = std::time::Instant::now();
++        let cpu = crate::cpu_time::process();
++        let presented = present_composed(
++            &mut state.render_surface,
++            &mut state.backdrop_gpu,
++            backdrop,
++            now,
++            true,
++        );
++        if let (Some(before), Some(after)) = (cpu, crate::cpu_time::process()) {
++            backdrop.note_cost(after.saturating_sub(before));
++        }
++        if presented.is_err() {
++            // Nothing was shown; the next whole frame starts again.
++            self.has_full_frame = false;
++            return false;
++        }
++        backdrop.last_frame = Some(now);
++        self.backdrop_frames += 1;
++        true
++    }
++
++    fn backdrop_frames(&self) -> u64 {
++        self.backdrop_frames
++    }
++}
++
++/// Presents the backdrop with the scene kept in the intermediate texture
++/// composed over it, in one pass straight onto the surface.
++fn present_composed(
++    surface: &mut SurfaceRenderer<'static>,
++    gpu: &mut Option<BackdropGpu>,
++    backdrop: &mut BackdropState,
++    now: std::time::Instant,
++    advance: bool,
++) -> Result<(), wgpu_context::GetCurrentSurfaceTextureErr> {
++    let Some(scene) = surface.intermediate_texture_view().cloned() else {
++        return Err(wgpu_context::GetCurrentSurfaceTextureErr);
++    };
++    let format = surface.config.format;
++    let size = (surface.config.width, surface.config.height);
++    let unpremultiply = surface.unpremultiplies();
++    let gpu = match gpu {
++        Some(existing) if existing.format() == format => existing,
++        slot => slot.insert(BackdropGpu::new(surface.device(), format)),
++    };
++    #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
++    let mut gpu_timer = None;
++    // Measurement only: acquiring the surface, recording the pass, and
++    // submitting and presenting, apart.
++    let started = std::time::Instant::now();
++    let mut acquired = started;
++    let mut encoded = started;
++    let presented = surface.present_with(|device, queue, encoder, target| {
++        acquired = std::time::Instant::now();
++        #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
++        {
++            gpu_timer = crate::gpu_timing::GpuTimer::begin(device, encoder);
++        }
++        gpu.draw(
++            device,
++            queue,
++            encoder,
++            backdrop,
++            now,
++            &scene,
++            target,
++            size,
++            unpremultiply,
++            advance,
++        );
++        #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
++        if let Some(gpu_timer) = &gpu_timer {
++            gpu_timer.end(encoder);
++        }
++        encoded = std::time::Instant::now();
++    });
++    #[cfg(feature = "log_frame_times")]
++    {
++        let ms = |duration: std::time::Duration| duration.as_secs_f64() * 1000.0;
++        let done = std::time::Instant::now();
++        println!(
++            "vello_hybrid {}: {:.3}ms (acquire: {:.3}ms, encode: {:.3}ms, present: {:.3}ms)",
++            if advance { "backdrop" } else { "compose" },
++            ms(done - started),
++            ms(acquired - started),
++            ms(encoded - acquired),
++            ms(done - encoded)
++        );
++    }
++    #[cfg(not(feature = "log_frame_times"))]
++    let _ = (acquired, encoded);
++    gpu.after_submit();
++    // Measurement only: the compose pass's own GPU time.
++    #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
++    if let Some(gpu_timer) = gpu_timer {
++        let (gpu_timer, ready) = gpu_timer.map();
++        let _ = surface.device().poll(wgpu::PollType::wait_indefinitely());
++        gpu_timer.print_as(
++            "gpu_backdrop",
++            ready,
++            surface.queue().get_timestamp_period(),
++        );
++    }
++    presented
+ }
+ 
+ impl VelloHybridWindowRenderer {
+@@ -683,7 +859,9 @@ impl VelloHybridWindowRenderer {
+         if let Some(damage) = damage {
+             scene_painter.push_clip_layer(peniko::Fill::NonZero, kurbo::Affine::IDENTITY, &damage);
+         }
+-        if self.config.base_color != Color::TRANSPARENT {
++        // Over a backdrop, the scene is drawn on a transparent background.
++        let composed = self.backdrop.is_some() && render_surface.has_intermediate_texture();
++        if self.config.base_color != Color::TRANSPARENT && !composed {
+             scene_painter.fill(
+                 peniko::Fill::NonZero,
+                 kurbo::Affine::IDENTITY,
+@@ -772,7 +950,26 @@ impl VelloHybridWindowRenderer {
+         // rendered over a complete frame).
+         self.has_full_frame = true;
+ 
+-        if render_surface.maybe_blit_and_present().is_err() {
++        let presented = match &mut self.backdrop {
++            Some(backdrop) if composed => {
++                let now = std::time::Instant::now();
++                // A document frame moves the backdrop on only when it's due.
++                let advance = backdrop.frame_due().is_some_and(|due| due <= now);
++                let presented = present_composed(
++                    render_surface,
++                    &mut state.backdrop_gpu,
++                    backdrop,
++                    now,
++                    advance,
++                );
++                if presented.is_ok() {
++                    backdrop.last_frame = Some(now);
++                }
++                presented
++            }
++            _ => render_surface.maybe_blit_and_present(),
++        };
++        if presented.is_err() {
+             self.scene.reset();
+             return;
+         }
+diff --git a/crates/wgpu_context/src/lib.rs b/crates/wgpu_context/src/lib.rs
+index 62dd1a2..9b31736 100644
+--- a/crates/wgpu_context/src/lib.rs
++++ b/crates/wgpu_context/src/lib.rs
+@@ -16,7 +16,9 @@ mod util;
+ pub use alpha_blitter::{AlphaConversion, AlphaConvertBlitter};
+ pub use buffer_renderer::{BufferRenderer, BufferRendererConfig};
+ pub use error::WgpuContextError;
+-pub use surface_renderer::{SurfaceRenderer, SurfaceRendererConfiguration, TextureConfiguration};
++pub use surface_renderer::{
++    GetCurrentSurfaceTextureErr, SurfaceRenderer, SurfaceRendererConfiguration, TextureConfiguration,
++};
+ pub use util::block_on_wgpu;
+ 
+ /// A wgpu `Device`, it's associated `Queue`, and the `Adapter` and `Instance` used to create them
+diff --git a/crates/wgpu_context/src/surface_renderer.rs b/crates/wgpu_context/src/surface_renderer.rs
+index 5daf415..1533e46 100644
+--- a/crates/wgpu_context/src/surface_renderer.rs
++++ b/crates/wgpu_context/src/surface_renderer.rs
+@@ -310,6 +310,62 @@ impl<'s> SurfaceRenderer<'s> {
+         self.intermediate_texture.is_some()
+     }
+ 
++    /// The intermediate texture, which keeps the last frame rendered into
++    /// it, when there is one.
++    pub fn intermediate_texture_view(&self) -> Option<&TextureView> {
++        self.intermediate_texture
++            .as_ref()
++            .map(|intermediate| &intermediate.texture_view)
++    }
++
++    /// Whether the surface takes straight (not premultiplied) alpha, so a
++    /// frame drawn straight onto it ([`Self::present_with`]) un-premultiplies
++    /// its colours.
++    pub fn unpremultiplies(&self) -> bool {
++        self.intermediate_texture
++            .as_ref()
++            .is_some_and(|intermediate| {
++                matches!(
++                    intermediate.config.alpha_conversion,
++                    Some(AlphaConversion::Unpremultiply)
++                )
++            })
++    }
++
++    /// Present a frame `draw` records straight onto the surface texture
++    /// (given its view), instead of blitting the intermediate texture: an
++    /// embedder that composes the intermediate texture with something else
++    /// draws both itself.
++    pub fn present_with(
++        &mut self,
++        draw: impl FnOnce(&Device, &Queue, &mut wgpu::CommandEncoder, &TextureView),
++    ) -> Result<(), GetCurrentSurfaceTextureErr> {
++        if self.ensure_current_surface_texture().is_err() {
++            self.clear_surface_texture();
++            return Err(GetCurrentSurfaceTextureErr);
++        }
++        let surface_texture = self.current_surface_texture.take().unwrap();
++        let view = surface_texture
++            .texture
++            .create_view(&TextureViewDescriptor::default());
++        let mut encoder =
++            self.device_handle
++                .device
++                .create_command_encoder(&CommandEncoderDescriptor {
++                    label: Some("Surface compose"),
++                });
++        draw(
++            &self.device_handle.device,
++            &self.device_handle.queue,
++            &mut encoder,
++            &view,
++        );
++        self.device_handle.queue.submit([encoder.finish()]);
++        drop(view);
++        self.device_handle.queue.present(surface_texture);
++        Ok(())
++    }
++
+     /// Get a target texture view to render to.
+     ///
+     /// If there is an intermediate texture, this is a view of that intermediate texture, otherwise

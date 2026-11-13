@@ -331,7 +331,7 @@ fn Onboarding(on_done: EventHandler<()>) -> Element {
             "data-cs": "onboarding",
             "data-step": current.name(),
             class: "relative flex h-screen flex-col overflow-clip",
-            div { "data-cs": "backdrop", "aria-hidden": "true" }
+            crate::backdrop::Backdrop {}
             header {
                 "data-part": "titlebar",
                 "data-window-drag": "true",

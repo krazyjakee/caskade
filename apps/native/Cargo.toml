@@ -22,7 +22,7 @@ smoke = []
 # The reference screens' screenshots (`src/shots.rs`, #90): vello_cpu,
 # headless. `cargo test -p caskade-native --features shots --test shots`.
 # The reference screens include the component gallery's pages.
-shots = ["dep:anyrender", "dep:anyrender_vello_cpu", "dep:blitz-paint", "gallery"]
+shots = ["dep:anyrender_vello_cpu", "dep:blitz-paint", "gallery"]
 # The component gallery (`src/gallery`, #93) in a release build:
 # `caskade-native --gallery`; debug builds always have it.
 gallery = []
@@ -74,6 +74,10 @@ caskade-ui-i18n = { path = "../../crates/caskade-ui-i18n" }
 chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 # Appearance, the accent and the user CSS check, as the webview has them (#90).
 caskade-ui-theme = { path = "../../crates/caskade-ui-theme" }
+# Themes' backdrop compositions (`backdrop.rs`, #149).
+caskade-theme = { path = "../../crates/caskade-theme" }
+# Hands freed memory back when the window hides (`launch.rs`).
+caskade-malloc = { path = "../../crates/caskade-malloc" }
 # The game and video windows (`--web-game`, `--video`), shared with the
 # Tauri app.
 caskade-player = { path = "../../crates/caskade-player" }
@@ -92,14 +96,18 @@ blitz-shell = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735
 blitz-traits = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false }
 # Headless rendering for the screenshots (`shots`), at the same revisions.
 blitz-paint = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, optional = true }
-anyrender = { git = "https://github.com/DioxusLabs/anyrender", branch = "main", optional = true }
+# The window's GPU backdrop (`backdrop.rs`, #149), and headless rendering.
+anyrender = { git = "https://github.com/DioxusLabs/anyrender", branch = "main" }
 anyrender_vello_cpu = { git = "https://github.com/DioxusLabs/anyrender", branch = "main", default-features = false, optional = true }
 # The tray icon and its menu (`tray.rs`), as the Tauri app builds them.
 tray-icon = { version = "0.25", default-features = false, features = ["libappindicator"] }
-image = { version = "=0.25.10", default-features = false, features = ["png"] }
+# PNG for the tray; JPEG and WebP too for themes' backdrop images (#149).
+image = { version = "=0.25.10", default-features = false, features = ["png", "jpeg", "webp"] }
 # The bundled fonts under the tokens' family names, and theme asset URLs
 # (`theme.rs`), at the versions Blitz uses.
 parley = "0.12"
+# The backdrop's colours and geometry (#149), at the versions anyrender uses.
+peniko = "0.6"
 # The library's chosen games, in the order chosen (`library/selection.rs`).
 indexmap = "2"
 # The search's accent-blind matching, as the webview's `foldSearch` (#96).

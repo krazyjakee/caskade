@@ -28,16 +28,17 @@ pub struct FallbackWindowRenderer {
 }
 
 impl FallbackWindowRenderer {
-    /// Tries vello_hybrid with `options` first (refusing software adapters),
-    /// or goes straight to vello_cpu when `cpu_only`.
-    pub fn new(options: VelloHybridRendererOptions, cpu_only: bool) -> Self {
+    /// Tries vello_hybrid with `options` first (refusing software adapters
+    /// unless `allow_software`), or goes straight to vello_cpu when
+    /// `cpu_only`.
+    pub fn new(options: VelloHybridRendererOptions, cpu_only: bool, allow_software: bool) -> Self {
         let mut cpu_config = RendererConfig::default();
         cpu_config.base_color = Some(options.base_color);
         let active = if cpu_only {
             Active::Cpu(VelloCpuWindowRenderer::with_options(cpu_config.clone()))
         } else {
             Active::Gpu(VelloHybridWindowRenderer::with_options(
-                options.allow_software_adapter(false),
+                options.allow_software_adapter(allow_software),
             ))
         };
         Self {
@@ -186,6 +187,41 @@ impl WindowRenderer for FallbackWindowRenderer {
         match &mut self.active {
             Active::Gpu(r) => r.render_damage(damage, |p| draw_fn(&mut DynScenePainter::new(p))),
             Active::Cpu(r) => r.render_damage(damage, |p| draw_fn(&mut DynScenePainter::new(p))),
+        }
+    }
+
+    // vello_cpu draws no backdrop: the document's own is drawn instead.
+    fn supports_backdrop(&self) -> bool {
+        match &self.active {
+            Active::Gpu(r) => r.supports_backdrop(),
+            Active::Cpu(_) => false,
+        }
+    }
+
+    fn set_backdrop(&mut self, backdrop: Option<anyrender::Backdrop>) {
+        if let Active::Gpu(r) = &mut self.active {
+            r.set_backdrop(backdrop);
+        }
+    }
+
+    fn backdrop_frame_due(&self) -> Option<std::time::Instant> {
+        match &self.active {
+            Active::Gpu(r) => r.backdrop_frame_due(),
+            Active::Cpu(_) => None,
+        }
+    }
+
+    fn render_backdrop(&mut self) -> bool {
+        match &mut self.active {
+            Active::Gpu(r) => r.render_backdrop(),
+            Active::Cpu(_) => false,
+        }
+    }
+
+    fn backdrop_frames(&self) -> u64 {
+        match &self.active {
+            Active::Gpu(r) => r.backdrop_frames(),
+            Active::Cpu(_) => 0,
         }
     }
 }

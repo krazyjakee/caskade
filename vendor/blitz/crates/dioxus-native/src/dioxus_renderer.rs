@@ -54,6 +54,11 @@ pub struct RendererOptions {
     /// `gpu-cpu-fallback`).
     #[cfg(feature = "gpu-cpu-fallback")]
     pub cpu_only: bool,
+    /// Draw through wgpu on a software adapter (llvmpipe, lavapipe, WARP)
+    /// too, instead of falling back to the CPU renderer: for testing the
+    /// GPU path without a GPU (only with `gpu-cpu-fallback`).
+    #[cfg(feature = "gpu-cpu-fallback")]
+    pub allow_software_gpu: bool,
 }
 
 #[derive(Clone)]
@@ -101,7 +106,11 @@ impl DioxusNativeWindowRenderer {
                 if let Some(limits) = options.limits {
                     inner_options = inner_options.limits(limits);
                 }
-                let inner_renderer = InnerRenderer::new(inner_options, options.cpu_only);
+                let inner_renderer = InnerRenderer::new(
+                    inner_options,
+                    options.cpu_only,
+                    options.allow_software_gpu,
+                );
             } else if #[cfg(any(feature = "vello", feature = "vello-hybrid"))] {
                 let mut inner_options: InnerRendererOptions = config.into();
                 if let Some(features) = options.features {
@@ -220,5 +229,25 @@ impl WindowRenderer for DioxusNativeWindowRenderer {
         draw_fn: F,
     ) {
         self.inner.borrow_mut().render_damage(damage, draw_fn)
+    }
+
+    fn supports_backdrop(&self) -> bool {
+        self.inner.borrow().supports_backdrop()
+    }
+
+    fn set_backdrop(&mut self, backdrop: Option<anyrender::Backdrop>) {
+        self.inner.borrow_mut().set_backdrop(backdrop)
+    }
+
+    fn backdrop_frame_due(&self) -> Option<std::time::Instant> {
+        self.inner.borrow().backdrop_frame_due()
+    }
+
+    fn render_backdrop(&mut self) -> bool {
+        self.inner.borrow_mut().render_backdrop()
+    }
+
+    fn backdrop_frames(&self) -> u64 {
+        self.inner.borrow().backdrop_frames()
     }
 }

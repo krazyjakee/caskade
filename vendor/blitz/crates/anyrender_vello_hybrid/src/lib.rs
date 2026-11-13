@@ -1,6 +1,8 @@
 //! A [`vello_gpu`] backend for the [`anyrender`] 2D drawing abstraction
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+mod backdrop;
+mod cpu_time;
 mod filters;
 #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
 mod gpu_timing;

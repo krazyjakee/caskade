@@ -1,0 +1,35 @@
+{
+  "$description": "Nexus's backdrop (#149), as theme.css draws it: a faint HUD grid panning a cell every 40 s under an elliptical mask, and two nebula glows drifting out and back. The glows' boxes are theme.css's, which overhang the window by 6% each side. Reduce effects hides the grid through effect.grid.opacity; reduced motion stops both.",
+  "frameRate": 6,
+  "layers": [
+    {
+      "type": "grid",
+      "color": "{color.accent.alt}",
+      "cell": "{grid.size}",
+      "line": "1px",
+      "opacity": "{effect.grid.opacity}",
+      "mask": { "at": ["60%", "30%"], "size": ["80%", "70%"], "from": "20%", "to": "75%" },
+      "motion": { "type": "pan", "by": ["{grid.size}", "{grid.size}"], "period": "40s" }
+    },
+    {
+      "type": "radial",
+      "at": ["78%", "10.8%"],
+      "size": ["44.8%", "39.2%"],
+      "stops": [
+        { "color": "{color.accent}", "alpha": 0.22, "at": "0%" },
+        { "color": "transparent", "at": "70%" }
+      ],
+      "motion": { "type": "drift", "by": ["-3vw", "2vh"], "period": "40s" }
+    },
+    {
+      "type": "radial",
+      "at": ["16.4%", "89.2%"],
+      "size": ["39.2%", "33.6%"],
+      "stops": [
+        { "color": "{color.accent.alt}", "alpha": 0.1, "at": "0%" },
+        { "color": "transparent", "at": "70%" }
+      ],
+      "motion": { "type": "drift", "by": ["-3vw", "2vh"], "period": "40s" }
+    }
+  ]
+}

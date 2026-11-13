@@ -124,6 +124,16 @@ struct State {
     compiled: HashMap<String, Arc<str>>,
 }
 
+/// A theme's backdrop as data ([`ThemeService::backdrop`]).
+#[derive(Clone, Debug, PartialEq)]
+pub struct ThemeBackdrop {
+    /// The theme whose `backdrop.json` it is.
+    pub theme: String,
+    pub composition: caskade_theme::backdrop::Composition,
+    /// The images its layers draw: path under the theme and bytes.
+    pub images: Vec<(String, Vec<u8>)>,
+}
+
 /// The themes the app can apply.
 #[derive(Clone)]
 pub struct ThemeService {
@@ -153,6 +163,7 @@ fn builtins() -> Vec<MemFiles> {
             "default": "theme.json",
             "tokens.json",
             "theme.css",
+            "backdrop.json",
             "locales/sv.po",
         ),
         // Deep cobalt and white, in the spirit of a console home screen (#125).
@@ -160,6 +171,7 @@ fn builtins() -> Vec<MemFiles> {
             "cobalt": "theme.json",
             "tokens.json",
             "theme.css",
+            "backdrop.json",
             "assets/fonts/OFL.txt",
             "assets/fonts/manrope-latin-ext-wght-normal.woff2",
             "assets/fonts/manrope-latin-wght-normal.woff2",
@@ -171,6 +183,7 @@ fn builtins() -> Vec<MemFiles> {
             "emerald": "theme.json",
             "tokens.json",
             "theme.css",
+            "backdrop.json",
             "assets/fonts/OFL.txt",
             "assets/fonts/barlow-semi-condensed-latin-500-normal.woff2",
             "assets/fonts/barlow-semi-condensed-latin-600-normal.woff2",
@@ -186,6 +199,7 @@ fn builtins() -> Vec<MemFiles> {
             "engage": "theme.json",
             "tokens.json",
             "theme.css",
+            "backdrop.json",
             "assets/fonts/OFL.txt",
             "assets/fonts/nunito-latin-ext-wght-normal.woff2",
             "assets/fonts/nunito-latin-wght-normal.woff2",
@@ -594,6 +608,31 @@ impl ThemeService {
             .compiled
             .insert(id.to_owned(), css.clone());
         Ok(css)
+    }
+
+    /// The backdrop the native app draws for a theme on the GPU (#149):
+    /// the `backdrop.json` nearest it in its `extends` chain, with the
+    /// images it names. `None` when the chain draws its backdrop in CSS
+    /// (no theme has a composition, or a theme's CSS restyles the backdrop
+    /// without one: [`caskade_theme::backdrop_of`]) or isn't valid.
+    pub fn backdrop(&self, id: &str) -> Option<ThemeBackdrop> {
+        let state = read(&self.state);
+        let chain = caskade_theme::chain(id, |id| lookup(&state.entries, id)).ok()?;
+        let (theme, composition) = caskade_theme::backdrop_of(&chain)?;
+        let entry = state
+            .entries
+            .iter()
+            .find(|entry| entry.info.id == theme.id())?;
+        let images = composition
+            .images()
+            .into_iter()
+            .filter_map(|path| Some((path.to_owned(), entry.files.read(path)?)))
+            .collect();
+        Some(ThemeBackdrop {
+            theme: theme.id().to_owned(),
+            composition: composition.clone(),
+            images,
+        })
     }
 
     /// An asset or preview of a valid theme.

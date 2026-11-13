@@ -99,7 +99,8 @@ def copy_library(database, artwork, out, appearance_override=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("app", type=Path)
-    parser.add_argument("mode", choices=("default", "reduced", "stepped", "flat", "grid", "list"))
+    parser.add_argument("mode", choices=("default", "reduced", "stepped", "flat", "backdrop-only",
+                                         "grid", "list"))
     parser.add_argument("out", type=Path)
     parser.add_argument("--renderer", choices=("cpu", "auto"), default="cpu",
                         help="grid/list renderer; Home uses auto")
@@ -108,6 +109,10 @@ def main():
     parser.add_argument("--gpu-timestamps", action="store_true")
     parser.add_argument("--library", type=Path)
     parser.add_argument("--artwork", type=Path)
+    parser.add_argument("--backdrop", choices=("auto", "still", "css"), default="auto",
+                        help="CASKADE_BACKDROP: the GPU backdrop (#149), or the CSS one still or animated")
+    parser.add_argument("--hide-after", type=float,
+                        help="hide the window to the tray after this many seconds and sample it hidden")
     parser.add_argument("--width", type=int, default=1280)
     parser.add_argument("--height", type=int, default=800)
     args = parser.parse_args()
@@ -135,6 +140,12 @@ def main():
     if args.mode == "flat":
         prefs["customCss"] = (
             '[data-cs="backdrop"]::before, [data-cs="backdrop"]::after { content: none; } '
+            '[data-cs="hero"] [data-part="fx"]::after, '
+            '[data-cs="hero"] [data-part="glow"] { animation-play-state: paused; }'
+        )
+    if args.mode == "backdrop-only":
+        # Home's hero loops paused: only the backdrop moves.
+        prefs["customCss"] = (
             '[data-cs="hero"] [data-part="fx"]::after, '
             '[data-cs="hero"] [data-part="glow"] { animation-play-state: paused; }'
         )
@@ -167,7 +178,11 @@ def main():
     if args.gpu_timestamps:
         env["ANYRENDER_GPU_TIMINGS"] = "1"
     env.update(CASKADE_FIXTURES="1", CASKADE_FIXTURE_COUNT="10000",
-               CASKADE_NATIVE_NO_TRAY="1", RUST_LOG="warn")
+               CASKADE_NATIVE_NO_TRAY="1", RUST_LOG="warn",
+               CASKADE_BACKDROP=args.backdrop,
+               CASKADE_NATIVE_SMOKE_FRAMES=str(out / "frames.json"))
+    if args.hide_after is not None:
+        env["CASKADE_NATIVE_SMOKE_HIDE"] = str(args.hide_after)
     if library_copy:
         env["CASKADE_FIXTURES"] = "0"
     if prefs and not library_copy:
@@ -179,14 +194,18 @@ def main():
 
     samples = []
     gpu_processes = []
+    gpu_memory = []
+    frame_counts = []
     steady_marked = False
+    hidden_marked = False
+    duration = 300 if scrolling else (45 if args.hide_after is None else args.hide_after + 25)
     with (out / "app.log").open("w") as log:
         process = subprocess.Popen([str(args.app.resolve())], env=env, stdout=log,
                                    stderr=subprocess.STDOUT)
         start = previous_time = time.monotonic()
         previous = snapshot(process.pid)
         try:
-            while process.poll() is None and time.monotonic() - start < (300 if scrolling else 45):
+            while process.poll() is None and time.monotonic() - start < duration:
                 time.sleep(1)
                 now = time.monotonic()
                 if args.adapter and not gpu_processes and now - start >= 3:
@@ -201,6 +220,19 @@ def main():
                                     "driver": nvidia.findtext("driver_version"),
                                     "process": {field.tag: field.text for field in entry},
                                 })
+                if args.adapter and now - start >= 3:
+                    result = subprocess.run(["nvidia-smi", "-q", "-x"], capture_output=True,
+                                            text=True, timeout=5, check=True)
+                    for entry in ET.fromstring(result.stdout).iter("process_info"):
+                        if entry.findtext("pid") == str(process.pid):
+                            used = (entry.findtext("used_memory") or "").split()
+                            if used and used[0].isdigit():
+                                gpu_memory.append({"seconds": now - start, "usedMiB": int(used[0])})
+                try:
+                    counts = json.loads((out / "frames.json").read_text())
+                    frame_counts.append({"seconds": now - start, **counts})
+                except (OSError, ValueError):
+                    pass
                 current = snapshot(process.pid)
                 if current is None:
                     break
@@ -218,6 +250,11 @@ def main():
                     log.write("probe: steady window begins\n")
                     log.flush()
                     steady_marked = True
+                if (args.hide_after is not None and not hidden_marked
+                        and now - start >= args.hide_after + 5):
+                    log.write("probe: hidden window begins\n")
+                    log.flush()
+                    hidden_marked = True
         finally:
             if process.poll() is None:
                 process.terminate()
@@ -227,7 +264,26 @@ def main():
                 process.kill()
                 process.wait()
 
-    steady = [sample for sample in samples if sample["seconds"] >= 25]
+    # Shown: from 25 s to the hide (or the end); hidden: from 5 s after it.
+    shown_end = args.hide_after if args.hide_after is not None else float("inf")
+    steady = [sample for sample in samples if 25 <= sample["seconds"] < shown_end]
+    hidden = ([sample for sample in samples if sample["seconds"] >= args.hide_after + 5]
+              if args.hide_after is not None else [])
+
+    def window(series, low, high):
+        return [entry for entry in series if low <= entry["seconds"] < high]
+
+    def rates(series):
+        if len(series) < 2:
+            return None
+        first, last = series[0], series[-1]
+        span = last["seconds"] - first["seconds"]
+        return {
+            "seconds": span,
+            "documentFramesPerSecond": (last["document"] - first["document"]) / span,
+            "backdropFramesPerSecond": (last["backdrop"] - first["backdrop"]) / span,
+            "gpuBackdrop": last["gpu"], "released": last.get("released"),
+        }
     report = {
         "app": str(args.app.resolve()), "mode": args.mode,
         "window": [args.width, args.height], "exitCode": process.returncode,
@@ -237,9 +293,40 @@ def main():
         "libraryCopy": library_copy,
         "appearanceOverride": prefs, "samples": samples,
         "steadyCpuPercent": statistics.fmean(s["cpuPercent"] for s in steady) if steady else None,
+        "steadyAnonMiB": statistics.fmean(s["anonMiB"] for s in steady) if steady else None,
+        "backdrop": args.backdrop,
+        "steadyFrames": rates(window(frame_counts, 25, shown_end)),
+        "gpuMemoryMiB": gpu_memory,
     }
+    if args.hide_after is not None:
+        report["hiddenCpuPercent"] = statistics.fmean(s["cpuPercent"] for s in hidden) if hidden else None
+        report["hiddenAnonMiB"] = statistics.fmean(s["anonMiB"] for s in hidden) if hidden else None
+        report["hiddenFrames"] = rates(window(frame_counts, args.hide_after + 5, float("inf")))
+        shown_gpu = window(gpu_memory, 25, shown_end)
+        hidden_gpu = window(gpu_memory, args.hide_after + 5, float("inf"))
+        report["shownGpuMemoryMiB"] = shown_gpu[-1]["usedMiB"] if shown_gpu else None
+        report["hiddenGpuMemoryMiB"] = hidden_gpu[-1]["usedMiB"] if hidden_gpu else None
     app_log = (out / "app.log").read_text()
     report["adapterLog"] = [line for line in app_log.splitlines() if line.startswith("GPU adapter:")]
+    steady_text = app_log.split("probe: steady window begins\n", 1)[1] if steady_marked else ""
+    steady_text = steady_text.split("probe: hidden window begins\n", 1)[0]
+    units = {"ms": 1.0, "µs": 0.001, "us": 0.001, "s": 1000.0}
+
+    def timings(pattern):
+        found = [float(value) * units[unit]
+                 for value, unit in re.findall(pattern, steady_text, re.MULTILINE)]
+        if not found:
+            return None
+        found.sort()
+        return {"frames": len(found), "p50ms": statistics.median(found),
+                "p95ms": found[round((len(found) - 1) * .95)]}
+
+    # CPU-side: a backdrop frame's encode, submit and present; a document
+    # frame's resolve. GPU: the backdrop's own pass.
+    report["steadyBackdropCpu"] = timings(r"vello_hybrid backdrop: ([\d.]+)(ms|µs|us|s) ")
+    report["steadyResolves"] = len(re.findall(r"^Resolve\(", steady_text, re.MULTILINE))
+    report["steadyDocumentFrameCpu"] = timings(r"^vello_hybrid: ([\d.]+)(ms|µs|us|s) ")
+    report["steadyGpuBackdrop"] = timings(r"gpu_backdrop: ([\d.]+)(ms)")
     if args.gpu_timestamps:
         report["gpuFrameMs"] = [float(value) for value in re.findall(r"gpu_frame: ([\d.]+)ms", app_log)]
         steady_log = app_log.split("probe: steady window begins\n", 1)[1] if steady_marked else ""

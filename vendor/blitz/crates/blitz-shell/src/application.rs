@@ -274,6 +274,17 @@ impl<Rend: WindowRenderer> ApplicationHandler for BlitzApplication<Rend> {
                     next = Some(next.map_or(at, |next| next.min(at)));
                 }
             }
+            // The renderer's backdrop moves on its own clock: its frames
+            // are presented here, without a document redraw.
+            if let Some(at) = view.next_backdrop_frame {
+                if at <= now {
+                    view.render_backdrop_if_due();
+                    view.schedule_backdrop();
+                }
+                if let Some(at) = view.next_backdrop_frame {
+                    next = Some(next.map_or(at, |next| next.min(at)));
+                }
+            }
         }
         event_loop.set_control_flow(match next {
             Some(at) => winit::event_loop::ControlFlow::WaitUntil(at),

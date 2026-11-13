@@ -18,6 +18,8 @@ mod accounts;
 mod activity;
 // The anatomy catalogue (#90); the components (#93) add to it.
 mod anatomy;
+// The window's backdrop on the GPU (#149).
+mod backdrop;
 // Collections and a collection's page (#102).
 mod collections;
 // Console mode, for a TV and a pad (#107).

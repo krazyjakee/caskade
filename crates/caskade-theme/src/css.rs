@@ -26,6 +26,18 @@ struct Lint<'a> {
     problems: Vec<Problem>,
     /// Byte ranges of `url()`s and their replacements.
     edits: Vec<(usize, usize, String)>,
+    /// A selector names `[data-cs="backdrop"]`.
+    backdrop: bool,
+}
+
+/// A theme's CSS once it passed the lint.
+pub(crate) struct Linted {
+    /// With its `url()`s pointing at `/<id>/<path>`.
+    pub css: String,
+    /// Whether a rule restyles `[data-cs="backdrop"]`: then the theme draws
+    /// its own backdrop in CSS and doesn't inherit a composition
+    /// (`backdrop.json`) from the theme it extends.
+    pub restyles_backdrop: bool,
 }
 
 impl Lint<'_> {
@@ -37,13 +49,14 @@ impl Lint<'_> {
 
 type Done = Result<(), ParseError<()>>;
 
-pub(crate) fn lint(text: &str, id: &str, files: &[String]) -> Result<String, Vec<Problem>> {
+pub(crate) fn lint(text: &str, id: &str, files: &[String]) -> Result<Linted, Vec<Problem>> {
     let mut parser = Parser::new(text);
     let mut lint = Lint {
         id,
         files,
         problems: Vec::new(),
         edits: Vec::new(),
+        backdrop: false,
     };
     rules(&mut parser, &mut lint, false);
     if !lint.problems.is_empty() {
@@ -58,7 +71,10 @@ pub(crate) fn lint(text: &str, id: &str, files: &[String]) -> Result<String, Vec
         at = end;
     }
     out.push_str(&text[at..]);
-    Ok(out)
+    Ok(Linted {
+        css: out,
+        restyles_backdrop: lint.backdrop,
+    })
 }
 
 fn nested<'i>(p: &mut Parser<'i>, walk: impl FnOnce(&mut Parser<'i>)) {
@@ -340,6 +356,7 @@ fn attribute(
                     format!("data-cs \"{root}\" is a consent dialog: themes can't restyle it"),
                 );
             } else if contract.anatomy.roots.contains_key(&root) {
+                lint.backdrop |= root == "backdrop";
                 *current = Some(root);
             } else {
                 lint.problem(

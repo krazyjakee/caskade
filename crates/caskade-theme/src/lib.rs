@@ -8,14 +8,20 @@
 //! `extends` chain into one stylesheet in the `cs.theme` cascade layer.
 //! Every problem names its file and, where it has one, its line and column.
 //!
+//! A theme may also describe its backdrop as data (`backdrop.json`, #149):
+//! the native app draws it on the GPU. [`backdrop_of`] picks the
+//! composition a chain shows.
+//!
 //! [`Locales`] reads a theme's translations of its name and description
 //! (`locales/<lang>.po`, #219). Their problems never stop a theme applying.
 
+pub mod backdrop;
 mod contract;
 mod css;
 mod files;
 mod locales;
 mod manifest;
+pub mod shader;
 mod tokens;
 
 pub use files::{DirFiles, Files, MemFiles};
@@ -106,6 +112,10 @@ pub struct Theme {
     tokens: Vec<(String, String)>,
     /// `theme.css` with its `url()`s pointing at `/<id>/<path>`.
     css: String,
+    /// `backdrop.json`, checked.
+    backdrop: Option<backdrop::Composition>,
+    /// `theme.css` restyles `[data-cs="backdrop"]`.
+    restyles_backdrop: bool,
 }
 
 impl Theme {
@@ -137,18 +147,28 @@ impl Theme {
         let id = manifest
             .as_ref()
             .map_or("", |manifest| manifest.id.as_str());
-        let css = match read_text(files, "theme.css", &mut problems) {
-            Some(text) => css::lint(&text, id, &list).unwrap_or_else(|mut found| {
-                problems.append(&mut found);
-                String::new()
-            }),
-            None => String::new(),
+        let (css, restyles_backdrop) = match read_text(files, "theme.css", &mut problems) {
+            Some(text) => match css::lint(&text, id, &list) {
+                Ok(linted) => (linted.css, linted.restyles_backdrop),
+                Err(mut found) => {
+                    problems.append(&mut found);
+                    (String::new(), false)
+                }
+            },
+            None => (String::new(), false),
         };
+        let backdrop = read_text(files, backdrop::FILE, &mut problems).and_then(|text| {
+            backdrop::parse(&text, &list, files)
+                .map_err(|mut found| problems.append(&mut found))
+                .ok()
+        });
         match manifest {
             Some(manifest) if problems.is_empty() => Ok(Self {
                 manifest,
                 tokens,
                 css,
+                backdrop,
+                restyles_backdrop,
             }),
             _ => Err(problems),
         }
@@ -157,6 +177,33 @@ impl Theme {
     pub fn id(&self) -> &str {
         &self.manifest.id
     }
+
+    /// The theme's own `backdrop.json`, if it has one.
+    pub fn backdrop(&self) -> Option<&backdrop::Composition> {
+        self.backdrop.as_ref()
+    }
+
+    /// Whether `theme.css` restyles `[data-cs="backdrop"]`.
+    pub fn restyles_backdrop(&self) -> bool {
+        self.restyles_backdrop
+    }
+}
+
+/// The backdrop composition a chain from [`chain`] shows, and the theme
+/// whose file (and assets) it is: the nearest theme's, from the leaf down.
+/// A theme whose CSS restyles `[data-cs="backdrop"]` without a
+/// `backdrop.json` of its own stops the search: its CSS backdrop is drawn
+/// instead, still (`None`).
+pub fn backdrop_of<'a>(chain: &[&'a Theme]) -> Option<(&'a Theme, &'a backdrop::Composition)> {
+    for theme in chain.iter().rev() {
+        if let Some(composition) = &theme.backdrop {
+            return Some((theme, composition));
+        }
+        if theme.restyles_backdrop {
+            return None;
+        }
+    }
+    None
 }
 
 fn read_text(files: &dyn Files, path: &str, problems: &mut Vec<Problem>) -> Option<String> {

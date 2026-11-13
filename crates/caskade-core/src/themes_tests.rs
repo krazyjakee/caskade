@@ -553,3 +553,57 @@ fn no_built_in_theme_names_a_console_or_its_maker() {
     assert!(has_word("a playful nod to the ps5 era", "ps5"));
     assert!(!has_word("steps(4)", "ps"));
 }
+
+/// #149: the native app's backdrop is the `backdrop.json` nearest a theme
+/// in its chain, unless a theme's CSS restyles the backdrop without one.
+#[test]
+fn a_theme_shows_the_nearest_backdrop_composition_in_its_chain() {
+    let temp = tempfile::tempdir().unwrap();
+    let user = temp.path().join("themes");
+    // Tokens only: Nexus's composition, in Neon's colours.
+    neon(&user.join("neon"), "#e0457b");
+    // Its own CSS backdrop and no composition: drawn in CSS.
+    write(
+        &user.join("plain"),
+        &[
+            (
+                "theme.json",
+                r#"{"id": "dev.example.plain", "name": "Plain", "version": "0.1.0", "extends": "caskade.default"}"#,
+            ),
+            (
+                "theme.css",
+                r#"[data-cs="backdrop"] { background: #102030; }"#,
+            ),
+        ],
+    );
+    // Its own composition, with an image.
+    write(
+        &user.join("stars"),
+        &[
+            (
+                "theme.json",
+                r#"{"id": "dev.example.stars", "name": "Stars", "version": "0.1.0", "extends": "dev.example.plain"}"#,
+            ),
+            (
+                "backdrop.json",
+                r#"{"layers": [{"type": "image", "src": "assets/stars.png", "size": "cover", "repeat": false}]}"#,
+            ),
+            ("assets/stars.png", "png"),
+        ],
+    );
+    let themes = ThemeService::new(&user);
+    let of = |id: &str| themes.backdrop(id).map(|backdrop| backdrop.theme);
+    assert_eq!(of(DEFAULT_THEME).as_deref(), Some(DEFAULT_THEME));
+    assert_eq!(of("caskade.cobalt").as_deref(), Some("caskade.cobalt"));
+    assert_eq!(of("caskade.emerald").as_deref(), Some("caskade.emerald"));
+    assert_eq!(of("caskade.engage").as_deref(), Some("caskade.engage"));
+    assert_eq!(of("dev.example.neon").as_deref(), Some(DEFAULT_THEME));
+    assert_eq!(of("dev.example.plain"), None);
+    let stars = themes.backdrop("dev.example.stars").unwrap();
+    assert_eq!(stars.theme, "dev.example.stars");
+    assert_eq!(
+        stars.images,
+        vec![("assets/stars.png".to_owned(), b"png".to_vec())]
+    );
+    assert_eq!(of("dev.example.missing"), None);
+}

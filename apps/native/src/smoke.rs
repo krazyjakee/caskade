@@ -13,8 +13,11 @@
 //! and `CASKADE_NATIVE_SMOKE_PANIC=1` panics in the window's UI (crash
 //! recovery). `CASKADE_NATIVE_SMOKE_MOTION=spinner|both` turns the status
 //! bar's spinner (#96), to measure what animation costs (#121); the theme's
-//! backdrop is the frame's own. Release builds ignore them unless built with
-//! the `smoke` feature.
+//! backdrop is the frame's own. `CASKADE_NATIVE_SMOKE_FRAMES=<file>` keeps
+//! the window's frame counts in `file` (#149), and
+//! `CASKADE_NATIVE_SMOKE_HIDE=<seconds>` hides the window as closing it to
+//! the tray does. Release builds ignore them
+//! unless built with the `smoke` feature.
 
 use std::sync::Arc;
 
@@ -135,6 +138,13 @@ pub fn panic_in_ui() {
 
 /// Once the main window is up.
 pub fn window_ready(window: Arc<dyn Window>) {
+    if let Some(seconds) = var("CASKADE_NATIVE_SMOKE_HIDE").and_then(|s| s.parse::<f64>().ok()) {
+        caskade_app::runtime::spawn(async move {
+            tokio::time::sleep(std::time::Duration::from_secs_f64(seconds)).await;
+            tracing::info!("smoke: hiding the window");
+            crate::launch::ask(crate::launch::Request::Hide);
+        });
+    }
     let Some(seconds) = var("CASKADE_NATIVE_SMOKE_QUIT").and_then(|s| s.parse::<f64>().ok()) else {
         return;
     };
@@ -145,6 +155,43 @@ pub fn window_ready(window: Arc<dyn Window>) {
         crate::tray::state().quit();
         crate::launch::ask(crate::launch::Request::Quit);
     });
+}
+
+/// `CASKADE_NATIVE_SMOKE_FRAMES=<file>`: writes the window's frame counts to
+/// `file` as JSON when they changed, at most four times a second: frames
+/// the document painted (`document`, each after a resolve), frames of the
+/// backdrop alone (`backdrop`, #149), whether the GPU draws the backdrop
+/// (`gpu`) and whether the window's GPU resources are released while it
+/// is hidden (`released`). For the backdrop's test and measurements.
+pub fn frames(document: u64, backdrop: u64, gpu: bool, released: bool) {
+    use std::sync::{Mutex, OnceLock};
+    use std::time::{Duration, Instant};
+    static PATH: OnceLock<Option<String>> = OnceLock::new();
+    /// Frames painted and backdrop frames, on the GPU, released.
+    type Counts = (u64, u64, bool, bool);
+    static LAST: Mutex<Option<(Instant, Counts)>> = Mutex::new(None);
+    let Some(path) = PATH.get_or_init(|| var("CASKADE_NATIVE_SMOKE_FRAMES")) else {
+        return;
+    };
+    let counts = (document, backdrop, gpu, released);
+    let mut last = caskade_core::lock(&LAST);
+    if let Some((at, written)) = *last
+        && (written == counts || at.elapsed() < Duration::from_millis(250))
+    {
+        return;
+    }
+    *last = Some((Instant::now(), counts));
+    let json = serde_json::json!({
+        "document": document,
+        "backdrop": backdrop,
+        "gpu": gpu,
+        "released": released,
+    });
+    // Whole or not at all: the test reads it while the app runs.
+    let partial = format!("{path}.part");
+    if std::fs::write(&partial, json.to_string()).is_ok() {
+        let _ = std::fs::rename(&partial, path);
+    }
 }
 
 /// Whether `CASKADE_NATIVE_SMOKE_MOTION` (`spinner` or `both`) asks the

@@ -110,7 +110,7 @@ pub fn AccountPicker(list: AccountList, on_signed_in: EventHandler<Account>) -> 
                     root.set(Some(handle.node_id()));
                 }
             },
-            div { "data-cs": "backdrop", "aria-hidden": "true" }
+            crate::backdrop::Backdrop {}
             header {
                 "data-part": "titlebar",
                 "data-window-drag": "true",

@@ -310,6 +310,62 @@ impl<'s> SurfaceRenderer<'s> {
         self.intermediate_texture.is_some()
     }
 
+    /// The intermediate texture, which keeps the last frame rendered into
+    /// it, when there is one.
+    pub fn intermediate_texture_view(&self) -> Option<&TextureView> {
+        self.intermediate_texture
+            .as_ref()
+            .map(|intermediate| &intermediate.texture_view)
+    }
+
+    /// Whether the surface takes straight (not premultiplied) alpha, so a
+    /// frame drawn straight onto it ([`Self::present_with`]) un-premultiplies
+    /// its colours.
+    pub fn unpremultiplies(&self) -> bool {
+        self.intermediate_texture
+            .as_ref()
+            .is_some_and(|intermediate| {
+                matches!(
+                    intermediate.config.alpha_conversion,
+                    Some(AlphaConversion::Unpremultiply)
+                )
+            })
+    }
+
+    /// Present a frame `draw` records straight onto the surface texture
+    /// (given its view), instead of blitting the intermediate texture: an
+    /// embedder that composes the intermediate texture with something else
+    /// draws both itself.
+    pub fn present_with(
+        &mut self,
+        draw: impl FnOnce(&Device, &Queue, &mut wgpu::CommandEncoder, &TextureView),
+    ) -> Result<(), GetCurrentSurfaceTextureErr> {
+        if self.ensure_current_surface_texture().is_err() {
+            self.clear_surface_texture();
+            return Err(GetCurrentSurfaceTextureErr);
+        }
+        let surface_texture = self.current_surface_texture.take().unwrap();
+        let view = surface_texture
+            .texture
+            .create_view(&TextureViewDescriptor::default());
+        let mut encoder =
+            self.device_handle
+                .device
+                .create_command_encoder(&CommandEncoderDescriptor {
+                    label: Some("Surface compose"),
+                });
+        draw(
+            &self.device_handle.device,
+            &self.device_handle.queue,
+            &mut encoder,
+            &view,
+        );
+        self.device_handle.queue.submit([encoder.finish()]);
+        drop(view);
+        self.device_handle.queue.present(surface_texture);
+        Ok(())
+    }
+
     /// Get a target texture view to render to.
     ///
     /// If there is an intermediate texture, this is a view of that intermediate texture, otherwise

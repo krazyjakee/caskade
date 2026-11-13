@@ -18,6 +18,7 @@ use wgpu::{
 };
 use wgpu_context::{DeviceHandle, SurfaceRenderer, SurfaceRendererConfiguration, WGPUContext};
 
+use crate::backdrop::{BackdropGpu, BackdropState};
 use crate::{ImageCache, VelloHybridScenePainter, scene::ImageManager};
 
 /// Drive the wgpu init future. On wasm32 we spawn it onto the JS microtask
@@ -40,6 +41,8 @@ struct ActiveRenderState {
     depth_texture_view: TextureView,
     texture_bindings: FxHashMap<ResourceId, TextureView>,
     render_surface: SurfaceRenderer<'static>,
+    /// The backdrop's pipeline and resources on this device, once drawn.
+    backdrop_gpu: Option<BackdropGpu>,
 }
 
 /// Result of a successful asynchronous resume; both the active state and the
@@ -197,6 +200,10 @@ pub struct VelloHybridWindowRenderer {
     /// Measurement only (`ANYRENDER_FRAME_LIMIT_HZ`): when the last frame
     /// was presented, to pace frames like vsync without a display.
     last_present: Option<std::time::Instant>,
+    /// What is drawn beneath the scene (`set_backdrop`).
+    backdrop: Option<BackdropState>,
+    /// Frames of the backdrop alone presented so far.
+    backdrop_frames: u64,
 }
 impl VelloHybridWindowRenderer {
     /// Why the last resume failed, if it did: then `complete_resume` returns
@@ -226,6 +233,8 @@ impl VelloHybridWindowRenderer {
             cached_images: ImageCache::default(),
             has_full_frame: false,
             last_present: None,
+            backdrop: None,
+            backdrop_frames: 0,
         }
     }
 
@@ -238,8 +247,12 @@ impl VelloHybridWindowRenderer {
 }
 
 fn build_wgpu_context(config: &VelloHybridRendererOptions) -> WGPUContext {
-    let features =
-        config.features.unwrap_or_default() | Features::CLEAR_TEXTURE | Features::PIPELINE_CACHE;
+    // Timestamps (where the adapter has them) time a backdrop's embedder
+    // shaders, which stop moving over their budget.
+    let features = config.features.unwrap_or_default()
+        | Features::CLEAR_TEXTURE
+        | Features::PIPELINE_CACHE
+        | Features::TIMESTAMP_QUERY;
     #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
     let features = if crate::gpu_timing::enabled() {
         features | Features::TIMESTAMP_QUERY | Features::TIMESTAMP_QUERY_INSIDE_ENCODERS
@@ -522,6 +535,7 @@ impl WindowRenderer for VelloHybridWindowRenderer {
                     depth_texture_view,
                     render_surface,
                     texture_bindings: FxHashMap::default(),
+                    backdrop_gpu: None,
                 },
             }));
             on_ready();
@@ -565,7 +579,16 @@ impl WindowRenderer for VelloHybridWindowRenderer {
     }
 
     fn suspend(&mut self) {
+        // Dropped resources are reclaimed when the device is next polled:
+        // poll it once they're gone, so a hidden window holds none.
+        let device = match &self.render_state {
+            RenderState::Active(state) => Some(state.render_surface.device().clone()),
+            _ => None,
+        };
         self.render_state = RenderState::Suspended;
+        if let Some(device) = device {
+            let _ = device.poll(wgpu::PollType::wait_indefinitely());
+        }
         self.cached_images.clear();
         self.has_full_frame = false;
     }
@@ -580,6 +603,9 @@ impl WindowRenderer for VelloHybridWindowRenderer {
             );
             if let RenderState::Active(active) = &mut self.render_state {
                 active.render_surface.resize(width, height);
+                if let Some(gpu) = &mut active.backdrop_gpu {
+                    gpu.scene_changed();
+                }
                 active.depth_texture_view = VelloHybridRenderer::create_depth_texture_view(
                     active.render_surface.device(),
                     &RenderSize {
@@ -617,6 +643,156 @@ impl WindowRenderer for VelloHybridWindowRenderer {
             self.render_impl(None, draw_fn);
         }
     }
+
+    fn supports_backdrop(&self) -> bool {
+        // The scene is kept in the intermediate texture to compose it over
+        // the backdrop; without one (Apple) it goes straight to the surface.
+        match &self.render_state {
+            RenderState::Active(state) => state.render_surface.has_intermediate_texture(),
+            _ => false,
+        }
+    }
+
+    fn set_backdrop(&mut self, backdrop: Option<anyrender::Backdrop>) {
+        let was = self.backdrop.is_some();
+        self.backdrop = match (self.backdrop.take(), backdrop) {
+            (_, None) => None,
+            // The same backdrop goes on moving where it is.
+            (Some(current), Some(backdrop)) if current.backdrop == backdrop => Some(current),
+            // Another one keeps the motion's clock, so a restyle doesn't
+            // jump it back to its start.
+            (current, Some(backdrop)) => Some(BackdropState::new(
+                backdrop,
+                current.map(|current| current.started()),
+            )),
+        };
+        // The scene was drawn over the base colour, or without it.
+        if was != self.backdrop.is_some() {
+            self.has_full_frame = false;
+        }
+    }
+
+    fn backdrop_frame_due(&self) -> Option<std::time::Instant> {
+        if !self.supports_backdrop() {
+            return None;
+        }
+        self.backdrop.as_ref()?.frame_due()
+    }
+
+    fn render_backdrop(&mut self) -> bool {
+        if !(self.has_full_frame && self.supports_backdrop()) {
+            return false;
+        }
+        let (RenderState::Active(state), Some(backdrop)) =
+            (&mut self.render_state, &mut self.backdrop)
+        else {
+            return false;
+        };
+        let now = std::time::Instant::now();
+        let cpu = crate::cpu_time::process();
+        let presented = present_composed(
+            &mut state.render_surface,
+            &mut state.backdrop_gpu,
+            backdrop,
+            now,
+            true,
+        );
+        if let (Some(before), Some(after)) = (cpu, crate::cpu_time::process()) {
+            backdrop.note_cost(after.saturating_sub(before));
+        }
+        if presented.is_err() {
+            // Nothing was shown; the next whole frame starts again.
+            self.has_full_frame = false;
+            return false;
+        }
+        backdrop.last_frame = Some(now);
+        self.backdrop_frames += 1;
+        true
+    }
+
+    fn backdrop_frames(&self) -> u64 {
+        self.backdrop_frames
+    }
+}
+
+/// Presents the backdrop with the scene kept in the intermediate texture
+/// composed over it, in one pass straight onto the surface.
+fn present_composed(
+    surface: &mut SurfaceRenderer<'static>,
+    gpu: &mut Option<BackdropGpu>,
+    backdrop: &mut BackdropState,
+    now: std::time::Instant,
+    advance: bool,
+) -> Result<(), wgpu_context::GetCurrentSurfaceTextureErr> {
+    let Some(scene) = surface.intermediate_texture_view().cloned() else {
+        return Err(wgpu_context::GetCurrentSurfaceTextureErr);
+    };
+    let format = surface.config.format;
+    let size = (surface.config.width, surface.config.height);
+    let unpremultiply = surface.unpremultiplies();
+    let gpu = match gpu {
+        Some(existing) if existing.format() == format => existing,
+        slot => slot.insert(BackdropGpu::new(surface.device(), format)),
+    };
+    #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+    let mut gpu_timer = None;
+    // Measurement only: acquiring the surface, recording the pass, and
+    // submitting and presenting, apart.
+    let started = std::time::Instant::now();
+    let mut acquired = started;
+    let mut encoded = started;
+    let presented = surface.present_with(|device, queue, encoder, target| {
+        acquired = std::time::Instant::now();
+        #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+        {
+            gpu_timer = crate::gpu_timing::GpuTimer::begin(device, encoder);
+        }
+        gpu.draw(
+            device,
+            queue,
+            encoder,
+            backdrop,
+            now,
+            &scene,
+            target,
+            size,
+            unpremultiply,
+            advance,
+        );
+        #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+        if let Some(gpu_timer) = &gpu_timer {
+            gpu_timer.end(encoder);
+        }
+        encoded = std::time::Instant::now();
+    });
+    #[cfg(feature = "log_frame_times")]
+    {
+        let ms = |duration: std::time::Duration| duration.as_secs_f64() * 1000.0;
+        let done = std::time::Instant::now();
+        println!(
+            "vello_hybrid {}: {:.3}ms (acquire: {:.3}ms, encode: {:.3}ms, present: {:.3}ms)",
+            if advance { "backdrop" } else { "compose" },
+            ms(done - started),
+            ms(acquired - started),
+            ms(encoded - acquired),
+            ms(done - encoded)
+        );
+    }
+    #[cfg(not(feature = "log_frame_times"))]
+    let _ = (acquired, encoded);
+    gpu.after_submit();
+    // Measurement only: the compose pass's own GPU time.
+    #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+    if let Some(gpu_timer) = gpu_timer {
+        let (gpu_timer, ready) = gpu_timer.map();
+        let _ = surface.device().poll(wgpu::PollType::wait_indefinitely());
+        gpu_timer.print_as(
+            "gpu_backdrop",
+            ready,
+            surface.queue().get_timestamp_period(),
+        );
+    }
+    presented
 }
 
 impl VelloHybridWindowRenderer {
@@ -683,7 +859,9 @@ impl VelloHybridWindowRenderer {
         if let Some(damage) = damage {
             scene_painter.push_clip_layer(peniko::Fill::NonZero, kurbo::Affine::IDENTITY, &damage);
         }
-        if self.config.base_color != Color::TRANSPARENT {
+        // Over a backdrop, the scene is drawn on a transparent background.
+        let composed = self.backdrop.is_some() && render_surface.has_intermediate_texture();
+        if self.config.base_color != Color::TRANSPARENT && !composed {
             scene_painter.fill(
                 peniko::Fill::NonZero,
                 kurbo::Affine::IDENTITY,
@@ -772,7 +950,26 @@ impl VelloHybridWindowRenderer {
         // rendered over a complete frame).
         self.has_full_frame = true;
 
-        if render_surface.maybe_blit_and_present().is_err() {
+        let presented = match &mut self.backdrop {
+            Some(backdrop) if composed => {
+                let now = std::time::Instant::now();
+                // A document frame moves the backdrop on only when it's due.
+                let advance = backdrop.frame_due().is_some_and(|due| due <= now);
+                let presented = present_composed(
+                    render_surface,
+                    &mut state.backdrop_gpu,
+                    backdrop,
+                    now,
+                    advance,
+                );
+                if presented.is_ok() {
+                    backdrop.last_frame = Some(now);
+                }
+                presented
+            }
+            _ => render_surface.maybe_blit_and_present(),
+        };
+        if presented.is_err() {
             self.scene.reset();
             return;
         }

@@ -137,7 +137,7 @@ fn Shell() -> Element {
             },
             onmousemove: move |event| drag.moved(&event),
             onmouseup: move |_| drag.up(),
-            div { "data-cs": "backdrop", "aria-hidden": "true" }
+            crate::backdrop::Backdrop {}
             div { class: "flex min-h-0 flex-1",
                 sidebar::Sidebar {}
                 div { "data-part": "main", class: "relative flex min-w-0 flex-1 flex-col",

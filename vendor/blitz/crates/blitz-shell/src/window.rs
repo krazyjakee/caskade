@@ -41,10 +41,18 @@ fn get_safe_area_insets(window: &dyn Window) -> PhysicalInsets<u32> {
     window.safe_area()
 }
 
+/// Runs after the document is resolved and before each frame is painted,
+/// with the window's renderer and the animation clock (seconds): an
+/// embedder that keeps renderer state in step with the document (such as a
+/// backdrop the renderer draws) updates it here. It may change the
+/// document, and then resolves it again at the time given.
+pub type BeforePaint<Rend> = Box<dyn FnMut(&mut blitz_dom::BaseDocument, &mut Rend, f64)>;
+
 pub struct WindowConfig<Rend: WindowRenderer> {
     doc: Box<dyn Document>,
     pub(crate) attributes: WindowAttributes,
     renderer: Rend,
+    before_paint: Option<BeforePaint<Rend>>,
 }
 
 impl<Rend: WindowRenderer> WindowConfig<Rend> {
@@ -61,7 +69,17 @@ impl<Rend: WindowRenderer> WindowConfig<Rend> {
             doc,
             attributes,
             renderer,
+            before_paint: None,
         }
+    }
+
+    /// Calls `hook` before each frame is painted ([`BeforePaint`]).
+    pub fn with_before_paint(
+        mut self,
+        hook: impl FnMut(&mut blitz_dom::BaseDocument, &mut Rend, f64) + 'static,
+    ) -> Self {
+        self.before_paint = Some(Box::new(hook));
+        self
     }
 }
 
@@ -102,8 +120,14 @@ pub struct View<Rend: WindowRenderer> {
     /// An animation runs but its last frame changed nothing visible: the next
     /// tick waits for this time instead of the next vsync.
     pub next_animation_frame: Option<Instant>,
+    /// When the renderer's backdrop next needs a frame of its own
+    /// ([`WindowRenderer::backdrop_frame_due`]): the backdrop moves on its
+    /// own clock, without resolving or painting the document.
+    pub next_backdrop_frame: Option<Instant>,
     /// `BLITZ_DAMAGE=0` turns damage-limited repaint off (for comparisons).
     damage_enabled: bool,
+    /// The embedder's [`BeforePaint`] hook.
+    before_paint: Option<BeforePaint<Rend>>,
     pub is_visible: bool,
     pub safe_area_insets: PhysicalInsets<u32>,
 
@@ -238,7 +262,9 @@ impl<Rend: WindowRenderer> View<Rend> {
             animation_timer: None,
             full_repaint: std::cell::Cell::new(true),
             next_animation_frame: None,
+            next_backdrop_frame: None,
             damage_enabled: std::env::var("BLITZ_DAMAGE").map_or(true, |v| v != "0"),
+            before_paint: config.before_paint,
             keyboard_modifiers: Default::default(),
             proxy: proxy.clone(),
             window: winit_window.clone(),
@@ -367,11 +393,15 @@ impl<Rend: WindowRenderer> View<Rend> {
         #[cfg(feature = "custom-widget")]
         inner.can_create_surfaces(&mut self.renderer as _);
 
-        // The render surface covers the entire window, including the safe area
+        // The render surface covers the entire window, including the safe
+        // area; sized before the hook, so it sees the renderer's size.
         self.renderer.set_size(
             width + insets.left + insets.right,
             height + insets.top + insets.bottom,
         );
+        if let Some(hook) = &mut self.before_paint {
+            hook(&mut inner, &mut self.renderer, animation_time);
+        }
 
         self.renderer.render(|scene| {
             paint_scene(
@@ -384,6 +414,8 @@ impl<Rend: WindowRenderer> View<Rend> {
                 insets.top,
             )
         });
+        drop(inner);
+        self.schedule_backdrop();
 
         self.waker = Some(create_waker(&self.proxy, window_id));
         true
@@ -439,6 +471,9 @@ impl<Rend: WindowRenderer> View<Rend> {
 
         let mut inner = self.doc.inner_mut();
         inner.resolve(animation_time);
+        if let Some(hook) = &mut self.before_paint {
+            hook(&mut inner, &mut self.renderer, animation_time);
+        }
 
         // Unregister resources (e.g. textures) from dropped custom widget nodes
         #[cfg(feature = "custom-widget")]
@@ -511,6 +546,13 @@ impl<Rend: WindowRenderer> View<Rend> {
 
         drop(inner);
 
+        // A changed backdrop is shown even when the document painted
+        // nothing; a moving one wakes for its next frame.
+        if !painted && is_visible && !is_blocked {
+            self.render_backdrop_if_due();
+        }
+        self.schedule_backdrop();
+
         // Animations that only change in steps wake for their next step.
         let next_change = next_change
             .zip(self.animation_timer)
@@ -525,6 +567,44 @@ impl<Rend: WindowRenderer> View<Rend> {
                 // Nothing was presented, so nothing paces the loop: wait a frame.
                 self.next_animation_frame = Some(Instant::now() + FRAME_INTERVAL);
             }
+        }
+    }
+
+    /// Whether the window can be seen: not occluded, minimised or hidden.
+    fn is_shown(&self) -> bool {
+        self.is_visible
+            && self.window.is_visible() != Some(false)
+            && self.window.is_minimized() != Some(true)
+    }
+
+    /// Asks the renderer when its backdrop next needs a frame, unless the
+    /// window can't be seen: hidden windows submit no ambient frames.
+    pub fn schedule_backdrop(&mut self) {
+        self.next_backdrop_frame = if self.is_shown() {
+            self.renderer.backdrop_frame_due()
+        } else {
+            None
+        };
+    }
+
+    /// Presents a frame of the backdrop alone, if one is due: the last
+    /// painted document is composited over it as it is, so nothing is
+    /// resolved, laid out or painted. Returns whether it presented one.
+    pub fn render_backdrop_if_due(&mut self) -> bool {
+        let due = self
+            .renderer
+            .backdrop_frame_due()
+            .is_some_and(|at| at <= Instant::now() + FRAME_INTERVAL / 4);
+        if !due || !self.is_shown() {
+            return false;
+        }
+        if self.renderer.render_backdrop() {
+            true
+        } else {
+            // No complete document frame to composite (a resize, a lost
+            // surface): paint one.
+            self.request_redraw();
+            false
         }
     }
 
@@ -691,6 +771,8 @@ impl<Rend: WindowRenderer> View<Rend> {
                 self.is_visible = !is_occluded;
                 if self.is_visible {
                     self.request_redraw();
+                } else {
+                    self.next_backdrop_frame = None;
                 }
             },
             WindowEvent::SurfaceResized(physical_size) => {

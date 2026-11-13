@@ -29,9 +29,9 @@ test-native *args:
     flock /tmp/caskade-heavy.lock cargo test -p caskade-native {{args}}
     flock /tmp/caskade-heavy.lock cargo test -p caskade-native --features shots --test shots --test text_pixels
 
-# The native app's window tests: the smoke test and a pad end to end, each on an Xvfb and session bus of its own (needs Xvfb, D-Bus and a Vulkan driver such as lavapipe)
+# The native app's window tests: the smoke test, a pad end to end and the GPU backdrop, each on an Xvfb and session bus of its own (needs Xvfb, D-Bus and a Vulkan driver such as lavapipe)
 test-native-window:
-    flock /tmp/caskade-heavy.lock cargo test -p caskade-native --test smoke --test console_e2e -- --ignored
+    flock /tmp/caskade-heavy.lock cargo test -p caskade-native --test smoke --test console_e2e --test backdrop -- --ignored
 
 # Rewrite the native screenshots' committed images, after deliberately changing how a reference screen or theme looks
 native-shots:

@@ -26,6 +26,7 @@ debug_timer = { version = "^0.1.1" }
 futures-channel = { version = "^0.3" }
 glifo = { version = "^0.4" }
 kurbo = { version = "^0.13.1" }
+log = { version = "^0.4" }
 peniko = { version = "^0.6" }
 rustc-hash = { version = "^2" }
 vello_common = { version = "^0.3" }
@@ -38,6 +39,12 @@ pollster = { version = "^0.4" }
 
 [target."cfg(target_arch = \"wasm32\")".dependencies]
 wasm-bindgen-futures = { version = "^0.4" }
+
+[target."cfg(unix)".dependencies]
+libc = { version = "^0.2" }
+
+[target."cfg(windows)".dependencies]
+windows-sys = { version = "^0.61", features = ["Win32_Foundation", "Win32_System_Threading"] }
 
 [lints.rust]
 unexpected_cfgs = "allow"

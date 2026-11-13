@@ -14,6 +14,8 @@ pub(crate) struct Token {
     pub path: String,
     #[serde(rename = "type")]
     pub kind: String,
+    /// The default value, aliases resolved.
+    pub resolved: String,
 }
 
 #[derive(Deserialize)]

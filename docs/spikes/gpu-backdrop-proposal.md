@@ -1,5 +1,10 @@
 # GPU backdrop proposal
 
+**Implemented in #149**: [the theming contract](../theming/README.md#backdrops-149)
+and [backdrop.md](../theming/backdrop.md) describe what shipped, and the
+tech spec's §6 and §9 how it works and what it costs. Themes may also ship
+their own shaders, which this proposal left out.
+
 Proposed direction for [#148](https://github.com/krazyjakee/caskade/issues/148),
 following the [hardware measurements](native-gpu-2026-11-13.md). This records
 requirements; it does not introduce a supported theme field or token.

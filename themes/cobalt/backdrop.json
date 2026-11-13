@@ -1,0 +1,52 @@
+{
+  "$description": "Cobalt's backdrop (#149): theme.css's deep blue field lit from the top right, with the drifting glows and the grid (hidden by Cobalt's tokens) it inherits from Nexus over it.",
+  "frameRate": 6,
+  "layers": [
+    {
+      "type": "linear",
+      "angle": 180,
+      "stops": [{ "color": "#0a1a45", "at": "0%" }, { "color": "#061029", "at": "100%" }]
+    },
+    {
+      "type": "radial",
+      "at": ["-5%", "105%"],
+      "size": ["80%", "70%"],
+      "stops": [{ "color": "#0d2e7a66", "at": "0%" }, { "color": "transparent", "at": "60%" }]
+    },
+    {
+      "type": "radial",
+      "at": ["88%", "-10%"],
+      "size": ["110%", "80%"],
+      "stops": [{ "color": "#1f4fb84d", "at": "0%" }, { "color": "transparent", "at": "60%" }]
+    },
+    {
+      "type": "grid",
+      "color": "{color.accent.alt}",
+      "cell": "{grid.size}",
+      "line": "1px",
+      "opacity": "{effect.grid.opacity}",
+      "mask": { "at": ["60%", "30%"], "size": ["80%", "70%"], "from": "20%", "to": "75%" },
+      "motion": { "type": "pan", "by": ["{grid.size}", "{grid.size}"], "period": "40s" }
+    },
+    {
+      "type": "radial",
+      "at": ["78%", "10.8%"],
+      "size": ["44.8%", "39.2%"],
+      "stops": [
+        { "color": "{color.accent}", "alpha": 0.22, "at": "0%" },
+        { "color": "transparent", "at": "70%" }
+      ],
+      "motion": { "type": "drift", "by": ["-3vw", "2vh"], "period": "40s" }
+    },
+    {
+      "type": "radial",
+      "at": ["16.4%", "89.2%"],
+      "size": ["39.2%", "33.6%"],
+      "stops": [
+        { "color": "{color.accent.alt}", "alpha": 0.1, "at": "0%" },
+        { "color": "transparent", "at": "70%" }
+      ],
+      "motion": { "type": "drift", "by": ["-3vw", "2vh"], "period": "40s" }
+    }
+  ]
+}

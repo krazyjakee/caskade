@@ -167,7 +167,7 @@ Settings → Backup (admins): back up now, daily or weekly automatic backups wit
 
 ### 4.17 Making it yours
 
-- **Themes**: four built in: Nexus, the default (dark, sci-fi accents), and three in the spirit of today's console home screens with names of their own: Cobalt (deep cobalt and white), Emerald (near-black and emerald) and Engage (light, white with red and teal); Paper, Ember and more from the add-on catalogue, and any theme folder you add. An accent colour, density, reduced effects and motion, a UI scale, and custom CSS on top.
+- **Themes**: four built in: Nexus, the default (dark, sci-fi accents), and three in the spirit of today's console home screens with names of their own: Cobalt (deep cobalt and white), Emerald (near-black and emerald) and Engage (light, white with red and teal); Paper, Ember and more from the add-on catalogue, and any theme folder you add. An accent colour, density, reduced effects and motion, a UI scale, and custom CSS on top. A theme's animated backdrop is drawn on the GPU (#149): layers of gradients, a grid, images or the theme's own shaders, in the theme's and your colours, moving without repainting the window and costing nothing while the window is hidden or minimised. Without a GPU it shows still.
 - **Plugins**: WebAssembly backends with the permissions you grant, and optional UI parts (views, game page tabs, menu actions, settings). Settings → Plugins installs, updates and removes plugins and themes from a signed catalogue, rolling back a failed update and asking again for any new permission.
 - **Languages**: the UI, the core's messages and plugins are translatable.
 

@@ -106,7 +106,7 @@ pub fn ConsoleShell(view_key: String) -> Element {
             onmousemove: moved,
             onmousedown: moved,
             ShellBindings {}
-            div { "data-cs": "backdrop", "aria-hidden": "true" }
+            crate::backdrop::Backdrop {}
             div { class: "flex min-h-0 flex-1",
                 ConsoleSidebar {}
                 div { "data-part": "main", class: "relative flex min-w-0 flex-1 flex-col",

@@ -1,0 +1,13 @@
+{
+  "$description": "Engage's backdrop (#149): theme.css's still wash from pale grey to the base surface. Nothing moves, so it needs no frames of its own.",
+  "layers": [
+    {
+      "type": "linear",
+      "angle": 180,
+      "stops": [
+        { "color": "#f5f6f8", "at": "0%" },
+        { "color": "{color.surface.base}", "at": "100%" }
+      ]
+    }
+  ]
+}

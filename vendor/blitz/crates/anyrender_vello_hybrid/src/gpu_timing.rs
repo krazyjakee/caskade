@@ -70,23 +70,34 @@ impl GpuTimer {
         ready: mpsc::Receiver<Result<(), wgpu::BufferAsyncError>>,
         period: f32,
     ) {
+        self.print_as("gpu_frame", ready, period)
+    }
+
+    /// [`Self::print`] under another label: `gpu_backdrop` for the
+    /// backdrop's compose pass.
+    pub(crate) fn print_as(
+        self,
+        label: &str,
+        ready: mpsc::Receiver<Result<(), wgpu::BufferAsyncError>>,
+        period: f32,
+    ) {
         if !matches!(ready.try_recv(), Ok(Ok(()))) {
-            eprintln!("gpu_frame: timestamp readback unavailable");
+            eprintln!("{label}: timestamp readback unavailable");
             return;
         }
         let Ok(data) = self.readback.slice(..).get_mapped_range() else {
-            eprintln!("gpu_frame: mapped timestamp range unavailable");
+            eprintln!("{label}: mapped timestamp range unavailable");
             return;
         };
         let start = u64::from_le_bytes(data[0..8].try_into().unwrap());
         let end = u64::from_le_bytes(data[8..16].try_into().unwrap());
         if let Some(ticks) = end.checked_sub(start) {
             eprintln!(
-                "gpu_frame: {:.6}ms",
+                "{label}: {:.6}ms",
                 ticks as f64 * f64::from(period) / 1_000_000.0
             );
         } else {
-            eprintln!("gpu_frame: timestamp order invalid");
+            eprintln!("{label}: timestamp order invalid");
         }
         drop(data);
         self.readback.unmap();

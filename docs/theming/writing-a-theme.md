@@ -682,3 +682,14 @@ in console mode. Then try the user's settings against the theme:
   They do when the theme leaves `density.scale` and `type.scale` alone.
 - **A custom accent** replaces `--cs-color-accent`. It must stay readable on
   `surface-base` and `surface-raised`.
+
+## A moving backdrop
+
+Paper's backdrop is still, so `theme.css` draws it. A theme whose backdrop
+moves gives the native app a `backdrop.json` too, which it draws on the GPU
+without repainting the window: gradients, a grid, images or a shader of the
+theme's own, in its tokens' colours. Keep the `theme.css` backdrop as the
+same look at the start of its motion: the webview and a window without a GPU
+show that. Start from `themes/default/backdrop.json`; the fields are in
+[backdrop.md](backdrop.md) and how it fits with the rest in
+[the theming contract](README.md#backdrops-149).
