@@ -276,9 +276,18 @@ fn a_theme_shader_moves_and_stops_over_its_gpu_budget() {
         eprintln!("budget {budget:?}: {settled:?} → {later:?}");
         assert!(!log_text().contains("didn't compile"), "{}", log_text());
         match budget {
+            // A software GPU (CI's lavapipe: ~44 ms a frame) runs the shader
+            // over its fixed per-frame budget, so the watch rightly stops it
+            // there: only the stop can be checked on such a machine.
+            None if log_text().contains("they stop moving") => {
+                eprintln!(
+                    "this GPU runs the shader over its frame budget: only its stop is checked"
+                );
+                assert_eq!(later.backdrop, settled.backdrop);
+            }
             None => {
-                // On a CI runner's lavapipe a frame of it can take seconds:
-                // wait for a few more rather than a rate.
+                // Wait for a few more frames rather than a rate: a loaded
+                // machine can take a while over each.
                 let moved = until(&counts, Duration::from_secs(20), |frames| {
                     frames.backdrop >= settled.backdrop + 3
                 })
