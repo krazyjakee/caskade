@@ -25,7 +25,7 @@ use dioxus_native::prelude::*;
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tokio::sync::mpsc;
 
 /// Something for the dispatcher to do, in order.
@@ -55,6 +55,9 @@ const MAX_FRAMES: u32 = 30;
 const FRAME: Duration = Duration::from_millis(16);
 /// The longest a pad action waits for the window's layout to catch up.
 const STALE_WAIT: Duration = Duration::from_millis(250);
+/// Stop checking an unresolved document once a hidden or stalled window
+/// has had this long to draw. The next action starts the checks again.
+const LAYOUT_WAIT: Duration = Duration::from_secs(5);
 
 /// The window's input state, for views: the context [`InputRoot`] provides.
 #[derive(Clone)]
@@ -439,6 +442,11 @@ impl Input {
                     .parent(section)
                     .and_then(|parent| spatial::section(ui, parent));
             }
+            let stale = {
+                let root = ui.doc().root_element();
+                root.has_dirty_descendants() || root.has_damaged_descendants()
+            };
+            let within = spatial::scope(ui);
             super::e2e::Probe {
                 focused: name.unwrap_or_default(),
                 sections,
@@ -449,15 +457,18 @@ impl Input {
                 repeats: 0,
                 handled: 0,
                 focus_debug: format!(
-                    "pending={}, waiting={}, frames={}, entered={:?}, default={:?}",
+                    "pending={}, waiting={}, frames={}, stale={}, entered={:?}, default={:?}, scope={:?}, entry={:?}",
                     dispatcher.pending(),
                     dispatcher.waiting_for_view(),
                     self.inner.frames.get(),
+                    stale,
                     dispatcher.entered().map(|node| ui.text(node)),
                     dispatcher
                         .spatial
                         .view_default(ui)
                         .map(|node| ui.text(node)),
+                    (ui.attr(within, "data-cs"), ui.attr(within, "aria-label"), ui.rect(within)),
+                    dispatcher.spatial.entry(ui).map(|node| ui.text(node)),
                 ),
             }
         });
@@ -533,7 +544,13 @@ impl Input {
                 }
                 self.frames();
             }
-            Job::Frame => self.act(true, |ui, dispatcher| dispatcher.frame(ui)),
+            Job::Frame => {
+                if self.stale() {
+                    self.frames();
+                } else {
+                    self.act(true, |ui, dispatcher| dispatcher.frame(ui));
+                }
+            }
             Job::Focus(node) => {
                 self.act(true, |ui, dispatcher| dispatcher.focus(ui, node, false));
             }
@@ -603,8 +620,20 @@ impl Input {
         let input = self.clone();
         spawn(async move {
             let mut frame = 0;
+            let mut stale_since = None;
             loop {
                 crate::data::sleep(FRAME).await;
+                // A timer tick is not a rendered frame. In particular,
+                // menus and new views can be in the DOM with old boxes
+                // until the next layout on a busy renderer.
+                if input.stale() {
+                    let since = stale_since.get_or_insert_with(Instant::now);
+                    if since.elapsed() >= LAYOUT_WAIT {
+                        break;
+                    }
+                    continue;
+                }
+                stale_since = None;
                 input.run_frame();
                 frame += 1;
                 let (pending, waiting) = {
