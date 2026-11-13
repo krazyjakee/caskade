@@ -283,7 +283,7 @@ press back
 wait-text Welcome back
 seek-section nav.left sidebar
 seek nav.up Home
-seek nav.up Library
+seek nav.down Library
 press confirm
 wait-text Save as collection
 # The Library's filters are under its link in the sidebar.
