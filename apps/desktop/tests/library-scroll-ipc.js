@@ -66,8 +66,6 @@
         ].includes(command)
       )
         return [];
-      if (command === "hello")
-        return { message: "Synthetic benchmark backend", coreVersion: "benchmark" };
       if (command === "plugin:event|listen") return ++id;
       if (command === "plugin:event|unlisten") return null;
       throw new Error(`Unexpected benchmark command: ${command}`);

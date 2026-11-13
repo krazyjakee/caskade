@@ -1,9 +1,10 @@
 import { t as tNow } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react/macro";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Dialog, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog } from "react-aria-components";
 import type { InstallRequestApi } from "../../api/installRequests";
 import { effectSubscription } from "../../api/subscription";
+import { ModalFrame } from "../../components/ModalFrame";
 import { InstallRootPicker } from "../../components/storage/InstallRootPicker";
 import { useDropFallback } from "../../drop/DropProvider";
 import { useActivityStorage, useFollowJob } from "./ActivityProvider";
@@ -175,42 +176,37 @@ export function InstallIngress({ api }: { api: InstallRequestApi }) {
         />
       )}
       {rootRequest && storageApi && (
-        <ModalOverlay
-          isOpen
-          isDismissable={!confirming}
-          onOpenChange={(open) => {
-            if (!open && !confirming) setRootRequest(null);
-          }}
-          className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+        <ModalFrame
+          busy={confirming}
+          close={() => setRootRequest(null)}
+          className="max-h-[85vh] w-full max-w-xl overflow-auto rounded-panel border border-border-strong bg-surface-raised p-5"
         >
-          <Modal className="max-h-[85vh] w-full max-w-xl overflow-auto rounded-panel border border-border-strong bg-surface-raised p-5">
-            <Dialog aria-label={t`Choose installation storage`} className="outline-none">
-              {rootError && (
-                <p role="alert" className="mb-3 text-sm text-danger">
-                  {rootError}
-                </p>
-              )}
-              <div inert={confirming} aria-busy={confirming}>
-                <InstallRootPicker
-                  api={storageApi}
-                  onCancel={() => setRootRequest(null)}
-                  onSelect={(rootId) => {
-                    setConfirming(true);
-                    void finish(rootRequest, true, rootId)
-                      .catch((error: unknown) =>
-                        setRootError(
-                          error instanceof Error
-                            ? error.message
-                            : tNow`Unable to confirm installation.`,
-                        ),
-                      )
-                      .finally(() => setConfirming(false));
-                  }}
-                />
-              </div>
-            </Dialog>
-          </Modal>
-        </ModalOverlay>
+          <Dialog aria-label={t`Choose installation storage`} className="outline-none">
+            {rootError && (
+              <p role="alert" className="mb-3 text-sm text-danger">
+                {rootError}
+              </p>
+            )}
+            <div inert={confirming} aria-busy={confirming}>
+              <InstallRootPicker
+                api={storageApi}
+                onCancel={() => setRootRequest(null)}
+                onSelect={(rootId) => {
+                  setConfirming(true);
+                  void finish(rootRequest, true, rootId)
+                    .catch((error: unknown) =>
+                      setRootError(
+                        error instanceof Error
+                          ? error.message
+                          : tNow`Unable to confirm installation.`,
+                      ),
+                    )
+                    .finally(() => setConfirming(false));
+                }}
+              />
+            </div>
+          </Dialog>
+        </ModalFrame>
       )}
     </>
   );

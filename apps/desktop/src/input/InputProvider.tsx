@@ -49,7 +49,7 @@ export interface PadAction {
   glyphs: GlyphFamily;
 }
 
-export interface InputState {
+interface InputState {
   /** Spatial navigation and the keyboard map are on. */
   active: boolean;
   /** What sent the last action. */

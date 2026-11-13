@@ -6,7 +6,7 @@ export type Tier = "primitive" | "semantic" | "component";
 export const tiers: readonly Tier[] = ["primitive", "semantic", "component"];
 
 /** DTCG types, plus Caskade's `keyword` for CSS keywords and ratios. */
-export const tokenTypes = [
+const tokenTypes = [
   "color",
   "dimension",
   "duration",
@@ -15,7 +15,7 @@ export const tokenTypes = [
   "fontFamily",
   "keyword",
 ] as const;
-export type TokenType = (typeof tokenTypes)[number];
+type TokenType = (typeof tokenTypes)[number];
 
 export interface Token {
   /** Dotted path, `$root` omitted: `color.accent`, `color.accent.strong`. */
@@ -32,7 +32,7 @@ export interface Token {
 }
 
 /** A partial token tree applied under a condition (a selector or media query). */
-export interface TokenSet {
+interface TokenSet {
   name: string;
   /** `:root` when not given. */
   selector?: string;
@@ -67,10 +67,10 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 const segment = /^(?:\$root|[a-z][a-z0-9]*(?:-[a-z0-9]+)*)$/;
 const ALIAS = /^\{([a-z0-9$.-]+)\}$/;
 
-export const cssName = (path: string) => `--cs-${path.replaceAll(".", "-")}`;
+const cssName = (path: string) => `--cs-${path.replaceAll(".", "-")}`;
 
 /** The tokens of one tier file: `$type` is inherited from groups. */
-export function collect(tree: unknown, tier: Tier, file: string): Token[] {
+function collect(tree: unknown, tier: Tier, file: string): Token[] {
   const tokens: Token[] = [];
   const walk = (node: unknown, path: string[], inherited?: string) => {
     if (!isObject(node)) throw new TokenError(file, path.join("."), "expected a group or token");
@@ -183,7 +183,7 @@ function literal(type: TokenType, value: unknown): string {
   }
 }
 
-export interface Compiled {
+interface Compiled {
   tokens: Token[];
   manifest: ManifestEntry[];
   css: string;

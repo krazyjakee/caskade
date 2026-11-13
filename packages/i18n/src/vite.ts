@@ -20,10 +20,10 @@ export type Domain = (typeof domains)[number];
 /** Every domain in `locales/`: the webview's and `core`, the Rust side's
  * (extracted by `just i18n`). A language's completion counts them all. */
 export const allDomains = [...domains, "core"] as const;
-export type CatalogDomain = (typeof allDomains)[number];
+type CatalogDomain = (typeof allDomains)[number];
 
 /** The source language. Its text is in the code, so it has no catalog. */
-export const sourceLocale = "en";
+const sourceLocale = "en";
 
 /** Accented, bracketed and about 35 % longer, to find unmarked strings and
  * labels that overflow. Generated from the templates, never translated. */
@@ -43,7 +43,7 @@ const sources: Record<Domain, string> = { ui: "packages/ui/src", app: "apps/desk
 
 /** Gettext PO with native plurals (`msgid_plural` / `msgstr[n]`). References
  * name files without line numbers, so moving code doesn't stale a template. */
-export const poFormat = formatter({ lineNumbers: false });
+const poFormat = formatter({ lineNumbers: false });
 
 export const templateFile = (root: string, domain: CatalogDomain) =>
   join(root, "locales", `${domain}.pot`);
@@ -210,7 +210,7 @@ export const isMessage = (entry: PoEntry) =>
   !entry.obsolete && (entry.id !== "" || entry.context !== undefined);
 
 /** Translated: every form filled in and not fuzzy, so it doesn't show English. */
-export const isTranslated = (entry: PoEntry) =>
+const isTranslated = (entry: PoEntry) =>
   isMessage(entry) &&
   !entry.flags.includes("fuzzy") &&
   entry.translations.length > 0 &&
@@ -222,10 +222,7 @@ const flags = (message: CatalogType[string]) =>
 /** The translations a catalog contributes: entries that are translated, not
  * fuzzy and not obsolete, and still in the template when there is one.
  * Everything else shows the English source text. */
-export function usableTranslations(
-  catalog: CatalogType,
-  template?: CatalogType,
-): Record<string, string> {
+function usableTranslations(catalog: CatalogType, template?: CatalogType): Record<string, string> {
   const usable: Record<string, string> = {};
   for (const [id, message] of Object.entries(catalog)) {
     if (!message.translation || message.obsolete || flags(message).includes("fuzzy")) continue;
@@ -235,7 +232,7 @@ export function usableTranslations(
   return usable;
 }
 
-export interface CompiledCatalog {
+interface CompiledCatalog {
   /** Compiled messages by id, for `i18n.load`. */
   messages: Record<string, unknown>;
   /** Translations that failed to compile; those show English. */
@@ -293,7 +290,7 @@ const catalogPrefix = "virtual:caskade-i18n/catalog/";
 const macroImport = /from\s*["']@lingui\/(?:core|react)\/macro["']/;
 
 /** A domain's messages and how many of them a language translates. */
-export interface Completion {
+interface Completion {
   translated: number;
   total: number;
 }
@@ -359,7 +356,7 @@ async function catalogsModule(root: string, pseudo: boolean): Promise<string> {
 const messagesModule = (messages: Record<string, unknown>) =>
   `export const messages = JSON.parse(${JSON.stringify(JSON.stringify(messages))});`;
 
-export interface I18nPluginOptions {
+interface I18nPluginOptions {
   /** The repository root; by default the one this package is in. */
   root?: string;
   /** Offer the pseudo-locale. By default in dev servers, tests and debug app

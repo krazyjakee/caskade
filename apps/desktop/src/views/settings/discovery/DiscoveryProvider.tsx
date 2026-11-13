@@ -35,7 +35,6 @@ export function useDiscovery() {
   const query = useQuery({
     queryKey: discoveryKey,
     queryFn: async () => newest(client.getQueryData(discoveryKey), await api.status()),
-    refetchInterval: 5000,
   });
   const action = useMutation({
     mutationFn: (

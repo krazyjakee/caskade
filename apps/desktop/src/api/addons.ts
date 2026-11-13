@@ -4,7 +4,6 @@
 import { t } from "@lingui/core/macro";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext } from "react";
 import { assetUrl, thumbnailPath } from "./artwork";
 import {
   type AddonFailure,
@@ -20,7 +19,7 @@ import {
   events,
   type UpdatePreference,
 } from "./bindings";
-import { lazyApi } from "./lazyApi";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
 import { effectSubscription } from "./subscription";
 
@@ -67,7 +66,7 @@ export interface AddonsApi {
 /** An add-on on another of the user's devices. */
 export type DeviceAddon = DeviceAddon_Serialize;
 
-export function createNativeAddons(): AddonsApi {
+function createNativeAddons(): AddonsApi {
   const native = () => {
     if (!isTauri()) throw new Error(t`Open Caskade desktop to browse add-ons.`);
   };
@@ -121,45 +120,13 @@ export function createNativeAddons(): AddonsApi {
   };
 }
 
-/** The preview's fixture reports no progress; subscribing stays synchronous. */
-function withProgress(api: Omit<AddonsApi, "subscribeProgress">): AddonsApi {
-  return { ...api, subscribeProgress: () => () => {} };
-}
+export const {
+  Provider: AddonsProvider,
+  useApi: useAddonsApi,
+  preview: previewAddons,
+} = injectable(createNativeAddons);
 
-const Context = createContext<AddonsApi | null>(null);
-let nativeApi: AddonsApi | undefined;
-
-export function AddonsProvider({ api, children }: { api: AddonsApi; children: ReactNode }) {
-  return createElement(Context.Provider, { value: api }, children);
-}
-
-export function useAddonsApi(): AddonsApi {
-  const api = useContext(Context);
-  if (api) return api;
-  // Dev builds started with `VITE_CASKADE_FIXTURES=1` browse a fixture catalogue.
-  nativeApi ??=
-    import.meta.env.DEV && import.meta.env.VITE_CASKADE_FIXTURES === "1"
-      ? withProgress(
-          lazyApi(
-            () => import("./addonsFixtures").then((module) => module.createAddonsFixture()),
-            [
-              "catalogue",
-              "refresh",
-              "media",
-              "install",
-              "cancel",
-              "uninstall",
-              "records",
-              "skipUpdate",
-              "setUpdatePreference",
-            ],
-          ),
-        )
-      : createNativeAddons();
-  return nativeApi;
-}
-
-export const addonsKey = (mode: AppMode) => ["addons", "catalogue", mode] as const;
+const addonsKey = (mode: AppMode) => ["addons", "catalogue", mode] as const;
 
 /** The catalogue as last fetched (offline too); `useRefreshCatalogue` fetches it again. */
 export function useCatalogue(mode: AppMode) {
@@ -185,7 +152,7 @@ export function useAddonMedia(id: string, index: number) {
   });
 }
 
-export const addonRecordsKey = ["addons", "records"] as const;
+const addonRecordsKey = ["addons", "records"] as const;
 
 export function useAddonRecords() {
   const api = useAddonsApi();

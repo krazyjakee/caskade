@@ -4,8 +4,8 @@
  * keeps the player's files. */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext } from "react";
 import { commands, type GameUpdate_Serialize } from "./bindings";
+import { injectable } from "./injectable";
 import { libraryKeys } from "./provider";
 import { unwrap } from "./reply";
 
@@ -30,7 +30,7 @@ function native<T>(request: () => Promise<T>): Promise<T> {
   return request();
 }
 
-export const nativeGameUpdatesApi: GameUpdatesApi = {
+const nativeGameUpdatesApi: GameUpdatesApi = {
   game: (gameId) => native(() => unwrap(commands.gameUpdates(gameId))),
   check: (entryId) => native(() => unwrap(commands.gameUpdateCheck(entryId))),
   beforePlay: (entryId) => native(() => unwrap(commands.gameUpdateBeforePlay(entryId))),
@@ -40,20 +40,9 @@ export const nativeGameUpdatesApi: GameUpdatesApi = {
   install: (entryId) => native(async () => (await unwrap(commands.gameUpdateInstall(entryId))).id),
 };
 
-const GameUpdatesContext = createContext<GameUpdatesApi>(nativeGameUpdatesApi);
-
-/** Tests and previews supply their own API; the app uses the native one. */
-export function GameUpdatesProvider({
-  api,
-  children,
-}: {
-  api: GameUpdatesApi;
-  children: ReactNode;
-}) {
-  return createElement(GameUpdatesContext.Provider, { value: api }, children);
-}
-
-export const useGameUpdatesApi = () => useContext(GameUpdatesContext);
+export const { Provider: GameUpdatesProvider, useApi: useGameUpdatesApi } = injectable(
+  () => nativeGameUpdatesApi,
+);
 
 /** Under `library`, so the core's library events (a check that found a
  * release, an update that finished) refresh it. */
@@ -69,7 +58,7 @@ export function useGameUpdates(gameId: string) {
   });
 }
 
-export type GameUpdateChange =
+type GameUpdateChange =
   | { type: "check" }
   | { type: "skip"; version: string | null }
   | { type: "prereleases"; prereleases: boolean };

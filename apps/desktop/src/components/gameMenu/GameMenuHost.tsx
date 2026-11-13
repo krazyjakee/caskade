@@ -13,18 +13,18 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import { useGame } from "../../api/hooks";
 import { useUnavailableStorageEntries } from "../../api/StorageProvider";
 import type { ShareItem } from "../../api/shares";
 import { useMode } from "../../shell/console/mode";
 import { useGameLaunch } from "../../views/game/launch";
 import { useOpenGame } from "../../views/game/origin";
-import { RemoveWebGameDialog } from "../../views/library/web/RemoveWebGame";
 import { SaveOfflineDialog } from "../../views/library/web/SaveOffline";
 import { CollectionPicker } from "../collections/CollectionPicker";
 import { ToolRequest } from "../gameActions/ToolRequest";
 import { GameEditor } from "../gameEditor/GameEditor";
+import { ModalFrame } from "../ModalFrame";
 import { ShareGameDialog } from "../shares/ShareGameDialog";
 import { MoveGameDialog } from "../storage/MoveGameAction";
 import { GameMenu, playableEntry } from "./GameMenu";
@@ -179,7 +179,7 @@ export function useSelectGame() {
 
 /** A game link's `onClick`: a plain click (or Enter, or a pad's A) chooses
  * the game (`useSelectGame`); a modified or middle click is left alone. */
-export function useGameClick(target: GameMenuTarget) {
+function useGameClick(target: GameMenuTarget) {
   const select = useSelectGame();
   return (event: MouseEvent<HTMLElement>) => {
     if (event.defaultPrevented || event.button !== 0) return;
@@ -377,9 +377,10 @@ export function GameMenuHost({ children }: { children: ReactNode }) {
         />
       )}
       {dialog?.dialog.type === "remove-web" && (
-        <RemoveWebGameDialog
+        <RemoveGameDialog
           gameId={dialog.target.gameId}
           title={dialog.target.title}
+          web
           keepsGame={dialog.dialog.keepsGame}
           close={close}
         />
@@ -482,28 +483,22 @@ function PlayRequest({
     <>
       {flow.dialogs}
       {failure && (
-        <ModalOverlay
-          isOpen
-          isDismissable
-          onOpenChange={(open) => {
-            if (!open) close();
-          }}
-          className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+        <ModalFrame
+          close={close}
+          className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg"
         >
-          <Modal className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-            <Dialog role="alertdialog" className="space-y-4 outline-none">
-              <Heading slot="title" className="font-display text-xl font-semibold">
-                <Trans>{title} didn't start</Trans>
-              </Heading>
-              <p className="text-sm text-fg-muted">{failure}</p>
-              <div className="flex justify-end">
-                <Button data-spatial="focusable" onPress={close}>
-                  <Trans>OK</Trans>
-                </Button>
-              </div>
-            </Dialog>
-          </Modal>
-        </ModalOverlay>
+          <Dialog role="alertdialog" className="space-y-4 outline-none">
+            <Heading slot="title" className="font-display text-xl font-semibold">
+              <Trans>{title} didn't start</Trans>
+            </Heading>
+            <p className="text-sm text-fg-muted">{failure}</p>
+            <div className="flex justify-end">
+              <Button data-spatial="focusable" onPress={close}>
+                <Trans>OK</Trans>
+              </Button>
+            </div>
+          </Dialog>
+        </ModalFrame>
       )}
     </>
   );

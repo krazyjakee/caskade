@@ -5,7 +5,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FolderOpen, Info, Power, Puzzle, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import {
   type PluginSummary,
   useManagedPlugins,
@@ -14,6 +14,7 @@ import {
 } from "../../api/pluginManager";
 import { useActionMenus } from "../../components/ActionMenu";
 import { AddonCatalogue } from "../../components/addons/AddonCatalogue";
+import { ModalFrame } from "../../components/ModalFrame";
 import { usePathPicker } from "../../components/pathBrowser/PathPicker";
 import { useDropZone } from "../../drop/DropProvider";
 import { PluginSettingsPages } from "../../plugins/PluginViews";
@@ -129,94 +130,89 @@ export function ReviewDialog({
   const contributions = contributionLines(plugin);
   const valid = plugin.status !== "invalid";
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable={!busy}
-      onOpenChange={(open) => {
-        if (!open && !busy) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      busy={busy}
+      close={close}
+      className="w-full max-w-xl rounded-panel border border-border-strong bg-surface-raised p-6"
     >
-      <Modal className="w-full max-w-xl rounded-panel border border-border-strong bg-surface-raised p-6">
-        <Dialog data-cs="plugin-review" className="outline-none">
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            {plugin.name}
-            {plugin.version && (
-              <span className="ml-2 font-mono text-sm text-fg-muted">{plugin.version}</span>
-            )}
-          </Heading>
-          <p className="mt-1 font-mono text-xs text-fg-muted">{plugin.id}</p>
-          {plugin.description && <p className="mt-3 text-sm">{plugin.description}</p>}
-          {installedVersion && (
-            <p className="mt-2 text-sm text-fg-muted">
-              <Trans>Replaces the installed version {installedVersion}.</Trans>
-            </p>
+      <Dialog data-cs="plugin-review" className="outline-none">
+        <Heading slot="title" className="font-display text-xl font-semibold">
+          {plugin.name}
+          {plugin.version && (
+            <span className="ml-2 font-mono text-sm text-fg-muted">{plugin.version}</span>
           )}
-          {valid ? (
-            <>
-              <h3 className="mt-4 text-sm font-semibold">
-                {accept ? (
-                  <Trans comment="Heading over a plugin's permissions">It asks to</Trans>
-                ) : (
-                  <Trans comment="Heading over an installed plugin's permissions">It can</Trans>
-                )}
-              </h3>
-              <ul aria-label={t`Permissions`} className="mt-1 list-disc pl-5 text-sm">
-                {capabilities.length > 0 ? (
-                  capabilities.map((line) => <li key={line}>{line}</li>)
-                ) : (
-                  <li>
-                    <Trans>Nothing beyond its own storage</Trans>
-                  </li>
-                )}
-              </ul>
-              {contributions.length > 0 && (
-                <>
-                  <h3 className="mt-4 text-sm font-semibold">
-                    <Trans comment="Heading over what a plugin contributes">It adds</Trans>
-                  </h3>
-                  <ul aria-label={t`Contributions`} className="mt-1 list-disc pl-5 text-sm">
-                    {contributions.map((line) => (
-                      <li key={line}>{line}</li>
-                    ))}
-                  </ul>
-                </>
+        </Heading>
+        <p className="mt-1 font-mono text-xs text-fg-muted">{plugin.id}</p>
+        {plugin.description && <p className="mt-3 text-sm">{plugin.description}</p>}
+        {installedVersion && (
+          <p className="mt-2 text-sm text-fg-muted">
+            <Trans>Replaces the installed version {installedVersion}.</Trans>
+          </p>
+        )}
+        {valid ? (
+          <>
+            <h3 className="mt-4 text-sm font-semibold">
+              {accept ? (
+                <Trans comment="Heading over a plugin's permissions">It asks to</Trans>
+              ) : (
+                <Trans comment="Heading over an installed plugin's permissions">It can</Trans>
               )}
+            </h3>
+            <ul aria-label={t`Permissions`} className="mt-1 list-disc pl-5 text-sm">
+              {capabilities.length > 0 ? (
+                capabilities.map((line) => <li key={line}>{line}</li>)
+              ) : (
+                <li>
+                  <Trans>Nothing beyond its own storage</Trans>
+                </li>
+              )}
+            </ul>
+            {contributions.length > 0 && (
+              <>
+                <h3 className="mt-4 text-sm font-semibold">
+                  <Trans comment="Heading over what a plugin contributes">It adds</Trans>
+                </h3>
+                <ul aria-label={t`Contributions`} className="mt-1 list-disc pl-5 text-sm">
+                  {contributions.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </>
+        ) : (
+          <ul aria-label={t`Problems`} className="mt-4 list-disc pl-5 text-sm text-danger">
+            {plugin.errors.map((problem) => (
+              <li key={`${problem.key}:${problem.message}`}>
+                {problem.key ? `${problem.key}: ` : ""}
+                {problem.message}
+              </li>
+            ))}
+          </ul>
+        )}
+        {error && (
+          <p role="alert" className="mt-3 text-sm text-danger">
+            {error}
+          </p>
+        )}
+        <div className="mt-6 flex justify-end gap-2">
+          {accept ? (
+            <>
+              <Button variant="secondary" onPress={close} isDisabled={busy}>
+                <Trans>Cancel</Trans>
+              </Button>
+              <Button onPress={accept} isDisabled={!valid || busy}>
+                {action}
+              </Button>
             </>
           ) : (
-            <ul aria-label={t`Problems`} className="mt-4 list-disc pl-5 text-sm text-danger">
-              {plugin.errors.map((problem) => (
-                <li key={`${problem.key}:${problem.message}`}>
-                  {problem.key ? `${problem.key}: ` : ""}
-                  {problem.message}
-                </li>
-              ))}
-            </ul>
+            <Button variant="secondary" onPress={close}>
+              <Trans>Close</Trans>
+            </Button>
           )}
-          {error && (
-            <p role="alert" className="mt-3 text-sm text-danger">
-              {error}
-            </p>
-          )}
-          <div className="mt-6 flex justify-end gap-2">
-            {accept ? (
-              <>
-                <Button variant="secondary" onPress={close} isDisabled={busy}>
-                  <Trans>Cancel</Trans>
-                </Button>
-                <Button onPress={accept} isDisabled={!valid || busy}>
-                  {action}
-                </Button>
-              </>
-            ) : (
-              <Button variant="secondary" onPress={close}>
-                <Trans>Close</Trans>
-              </Button>
-            )}
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }
 

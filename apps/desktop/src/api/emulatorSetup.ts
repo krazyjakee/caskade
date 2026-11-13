@@ -17,8 +17,8 @@ import { unwrap } from "./reply";
 export type Installable = Installable_Serialize;
 export type MissingPlatform = MissingPlatform_Serialize;
 export type SetupJob = SetupJob_Serialize;
-export type ManagedEmulator = ManagedEmulator_Serialize;
-export type BiosFetch = BiosFetch_Serialize;
+type ManagedEmulator = ManagedEmulator_Serialize;
+type BiosFetch = BiosFetch_Serialize;
 /** A platform's emulator on another device that this one lacks (#275). */
 export type EmulatorOffer = DeviceEmulator;
 

@@ -5,7 +5,7 @@ import type { InstallApi, JobRecovery } from "./install";
 import { mapJob, type RawJobSnapshot } from "./installMapping";
 import { type Reply, unwrap } from "./reply";
 
-export interface InstallTransport {
+interface InstallTransport {
   jobsList(): Promise<RawJobSnapshot[]>;
   installStart(input: string, rootId: string | null): Promise<Reply<RawJobSnapshot>>;
   jobCancel(id: string): Promise<Reply<RawJobSnapshot>>;
@@ -29,7 +29,7 @@ function index(value: string): number {
 }
 /** Only an index/revision crosses the answer boundary. Plans and paths remain
  * server-held; the core checks revisions and bounds again under its job lock. */
-export function createInstallApi(
+function createInstallApi(
   transport: InstallTransport,
   subscribe: (listener: (snapshot: RawJobSnapshot) => void) => Promise<() => void>,
 ): InstallApi {

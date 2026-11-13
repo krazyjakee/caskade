@@ -8,7 +8,7 @@
  * The browser preview and tests use the in-memory fixture. */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext, useEffect } from "react";
+import { useEffect } from "react";
 import {
   commands,
   type DeviceGame_Serialize,
@@ -26,14 +26,12 @@ import {
   type PairingState,
   type PeerCopy_Serialize,
   type RemotePlayRequested,
-  type ThisDevice_Serialize,
 } from "./bindings";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
 import { effectSubscription } from "./subscription";
-import { createSyncFixtureApi } from "./syncFixtures";
 
 export type DevicesStatus = DevicesStatus_Serialize;
-export type ThisDevice = ThisDevice_Serialize;
 export type PairedDevice = PairedDevice_Serialize;
 /** A game's copy on another of the user's devices (#232). */
 export type PeerCopy = PeerCopy_Serialize;
@@ -118,7 +116,7 @@ export interface SyncApi {
 
 const nothing = async () => {};
 
-export const nativeSyncApi: SyncApi = {
+const nativeSyncApi: SyncApi = {
   status: () => unwrap(commands.devicesStatus()),
   rename: (name) => unwrap(commands.devicesRename(name)).then(nothing),
   setKind: (kind) => unwrap(commands.devicesSetKind(kind)).then(nothing),
@@ -157,28 +155,13 @@ export const nativeSyncApi: SyncApi = {
   },
 };
 
-let preview: SyncApi | undefined;
-function defaultApi(): SyncApi {
-  if (isTauri()) return nativeSyncApi;
-  preview ??= createSyncFixtureApi();
-  return preview;
-}
-
-const SyncContext = createContext<SyncApi | null>(null);
-
-/** Tests and previews supply their own API; the app uses the native one. */
-export function SyncProvider({ api, children }: { api: SyncApi; children: ReactNode }) {
-  return createElement(SyncContext.Provider, { value: api }, children);
-}
-
-export function useSyncApi(): SyncApi {
-  return useContext(SyncContext) ?? defaultApi();
-}
+const sync = injectable(() => nativeSyncApi);
+export const { Provider: SyncProvider, useApi: useSyncApi, preview: previewSync } = sync;
 
 /** The API when there is one for real: given by a provider, or the core.
  * The status bar's entry shows only then, not in a bare browser preview. */
 export function useProvidedSyncApi(): SyncApi | null {
-  return useContext(SyncContext) ?? (isTauri() ? nativeSyncApi : null);
+  return sync.useProvided() ?? (isTauri() ? nativeSyncApi : null);
 }
 
 export const syncKey = ["sync"] as const;

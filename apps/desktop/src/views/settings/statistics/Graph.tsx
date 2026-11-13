@@ -8,7 +8,7 @@ export interface GraphPoint {
   value: number | null;
 }
 
-export interface GraphSeries {
+interface GraphSeries {
   /** Its name in the legend and the summary ("Receive"). */
   name: string;
   points: GraphPoint[];

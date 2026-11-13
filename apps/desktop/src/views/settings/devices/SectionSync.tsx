@@ -16,7 +16,7 @@ const SECTIONS = {
   "core.romm": "rommServers",
 } as const satisfies Record<string, SyncCategory>;
 
-export type SyncedSection = keyof typeof SECTIONS;
+type SyncedSection = keyof typeof SECTIONS;
 
 type Value = SyncSettingsValue & { sections?: Partial<Record<SyncedSection, CategoryState>> };
 

@@ -12,7 +12,8 @@ import {
   useGameUpdates,
   useGameUpdatesApi,
 } from "../../api/updates";
-import { activityKey, useFollowJob, useJobs } from "../activity/ActivityProvider";
+import { activityKey, useFollowJob } from "../activity/ActivityProvider";
+import { JobProgressText } from "../activity/JobProgressText";
 
 /** Starts an install's update; resolves with its job's id. */
 export function useInstallUpdate(gameId: string) {
@@ -32,48 +33,26 @@ export function useInstallUpdate(gameId: string) {
 /** An update job as it runs: how far it got, and how it ended. */
 export function UpdateProgress({ jobId }: { jobId: string }) {
   const { t } = useLingui();
-  const job = useJobs().data?.find((each) => each.id === jobId);
-  if (!job)
-    return (
-      <p className="text-fg-muted">
-        <Trans>Starting the update…</Trans>
-      </p>
-    );
-  if (job.status === "completed")
-    return (
-      <p className="text-accent-alt">
-        <Trans>Updated.</Trans>
-      </p>
-    );
-  if (job.status === "failed" || job.status === "cancelled") {
-    const error = job.error;
-    return (
-      <p role="alert" className="text-danger">
-        {job.status === "cancelled" ? t`The update was cancelled.` : t`Update failed: ${error}`}
-      </p>
-    );
-  }
-  if (job.status === "needs_user")
-    return (
-      <p className="text-fg-muted">
-        <Trans>The update needs a choice in Activity.</Trans>
-      </p>
-    );
-  const percent =
-    job.progress?.total && job.progress.unit === "bytes"
-      ? Math.floor((job.progress.completed / job.progress.total) * 100)
-      : null;
-  const downloading = job.phase === "download";
   return (
-    <p role="status" className="text-fg-muted">
-      {percent === null
-        ? downloading
-          ? t`Downloading the update…`
-          : t`Installing the update…`
-        : downloading
-          ? t`Downloading the update… ${percent}%`
-          : t`Installing the update… ${percent}%`}
-    </p>
+    <JobProgressText
+      jobId={jobId}
+      starting={<Trans>Starting the update…</Trans>}
+      completed={<Trans>Updated.</Trans>}
+      ended={({ status, error }) =>
+        status === "cancelled" ? t`The update was cancelled.` : t`Update failed: ${error}`
+      }
+      needsUser={<Trans>The update needs a choice in Activity.</Trans>}
+      running={(job, percent) => {
+        const downloading = job.phase === "download";
+        return percent === null
+          ? downloading
+            ? t`Downloading the update…`
+            : t`Installing the update…`
+          : downloading
+            ? t`Downloading the update… ${percent}%`
+            : t`Installing the update… ${percent}%`;
+      }}
+    />
   );
 }
 

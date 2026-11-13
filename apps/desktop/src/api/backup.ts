@@ -4,9 +4,7 @@
  * core's `backupChanged` events. The browser preview has no core: it uses
  * an in-memory fixture. */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext, useEffect } from "react";
-import { createBackupFixtureApi } from "./backupFixtures";
+import { useEffect } from "react";
 import {
   type BackupComponent,
   type BackupExclusion,
@@ -21,13 +19,15 @@ import {
   type HeldBackup,
   type RestoreJournal_Serialize,
 } from "./bindings";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
 import { effectSubscription } from "./subscription";
 
 export type BackupStatus = BackupStatus_Serialize;
 export type BackupPlan = BackupPlan_Serialize;
 export type BackupInspection = BackupInspection_Serialize;
-export type RestoreJournal = RestoreJournal_Serialize;
+type RestoreJournal = RestoreJournal_Serialize;
+
 export type {
   BackupComponent,
   BackupExclusion,
@@ -70,7 +70,7 @@ export interface BackupApi {
   fetchFromDevice?(hash: string): Promise<string>;
 }
 
-export const nativeBackupApi: BackupApi = {
+const nativeBackupApi: BackupApi = {
   status: () => unwrap(commands.backupStatus()),
   plan: (destination, components) => unwrap(commands.backupPlan(destination, components)),
   start: async () => {
@@ -94,25 +94,13 @@ export const nativeBackupApi: BackupApi = {
   fetchFromDevice: (hash) => unwrap(commands.backupFetchFromDevice(hash)),
 };
 
-let preview: BackupApi | undefined;
-function defaultApi(): BackupApi {
-  if (isTauri()) return nativeBackupApi;
-  preview ??= createBackupFixtureApi();
-  return preview;
-}
+export const {
+  Provider: BackupProvider,
+  useApi: useBackupApi,
+  preview: previewBackup,
+} = injectable(() => nativeBackupApi);
 
-const BackupContext = createContext<BackupApi | null>(null);
-
-/** Tests and previews supply their own API; the app uses the native one. */
-export function BackupProvider({ api, children }: { api: BackupApi; children: ReactNode }) {
-  return createElement(BackupContext.Provider, { value: api }, children);
-}
-
-export function useBackupApi(): BackupApi {
-  return useContext(BackupContext) ?? defaultApi();
-}
-
-export const backupKey = ["backup", "status"] as const;
+const backupKey = ["backup", "status"] as const;
 
 /** The backup status, kept current by the core's events. */
 export function useBackupStatus() {

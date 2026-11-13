@@ -8,7 +8,7 @@ import { type PluginSlot, type PluginUiApi, pluginSlots } from "./types";
 
 /** Plugins through the typed IPC: the host lists UI halves, serves them
  * over `caskade-plugin://` and routes backend calls. */
-export const nativePlugins: PluginUiApi = {
+const nativePlugins: PluginUiApi = {
   async list() {
     // 0.1 JavaScript halves, then 0.2 plugins their backends draw (#109).
     const [halves, drawn] = await Promise.all([

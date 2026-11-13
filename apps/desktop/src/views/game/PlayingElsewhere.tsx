@@ -1,13 +1,15 @@
 /** Starting a game that's running on another device (#240): Play warns that
  * each device will keep its own save. The check reads what the core already
  * knows, so it never waits on a device that can't be reached. */
+
 import { Button } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useState } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import { formatDateTime } from "../../api/presentation";
 import { useOptionalLibraryApi } from "../../api/provider";
 import { type PlayingElsewhere, usePlayingElsewhere } from "../../api/saves";
+import { ModalFrame } from "../../components/ModalFrame";
 
 export function usePlayWhilePlayingElsewhere(gameId: string, next: (entryId: string) => void) {
   const api = useOptionalLibraryApi()?.saves;
@@ -56,46 +58,39 @@ function PlayingElsewhereDialog({
   const device = first?.deviceName || t({ message: "another device", context: "playing on" });
   const title = first?.title ?? "";
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable
-      onOpenChange={(open) => {
-        if (!open) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      close={close}
+      className="w-full max-w-lg rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg"
     >
-      <Modal className="w-full max-w-lg rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog data-cs="playing-elsewhere" className="outline-none">
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            {t`${title} is running on ${device}`}
-          </Heading>
-          <p className="mt-2 text-sm text-fg-muted">
-            <Trans>
-              If you play here too, each device keeps its own save, and the next time you play you
-              choose which one to carry on with.
-            </Trans>
-          </p>
-          <ul className="mt-4 space-y-1 text-sm">
-            {playing.map((each) => {
-              const name =
-                each.deviceName || t({ message: "another device", context: "playing on" });
-              const since = formatDateTime(each.startedAtMs);
-              return (
-                <li key={`${each.deviceId}:${each.startedAtMs}`}>{t`On ${name} since ${since}`}</li>
-              );
-            })}
-          </ul>
-          <div className="mt-6 flex justify-end gap-2">
-            <Button data-spatial="focusable" data-focus-default="" onPress={close}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button data-spatial="focusable" variant="primary" onPress={playAnyway}>
-              <Trans>Play anyway</Trans>
-            </Button>
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+      <Dialog data-cs="playing-elsewhere" className="outline-none">
+        <Heading slot="title" className="font-display text-xl font-semibold">
+          {t`${title} is running on ${device}`}
+        </Heading>
+        <p className="mt-2 text-sm text-fg-muted">
+          <Trans>
+            If you play here too, each device keeps its own save, and the next time you play you
+            choose which one to carry on with.
+          </Trans>
+        </p>
+        <ul className="mt-4 space-y-1 text-sm">
+          {playing.map((each) => {
+            const name = each.deviceName || t({ message: "another device", context: "playing on" });
+            const since = formatDateTime(each.startedAtMs);
+            return (
+              <li key={`${each.deviceId}:${each.startedAtMs}`}>{t`On ${name} since ${since}`}</li>
+            );
+          })}
+        </ul>
+        <div className="mt-6 flex justify-end gap-2">
+          <Button data-spatial="focusable" data-focus-default="" onPress={close}>
+            <Trans>Cancel</Trans>
+          </Button>
+          <Button data-spatial="focusable" variant="primary" onPress={playAnyway}>
+            <Trans>Play anyway</Trans>
+          </Button>
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }
 

@@ -81,7 +81,7 @@ export function colorScheme(modes: readonly string[], prefersLight: boolean): "d
   return schemes.includes(wanted) ? wanted : (schemes[0] ?? "dark");
 }
 
-export function prefersLight(): boolean {
+function prefersLight(): boolean {
   return (
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-color-scheme: light)").matches

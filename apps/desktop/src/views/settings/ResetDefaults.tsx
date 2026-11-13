@@ -5,15 +5,17 @@
  * one setting of another section (Start in, online lookups) resets that one
  * and leaves the rest of the section, such as whether first-run setup is
  * done, alone. */
+
 import { Button } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import { FailureNotice } from "../../components/FailureNotice";
+import { ModalFrame } from "../../components/ModalFrame";
 import { settingsKeys, useSettingsApi } from "./useSettings";
 
-export interface ResetField {
+interface ResetField {
   key: string;
   /** The setting's name as its row shows it. */
   label: string;
@@ -147,97 +149,92 @@ function ResetDialog({
   });
 
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable={!reset.isPending}
-      onOpenChange={(isOpen) => {
-        if (!isOpen && !reset.isPending) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      busy={reset.isPending}
+      close={close}
+      className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg"
     >
-      <Modal className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog role="alertdialog" className="space-y-4 outline-none">
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            <Trans>Reset {group} settings?</Trans>
-          </Heading>
-          {loading ? (
-            <p role="status" className="text-sm text-fg-muted">
-              <Trans>Checking what would change…</Trans>
-            </p>
-          ) : failure ? (
-            <FailureNotice
-              variant="inline"
-              error={failure}
-              title={t`Caskade couldn't check what would change`}
-              onRetry={() => {
-                for (const query of [sections, ...values]) {
-                  if (query.error) void query.refetch();
-                }
-              }}
-            />
-          ) : (
-            <>
-              {labels.length > 0 && (
-                <div className="space-y-2 text-sm">
-                  <p className="text-fg-muted">
-                    <Trans>These settings go back to their defaults:</Trans>
-                  </p>
-                  <ul className="list-disc space-y-1 pl-5">
-                    {labels.map((label) => (
-                      <li key={label}>{label}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {resetsUnseen && (
-                <p className="text-sm text-fg-muted">
-                  {labels.length
-                    ? t`Caskade can't tell what else would change. Reset also puts the rest of these settings back to their defaults.`
-                    : t`Caskade can't tell what would change. Reset puts all of these settings back to their defaults.`}
-                </p>
-              )}
-              {leavesUnseen && (
-                <p className="text-sm text-fg-muted">
-                  {changes.length
-                    ? t`Caskade can't tell what would change for some settings here, so those stay as they are.`
-                    : t`Caskade can't tell what would change, so these settings can't be reset here.`}
-                </p>
-              )}
-              {!labels.length && !unseen.length && (
-                <p className="text-sm text-fg-muted">
-                  <Trans>Every setting here already uses its default.</Trans>
-                </p>
-              )}
-            </>
-          )}
-          <p className="text-sm text-fg-muted">
-            {keeps ?? t`Settings on other pages stay as they are.`}
+      <Dialog role="alertdialog" className="space-y-4 outline-none">
+        <Heading slot="title" className="font-display text-xl font-semibold">
+          <Trans>Reset {group} settings?</Trans>
+        </Heading>
+        {loading ? (
+          <p role="status" className="text-sm text-fg-muted">
+            <Trans>Checking what would change…</Trans>
           </p>
-          {reset.error && <FailureNotice variant="inline" error={reset.error} />}
-          <div className="flex justify-end gap-2">
+        ) : failure ? (
+          <FailureNotice
+            variant="inline"
+            error={failure}
+            title={t`Caskade couldn't check what would change`}
+            onRetry={() => {
+              for (const query of [sections, ...values]) {
+                if (query.error) void query.refetch();
+              }
+            }}
+          />
+        ) : (
+          <>
+            {labels.length > 0 && (
+              <div className="space-y-2 text-sm">
+                <p className="text-fg-muted">
+                  <Trans>These settings go back to their defaults:</Trans>
+                </p>
+                <ul className="list-disc space-y-1 pl-5">
+                  {labels.map((label) => (
+                    <li key={label}>{label}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {resetsUnseen && (
+              <p className="text-sm text-fg-muted">
+                {labels.length
+                  ? t`Caskade can't tell what else would change. Reset also puts the rest of these settings back to their defaults.`
+                  : t`Caskade can't tell what would change. Reset puts all of these settings back to their defaults.`}
+              </p>
+            )}
+            {leavesUnseen && (
+              <p className="text-sm text-fg-muted">
+                {changes.length
+                  ? t`Caskade can't tell what would change for some settings here, so those stay as they are.`
+                  : t`Caskade can't tell what would change, so these settings can't be reset here.`}
+              </p>
+            )}
+            {!labels.length && !unseen.length && (
+              <p className="text-sm text-fg-muted">
+                <Trans>Every setting here already uses its default.</Trans>
+              </p>
+            )}
+          </>
+        )}
+        <p className="text-sm text-fg-muted">
+          {keeps ?? t`Settings on other pages stay as they are.`}
+        </p>
+        {reset.error && <FailureNotice variant="inline" error={reset.error} />}
+        <div className="flex justify-end gap-2">
+          <Button
+            data-spatial="focusable"
+            data-focus-default
+            isDisabled={reset.isPending}
+            onPress={close}
+          >
+            {canReset || loading ? t`Cancel` : t`Close`}
+          </Button>
+          {/* Offered once it's known what it does: a greyed-out Reset gives
+              no reason while the check runs. */}
+          {canReset && (
             <Button
               data-spatial="focusable"
-              data-focus-default
+              variant="danger"
               isDisabled={reset.isPending}
-              onPress={close}
+              onPress={() => reset.mutate()}
             >
-              {canReset || loading ? t`Cancel` : t`Close`}
+              {reset.isPending ? t`Resetting…` : t`Reset`}
             </Button>
-            {/* Offered once it's known what it does: a greyed-out Reset gives
-                no reason while the check runs. */}
-            {canReset && (
-              <Button
-                data-spatial="focusable"
-                variant="danger"
-                isDisabled={reset.isPending}
-                onPress={() => reset.mutate()}
-              >
-                {reset.isPending ? t`Resetting…` : t`Reset`}
-              </Button>
-            )}
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+          )}
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }

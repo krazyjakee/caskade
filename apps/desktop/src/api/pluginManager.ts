@@ -2,13 +2,12 @@
 import { t } from "@lingui/core/macro";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext } from "react";
 import { commands, type PluginPreview_Serialize, type PluginSummary_Serialize } from "./bindings";
-import { lazyApi } from "./lazyApi";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
 
 export type PluginSummary = PluginSummary_Serialize;
-export type PluginPreview = PluginPreview_Serialize;
+type PluginPreview = PluginPreview_Serialize;
 
 export interface PluginManagerApi {
   list(): Promise<PluginSummary[]>;
@@ -25,7 +24,7 @@ export interface PluginManagerApi {
   loadUnpacked?(folder: string): Promise<void>;
 }
 
-export function createNativePluginManager(): PluginManagerApi {
+function createNativePluginManager(): PluginManagerApi {
   const native = () => {
     if (!isTauri()) throw new Error(t`Open Caskade desktop to manage plugins.`);
   };
@@ -63,36 +62,14 @@ export function createNativePluginManager(): PluginManagerApi {
   };
 }
 
-const Context = createContext<PluginManagerApi | null>(null);
-let nativeApi: PluginManagerApi | undefined;
-
-export function PluginManagerProvider({
-  api,
-  children,
-}: {
-  api: PluginManagerApi;
-  children: ReactNode;
-}) {
-  return createElement(Context.Provider, { value: api }, children);
-}
-
-export function usePluginManager() {
-  const api = useContext(Context);
-  if (api) return api;
-  // Dev builds started with `VITE_CASKADE_FIXTURES=1` list fixture plugins (README.md).
-  nativeApi ??=
-    import.meta.env.DEV && import.meta.env.VITE_CASKADE_FIXTURES === "1"
-      ? lazyApi(
-          () =>
-            import("./pluginManagerFixtures").then((module) => module.createPluginManagerFixture()),
-          ["list", "setEnabled", "chooseFolder", "preview", "install", "uninstall"],
-        )
-      : createNativePluginManager();
-  return nativeApi;
-}
+export const {
+  Provider: PluginManagerProvider,
+  useApi: usePluginManager,
+  preview: previewPluginManager,
+} = injectable(createNativePluginManager);
 
 /** Under `plugins`, so the UI-half loader refreshes after changes too. */
-export const managedPluginsKey = ["plugins", "managed"] as const;
+const managedPluginsKey = ["plugins", "managed"] as const;
 
 export function useManagedPlugins() {
   const api = usePluginManager();

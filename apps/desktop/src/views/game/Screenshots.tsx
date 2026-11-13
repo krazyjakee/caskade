@@ -85,7 +85,7 @@ export function Screenshots({
 /** The screenshots one at a time, filling the window, with a filmstrip.
  * Arrow keys, a swipe, a pad's left/right or LB/RB step through them
  * (round from the last to the first); B or Escape closes it. */
-export function ScreenshotViewer({
+function ScreenshotViewer({
   title,
   shots,
   start,

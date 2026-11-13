@@ -4,7 +4,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { libraryKeys, useLibraryApi } from "./provider";
 
-export type AccountRole = "admin" | "standard";
+type AccountRole = "admin" | "standard";
 
 export interface Account {
   id: string;
@@ -68,7 +68,7 @@ export interface AccountsApi {
 
 /** Under the library's keys: `account.changed` events refresh them, with
  * the collections that belong to the account. */
-export const accountKeys = {
+const accountKeys = {
   all: [...libraryKeys.all, "accounts"] as const,
 };
 

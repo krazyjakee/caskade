@@ -2,7 +2,7 @@ import { t } from "@lingui/core/macro";
 import { type Reply, unwrap } from "./reply";
 
 /** Discovery controller projection, independent of the development fixtures. */
-export interface DiscoveryReview {
+interface DiscoveryReview {
   id: string;
   title: string;
   sources: string[];
@@ -64,7 +64,7 @@ export interface DiscoveryApi {
 export const scanning = (snapshot?: DiscoverySnapshot) =>
   snapshot && ["scanning", "importing", "cancelling"].includes(snapshot.phase);
 
-export interface RawDiscoverySnapshot extends Omit<DiscoverySnapshot, "os" | "sources"> {
+interface RawDiscoverySnapshot extends Omit<DiscoverySnapshot, "os" | "sources"> {
   os: string;
   sources: {
     source: string;
@@ -84,7 +84,7 @@ function sourceError(error: unknown): string | null {
   if (type === "cancelled") return t`Scanning this source was cancelled.`;
   return value?.message ?? t`Caskade couldn't read this source.`;
 }
-export function mapDiscoverySnapshot(snapshot: RawDiscoverySnapshot): DiscoverySnapshot {
+function mapDiscoverySnapshot(snapshot: RawDiscoverySnapshot): DiscoverySnapshot {
   if (snapshot.os !== "linux" && snapshot.os !== "windows" && snapshot.os !== "macos")
     throw new Error("Unknown backend discovery profile.");
   return {
@@ -99,7 +99,7 @@ export function mapDiscoverySnapshot(snapshot: RawDiscoverySnapshot): DiscoveryS
     })),
   };
 }
-export interface DiscoveryTransport {
+interface DiscoveryTransport {
   discoveryStatus(): Promise<Reply<RawDiscoverySnapshot>>;
   discoveryLaunchers(): Promise<Reply<RawDiscoverySnapshot>>;
   discoveryScan(): Promise<Reply<RawDiscoverySnapshot>>;

@@ -20,7 +20,7 @@ import { FolderBrowser, type PathRequest } from "./FolderBrowser";
 
 export type { PathRequest };
 
-export interface PathPicker {
+interface PathPicker {
   /** Console mode: `pick` shows the in-app browser. A caller whose native
    * picker returns several paths checks this to take one from the browser. */
   inApp: boolean;
@@ -30,7 +30,7 @@ export interface PathPicker {
 }
 
 /** The dialog plugin's picker. */
-export async function nativePick(request: PathRequest): Promise<string | null> {
+async function nativePick(request: PathRequest): Promise<string | null> {
   const { open } = await import("@tauri-apps/plugin-dialog");
   const selected = await open({
     directory: request.kind === "folder",

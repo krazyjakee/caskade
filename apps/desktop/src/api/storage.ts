@@ -3,13 +3,13 @@
 import { t } from "@lingui/core/macro";
 
 export type RootStatus = "online" | "offline" | "read_only" | "identity_mismatch";
-export interface StorageRoot {
+interface StorageRoot {
   id: string;
   path: string;
   isDefault: boolean;
   label: string | null;
 }
-export interface RootCapabilities {
+interface RootCapabilities {
   writable: boolean;
   executable: boolean;
   symlinks: boolean;
@@ -20,7 +20,7 @@ export interface RootCapabilities {
   volume?: string | null;
   warnings: string[];
 }
-export interface StorageGame {
+interface StorageGame {
   entryId: string;
   gameId: string;
   title: string;

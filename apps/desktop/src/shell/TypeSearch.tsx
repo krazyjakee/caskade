@@ -27,7 +27,7 @@ import { focus } from "../input/spatial";
 /** Whether `event` starts a search: a printable character typed outside a
  * text field, a menu, a popover or a dialog. Keys the console-mode
  * keyboard map turns into actions never get here. */
-export function startsTyping(event: globalThis.KeyboardEvent): boolean {
+function startsTyping(event: globalThis.KeyboardEvent): boolean {
   if (event.defaultPrevented || event.isComposing) return false;
   if (event.ctrlKey || event.metaKey || event.altKey) return false;
   if ([...event.key].length !== 1 || event.key.trim() === "") return false;

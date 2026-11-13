@@ -7,7 +7,7 @@ export type TextField = "title" | "sortTitle" | "description" | "notes";
 export type ListField = "aliases" | "genres" | "tags" | "platforms";
 
 /** A field's value as the editor holds it. */
-export interface Values {
+interface Values {
   title: string;
   sortTitle: string;
   description: string;
@@ -26,7 +26,7 @@ export type Draft = { [F in GameField]?: Change<F> };
 
 /** Fields automatic sources fill, so they can be reset; rating and notes
  * are only ever the user's. */
-export const AUTOMATIC: readonly GameField[] = [
+const AUTOMATIC: readonly GameField[] = [
   "title",
   "sortTitle",
   "description",

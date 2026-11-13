@@ -5,7 +5,7 @@ import { msg, t } from "@lingui/core/macro";
  * code to match on, a sentence for people, redacted details and recovery
  * hints. Declared by shape here so this file doesn't depend on which commands
  * the generated bindings have moved to it yet. */
-export interface ErrorReportShape {
+interface ErrorReportShape {
   code: string;
   summary: string;
   detail: string | null;

@@ -1,13 +1,13 @@
 /** An emulated game's emulator settings and readiness (#122). */
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext } from "react";
 import {
   type ArgsOverride_Deserialize,
   commands,
   type EmulatorTarget,
   type GameEmulation_Serialize,
 } from "./bindings";
+import { injectable } from "./injectable";
 import { libraryKeys } from "./provider";
 import { unwrap } from "./reply";
 
@@ -22,7 +22,7 @@ export interface GameEmulationApi {
   splitArgs(text: string): Promise<string[]>;
 }
 
-export function createNativeGameEmulationApi(): GameEmulationApi {
+function createNativeGameEmulationApi(): GameEmulationApi {
   const native = () => {
     if (!isTauri()) throw new Error("Open Caskade desktop to see emulator settings.");
   };
@@ -42,29 +42,10 @@ export function createNativeGameEmulationApi(): GameEmulationApi {
   };
 }
 
-const Context = createContext<GameEmulationApi | null>(null);
-let nativeApi: GameEmulationApi | undefined;
-
-/** Tests and previews supply their own API; the app uses the native one. */
-export function GameEmulationProvider({
-  api,
-  children,
-}: {
-  api: GameEmulationApi;
-  children: ReactNode;
-}) {
-  return createElement(Context.Provider, { value: api }, children);
-}
-
-function useApi() {
-  const api = useContext(Context);
-  if (api) return api;
-  nativeApi ??= createNativeGameEmulationApi();
-  return nativeApi;
-}
+export const { Provider: GameEmulationProvider, useApi } = injectable(createNativeGameEmulationApi);
 
 /** Under `library` so library changes (and launches) refresh it. */
-export const gameEmulationKey = (entryId: string) => [...libraryKeys.all, "emulation", entryId];
+const gameEmulationKey = (entryId: string) => [...libraryKeys.all, "emulation", entryId];
 
 export function useGameEmulation(entryId: string, enabled = true) {
   const api = useApi();

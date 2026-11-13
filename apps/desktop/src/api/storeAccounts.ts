@@ -2,8 +2,7 @@
  * what they own. Sign-ins stay in the core and the OS keychain: nothing
  * here ever holds a token. The browser preview uses an in-memory fixture. */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext, useEffect } from "react";
+import { useEffect } from "react";
 import {
   commands,
   events,
@@ -20,14 +19,14 @@ import {
   type StoreRefreshOutcome,
   type StoreRemovalPreview,
 } from "./bindings";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
-import { createStoreAccountsFixtureApi } from "./storeAccountsFixtures";
 import { effectSubscription } from "./subscription";
 
 export type StoreAccountSummary = StoreAccountSummary_Serialize;
-export type StoreAccount = StoreAccount_Serialize;
+type StoreAccount = StoreAccount_Serialize;
 export type StoreAuthFlow = StoreAuthFlow_Serialize;
-export type PlaytimeBreakdown = PlaytimeBreakdown_Serialize;
+type PlaytimeBreakdown = PlaytimeBreakdown_Serialize;
 export type OwnedRelease = OwnedRelease_Serialize;
 export type {
   OwnedInstallState,
@@ -63,7 +62,7 @@ export interface StoreAccountsApi {
   subscribe(listener: () => void): () => void;
 }
 
-export const nativeStoreAccountsApi: StoreAccountsApi = {
+const nativeStoreAccountsApi: StoreAccountsApi = {
   providers: () => commands.storeProviders(),
   list: () => unwrap(commands.storeAccountsList()),
   flows: () => commands.storeAuthFlows(),
@@ -84,31 +83,13 @@ export const nativeStoreAccountsApi: StoreAccountsApi = {
   subscribe: (listener) => effectSubscription(events.storeAccountsChanged.listen, () => listener()),
 };
 
-let preview: StoreAccountsApi | undefined;
-function defaultApi(): StoreAccountsApi {
-  if (isTauri()) return nativeStoreAccountsApi;
-  preview ??= createStoreAccountsFixtureApi();
-  return preview;
-}
+export const {
+  Provider: StoreAccountsProvider,
+  useApi: useStoreAccountsApi,
+  preview: previewStoreAccounts,
+} = injectable(() => nativeStoreAccountsApi);
 
-const Context = createContext<StoreAccountsApi | null>(null);
-
-/** Tests and previews supply their own API; the app uses the native one. */
-export function StoreAccountsProvider({
-  api,
-  children,
-}: {
-  api: StoreAccountsApi;
-  children: ReactNode;
-}) {
-  return createElement(Context.Provider, { value: api }, children);
-}
-
-export function useStoreAccountsApi(): StoreAccountsApi {
-  return useContext(Context) ?? defaultApi();
-}
-
-export const storeAccountsKey = ["storeAccounts"] as const;
+const storeAccountsKey = ["storeAccounts"] as const;
 
 /** Providers, accounts and sign-ins under way, kept current by events. */
 export function useStoreAccounts() {

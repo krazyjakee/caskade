@@ -4,22 +4,23 @@
  * its watch, and gets each sample as a `systemStatsSampled` event; the
  * core stops sampling when nobody watches. A metric that couldn't be read
  * is `null` (with a reason where there is one), never 0. */
+
 import { isTauri } from "@tauri-apps/api/core";
 import { createContext, useContext, useEffect, useState } from "react";
 import { commands, events } from "./bindings";
 import { errorMessage, unwrap } from "./reply";
 import { effectSubscription } from "./subscription";
 
-export type GpuVendor = "amd" | "intel" | "nvidia" | "other";
-export type InterfaceKind = "physical" | "virtual" | "loopback";
+type GpuVendor = "amd" | "intel" | "nvidia" | "other";
+type InterfaceKind = "physical" | "virtual" | "loopback";
 
-export interface CpuSample {
+interface CpuSample {
   /** Overall utilization, 0–100; null before the first measurement. */
   usage: number | null;
   cores: number;
 }
 /** Bytes. */
-export interface MemorySample {
+interface MemorySample {
   total: number;
   used: number;
   available: number;
@@ -34,7 +35,7 @@ export interface GpuSample {
   /** Why `usage` is missing. */
   unavailable: string | null;
 }
-export interface GpuSamples {
+interface GpuSamples {
   devices: GpuSample[];
   /** Why no GPU is listed. */
   unavailable: string | null;
@@ -57,7 +58,7 @@ export interface InterfaceSample {
   received: number | null;
   transmitted: number | null;
 }
-export interface NetworkSample {
+interface NetworkSample {
   interfaces: InterfaceSample[];
   /** Bytes per second over the physical interfaces. */
   received: number | null;
@@ -132,7 +133,7 @@ function lazyFixtureApi(): SystemStatsApi {
   };
 }
 
-export const nativeSystemStatsApi: SystemStatsApi =
+const nativeSystemStatsApi: SystemStatsApi =
   import.meta.env.DEV && import.meta.env.VITE_CASKADE_FIXTURES === "1"
     ? lazyFixtureApi()
     : ipcSystemStatsApi;
@@ -141,11 +142,11 @@ export const nativeSystemStatsApi: SystemStatsApi =
 export const SystemStatsApiContext = createContext<SystemStatsApi>(nativeSystemStatsApi);
 
 /** How often a watch is renewed; the core lets one lapse after 30 s. */
-export const RENEW_MS = 10_000;
+const RENEW_MS = 10_000;
 /** Samples older than this many intervals make the view stale. */
-export const STALE_INTERVALS = 3;
+const STALE_INTERVALS = 3;
 
-export type SystemStatsStatus = "loading" | "live" | "stale" | "error";
+type SystemStatsStatus = "loading" | "live" | "stale" | "error";
 
 export interface SystemStatsState {
   /** `loading` until the first sample, `stale` when samples stopped

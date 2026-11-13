@@ -9,7 +9,6 @@ import type {
   ArtworkSlot as ArtworkSlotDto,
   BulkGameResult,
   BulkStatus,
-  DateEdit_Deserialize,
   FieldError,
   FieldProblem,
   Game_Serialize,
@@ -42,12 +41,11 @@ export type EditableGame = Game_Serialize;
 export type GameEdit = GameEdit_Deserialize;
 export type TextEdit = TextEditDto;
 export type ListEdit = ListEditDto;
-export type DateEdit = DateEdit_Deserialize;
 /** The game as the editor shows it: `game` is what the library shows,
  * `automatic` the values beneath, `manual` the fields the user set. */
 export type GameEditState = GameEditState_Serialize;
 /** What became of a patch; a rejected one saved nothing. */
-export type GameEditOutcome = GameEditOutcome_Serialize;
+type GameEditOutcome = GameEditOutcome_Serialize;
 
 /** The artwork kinds the editor changes. */
 export type EditableArtworkKind = "cover" | "hero" | "icon";
@@ -178,7 +176,7 @@ export const nativeGameEdits: GameEditApi = {
   },
 };
 
-export const gameEditKeys = {
+const gameEditKeys = {
   /** Under the library's keys, so a refresh shows the latest automatic
    * values; the editor keeps the game it opened with as its base. */
   state: (gameId: string) => [...libraryKeys.all, "edit", gameId] as const,

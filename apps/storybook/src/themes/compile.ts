@@ -28,7 +28,7 @@ export interface ThemeFolder {
 }
 
 /** A token of the contract (`@caskade/tokens/manifest.json`). */
-export interface ContractToken {
+interface ContractToken {
   name: string;
   path: string;
   type: string;

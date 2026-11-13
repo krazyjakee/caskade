@@ -1,17 +1,10 @@
 import { Button } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useState } from "react";
-import {
-  Dialog,
-  Heading,
-  Label,
-  Modal,
-  ModalOverlay,
-  Radio,
-  RadioGroup,
-} from "react-aria-components";
+import { Dialog, Heading, Label, Radio, RadioGroup } from "react-aria-components";
 import { formatBytes, formatDateTime } from "../../api/presentation";
 import type { SaveVersion } from "../../api/saves";
+import { ModalFrame } from "../ModalFrame";
 import { useSaveDeviceName } from "./devices";
 
 const option =
@@ -43,67 +36,57 @@ export function SaveConflictDialog({
     (versions.find((each) => each.local) ?? versions[0])?.id ?? null,
   );
   return (
-    <ModalOverlay
-      isOpen
-      onOpenChange={(open) => {
-        if (!open && !busy) close();
-      }}
-      isDismissable={!busy}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      busy={busy}
+      close={close}
+      className="max-h-[85vh] w-full max-w-lg overflow-auto rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg"
     >
-      <Modal className="max-h-[85vh] w-full max-w-lg overflow-auto rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog data-cs="save-conflict" className="outline-none">
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            {t`Choose which save to play with`}
-          </Heading>
-          <p className="mt-2 text-sm text-fg-muted">
-            <Trans>
-              This game was played on more than one device since they last shared saves. The save
-              you don't choose is kept as a version.
-            </Trans>
+      <Dialog data-cs="save-conflict" className="outline-none">
+        <Heading slot="title" className="font-display text-xl font-semibold">
+          {t`Choose which save to play with`}
+        </Heading>
+        <p className="mt-2 text-sm text-fg-muted">
+          <Trans>
+            This game was played on more than one device since they last shared saves. The save you
+            don't choose is kept as a version.
+          </Trans>
+        </p>
+        <RadioGroup
+          data-part="versions"
+          value={chosen}
+          onChange={setChosen}
+          isDisabled={busy}
+          className="mt-5 space-y-2"
+        >
+          <Label className="sr-only">{t`Saves`}</Label>
+          {versions.map((version) => (
+            <Radio key={version.id} value={version.id} data-spatial="focusable" className={option}>
+              <span className="text-sm font-medium">{deviceName(version)}</span>
+              <span className="mt-1 block text-xs text-fg-muted">
+                {formatDateTime(version.createdAtMs)} · {formatBytes(version.sizeBytes)}
+              </span>
+            </Radio>
+          ))}
+        </RadioGroup>
+        {error && (
+          <p role="alert" className="mt-3 text-sm text-danger">
+            {error}
           </p>
-          <RadioGroup
-            data-part="versions"
-            value={chosen}
-            onChange={setChosen}
-            isDisabled={busy}
-            className="mt-5 space-y-2"
+        )}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button data-spatial="focusable" onPress={close} isDisabled={busy}>
+            <Trans>Cancel</Trans>
+          </Button>
+          <Button
+            data-spatial="focusable"
+            variant="primary"
+            isDisabled={chosen === null || busy}
+            onPress={() => chosen && choose(chosen)}
           >
-            <Label className="sr-only">{t`Saves`}</Label>
-            {versions.map((version) => (
-              <Radio
-                key={version.id}
-                value={version.id}
-                data-spatial="focusable"
-                className={option}
-              >
-                <span className="text-sm font-medium">{deviceName(version)}</span>
-                <span className="mt-1 block text-xs text-fg-muted">
-                  {formatDateTime(version.createdAtMs)} · {formatBytes(version.sizeBytes)}
-                </span>
-              </Radio>
-            ))}
-          </RadioGroup>
-          {error && (
-            <p role="alert" className="mt-3 text-sm text-danger">
-              {error}
-            </p>
-          )}
-          <div className="mt-6 flex justify-end gap-2">
-            <Button data-spatial="focusable" onPress={close} isDisabled={busy}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button
-              data-spatial="focusable"
-              variant="primary"
-              isDisabled={chosen === null || busy}
-              onPress={() => chosen && choose(chosen)}
-            >
-              {action ?? (busy ? t`Starting…` : t`Play with this save`)}
-            </Button>
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+            {action ?? (busy ? t`Starting…` : t`Play with this save`)}
+          </Button>
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }

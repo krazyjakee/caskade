@@ -4,7 +4,7 @@
  * have it ask, and save one action at a time. */
 import { Button, Select } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
-import { ArrowDown, ArrowUp, Copy, Gamepad2, Plus, Trash2, Wrench } from "lucide-react";
+import { Copy, Gamepad2, Plus, Wrench } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ListBox, ListBoxItem } from "react-aria-components";
 import {
@@ -19,6 +19,7 @@ import {
 } from "../../api/actions";
 import type { GameEntry } from "../../api/types";
 import { ActionForm } from "../gameActions/ActionForm";
+import { OrderedItemControls } from "../OrderedItemControls";
 import type { GameEditorTabProps } from "./types";
 
 const ASK = "ask";
@@ -43,7 +44,6 @@ export function ActionsTab({ gameId, details, onDirtyChange }: GameEditorTabProp
   // The action being edited: a saved one's id, or a new one's draft.
   const [selected, setSelected] = useState<string | null>(null);
   const [draft, setDraft] = useState<GameAction | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const actions = release?.actions ?? [];
   const proton = useProtonBuilds(Boolean(release?.proton));
   // The saved action shown: the one chosen, else the first.
@@ -57,12 +57,10 @@ export function ActionsTab({ gameId, details, onDirtyChange }: GameEditorTabProp
   const choose = (id: string | null) => {
     setSelected(id);
     setDraft(null);
-    setConfirmDelete(false);
     changes.save.reset();
   };
   const startNew = (kind: GameAction["kind"]) => {
     setSelected(null);
-    setConfirmDelete(false);
     changes.save.reset();
     setDraft({
       ...blankAction(release?.entryId ?? "", kind),
@@ -89,15 +87,6 @@ export function ActionsTab({ gameId, details, onDirtyChange }: GameEditorTabProp
     });
   };
   const added = actions.filter((action) => !isBuiltIn(action));
-  const move = (action: GameAction, by: -1 | 1) => {
-    if (!release) return;
-    const ids = added.map((each) => each.id);
-    const at = ids.indexOf(action.id);
-    const to = at + by;
-    if (at < 0 || to < 0 || to >= ids.length) return;
-    ids.splice(to, 0, ...ids.splice(at, 1));
-    changes.order.mutate({ entryId: release.entryId, ids });
-  };
   const play = actions.filter((action) => action.kind === "play");
   const settings = release?.settings;
   const current = settings?.ask
@@ -278,40 +267,18 @@ export function ActionsTab({ gameId, details, onDirtyChange }: GameEditorTabProp
                 </Button>
               )}
               {saved && !isBuiltIn(saved) && (
-                <>
-                  <Button
-                    data-spatial="focusable"
-                    aria-label={t`Move up`}
-                    icon={ArrowUp}
-                    isDisabled={dirty || added[0]?.id === saved.id || changes.order.isPending}
-                    onPress={() => move(saved, -1)}
-                  />
-                  <Button
-                    data-spatial="focusable"
-                    aria-label={t`Move down`}
-                    icon={ArrowDown}
-                    isDisabled={
-                      dirty || added[added.length - 1]?.id === saved.id || changes.order.isPending
-                    }
-                    onPress={() => move(saved, 1)}
-                  />
-                  <Button
-                    data-spatial="focusable"
-                    data-part="delete"
-                    variant="danger"
-                    icon={Trash2}
-                    isDisabled={changes.remove.isPending}
-                    onPress={() => {
-                      if (!confirmDelete) {
-                        setConfirmDelete(true);
-                        return;
-                      }
-                      changes.remove.mutate(saved.id, { onSuccess: () => choose(null) });
-                    }}
-                  >
-                    {confirmDelete ? t`Delete “${saved.name}”?` : t`Delete…`}
-                  </Button>
-                </>
+                <OrderedItemControls
+                  key={saved.id}
+                  item={saved}
+                  order={added.map((action) => action.id)}
+                  dirty={dirty}
+                  ordering={changes.order.isPending}
+                  removing={changes.remove.isPending}
+                  reorder={(ids) =>
+                    release && changes.order.mutate({ entryId: release.entryId, ids })
+                  }
+                  remove={() => changes.remove.mutate(saved.id, { onSuccess: () => choose(null) })}
+                />
               )}
             </div>
           </div>

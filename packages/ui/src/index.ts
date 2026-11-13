@@ -32,8 +32,6 @@ export { Slider, type SliderProps } from "./form/Slider";
 export { Switch, type SwitchProps } from "./form/Switch";
 export { TextField, type TextFieldProps } from "./form/TextField";
 export { artBackground, GameArt } from "./GameArt";
-export { type CardGame, GameCard } from "./GameCard";
-export { Hero, type HeroGame } from "./Hero";
 export {
   ContextMenu,
   type ContextMenuProps,
@@ -48,5 +46,4 @@ export {
   MenuSeparator,
   useContextMenu,
 } from "./Menu";
-export { Shelf } from "./Shelf";
 export { type GameStatus, StatusBadge } from "./StatusBadge";

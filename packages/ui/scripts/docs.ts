@@ -33,7 +33,7 @@ export function entries(): string {
 
 /** The catalogue as data: roots with their parts, states and interaction,
  * and every attribute a selector may use. */
-export function contract(): string {
+function contract(): string {
   const entries = Object.entries(anatomy) as [string, AnatomyEntry][];
   const attributes = new Set<string>([
     "data-cs",

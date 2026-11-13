@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Dialog, Form, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { libraryKeys, useLibraryApi } from "../../../api/provider";
+import { ModalFrame } from "../../../components/ModalFrame";
 import { InstallRootPicker } from "../../../components/storage/InstallRootPicker";
 import { useActivityStorage } from "../../activity/ActivityProvider";
 
@@ -50,6 +51,10 @@ export function AddWebGame() {
     },
     onSettled: done,
   });
+  const keepOnline = () => {
+    setPlacing(null);
+    done();
+  };
   if (!api.addWebGame) return null;
   const error = add.error ?? save.error;
   return (
@@ -131,34 +136,22 @@ export function AddWebGame() {
         </Modal>
       </ModalOverlay>
       {placing && storage && (
-        <ModalOverlay
-          isOpen
-          isDismissable
-          onOpenChange={(keep) => {
-            if (!keep) {
-              setPlacing(null);
-              done();
-            }
-          }}
-          className={overlay}
+        <ModalFrame
+          close={keepOnline}
+          className="max-h-[85vh] w-full max-w-xl overflow-auto rounded-panel border border-border-strong bg-surface-raised p-5"
         >
-          <Modal className="max-h-[85vh] w-full max-w-xl overflow-auto rounded-panel border border-border-strong bg-surface-raised p-5">
-            <Dialog aria-label={t`Where to keep the game`} className="outline-none">
-              <InstallRootPicker
-                api={storage}
-                onCancel={() => {
-                  setPlacing(null);
-                  done();
-                }}
-                onSelect={(rootId) => {
-                  const gameId = placing;
-                  setPlacing(null);
-                  save.mutate({ gameId, rootId });
-                }}
-              />
-            </Dialog>
-          </Modal>
-        </ModalOverlay>
+          <Dialog aria-label={t`Where to keep the game`} className="outline-none">
+            <InstallRootPicker
+              api={storage}
+              onCancel={keepOnline}
+              onSelect={(rootId) => {
+                const gameId = placing;
+                setPlacing(null);
+                save.mutate({ gameId, rootId });
+              }}
+            />
+          </Dialog>
+        </ModalFrame>
       )}
     </div>
   );

@@ -15,7 +15,7 @@ import {
 } from "./draft";
 import { FieldFrame, ListInput, TextAreaField } from "./fields";
 
-export interface DetailsTabProps {
+interface DetailsTabProps {
   state: GameEditState;
   draft: Draft;
   onDraft: (draft: Draft) => void;

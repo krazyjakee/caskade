@@ -6,8 +6,7 @@
  *
  * The browser preview and tests use the in-memory fixture. */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext, useEffect } from "react";
+import { useEffect } from "react";
 import {
   type Collection_Serialize,
   commands,
@@ -15,9 +14,7 @@ import {
   type GameHere,
   type JobSnapshot_Serialize,
   type ReceivedShare,
-  type ShareContents_Serialize,
   type ShareCreated_Serialize,
-  type SharedGame_Serialize,
   type ShareExpiry,
   type ShareInfo_Serialize,
   type ShareItem,
@@ -26,15 +23,13 @@ import {
   type ShareRecord_Serialize,
   type ShareState,
 } from "./bindings";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
-import { createSharesFixtureApi } from "./sharesFixtures";
 import { effectSubscription } from "./subscription";
 
 export type ShareRecord = ShareRecord_Serialize;
 export type ShareInfo = ShareInfo_Serialize;
 export type ShareCreated = ShareCreated_Serialize;
-export type ShareContents = ShareContents_Serialize;
-export type SharedGame = SharedGame_Serialize;
 export type {
   GameHere,
   ReceivedShare,
@@ -83,7 +78,7 @@ export interface SharesApi {
 
 const nothing = async () => {};
 
-export const nativeSharesApi: SharesApi = {
+const nativeSharesApi: SharesApi = {
   share: (target, expiry) =>
     unwrap(
       target.kind === "game"
@@ -103,25 +98,13 @@ export const nativeSharesApi: SharesApi = {
   subscribe: (listener) => effectSubscription(events.sharesChanged.listen, () => listener()),
 };
 
-let preview: SharesApi | undefined;
-function defaultApi(): SharesApi {
-  if (isTauri()) return nativeSharesApi;
-  preview ??= createSharesFixtureApi();
-  return preview;
-}
+export const {
+  Provider: SharesProvider,
+  useApi: useSharesApi,
+  preview: previewShares,
+} = injectable(() => nativeSharesApi);
 
-const SharesContext = createContext<SharesApi | null>(null);
-
-/** Tests and previews supply their own API; the app uses the native one. */
-export function SharesProvider({ api, children }: { api: SharesApi; children: ReactNode }) {
-  return createElement(SharesContext.Provider, { value: api }, children);
-}
-
-export function useSharesApi(): SharesApi {
-  return useContext(SharesContext) ?? defaultApi();
-}
-
-export const sharesKey = ["shares"] as const;
+const sharesKey = ["shares"] as const;
 
 /** Refetches the share queries whenever the core says something changed. */
 function useSharesRefresh(api: SharesApi) {

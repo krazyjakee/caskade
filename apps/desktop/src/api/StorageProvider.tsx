@@ -16,7 +16,7 @@ export const STORAGE_EVENT_DEBOUNCE_MS = 500;
 export const STORAGE_EVENT_MAX_WAIT_MS = 5000;
 /** Catches a drive that goes away while the window keeps focus and nothing
  * else changes. Listing is cheap: the core caches volume probes and manifests. */
-export const STORAGE_REFETCH_INTERVAL_MS = 60_000;
+const STORAGE_REFETCH_INTERVAL_MS = 60_000;
 
 function unavailableIn(roots: readonly RootSummary[]) {
   const games = new Set<string>();

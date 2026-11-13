@@ -10,7 +10,7 @@ import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import type { SettingsTab } from "../SettingsView";
 
-export interface SettingsSearchEntry {
+interface SettingsSearchEntry {
   tab: SettingsTab;
   /** The sub-section inside the tab (`?section=`) where it lives. */
   section?: string;

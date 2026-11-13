@@ -8,7 +8,7 @@ type Detected = DiscoverySnapshot["launchers"][number];
 /** A launcher as people know it, and the discovery sources that read its
  * games (#48). The switch keys in `core.launchers.enabled` are those source
  * ids: one switch turns all of a launcher's sources off. */
-export interface Launcher {
+interface Launcher {
   id: string;
   /** Its own name: a product's, not translated. */
   name: string;
@@ -35,7 +35,7 @@ const known: readonly Launcher[] = [
   { id: "faugus", name: "Faugus Launcher", sources: ["faugus"] },
 ];
 
-export interface DetectedLauncher extends Launcher {
+interface DetectedLauncher extends Launcher {
   /** Where discovery found it on this device; empty when it didn't. */
   found: Detected[];
 }

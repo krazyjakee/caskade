@@ -5,7 +5,7 @@
 import { Button, SegmentedControl, Select, Switch, TextField } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowDown, ArrowUp, Copy, FlaskConical, Plus, Square, Trash2 } from "lucide-react";
+import { Copy, FlaskConical, Plus, Square } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { ListBox, ListBoxItem } from "react-aria-components";
 import {
@@ -22,6 +22,7 @@ import {
 } from "../../api/scripts";
 import { ListField, PathField } from "../gameActions/ActionForm";
 import { TextAreaField } from "../gameEditor/fields";
+import { OrderedItemControls } from "../OrderedItemControls";
 
 const WINDOWS = typeof navigator !== "undefined" && /Win/i.test(navigator.platform);
 /** The shells this OS has, first the one a new script uses. */
@@ -74,7 +75,6 @@ function Scripts({ scope, gameId = null, profileId = null, onDirtyChange }: Scri
   const scripts = query.data ?? [];
   const [selected, setSelected] = useState<string | null>(null);
   const [draft, setDraft] = useState<LifecycleScript | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const shown = scripts.find((script) => script.id === (selected ?? scripts[0]?.id)) ?? null;
   const editing = draft ?? shown;
   const saved = draft && draft.id !== shown?.id ? null : shown;
@@ -83,7 +83,6 @@ function Scripts({ scope, gameId = null, profileId = null, onDirtyChange }: Scri
   const choose = (id: string | null) => {
     setSelected(id);
     setDraft(null);
-    setConfirmDelete(false);
     changes.save.reset();
   };
   const startNew = () => {
@@ -101,14 +100,6 @@ function Scripts({ scope, gameId = null, profileId = null, onDirtyChange }: Scri
       enabled: false,
       name: t({ message: `${script.name} (copy)`, comment: "A duplicated script's name" }),
     });
-  };
-  const move = (script: LifecycleScript, by: -1 | 1) => {
-    const ids = scripts.map((each) => each.id);
-    const at = ids.indexOf(script.id);
-    const to = at + by;
-    if (at < 0 || to < 0 || to >= ids.length) return;
-    ids.splice(to, 0, ...ids.splice(at, 1));
-    changes.order.mutate(ids);
   };
   const failure =
     changes.save.error?.message ?? changes.remove.error?.message ?? changes.order.error?.message;
@@ -213,40 +204,18 @@ function Scripts({ scope, gameId = null, profileId = null, onDirtyChange }: Scri
                   >
                     {t`Duplicate`}
                   </Button>
-                  <Button
-                    data-spatial="focusable"
-                    aria-label={t`Move up`}
-                    icon={ArrowUp}
-                    isDisabled={dirty || scripts[0]?.id === saved.id || changes.order.isPending}
-                    onPress={() => move(saved, -1)}
-                  />
-                  <Button
-                    data-spatial="focusable"
-                    aria-label={t`Move down`}
-                    icon={ArrowDown}
-                    isDisabled={
-                      dirty ||
-                      scripts[scripts.length - 1]?.id === saved.id ||
-                      changes.order.isPending
+                  <OrderedItemControls
+                    key={saved.id}
+                    item={saved}
+                    order={scripts.map((script) => script.id)}
+                    dirty={dirty}
+                    ordering={changes.order.isPending}
+                    removing={changes.remove.isPending}
+                    reorder={(ids) => changes.order.mutate(ids)}
+                    remove={() =>
+                      changes.remove.mutate(saved.id, { onSuccess: () => choose(null) })
                     }
-                    onPress={() => move(saved, 1)}
                   />
-                  <Button
-                    data-spatial="focusable"
-                    data-part="delete"
-                    variant="danger"
-                    icon={Trash2}
-                    isDisabled={changes.remove.isPending}
-                    onPress={() => {
-                      if (!confirmDelete) {
-                        setConfirmDelete(true);
-                        return;
-                      }
-                      changes.remove.mutate(saved.id, { onSuccess: () => choose(null) });
-                    }}
-                  >
-                    {confirmDelete ? t`Delete “${saved.name}”?` : t`Delete…`}
-                  </Button>
                 </>
               )}
             </div>

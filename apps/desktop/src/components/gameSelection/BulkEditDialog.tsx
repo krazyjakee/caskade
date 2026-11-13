@@ -4,11 +4,12 @@
  * what changes before anything is saved; the result says exactly which
  * games saved, which already had it and which failed. Cancelling before
  * Apply saves nothing, and applying again changes only what is left. */
+
 import { Button, Checkbox, SegmentedControl, Slider, TextField } from "@caskade/ui";
 import { plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import {
   type BulkGameResult,
   type GameEdit,
@@ -17,6 +18,7 @@ import {
 } from "../../api/gameEdit";
 import { useInputAction } from "../../input";
 import { ListInput, TextAreaField } from "../gameEditor/fields";
+import { ModalFrame } from "../ModalFrame";
 
 type ListKey = "genres" | "tags" | "platforms" | "aliases";
 type ListMode = "add" | "remove" | "replace" | "reset";
@@ -46,7 +48,7 @@ const emptyForm = (): Form => ({
 });
 
 /** The patch the ticked fields make. */
-export function bulkPatch(form: Form): GameEdit {
+function bulkPatch(form: Form): GameEdit {
   const edit: GameEdit = {};
   for (const key of ["genres", "tags", "platforms", "aliases"] as const) {
     if (!form.enabled[key]) continue;
@@ -151,172 +153,168 @@ export function BulkEditDialog({ gameIds, close }: { gameIds: string[]; close: (
   };
   const count = gameIds.length;
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable={!bulk.isPending}
-      onOpenChange={(open) => {
-        if (!open && !bulk.isPending) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm console:p-0"
+    <ModalFrame
+      busy={bulk.isPending}
+      close={close}
+      consoleFill
+      className="flex h-[88vh] w-full max-w-3xl flex-col rounded-panel border border-border-strong bg-surface-raised shadow-lg console:h-full console:max-w-none console:rounded-none"
     >
-      <Modal className="flex h-[88vh] w-full max-w-3xl flex-col rounded-panel border border-border-strong bg-surface-raised shadow-lg console:h-full console:max-w-none console:rounded-none">
-        <Dialog
-          ref={dialog}
-          data-cs="bulk-editor"
-          data-step={step.type}
-          className="flex min-h-0 flex-1 flex-col outline-none"
-        >
-          <Heading slot="title" className="px-6 pt-5 font-display text-xl font-semibold">
-            {plural(count, { one: "Edit # game", other: "Edit # games" })}
-          </Heading>
-          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-            {step.type === "edit" && (
-              <div data-part="fields" className="flex flex-col gap-4">
-                <p className="text-sm text-fg-muted">
-                  <Trans>Tick what to change. Everything else stays as each game has it.</Trans>
-                </p>
-                {listField("tags")}
-                {listField("genres")}
-                {listField("platforms")}
-                {listField("aliases")}
-                <Field
-                  field="description"
-                  label={labels.description}
-                  form={form}
-                  toggle={toggle("description")}
-                >
-                  <SegmentedControl
-                    aria-label={t`How to change ${labels.description}`}
-                    value={form.description.mode}
-                    onChange={(mode) =>
-                      setForm((f) => ({ ...f, description: { ...f.description, mode } }))
-                    }
-                    options={[
-                      { id: "replace", label: t`Replace` },
-                      { id: "reset", label: t`Reset to automatic` },
-                    ]}
-                  />
-                  {form.description.mode === "replace" && (
-                    <TextAreaField
-                      label={labels.description}
-                      value={form.description.value}
-                      onChange={(value) =>
-                        setForm((f) => ({ ...f, description: { ...f.description, value } }))
-                      }
-                    />
-                  )}
-                </Field>
-                <Field
-                  field="releaseDate"
-                  label={labels.releaseDate}
-                  form={form}
-                  toggle={toggle("releaseDate")}
-                >
-                  <SegmentedControl
-                    aria-label={t`How to change ${labels.releaseDate}`}
-                    value={form.releaseDate.mode}
-                    onChange={(mode) =>
-                      setForm((f) => ({ ...f, releaseDate: { ...f.releaseDate, mode } }))
-                    }
-                    options={[
-                      { id: "replace", label: t`Set` },
-                      { id: "reset", label: t`Reset to automatic` },
-                    ]}
-                  />
-                  {form.releaseDate.mode === "replace" && (
-                    <TextField
-                      aria-label={labels.releaseDate}
-                      placeholder={t`YYYY-MM-DD, or empty for none`}
-                      mono
-                      value={form.releaseDate.value}
-                      onChange={(value) =>
-                        setForm((f) => ({ ...f, releaseDate: { ...f.releaseDate, value } }))
-                      }
-                    />
-                  )}
-                </Field>
-                <Field field="rating" label={labels.rating} form={form} toggle={toggle("rating")}>
-                  <div className="flex flex-wrap items-center gap-4">
-                    <Checkbox
-                      isSelected={form.rating !== null}
-                      onChange={(rated) => setForm((f) => ({ ...f, rating: rated ? 50 : null }))}
-                    >
-                      {t`Rated`}
-                    </Checkbox>
-                    <Slider
-                      aria-label={labels.rating}
-                      className="flex-1"
-                      minValue={0}
-                      maxValue={100}
-                      isDisabled={form.rating === null}
-                      value={form.rating ?? 0}
-                      onChange={(rating) => setForm((f) => ({ ...f, rating }))}
-                      format={(value) => t`${value} / 100`}
-                    />
-                  </div>
-                </Field>
-                <Field field="notes" label={labels.notes} form={form} toggle={toggle("notes")}>
-                  <TextAreaField
-                    label={labels.notes}
-                    value={form.notes}
-                    onChange={(notes) => setForm((f) => ({ ...f, notes }))}
-                  />
-                </Field>
-              </div>
-            )}
-            {step.type !== "edit" && (
-              <Results results={step.results} labels={labels} applied={step.type === "done"} />
-            )}
-          </div>
-          <div
-            data-part="footer"
-            className="flex flex-wrap items-center gap-3 border-t border-border px-6 py-4"
-          >
-            <p role="status" data-part="status" className="mr-auto text-sm">
-              {bulk.error ? (
-                <span className="text-danger">
-                  {t`That didn't finish: ${bulk.error.message}. Trying again is safe: what saved stays as it is.`}
-                </span>
-              ) : bulk.isPending ? (
-                <span className="text-fg-muted">
-                  {step.type === "edit" ? t`Working out the changes…` : t`Saving…`}
-                </span>
-              ) : null}
-            </p>
-            {step.type !== "done" && (
-              <Button
-                data-part="cancel"
-                data-spatial="focusable"
-                isDisabled={bulk.isPending}
-                onPress={step.type === "preview" ? () => setStep({ type: "edit" }) : close}
+      <Dialog
+        ref={dialog}
+        data-cs="bulk-editor"
+        data-step={step.type}
+        className="flex min-h-0 flex-1 flex-col outline-none"
+      >
+        <Heading slot="title" className="px-6 pt-5 font-display text-xl font-semibold">
+          {plural(count, { one: "Edit # game", other: "Edit # games" })}
+        </Heading>
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+          {step.type === "edit" && (
+            <div data-part="fields" className="flex flex-col gap-4">
+              <p className="text-sm text-fg-muted">
+                <Trans>Tick what to change. Everything else stays as each game has it.</Trans>
+              </p>
+              {listField("tags")}
+              {listField("genres")}
+              {listField("platforms")}
+              {listField("aliases")}
+              <Field
+                field="description"
+                label={labels.description}
+                form={form}
+                toggle={toggle("description")}
               >
-                {step.type === "preview" ? <Trans>Back</Trans> : <Trans>Cancel</Trans>}
-              </Button>
-            )}
+                <SegmentedControl
+                  aria-label={t`How to change ${labels.description}`}
+                  value={form.description.mode}
+                  onChange={(mode) =>
+                    setForm((f) => ({ ...f, description: { ...f.description, mode } }))
+                  }
+                  options={[
+                    { id: "replace", label: t`Replace` },
+                    { id: "reset", label: t`Reset to automatic` },
+                  ]}
+                />
+                {form.description.mode === "replace" && (
+                  <TextAreaField
+                    label={labels.description}
+                    value={form.description.value}
+                    onChange={(value) =>
+                      setForm((f) => ({ ...f, description: { ...f.description, value } }))
+                    }
+                  />
+                )}
+              </Field>
+              <Field
+                field="releaseDate"
+                label={labels.releaseDate}
+                form={form}
+                toggle={toggle("releaseDate")}
+              >
+                <SegmentedControl
+                  aria-label={t`How to change ${labels.releaseDate}`}
+                  value={form.releaseDate.mode}
+                  onChange={(mode) =>
+                    setForm((f) => ({ ...f, releaseDate: { ...f.releaseDate, mode } }))
+                  }
+                  options={[
+                    { id: "replace", label: t`Set` },
+                    { id: "reset", label: t`Reset to automatic` },
+                  ]}
+                />
+                {form.releaseDate.mode === "replace" && (
+                  <TextField
+                    aria-label={labels.releaseDate}
+                    placeholder={t`YYYY-MM-DD, or empty for none`}
+                    mono
+                    value={form.releaseDate.value}
+                    onChange={(value) =>
+                      setForm((f) => ({ ...f, releaseDate: { ...f.releaseDate, value } }))
+                    }
+                  />
+                )}
+              </Field>
+              <Field field="rating" label={labels.rating} form={form} toggle={toggle("rating")}>
+                <div className="flex flex-wrap items-center gap-4">
+                  <Checkbox
+                    isSelected={form.rating !== null}
+                    onChange={(rated) => setForm((f) => ({ ...f, rating: rated ? 50 : null }))}
+                  >
+                    {t`Rated`}
+                  </Checkbox>
+                  <Slider
+                    aria-label={labels.rating}
+                    className="flex-1"
+                    minValue={0}
+                    maxValue={100}
+                    isDisabled={form.rating === null}
+                    value={form.rating ?? 0}
+                    onChange={(rating) => setForm((f) => ({ ...f, rating }))}
+                    format={(value) => t`${value} / 100`}
+                  />
+                </div>
+              </Field>
+              <Field field="notes" label={labels.notes} form={form} toggle={toggle("notes")}>
+                <TextAreaField
+                  label={labels.notes}
+                  value={form.notes}
+                  onChange={(notes) => setForm((f) => ({ ...f, notes }))}
+                />
+              </Field>
+            </div>
+          )}
+          {step.type !== "edit" && (
+            <Results results={step.results} labels={labels} applied={step.type === "done"} />
+          )}
+        </div>
+        <div
+          data-part="footer"
+          className="flex flex-wrap items-center gap-3 border-t border-border px-6 py-4"
+        >
+          <p role="status" data-part="status" className="mr-auto text-sm">
+            {bulk.error ? (
+              <span className="text-danger">
+                {t`That didn't finish: ${bulk.error.message}. Trying again is safe: what saved stays as it is.`}
+              </span>
+            ) : bulk.isPending ? (
+              <span className="text-fg-muted">
+                {step.type === "edit" ? t`Working out the changes…` : t`Saving…`}
+              </span>
+            ) : null}
+          </p>
+          {step.type !== "done" && (
             <Button
-              ref={primaryButton}
-              data-part="apply"
+              data-part="cancel"
               data-spatial="focusable"
-              variant="primary"
-              isDisabled={bulk.isPending || (step.type === "edit" && !ready)}
-              onPress={primary}
+              isDisabled={bulk.isPending}
+              onPress={step.type === "preview" ? () => setStep({ type: "edit" }) : close}
             >
-              {step.type === "edit" ? (
-                <Trans>Preview</Trans>
-              ) : step.type === "preview" ? (
-                bulk.error ? (
-                  <Trans>Try again</Trans>
-                ) : (
-                  <Trans>Apply</Trans>
-                )
-              ) : (
-                <Trans>Done</Trans>
-              )}
+              {step.type === "preview" ? <Trans>Back</Trans> : <Trans>Cancel</Trans>}
             </Button>
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+          )}
+          <Button
+            ref={primaryButton}
+            data-part="apply"
+            data-spatial="focusable"
+            variant="primary"
+            isDisabled={bulk.isPending || (step.type === "edit" && !ready)}
+            onPress={primary}
+          >
+            {step.type === "edit" ? (
+              <Trans>Preview</Trans>
+            ) : step.type === "preview" ? (
+              bulk.error ? (
+                <Trans>Try again</Trans>
+              ) : (
+                <Trans>Apply</Trans>
+              )
+            ) : (
+              <Trans>Done</Trans>
+            )}
+          </Button>
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }
 

@@ -5,10 +5,11 @@
  *
  * Mounted in the shell, inside the input provider, so a pad reaches every
  * control; in console mode the code is large enough to read from a sofa. */
+
 import { Button } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { type ReactNode, useEffect, useState } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import { formatDateTime } from "../../api/presentation";
 import {
   type Pairing,
@@ -20,6 +21,7 @@ import {
 import { useMode } from "../../shell/console/mode";
 import { useDeviceAdmin } from "../../views/settings/devices/admin";
 import { FailureNotice } from "../FailureNotice";
+import { ModalFrame } from "../ModalFrame";
 
 export function PairingHost() {
   const { data } = useSyncStatus();
@@ -54,25 +56,19 @@ function Frame({
   label: string;
 }) {
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      close={onClose}
+      className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6"
     >
-      <Modal className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6">
-        <Dialog
-          data-cs="pair-device"
-          data-focus-scope="pair-device"
-          aria-label={label}
-          className="space-y-4 outline-none"
-        >
-          {children}
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+      <Dialog
+        data-cs="pair-device"
+        data-focus-scope="pair-device"
+        aria-label={label}
+        className="space-y-4 outline-none"
+      >
+        {children}
+      </Dialog>
+    </ModalFrame>
   );
 }
 

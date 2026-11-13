@@ -28,7 +28,7 @@ export function shownIn(item: Registered, mode: Mode): boolean {
   return mode === "desktop" || consoleSlots.has(item.slot);
 }
 
-export interface PluginNotice {
+interface PluginNotice {
   id: number;
   pluginId: string;
   pluginName: string;

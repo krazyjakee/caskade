@@ -5,7 +5,7 @@ import type { Action, GlyphFamily } from "../api/bindings";
 export type { Action, GlyphFamily };
 export type InputSource = "pad" | "keyboard";
 
-export const directions = ["nav.up", "nav.down", "nav.left", "nav.right"] as const;
+const directions = ["nav.up", "nav.down", "nav.left", "nav.right"] as const;
 export type Direction = (typeof directions)[number];
 export const isDirection = (action: Action): action is Direction =>
   (directions as readonly string[]).includes(action);

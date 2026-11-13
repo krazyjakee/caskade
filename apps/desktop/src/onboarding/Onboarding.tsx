@@ -27,7 +27,7 @@ import { type Choices, defaultChoices, markCompleted } from "./run";
 import { SetupStep } from "./SetupStep";
 import { createSounds } from "./sound";
 
-export type Step =
+type Step =
   | "welcome"
   | "device"
   | "language"

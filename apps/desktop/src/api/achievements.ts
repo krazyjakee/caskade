@@ -6,19 +6,18 @@
 import { t } from "@lingui/core/macro";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { assetUrl, thumbnailPath } from "./artwork";
 import { type AchievementSet_Serialize, commands, events } from "./bindings";
-import { lazyApi } from "./lazyApi";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
 import { effectSubscription } from "./subscription";
 
 export type AchievementSet = AchievementSet_Serialize;
 export type Achievement = AchievementSet["achievements"][number];
-export type SetStatus = AchievementSet["sync"]["status"];
 
 /** Which icon of an achievement: its own, or the one shown while locked. */
-export interface IconRequest {
+interface IconRequest {
   gameId: string;
   storeAccountId: string;
   productId: string;
@@ -41,7 +40,7 @@ export interface AchievementsApi {
   subscribe(listener: (gameId: string) => void): () => void;
 }
 
-export function createNativeAchievements(): AchievementsApi {
+function createNativeAchievements(): AchievementsApi {
   const native = () => {
     if (!isTauri()) throw new Error(t`Open Caskade desktop to see achievements.`);
   };
@@ -76,40 +75,13 @@ export function createNativeAchievements(): AchievementsApi {
   };
 }
 
-const Context = createContext<AchievementsApi | null>(null);
-let nativeApi: AchievementsApi | undefined;
+export const {
+  Provider: AchievementsProvider,
+  useApi: useAchievementsApi,
+  preview: previewAchievements,
+} = injectable(createNativeAchievements);
 
-export function AchievementsProvider({
-  api,
-  children,
-}: {
-  api: AchievementsApi;
-  children: ReactNode;
-}) {
-  return createElement(Context.Provider, { value: api }, children);
-}
-
-export function useAchievementsApi(): AchievementsApi {
-  const api = useContext(Context);
-  if (api) return api;
-  // Dev builds started with `VITE_CASKADE_FIXTURES=1` show fixture sets.
-  nativeApi ??=
-    import.meta.env.DEV && import.meta.env.VITE_CASKADE_FIXTURES === "1"
-      ? {
-          ...lazyApi(
-            () =>
-              import("./achievementsFixtures").then((module) => module.createAchievementsFixture()),
-            ["sets", "refresh", "cancel", "icon"],
-          ),
-          // Subscribing stays synchronous; a refresh's answer replaces the
-          // sets shown anyway.
-          subscribe: () => () => {},
-        }
-      : createNativeAchievements();
-  return nativeApi;
-}
-
-export const achievementsKey = (gameId: string) => ["achievements", gameId] as const;
+const achievementsKey = (gameId: string) => ["achievements", gameId] as const;
 
 /** The game's sets, read again whenever a fetch changes them. */
 export function useGameAchievements(gameId: string) {

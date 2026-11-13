@@ -21,7 +21,7 @@ interface Override {
   regions?: string[];
   group?: string;
 }
-export interface FixtureProfile {
+interface FixtureProfile {
   platforms: string[];
   extensions: string[];
   emulatorName: string;

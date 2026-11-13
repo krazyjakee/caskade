@@ -1,8 +1,9 @@
 /** Core's settings sections in memory, and a quiet discovery backend, for
  * tests that open Settings in the whole app (#151). Defaults follow
  * `caskade_core::settings::builtin`. */
-import type { DiscoveryApi, DiscoverySnapshot } from "../api/discovery";
-import type { SettingsApi, SettingsChanged, SettingsSnapshot } from "../api/settings";
+import type { DiscoveryApi } from "../api/discovery";
+import { createDiscoveryFixtureApi } from "../api/discoveryFixtures";
+import { createSettingsStore } from "../api/settingsFixtures";
 
 const installerSchema = {
   type: "object",
@@ -125,50 +126,18 @@ export function coreSettingsDefaults(): Record<string, Record<string, unknown>> 
 
 /** Every write lands in `values`; `writes` lists the namespaces in order. */
 export function createSettingsFixture(values = coreSettingsDefaults()) {
-  const defaults = structuredClone(values);
-  const revisions: Record<string, number> = {};
-  const writes: string[] = [];
-  const listeners = new Set<(event: SettingsChanged) => void>();
-  const snapshot = (namespace: string): SettingsSnapshot => ({
-    namespace,
-    version: 1,
-    revision: revisions[namespace] ?? 0,
-    value: structuredClone(values[namespace] ?? {}),
-  });
-  const api: SettingsApi = {
-    sections: async () =>
-      Object.keys(values).map((namespace) => ({
-        namespace,
-        version: 1,
-        schema: schemas[namespace] ?? {},
-        defaults: defaults[namespace],
-      })),
-    get: async (namespace) => {
-      if (!(namespace in values)) throw new Error(`unknown settings section ${namespace}`);
-      return snapshot(namespace);
-    },
-    set: async (namespace, value, revision) => {
-      if (revision !== (revisions[namespace] ?? 0)) throw new Error("Revision conflict");
-      values[namespace] = structuredClone(value);
-      revisions[namespace] = revision + 1;
-      writes.push(namespace);
-      for (const listener of listeners) listener({ namespace, version: 1 });
-      return snapshot(namespace);
-    },
-    reset: async (namespace, revision) =>
-      api.set(namespace, structuredClone(defaults[namespace] ?? {}), revision),
-    subscribe: async (listener) => {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-  };
-  return { api, values, writes };
+  return createSettingsStore(
+    Object.entries(values).map(([namespace, defaults]) => ({
+      namespace,
+      version: 1,
+      schema: schemas[namespace],
+      defaults,
+    })),
+  );
 }
 
 export function createDiscoveryFixture(): DiscoveryApi {
-  const snapshot: DiscoverySnapshot = {
+  return createDiscoveryFixtureApi({
     revision: 1,
     os: "linux",
     checks: [{ id: "desktop", label: "Desktop entries", sources: ["desktop"] }],
@@ -189,13 +158,5 @@ export function createDiscoveryFixture(): DiscoveryApi {
     warnings: [],
     error: null,
     watching: false,
-  };
-  return {
-    status: async () => snapshot,
-    launchers: async () => snapshot,
-    scan: async () => snapshot,
-    cancel: async () => snapshot,
-    review: async () => snapshot,
-    subscribe: async () => () => {},
-  };
+  });
 }

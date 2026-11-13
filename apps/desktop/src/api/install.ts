@@ -1,6 +1,6 @@
 /** Activity view projection. Native answers use opaque backend choice IDs;
  * the UI never submits a plan, executable or arbitrary installation path. */
-export type JobStatus =
+type JobStatus =
   | "queued"
   | "running"
   | "needs_user"
@@ -9,7 +9,7 @@ export type JobStatus =
   | "completed"
   | "failed"
   | "cancelled";
-export interface JobChoice {
+interface JobChoice {
   id: string;
   label: string;
   detail?: string;
@@ -24,7 +24,7 @@ export interface JobQuestion {
   canAnswer?: boolean;
 }
 /** Why a job failed (#158), from the installer's classification. */
-export type FailureKind =
+type FailureKind =
   | "missingSource"
   | "missingStaged"
   | "missingOutput"

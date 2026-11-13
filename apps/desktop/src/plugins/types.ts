@@ -9,7 +9,7 @@ import type {
 export { type PluginEventName, type PluginSlot, pluginSlots } from "@caskade/sdk";
 
 /** A contribution the manifest declares; only these can be registered. */
-export interface DeclaredContribution {
+interface DeclaredContribution {
   slot: PluginSlot;
   id: string;
   title?: string | null;
@@ -50,7 +50,7 @@ export interface InstalledPlugin {
   settingsError: string | null;
 }
 /** A plugin's settings section, `plugins.<id>`. */
-export interface PluginSettingsSnapshot {
+interface PluginSettingsSnapshot {
   revision: number;
   value: unknown;
 }

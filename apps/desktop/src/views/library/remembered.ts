@@ -3,7 +3,7 @@ import { libraryFilters } from "./LibraryView";
 
 /** The library's filter, sort and layout as the user last left them. A link
  * to `/library` that doesn't set them comes back to these, across restarts. */
-export interface LibraryViewPrefs {
+interface LibraryViewPrefs {
   filter: LibraryFilter;
   sort: LibrarySort;
   layout: LibraryLayout;

@@ -3,15 +3,17 @@
  * entries, A opens a folder or picks a file, B cancels, LB/RB go to the
  * previous and next place, LT/RT page through a long folder and Start
  * picks the folder shown. Touch and the mouse work the same way. */
+
 import { Button } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { ArrowUp, File, Folder, HardDrive, Home } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button as AriaButton, Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Button as AriaButton, Dialog, Heading } from "react-aria-components";
 import type { BrowseApi, DirEntry, DirListing, Place } from "../../api/browse";
 import { formatPath } from "../../api/presentation";
 import { errorMessage } from "../../api/reply";
 import { useInputAction } from "../../input";
+import { ModalFrame } from "../ModalFrame";
 
 export interface PathRequest {
   kind: "file" | "folder";
@@ -24,7 +26,7 @@ export interface PathRequest {
 }
 
 /** The place `path` is in: the one with the longest matching path. */
-export function currentPlace(places: readonly Place[], path: string): number {
+function currentPlace(places: readonly Place[], path: string): number {
   let best = -1;
   let length = -1;
   places.forEach((place, index) => {
@@ -185,123 +187,117 @@ export function FolderBrowser({
     (listing?.parent ? "up" : null);
 
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable
-      onOpenChange={(isOpen) => {
-        if (!isOpen) onClose(null);
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      close={() => onClose(null)}
+      className="flex h-[85vh] w-full max-w-3xl flex-col rounded-panel border border-border-strong bg-surface-raised shadow-lg"
     >
-      <Modal className="flex h-[85vh] w-full max-w-3xl flex-col rounded-panel border border-border-strong bg-surface-raised shadow-lg">
-        <Dialog
-          ref={dialog}
-          data-cs="folder-browser"
-          data-kind={request.kind}
-          className="flex min-h-0 flex-1 flex-col gap-4 p-6 outline-none"
-        >
-          <div>
-            <Heading slot="title" data-part="title" className="font-display text-2xl font-semibold">
-              {request.title}
-            </Heading>
-            <p data-part="location" className="mt-1 break-all font-mono text-base text-fg-muted">
-              {listing ? formatPath(listing.path) : "…"}
-            </p>
-          </div>
-          {places.length > 0 && (
-            <nav
-              data-part="places"
-              aria-label={t({ message: "Places", context: "folder browser" })}
-              className="flex flex-wrap gap-2"
-            >
-              {places.map((place, index) => {
-                const Icon = index === 0 ? Home : HardDrive;
-                return (
-                  <AriaButton
-                    key={place.path}
-                    data-part="place"
-                    data-status={index === placeIndex ? "active" : undefined}
-                    aria-current={index === placeIndex ? "true" : undefined}
-                    onPress={() => open(place.path)}
-                    className="flex min-h-11 items-center gap-2 rounded-control border border-border px-4 text-base outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring aria-[current]:border-accent-alt aria-[current]:bg-accent/10"
-                  >
-                    <Icon aria-hidden className="size-5 text-fg-muted" />
-                    {place.label}
-                  </AriaButton>
-                );
-              })}
-            </nav>
-          )}
-          {error && (
-            <p data-part="error" role="alert" className="text-base text-danger">
-              {error}
-            </p>
-          )}
-          <section
-            ref={list}
-            data-part="entries"
-            aria-label={t`Folder contents`}
-            className="min-h-0 flex-1 overflow-y-auto rounded-control border border-border bg-surface-base/40 p-1"
+      <Dialog
+        ref={dialog}
+        data-cs="folder-browser"
+        data-kind={request.kind}
+        className="flex min-h-0 flex-1 flex-col gap-4 p-6 outline-none"
+      >
+        <div>
+          <Heading slot="title" data-part="title" className="font-display text-2xl font-semibold">
+            {request.title}
+          </Heading>
+          <p data-part="location" className="mt-1 break-all font-mono text-base text-fg-muted">
+            {listing ? formatPath(listing.path) : "…"}
+          </p>
+        </div>
+        {places.length > 0 && (
+          <nav
+            data-part="places"
+            aria-label={t({ message: "Places", context: "folder browser" })}
+            className="flex flex-wrap gap-2"
           >
-            {listing?.parent && (
-              <AriaButton
-                data-part="up"
-                data-focus-default={landing === "up" || undefined}
-                onPress={() => listing.parent && open(listing.parent, listing.path)}
-                className={row}
-              >
-                <ArrowUp aria-hidden className="size-6 shrink-0 text-fg-muted" />
-                <span className="font-medium">
-                  <Trans>Up one folder</Trans>
-                </span>
-              </AriaButton>
-            )}
-            {entries.map(({ entry, enabled }) => {
-              const Icon = entry.isDir ? Folder : File;
+            {places.map((place, index) => {
+              const Icon = index === 0 ? Home : HardDrive;
               return (
                 <AriaButton
-                  key={entry.path}
-                  data-part="entry"
-                  data-focus-default={landing === entry.path || undefined}
-                  data-kind={entry.isDir ? "folder" : "file"}
-                  isDisabled={!enabled}
-                  onPress={() => (entry.isDir ? open(entry.path) : onClose(entry.path))}
-                  className={row}
+                  key={place.path}
+                  data-part="place"
+                  data-status={index === placeIndex ? "active" : undefined}
+                  aria-current={index === placeIndex ? "true" : undefined}
+                  onPress={() => open(place.path)}
+                  className="flex min-h-11 items-center gap-2 rounded-control border border-border px-4 text-base outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring aria-[current]:border-accent-alt aria-[current]:bg-accent/10"
                 >
-                  <Icon
-                    data-part="icon"
-                    aria-hidden
-                    className={`size-6 shrink-0 ${entry.isDir ? "text-accent-alt" : "text-fg-muted"}`}
-                  />
-                  <span data-part="name" className="min-w-0 truncate">
-                    {entry.name}
-                  </span>
+                  <Icon aria-hidden className="size-5 text-fg-muted" />
+                  {place.label}
                 </AriaButton>
               );
             })}
-            {listing && entries.length === 0 && (
-              <p data-part="empty" className="px-4 py-3 text-base text-fg-muted">
-                <Trans>This folder is empty.</Trans>
-              </p>
-            )}
-          </section>
-          <div data-part="actions" className="flex justify-end gap-3">
-            <Button autoFocus={!listing} onPress={() => onClose(null)}>
-              <Trans>Cancel</Trans>
-            </Button>
-            {folderMode && (
-              <Button
-                variant="primary"
-                data-part="select"
-                isDisabled={!listing}
-                onPress={() => listing && onClose(listing.path)}
+          </nav>
+        )}
+        {error && (
+          <p data-part="error" role="alert" className="text-base text-danger">
+            {error}
+          </p>
+        )}
+        <section
+          ref={list}
+          data-part="entries"
+          aria-label={t`Folder contents`}
+          className="min-h-0 flex-1 overflow-y-auto rounded-control border border-border bg-surface-base/40 p-1"
+        >
+          {listing?.parent && (
+            <AriaButton
+              data-part="up"
+              data-focus-default={landing === "up" || undefined}
+              onPress={() => listing.parent && open(listing.parent, listing.path)}
+              className={row}
+            >
+              <ArrowUp aria-hidden className="size-6 shrink-0 text-fg-muted" />
+              <span className="font-medium">
+                <Trans>Up one folder</Trans>
+              </span>
+            </AriaButton>
+          )}
+          {entries.map(({ entry, enabled }) => {
+            const Icon = entry.isDir ? Folder : File;
+            return (
+              <AriaButton
+                key={entry.path}
+                data-part="entry"
+                data-focus-default={landing === entry.path || undefined}
+                data-kind={entry.isDir ? "folder" : "file"}
+                isDisabled={!enabled}
+                onPress={() => (entry.isDir ? open(entry.path) : onClose(entry.path))}
+                className={row}
               >
-                <Trans>Select this folder</Trans>
-              </Button>
-            )}
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+                <Icon
+                  data-part="icon"
+                  aria-hidden
+                  className={`size-6 shrink-0 ${entry.isDir ? "text-accent-alt" : "text-fg-muted"}`}
+                />
+                <span data-part="name" className="min-w-0 truncate">
+                  {entry.name}
+                </span>
+              </AriaButton>
+            );
+          })}
+          {listing && entries.length === 0 && (
+            <p data-part="empty" className="px-4 py-3 text-base text-fg-muted">
+              <Trans>This folder is empty.</Trans>
+            </p>
+          )}
+        </section>
+        <div data-part="actions" className="flex justify-end gap-3">
+          <Button autoFocus={!listing} onPress={() => onClose(null)}>
+            <Trans>Cancel</Trans>
+          </Button>
+          {folderMode && (
+            <Button
+              variant="primary"
+              data-part="select"
+              isDisabled={!listing}
+              onPress={() => listing && onClose(listing.path)}
+            >
+              <Trans>Select this folder</Trans>
+            </Button>
+          )}
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }

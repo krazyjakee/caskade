@@ -33,11 +33,11 @@ import { STORE_GAMES, useOpenStoreGame } from "./game/origin";
 import { CatalogCard } from "./store/CatalogCard";
 import { listedGames } from "./store/releases";
 
-export const storeTabs = ["browse", "recent", "upcoming"] as const;
-export type StoreTab = (typeof storeTabs)[number];
+const storeTabs = ["browse", "recent", "upcoming"] as const;
+type StoreTab = (typeof storeTabs)[number];
 
 /** The Store's view, as its URL holds it. */
-export interface StoreSearch {
+interface StoreSearch {
   tab: StoreTab;
   sort?: CatalogSort;
   q?: string;

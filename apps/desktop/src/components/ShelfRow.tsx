@@ -12,7 +12,7 @@ import { useMode } from "../shell/console/mode";
 import { GAME_GRID_ROW_HEIGHT, useGameCardLayout } from "./gameCardLayout";
 
 /** Moves focus a page of cards along `items` (each child is a card). */
-export function pageShelf(items: HTMLElement, direction: 1 | -1): boolean {
+function pageShelf(items: HTMLElement, direction: 1 | -1): boolean {
   const cards = Array.from(items.children).filter(
     (card): card is HTMLElement => card instanceof HTMLElement,
   );
@@ -34,7 +34,7 @@ export function pageShelf(items: HTMLElement, direction: 1 | -1): boolean {
 }
 
 /** LT/RT page the shelf while focus is in it. */
-export function useShelfPaging(shelf: RefObject<HTMLElement | null>) {
+function useShelfPaging(shelf: RefObject<HTMLElement | null>) {
   const { t } = useLingui();
   const items = () => shelf.current?.querySelector<HTMLElement>('[data-part="items"]') ?? null;
   useInputAction(

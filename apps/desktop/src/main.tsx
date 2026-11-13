@@ -4,6 +4,7 @@ import "@fontsource-variable/oxanium";
 import { activateLocale, i18n, sourceLocale } from "@caskade/i18n";
 import { I18nProvider } from "@lingui/react";
 import { RouterProvider } from "@tanstack/react-router";
+import { isTauri } from "@tauri-apps/api/core";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { connectLibraryApi } from "./api/bootstrap";
@@ -40,6 +41,11 @@ const root = document.getElementById("root");
 if (!root) throw new Error("#root element missing from index.html");
 suppressNativeContextMenu();
 
+// A dev build in a plain browser has no core: in-memory backends stand in.
+if (import.meta.env.DEV && !isTauri())
+  (await import("./api/previewFixtures")).previewFixtures(
+    import.meta.env.VITE_CASKADE_FIXTURES === "1",
+  );
 const api = await connectLibraryApi();
 const installApi = await connectInstallApi();
 const emulationApi = await connectEmulationApi();

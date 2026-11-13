@@ -3,9 +3,10 @@ import type { MessageDescriptor } from "@lingui/core";
 import { msg } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation } from "@tanstack/react-query";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import type { DropPlan, InstallRequest, PeerSend } from "../../api/installRequests";
 import { formatSize } from "../../api/presentation";
+import { ModalFrame } from "../../components/ModalFrame";
 import { ShareInfoDetails } from "../../components/shares/ShareInfoDetails";
 
 export type { InstallRequest } from "../../api/installRequests";
@@ -29,102 +30,96 @@ export function InstallConfirmation({
       accept ? confirm(request.requestId) : dismiss(request.requestId),
   });
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable={!action.isPending}
-      onOpenChange={(open) => {
-        if (!open && !action.isPending) action.mutate(false);
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      busy={action.isPending}
+      close={() => action.mutate(false)}
+      className="w-full max-w-xl rounded-panel border border-border-strong bg-surface-raised p-6"
     >
-      <Modal className="w-full max-w-xl rounded-panel border border-border-strong bg-surface-raised p-6">
-        <Dialog
-          data-cs="install-confirmation"
-          data-focus-scope="install-confirmation"
-          className="outline-none"
-        >
-          {request.share ? (
-            <div data-part="share">
-              <Heading slot="title" className="font-display text-xl font-semibold">
-                {t`Receive ${shared}?`}
-              </Heading>
-              <div className="mt-3">
-                <ShareInfoDetails info={request.share} />
-              </div>
-              <p className="mt-3 text-sm text-fg-muted">
-                <Trans>
-                  It comes straight from their computer and installs like any other game; nothing is
-                  written until you say so.
-                </Trans>
-              </p>
-            </div>
-          ) : request.peer ? (
-            <PeerDetails peer={request.peer} />
-          ) : (
+      <Dialog
+        data-cs="install-confirmation"
+        data-focus-scope="install-confirmation"
+        className="outline-none"
+      >
+        {request.share ? (
+          <div data-part="share">
             <Heading slot="title" className="font-display text-xl font-semibold">
-              {title ? t`Install ${title}?` : t`Install this game?`}
+              {t`Receive ${shared}?`}
             </Heading>
-          )}
-          {request.peer || request.share ? null : request.plan ? (
-            <PlanDetails plan={request.plan} />
-          ) : (
-            <>
-              <p className="mt-3 text-sm text-fg-muted">
-                {request.kind === "url"
-                  ? t`An external link asked Caskade to install from this URL. Confirm only if you trust its source.`
-                  : t`An external link asked Caskade to install from this path. Confirm only if you trust its source.`}
-              </p>
-              <p
-                data-part="source"
-                className="mt-4 max-h-40 overflow-auto break-all rounded-control border border-border p-3 font-mono text-xs"
-              >
-                {request.value}
-              </p>
-            </>
-          )}
-          {request.kind === "url" && (
+            <div className="mt-3">
+              <ShareInfoDetails info={request.share} />
+            </div>
             <p className="mt-3 text-sm text-fg-muted">
               <Trans>
-                Nothing will be downloaded until you confirm. If the download is an installer
-                program, Caskade runs it, unless Settings → Installer asks first for downloaded
-                installers.
+                It comes straight from their computer and installs like any other game; nothing is
+                written until you say so.
               </Trans>
             </p>
-          )}
-          {action.isError && (
-            <p role="alert" className="mt-3 text-sm text-danger">
-              {action.error.message}
-            </p>
-          )}
-          <div className="mt-6 flex justify-end gap-2">
-            <Button
-              data-spatial="focusable"
-              autoFocus
-              isDisabled={action.isPending}
-              onPress={() => action.mutate(false)}
-            >
-              <Trans>Dismiss</Trans>
-            </Button>
-            <Button
-              data-spatial="focusable"
-              variant="primary"
-              isDisabled={action.isPending}
-              onPress={() => action.mutate(true)}
-            >
-              {request.share?.contents.kind === "collection"
-                ? t`Add to my collections`
-                : request.share
-                  ? t({ message: "Receive", context: "button" })
-                  : request.peer
-                    ? t`Copy here`
-                    : request.plan
-                      ? t({ message: "Install", context: "button", comment: "Starts an install" })
-                      : t`Confirm installation`}
-            </Button>
           </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+        ) : request.peer ? (
+          <PeerDetails peer={request.peer} />
+        ) : (
+          <Heading slot="title" className="font-display text-xl font-semibold">
+            {title ? t`Install ${title}?` : t`Install this game?`}
+          </Heading>
+        )}
+        {request.peer || request.share ? null : request.plan ? (
+          <PlanDetails plan={request.plan} />
+        ) : (
+          <>
+            <p className="mt-3 text-sm text-fg-muted">
+              {request.kind === "url"
+                ? t`An external link asked Caskade to install from this URL. Confirm only if you trust its source.`
+                : t`An external link asked Caskade to install from this path. Confirm only if you trust its source.`}
+            </p>
+            <p
+              data-part="source"
+              className="mt-4 max-h-40 overflow-auto break-all rounded-control border border-border p-3 font-mono text-xs"
+            >
+              {request.value}
+            </p>
+          </>
+        )}
+        {request.kind === "url" && (
+          <p className="mt-3 text-sm text-fg-muted">
+            <Trans>
+              Nothing will be downloaded until you confirm. If the download is an installer program,
+              Caskade runs it, unless Settings → Installer asks first for downloaded installers.
+            </Trans>
+          </p>
+        )}
+        {action.isError && (
+          <p role="alert" className="mt-3 text-sm text-danger">
+            {action.error.message}
+          </p>
+        )}
+        <div className="mt-6 flex justify-end gap-2">
+          <Button
+            data-spatial="focusable"
+            autoFocus
+            isDisabled={action.isPending}
+            onPress={() => action.mutate(false)}
+          >
+            <Trans>Dismiss</Trans>
+          </Button>
+          <Button
+            data-spatial="focusable"
+            variant="primary"
+            isDisabled={action.isPending}
+            onPress={() => action.mutate(true)}
+          >
+            {request.share?.contents.kind === "collection"
+              ? t`Add to my collections`
+              : request.share
+                ? t({ message: "Receive", context: "button" })
+                : request.peer
+                  ? t`Copy here`
+                  : request.plan
+                    ? t({ message: "Install", context: "button", comment: "Starts an install" })
+                    : t`Confirm installation`}
+          </Button>
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }
 

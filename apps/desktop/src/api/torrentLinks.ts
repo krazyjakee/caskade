@@ -3,8 +3,8 @@
  * Windows only offers it, and the user chooses it in Default apps. */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext } from "react";
 import { commands, type TorrentLinks } from "./bindings";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
 
 export type { TorrentLinks };
@@ -25,7 +25,7 @@ const preview: TorrentLinks = {
   torrentFiles: false,
 };
 
-export const nativeTorrentLinksApi: TorrentLinksApi = {
+const nativeTorrentLinksApi: TorrentLinksApi = {
   status: () => (isTauri() ? unwrap(commands.torrentLinksStatus()) : Promise.resolve(preview)),
   set: (open) => unwrap(commands.torrentLinksSet(open)),
   choose: async () => {
@@ -33,23 +33,13 @@ export const nativeTorrentLinksApi: TorrentLinksApi = {
   },
 };
 
-const TorrentLinksContext = createContext<TorrentLinksApi>(nativeTorrentLinksApi);
-
-/** Tests supply their own API; the app uses the native one. */
-export function TorrentLinksProvider({
-  api,
-  children,
-}: {
-  api: TorrentLinksApi;
-  children: ReactNode;
-}) {
-  return createElement(TorrentLinksContext.Provider, { value: api }, children);
-}
+const torrentLinks = injectable(() => nativeTorrentLinksApi);
+export const TorrentLinksProvider = torrentLinks.Provider;
 
 const torrentLinksKey = ["torrentLinks"] as const;
 
 export function useTorrentLinks() {
-  const api = useContext(TorrentLinksContext);
+  const api = torrentLinks.useApi();
   return useQuery({
     queryKey: torrentLinksKey,
     queryFn: () => api.status(),
@@ -60,7 +50,7 @@ export function useTorrentLinks() {
 }
 
 export function useSetTorrentLinks() {
-  const api = useContext(TorrentLinksContext);
+  const api = torrentLinks.useApi();
   const client = useQueryClient();
   return useMutation({
     mutationFn: (open: boolean) => api.set(open),
@@ -69,6 +59,6 @@ export function useSetTorrentLinks() {
 }
 
 export function useChooseTorrentLinks() {
-  const api = useContext(TorrentLinksContext);
+  const api = torrentLinks.useApi();
   return useMutation({ mutationFn: () => api.choose() });
 }

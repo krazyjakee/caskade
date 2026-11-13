@@ -29,10 +29,10 @@ export type RommSettings = RommSettings_Serialize;
 export type RommServer = RommServerConfig_Serialize;
 export type RommMapping = RommPlatformMapping_Serialize;
 export type RommServerStatus = ServerStatus_Serialize;
-export type RommCache = CacheStatus_Serialize;
+type RommCache = CacheStatus_Serialize;
 export type RommConnection = ConnectionReport_Serialize;
 export type RommDownload = DownloadProgress_Serialize;
-export type RommGameStatus = RommGameStatus_Serialize;
+type RommGameStatus = RommGameStatus_Serialize;
 
 export interface RommApi {
   overview(): Promise<RommOverview>;

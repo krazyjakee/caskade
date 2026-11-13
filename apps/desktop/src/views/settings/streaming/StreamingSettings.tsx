@@ -7,6 +7,7 @@
  * from and sets the quality for this device (#66); only an admin hosts or
  * accepts pairings (the core refuses the rest whatever this shows). No
  * technology's name appears: Caskade does the streaming. */
+
 import {
   Button,
   Select,
@@ -20,7 +21,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Cast, Download, Gauge, MonitorPlay, Plus, RefreshCw, Trash2, Wrench } from "lucide-react";
 import { useState } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import type { SettingsSnapshot } from "../../../api/settings";
 import {
   type HostOutcome,
@@ -38,6 +39,7 @@ import {
   useStreamingPrograms,
 } from "../../../api/streaming";
 import { FailureNotice } from "../../../components/FailureNotice";
+import { ModalFrame } from "../../../components/ModalFrame";
 import { PairRequestForm } from "../../../components/streaming/PairRequestForm";
 import { useDeviceAdmin } from "../devices/admin";
 import { SettingsStatus, settingsKeys, useSettingsSection } from "../useSettings";
@@ -221,60 +223,50 @@ function ExistingDialog({ close }: { close: () => void }) {
   const [password, setPassword] = useState("");
   const use = useStreamingAction((api, _: undefined) => api.hostThroughExisting(user, password));
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable={!use.isPending}
-      onOpenChange={(open) => {
-        if (!open && !use.isPending) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      busy={use.isPending}
+      close={close}
+      className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg"
     >
-      <Modal className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog
-          data-cs="streaming-existing"
-          aria-label={t`Streaming is already set up`}
-          className="outline-none"
+      <Dialog
+        data-cs="streaming-existing"
+        aria-label={t`Streaming is already set up`}
+        className="outline-none"
+      >
+        <Heading slot="title" className="font-display text-xl font-semibold">
+          {t`Streaming is already set up`}
+        </Heading>
+        <p className="mt-2 text-sm text-fg-muted">
+          <Trans>
+            Game streaming was set up on this device before. Caskade can use it, adding only its own
+            games. Enter the user name and password it was set up with.
+          </Trans>
+        </p>
+        <form
+          className="mt-4 flex flex-col gap-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (user && password) use.mutate(undefined, { onSuccess: close });
+          }}
         >
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            {t`Streaming is already set up`}
-          </Heading>
-          <p className="mt-2 text-sm text-fg-muted">
-            <Trans>
-              Game streaming was set up on this device before. Caskade can use it, adding only its
-              own games. Enter the user name and password it was set up with.
-            </Trans>
-          </p>
-          <form
-            className="mt-4 flex flex-col gap-3"
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (user && password) use.mutate(undefined, { onSuccess: close });
-            }}
-          >
-            <TextField label={t`User name`} value={user} onChange={setUser} autoFocus />
-            <TextField
-              label={t`Password`}
-              type="password"
-              value={password}
-              onChange={setPassword}
-            />
-            {use.error && <FailureNotice variant="inline" error={use.error} />}
-            <div className="mt-2 flex justify-end gap-2">
-              <Button isDisabled={use.isPending} onPress={close}>
-                <Trans>Leave it off</Trans>
-              </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                isDisabled={!user || !password || use.isPending}
-              >
-                {use.isPending ? t`Checking…` : t`Use it`}
-              </Button>
-            </div>
-          </form>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+          <TextField label={t`User name`} value={user} onChange={setUser} autoFocus />
+          <TextField label={t`Password`} type="password" value={password} onChange={setPassword} />
+          {use.error && <FailureNotice variant="inline" error={use.error} />}
+          <div className="mt-2 flex justify-end gap-2">
+            <Button isDisabled={use.isPending} onPress={close}>
+              <Trans>Leave it off</Trans>
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              isDisabled={!user || !password || use.isPending}
+            >
+              {use.isPending ? t`Checking…` : t`Use it`}
+            </Button>
+          </div>
+        </form>
+      </Dialog>
+    </ModalFrame>
   );
 }
 

@@ -5,14 +5,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FolderSearch, HardDrive, RotateCcw, TimerOff } from "lucide-react";
 import { useState } from "react";
-import {
-  Dialog,
-  Disclosure,
-  DisclosurePanel,
-  Heading,
-  Modal,
-  ModalOverlay,
-} from "react-aria-components";
+import { Dialog, Disclosure, DisclosurePanel, Heading } from "react-aria-components";
 import {
   type JobFailure,
   type JobRecovery,
@@ -21,6 +14,7 @@ import {
   type RecoveryAction,
 } from "../../api/install";
 import { formatTime } from "../../api/presentation";
+import { ModalFrame } from "../../components/ModalFrame";
 import { usePathPicker } from "../../components/pathBrowser/PathPicker";
 import { InstallRootPicker } from "../../components/storage/InstallRootPicker";
 import { activityKey, useActivityStorage, useFollowJob, useInstallApi } from "./ActivityProvider";
@@ -192,28 +186,22 @@ export function JobFailurePanel({
         </DisclosurePanel>
       </Disclosure>
       {choosingRoot && storageApi && (
-        <ModalOverlay
-          isOpen
-          isDismissable
-          onOpenChange={(open) => {
-            if (!open) setChoosingRoot(false);
-          }}
-          className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+        <ModalFrame
+          close={() => setChoosingRoot(false)}
+          className="max-h-[85vh] w-full max-w-xl overflow-auto rounded-panel border border-border-strong bg-surface-raised p-5"
         >
-          <Modal className="max-h-[85vh] w-full max-w-xl overflow-auto rounded-panel border border-border-strong bg-surface-raised p-5">
-            <Dialog aria-label={t`Choose another install location`} className="outline-none">
-              <InstallRootPicker
-                api={storageApi}
-                alwaysUseDefault={false}
-                onCancel={() => setChoosingRoot(false)}
-                onSelect={(rootId) => {
-                  setChoosingRoot(false);
-                  recover.mutate({ type: "chooseDestination", rootId });
-                }}
-              />
-            </Dialog>
-          </Modal>
-        </ModalOverlay>
+          <Dialog aria-label={t`Choose another install location`} className="outline-none">
+            <InstallRootPicker
+              api={storageApi}
+              alwaysUseDefault={false}
+              onCancel={() => setChoosingRoot(false)}
+              onSelect={(rootId) => {
+                setChoosingRoot(false);
+                recover.mutate({ type: "chooseDestination", rootId });
+              }}
+            />
+          </Dialog>
+        </ModalFrame>
       )}
     </section>
   );

@@ -1,6 +1,6 @@
 import { type RefObject, useLayoutEffect, useState } from "react";
 
-export const GAME_GRID_GAP = 16;
+const GAME_GRID_GAP = 16;
 export const GAME_GRID_ROW_HEIGHT = 312;
 
 /** Home shelves and the library use the same card dimensions at each width. */

@@ -6,6 +6,7 @@
  * asks first: Save, Discard or Stay. So do switching accounts and modes
  * (#58), which replace Settings without a navigation, and a close of the
  * window that would quit (`useCloseQuestion`). */
+
 import { Button } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useBlocker } from "@tanstack/react-router";
@@ -21,11 +22,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import { useRunningCount } from "../../api/hooks";
+import { ModalFrame } from "../../components/ModalFrame";
 import { useAppWindow } from "../../shell/appWindow";
 
-export interface UnsavedForm {
+interface UnsavedForm {
   /** What holds the edits, named in the question (e.g. "My profile"). */
   label: string;
   /** Saves the edits: false, or a rejection, when they weren't saved. */
@@ -284,68 +286,63 @@ function UnsavedChangesDialog({
     leave();
   };
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable={!saving}
-      onOpenChange={(open) => {
-        if (!open && !saving) stay();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      busy={saving}
+      close={stay}
+      className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg"
     >
-      <Modal className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog role="alertdialog" className="space-y-4 outline-none">
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            <Trans>Save your changes?</Trans>
-          </Heading>
-          <p className="text-sm text-fg-muted">
-            {leaving === "window" ? (
-              <Trans>
-                These changes aren't saved yet. Closing Caskade without saving loses them.
-              </Trans>
-            ) : leaving === "account" ? (
-              <Trans>
-                These changes aren't saved yet. Switching accounts without saving loses them.
-              </Trans>
-            ) : leaving === "mode" ? (
-              <Trans>
-                These changes aren't saved yet. Switching modes without saving loses them.
-              </Trans>
-            ) : (
-              <Trans>
-                These changes aren't saved yet. Leaving this section without saving loses them.
-              </Trans>
-            )}
-          </p>
-          <ul className="list-inside list-disc text-sm">
-            {forms.map((form) => (
-              <li key={form.label}>{form.label}</li>
-            ))}
-          </ul>
-          {failed && (
-            <p role="alert" className="text-sm text-danger">
-              <Trans>
-                Some changes couldn't be saved. Stay to fix them, or discard them and leave.
-              </Trans>
-            </p>
+      <Dialog role="alertdialog" className="space-y-4 outline-none">
+        <Heading slot="title" className="font-display text-xl font-semibold">
+          <Trans>Save your changes?</Trans>
+        </Heading>
+        <p className="text-sm text-fg-muted">
+          {leaving === "window" ? (
+            <Trans>
+              These changes aren't saved yet. Closing Caskade without saving loses them.
+            </Trans>
+          ) : leaving === "account" ? (
+            <Trans>
+              These changes aren't saved yet. Switching accounts without saving loses them.
+            </Trans>
+          ) : leaving === "mode" ? (
+            <Trans>
+              These changes aren't saved yet. Switching modes without saving loses them.
+            </Trans>
+          ) : (
+            <Trans>
+              These changes aren't saved yet. Leaving this section without saving loses them.
+            </Trans>
           )}
-          <div className="flex flex-wrap justify-end gap-2">
-            <Button data-spatial="focusable" variant="danger" isDisabled={saving} onPress={discard}>
-              <Trans comment="Leave a settings section without saving its changes">Discard</Trans>
-            </Button>
-            <Button data-spatial="focusable" data-focus-default isDisabled={saving} onPress={stay}>
-              <Trans comment="Keep editing the unsaved settings">Stay</Trans>
-            </Button>
-            <Button
-              data-spatial="focusable"
-              variant="primary"
-              isDisabled={saving}
-              onPress={() => void save()}
-            >
-              {saving ? t`Saving…` : t`Save`}
-            </Button>
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+        </p>
+        <ul className="list-inside list-disc text-sm">
+          {forms.map((form) => (
+            <li key={form.label}>{form.label}</li>
+          ))}
+        </ul>
+        {failed && (
+          <p role="alert" className="text-sm text-danger">
+            <Trans>
+              Some changes couldn't be saved. Stay to fix them, or discard them and leave.
+            </Trans>
+          </p>
+        )}
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button data-spatial="focusable" variant="danger" isDisabled={saving} onPress={discard}>
+            <Trans comment="Leave a settings section without saving its changes">Discard</Trans>
+          </Button>
+          <Button data-spatial="focusable" data-focus-default isDisabled={saving} onPress={stay}>
+            <Trans comment="Keep editing the unsaved settings">Stay</Trans>
+          </Button>
+          <Button
+            data-spatial="focusable"
+            variant="primary"
+            isDisabled={saving}
+            onPress={() => void save()}
+          >
+            {saving ? t`Saving…` : t`Save`}
+          </Button>
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }

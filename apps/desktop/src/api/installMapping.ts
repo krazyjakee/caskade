@@ -31,7 +31,7 @@ export type RawQuestion =
         options: { label: string; folder: string | null; copy: boolean }[];
       };
     };
-export interface RawFailure {
+interface RawFailure {
   kind: JobFailure["kind"];
   stage: JobFailure["stage"];
   path: string | null;

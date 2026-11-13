@@ -3,7 +3,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import { useQueryClient } from "@tanstack/react-query";
 import { CircleCheck, Download, ExternalLink } from "lucide-react";
 import { useState } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import {
   gamePortsKey,
   type Port,
@@ -12,7 +12,9 @@ import {
   useGamePorts,
   useInstallPort,
 } from "../../api/ports";
-import { activityKey, useFollowJob, useJobs } from "../activity/ActivityProvider";
+import { ModalFrame } from "../../components/ModalFrame";
+import { activityKey, useFollowJob } from "../activity/ActivityProvider";
+import { JobProgressText } from "../activity/JobProgressText";
 
 function ExternalAnchor({ href, children }: { href: string; children: React.ReactNode }) {
   return (
@@ -65,41 +67,17 @@ function Need({ need }: { need: PortNeeds }) {
 /** A port install as it runs. */
 function PortProgress({ jobId }: { jobId: string }) {
   const { t } = useLingui();
-  const job = useJobs().data?.find((each) => each.id === jobId);
-  if (!job)
-    return (
-      <p role="status" className="text-fg-muted">
-        <Trans>Starting the install…</Trans>
-      </p>
-    );
-  if (job.status === "completed")
-    return (
-      <p className="text-accent-alt">
-        <Trans>Installed: it's in Play from your library.</Trans>
-      </p>
-    );
-  if (job.status === "failed" || job.status === "cancelled") {
-    const error = job.error;
-    return (
-      <p role="alert" className="text-danger">
-        {job.status === "cancelled" ? t`The install was cancelled.` : t`Install failed: ${error}`}
-      </p>
-    );
-  }
-  if (job.status === "needs_user")
-    return (
-      <p className="text-fg-muted">
-        <Trans>The install needs a choice in Activity.</Trans>
-      </p>
-    );
-  const percent =
-    job.progress?.total && job.progress.unit === "bytes"
-      ? Math.floor((job.progress.completed / job.progress.total) * 100)
-      : null;
   return (
-    <p role="status" className="text-fg-muted">
-      {percent === null ? t`Installing…` : t`Installing… ${percent}%`}
-    </p>
+    <JobProgressText
+      jobId={jobId}
+      starting={<Trans>Starting the install…</Trans>}
+      completed={<Trans>Installed: it's in Play from your library.</Trans>}
+      ended={({ status, error }) =>
+        status === "cancelled" ? t`The install was cancelled.` : t`Install failed: ${error}`
+      }
+      needsUser={<Trans>The install needs a choice in Activity.</Trans>}
+      running={(_, percent) => (percent === null ? t`Installing…` : t`Installing… ${percent}%`)}
+    />
   );
 }
 
@@ -122,90 +100,85 @@ function InstallPortDialog({
   const { asset, release, checked } = port.here;
   const repository = `${port.owner}/${port.name}`;
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable={!pending}
-      onOpenChange={(open) => {
-        if (!open && !pending) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      busy={pending}
+      close={close}
+      className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg"
     >
-      <Modal className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog className="space-y-4 outline-none" aria-label={t`Install ${repository}?`}>
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            <Trans>Install {repository}?</Trans>
-          </Heading>
-          <p className="text-sm text-fg-muted">
-            <Trans>
-              Caskade downloads {asset} ({release}) from {repository} on GitHub and adds it to this
-              game as another way to play. It's a fan project, not the publisher's: installing it
-              runs code from that repository.
-            </Trans>
-          </p>
-          <p className="text-sm text-fg-muted">
-            {checked
-              ? t`The download is checked against the checksum in its install plan.`
-              : t`Its install plan has no checksum for the download, so it can't be checked.`}
-          </p>
-          {port.needs.length > 0 && (
-            <div className="text-sm">
-              <h3 className="font-semibold">
-                <Trans>It needs</Trans>
-              </h3>
-              <ul className="mt-1 list-disc space-y-1 pl-5">
-                {port.needs.map((need) => (
-                  <Need key={need.label} need={need} />
-                ))}
-              </ul>
-            </div>
-          )}
-          {port.notes.length > 0 && (
-            <div className="text-sm">
-              <h3 className="font-semibold">
-                <Trans>Notes</Trans>
-              </h3>
-              <ul className="mt-1 list-disc space-y-1 pl-5 text-fg-muted">
-                {port.notes.map((note) => (
-                  <li key={note}>{note}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {port.unsure.length > 0 && (
-            <div className="text-sm">
-              <h3 className="font-semibold">
-                <Trans>Not certain in the plan</Trans>
-              </h3>
-              <ul className="mt-1 list-disc space-y-1 pl-5 text-fg-muted">
-                {port.unsure.map((note) => (
-                  <li key={note}>{note}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {error && (
-            <p role="alert" className="text-sm text-danger">
-              {error}
-            </p>
-          )}
-          <div className="flex justify-end gap-2">
-            <Button data-spatial="focusable" isDisabled={pending} onPress={close}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button
-              data-spatial="focusable"
-              data-focus-default
-              variant="primary"
-              icon={Download}
-              isDisabled={pending}
-              onPress={confirm}
-            >
-              {pending ? t`Starting…` : t({ message: "Install", context: "port" })}
-            </Button>
+      <Dialog className="space-y-4 outline-none" aria-label={t`Install ${repository}?`}>
+        <Heading slot="title" className="font-display text-xl font-semibold">
+          <Trans>Install {repository}?</Trans>
+        </Heading>
+        <p className="text-sm text-fg-muted">
+          <Trans>
+            Caskade downloads {asset} ({release}) from {repository} on GitHub and adds it to this
+            game as another way to play. It's a fan project, not the publisher's: installing it runs
+            code from that repository.
+          </Trans>
+        </p>
+        <p className="text-sm text-fg-muted">
+          {checked
+            ? t`The download is checked against the checksum in its install plan.`
+            : t`Its install plan has no checksum for the download, so it can't be checked.`}
+        </p>
+        {port.needs.length > 0 && (
+          <div className="text-sm">
+            <h3 className="font-semibold">
+              <Trans>It needs</Trans>
+            </h3>
+            <ul className="mt-1 list-disc space-y-1 pl-5">
+              {port.needs.map((need) => (
+                <Need key={need.label} need={need} />
+              ))}
+            </ul>
           </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+        )}
+        {port.notes.length > 0 && (
+          <div className="text-sm">
+            <h3 className="font-semibold">
+              <Trans>Notes</Trans>
+            </h3>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-fg-muted">
+              {port.notes.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {port.unsure.length > 0 && (
+          <div className="text-sm">
+            <h3 className="font-semibold">
+              <Trans>Not certain in the plan</Trans>
+            </h3>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-fg-muted">
+              {port.unsure.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {error && (
+          <p role="alert" className="text-sm text-danger">
+            {error}
+          </p>
+        )}
+        <div className="flex justify-end gap-2">
+          <Button data-spatial="focusable" isDisabled={pending} onPress={close}>
+            <Trans>Cancel</Trans>
+          </Button>
+          <Button
+            data-spatial="focusable"
+            data-focus-default
+            variant="primary"
+            icon={Download}
+            isDisabled={pending}
+            onPress={confirm}
+          >
+            {pending ? t`Starting…` : t({ message: "Install", context: "port" })}
+          </Button>
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }
 

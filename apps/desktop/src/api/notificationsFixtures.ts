@@ -66,7 +66,7 @@ export function fixtureNotifications(): AppNotification[] {
   ];
 }
 
-export function fixtureMembers(count = 10): NotificationMember[] {
+function fixtureMembers(count = 10): NotificationMember[] {
   return Array.from({ length: count }, (_, i) => ({
     kind: "game" as const,
     label: `Fixture Game ${i + 1}`,

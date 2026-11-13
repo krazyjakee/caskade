@@ -6,8 +6,9 @@
  * when to read the feed again. */
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { commands, events } from "./bindings";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
 import { effectSubscription } from "./subscription";
 
@@ -20,8 +21,8 @@ export type NotificationCategory =
   | "achievementsUnlocked"
   | "shareReceived"
   | "shareArrived";
-export type NotificationSeverity = "info" | "warning" | "error";
-export type NotificationTarget =
+type NotificationSeverity = "info" | "warning" | "error";
+type NotificationTarget =
   | { type: "members" }
   | { type: "game"; gameId: string }
   | { type: "jobs" }
@@ -57,7 +58,7 @@ export interface NotificationPage {
   revision: number;
 }
 
-export type MemberState = "present" | "merged" | "removed" | "other";
+type MemberState = "present" | "merged" | "removed" | "other";
 
 export interface NotificationMember {
   kind: "game" | "gameUpdate" | "emulatorUpdate" | "toolUpdate";
@@ -89,7 +90,7 @@ export interface NotificationsApi {
 const emptyPage: NotificationPage = { items: [], total: 0, unread: 0, revision: 0 };
 
 /** The browser preview has no core: an empty feed. */
-export const nativeNotificationsApi: NotificationsApi = {
+const nativeNotificationsApi: NotificationsApi = {
   list: async (unreadOnly, offset, limit) =>
     isTauri()
       ? ((await unwrap(commands.notificationsList(unreadOnly, offset, limit))) as NotificationPage)
@@ -116,22 +117,11 @@ export const nativeNotificationsApi: NotificationsApi = {
       : () => {},
 };
 
-const NotificationsContext = createContext<NotificationsApi>(nativeNotificationsApi);
+export const { Provider: NotificationsProvider, useApi: useNotificationsApi } = injectable(
+  () => nativeNotificationsApi,
+);
 
-/** Tests and previews supply their own API; the app uses the native one. */
-export function NotificationsProvider({
-  api,
-  children,
-}: {
-  api: NotificationsApi;
-  children: ReactNode;
-}) {
-  return createElement(NotificationsContext.Provider, { value: api }, children);
-}
-
-export const useNotificationsApi = () => useContext(NotificationsContext);
-
-export const notificationKeys = {
+const notificationKeys = {
   all: ["notifications"] as const,
   unread: ["notifications", "unread"] as const,
   list: (unreadOnly: boolean, offset: number) =>
@@ -187,7 +177,7 @@ export function useNotificationMembers(id: string, limit: number) {
   });
 }
 
-export type NotificationAction =
+type NotificationAction =
   | { type: "read"; id: string; version: number }
   | { type: "unread"; id: string }
   | { type: "allRead"; revision: number };

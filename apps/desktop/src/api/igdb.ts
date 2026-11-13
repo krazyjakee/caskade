@@ -17,7 +17,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext } from "react";
 import {
   type CatalogReleases_Deserialize,
   type CatalogSearch_Deserialize,
@@ -27,45 +26,37 @@ import {
   type IgdbAgeRating,
   type IgdbCatalogFilters_Serialize,
   type IgdbCatalogPage_Serialize,
-  type IgdbExternalId_Serialize,
   type IgdbGame_Serialize,
-  type IgdbImage_Serialize,
-  type IgdbImages_Serialize,
   type IgdbListedRelease_Serialize,
   type IgdbLookup_Serialize,
   type IgdbOwned_Serialize,
-  type IgdbPlatform_Serialize,
   type IgdbReleaseDate_Serialize,
   type IgdbStoreLink_Serialize,
   type IgdbWebsite_Serialize,
   type MatchSource,
   type CatalogSort as NativeCatalogSort,
-  type ReleasePrecision_Serialize,
 } from "./bindings";
+import { injectable } from "./injectable";
 import { libraryKeys } from "./provider";
 import { unwrap } from "./reply";
 
 export type IgdbGame = IgdbGame_Serialize;
-export type IgdbImage = IgdbImage_Serialize;
-export type IgdbImages = IgdbImages_Serialize;
-export type IgdbPlatform = IgdbPlatform_Serialize;
-export type IgdbExternalId = IgdbExternalId_Serialize;
-export type IgdbLookup = IgdbLookup_Serialize;
+type IgdbLookup = IgdbLookup_Serialize;
 export type GameIgdb = GameIgdb_Serialize;
 export type { IgdbAgeRating, MatchSource };
-export type GameAgeRatings = GameAgeRatings_Serialize;
+
+type GameAgeRatings = GameAgeRatings_Serialize;
 export type IgdbReleaseDate = IgdbReleaseDate_Serialize;
-export type ReleasePrecision = ReleasePrecision_Serialize;
 export type IgdbStoreLink = IgdbStoreLink_Serialize;
 export type IgdbWebsite = IgdbWebsite_Serialize;
 export type CatalogPage = IgdbCatalogPage_Serialize;
 export type ListedRelease = IgdbListedRelease_Serialize;
-export type CatalogFilters = IgdbCatalogFilters_Serialize;
+type CatalogFilters = IgdbCatalogFilters_Serialize;
 export type IgdbOwned = IgdbOwned_Serialize;
 export type CatalogSearch = CatalogSearch_Deserialize;
 export type CatalogReleases = CatalogReleases_Deserialize;
 
-export interface IgdbApi {
+interface IgdbApi {
   /** Games in the order asked for; ids IGDB has no game for are in `notFound`, ids the server
    * couldn't answer yet in `pending`. Fails only when the server can't be reached and none of
    * the ids are cached. */
@@ -115,21 +106,17 @@ export const nativeGameIgdbApi: GameIgdbApi = {
   ageRatings: (gameId) => native(() => unwrap(commands.gameAgeRatings(gameId))),
 };
 
-const GameIgdbContext = createContext<GameIgdbApi>(nativeGameIgdbApi);
-
-/** Tests and previews supply their own API; the app uses the native one. */
-export function GameIgdbProvider({ api, children }: { api: GameIgdbApi; children: ReactNode }) {
-  return createElement(GameIgdbContext.Provider, { value: api }, children);
-}
+const gameIgdb = injectable(() => nativeGameIgdbApi);
+export const GameIgdbProvider = gameIgdb.Provider;
 
 /** Under `library`, so the core's library events (a match being applied)
  * refresh it. */
-export const gameIgdbKey = (gameId: string) => [...libraryKeys.all, "igdb", gameId];
+const gameIgdbKey = (gameId: string) => [...libraryKeys.all, "igdb", gameId];
 
 /** A local read, so a failure isn't worth retrying: library refreshes
  * (a launch's, say) wait for this query too. */
 export function useGameIgdb(gameId: string) {
-  const api = useContext(GameIgdbContext);
+  const api = gameIgdb.useApi();
   return useQuery({
     queryKey: gameIgdbKey(gameId),
     queryFn: () => api.game(gameId),
@@ -140,7 +127,7 @@ export function useGameIgdb(gameId: string) {
 /** Searches ask the metadata server, and so IGDB, every time: keep each
  * answer a while. Off until there is something to search for. */
 export function useIgdbSearch(query: string) {
-  const api = useContext(GameIgdbContext);
+  const api = gameIgdb.useApi();
   const text = query.trim();
   return useQuery({
     queryKey: ["igdb", "search", text],
@@ -153,7 +140,7 @@ export function useIgdbSearch(query: string) {
 
 /** Under `library`, so a match being applied refreshes it. */
 export function useGameAgeRatings(gameId: string) {
-  const api = useContext(GameIgdbContext);
+  const api = gameIgdb.useApi();
   return useQuery({
     queryKey: [...libraryKeys.all, "age-ratings", gameId],
     queryFn: () => api.ageRatings(gameId),
@@ -161,7 +148,7 @@ export function useGameAgeRatings(gameId: string) {
   });
 }
 
-export type GameIgdbChange =
+type GameIgdbChange =
   | { type: "set"; igdbId: string | null }
   | { type: "rematch" }
   | { type: "refresh" };
@@ -174,7 +161,7 @@ export const gameIgdbChangeKey = (gameId: string) => ["gameIgdbChange", gameId];
  * change that merges the game into another that is the same game answers
  * for that one, and `onMerged` gets its id. */
 export function useChangeGameIgdb(gameId: string, onMerged?: (gameId: string) => void) {
-  const api = useContext(GameIgdbContext);
+  const api = gameIgdb.useApi();
   const client = useQueryClient();
   return useMutation({
     mutationKey: gameIgdbChangeKey(gameId),
@@ -194,7 +181,7 @@ export function useChangeGameIgdb(gameId: string, onMerged?: (gameId: string) =>
 
 /** Separates one of a game's entries into a game of its own. */
 export function useSeparateEntry() {
-  const api = useContext(GameIgdbContext);
+  const api = gameIgdb.useApi();
   const client = useQueryClient();
   return useMutation({
     mutationFn: (entryId: string) => api.separate(entryId),
@@ -218,7 +205,7 @@ export interface CatalogApi {
   owned(ids: string[]): Promise<IgdbOwned[]>;
 }
 
-const ipcCatalogApi: CatalogApi = {
+export const nativeCatalogApi: CatalogApi = {
   search: (search) => native(() => unwrap(commands.igdbCatalogSearch(search))),
   recent: (releases) => native(() => unwrap(commands.igdbCatalogRecent(releases))),
   upcoming: (releases) => native(() => unwrap(commands.igdbCatalogUpcoming(releases))),
@@ -227,44 +214,18 @@ const ipcCatalogApi: CatalogApi = {
   owned: (ids) => native(() => unwrap(commands.igdbOwned(ids))),
 };
 
-/** Dev builds started with `VITE_CASKADE_FIXTURES=1` browse a fixture
- * catalog instead (README.md). */
-export const nativeCatalogApi: CatalogApi =
-  import.meta.env.DEV && import.meta.env.VITE_CASKADE_FIXTURES === "1"
-    ? lazyCatalogFixtures()
-    : ipcCatalogApi;
-
-function lazyCatalogFixtures(): CatalogApi {
-  let loading: Promise<CatalogApi> | undefined;
-  const load = () => {
-    loading ??= import("./catalogFixtures").then((module) => module.createCatalogFixtureApi());
-    return loading;
-  };
-  return {
-    search: (search) => load().then((api) => api.search(search)),
-    recent: (releases) => load().then((api) => api.recent(releases)),
-    upcoming: (releases) => load().then((api) => api.upcoming(releases)),
-    filters: () => load().then((api) => api.filters()),
-    games: (ids) => load().then((api) => api.games(ids)),
-    owned: (ids) => load().then((api) => api.owned(ids)),
-  };
-}
-
-const CatalogContext = createContext<CatalogApi>(nativeCatalogApi);
-
-/** Tests and previews supply their own catalog; the app uses the core's. */
-export function CatalogProvider({ api, children }: { api: CatalogApi; children: ReactNode }) {
-  return createElement(CatalogContext.Provider, { value: api }, children);
-}
+const catalog = injectable(() => nativeCatalogApi);
+export const CatalogProvider = catalog.Provider;
+export const previewCatalog = catalog.preview;
 
 /** Games per catalog page. */
-export const CATALOG_PAGE = 24;
+const CATALOG_PAGE = 24;
 
 export type CatalogShelf = "recent" | "upcoming" | "tbd";
 
 export type CatalogSort = NativeCatalogSort;
 
-export interface CatalogQuery {
+interface CatalogQuery {
   sort?: CatalogSort;
   query?: string;
   platform?: string;
@@ -288,7 +249,7 @@ function yearAgo(): string {
 const catalogCache = { retry: false, staleTime: 5 * 60_000 } as const;
 
 export function useCatalogSearch(search: CatalogQuery) {
-  const api = useContext(CatalogContext);
+  const api = catalog.useApi();
   const query = search.query?.trim() || null;
   const year = search.year;
   const since = !year && search.pastYear ? yearAgo() : null;
@@ -327,7 +288,7 @@ export function useCatalogReleases(
   shelf: CatalogShelf,
   { platform, genre, limit = CATALOG_PAGE }: { platform?: string; genre?: string; limit?: number },
 ) {
-  const api = useContext(CatalogContext);
+  const api = catalog.useApi();
   return useInfiniteQuery({
     queryKey: ["igdb", "catalog", shelf, platform, genre, limit],
     queryFn: ({ pageParam }) => {
@@ -348,7 +309,7 @@ export function useCatalogReleases(
 }
 
 export function useCatalogFilters() {
-  const api = useContext(CatalogContext);
+  const api = catalog.useApi();
   return useQuery({
     queryKey: ["igdb", "catalog", "filters"],
     queryFn: () => api.filters(),
@@ -359,7 +320,7 @@ export function useCatalogFilters() {
 
 /** Catalog games by id, in the order asked for; off without ids. */
 export function useCatalogGames(ids: string[]) {
-  const api = useContext(CatalogContext);
+  const api = catalog.useApi();
   return useQuery({
     queryKey: ["igdb", "catalog", "games", ids],
     queryFn: () => api.games(ids),
@@ -371,7 +332,7 @@ export function useCatalogGames(ids: string[]) {
 /** Which of `ids` are in the library: under `library`, so library changes
  * (an install, a new match) refresh it. */
 export function useCatalogOwned(ids: string[]) {
-  const api = useContext(CatalogContext);
+  const api = catalog.useApi();
   const sorted = [...new Set(ids)].sort();
   return useQuery({
     queryKey: [...libraryKeys.all, "igdb-owned", sorted],

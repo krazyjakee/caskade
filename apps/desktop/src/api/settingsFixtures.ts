@@ -167,12 +167,14 @@ function fixturesOnboarded(): boolean {
   }
 }
 
-const sections: {
+export interface FixtureSection {
   namespace: string;
   version: number;
   schema?: unknown;
   defaults: Record<string, unknown>;
-}[] = [
+}
+
+const sections: FixtureSection[] = [
   {
     namespace: "core.general",
     version: 1,
@@ -209,20 +211,16 @@ const sections: {
   { namespace: "core.launchers", version: 1, defaults: { enabled: enabled(launchers) } },
   {
     namespace: "core.discovery",
-    version: 1,
+    version: 2,
     defaults: {
       enabled: true,
       scanOnStartup: true,
       backgroundRefresh: true,
       refreshInterval: "24h",
-      rescanAfterLauncherInstall: true,
       watchFolders: true,
-      mergeDuplicates: true,
-      preferLauncherMetadata: true,
       deepScans: {
         customFolders: false,
         externalDrives: false,
-        romDirectories: false,
         portableExecutables: false,
         winePrefixes: false,
         fullDisk: false,
@@ -337,9 +335,15 @@ const sections: {
   { namespace: "discovery.import", version: 1, defaults: { seedPlaytime: true } },
 ];
 
-export function createSettingsFixtureApi(): SettingsApi {
-  const values = new Map(sections.map(({ namespace, defaults }) => [namespace, defaults]));
+/** Settings sections in memory, starting at their defaults: `values` holds
+ * each section's value and takes every write; `writes` lists the namespaces
+ * written, in order. */
+export function createSettingsStore(sections: readonly FixtureSection[]) {
+  const values: Record<string, Record<string, unknown>> = Object.fromEntries(
+    sections.map(({ namespace, defaults }) => [namespace, structuredClone(defaults)]),
+  );
   const revisions = new Map<string, number>();
+  const writes: string[] = [];
   const listeners = new Set<(event: SettingsChanged) => void>();
   const section = (namespace: string) => {
     const found = sections.find((candidate) => candidate.namespace === namespace);
@@ -350,7 +354,7 @@ export function createSettingsFixtureApi(): SettingsApi {
     namespace,
     version: section(namespace).version,
     revision: revisions.get(namespace) ?? 0,
-    value: structuredClone(values.get(namespace) ?? {}) as Record<string, unknown>,
+    value: structuredClone(values[namespace] ?? {}),
   });
   const api: SettingsApi = {
     sections: async () =>
@@ -367,8 +371,9 @@ export function createSettingsFixtureApi(): SettingsApi {
       const { version } = section(namespace);
       if (revision !== (revisions.get(namespace) ?? 0))
         throw new Error("These settings changed elsewhere. Reload and try again.");
-      values.set(namespace, structuredClone(value));
+      values[namespace] = structuredClone(value) as Record<string, unknown>;
       revisions.set(namespace, revision + 1);
+      writes.push(namespace);
       for (const listener of listeners) listener({ namespace, version });
       return snapshot(namespace);
     },
@@ -381,8 +386,8 @@ export function createSettingsFixtureApi(): SettingsApi {
       };
     },
   };
-  return api;
+  return { api, values, writes };
 }
 
 /** One store for the whole page, shared by every consumer of the settings API. */
-export const settingsFixtureApi = createSettingsFixtureApi();
+export const settingsFixtureApi = createSettingsStore(sections).api;

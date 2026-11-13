@@ -42,7 +42,7 @@ export function remember(element: HTMLElement) {
   }
 }
 
-export function remembered(of: Element): HTMLElement | null {
+function remembered(of: Element): HTMLElement | null {
   const element = memory.get(of);
   return element && isFocusable(element) && of.contains(element) ? element : null;
 }

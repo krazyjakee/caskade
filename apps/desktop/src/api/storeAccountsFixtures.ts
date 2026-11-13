@@ -96,7 +96,7 @@ function account(
 
 /** Owned releases of fixture games `g1` (installable), `g2` (no launcher)
  * and `g3` (another system); entry ids start with their game's id. */
-export function fixtureReleases(): OwnedRelease[] {
+function fixtureReleases(): OwnedRelease[] {
   const release = (entryId: string, state: OwnedRelease["state"]): OwnedRelease => ({
     entryId,
     storeAccountId: "a1",

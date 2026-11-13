@@ -4,7 +4,7 @@ import { libraryKeys, useLibraryApi } from "./provider";
 import type { CollectionsApi, SaveCollectionInput } from "./types";
 
 /** Under the library's keys, so library events refresh smart collections. */
-export const collectionKeys = {
+const collectionKeys = {
   all: [...libraryKeys.all, "collections"] as const,
   members: (id: string) => [...libraryKeys.all, "collections", "members", id] as const,
   games: (id: string) => [...libraryKeys.all, "collections", "games", id] as const,

@@ -46,7 +46,7 @@ interface Layout {
 const english: Layout = { letters: ["qwertyuiop-_", "asdfghjkl:./", "zxcvbnm,@'"] };
 /** A layout per language, as its people's keyboards are, with the letters
  * the language needs within a pad's reach. Others get English's. */
-export const keyboardLayouts: Readonly<Record<string, Layout>> = {
+const keyboardLayouts: Readonly<Record<string, Layout>> = {
   en: english,
   // AZERTY, with é è à ç on the letters and the other accents on the symbols.
   fr: { letters: ["azertyuiopéè", "qsdfghjklmàç", "wxcvbn,.-'"], more: "âêîôûëïüùœ:_" },
@@ -56,7 +56,7 @@ export const keyboardLayouts: Readonly<Record<string, Layout>> = {
   sv: { letters: ["qwertyuiopå-", "asdfghjklöä.", "zxcvbnm,@'"], more: ":_éü" },
 };
 /** The layout for `locale` (`fr-CA` is French's), else English's. */
-export function layoutFor(locale: string): Layout {
+function layoutFor(locale: string): Layout {
   const language = locale.toLowerCase().split("-")[0] ?? "";
   return keyboardLayouts[language] ?? english;
 }

@@ -10,7 +10,7 @@ import { emptyServer, type RommApi, type RommAuth, type RommServer, serverId } f
 import type { SettingsApi } from "../api/settings";
 import type { Cue } from "./sound";
 
-export interface RommChoice {
+interface RommChoice {
   url: string;
   /** A username and password, or an API token made in RomM. */
   auth: RommAuth;
@@ -42,7 +42,7 @@ export const defaultChoices: Choices = {
   online: true,
 };
 
-export type TaskId = "games" | "emulators" | "roms" | "romm" | "artwork";
+type TaskId = "games" | "emulators" | "roms" | "romm" | "artwork";
 export type TaskState =
   | "waiting"
   | "running"
@@ -58,14 +58,14 @@ export interface Task {
   detail: string;
 }
 
-export interface SetupApis {
+interface SetupApis {
   settings: SettingsApi;
   discovery: DiscoveryApi;
   emulation: EmulationApi;
   romm: RommApi;
 }
 
-export interface RunOptions {
+interface RunOptions {
   update(tasks: Task[]): void;
   cue(cue: Cue): void;
   /** Settings are saved; remaining work can continue after leaving setup. */
@@ -103,7 +103,7 @@ async function updateSection(
 
 /** Saves the choices that are settings. Setup counts as done from here:
  * the first scan and the online lookups may start. */
-export async function saveChoices(api: SettingsApi, choices: Choices): Promise<void> {
+async function saveChoices(api: SettingsApi, choices: Choices): Promise<void> {
   await updateSection(api, "core.discovery", { enabled: choices.pcGames });
   // The play history section belongs to discovery's sources; without it
   // there is nothing to keep.

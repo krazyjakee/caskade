@@ -22,13 +22,11 @@ function Gallery({ cells }: { cells: [label: string, content: ReactNode][] }) {
   );
 }
 
-/** The domain states the package renders (app-only ones are the app's). */
+/** The domain states the package renders. */
 export function uiStates(name: UiName): [attribute: string, value: string][] {
-  const entry = anatomy[name];
-  const appOnly: readonly string[] = "appOnly" in entry ? entry.appOnly : [];
-  return Object.entries(entry.states as Record<string, readonly string[]>)
-    .filter(([attribute]) => !appOnly.includes(attribute))
-    .flatMap(([attribute, values]) => values.map((value): [string, string] => [attribute, value]));
+  return Object.entries(anatomy[name].states as Record<string, readonly string[]>).flatMap(
+    ([attribute, values]) => values.map((value): [string, string] => [attribute, value]),
+  );
 }
 
 export const parts = (name: UiName): Story => ({

@@ -1,7 +1,7 @@
 /** Ports for the browser preview and tests: every game has the same two. */
 import type { GamePorts, Port, PortsApi } from "./ports";
 
-export const fixturePorts: Port[] = [
+const fixturePorts: Port[] = [
   {
     project: "github:zelda64recomp/zelda64recomp",
     name: "Zelda64Recomp",

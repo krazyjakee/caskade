@@ -10,7 +10,9 @@ The browser fixture transport is selected **only** by `import.meta.env.DEV` plus
 VITE_CASKADE_FIXTURES=1 VITE_CASKADE_FIXTURE_COUNT=1203 pnpm --filter @caskade/desktop exec vite --port 1421
 ```
 
-The same switch gives settings (`settingsFixtures.ts`), discovery, storage and the plugin manager in-memory fixtures, so every Settings tab renders in the browser; their exported APIs stay synchronous through `lazyApi`. Production builds eliminate the fixture import. Fixture records are original synthetic metadata; no contributor library is copied into frontend tests.
+The same switch gives settings (`settingsFixtures.ts`), browse, discovery and storage in-memory fixtures, so every Settings tab renders in the browser; their exported APIs stay synchronous through `lazyApi`.
+
+A dev build opened in a plain browser (`just web`, no core) gets the backends `injectable` serves from `previewFixtures.ts`, which `main.tsx` loads before the first render, with or without the switch: backup, streaming, store accounts, shares and devices always use their fixtures, and game pages list no ports. With `VITE_CASKADE_FIXTURES=1` games list fixture ports, and add-ons, achievements, the Store catalog and the plugin manager use their fixtures too; without it those four answer as the native API does outside the desktop app ("Open Caskade desktop…", no achievements). Inside Tauri the native APIs always serve. Production builds load none of this: `main.tsx`'s import sits behind `import.meta.env.DEV`, so the bundle drops every fixture. Fixture records are original synthetic metadata; no contributor library is copied into frontend tests.
 
 Grid/list use TanStack Virtual rows, memoized cards and exact 320/96 pixel cache thumbnails. Details use the 960 variant; missing variants retain a themed placeholder, never an original-image fallback. `convertFileSrc(path, 'caskade-asset')` handles the platform-specific custom scheme. Artwork cache confinement is enforced again in Rust.
 

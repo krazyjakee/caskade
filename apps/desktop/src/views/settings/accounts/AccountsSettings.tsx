@@ -7,7 +7,6 @@ import { t as translate } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { Pencil, Plus, ShieldCheck, Trash2, Users } from "lucide-react";
 import { useState } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { type Account, useAccounts, useDeleteAccount } from "../../../api/accounts";
 import {
   ACCOUNTS_SETTINGS,
@@ -15,6 +14,7 @@ import {
   boardName,
   DEFAULT_BOARD,
 } from "../../../components/AgeRatingLabel";
+import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { FailureNotice } from "../../../components/FailureNotice";
 import { SectionSync } from "../devices/SectionSync";
 import { useSettingsSection } from "../useSettings";
@@ -49,48 +49,19 @@ function DeleteAccountDialog({ account, close }: { account: Account; close: () =
   const { t } = useLingui();
   const remove = useDeleteAccount();
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable={!remove.isPending}
-      onOpenChange={(open) => {
-        if (!open && !remove.isPending) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ConfirmDialog
+      title={t`Delete ${{ name: account.name }}?`}
+      confirmLabel={t`Delete`}
+      pendingLabel={t`Deleting…`}
+      isPending={remove.isPending}
+      error={remove.error}
+      onConfirm={() => remove.mutate(account.id, { onSuccess: close })}
+      close={close}
     >
-      <Modal className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog role="alertdialog" className="space-y-4 outline-none">
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            {t`Delete ${{ name: account.name }}?`}
-          </Heading>
-          <p className="text-sm text-fg-muted">
-            {t`${{ name: account.name }}'s collections go with it. Games, installs and play history stay.`}
-          </p>
-          {remove.error && (
-            <p role="alert" className="text-sm text-danger">
-              {sentence(remove.error)}
-            </p>
-          )}
-          <div className="flex justify-end gap-2">
-            <Button
-              data-spatial="focusable"
-              data-focus-default
-              isDisabled={remove.isPending}
-              onPress={close}
-            >
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button
-              data-spatial="focusable"
-              variant="danger"
-              isDisabled={remove.isPending}
-              onPress={() => remove.mutate(account.id, { onSuccess: close })}
-            >
-              {remove.isPending ? <Trans>Deleting…</Trans> : <Trans>Delete</Trans>}
-            </Button>
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+      <p>
+        {t`${{ name: account.name }}'s collections go with it. Games, installs and play history stay.`}
+      </p>
+    </ConfirmDialog>
   );
 }
 

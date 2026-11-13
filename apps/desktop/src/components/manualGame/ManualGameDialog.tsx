@@ -3,12 +3,13 @@
  * title-only record of a game Caskade can't start (a cartridge, a disc on a
  * shelf). A game that may already be in the library offers to add the
  * target to it, or to keep the new one apart. */
+
 import { Button, TextField } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useNavigate } from "@tanstack/react-router";
 import { FileSearch } from "lucide-react";
 import { useState } from "react";
-import { Dialog, Form, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Form, Heading } from "react-aria-components";
 import {
   type DuplicateGame,
   type ManualTarget,
@@ -18,6 +19,7 @@ import {
 import { formatPath } from "../../api/presentation";
 import { errorMessage } from "../../api/reply";
 import { useDropZone } from "../../drop/DropProvider";
+import { ModalFrame } from "../ModalFrame";
 import { usePathPicker } from "../pathBrowser/PathPicker";
 
 export type ManualMode = "target" | "title";
@@ -93,163 +95,159 @@ export function ManualGameDialog({ mode, close }: { mode: ManualMode; close: () 
   const failure = error ?? add.error?.message ?? null;
   const ready = Boolean(title.trim()) && (mode === "title" || target !== null);
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable={!busy}
-      onOpenChange={(open) => {
-        if (!open && !busy) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm console:p-0"
+    <ModalFrame
+      busy={busy}
+      close={close}
+      consoleFill
+      className="flex max-h-[88vh] w-full max-w-xl flex-col rounded-panel border border-border-strong bg-surface-raised shadow-lg console:h-full console:max-h-none console:max-w-none console:rounded-none"
     >
-      <Modal className="flex max-h-[88vh] w-full max-w-xl flex-col rounded-panel border border-border-strong bg-surface-raised shadow-lg console:h-full console:max-h-none console:max-w-none console:rounded-none">
-        <Dialog
-          data-cs="manual-game"
-          data-mode={mode}
-          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-6 outline-none"
+      <Dialog
+        data-cs="manual-game"
+        data-mode={mode}
+        className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-6 outline-none"
+      >
+        <Heading slot="title" className="font-display text-xl font-semibold">
+          {mode === "target" ? (
+            <Trans>Add a game on this computer</Trans>
+          ) : (
+            <Trans>Add a game by title</Trans>
+          )}
+        </Heading>
+        <p className="text-sm text-fg-muted">
+          {mode === "target" ? (
+            <Trans>
+              Caskade starts it where it is: nothing is copied, moved or installed. To install a
+              game instead, use Install from file or drop it on the library.
+            </Trans>
+          ) : (
+            <Trans>
+              A record for a game Caskade can't start, like a cartridge or a disc: it keeps your
+              notes, artwork and collections. Add something to start later in Edit details.
+            </Trans>
+          )}
+        </p>
+        <Form
+          className="flex flex-col gap-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            submit();
+          }}
         >
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            {mode === "target" ? (
-              <Trans>Add a game on this computer</Trans>
-            ) : (
-              <Trans>Add a game by title</Trans>
-            )}
-          </Heading>
-          <p className="text-sm text-fg-muted">
-            {mode === "target" ? (
-              <Trans>
-                Caskade starts it where it is: nothing is copied, moved or installed. To install a
-                game instead, use Install from file or drop it on the library.
-              </Trans>
-            ) : (
-              <Trans>
-                A record for a game Caskade can't start, like a cartridge or a disc: it keeps your
-                notes, artwork and collections. Add something to start later in Edit details.
-              </Trans>
-            )}
-          </p>
-          <Form
-            className="flex flex-col gap-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              submit();
+          {mode === "target" && (
+            <section
+              ref={zone.ref}
+              data-part="target"
+              data-drop-active={zone.active || undefined}
+              aria-label={t`What it starts`}
+              className={`flex flex-col gap-3 rounded-panel border border-dashed p-4 ${zone.active ? "border-accent-alt" : "border-border-strong"}`}
+            >
+              <TextField
+                label={t`Program, shortcut or URI`}
+                description={t`A path, a .desktop, .lnk or .url shortcut, or a URI like steam://rungameid/620. Or drop a file here.`}
+                mono
+                value={input}
+                onChange={(value) => {
+                  setInput(value);
+                  setTarget(null);
+                  setDuplicates(null);
+                }}
+                onBlur={() => {
+                  if (input.trim() && !target) resolve(input);
+                }}
+                action={
+                  <Button
+                    data-spatial="focusable"
+                    icon={FileSearch}
+                    onPress={choose}
+                    isDisabled={busy}
+                  >
+                    <Trans>Browse…</Trans>
+                  </Button>
+                }
+              />
+              {target && <TargetSummary target={target} />}
+            </section>
+          )}
+          <TextField
+            label={t`Title`}
+            value={title}
+            onChange={(value) => {
+              setTitle(value);
+              setDuplicates(null);
             }}
-          >
-            {mode === "target" && (
-              <section
-                ref={zone.ref}
-                data-part="target"
-                data-drop-active={zone.active || undefined}
-                aria-label={t`What it starts`}
-                className={`flex flex-col gap-3 rounded-panel border border-dashed p-4 ${zone.active ? "border-accent-alt" : "border-border-strong"}`}
-              >
-                <TextField
-                  label={t`Program, shortcut or URI`}
-                  description={t`A path, a .desktop, .lnk or .url shortcut, or a URI like steam://rungameid/620. Or drop a file here.`}
-                  mono
-                  value={input}
-                  onChange={(value) => {
-                    setInput(value);
-                    setTarget(null);
-                    setDuplicates(null);
-                  }}
-                  onBlur={() => {
-                    if (input.trim() && !target) resolve(input);
-                  }}
-                  action={
-                    <Button
-                      data-spatial="focusable"
-                      icon={FileSearch}
-                      onPress={choose}
-                      isDisabled={busy}
-                    >
-                      <Trans>Browse…</Trans>
-                    </Button>
-                  }
-                />
-                {target && <TargetSummary target={target} />}
-              </section>
-            )}
-            <TextField
-              label={t`Title`}
-              value={title}
-              onChange={(value) => {
-                setTitle(value);
-                setDuplicates(null);
-              }}
-              isRequired
-            />
-            {duplicates && duplicates.length > 0 && (
-              <section
-                data-part="duplicates"
-                aria-label={t`Maybe already in your library`}
-                className="flex flex-col gap-2 rounded-panel border border-warning/50 p-4"
-              >
-                <h3 className="text-sm font-semibold">
-                  <Trans>This may already be in your library</Trans>
-                </h3>
-                <ul className="flex flex-col gap-2">
-                  {duplicates.map((duplicate) => (
-                    <li
-                      key={duplicate.gameId}
-                      data-part="duplicate"
-                      className="flex flex-wrap items-center justify-between gap-2"
-                    >
-                      <span className="text-sm">
-                        {duplicate.title}{" "}
-                        <span className="text-xs text-fg-muted">
-                          {duplicate.reason === "sameTarget"
-                            ? t`starts the same program`
-                            : t`has the same title`}
-                        </span>
+            isRequired
+          />
+          {duplicates && duplicates.length > 0 && (
+            <section
+              data-part="duplicates"
+              aria-label={t`Maybe already in your library`}
+              className="flex flex-col gap-2 rounded-panel border border-warning/50 p-4"
+            >
+              <h3 className="text-sm font-semibold">
+                <Trans>This may already be in your library</Trans>
+              </h3>
+              <ul className="flex flex-col gap-2">
+                {duplicates.map((duplicate) => (
+                  <li
+                    key={duplicate.gameId}
+                    data-part="duplicate"
+                    className="flex flex-wrap items-center justify-between gap-2"
+                  >
+                    <span className="text-sm">
+                      {duplicate.title}{" "}
+                      <span className="text-xs text-fg-muted">
+                        {duplicate.reason === "sameTarget"
+                          ? t`starts the same program`
+                          : t`has the same title`}
                       </span>
-                      {mode === "target" && (
-                        <Button
-                          data-part="link"
-                          data-spatial="focusable"
-                          size="sm"
-                          isDisabled={busy}
-                          onPress={() => finish({ linkTo: duplicate.gameId })}
-                        >
-                          <Trans>Add to this game</Trans>
-                        </Button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-xs text-fg-muted">
-                  <Trans>Or keep it as a game of its own: Caskade won't merge them later.</Trans>
-                </p>
-              </section>
-            )}
-            {failure && (
-              <p role="alert" data-part="error" className="text-sm text-danger">
-                {failure}
+                    </span>
+                    {mode === "target" && (
+                      <Button
+                        data-part="link"
+                        data-spatial="focusable"
+                        size="sm"
+                        isDisabled={busy}
+                        onPress={() => finish({ linkTo: duplicate.gameId })}
+                      >
+                        <Trans>Add to this game</Trans>
+                      </Button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-fg-muted">
+                <Trans>Or keep it as a game of its own: Caskade won't merge them later.</Trans>
               </p>
-            )}
-            <div className="flex justify-end gap-2">
-              <Button data-spatial="focusable" onPress={close} isDisabled={busy}>
-                <Trans>Cancel</Trans>
-              </Button>
-              <Button
-                data-part="add"
-                data-spatial="focusable"
-                type="submit"
-                variant="primary"
-                isDisabled={!ready || busy}
-              >
-                {duplicates && duplicates.length > 0 ? (
-                  <Trans>Keep separate</Trans>
-                ) : busy ? (
-                  <Trans>Adding…</Trans>
-                ) : (
-                  <Trans>Add game</Trans>
-                )}
-              </Button>
-            </div>
-          </Form>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+            </section>
+          )}
+          {failure && (
+            <p role="alert" data-part="error" className="text-sm text-danger">
+              {failure}
+            </p>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button data-spatial="focusable" onPress={close} isDisabled={busy}>
+              <Trans>Cancel</Trans>
+            </Button>
+            <Button
+              data-part="add"
+              data-spatial="focusable"
+              type="submit"
+              variant="primary"
+              isDisabled={!ready || busy}
+            >
+              {duplicates && duplicates.length > 0 ? (
+                <Trans>Keep separate</Trans>
+              ) : busy ? (
+                <Trans>Adding…</Trans>
+              ) : (
+                <Trans>Add game</Trans>
+              )}
+            </Button>
+          </div>
+        </Form>
+      </Dialog>
+    </ModalFrame>
   );
 }
 

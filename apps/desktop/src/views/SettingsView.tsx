@@ -47,7 +47,7 @@ import { UnsavedChangesGuard } from "./settings/unsavedChanges";
 import { SettingsProvider } from "./settings/useSettings";
 
 /** Groups of sections under a heading in the list (#46), in order. */
-export const settingsGroups = [
+const settingsGroups = [
   { id: "app", label: msg({ message: "App", context: "settings group" }) },
   { id: "library", label: msg({ message: "Library", context: "settings group" }) },
   { id: "play", label: msg({ message: "Games & play", context: "settings group" }) },

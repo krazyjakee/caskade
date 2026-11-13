@@ -2,11 +2,13 @@
  * too: the current PIN first when an account changes its own, then the new
  * one twice. Removing one asks only for the current PIN. A PIN lives only
  * in this dialog until `save` hands it on. */
+
 import { useLingui } from "@lingui/react/macro";
 import { useState } from "react";
-import { Dialog, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog } from "react-aria-components";
 import type { PinCheck } from "../../../api/accounts";
 import { PinPad } from "../../../components/accounts/PinPad";
+import { ModalFrame } from "../../../components/ModalFrame";
 
 type Step = "current" | "new" | "again";
 
@@ -59,30 +61,24 @@ export function PinDialog({
     else close();
   };
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable
-      onOpenChange={(open) => {
-        if (!open) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      close={close}
+      className="w-full max-w-sm rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg"
     >
-      <Modal className="w-full max-w-sm rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog aria-label={title} className="outline-none">
-          {/* React carries the pad's submit through the portal to a form
-              that opened this dialog (the account editor's); it stops here. */}
-          <div className="grid place-items-center" onSubmit={(event) => event.stopPropagation()}>
-            <PinPad
-              key={step}
-              title={title}
-              check={check}
-              onMatched={next}
-              onCancel={close}
-              lockedUntilMs={step === "current" ? lockedUntilMs : null}
-            />
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+      <Dialog aria-label={title} className="outline-none">
+        {/* React carries the pad's submit through the portal to a form
+            that opened this dialog (the account editor's); it stops here. */}
+        <div className="grid place-items-center" onSubmit={(event) => event.stopPropagation()}>
+          <PinPad
+            key={step}
+            title={title}
+            check={check}
+            onMatched={next}
+            onCancel={close}
+            lockedUntilMs={step === "current" ? lockedUntilMs : null}
+          />
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }

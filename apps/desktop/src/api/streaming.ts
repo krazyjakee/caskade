@@ -4,8 +4,6 @@
  * "Stream from <device>". */
 import { t } from "@lingui/core/macro";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext } from "react";
 import {
   commands,
   events,
@@ -21,9 +19,9 @@ import {
   type StreamingPart,
   type StreamingProgram,
 } from "./bindings";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
 import { objectReply, type SettingsSnapshot } from "./settings";
-import { createStreamingFixtureApi } from "./streamingFixtures";
 
 export type {
   HostOutcome,
@@ -94,7 +92,7 @@ export interface StreamingApi {
 
 const nothing = async () => {};
 
-export const nativeStreamingApi: StreamingApi = {
+const nativeStreamingApi: StreamingApi = {
   hosts: () => commands.streamingHosts(),
   addHost: (address) => unwrap(commands.streamingAddHost(address)),
   lookAgain: () => unwrap(commands.streamingLookAgain()),
@@ -131,30 +129,11 @@ export const nativeStreamingApi: StreamingApi = {
   skip: (part) => unwrap(commands.streamingSkip(part)).then(nothing),
 };
 
-let preview: StreamingApi | undefined;
-/** The core in the app; a fixture device in the browser preview. */
-function defaultApi(): StreamingApi {
-  if (isTauri()) return nativeStreamingApi;
-  preview ??= createStreamingFixtureApi();
-  return preview;
-}
-
-const StreamingApiContext = createContext<StreamingApi | null>(null);
-
-/** Tests supply their own API; the app uses the native one. */
-export function StreamingApiProvider({
-  api,
-  children,
-}: {
-  api: StreamingApi;
-  children: ReactNode;
-}) {
-  return createElement(StreamingApiContext.Provider, { value: api }, children);
-}
-
-export function useStreamingApi(): StreamingApi {
-  return useContext(StreamingApiContext) ?? defaultApi();
-}
+export const {
+  Provider: StreamingApiProvider,
+  useApi: useStreamingApi,
+  preview: previewStreaming,
+} = injectable(() => nativeStreamingApi);
 
 export const streamingKey = ["streaming"] as const;
 
@@ -248,7 +227,7 @@ export function streamReleaseName(
 }
 
 /** The device a `stream:` release streams from, when known. */
-export function streamHost(source: string, hosts: readonly StreamHost[]): StreamHost | undefined {
+function streamHost(source: string, hosts: readonly StreamHost[]): StreamHost | undefined {
   if (!source.startsWith("stream:")) return undefined;
   const id = source.slice("stream:".length).toLowerCase();
   return hosts.find((candidate) => candidate.id.toLowerCase() === id);

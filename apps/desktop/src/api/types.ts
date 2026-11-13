@@ -102,7 +102,7 @@ export interface TitleLetter {
   letter: string;
   offset: number;
 }
-export interface LibraryStats {
+interface LibraryStats {
   total: number;
   installed: number;
   recent: number;
@@ -123,7 +123,7 @@ export type LibraryEvent =
   /** Another account signed in, or nobody: its collections replace the last one's. */
   | { type: "account.changed" }
   | { type: "game.started" | "game.exited"; gameId: string; entryId: string; sessionId: string };
-export interface LaunchTicket {
+interface LaunchTicket {
   gameId: string;
   entryId: string;
   sessionId: string;
@@ -172,7 +172,7 @@ export interface AgeRestriction {
   /** The account's age limit. */
   maxAge: number;
 }
-export type LaunchResult =
+type LaunchResult =
   | { type: "started"; ticket: LaunchTicket }
   | { type: "choose"; prompt: LaunchPrompt }
   /** Launch again once `approvePlay` matched an admin's PIN. */

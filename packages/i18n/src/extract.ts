@@ -18,7 +18,7 @@ import {
   translatedLocales,
 } from "./vite.ts";
 
-export interface Template {
+interface Template {
   domain: Domain;
   file: string;
   /** The template as extraction writes it. */
@@ -42,7 +42,7 @@ function sorted(messages: ExtractedCatalogType): CatalogType {
 
 /** A message of the native UI (#91), as the core's extractor lists them in
  * `locales/native.json` (`just i18n` writes it from the `t!` family). */
-export interface NativeMessage {
+interface NativeMessage {
   id: string;
   context?: string;
   plural?: string;
@@ -51,7 +51,7 @@ export interface NativeMessage {
 }
 
 /** The native UI's messages; none before `just i18n` has listed them. */
-export function nativeMessages(root = defaultRoot): NativeMessage[] {
+function nativeMessages(root = defaultRoot): NativeMessage[] {
   const file = `${root}/locales/native.json`;
   if (!existsSync(file)) return [];
   return (JSON.parse(readFileSync(file, "utf8")) as { messages: NativeMessage[] }).messages;

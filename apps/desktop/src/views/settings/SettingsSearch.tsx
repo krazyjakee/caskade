@@ -13,7 +13,7 @@ import { focus, reducedMotion } from "../../input/spatial";
 import type { SettingsTab } from "../SettingsView";
 import { fold, matches, sectionWords, settingsSearchIndex } from "./searchIndex";
 
-export interface SettingsSearchResult {
+interface SettingsSearchResult {
   key: string;
   tab: SettingsTab;
   section?: string;
@@ -39,7 +39,7 @@ interface Section {
 /** The results for `query` among `sections` (the ones this account sees):
  * sections first, then preferences, each those whose name matches before
  * those found by another word. */
-export function searchSettings(
+function searchSettings(
   query: string,
   sections: readonly Section[],
   translate: (descriptor: MessageDescriptor) => string,

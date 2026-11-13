@@ -20,7 +20,7 @@ export const FIXTURE_LINK = "caskade://receive?t=caskadesharefixture";
 /** A tiny QR code: what matters in tests is that one shows. */
 const QR = `<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 3"><path d="M0 0h1v1H0zM2 2h1v1H2z"/></svg>`;
 
-export interface SharesFixtureOptions {
+interface SharesFixtureOptions {
   shares?: ShareRecord[];
   received?: ReceivedShare[];
   /** What `inspect` answers for a known link. */
@@ -89,7 +89,7 @@ function job(title: string): JobSnapshot_Serialize {
   };
 }
 
-export interface SharesFixtureApi extends SharesApi {
+interface SharesFixtureApi extends SharesApi {
   /** Someone opens share `id`'s link. */
   receivedBy(id: string, recipient: ShareRecipient): void;
   /** The storage the last share received went to (none: the default). */

@@ -38,13 +38,10 @@ beforeAll(() => {
 });
 
 it("has a story for every @caskade/ui component in the anatomy catalogue", () => {
-  // Shell stories also render the app's own roots (About, Legal): apps/desktop checks those.
-  const app = new Set(
-    Object.entries(anatomy)
-      .filter(([, entry]) => entry.source === "app")
-      .map(([name]) => name),
+  // Shell stories also render the app's own roots (About, Legal, cards): apps/desktop checks those.
+  const ui = [...rendered.keys()].filter(
+    (name) => anatomy[name as keyof typeof anatomy].source === "@caskade/ui",
   );
-  const ui = [...rendered.keys()].filter((name) => !app.has(name));
   expect(ui.sort()).toEqual([...uiNames].sort());
 });
 

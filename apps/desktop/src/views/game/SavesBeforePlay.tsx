@@ -2,9 +2,10 @@ import { Button } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import { useOptionalLibraryApi } from "../../api/provider";
 import type { BeforePlay, SaveVersion } from "../../api/saves";
+import { ModalFrame } from "../../components/ModalFrame";
 import { useSaveDeviceName } from "../../components/saves/devices";
 import { SaveConflictDialog } from "../../components/saves/SaveConflictDialog";
 
@@ -168,41 +169,35 @@ function WaitForSave({
     };
   }, []);
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable
-      onOpenChange={(open) => {
-        if (!open) cancel();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      close={cancel}
+      className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg"
     >
-      <Modal className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog data-cs="save-arriving" className="outline-none">
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            {t`Waiting for the save from ${device}`}
-          </Heading>
-          <p role="status" className="mt-2 text-sm text-fg-muted">
-            <Trans>
-              It was just played there, and its save is on its way. Skip to play with the save on
-              this device.
-            </Trans>
-          </p>
-          <div className="mt-6 flex justify-end gap-2">
-            <Button data-spatial="focusable" onPress={cancel}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button
-              data-spatial="focusable"
-              data-focus-default=""
-              variant="primary"
-              onPress={() => finish.current(latest.current)}
-            >
-              <Trans>Skip</Trans>
-            </Button>
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+      <Dialog data-cs="save-arriving" className="outline-none">
+        <Heading slot="title" className="font-display text-xl font-semibold">
+          {t`Waiting for the save from ${device}`}
+        </Heading>
+        <p role="status" className="mt-2 text-sm text-fg-muted">
+          <Trans>
+            It was just played there, and its save is on its way. Skip to play with the save on this
+            device.
+          </Trans>
+        </p>
+        <div className="mt-6 flex justify-end gap-2">
+          <Button data-spatial="focusable" onPress={cancel}>
+            <Trans>Cancel</Trans>
+          </Button>
+          <Button
+            data-spatial="focusable"
+            data-focus-default=""
+            variant="primary"
+            onPress={() => finish.current(latest.current)}
+          >
+            <Trans>Skip</Trans>
+          </Button>
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }
 

@@ -13,7 +13,7 @@ import {
   skipRootPicker,
 } from "../../api/storage";
 
-export interface InstallRootPickerProps extends RootRequirements {
+interface InstallRootPickerProps extends RootRequirements {
   api: StorageApi;
   onSelect: (rootId: string) => void;
   onCancel: () => void;

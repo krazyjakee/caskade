@@ -8,7 +8,7 @@ import { unwrap } from "../api/reply";
 
 export const DEFAULT_THEME = "caskade.default";
 
-export interface ThemeProblem {
+interface ThemeProblem {
   file: string;
   line?: number | null;
   column?: number | null;
@@ -87,7 +87,7 @@ const NEXUS: InstalledTheme = {
   problems: [],
 };
 
-export const safeModeNotice = () =>
+const safeModeNotice = () =>
   t`Safe mode: Caskade started with the default theme and without your custom CSS.`;
 
 /** The browser preview starts in safe mode with `?safe-mode`. */

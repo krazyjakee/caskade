@@ -3,8 +3,8 @@
  * (YouTube's player won't play inside the app's pages); without the core,
  * the browser preview opens them on YouTube. */
 import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext } from "react";
 import { commands, type IgdbVideo_Serialize } from "./bindings";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
 
 export type IgdbVideo = IgdbVideo_Serialize;
@@ -20,10 +20,10 @@ export const videoThumbnail = (videoId: string) =>
   `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/mqdefault.jpg`;
 
 /** The video's page on YouTube. */
-export const videoPage = (videoId: string) =>
+const videoPage = (videoId: string) =>
   `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`;
 
-export const nativeVideoApi: VideoApi = {
+const nativeVideoApi: VideoApi = {
   play: async (videoId, title) => {
     if (!isTauri()) {
       window.open(videoPage(videoId), "_blank", "noopener,noreferrer");
@@ -33,11 +33,4 @@ export const nativeVideoApi: VideoApi = {
   },
 };
 
-const VideoApiContext = createContext<VideoApi>(nativeVideoApi);
-
-/** Tests supply their own API; the app uses the native one. */
-export function VideoApiProvider({ api, children }: { api: VideoApi; children: ReactNode }) {
-  return createElement(VideoApiContext.Provider, { value: api }, children);
-}
-
-export const useVideoApi = () => useContext(VideoApiContext);
+export const { Provider: VideoApiProvider, useApi: useVideoApi } = injectable(() => nativeVideoApi);

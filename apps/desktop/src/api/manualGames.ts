@@ -14,7 +14,7 @@ import { unwrap } from "./reply";
 export type { DuplicateGame };
 /** What a program, shortcut or URI starts, and the title it suggests. */
 export type ManualTarget = ManualTarget_Serialize;
-export type ManualGame = ManualGame_Deserialize;
+type ManualGame = ManualGame_Deserialize;
 
 export interface ManualGamesApi {
   /** Refused, with the reason, when it can't start a game. */

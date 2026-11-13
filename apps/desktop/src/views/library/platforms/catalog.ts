@@ -467,7 +467,7 @@ const byName = new Map<string, string>();
 for (const [id, look] of Object.entries(looks))
   for (const name of [id, look.title, ...look.names]) byName.set(key(name), id);
 
-export interface PlatformPresentation {
+interface PlatformPresentation {
   /** The library's name for it, which the platform filter takes. */
   name: string;
   title: string;

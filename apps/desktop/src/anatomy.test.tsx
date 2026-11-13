@@ -45,9 +45,7 @@ import { fixtureStatsState } from "./api/systemStatsFixtures";
 import type { CollectionSummary } from "./api/types";
 import { CollectionCard } from "./components/CollectionCard";
 import { FolderBrowser } from "./components/pathBrowser/FolderBrowser";
-import { StoreLinks } from "./components/StoreLinks";
 import { PadSource } from "./input";
-import { games as mockGames } from "./mocks/games";
 import { DrawnTree } from "./plugins/drawn";
 import { PluginBoundary } from "./plugins/PluginBoundary";
 import { PluginRegistry, PluginRegistryContext } from "./plugins/registry";
@@ -79,6 +77,7 @@ import { EmulationProvider } from "./views/settings/emulators/EmulationProvider"
 import { RommPanel } from "./views/settings/romm/RommPanel";
 import { RommApiContext } from "./views/settings/romm/useRomm";
 import { StatisticsDashboard } from "./views/settings/statistics/StatisticsDashboard";
+import { WhereToBuy } from "./views/store/WhereToBuy";
 
 afterEach(cleanup);
 
@@ -191,7 +190,6 @@ const collectionCards: CollectionSummary[] = [
 ];
 
 function Showcase() {
-  const store = mockGames.find((game) => game.stores?.length);
   return (
     <>
       <HomeView />
@@ -201,7 +199,17 @@ function Showcase() {
       {collectionCards.map((collection) => (
         <CollectionCard key={collection.id} collection={collection} />
       ))}
-      {store && <StoreLinks game={store} />}
+      <WhereToBuy
+        links={[
+          {
+            store: "steam",
+            name: "Steam",
+            url: "https://store.example.invalid/game",
+            platforms: [],
+            countries: [],
+          },
+        ]}
+      />
       {games.map((game) => (
         <LibraryCard key={game.id} game={game} />
       ))}

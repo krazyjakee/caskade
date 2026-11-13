@@ -22,7 +22,7 @@ import {
   rememberLibraryView,
   resolveLibraryView,
 } from "./views/library/remembered";
-import { NotFoundView } from "./views/PlaceholderView";
+import { NotFoundView } from "./views/NotFoundView";
 import { type SettingsTab, SettingsView } from "./views/SettingsView";
 import { StoreView, validateStoreSearch } from "./views/StoreView";
 import { rememberSettingsTab, resolveSettingsTab } from "./views/settings/rememberedTab";

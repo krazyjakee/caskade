@@ -100,7 +100,7 @@ export function languageName(tag: string): string {
   return tag;
 }
 
-export interface LanguageOption {
+interface LanguageOption {
   id: string;
   label: string;
 }

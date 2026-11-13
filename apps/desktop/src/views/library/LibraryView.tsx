@@ -12,6 +12,7 @@ import { useGameWindow, useLibraryPlatforms, useTitleLetters } from "../../api/h
 import { nonPcPlatforms } from "../../api/presentation";
 import type { LibraryFilter, LibraryLayout, LibrarySort } from "../../api/types";
 import { CollectionDialog } from "../../components/collections/CollectionDialog";
+import { sortMessages } from "../../components/collections/rules";
 import { FailureNotice } from "../../components/FailureNotice";
 import { SelectionBar } from "../../components/gameSelection/SelectionBar";
 import {
@@ -31,6 +32,9 @@ import { useWebGames, WebMosaic } from "./web/WebMosaic";
 
 /** Lists sorted by title get an alphabet bar from this many games. */
 const ALPHABET_BAR_MIN_GAMES = 50;
+
+/** The sorts in the order the menu lists them. */
+const sortOrder: LibrarySort[] = ["recent", "title", "popular", "playtime", "added", "released"];
 
 /** In the sidebar's order. Recently played is the default once something has
  * been played, All Games until then (`router.tsx`); All Games comes last. */
@@ -194,14 +198,7 @@ export function LibraryView({
           <Select
             aria-label={t`Sort games`}
             value={sort}
-            options={[
-              { id: "recent", label: t({ message: "Recently played", context: "library sort" }) },
-              { id: "title", label: t({ message: "Title", context: "library sort" }) },
-              { id: "popular", label: t({ message: "Popular", context: "library sort" }) },
-              { id: "playtime", label: t({ message: "Playtime", context: "library sort" }) },
-              { id: "added", label: t({ message: "Recently added", context: "library sort" }) },
-              { id: "released", label: t({ message: "Release date", context: "library sort" }) },
-            ]}
+            options={sortOrder.map((id) => ({ id, label: t(sortMessages[id]) }))}
             onChange={(next) => {
               void navigate({
                 to: "/library",

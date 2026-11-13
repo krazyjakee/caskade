@@ -86,7 +86,7 @@ const scopeKey = (scope: ScriptScope) =>
       ? `profile:${scope.profileId}`
       : `game:${scope.gameId}`;
 
-export const scriptKeys = {
+const scriptKeys = {
   all: [...libraryKeys.all, "scripts"] as const,
   scope: (scope: ScriptScope) => [...scriptKeys.all, scopeKey(scope)] as const,
   effective: (gameId: string | null, profileId: string | null) =>

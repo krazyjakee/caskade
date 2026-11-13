@@ -7,9 +7,10 @@
 import { t } from "@lingui/core/macro";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { isTauri } from "@tauri-apps/api/core";
-import { createContext, createElement, type ReactNode, useContext, useEffect } from "react";
+import { useEffect } from "react";
 import appConfig from "../../src-tauri/tauri.conf.json";
 import { type AppUpdatePhase, type AppUpdateStatus_Serialize, commands, events } from "./bindings";
+import { injectable } from "./injectable";
 import { unwrap } from "./reply";
 import { effectSubscription } from "./subscription";
 
@@ -45,7 +46,7 @@ function native<T>(request: () => Promise<T>): Promise<T> {
   return request();
 }
 
-export const nativeAppUpdateApi: AppUpdateApi = {
+const nativeAppUpdateApi: AppUpdateApi = {
   status: () => (isTauri() ? commands.appUpdateStatus() : Promise.resolve(previewStatus())),
   check: () => native(() => unwrap(commands.appUpdateCheck())),
   install: () => native(() => unwrap(commands.appUpdateInstall())),
@@ -59,18 +60,14 @@ export const nativeAppUpdateApi: AppUpdateApi = {
       : () => {},
 };
 
-const AppUpdateContext = createContext<AppUpdateApi>(nativeAppUpdateApi);
+const appUpdate = injectable(() => nativeAppUpdateApi);
+export const AppUpdateProvider = appUpdate.Provider;
 
-/** Tests and previews supply their own API; the app uses the native one. */
-export function AppUpdateProvider({ api, children }: { api: AppUpdateApi; children: ReactNode }) {
-  return createElement(AppUpdateContext.Provider, { value: api }, children);
-}
-
-export const appUpdateKey = ["appUpdate"] as const;
+const appUpdateKey = ["appUpdate"] as const;
 
 /** The update status, kept current by the core's events. */
 export function useAppUpdate() {
-  const api = useContext(AppUpdateContext);
+  const api = appUpdate.useApi();
   const client = useQueryClient();
   useEffect(
     () => api.subscribe((status) => client.setQueryData(appUpdateKey, status)),
@@ -79,10 +76,10 @@ export function useAppUpdate() {
   return useQuery({ queryKey: appUpdateKey, queryFn: () => api.status(), retry: false });
 }
 
-export type AppUpdateAction = "check" | "install" | "restart";
+type AppUpdateAction = "check" | "install" | "restart";
 
 export function useAppUpdateAction() {
-  const api = useContext(AppUpdateContext);
+  const api = appUpdate.useApi();
   const client = useQueryClient();
   return useMutation({
     mutationFn: async (action: AppUpdateAction) => {

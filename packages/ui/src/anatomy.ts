@@ -7,7 +7,9 @@
 export interface AnatomyEntry {
   /** The components that render this root, and where they live. */
   rendered: string;
-  source: "@caskade/ui" | "app" | "website";
+  /** `native`: the native UI's shared components render every part; the
+   * webview's own components, if any, render the root and its `appOnly` parts. */
+  source: "@caskade/ui" | "app" | "website" | "native";
   description: string;
   /** `data-part` names owned by this root → what each part is. */
   parts: Readonly<Record<string, string>>;
@@ -264,8 +266,8 @@ export const anatomy = {
     interaction: [],
   },
   "game-card": {
-    rendered: "GameCard; the library's LibraryCard and the Web tab's tiles (app)",
-    source: "@caskade/ui",
+    rendered: "LibraryCard, CatalogCard and the Web tab's tiles (app)",
+    source: "native",
     description: "A game tile in a grid.",
     parts: {
       art: "The cover (a `game-art`).",
@@ -312,8 +314,8 @@ export const anatomy = {
     slots: ["plugins"],
   },
   hero: {
-    rendered: "Hero; the home and game pages' hero sections (app)",
-    source: "@caskade/ui",
+    rendered: "the home and game pages' hero sections (app)",
+    source: "native",
     description: "The large featured-game banner.",
     parts: {
       art: "The game's artwork (a `game-art`).",
@@ -340,8 +342,8 @@ export const anatomy = {
     slots: ["actions"],
   },
   shelf: {
-    rendered: "Shelf",
-    source: "@caskade/ui",
+    rendered: "nothing: only the native UI has shelves",
+    source: "native",
     description: "A titled row of cards.",
     parts: {
       header: "The heading row.",
@@ -1220,7 +1222,7 @@ export const anatomy = {
     contains: ["button"],
   },
   "store-links": {
-    rendered: "StoreLinks (app)",
+    rendered: "WhereToBuy (app)",
     source: "app",
     description: "Links to the stores that sell a game.",
     parts: { "store-link": "One store; `data-store` names it." },

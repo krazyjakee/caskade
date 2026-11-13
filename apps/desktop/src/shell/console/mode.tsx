@@ -64,7 +64,7 @@ function previewMode(): Mode {
   return sessionStorage.getItem(PREVIEW_KEY) === "console" ? "console" : "desktop";
 }
 
-export interface ModeState {
+interface ModeState {
   mode: Mode;
   setMode(mode: Mode): void;
   toggle(): void;

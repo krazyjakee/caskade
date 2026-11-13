@@ -6,7 +6,6 @@ import type {
   EmulatorInstall,
   EmulatorTarget,
   ReviewChoice,
-  ReviewGame_Serialize,
   RomFolderSetup_Serialize,
   RomScanner_Serialize,
   ScanJob_Serialize,
@@ -22,15 +21,14 @@ export type { EmulatorInstall, EmulatorTarget, ReviewChoice, ScanMode };
 export type RomScanner = RomScanner_Serialize;
 export type ScannerRow = ScannerView_Serialize;
 export type ScanJob = ScanJob_Serialize;
-export type ReviewGame = ReviewGame_Serialize;
 export type ScanSummary = ScanSummary_Serialize;
-export type RomFolderSetup = RomFolderSetup_Serialize;
-export type ArgumentsOverride =
+type RomFolderSetup = RomFolderSetup_Serialize;
+type ArgumentsOverride =
   | { type: "default" }
   | { type: "replace"; args: string[]; replaced?: string[] }
   | { type: "append"; args: string[] };
-export type ProfileTracking = Tracking;
-export interface ProfileHooks {
+type ProfileTracking = Tracking;
+interface ProfileHooks {
   before: string[] | null;
   afterExit: string[] | null;
 }
@@ -62,7 +60,7 @@ export interface BiosStatus {
   /** `wrong_hash`: a file is there, but not the dump the definition names. */
   state?: "found" | "missing" | "wrong_hash" | null;
 }
-export interface DefinitionProfile {
+interface DefinitionProfile {
   name: string;
   platforms: string[];
   extensions: string[];
@@ -83,7 +81,7 @@ export interface ArgvPreview {
   sampleRom: string;
   error: string | null;
 }
-export interface ResolvedProfile extends ArgvPreview {
+interface ResolvedProfile extends ArgvPreview {
   name: string;
   platforms: string[];
   extensions: string[];
@@ -145,7 +143,7 @@ export interface ProfileEdit {
   beforeText: string;
   afterExitText: string;
 }
-export interface DetectionCandidate {
+interface DetectionCandidate {
   id: string;
   definition: string;
   name: string;

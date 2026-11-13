@@ -1,9 +1,7 @@
 import {
   Button,
-  type CardGame,
   Checkbox,
   GameArt,
-  GameCard,
   SegmentedControl,
   Select,
   SettingRow,
@@ -26,7 +24,7 @@ const meta = { title: "Shell/Focus", parameters: { layout: "fullscreen" } } sati
 export default meta;
 
 const many = Array.from({ length: 10 }, (_, index) => {
-  const game = games[index % games.length] as CardGame;
+  const game = games[index % games.length] as (typeof games)[number];
   return { ...game, title: `${game.title} ${Math.floor(index / games.length) + 1}` };
 });
 
@@ -51,7 +49,10 @@ export const Pinned: Story = {
       </div>
       <div className={`${frame} flex w-fit gap-3`}>
         <div className="focus-ring-over relative w-44 overflow-hidden rounded-card border border-border bg-surface-raised">
-          <GameArt game={games[0] as CardGame} className="aspect-(--cs-card-aspect) w-full" />
+          <GameArt
+            game={games[0] as (typeof games)[number]}
+            className="aspect-(--cs-card-aspect) w-full"
+          />
           <p className="truncate px-3 py-2.5 text-sm font-semibold">Image card</p>
         </div>
         <div className="chamfer focus-ring-chamfer relative flex h-fit items-center gap-2 bg-linear-to-r from-accent to-accent-strong px-6 py-2.5 font-display font-semibold tracking-wider text-accent-fg uppercase">
@@ -80,10 +81,15 @@ export const ClippedEdges: Story = {
   render: () => (
     <div className="flex flex-col gap-6 p-6">
       <div className="grid grid-flow-col gap-4 overflow-x-auto">
-        {many.map((game, index) => (
-          <div key={game.title} className="w-(--cs-card-width)">
-            <GameCard game={game} variant="recent" index={index} />
-          </div>
+        {many.map((game) => (
+          <button
+            key={game.title}
+            type="button"
+            className="relative w-(--cs-card-width) overflow-hidden rounded-card border border-border bg-surface-raised text-left focus-visible:focus-ring-over"
+          >
+            <GameArt game={game} className="aspect-(--cs-card-aspect) w-full" />
+            <p className="truncate px-3 py-2.5 text-sm font-semibold">{game.title}</p>
+          </button>
         ))}
       </div>
       <div className="h-64 w-80 overflow-y-auto rounded-panel border border-border">

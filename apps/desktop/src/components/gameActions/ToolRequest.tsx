@@ -1,10 +1,11 @@
 import { Button } from "@caskade/ui";
 import { Trans } from "@lingui/react/macro";
 import { useEffect, useRef, useState } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { Dialog, Heading } from "react-aria-components";
 import { useRunTool } from "../../api/actions";
 import type { AgeRestriction } from "../../api/types";
 import { AgeGateDialog } from "../../views/game/AgeGate";
+import { ModalFrame } from "../ModalFrame";
 
 /** Runs one of a release's tools once (#178), as its menu item asked: an
  * admin's PIN first when the age limit asks for one, and why it failed
@@ -52,27 +53,21 @@ export function ToolRequest({
     );
   if (!run.isError) return null;
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable
-      onOpenChange={(open) => {
-        if (!open) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      close={close}
+      className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg"
     >
-      <Modal className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog role="alertdialog" data-cs="tool-failed" className="space-y-4 outline-none">
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            <Trans>{name} didn't start</Trans>
-          </Heading>
-          <p className="text-sm text-fg-muted">{run.error.message}</p>
-          <div className="flex justify-end">
-            <Button data-spatial="focusable" onPress={close}>
-              <Trans>OK</Trans>
-            </Button>
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+      <Dialog role="alertdialog" data-cs="tool-failed" className="space-y-4 outline-none">
+        <Heading slot="title" className="font-display text-xl font-semibold">
+          <Trans>{name} didn't start</Trans>
+        </Heading>
+        <p className="text-sm text-fg-muted">{run.error.message}</p>
+        <div className="flex justify-end">
+          <Button data-spatial="focusable" onPress={close}>
+            <Trans>OK</Trans>
+          </Button>
+        </div>
+      </Dialog>
+    </ModalFrame>
   );
 }

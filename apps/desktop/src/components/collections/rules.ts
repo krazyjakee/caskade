@@ -45,9 +45,9 @@ function translated<K extends string>(messages: Record<K, MessageDescriptor>): R
 }
 
 /** `filterMessages` in the active language, read as plain strings. */
-export const filterLabels = translated(filterMessages);
+const filterLabels = translated(filterMessages);
 
-export interface Rule {
+interface Rule {
   field: string;
   op: string;
   value: string;

@@ -8,14 +8,10 @@ import {
   AvatarPicker,
   anatomy,
   Button,
-  type CardGame,
   Checkbox,
   ErrorNotice,
   GameArt,
-  GameCard,
   type GameStatus,
-  Hero,
-  type HeroGame,
   Menu,
   MenuItem,
   MenuPopover,
@@ -26,7 +22,6 @@ import {
   Select,
   SettingRow,
   SettingsSection,
-  Shelf,
   Slider,
   StatusBadge,
   StatusDot,
@@ -63,56 +58,20 @@ const options = [
   { id: "list", label: "List" },
 ] as const;
 
-export const games: readonly CardGame[] = [
-  {
-    title: "Nebula Drift",
-    genre: "Racing",
-    status: "installed",
-    art: [220, 280],
-    playtimeHours: 12,
-    lastPlayed: "Yesterday",
-    sizeGb: 18,
-  },
-  {
-    title: "Hollow Crown",
-    genre: "Action RPG",
-    status: "not-installed",
-    art: [12, 340],
-    playtimeHours: 64,
-    lastPlayed: "Last week",
-    sizeGb: 42,
-  },
-  {
-    title: "Tidebreaker",
-    genre: "Strategy",
-    status: "available",
-    art: [180, 140],
-    sizeGb: 9,
-    stores: ["steam", "gog"],
-  },
-  {
-    title: "Pixel Paladin",
-    genre: "SNES · Platformer",
-    status: "emulated",
-    art: [40, 300],
-    playtimeHours: 3,
-    lastPlayed: "Today",
-    sizeGb: 1,
-  },
+/** Hue pairs stand in for downloaded art. */
+export const games: readonly { title: string; art: [number, number] }[] = [
+  { title: "Nebula Drift", art: [220, 280] },
+  { title: "Hollow Crown", art: [12, 340] },
+  { title: "Tidebreaker", art: [180, 140] },
+  { title: "Pixel Paladin", art: [40, 300] },
 ];
 
-const game = games[0] as CardGame;
+const game = games[0] as (typeof games)[number];
 
 /** Stands in for downloaded artwork (`data-source="image"`). */
 const cover = `data:image/svg+xml,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100"><rect width="160" height="100" fill="#1d2b5a"/><circle cx="110" cy="35" r="22" fill="#38d9f5"/><path d="M0 100 60 40l40 40 20-20 40 40z" fill="#5b5ff7"/></svg>',
 )}`;
-
-export const hero: HeroGame = {
-  ...game,
-  art: [220, 280],
-  description: "Race the void between collapsing stars.",
-};
 
 export const fixtures: Record<UiName, Fixture> = {
   button: {
@@ -280,37 +239,6 @@ export const fixtures: Record<UiName, Fixture> = {
   "status-badge": {
     variants: <StatusBadge status="installed" />,
     state: (_, value) => <StatusBadge status={value as GameStatus} />,
-  },
-  "game-card": {
-    variants: (
-      <div className="grid w-[48rem] grid-cols-4 gap-4">
-        <GameCard game={game} />
-        <GameCard game={game} variant="recent" />
-        <GameCard game={{ ...game, stores: ["steam"] }} variant="store" />
-        <GameCard game={game} variant="store" />
-      </div>
-    ),
-    state: (attribute, value) => (
-      <div className="w-48">
-        {attribute === "data-status" ? (
-          <GameCard game={{ ...game, status: value as GameStatus }} />
-        ) : (
-          <GameCard game={game} variant={value as "store"} />
-        )}
-      </div>
-    ),
-  },
-  hero: {
-    variants: <Hero game={hero} eyebrow="Continue playing" action="Play" />,
-  },
-  shelf: {
-    variants: (
-      <Shelf title="Recently played" icon={Gauge} subtitle="This week">
-        {games.map((entry, index) => (
-          <GameCard key={entry.title} game={entry} index={index} />
-        ))}
-      </Shelf>
-    ),
   },
   avatar: {
     variants: (

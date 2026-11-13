@@ -11,7 +11,7 @@ import { entryKey, isMessage, type PoEntry, parsePo } from "./vite.ts";
 /** How a domain's messages mark what the code fills in: ICU (`{name}`,
  * `{0}`, Lingui's `<0>…</0>` tags) in the webview, the Rust runtime's
  * `{name}` (`{{` and `}}` are literal braces) in `core`. */
-export type Syntax = "icu" | "rust";
+type Syntax = "icu" | "rust";
 
 export const syntaxOf = (domain: string): Syntax => (domain === "core" ? "rust" : "icu");
 
@@ -116,7 +116,7 @@ export function entryProblems(entry: PoEntry, syntax: Syntax): string[] {
 }
 
 /** `msgctxt "…" msgid "…"`, shortened, to name an entry in a message. */
-export function describeEntry(entry: Pick<PoEntry, "context" | "id">): string {
+function describeEntry(entry: Pick<PoEntry, "context" | "id">): string {
   const short = (text: string) =>
     JSON.stringify(text.length > 60 ? `${text.slice(0, 57)}...` : text);
   return `${entry.context !== undefined ? `msgctxt ${short(entry.context)} ` : ""}msgid ${short(entry.id)}`;

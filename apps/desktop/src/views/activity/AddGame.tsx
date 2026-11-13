@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Dialog, Form, Heading, MenuTrigger, Modal, ModalOverlay } from "react-aria-components";
 import { type InstallInput, type JobSnapshot, mergeJobs } from "../../api/install";
 import { useManualGamesApi } from "../../api/manualGames";
+import { ModalFrame } from "../../components/ModalFrame";
 import { ManualGameDialog, type ManualMode } from "../../components/manualGame/ManualGameDialog";
 import { usePathPicker } from "../../components/pathBrowser/PathPicker";
 import { ReceiveShareDialog } from "../../components/shares/ReceiveShareDialog";
@@ -181,28 +182,22 @@ export function AddGame() {
         </Modal>
       </ModalOverlay>
       {pending && storageApi && (
-        <ModalOverlay
-          isOpen
-          isDismissable
-          onOpenChange={(open) => {
-            if (!open) setPending(null);
-          }}
-          className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+        <ModalFrame
+          close={() => setPending(null)}
+          className="max-h-[85vh] w-full max-w-xl overflow-auto rounded-panel border border-border-strong bg-surface-raised p-5"
         >
-          <Modal className="max-h-[85vh] w-full max-w-xl overflow-auto rounded-panel border border-border-strong bg-surface-raised p-5">
-            <Dialog aria-label={t`Choose installation storage`} className="outline-none">
-              <InstallRootPicker
-                api={storageApi}
-                onCancel={() => setPending(null)}
-                onSelect={(rootId) => {
-                  const inputs = pending;
-                  setPending(null);
-                  install.mutate({ inputs, rootId });
-                }}
-              />
-            </Dialog>
-          </Modal>
-        </ModalOverlay>
+          <Dialog aria-label={t`Choose installation storage`} className="outline-none">
+            <InstallRootPicker
+              api={storageApi}
+              onCancel={() => setPending(null)}
+              onSelect={(rootId) => {
+                const inputs = pending;
+                setPending(null);
+                install.mutate({ inputs, rootId });
+              }}
+            />
+          </Dialog>
+        </ModalFrame>
       )}
     </div>
   );

@@ -1,24 +1,30 @@
-import { Button } from "@caskade/ui";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { libraryKeys, useLibraryApi } from "../../api/provider";
 import { backTarget, useGoBack } from "../../views/game/origin";
+import { ConfirmDialog } from "../ConfirmDialog";
 
 /** Asks before a game's menu removes a game Caskade installed or handed
- * off: no scan brings it back, so it goes for good. On its own page, the
- * page goes back to where it was opened from. */
+ * off, or a web game (with its offline copy and saves): no scan brings
+ * either back, so it goes for good. On its own page, the page goes back to
+ * where it was opened from. */
 export function RemoveGameDialog({
   gameId,
   title,
-  uninstalls,
+  web = false,
+  uninstalls = false,
+  keepsGame = false,
   close,
 }: {
   gameId: string;
   title: string;
+  /** Removes the game's web version. */
+  web?: boolean;
   /** It has files Caskade installed, which are deleted first. */
-  uninstalls: boolean;
+  uninstalls?: boolean;
+  /** A web game that has other entries, which stay. */
+  keepsGame?: boolean;
   close: () => void;
 }) {
   const { t } = useLingui();
@@ -27,67 +33,67 @@ export function RemoveGameDialog({
   const router = useRouter();
   const goBack = useGoBack();
   const remove = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
+      if (web) {
+        if (!api.removeWebGame) throw new Error(t`Web games aren't available here`);
+        await api.removeWebGame(gameId);
+        return;
+      }
       if (!api.removeGame) throw new Error(t`Removing games isn't available here`);
-      return api.removeGame(gameId);
+      await api.removeGame(gameId);
     },
     onSuccess: () => {
-      void client.invalidateQueries({ queryKey: ["storage"] });
+      if (!web) void client.invalidateQueries({ queryKey: ["storage"] });
       void client.invalidateQueries({ queryKey: libraryKeys.all });
       close();
       const { pathname, search } = router.state.location;
-      if (pathname === `/games/${encodeURIComponent(gameId)}`)
-        goBack(backTarget(gameId, (search as { from?: unknown }).from));
+      if (!keepsGame && pathname === `/games/${encodeURIComponent(gameId)}`)
+        goBack(
+          backTarget(gameId, (search as { from?: unknown }).from),
+          web ? "/library?filter=web" : undefined,
+        );
     },
   });
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable={!remove.isPending}
-      onOpenChange={(open) => {
-        if (!open && !remove.isPending) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ConfirmDialog
+      title={web ? t`Remove ${title}?` : t`Remove ${title} from your library?`}
+      confirmLabel={
+        web
+          ? t({ message: "Remove", context: "web game" })
+          : t({ message: "Remove", context: "library game" })
+      }
+      pendingLabel={t`Removing…`}
+      isPending={remove.isPending}
+      error={remove.error}
+      onConfirm={() => remove.mutate()}
+      close={close}
     >
-      <Modal className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog role="alertdialog" className="space-y-4 outline-none">
-          <Heading slot="title" className="font-display text-xl font-semibold">
-            <Trans>Remove {title} from your library?</Trans>
-          </Heading>
-          <p className="text-sm text-fg-muted">
-            {uninstalls ? (
-              <Trans>
-                The files Caskade installed for it are deleted, then it leaves your library with its
-                play sessions. Files it didn't install stay where they are. The uninstall shows in
-                Activity.
-              </Trans>
-            ) : (
-              <Trans>
-                It leaves your library with its play sessions. Its files, if it has any, stay where
-                they are.
-              </Trans>
-            )}
-          </p>
-          {remove.error && (
-            <p role="alert" className="text-sm text-danger">
-              {remove.error.message}
-            </p>
-          )}
-          <div className="flex justify-end gap-2">
-            <Button data-spatial="focusable" isDisabled={remove.isPending} onPress={close}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button
-              data-spatial="focusable"
-              variant="danger"
-              isDisabled={remove.isPending}
-              onPress={() => remove.mutate()}
-            >
-              {remove.isPending ? t`Removing…` : t({ message: "Remove", context: "library game" })}
-            </Button>
-          </div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+      <p>
+        {web ? (
+          keepsGame ? (
+            <Trans>
+              Its web version is removed: the offline copy and the progress saved in the game window
+              are deleted, with its play sessions. The game's other versions stay in your library.
+            </Trans>
+          ) : (
+            <Trans>
+              It leaves your library: the offline copy and the progress saved in the game window are
+              deleted, with its play sessions. Add its page again to play it again.
+            </Trans>
+          )
+        ) : uninstalls ? (
+          <Trans>
+            The files Caskade installed for it are deleted, then it leaves your library with its
+            play sessions. Files it didn't install stay where they are. The uninstall shows in
+            Activity.
+          </Trans>
+        ) : (
+          <Trans>
+            It leaves your library with its play sessions. Its files, if it has any, stay where they
+            are.
+          </Trans>
+        )}
+      </p>
+    </ConfirmDialog>
   );
 }

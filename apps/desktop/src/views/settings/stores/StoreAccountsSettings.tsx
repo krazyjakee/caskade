@@ -14,8 +14,7 @@ import type { MessageDescriptor } from "@lingui/core";
 import { msg, plural } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { ExternalLink, KeyRound, Link2, RefreshCw, Store } from "lucide-react";
-import { type ReactNode, useEffect, useState } from "react";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { useEffect, useState } from "react";
 import { formatDateTime } from "../../../api/presentation";
 import {
   type StoreAccountSummary,
@@ -27,6 +26,7 @@ import {
   useStoreAccounts,
 } from "../../../api/storeAccounts";
 import { AchievementSettings } from "../../../components/achievements/AchievementSettings";
+import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { FailureNotice } from "../../../components/FailureNotice";
 import { SettingsLoading, SettingsStatus, useSettingsSection } from "../useSettings";
 
@@ -387,63 +387,28 @@ function AccountRow({ summary, flows }: { summary: StoreAccountSummary; flows: S
   );
 }
 
-function DialogFrame({
-  busy,
-  close,
-  children,
-}: {
-  busy: boolean;
-  close: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <ModalOverlay
-      isOpen
-      isDismissable={!busy}
-      onOpenChange={(open) => {
-        if (!open && !busy) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
-    >
-      <Modal className="w-full max-w-md rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog role="alertdialog" className="space-y-4 outline-none">
-          {children}
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
-  );
-}
-
 function DisconnectDialog({ summary, close }: { summary: StoreAccountSummary; close: () => void }) {
+  const { t } = useLingui();
   const disconnect = useStoreAccountAction((api, _: undefined) =>
     api.disconnect(summary.account.id),
   );
   const name = summary.account.displayName;
   return (
-    <DialogFrame busy={disconnect.isPending} close={close}>
-      <Heading slot="title" className="font-display text-xl font-semibold">
-        <Trans>Disconnect {name}?</Trans>
-      </Heading>
-      <p className="text-sm text-fg-muted">
+    <ConfirmDialog
+      title={t`Disconnect ${name}?`}
+      confirmLabel={t`Disconnect`}
+      isPending={disconnect.isPending}
+      error={disconnect.error}
+      onConfirm={() => disconnect.mutate(undefined, { onSuccess: close })}
+      close={close}
+    >
+      <p>
         <Trans>
           Caskade signs out of it and stops refreshing it. Its games stay in your library, and
           connecting it again brings it back as it was. Remove it to take its games out.
         </Trans>
       </p>
-      {disconnect.error && <FailureNotice variant="inline" error={disconnect.error} />}
-      <div className="flex justify-end gap-2">
-        <Button data-focus-default onPress={close} isDisabled={disconnect.isPending}>
-          <Trans>Cancel</Trans>
-        </Button>
-        <Button
-          variant="danger"
-          isDisabled={disconnect.isPending}
-          onPress={() => disconnect.mutate(undefined, { onSuccess: close })}
-        >
-          <Trans>Disconnect</Trans>
-        </Button>
-      </div>
-    </DialogFrame>
+    </ConfirmDialog>
   );
 }
 
@@ -459,12 +424,17 @@ function RemoveDialog({ summary, close }: { summary: StoreAccountSummary; close:
   const removed = preview?.removed.length ?? 0;
   const kept = preview?.kept.length ?? 0;
   return (
-    <DialogFrame busy={remove.isPending} close={close}>
-      <Heading slot="title" className="font-display text-xl font-semibold">
-        <Trans>Remove {name}?</Trans>
-      </Heading>
+    <ConfirmDialog
+      title={t`Remove ${name}?`}
+      confirmLabel={t`Remove`}
+      isPending={remove.isPending}
+      confirmDisabled={!preview}
+      error={load.error ?? remove.error}
+      onConfirm={() => remove.mutate(undefined, { onSuccess: close })}
+      close={close}
+    >
       {preview ? (
-        <div className="space-y-2 text-sm text-fg-muted">
+        <>
           <p>
             {plural(removed, {
               one: "# game only this account brought leaves your library.",
@@ -488,28 +458,13 @@ function RemoveDialog({ summary, close }: { summary: StoreAccountSummary; close:
               ))}
             </ul>
           )}
-        </div>
+        </>
       ) : (
-        <p className="text-sm text-fg-muted">
+        <p>
           <Trans>Checking what would change…</Trans>
         </p>
       )}
-      {(load.error || remove.error) && (
-        <FailureNotice variant="inline" error={load.error ?? remove.error} />
-      )}
-      <div className="flex justify-end gap-2">
-        <Button data-focus-default onPress={close} isDisabled={remove.isPending}>
-          <Trans>Cancel</Trans>
-        </Button>
-        <Button
-          variant="danger"
-          isDisabled={!preview || remove.isPending}
-          onPress={() => remove.mutate(undefined, { onSuccess: close })}
-        >
-          <Trans>Remove</Trans>
-        </Button>
-      </div>
-    </DialogFrame>
+    </ConfirmDialog>
   );
 }
 

@@ -7,7 +7,6 @@ import { isTauri } from "@tauri-apps/api/core";
 import type {
   ActionKind,
   ActionOption,
-  ActionTracking_Serialize,
   EntryActionSettings_Serialize,
   GameAction_Serialize,
   LaunchSpec_Serialize,
@@ -23,12 +22,11 @@ import { unwrap } from "./reply";
 export type { ActionKind, ActionOption, TrackingMode };
 export type GameAction = GameAction_Serialize;
 export type ActionTarget = LaunchSpec_Serialize;
-export type ActionTracking = ActionTracking_Serialize;
 export type EntryActionSettings = EntryActionSettings_Serialize;
 /** One release with its actions: its built-in action first. */
 export type ReleaseActions = ReleaseActions_Serialize;
 /** A tool started, or the age limit asks for an admin's PIN first. */
-export type ToolOutcome = ToolOutcome_Serialize;
+type ToolOutcome = ToolOutcome_Serialize;
 /** The Proton builds on this device an action can choose, best first, and
  * the one an action without its own runs now. */
 export type ProtonBuilds = ProtonBuilds_Serialize;
@@ -92,14 +90,14 @@ export const nativeActions: ActionsApi = {
   },
 };
 
-export const actionKeys = {
+const actionKeys = {
   /** Under the library's keys, so library changes refresh them. */
   game: (gameId: string) => [...libraryKeys.all, "actions", gameId] as const,
   proton: ["actions", "proton"] as const,
 };
 
 /** The library's launch actions, or `null` where there are none. */
-export function useActionsApi(): ActionsApi | null {
+function useActionsApi(): ActionsApi | null {
   return useLibraryApi().actions ?? null;
 }
 

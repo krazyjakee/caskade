@@ -4,12 +4,13 @@
  * download, and a launch it still refuses asks again. An approval covers one
  * start or persists for this account and game. The core keeps the approval;
  * the PIN is never kept here. */
+
 import { t } from "@lingui/core/macro";
 import { Trans, useLingui } from "@lingui/react/macro";
 import { useQuery } from "@tanstack/react-query";
 import { Lock } from "lucide-react";
 import { useState } from "react";
-import { Dialog, Modal, ModalOverlay, Radio, RadioGroup } from "react-aria-components";
+import { Dialog, Radio, RadioGroup } from "react-aria-components";
 import type { PinCheck } from "../../api/accounts";
 import { libraryKeys, useLibraryApi } from "../../api/provider";
 import type { AgeRestriction } from "../../api/types";
@@ -20,6 +21,7 @@ import {
   usePreferredBoard,
 } from "../../components/AgeRatingLabel";
 import { PinPad } from "../../components/accounts/PinPad";
+import { ModalFrame } from "../../components/ModalFrame";
 
 /** Whether the signed-in account needs an admin's PIN for the game. Under
  * the library's keys, so switching accounts asks again. */
@@ -69,47 +71,41 @@ export function AgeGateDialog({
       ? api.approvePlay(restriction.gameId, restriction.accountId, pin, scope === "always")
       : Promise.reject(new Error(t`Admin approval isn't available here`));
   return (
-    <ModalOverlay
-      isOpen
-      isDismissable
-      onOpenChange={(open) => {
-        if (!open) close();
-      }}
-      className="fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm"
+    <ModalFrame
+      close={close}
+      className="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg"
     >
-      <Modal className="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-panel border border-border-strong bg-surface-raised p-6 shadow-lg">
-        <Dialog aria-label={title} className="flex flex-col items-center gap-4 outline-none">
-          <Lock aria-hidden="true" className="size-6 text-fg-muted" />
-          {restriction.ratings.length > 0 && <AgeRatingLabel ratings={restriction.ratings} />}
-          <p className="text-center text-sm text-fg-muted">
-            <Trans>
-              Approve {game} for {account}.
-            </Trans>
-          </p>
-          <RadioGroup
-            aria-label={t`Approval duration`}
-            value={scope}
-            onChange={setScope}
-            className="flex w-full flex-col gap-2"
-          >
-            {[
-              { value: "once", label: t`Unlock this time` },
-              { value: "always", label: t`Always allow this game for this account` },
-            ].map(({ value, label }) => (
-              <Radio
-                key={value}
-                value={value}
-                data-spatial="focusable"
-                className="cursor-pointer rounded-control border border-border-strong px-3 py-2 text-sm text-fg-muted outline-none data-focus-visible:focus-ring data-selected:border-accent-alt data-selected:bg-accent/25 data-selected:text-fg"
-              >
-                {label}
-              </Radio>
-            ))}
-          </RadioGroup>
-          <PinPad title={title} check={check} onMatched={approved} onCancel={close} />
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+      <Dialog aria-label={title} className="flex flex-col items-center gap-4 outline-none">
+        <Lock aria-hidden="true" className="size-6 text-fg-muted" />
+        {restriction.ratings.length > 0 && <AgeRatingLabel ratings={restriction.ratings} />}
+        <p className="text-center text-sm text-fg-muted">
+          <Trans>
+            Approve {game} for {account}.
+          </Trans>
+        </p>
+        <RadioGroup
+          aria-label={t`Approval duration`}
+          value={scope}
+          onChange={setScope}
+          className="flex w-full flex-col gap-2"
+        >
+          {[
+            { value: "once", label: t`Unlock this time` },
+            { value: "always", label: t`Always allow this game for this account` },
+          ].map(({ value, label }) => (
+            <Radio
+              key={value}
+              value={value}
+              data-spatial="focusable"
+              className="cursor-pointer rounded-control border border-border-strong px-3 py-2 text-sm text-fg-muted outline-none data-focus-visible:focus-ring data-selected:border-accent-alt data-selected:bg-accent/25 data-selected:text-fg"
+            >
+              {label}
+            </Radio>
+          ))}
+        </RadioGroup>
+        <PinPad title={title} check={check} onMatched={approved} onCancel={close} />
+      </Dialog>
+    </ModalFrame>
   );
 }
 

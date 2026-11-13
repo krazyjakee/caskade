@@ -15,10 +15,7 @@ import { Slider } from "./form/Slider";
 import { Switch } from "./form/Switch";
 import { TextField } from "./form/TextField";
 import { GameArt } from "./GameArt";
-import { type CardGame, GameCard } from "./GameCard";
-import { Hero } from "./Hero";
 import { ContextMenu, Menu, MenuItem, MenuPopover, MenuSection, MenuSeparator } from "./Menu";
-import { Shelf } from "./Shelf";
 import { type GameStatus, StatusBadge } from "./StatusBadge";
 
 afterEach(cleanup);
@@ -55,16 +52,7 @@ const options = [
   { id: "grid", label: "Grid", icon: Gauge },
   { id: "list", label: "List" },
 ] as const;
-const game: CardGame = {
-  title: "Nebula Drift",
-  genre: "Racing",
-  status: "installed",
-  art: [220, 280],
-  playtimeHours: 12,
-  lastPlayed: "Yesterday",
-  sizeGb: 18,
-};
-const hero = { ...game, art: [220, 280] as [number, number], description: "Race the void." };
+const game = { title: "Nebula Drift", art: [220, 280] as [number, number] };
 
 const fixtures: Record<UiName, Fixture> = {
   button: {
@@ -238,32 +226,6 @@ const fixtures: Record<UiName, Fixture> = {
   "status-badge": {
     variants: <StatusBadge status="installed" />,
     state: (_, value) => <StatusBadge status={value as GameStatus} />,
-  },
-  "game-card": {
-    variants: (
-      <>
-        <GameCard game={game} />
-        <GameCard game={game} variant="recent" />
-        <GameCard game={{ ...game, stores: ["steam"] }} variant="store" />
-        <GameCard game={game} variant="store" />
-      </>
-    ),
-    state: (attribute, value) =>
-      attribute === "data-status" ? (
-        <GameCard game={{ ...game, status: value as GameStatus }} />
-      ) : (
-        <GameCard game={game} variant={value as "store"} />
-      ),
-  },
-  hero: {
-    variants: <Hero game={hero} eyebrow="Continue playing" action="Play" />,
-  },
-  shelf: {
-    variants: (
-      <Shelf title="Recently played" icon={Gauge} subtitle="This week">
-        <GameCard game={game} />
-      </Shelf>
-    ),
   },
   avatar: {
     variants: (

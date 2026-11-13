@@ -44,7 +44,7 @@ export function releaseWhen(release: IgdbReleaseDate): string {
 }
 
 /** What the release's status says about it, where IGDB says anything. */
-export type ReleaseKind = "released" | "early-access" | "cancelled" | "in-development" | "other";
+type ReleaseKind = "released" | "early-access" | "cancelled" | "in-development" | "other";
 
 export function releaseKind(release: IgdbReleaseDate): ReleaseKind | null {
   const status = release.status?.trim().toLowerCase();
