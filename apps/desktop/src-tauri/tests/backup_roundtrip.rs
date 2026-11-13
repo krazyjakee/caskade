@@ -5,6 +5,7 @@
 //! scheduled backup; and a scheduled backup to a drive that isn't there
 //! failing without touching the last good one.
 
+use caskade_app::recovery;
 use caskade_backup::{
     BackupError, BackupSettings, Backups, CancellationToken, Component, ExportOptions, Exported,
     NAMESPACE, ProgressFn, Schedule, restore,
@@ -18,7 +19,6 @@ use caskade_core::{
     },
     settings::SettingsService,
 };
-use caskade_desktop::recovery;
 use caskade_discovery::ExternalId;
 use std::{path::Path, sync::Arc};
 

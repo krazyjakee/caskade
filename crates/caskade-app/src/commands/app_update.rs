@@ -5,7 +5,7 @@
 //! plugin in the desktop app).
 
 use std::sync::{Mutex, MutexGuard};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::Duration;
 
 use caskade_core::i18n::Message;
 use caskade_core::settings::{AppUpdateSettings, SettingsService};
@@ -20,9 +20,13 @@ pub const ENDPOINT: &str = match option_env!("CASKADE_UPDATER_ENDPOINT") {
     None => "https://github.com/krazyjakee/caskade/releases/latest/download/latest.json",
 };
 /// How long after startup the first automatic check runs.
-pub const FIRST_CHECK: Duration = Duration::from_secs(30);
+const FIRST_CHECK: Duration = Duration::from_secs(30);
 /// How often automatic checks run after that.
-pub const CHECK_EVERY: Duration = Duration::from_secs(6 * 60 * 60);
+const CHECK_EVERY: Duration = Duration::from_secs(6 * 60 * 60);
+/// The whole download, which is the size of the app.
+pub const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(30 * 60);
+/// Download progress reaches the UI at most this often.
+pub const PROGRESS_EVERY: Duration = Duration::from_millis(250);
 
 /// Where an update is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
@@ -173,7 +177,7 @@ impl<P> AppUpdater<P> {
     /// A check's outcome: a newer release, none, or why it failed.
     pub fn checked(&self, outcome: Result<Option<(AppRelease, P)>, String>) -> AppUpdateStatus {
         let mut inner = self.lock();
-        inner.status.checked_at = Some(now_ms());
+        inner.status.checked_at = Some(caskade_core::now_ms());
         match outcome {
             Ok(Some((release, pending))) => {
                 inner.status.phase = AppUpdatePhase::Available;
@@ -244,12 +248,6 @@ impl<P> AppUpdater<P> {
             Err(caskade_core::tr!("Install an update before restarting."))
         }
     }
-}
-
-fn now_ms() -> i64 {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map_or(0, |elapsed| elapsed.as_millis() as i64)
 }
 
 /// Installs a downloaded `.deb` over this copy with one polkit prompt.
@@ -368,9 +366,28 @@ pub mod deb {
     }
 }
 
+/// Checks with `check` shortly after startup and then every six hours,
+/// while this copy can update, the setting allows it and first-run setup is
+/// done.
+pub async fn watch<P, F>(updater: &AppUpdater<P>, settings: &SettingsService, check: impl Fn() -> F)
+where
+    F: Future<Output = Result<AppUpdateStatus, String>>,
+{
+    tokio::time::sleep(FIRST_CHECK).await;
+    loop {
+        if updater.status().unavailable.is_none()
+            && automatic(settings).await
+            && let Err(error) = check().await
+        {
+            tracing::debug!(%error, "automatic app update check skipped");
+        }
+        tokio::time::sleep(CHECK_EVERY).await;
+    }
+}
+
 /// Whether checks run on their own: the setting is on and first-run setup
 /// is done.
-pub async fn automatic(settings: &SettingsService) -> bool {
+async fn automatic(settings: &SettingsService) -> bool {
     let check = match settings.get("core.appUpdates").await {
         Ok(snapshot) => {
             serde_json::from_value::<AppUpdateSettings>(snapshot.value)

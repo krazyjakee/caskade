@@ -4,40 +4,11 @@
 //! webview. Plugins and themes only.
 use crate::error::CommandError;
 pub use app::*;
-use caskade_addons::{AppMode, CatalogueService, InstalledAddon};
+use caskade_addons::{AppMode, CatalogueService};
 use caskade_app::commands::addons as app;
 use caskade_core::{artwork::CachedArtwork, themes::ThemeService};
 use caskade_plugin_host::PluginHost;
 use tauri::{Manager, Runtime, State};
-/// The catalogue client (`caskade_app`'s), checked against the release key
-/// the updater uses unless the environment names another.
-pub fn service(
-    app: &tauri::AppHandle<impl Runtime>,
-    dir: std::path::PathBuf,
-) -> Option<CatalogueService> {
-    app::service(dir, release_key(app))
-}
-
-/// The key Caskade's releases are signed with: the updater's.
-pub fn release_key(app: &tauri::AppHandle<impl Runtime>) -> Option<String> {
-    app.config()
-        .plugins
-        .0
-        .get("updater")
-        .and_then(|updater| updater.get("pubkey"))
-        .and_then(|key| key.as_str())
-        .map(str::to_owned)
-}
-
-/// What is installed: plugins and themes.
-pub async fn installed<R: Runtime>(app: &tauri::AppHandle<R>) -> Vec<InstalledAddon> {
-    app::installed(
-        app.try_state::<PluginHost>().as_deref(),
-        app.try_state::<ThemeService>().as_deref(),
-    )
-    .await
-}
-
 /// The catalogue as last fetched (offline too), with what each entry means
 /// here in `mode`. Fetches nothing.
 #[tauri::command]

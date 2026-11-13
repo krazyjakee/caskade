@@ -27,11 +27,16 @@ name = "USA"
 codes = ["USA"]
 "#;
 
-/// Polls `rom_scan_get` until the scan leaves `running`.
+/// Polls `rom_scan_jobs` until the scan leaves `running`.
 fn settled(window: &tauri::WebviewWindow<tauri::test::MockRuntime>, id: &str) -> Value {
     let deadline = Instant::now() + Duration::from_secs(10);
     loop {
-        let job = invoke(window, "rom_scan_get", json!({"id": id})).unwrap();
+        let jobs = invoke(window, "rom_scan_jobs", json!({})).unwrap();
+        let job = jobs
+            .as_array()
+            .and_then(|jobs| jobs.iter().find(|job| job["id"] == id))
+            .cloned()
+            .expect("the scan is retained");
         if job["status"] != "running" {
             return job;
         }
@@ -83,7 +88,6 @@ fn scanners_scan_review_and_import_through_typed_ipc() {
             rom_scanner_save,
             rom_scanner_delete,
             rom_scan_start,
-            rom_scan_get,
             rom_scan_jobs,
             rom_scan_cancel,
             rom_scan_submit,

@@ -72,19 +72,8 @@ pub async fn storage_move_and_remove(
 pub async fn storage_choose_directory<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
 ) -> Result<Option<String>, CommandError> {
-    use tauri_plugin_dialog::DialogExt;
-    let (send, receive) = tokio::sync::oneshot::channel();
-    app.dialog()
-        .file()
-        .set_title(caskade_core::tr!("Choose game storage location"))
-        .pick_folder(move |folder| {
-            let _ = send.send(folder);
-        });
-    receive
+    super::install_picker::pick_folder(&app, caskade_core::tr!("Choose game storage location"))
         .await
-        .map_err(|_| caskade_core::tr!("The folder chooser closed without an answer."))?
-        .map(super::install_picker::native_path)
-        .transpose()
         .map_err(CommandError::from)
 }
 

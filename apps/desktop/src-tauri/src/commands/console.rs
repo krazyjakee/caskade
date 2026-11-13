@@ -20,9 +20,12 @@ use std::time::Duration;
 use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, Runtime, WebviewWindow};
 use tauri_specta::Event as _;
 
-pub use app::{Startup, in_gamescope, wants_console};
+pub use app::Startup;
 #[cfg(test)]
-use {app::SETTINGS, caskade_core::settings::ConsoleSettings};
+use {
+    app::{SETTINGS, in_gamescope, wants_console},
+    caskade_core::settings::ConsoleSettings,
+};
 
 /// Console mode went on or off.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type, tauri_specta::Event)]

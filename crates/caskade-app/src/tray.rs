@@ -3,7 +3,7 @@
 //! UI's answer (unsaved edits, #58), and the menu's labels. The icon itself
 //! is each shell's (`tray.rs` in the Tauri app and the native app).
 
-use caskade_core::settings::GeneralSettings;
+use caskade_core::settings::{GeneralSettings, SettingsService};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
 /// Whether a close hides the main window or lets it close.
@@ -84,7 +84,6 @@ impl Tray {
         self.held() && self.heard.load(Ordering::Relaxed) < close
     }
 
-    /// Tests: as if the icon were up.
     /// The icon went up (`true`) or away.
     pub fn set_shown(&self, shown: bool) {
         self.shown.store(shown, Ordering::Relaxed);
@@ -106,6 +105,25 @@ impl Tray {
     /// Takes the icon down from the state: whether it was up.
     pub fn take_shown(&self) -> bool {
         self.shown.swap(false, Ordering::Relaxed)
+    }
+}
+
+/// Hands `apply` `core.general` now and after each change to it, until
+/// the settings close. It listens before the first read, so a change in
+/// between isn't missed.
+pub async fn follow_settings(settings: SettingsService, apply: impl Fn(&GeneralSettings)) {
+    use tokio::sync::broadcast::error::RecvError;
+    let mut changes = settings.subscribe();
+    loop {
+        apply(&settings.read_or_default("core.general").await);
+        loop {
+            match changes.recv().await {
+                // Missed changes may have been to `core.general`.
+                Ok(changed) if changed.namespace != "core.general" => {}
+                Ok(_) | Err(RecvError::Lagged(_)) => break,
+                Err(RecvError::Closed) => return,
+            }
+        }
     }
 }
 

@@ -23,7 +23,6 @@ pub mod emulation;
 pub mod emulator_setup;
 pub mod game_edit;
 pub mod guide;
-pub mod hello;
 pub mod i18n;
 pub mod igdb;
 pub mod input;

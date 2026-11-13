@@ -1,13 +1,11 @@
 //! Lifecycle scripts (#179): listing and changing the global, emulator
-//! profile and game scripts, and stopping a launch while its before-launch
-//! scripts run. Who may change a scope is
+//! profile and game scripts, and testing one. Who may change a scope is
 //! `caskade_app::permissions::script_scope`. Forwarded to
 //! `caskade_app::commands::scripts`.
 use crate::error::CommandError;
 use caskade_app::commands::scripts as app;
 use caskade_core::{
     db::LibraryStore,
-    launch::LaunchService,
     scripts::{LifecycleScript, ScriptScope, ScriptStep, ScriptTest},
 };
 use tauri::State;
@@ -52,17 +50,6 @@ pub async fn lifecycle_scripts_order(
     ids: Vec<String>,
 ) -> Result<(), CommandError> {
     app::lifecycle_scripts_order(&store, &scope, &ids).await
-}
-
-/// Stops the game's launch while its before-launch scripts run; false
-/// when it isn't at that point.
-#[tauri::command]
-#[specta::specta]
-pub async fn launch_cancel(
-    service: State<'_, LaunchService>,
-    game_id: String,
-) -> Result<bool, CommandError> {
-    app::launch_cancel(&service, &game_id).await
 }
 
 /// The steps a launch of the game (through the profile) takes, in order,

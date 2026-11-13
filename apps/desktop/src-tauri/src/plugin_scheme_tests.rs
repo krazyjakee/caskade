@@ -110,10 +110,16 @@ fn serves_only_enabled_plugins_files_inside_their_folder() {
 #[test]
 fn ui_plugins_lists_entry_urls_style_and_declared_contributions() {
     let Fixture { temp: _temp, host } = fixture();
-    let listed = tauri::async_runtime::block_on(crate::commands::plugin_ui::ui_plugins(&host));
+    let listed = tauri::async_runtime::block_on(caskade_app::commands::plugin_ui::ui_plugins(
+        &host,
+        crate::plugin_scheme::url,
+    ));
     assert!(listed.is_empty(), "disabled plugins load no UI");
     tauri::async_runtime::block_on(host.set_enabled("dev.example.hltb", true)).unwrap();
-    let listed = tauri::async_runtime::block_on(crate::commands::plugin_ui::ui_plugins(&host));
+    let listed = tauri::async_runtime::block_on(caskade_app::commands::plugin_ui::ui_plugins(
+        &host,
+        crate::plugin_scheme::url,
+    ));
     let base = if cfg!(windows) {
         "http://caskade-plugin.localhost"
     } else {

@@ -282,7 +282,13 @@ fn install_requests_need_the_install_permission() {
     let error = forbidden(invoke(&window, "request_install_input", paste.clone()));
     assert!(error.to_lowercase().contains("install"), "{error}");
     forbidden(invoke(&window, "request_dropped_install", dropped.clone()));
-    assert!(block(crate::deep_link::open(app.handle(), [link()])).is_empty());
+    assert!(
+        block(crate::deep_link::queue(
+            app.handle(),
+            vec![caskade_app::deep_link::install_input(&link())],
+        ))
+        .is_empty()
+    );
     assert!(queue.pending().is_empty(), "nothing is queued");
     assert_eq!(
         invoke(&window, "pending_install_requests", json!({})).unwrap(),
@@ -311,7 +317,11 @@ fn install_requests_need_the_install_permission() {
     invoke(&window, "request_install_input", paste).unwrap();
     invoke(&window, "request_dropped_install", dropped).unwrap();
     assert_eq!(
-        block(crate::deep_link::open(app.handle(), [link()])).len(),
+        block(crate::deep_link::queue(
+            app.handle(),
+            vec![caskade_app::deep_link::install_input(&link())],
+        ))
+        .len(),
         1
     );
     assert_eq!(queue.pending().len(), 3);

@@ -2,7 +2,8 @@
 //! against the signed-in account before it runs (`caskade_app::permissions`
 //! holds the rules), so they hold with the webview bypassed.
 
-pub use caskade_app::permissions::{Access, access};
+#[cfg(test)]
+use caskade_app::permissions::access;
 use caskade_core::{
     accounts::{AccountService, Permission},
     install::InstallService,

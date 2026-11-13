@@ -11,6 +11,7 @@
 //! isn't one of those (a development build) says why it can't update.
 
 use std::collections::BTreeMap;
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -46,8 +47,15 @@ pub enum Bundle {
 impl Bundle {
     /// This copy's, from where it runs; `None` for a development build.
     pub fn of_this_copy() -> Option<Self> {
-        let exe = std::env::current_exe().ok()?;
-        if cfg!(target_os = "linux") && std::env::var_os("APPIMAGE").is_some() {
+        Self::of(&std::env::current_exe().ok()?, |name| {
+            std::env::var_os(name)
+        })
+    }
+
+    /// The bundle executable `exe` runs from, with the environment read
+    /// through `var`.
+    fn of(exe: &Path, var: impl Fn(&str) -> Option<OsString>) -> Option<Self> {
+        if cfg!(target_os = "linux") && appimage(exe, var).is_some() {
             return Some(Self::AppImage);
         }
         if cfg!(target_os = "linux") && exe.starts_with("/usr/bin") {
@@ -269,8 +277,9 @@ pub fn verify(
 pub fn install(bundle: Bundle, bytes: &[u8], version: &str) -> Result<(), String> {
     match bundle {
         Bundle::AppImage => {
-            let target = std::env::var_os("APPIMAGE")
-                .map(PathBuf::from)
+            let target = std::env::current_exe()
+                .ok()
+                .and_then(|exe| appimage(&exe, |name| std::env::var_os(name)))
                 .ok_or_else(|| caskade_core::tr!("This copy isn't an AppImage."))?;
             replace_appimage(&target, bytes)
         }
@@ -284,6 +293,14 @@ pub fn install(bundle: Bundle, bytes: &[u8], version: &str) -> Result<(), String
             Err(caskade_core::tr!("This copy can't install a deb."))
         }
     }
+}
+
+/// The AppImage file executable `exe` runs from, with the environment read
+/// through `var`. An `APPIMAGE` another AppImage passed down names that one,
+/// not Caskade (`caskade_core::program`).
+fn appimage(exe: &Path, var: impl Fn(&str) -> Option<OsString>) -> Option<PathBuf> {
+    let program = caskade_core::program::from(exe.to_path_buf(), var);
+    (program != exe).then_some(program)
 }
 
 /// Replaces the AppImage at `target` with `bytes`, keeping its mode; the

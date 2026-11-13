@@ -2,8 +2,6 @@
 //! Fields the user sets stay theirs through automatic refreshes until reset.
 use crate::error::CommandError;
 pub use app::*;
-// The webview's event, which the app sends as `caskade_app`'s.
-pub use crate::events::GamesRefreshChanged;
 use caskade_app::commands::game_edit as app;
 use caskade_core::{
     accounts::AccountService,

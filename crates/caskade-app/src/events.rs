@@ -8,7 +8,6 @@ pub use crate::commands::addon_packages::AddonProgress;
 pub use crate::commands::app_update::AppUpdateChanged;
 pub use crate::commands::backup::BackupChanged;
 pub use crate::commands::game_edit::GamesRefreshChanged;
-pub use crate::commands::hello::Hello;
 pub use crate::commands::i18n::LocaleChanged;
 pub use crate::commands::input::InputActionEvent;
 pub use crate::commands::install_requests::InstallRefused;
@@ -130,11 +129,6 @@ pub struct AccountChanged {
     pub active_id: Option<String>,
 }
 
-/// `lifecycle.scripts.ran`: a launch's scripts of one phase ran (#179),
-/// with their bounded output. The user's own; plugins never see it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-pub struct LifecycleScriptsRan(pub caskade_core::scripts::ScriptReport);
-
 /// `achievements.changed`: a game's achievements were fetched (#185).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
@@ -166,7 +160,6 @@ pub enum Event {
     PluginsChanged(PluginsChanged),
     PluginReloaded(PluginReloaded),
     AccountChanged(AccountChanged),
-    LifecycleScriptsRan(LifecycleScriptsRan),
     AchievementsChanged(AchievementsChanged),
     BackgroundChanged(BackgroundChanged),
     RommDownloadChanged(RommDownloadChanged),
@@ -188,7 +181,6 @@ pub enum Event {
     SystemStatsSampled(SystemStatsSampled),
     AppUpdateChanged(AppUpdateChanged),
     InputActionEvent(InputActionEvent),
-    Hello(Hello),
     GamesRefreshChanged(GamesRefreshChanged),
     SaveVersionsChanged(SaveVersionsChanged),
 }
@@ -246,7 +238,6 @@ impl Event {
             Self::PluginsChanged(_) => "plugins.changed",
             Self::PluginReloaded(_) => "plugin.reloaded",
             Self::AccountChanged(_) => "account.changed",
-            Self::LifecycleScriptsRan(_) => "lifecycle.scripts.ran",
             Self::AchievementsChanged(_) => "achievements.changed",
             Self::BackgroundChanged(_) => "background.changed",
             Self::RommDownloadChanged(_) => "romm.download.changed",
@@ -268,7 +259,6 @@ impl Event {
             Self::SystemStatsSampled(_) => "system.stats.sampled",
             Self::AppUpdateChanged(_) => "app_update.changed",
             Self::InputActionEvent(_) => "input.action",
-            Self::Hello(_) => "hello",
             Self::GamesRefreshChanged(_) => "games.refresh.changed",
             Self::SaveVersionsChanged(_) => "save.versions.changed",
         }
@@ -327,9 +317,6 @@ pub fn translate(event: BusEvent) -> Option<Event> {
         }
         BusEvent::AccountChanged { active_id } => {
             Event::AccountChanged(AccountChanged { active_id })
-        }
-        BusEvent::LifecycleScriptsRan(report) => {
-            Event::LifecycleScriptsRan(LifecycleScriptsRan(*report))
         }
         BusEvent::AchievementsChanged { game_id } => {
             Event::AchievementsChanged(AchievementsChanged { game_id })

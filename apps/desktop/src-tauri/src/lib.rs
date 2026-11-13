@@ -15,12 +15,10 @@ pub mod e2e;
 pub mod events;
 pub mod game_focus;
 pub mod launch_cli;
-pub mod logging;
 pub mod main_window;
 pub mod navigation;
 pub mod permissions;
 pub mod plugin_scheme;
-pub mod recovery;
 pub mod theme_scheme;
 pub mod tray;
 pub mod webkit;
@@ -28,9 +26,8 @@ pub mod webview_recovery;
 pub mod window_state;
 
 // The app layer's, under the paths the adapter has always used.
-pub use caskade_app::{discovery, error, onboarding, torrent_links};
-// The game and video windows, shared with the native app.
-pub use caskade_player::{video_player, web_player};
+use caskade_app::single_instance::{Intent, intents};
+pub use caskade_app::{discovery, error, torrent_links};
 
 /// Builds and runs the app.
 pub fn run() {
@@ -58,42 +55,26 @@ pub fn run() {
             }
         }
     }
-    logging::init();
+    caskade_app::logging::init("Caskade", env!("CARGO_PKG_VERSION"));
     // Panics reach the log too, not only stderr.
     background::log_panics();
     // Before anything runs on it.
     async_runtime();
     // First, as it may restart the process.
-    webkit::prefer_gpu();
+    caskade_player::webkit::prefer_gpu();
     // The OS's language, until the Language setting (#213) picks one.
     caskade_core::i18n::set_locale(caskade_core::i18n::SYSTEM);
-    // `caskade --web-game <url>`: a web game's window, not the app.
-    if let Some(options) = web_player::Options::from_args(std::env::args_os()) {
-        exit_window(web_player::run(options), "the game window couldn't open");
-    }
-    // `caskade --video <id>`: a game's video, not the app.
-    if let Some(options) = video_player::Options::from_args(std::env::args_os()) {
-        exit_window(video_player::run(options), "the video window couldn't open");
+    // `caskade --web-game <url>` / `--video <id>`: a game's or a video's
+    // window, not the app.
+    if let Some(window) = caskade_player::Window::from_args(std::env::args_os()) {
+        window.run();
     }
     let specta = bindings::builder();
     #[cfg(debug_assertions)]
     if let Err(error) = bindings::export(&bindings::default_path()) {
         tracing::warn!(%error, "could not refresh the TypeScript bindings");
     }
-    let paths = caskade_core::AppPaths::standard()
-        .unwrap_or_else(|error| startup_failed("Caskade couldn't find its data folders", &error));
-    if let Err(error) = paths.create() {
-        startup_failed("Caskade couldn't create its data folders", &error);
-    }
-    // `caskade --restore <backup>` (#192): staged now, applied as the
-    // library opens.
-    if let Some(archive) = recovery::restore_arg(
-        &std::env::args().collect::<Vec<_>>(),
-        &std::env::current_dir().unwrap_or_default(),
-    ) && let Err(error) = tauri::async_runtime::block_on(recovery::stage(&paths, &archive))
-    {
-        startup_failed("Caskade couldn't restore the backup", &error);
-    }
+    let paths = caskade_app::recovery::prepare_paths();
     let setup_paths = paths.clone();
     // One cache, shared by every clone: without it no artwork shows;
     // everything else works.
@@ -105,21 +86,8 @@ pub fn run() {
         artwork.clone(),
     )))
     .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {
-        // `caskade dev <folder>` while Caskade runs loads it here (#131).
-        if let Some(folder) = dev_plugins::folder_from_args(&args, std::path::Path::new(&cwd)) {
-            dev_plugins::load_in_background(app, folder);
-        }
-        // A magnet link or torrent file the OS opened with Caskade (#159).
-        if let Some(input) = torrent_links::input_from_args(&args, std::path::Path::new(&cwd)) {
-            deep_link::queue_in_background(app, input);
-        }
         main_window::raise(app);
-        // `caskade --console` while Caskade runs switches it (#148).
-        if commands::console::wants_console(&args)
-            && let Err(error) = commands::console::requested(app)
-        {
-            tracing::warn!(%error, "couldn't switch to console mode");
-        }
+        take(app, intents(&args, std::path::Path::new(&cwd)));
     }))
     .plugin(tauri_plugin_deep_link::init())
     .plugin(window_state::plugin())
@@ -149,7 +117,7 @@ pub fn run() {
             Ok(core) => core,
             Err(error) => {
                 // Nothing works without the library: say so, then quit.
-                library_failed(app.handle(), &error, &setup_paths);
+                library_failed(app.handle(), error, &setup_paths);
                 return Ok(());
             }
         };
@@ -206,7 +174,6 @@ pub fn run() {
                 events,
                 placement: std::sync::Arc::new(move || main_window::placement(&placement)),
                 activation: std::sync::Arc::new(move || main_window::activation(&activation)),
-                release_key: commands::addons::release_key(app.handle()),
             },
         );
         // Following the running game with the window (#149).
@@ -217,25 +184,45 @@ pub fn run() {
             services.store.clone(),
             services.launch.clone(),
         );
-        let paths = services.paths.clone();
+        // `caskade --launch` from other programs (#256).
+        launch_cli::server::listen(
+            launch_cli::server::Services::of(&services),
+            launch_cli::Endpoint::for_paths(&services.paths),
+        );
         manage(app, services);
         deep_link::listen(app.handle());
         app.manage(commands::video::VideoWindow::default());
-        // `caskade dev <folder>`: load and watch a plugin in place (#131).
-        let args: Vec<String> = std::env::args().collect();
-        if let Some(folder) =
-            dev_plugins::folder_from_args(&args, &std::env::current_dir().unwrap_or_default())
-        {
-            dev_plugins::load_in_background(app.handle(), folder);
-        }
-        // `caskade --launch` from other programs (#256), once the library
-        // and the launch service are there to take them.
-        launch_cli::listen(app.handle(), launch_cli::Endpoint::for_paths(&paths));
+        // This start's `--console` is `Startup::read`'s.
+        let own = intents(
+            &std::env::args().collect::<Vec<_>>(),
+            &std::env::current_dir().unwrap_or_default(),
+        );
+        take(
+            app.handle(),
+            own.into_iter().filter(|intent| *intent != Intent::Console),
+        );
         Ok(())
     })
     .build(tauri::generate_context!())
     .expect("error while building Caskade")
     .run(run_event);
+}
+
+/// Does what a start's arguments ask (`caskade_app::single_instance`), but
+/// for its `caskade://` links, which the deep-link plugin hands over.
+fn take<R: tauri::Runtime>(app: &tauri::AppHandle<R>, intents: impl IntoIterator<Item = Intent>) {
+    for intent in intents {
+        match intent {
+            Intent::DevFolder(folder) => dev_plugins::load_in_background(app, folder),
+            Intent::Install(input) => deep_link::queue_in_background(app, input),
+            Intent::Console => {
+                if let Err(error) = commands::console::requested(app) {
+                    tracing::warn!(%error, "couldn't switch to console mode");
+                }
+            }
+            Intent::Links(_) => {}
+        }
+    }
 }
 
 /// Most workers the app's async runtime starts. Tauri's own starts one per
@@ -262,148 +249,83 @@ pub fn run_event<R: tauri::Runtime>(app: &tauri::AppHandle<R>, event: tauri::Run
     tray::on_run_event(app, event);
 }
 
-/// Ends a window process (`--web-game`, `--video`) with its window's code.
-fn exit_window(outcome: Result<i32, String>, failed: &str) -> ! {
-    match outcome {
-        Ok(code) => std::process::exit(code),
-        Err(error) => {
-            tracing::error!(%error, "{failed}");
-            std::process::exit(1)
-        }
-    }
-}
-
-/// Ends the process before Tauri starts, when there is nowhere to keep the
-/// library.
-fn startup_failed(what: &str, error: &dyn std::fmt::Display) -> ! {
-    tracing::error!(%error, "{what}");
-    eprintln!("{what}: {error}");
-    std::process::exit(1)
-}
-
-/// The library store couldn't open: a dialog says why and offers to restore
-/// a backup (#192), or to update when a newer Caskade wrote the library;
-/// otherwise closing it quits.
+/// The library store couldn't open: the app layer's dialogs say why and
+/// offer a way back (`caskade_app::recovery::library_failed`). They wait
+/// for answers, so they run off the main thread.
 fn library_failed<R: tauri::Runtime>(
     app: &tauri::AppHandle<R>,
-    error: &caskade_core::Error,
+    error: caskade_core::Error,
     paths: &caskade_core::AppPaths,
 ) {
-    use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
-    tracing::error!(%error, "library unavailable");
-    eprintln!("Caskade couldn't open its library: {error}");
-    let report = caskade_core::error::ErrorReport::from(error);
-    if report
-        .hints
-        .contains(&caskade_core::error::RecoveryHint::UpdateCaskade)
-    {
-        // A backup is older than the library: restoring one would lose
-        // what the newer Caskade added.
-        return library_newer(app, report.summary);
-    }
-    let (handle, paths) = (app.clone(), paths.clone());
-    app.dialog()
-        .message(caskade_core::tr!(
-            "Caskade couldn't open its library.\n\n{error}\n\nYou can restore it from a backup, or start Caskade with --restore <backup file>.",
-            error = error
-        ))
-        .title("Caskade")
-        .kind(MessageDialogKind::Error)
-        .buttons(MessageDialogButtons::OkCancelCustom(
-            caskade_core::tr!("Restore from backup…"),
-            caskade_core::tr!("Quit"),
-        ))
-        .show(move |restore| {
-            if restore {
-                recovery::restore_from_dialog(&handle, paths);
-            } else {
-                handle.exit(1);
-            }
-        });
+    let (dialogs, paths) = (StartupDialogs(app.clone()), paths.clone());
+    std::thread::spawn(move || caskade_app::recovery::library_failed(&error, &paths, &dialogs));
 }
 
-/// A newer Caskade changed the library in a way this one can't read: a
-/// copy that updates itself offers to, then restarts into the update.
-fn library_newer<R: tauri::Runtime>(app: &tauri::AppHandle<R>, summary: String) {
-    use tauri_plugin_dialog::MessageDialogButtons;
-    let handle = app.clone();
-    match commands::app_update::unavailable_reason(tauri::utils::platform::bundle_type()) {
-        Some(reason) => startup_dialog(app, format!("{summary}\n\n{}", reason.render()))
-            .buttons(MessageDialogButtons::OkCustom(caskade_core::tr!("Quit")))
-            .show(move |_| handle.exit(1)),
-        None => startup_dialog(
-            app,
-            caskade_core::tr!("{summary}\n\nUpdate Caskade to open it.", summary = summary),
-        )
-        .buttons(MessageDialogButtons::OkCancelCustom(
-            caskade_core::tr!("Update Caskade"),
-            caskade_core::tr!("Quit"),
-        ))
-        .show(move |update| {
-            if update {
-                update_for_library(&handle);
-            } else {
-                handle.exit(1);
-            }
-        }),
+/// Error dialogs before the main window shows.
+struct StartupDialogs<R: tauri::Runtime>(tauri::AppHandle<R>);
+
+impl<R: tauri::Runtime> StartupDialogs<R> {
+    fn message(&self, text: &str) -> tauri_plugin_dialog::MessageDialogBuilder<R> {
+        use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+        self.0
+            .dialog()
+            .message(text)
+            .title("Caskade")
+            .kind(MessageDialogKind::Error)
     }
 }
 
-/// An error dialog before the main window shows.
-fn startup_dialog<R: tauri::Runtime>(
-    app: &tauri::AppHandle<R>,
-    message: String,
-) -> tauri_plugin_dialog::MessageDialogBuilder<R> {
-    use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
-    app.dialog()
-        .message(message)
-        .title("Caskade")
-        .kind(MessageDialogKind::Error)
-}
+impl<R: tauri::Runtime> caskade_app::recovery::StartupDialogs for StartupDialogs<R> {
+    fn ask(&self, text: &str, buttons: &[String]) -> Option<usize> {
+        use tauri_plugin_dialog::MessageDialogButtons;
+        let dialog = self.message(text);
+        let dialog = match buttons {
+            [] => dialog,
+            [only] => dialog.buttons(MessageDialogButtons::OkCustom(only.clone())),
+            [ok, cancel, ..] => dialog.buttons(MessageDialogButtons::OkCancelCustom(
+                ok.clone(),
+                cancel.clone(),
+            )),
+        };
+        dialog.blocking_show().then_some(0)
+    }
 
-/// Installs the newest release from the startup dialog, then restarts into
-/// it; a failed update says why and offers to try again.
-fn update_for_library<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
-    use tauri_plugin_dialog::{MessageDialogButtons, MessageDialogKind};
-    // Nothing else shows while it downloads; closing this changes nothing.
-    startup_dialog(
-        app,
-        caskade_core::tr!(
+    fn pick_file(
+        &self,
+        title: &str,
+        (name, extensions): (&str, &[&str]),
+    ) -> Option<std::path::PathBuf> {
+        use tauri_plugin_dialog::DialogExt;
+        self.0
+            .dialog()
+            .file()
+            .set_title(title)
+            .add_filter(name, extensions)
+            .blocking_pick_file()
+            .and_then(|file| file.into_path().ok())
+    }
+
+    fn cant_update(&self) -> Option<caskade_core::i18n::Message> {
+        commands::app_update::unavailable_reason(tauri::utils::platform::bundle_type())
+    }
+
+    fn update(&self) -> Result<Option<String>, String> {
+        // Nothing else shows while it downloads; closing this changes nothing.
+        self.message(&caskade_core::tr!(
             "Updating Caskade…\n\nCaskade restarts by itself once the update is installed."
-        ),
-    )
-    .kind(MessageDialogKind::Info)
-    .show(|_| {});
-    let handle = app.clone();
-    tauri::async_runtime::spawn(async move {
-        let quit = handle.clone();
-        match commands::app_update::install_now(&handle).await {
-            Ok(Some(_)) => tray::restart(&handle),
-            Ok(None) => startup_dialog(
-                &handle,
-                caskade_core::tr!(
-                    "No released version of Caskade can open this library yet: a development build changed it."
-                ),
-            )
-            .buttons(MessageDialogButtons::OkCustom(caskade_core::tr!("Quit")))
-            .show(move |_| quit.exit(1)),
-            Err(error) => {
-                tracing::warn!(%error, "update from the startup dialog failed");
-                startup_dialog(&handle, error)
-                    .buttons(MessageDialogButtons::OkCancelCustom(
-                        caskade_core::tr!("Try again"),
-                        caskade_core::tr!("Quit"),
-                    ))
-                    .show(move |again| {
-                        if again {
-                            update_for_library(&quit);
-                        } else {
-                            quit.exit(1);
-                        }
-                    })
-            }
-        }
-    });
+        ))
+        .kind(tauri_plugin_dialog::MessageDialogKind::Info)
+        .show(|_| {});
+        caskade_app::runtime::block_on(commands::app_update::install_now(&self.0))
+    }
+
+    fn restart(&self) {
+        self.0.restart()
+    }
+
+    fn quit(&self) {
+        self.0.exit(1)
+    }
 }
 
 /// Puts every service the app layer started into Tauri's state, where

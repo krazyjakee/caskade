@@ -77,10 +77,7 @@ fn theme(version: &str) -> Vec<u8> {
 }
 
 fn sha(bytes: &[u8]) -> String {
-    Sha256::digest(bytes)
-        .iter()
-        .map(|b| format!("{b:02x}"))
-        .collect()
+    format!("{:x}", Sha256::digest(bytes))
 }
 
 struct World {

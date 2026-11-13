@@ -35,8 +35,8 @@ fn settings(start: &str, active: bool) -> ConsoleSettings {
 /// settings by kind of device leave it; a new desktop doesn't.
 #[test]
 fn a_new_handheld_starts_in_console_mode_and_a_desktop_doesnt() {
-    use caskade_core::device_type::{DeviceType, settle_new_device};
-    let first_mode = |kind: DeviceType| {
+    use caskade_core::device_type::{DeviceKind, settle_new_device};
+    let first_mode = |kind: DeviceKind| {
         tauri::async_runtime::block_on(async {
             let temp = tempfile::tempdir().unwrap();
             let store = LibraryStore::in_memory().await.unwrap();
@@ -49,10 +49,10 @@ fn a_new_handheld_starts_in_console_mode_and_a_desktop_doesnt() {
             Startup::from(&["caskade".to_owned()], env(&[])).console(&preferences)
         })
     };
-    assert!(first_mode(DeviceType::Handheld));
-    assert!(first_mode(DeviceType::Tv));
-    assert!(!first_mode(DeviceType::Desktop));
-    assert!(!first_mode(DeviceType::Laptop));
+    assert!(first_mode(DeviceKind::Handheld));
+    assert!(first_mode(DeviceKind::Tv));
+    assert!(!first_mode(DeviceKind::Desktop));
+    assert!(!first_mode(DeviceKind::Laptop));
 }
 
 #[test]

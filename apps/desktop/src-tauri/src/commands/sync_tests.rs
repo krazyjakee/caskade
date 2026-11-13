@@ -15,9 +15,18 @@ use std::{
     time::{Duration, Instant},
 };
 use tauri::{
-    Listener,
+    Listener, Manager,
     test::{mock_builder, mock_context, noop_assets},
 };
+
+/// Starts the devices service and library sync as the app does
+/// (`caskade_app::start`), and forwards their changes to the webview.
+fn setup<R: tauri::Runtime>(app: &tauri::AppHandle<R>, devices: Devices, sync: SyncService) {
+    app::setup(crate::events::sink(app.clone()), &devices, &sync);
+    app.manage(devices);
+    app.manage(sync);
+    app.manage(OpenedPairingLink::default());
+}
 
 fn block_on<F: std::future::Future>(future: F) -> F::Output {
     tauri::async_runtime::block_on(future)
@@ -150,7 +159,11 @@ fn devices_pair_by_link_and_by_an_opened_link_over_ipc() {
     assert!(!is_pair_link(
         &tauri::Url::parse("caskade://install?url=x").unwrap()
     ));
-    assert!(hold_pair_link(app.handle(), &url));
+    assert!(app::hold_pair_link(
+        &crate::events::sink(app.handle().clone()),
+        app.try_state::<OpenedPairingLink>().as_deref(),
+        &url
+    ));
     let announced = opened.lock().unwrap().clone();
     assert_eq!(announced.len(), 1);
     assert_eq!(announced[0]["deviceId"], json!(phone_id));

@@ -21,15 +21,6 @@ pub async fn game_updates(
     app::game_updates(&updates, &game_id).await
 }
 
-/// The installs with a newer release out.
-#[tauri::command]
-#[specta::specta]
-pub async fn updates_available(
-    updates: State<'_, Updates>,
-) -> Result<Vec<GameUpdate>, CommandError> {
-    app::updates_available(&updates).await
-}
-
 /// Asks the install's provider for its newest release now.
 #[tauri::command]
 #[specta::specta]

@@ -140,7 +140,7 @@ fn a_moved_caskade_rewrites_only_an_existing_entry() {
     handler.refresh().unwrap();
     let text = std::fs::read_to_string(&entry).unwrap();
     assert!(
-        text.contains("Exec=\"/home/me/Caskade.AppImage\" %u\n"),
+        text.contains("Exec=/home/me/Caskade.AppImage %u\n"),
         "{text}"
     );
     assert!(text.contains("X-Caskade-Previous-Torrent=transmission.desktop\n"));

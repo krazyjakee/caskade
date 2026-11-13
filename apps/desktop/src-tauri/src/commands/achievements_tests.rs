@@ -124,7 +124,6 @@ fn a_game_s_achievements_are_listed_and_refreshed_through_ipc() {
         .manage(accounts)
         .invoke_handler(tauri::generate_handler![
             game_achievements,
-            game_achievement_summary,
             game_achievements_refresh,
             game_achievements_cancel
         ])
@@ -147,68 +146,8 @@ fn a_game_s_achievements_are_listed_and_refreshed_through_ipc() {
         sets[0]["achievements"][0]["state"]["unlockedAtMs"],
         1_700_000_000_000_i64
     );
-    let summary = invoke(&window, "game_achievement_summary", json!({"gameId": game})).unwrap();
-    assert_eq!(
-        summary,
-        json!({"gameId": game, "sets": 1, "unlocked": 1, "total": 1})
-    );
     assert_eq!(
         invoke(&window, "game_achievements_cancel", json!({"gameId": game})).unwrap(),
         false
     );
-}
-
-#[test]
-fn a_release_is_linked_by_hand_listed_and_unlinked_through_ipc() {
-    let (store, game, entry) = tauri::async_runtime::block_on(async {
-        let store = LibraryStore::in_memory().await.unwrap();
-        let game = Game::new("Doom (SNES)");
-        let entry = GameEntry::new(&game.id, SourceId::new("roms"), "doom");
-        let group = store.import_group(&game, &[entry], None).await.unwrap();
-        (store, group.game_id, group.entry_ids[0].clone())
-    });
-    let bus = Bus::default();
-    let achievements = Achievements::new(
-        store.clone(),
-        bus.clone(),
-        Arc::new(Accounts(store.clone())),
-    );
-    let app = mock_builder()
-        .manage(achievements)
-        .manage(store)
-        .manage(bus)
-        .invoke_handler(tauri::generate_handler![
-            game_achievement_links,
-            game_achievement_link_set,
-            game_achievement_link_clear
-        ])
-        .build(mock_context(noop_assets()))
-        .unwrap();
-    let window = tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
-        .build()
-        .unwrap();
-    let link = json!({"gameId": game, "entryId": entry, "provider": "retroachievements", "productId": "5"});
-    invoke(&window, "game_achievement_link_set", link).unwrap();
-    let links = invoke(&window, "game_achievement_links", json!({"gameId": game})).unwrap();
-    assert_eq!(links[0]["productId"], "5");
-    assert_eq!(links[0]["method"]["type"], "manual");
-    // Another game's release isn't this game's to link.
-    let refused = invoke(
-        &window,
-        "game_achievement_link_set",
-        json!({"gameId": "other", "entryId": entry, "provider": "retroachievements", "productId": "6"}),
-    )
-    .unwrap_err();
-    assert_eq!(refused["code"], "invalid");
-    assert_eq!(
-        invoke(
-            &window,
-            "game_achievement_link_clear",
-            json!({"gameId": game, "entryId": entry, "provider": "retroachievements"}),
-        )
-        .unwrap(),
-        true
-    );
-    let links = invoke(&window, "game_achievement_links", json!({"gameId": game})).unwrap();
-    assert_eq!(links, json!([]));
 }

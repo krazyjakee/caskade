@@ -75,8 +75,7 @@ fn accounts_their_games_and_removal_over_ipc() {
             store_account_refresh,
             store_account_disconnect,
             store_account_removal_preview,
-            store_account_remove,
-            game_ownership
+            store_account_remove
         ]);
     let app = mock_builder()
         .manage(accounts)
@@ -99,8 +98,6 @@ fn accounts_their_games_and_removal_over_ipc() {
         .game_id
         .clone()
         .unwrap();
-    let owners = invoke(&window, "game_ownership", json!({"gameId": game})).unwrap();
-    assert_eq!(owners[0]["displayName"], "Me");
 
     invoke(
         &window,

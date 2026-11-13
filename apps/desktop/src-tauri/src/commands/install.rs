@@ -141,16 +141,6 @@ pub async fn job_recover(
 
 #[tauri::command]
 #[specta::specta]
-pub async fn fetch_start(
-    state: tauri::State<'_, InstallService>,
-    input: String,
-    root_id: Option<String>,
-) -> Result<JobSnapshot, String> {
-    app::fetch_start(&state, input, root_id).await
-}
-
-#[tauri::command]
-#[specta::specta]
 pub async fn uninstall_game(
     state: tauri::State<'_, InstallService>,
     launch: tauri::State<'_, LaunchService>,
@@ -170,15 +160,6 @@ pub async fn remove_game(
     game_id: String,
 ) -> Result<Option<JobSnapshot>, crate::error::CommandError> {
     app::remove_game(&state, &launch, game_id).await
-}
-
-#[tauri::command]
-#[specta::specta]
-pub async fn verify_game(
-    state: tauri::State<'_, InstallService>,
-    entry_id: String,
-) -> Result<JobSnapshot, String> {
-    app::verify_game(&state, entry_id).await
 }
 
 #[tauri::command]

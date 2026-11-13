@@ -148,6 +148,35 @@ fn a_deb_takes_only_its_own_entry() {
     assert_eq!(Bundle::AppImage.platforms().len(), 2);
 }
 
+#[test]
+fn only_caskades_own_appimage_counts() {
+    let env = |appdir: &'static str| {
+        move |name: &str| match name {
+            "APPIMAGE" => Some(OsString::from("/home/p/Launcher.AppImage")),
+            "APPDIR" => Some(OsString::from(appdir)),
+            _ => None,
+        }
+    };
+    // A deb started from another AppImage inherits its variables.
+    let deb = Path::new("/usr/bin/caskade");
+    assert_eq!(appimage(deb, env("/tmp/.mount_LauncherAbc")), None);
+    let mounted = Path::new("/tmp/.mount_CaskadXyz/usr/bin/caskade");
+    assert_eq!(
+        appimage(mounted, env("/tmp/.mount_CaskadXyz")),
+        Some(PathBuf::from("/home/p/Launcher.AppImage"))
+    );
+    if cfg!(target_os = "linux") {
+        assert_eq!(
+            Bundle::of(deb, env("/tmp/.mount_LauncherAbc")),
+            Some(Bundle::Deb)
+        );
+        assert_eq!(
+            Bundle::of(mounted, env("/tmp/.mount_CaskadXyz")),
+            Some(Bundle::AppImage)
+        );
+    }
+}
+
 #[cfg(unix)]
 #[test]
 fn an_appimage_is_replaced_in_place_and_keeps_running_mode() {

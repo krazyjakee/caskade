@@ -9,8 +9,6 @@ import * as __TAURI_EVENT from "@tauri-apps/api/event";
 
 /** Commands */
 export const commands = {
-	/**  Greets `name` and emits the `hello` event with the same greeting. */
-	hello: (name: string) => typedError<Greeting, string>(__TAURI_INVOKE("hello", { name })),
 	backgroundStatus: () => __TAURI_INVOKE<AppStatus>("background_status"),
 	discoveryStatus: () => typedError<DiscoverySnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("discovery_status")),
 	discoveryLaunchers: () => typedError<DiscoverySnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("discovery_launchers")),
@@ -282,7 +280,6 @@ export const commands = {
 	 *  download again, install from another source or into another root.
 	 */
 	jobRecover: (id: string, recovery: Recovery) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("job_recover", { id, recovery })),
-	fetchStart: (input: string, rootId: string | null) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("fetch_start", { input, rootId })),
 	uninstallGame: (entryId: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("uninstall_game", { entryId })),
 	/**
 	 *  Removes a game Caskade installed or handed off from the library for
@@ -290,7 +287,6 @@ export const commands = {
 	 *  are files, which removes the game once it completes.
 	 */
 	removeGame: (gameId: string) => typedError<JobSnapshot_Serialize | null, ErrorReport_Serialize>(__TAURI_INVOKE("remove_game", { gameId })),
-	verifyGame: (entryId: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("verify_game", { entryId })),
 	moveGame: (entryId: string, targetRootId: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("move_game", { entryId, targetRootId })),
 	jobGet: (id: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("job_get", { id })),
 	jobCancel: (id: string) => typedError<JobSnapshot_Serialize, string>(__TAURI_INVOKE("job_cancel", { id })),
@@ -352,11 +348,6 @@ export const commands = {
 	/**  Puts a scope's scripts in the order of `ids`. */
 	lifecycleScriptsOrder: (scope: ScriptScope, ids: string[]) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("lifecycle_scripts_order", { scope, ids })),
 	/**
-	 *  Stops the game's launch while its before-launch scripts run; false
-	 *  when it isn't at that point.
-	 */
-	launchCancel: (gameId: string) => typedError<boolean, ErrorReport_Serialize>(__TAURI_INVOKE("launch_cancel", { gameId })),
-	/**
 	 *  The steps a launch of the game (through the profile) takes, in order,
 	 *  disabled scripts where they would run (#180).
 	 */
@@ -371,8 +362,6 @@ export const commands = {
 	lifecycleScriptTestCancel: (testId: string) => typedError<boolean, ErrorReport_Serialize>(__TAURI_INVOKE("lifecycle_script_test_cancel", { testId })),
 	/**  The game's achievement sets the signed-in account sees, as last fetched. */
 	gameAchievements: (gameId: string) => typedError<AchievementSet_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("game_achievements", { gameId })),
-	/**  The game's counts: how many sets, unlocked and total. */
-	gameAchievementSummary: (gameId: string) => typedError<AchievementSummary, ErrorReport_Serialize>(__TAURI_INVOKE("game_achievement_summary", { gameId })),
 	/**
 	 *  Fetches the game's sets now, then answers them. A set that can't be
 	 *  fetched keeps its last answer and says why.
@@ -380,19 +369,6 @@ export const commands = {
 	gameAchievementsRefresh: (gameId: string) => typedError<AchievementSet_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("game_achievements_refresh", { gameId })),
 	/**  Stops the game's refresh under way; false when there is none. */
 	gameAchievementsCancel: (gameId: string) => typedError<boolean, ErrorReport_Serialize>(__TAURI_INVOKE("game_achievements_cancel", { gameId })),
-	/**
-	 *  How the game's releases are linked to achievement services that their
-	 *  store ids don't give (#189): verified by hash, by hand, or unresolved
-	 *  with why.
-	 */
-	gameAchievementLinks: (gameId: string) => typedError<AchievementLink[], ErrorReport_Serialize>(__TAURI_INVOKE("game_achievement_links", { gameId })),
-	/**
-	 *  Links one of the game's releases to `product_id` at `provider` by hand,
-	 *  replacing a verified or unresolved link; matching never changes it.
-	 */
-	gameAchievementLinkSet: (gameId: string, entryId: string, provider: string, productId: string) => typedError<null, ErrorReport_Serialize>(__TAURI_INVOKE("game_achievement_link_set", { gameId, entryId, provider, productId })),
-	/**  Removes a release's link: the next refresh looks for a verified one. */
-	gameAchievementLinkClear: (gameId: string, entryId: string, provider: string) => typedError<boolean, ErrorReport_Serialize>(__TAURI_INVOKE("game_achievement_link_clear", { gameId, entryId, provider })),
 	/**
 	 *  The icon of `achievement_id` in the game's set of `store_account_id` at
 	 *  `product_id`, as the signed-in account sees it: its locked icon when
@@ -628,7 +604,6 @@ export const commands = {
 	 *  Changes arrive as `emulationScanChanged`.
 	 */
 	romScanStart: (scannerId: string, mode: ScanMode) => typedError<ScanJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("rom_scan_start", { scannerId, mode })),
-	romScanGet: (id: string) => typedError<ScanJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("rom_scan_get", { id })),
 	/**  Retained scans, newest first, so a review survives a reload. */
 	romScanJobs: () => __TAURI_INVOKE<ScanJob_Serialize[]>("rom_scan_jobs"),
 	romScanCancel: (id: string) => typedError<ScanJob_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("rom_scan_cancel", { id })),
@@ -719,8 +694,6 @@ export const commands = {
 	gamePortInstall: (gameId: string, project: string, rootId: string | null) => typedError<JobSnapshot_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_port_install", { gameId, project, rootId })),
 	/**  The updates of a game's followed installs; empty when none is followed. */
 	gameUpdates: (gameId: string) => typedError<GameUpdate_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("game_updates", { gameId })),
-	/**  The installs with a newer release out. */
-	updatesAvailable: () => typedError<GameUpdate_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("updates_available")),
 	/**  Asks the install's provider for its newest release now. */
 	gameUpdateCheck: (entryId: string) => typedError<GameUpdate_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("game_update_check", { entryId })),
 	/**
@@ -752,11 +725,8 @@ export const commands = {
 	 *  failed server's status carries its error.
 	 */
 	rommSync: (id: string | null) => typedError<RommSyncReport[], ErrorReport_Serialize>(__TAURI_INVOKE("romm_sync", { id })),
-	rommCacheStatus: () => typedError<CacheStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("romm_cache_status")),
 	/**  Removes every download except pinned games. */
 	rommCacheClear: () => typedError<CacheStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("romm_cache_clear")),
-	/**  A RomM game's cache state; `null` for other entries. */
-	rommGameStatus: (entryId: string) => typedError<RommGameStatus_Serialize | null, ErrorReport_Serialize>(__TAURI_INVOKE("romm_game_status", { entryId })),
 	/**  "Keep downloaded". */
 	rommSetPinned: (entryId: string, pinned: boolean) => typedError<RommGameStatus_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("romm_set_pinned", { entryId, pinned })),
 	/**  Removes one game's download. */
@@ -778,11 +748,6 @@ export const commands = {
 	 *  notice. Safe mode always gives the default.
 	 */
 	themeResolve: (id: string | null) => typedError<ResolvedTheme_Serialize, ErrorReport_Serialize>(__TAURI_INVOKE("theme_resolve", { id })),
-	/**
-	 *  Whether Caskade started in safe mode (`--safe-mode`,
-	 *  `CASKADE_SAFE_MODE=1`): the default theme and no custom CSS.
-	 */
-	appearanceSafeMode: () => __TAURI_INVOKE<boolean>("appearance_safe_mode"),
 	/**  Appearance → "Load theme folder": development builds only. */
 	themeLoadUnpacked: (folder: string) => typedError<string, ErrorReport_Serialize>(__TAURI_INVOKE("theme_load_unpacked", { folder })),
 	/**  The connected gamepads; the one used last is active. */
@@ -994,8 +959,6 @@ export const commands = {
 	storeAccountRemovalPreview: (id: string) => typedError<StoreRemovalPreview, ErrorReport_Serialize>(__TAURI_INVOKE("store_account_removal_preview", { id })),
 	/**  Removes an account and the games only it brought. */
 	storeAccountRemove: (id: string) => typedError<StoreRemovalPreview, ErrorReport_Serialize>(__TAURI_INVOKE("store_account_remove", { id })),
-	/**  The store accounts that own a game. */
-	gameOwnership: (gameId: string) => typedError<GameOwnership_Serialize[], ErrorReport_Serialize>(__TAURI_INVOKE("game_ownership", { gameId })),
 	/**
 	 *  Where a game's play time comes from (#169): tracked sessions, and what
 	 *  each store or launcher reported.
@@ -1078,13 +1041,11 @@ export const events = {
 	gameExited: makeEvent<GameExited_Serialize, GameExited_Deserialize>("game-exited"),
 	gameStarted: makeEvent<GameStarted_Serialize, GameStarted_Deserialize>("game-started"),
 	gamesRefreshChanged: makeEvent<GamesRefreshChanged, GamesRefreshChanged>("games-refresh-changed"),
-	hello: makeEvent<Hello, Hello>("hello"),
 	inputActionEvent: makeEvent<InputActionEvent, InputActionEvent>("input-action-event"),
 	installRefused: makeEvent<InstallRefused, InstallRefused>("install-refused"),
 	installRequested: makeEvent<InstallRequested_Serialize, InstallRequested_Deserialize>("install-requested"),
 	jobChanged: makeEvent<JobChanged_Serialize, JobChanged_Deserialize>("job-changed"),
 	libraryChanged: makeEvent<LibraryChanged_Serialize, LibraryChanged_Deserialize>("library-changed"),
-	lifecycleScriptsRan: makeEvent<LifecycleScriptsRan_Serialize, LifecycleScriptsRan_Deserialize>("lifecycle-scripts-ran"),
 	localeChanged: makeEvent<LocaleChanged, LocaleChanged>("locale-changed"),
 	notificationsChanged: makeEvent<NotificationsChanged, NotificationsChanged>("notifications-changed"),
 	pairingLinkOpened: makeEvent<PairingLinkOpened, PairingLinkOpened>("pairing-link-opened"),
@@ -1341,19 +1302,6 @@ export type AchievementDefinition_Serialize = {
 	points: number | null,
 };
 
-/**
- *  A release's identity at an achievement service that its store ids don't
- *  give (#189).
- */
-export type AchievementLink = {
-	entryId: string,
-	provider: string,
-	/**  The service's game id. */
-	productId: string,
-	method: LinkMethod,
-	linkedAtMs: number,
-};
-
 /**  One account's achievements for one of a game's releases. */
 export type AchievementSet = AchievementSet_Serialize | AchievementSet_Deserialize;
 
@@ -1424,14 +1372,6 @@ export type AchievementState_Serialize = {
 	 *  apart; `None` where there is no such mode.
 	 */
 	hardcore: HardcoreUnlock_Serialize | null,
-};
-
-/**  A game's achievement counts, without the achievements: cards, lists. */
-export type AchievementSummary = {
-	gameId: string,
-	sets: number,
-	unlocked: number,
-	total: number,
 };
 
 /**  One achievement with the account's state, for the UI. */
@@ -4318,27 +4258,6 @@ export type GameIgdb_Serialize = {
 	game: IgdbGame_Serialize | null,
 };
 
-/**  Who owns a library game. */
-export type GameOwnership = GameOwnership_Serialize | GameOwnership_Deserialize;
-
-/**  Who owns a library game. */
-export type GameOwnership_Deserialize = {
-	storeAccountId: string,
-	provider: string,
-	displayName: string,
-	productId: string,
-	lostAtMs?: number | null,
-};
-
-/**  Who owns a library game. */
-export type GameOwnership_Serialize = {
-	storeAccountId: string,
-	provider: string,
-	displayName: string,
-	productId: string,
-	lostAtMs: number | null,
-};
-
 export type GamePage = GamePage_Serialize | GamePage_Deserialize;
 
 export type GamePage_Deserialize = {
@@ -4674,12 +4593,6 @@ export type GpuSamples_Serialize = {
 
 export type GpuVendor = "amd" | "intel" | "nvidia" | "other";
 
-/**  The core's answer to `hello`: proof that typed commands and events work. */
-export type Greeting = {
-	message: string,
-	coreVersion: string,
-};
-
 /**  Built-in or plugin handler identifier; unrelated to the Cargo feature set. */
 export type HandlerId = string;
 
@@ -4707,9 +4620,6 @@ export type HeldBackup = {
 	size: number,
 	createdMs: number,
 };
-
-/**  Emitted after every `hello` command. */
-export type Hello = Greeting;
 
 /**
  *  The device is playing another game: Play asks before stopping it, then
@@ -5838,37 +5748,6 @@ export type LifecycleScript_Serialize = {
 	cwd: string | null,
 	timeoutSecs: number,
 };
-
-/**
- *  `lifecycle.scripts.ran`: a launch's scripts of one phase ran (#179),
- *  with their bounded output. The user's own; plugins never see it.
- */
-export type LifecycleScriptsRan = LifecycleScriptsRan_Serialize | LifecycleScriptsRan_Deserialize;
-
-/**
- *  `lifecycle.scripts.ran`: a launch's scripts of one phase ran (#179),
- *  with their bounded output. The user's own; plugins never see it.
- */
-export type LifecycleScriptsRan_Deserialize = ScriptReport_Deserialize;
-
-/**
- *  `lifecycle.scripts.ran`: a launch's scripts of one phase ran (#179),
- *  with their bounded output. The user's own; plugins never see it.
- */
-export type LifecycleScriptsRan_Serialize = ScriptReport_Serialize;
-
-export type LinkMethod = 
-/**  The service recognised this hash of the release's ROM. */
-{ type: "hash"; hash: string } | 
-/**  The user chose the game. */
-{ type: "manual" } | 
-/**
- *  No game could be verified: an unsupported system or file, a ROM the
- *  service doesn't know (another revision or region), or more than one
- *  game. `product_id` is empty. Tried again after a while; never
- *  guessed from the title.
- */
-{ type: "unresolved"; reason: string };
 
 /**  A list field's change. */
 export type ListEdit = 
@@ -8727,27 +8606,6 @@ export type ScriptPhase =
  *  before-launch scripts and then failed: cleanup.
  */
 "after_exit";
-
-/**  The runs of one phase. */
-export type ScriptReport = ScriptReport_Serialize | ScriptReport_Deserialize;
-
-/**  The runs of one phase. */
-export type ScriptReport_Deserialize = {
-	gameId: string,
-	gameTitle: string,
-	sessionId?: string | null,
-	phase?: ScriptPhase | null,
-	runs: ScriptRun_Deserialize[],
-};
-
-/**  The runs of one phase. */
-export type ScriptReport_Serialize = {
-	gameId: string,
-	gameTitle: string,
-	sessionId: string | null,
-	phase: ScriptPhase | null,
-	runs: ScriptRun_Serialize[],
-};
 
 /**
  *  One script's run, for people: its output is bounded and stripped of

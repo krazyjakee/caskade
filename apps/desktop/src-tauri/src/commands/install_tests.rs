@@ -152,11 +152,9 @@ fn installed_fixture_reports_revisioned_progress_and_completion_through_ipc() {
             job_cancel,
             job_answer,
             job_retry,
-            verify_game,
             uninstall_game,
             remove_game,
-            move_game,
-            fetch_start
+            move_game
         ])
         .events(tauri_specta::collect_events![
             crate::events::JobChanged,
@@ -228,11 +226,6 @@ fn installed_fixture_reports_revisioned_progress_and_completion_through_ipc() {
     );
     assert!(invoke(&window, "job_retry", json!({"id":id,"candidateIndex":999})).is_err());
     let entry_id = entries[0].id.clone();
-    let verified = invoke(&window, "verify_game", json!({"entryId":entry_id})).unwrap();
-    assert_eq!(
-        terminal(&window, verified["id"].as_str().unwrap())["verification"]["valid"],
-        true
-    );
     let moved = invoke(
         &window,
         "move_game",

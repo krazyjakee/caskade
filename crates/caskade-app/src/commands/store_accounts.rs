@@ -6,8 +6,8 @@ use caskade_core::{
     accounts::AccountService,
     db::{LibraryStore, PlaytimeBreakdown},
     store_accounts::{
-        AuthFlow, AuthInput, OwnedRelease, Ownership, ProviderCapabilities, RefreshOutcome,
-        RemovalPreview, StoreAccount, StoreAccountSummary, StoreAccounts,
+        AuthFlow, AuthInput, OwnedRelease, ProviderCapabilities, RefreshOutcome, RemovalPreview,
+        StoreAccount, StoreAccountSummary, StoreAccounts,
     },
 };
 use serde::{Deserialize, Serialize};
@@ -246,12 +246,4 @@ pub fn owned_install_cancel(accounts: &StoreAccounts, entry_id: &str) {
         return;
     }
     accounts.cancel_install(entry_id);
-}
-
-/// The store accounts that own a game.
-pub async fn game_ownership(
-    accounts: &StoreAccounts,
-    game_id: &str,
-) -> Result<Vec<Ownership>, CommandError> {
-    accounts.ownership(game_id).await.map_err(report)
 }

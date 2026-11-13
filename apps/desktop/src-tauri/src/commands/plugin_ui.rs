@@ -6,11 +6,6 @@
 //! it to its backend. Names and titles come in the language in use, from
 //! the plugin's own catalog (#219).
 pub use app::*;
-
-/// The UI plugins, with their files at `caskade-plugin://` URLs.
-pub async fn ui_plugins(host: &caskade_plugin_host::PluginHost) -> Vec<UiPlugin> {
-    app::ui_plugins(host, crate::plugin_scheme::url).await
-}
 use caskade_app::commands::plugin_ui as app;
 use caskade_plugin_host::{PluginHost, PluginMessages};
 type State<'a> = tauri::State<'a, PluginHost>;

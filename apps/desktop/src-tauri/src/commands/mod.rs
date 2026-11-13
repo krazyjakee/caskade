@@ -1,4 +1,4 @@
-//! Tauri commands: thin wrappers that call into caskade-core. One
+//! Tauri commands: thin wrappers that call into caskade-app. One
 //! submodule per area (library, launch, settings, …), owned with that area.
 
 pub mod accounts;
@@ -55,15 +55,3 @@ pub mod torrent_links;
 pub mod updates;
 pub mod video;
 pub mod web;
-
-pub use caskade_app::commands::hello::Greeting;
-
-/// Greets `name` and emits the `hello` event with the same greeting.
-#[tauri::command]
-#[specta::specta]
-pub fn hello<R: tauri::Runtime>(
-    app: tauri::AppHandle<R>,
-    name: String,
-) -> Result<Greeting, String> {
-    caskade_app::commands::hello::hello(&crate::events::sink(app), &name)
-}

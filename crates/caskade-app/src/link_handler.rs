@@ -38,9 +38,9 @@ mod platform {
     const MIME: &str = "x-scheme-handler/caskade";
 
     pub fn entry(program: &str) -> String {
-        let quoted = program.replace('\\', "\\\\").replace('"', "\\\"");
         format!(
-            "[Desktop Entry]\nType=Application\nName=Caskade\nNoDisplay=true\nExec=\"{quoted}\" %u\nMimeType={MIME};\n"
+            "[Desktop Entry]\nType=Application\nName=Caskade\nNoDisplay=true\nExec={} %u\nMimeType={MIME};\n",
+            caskade_core::login_item::exec_arg(program)
         )
     }
 
@@ -114,5 +114,14 @@ mod tests {
         );
         assert!(entry.contains("MimeType=x-scheme-handler/caskade;\n"));
         assert!(entry.contains("NoDisplay=true\n"));
+    }
+
+    #[test]
+    fn the_entry_escapes_what_exec_reserves() {
+        let entry = super::platform::entry("/opt/100%/$caskade");
+        assert!(
+            entry.contains("Exec=\"/opt/100%%/\\\\$caskade\" %u\n"),
+            "{entry}"
+        );
     }
 }

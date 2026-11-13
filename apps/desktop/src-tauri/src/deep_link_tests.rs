@@ -77,7 +77,10 @@ fn a_url_deep_link_downloads_nothing_until_confirmed() {
     });
 
     let link = Url::parse_with_params("caskade://install", [("url", &download)]).unwrap();
-    let queued = tauri::async_runtime::block_on(open(app.handle(), [link]));
+    let queued = tauri::async_runtime::block_on(queue(
+        app.handle(),
+        vec![caskade_app::deep_link::install_input(&link)],
+    ));
     assert_eq!(queued.len(), 1);
     assert_eq!(queued[0].kind, InputKind::Url);
     assert_eq!(queued[0].value, download);

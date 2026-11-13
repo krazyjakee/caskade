@@ -5,27 +5,12 @@
 //! (`confirm_install_request`).
 
 use crate::commands::install_requests::{InstallRequest, InstallRequests};
+use caskade_app::deep_link::{LinkServices, SCHEME};
 use tauri::{Manager, Runtime, Url};
 
-pub use caskade_app::deep_link::{SCHEME, install_input};
-
-/// Queues each link for confirmation, tells the UI and brings the window up.
-/// A `?path=` is checked off the caller's thread, so await this on the async
-/// runtime ([`open_in_background`] from the main thread).
-pub async fn open<R: Runtime>(
-    app: &tauri::AppHandle<R>,
-    links: impl IntoIterator<Item = Url>,
-) -> Vec<InstallRequest> {
-    queue(
-        app,
-        links.into_iter().map(|link| install_input(&link)).collect(),
-    )
-    .await
-}
-
-/// Queues each install input from outside the app (deep links, and the
-/// magnet links and torrent files the OS hands Caskade, `torrent_links.rs`)
-/// for confirmation, tells the UI and brings the window up.
+/// Queues each install input from outside the app (the magnet links and
+/// torrent files the OS hands Caskade, `torrent_links.rs`) for
+/// confirmation, tells the UI and brings the window up.
 pub async fn queue<R: Runtime>(
     app: &tauri::AppHandle<R>,
     inputs: Vec<Result<String, String>>,
@@ -44,34 +29,31 @@ pub async fn queue<R: Runtime>(
     queued
 }
 
-/// [`open`] on the async runtime, for callers on the main thread.
-/// Store sign-in callbacks (#165) go to the store accounts, the rest are
-/// install requests.
+/// Opens `links` (`caskade_app::deep_link::open`) on the async runtime, for
+/// callers on the main thread, and brings the window up when they ask. A
+/// store sign-in callback (#165) brings it up too.
 pub fn open_in_background<R: Runtime>(app: &tauri::AppHandle<R>, links: Vec<Url>) {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
-        let (pairs, links): (Vec<_>, Vec<_>) = links
-            .into_iter()
-            .partition(crate::commands::sync::is_pair_link);
-        // Pairing links (#226) wait for an admin in the app.
-        for link in pairs {
-            crate::commands::sync::open_pair_link(&app, &link);
-        }
-        // Share links (#246) ask their sharer, then wait for confirmation.
-        let (shares, links): (Vec<_>, Vec<_>) = links
-            .into_iter()
-            .partition(crate::commands::shares::is_share_link);
-        for link in shares {
-            crate::commands::shares::open_share_link(&app, link.to_string()).await;
-        }
-        let (callbacks, installs): (Vec<_>, Vec<_>) = links
-            .into_iter()
-            .partition(crate::commands::store_accounts::is_callback);
-        for link in callbacks {
-            crate::commands::store_accounts::callback(&app, link).await;
-        }
-        if !installs.is_empty() {
-            open(&app, installs).await;
+        let requests = app.try_state::<InstallRequests>();
+        let accounts = app.try_state::<caskade_core::accounts::AccountService>();
+        let shares = app.try_state::<caskade_share::Shares>();
+        let store_accounts = app.try_state::<caskade_core::store_accounts::StoreAccounts>();
+        let opened = app.try_state::<crate::commands::sync::OpenedPairingLink>();
+        let signed_in = store_accounts.is_some()
+            && links
+                .iter()
+                .any(crate::commands::store_accounts::is_callback);
+        let services = LinkServices {
+            events: crate::events::sink(app.clone()),
+            requests: requests.as_deref(),
+            accounts: accounts.as_deref(),
+            shares: shares.as_deref(),
+            store_accounts: store_accounts.as_deref(),
+            opened_pairing_link: opened.as_deref(),
+        };
+        if caskade_app::deep_link::open(services, links).await || signed_in {
+            crate::main_window::raise(&app);
         }
     });
 }
@@ -85,9 +67,8 @@ pub fn queue_in_background<R: Runtime>(app: &tauri::AppHandle<R>, input: String)
     });
 }
 
-/// Handles links that started the app and links that arrive while it runs.
-/// The single-instance plugin forwards a second launch's link here, and
-/// its magnet link or torrent file (`torrent_links::input_from_args`).
+/// Handles links that started the app and links that arrive while it runs,
+/// a second launch's included.
 pub fn listen<R: Runtime>(app: &tauri::AppHandle<R>) {
     use tauri_plugin_deep_link::DeepLinkExt;
     // Installed builds register the scheme through their bundle; dev runs
@@ -104,11 +85,6 @@ pub fn listen<R: Runtime>(app: &tauri::AppHandle<R>) {
         Ok(Some(links)) => open_in_background(app, links),
         Ok(None) => {}
         Err(error) => tracing::warn!(%error, "could not read the launch deep link"),
-    }
-    let args = std::env::args().collect::<Vec<_>>();
-    let cwd = std::env::current_dir().unwrap_or_default();
-    if let Some(input) = crate::torrent_links::input_from_args(&args, &cwd) {
-        queue_in_background(app, input);
     }
     // The handler follows Caskade when it moves (an AppImage, an install).
     tauri::async_runtime::spawn_blocking(crate::torrent_links::refresh);

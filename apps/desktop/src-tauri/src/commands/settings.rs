@@ -13,12 +13,11 @@ pub fn settings_sections<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     state: tauri::State<'_, SettingsService>,
 ) -> Result<Vec<SettingsSection>, CommandError> {
-    let plugins = app.try_state::<caskade_plugin_host::PluginHost>();
-    forwarded::settings_sections(&state, |id, schema| {
-        if let Some(plugins) = &plugins {
-            plugins.translate_settings_schema(id, schema);
-        }
-    })
+    forwarded::settings_sections(
+        &state,
+        app.try_state::<caskade_plugin_host::PluginHost>()
+            .as_deref(),
+    )
 }
 
 #[tauri::command]

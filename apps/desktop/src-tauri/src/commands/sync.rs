@@ -16,40 +16,16 @@ use caskade_core::devices::{
     DeviceKind, Devices, DevicesStatus, PairedDevice, Pairing, PairingLinkInfo, PairingLinkTarget,
 };
 use caskade_core::sync::SyncService;
-use tauri::{AppHandle, Manager, Runtime, State};
+use tauri::State;
 
-pub use app::{OpenedPairingLink, is_pair_link};
+pub use app::OpenedPairingLink;
 // The webview's events, which the tests listen for.
 #[cfg(test)]
 use {
     crate::events::{DevicesChanged, PairingLinkOpened},
+    app::is_pair_link,
     tauri_specta::Event,
 };
-
-/// Starts the devices service (identity, endpoint, pairing) and library sync
-/// (#230), and forwards their changes to the webview: each device's sync
-/// state (syncing, last sync, the last failure) is in `DevicesChanged`.
-pub fn setup<R: Runtime>(app: &AppHandle<R>, devices: Devices, sync: SyncService) {
-    app::setup(crate::events::sink(app.clone()), &devices, &sync);
-    app.manage(devices);
-    app.manage(sync);
-    app.manage(OpenedPairingLink::default());
-}
-
-/// Holds an opened pairing link for an admin to accept, and shows the
-/// window.
-pub fn open_pair_link<R: Runtime>(app: &AppHandle<R>, link: &tauri::Url) {
-    if hold_pair_link(app, link) {
-        crate::main_window::raise(app);
-    }
-}
-
-/// Holds an opened pairing link and announces it; `false` when it isn't one.
-/// Never logs the link: it's a credential.
-fn hold_pair_link<R: Runtime>(app: &AppHandle<R>, link: &tauri::Url) -> bool {
-    let opened = app.try_state::<OpenedPairingLink>();
-    app::hold_pair_link(&crate::events::sink(app.clone()), opened.as_deref(), link)
-}
 
 #[tauri::command]
 #[specta::specta]

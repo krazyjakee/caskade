@@ -149,7 +149,7 @@ pub async fn devices_transfers(
 ) -> Result<Vec<TransferView>, CommandError> {
     crate::permissions::enforce("devices_transfers", serde_json::Value::default)?;
     let status = devices.status().await;
-    let now = caskade_core::sync::clock::now_ms();
+    let now = caskade_core::now_ms();
     Ok(transfers
         .transfers()
         .into_iter()

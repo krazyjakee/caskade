@@ -8,6 +8,7 @@ use tauri::{
     test::{MockRuntime, mock_builder, mock_context, noop_assets},
 };
 use tauri_specta::Event;
+use tokio::sync::watch;
 
 fn app() -> (tauri::App<MockRuntime>, tauri::WebviewWindow<MockRuntime>) {
     let specta = tauri_specta::Builder::<MockRuntime>::new()
@@ -52,7 +53,8 @@ fn each_change_of_language_reaches_the_webview() {
     });
     // A channel of its own: the core's language is the whole process's.
     let (language, changes) = watch::channel("en".to_owned());
-    let announcing = tauri::async_runtime::spawn(announce(app.handle().clone(), changes));
+    let announcing =
+        tauri::async_runtime::spawn(announce(crate::events::sink(app.handle().clone()), changes));
     let wait_for = |count: usize| {
         for _ in 0..200 {
             if seen.lock().unwrap().len() >= count {

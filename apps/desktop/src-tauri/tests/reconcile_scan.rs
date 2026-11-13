@@ -58,7 +58,6 @@ impl Fixture {
             .unwrap();
         let source = StorageSource::new(store.clone(), bus.clone(), storage.reconciler().unwrap())
             .with_remounts(storage, env.clone(), &paths);
-        source.register();
         let service = DiscoveryService::with_sources(store.clone(), bus, env, vec![]);
         let controller = DiscoveryController::new(service, settings).with_storage(source);
         Self {

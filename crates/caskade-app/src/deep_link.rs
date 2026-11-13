@@ -187,6 +187,72 @@ mod tests {
         install_input(&Url::parse(text).unwrap())
     }
 
+    /// What reached the UI.
+    #[derive(Clone, Default)]
+    struct Sink(std::sync::Arc<std::sync::Mutex<Vec<crate::events::Event>>>);
+
+    impl crate::events::Emit for Sink {
+        fn emit(&self, event: crate::events::Event) -> Result<(), String> {
+            self.0.lock().unwrap().push(event);
+            Ok(())
+        }
+    }
+
+    /// The shells' path: an install link waits for confirmation and a
+    /// share link that can't be received says why; both raise the window.
+    #[test]
+    fn opened_links_queue_installs_and_explain_refused_shares() {
+        crate::runtime::block_on(async {
+            let store = caskade_core::db::LibraryStore::in_memory().await.unwrap();
+            // The library's lone admin, signed in: it may install.
+            let accounts = caskade_core::accounts::AccountService::open(
+                store,
+                caskade_core::bus::Bus::default(),
+            )
+            .await
+            .unwrap();
+            let requests = crate::commands::install_requests::InstallRequests::default();
+            let sink = Sink::default();
+            let services = || LinkServices {
+                events: crate::events::Events::new(sink.clone()),
+                requests: Some(&requests),
+                accounts: Some(&accounts),
+                shares: None,
+                store_accounts: None,
+                opened_pairing_link: None,
+            };
+
+            let install = Url::parse_with_params(
+                "caskade://install",
+                [("url", "https://example.invalid/game.zip")],
+            )
+            .unwrap();
+            assert!(open(services(), vec![install]).await);
+            let pending = requests.pending();
+            assert_eq!(pending.len(), 1);
+            assert_eq!(pending[0].value, "https://example.invalid/game.zip");
+            assert!(matches!(
+                sink.0.lock().unwrap().as_slice(),
+                [crate::events::Event::InstallRequested(_)]
+            ));
+
+            let share = caskade_sync::share::ShareLink::new(
+                caskade_sync::EndpointAddr::new(caskade_sync::Identity::ephemeral().id()),
+                caskade_sync::Grant::generate(),
+                None,
+            );
+            let share = Url::parse(&share.to_url()).unwrap();
+            assert!(open(services(), vec![share]).await);
+            assert_eq!(requests.pending().len(), 1, "nothing more is queued");
+            assert!(matches!(
+                sink.0.lock().unwrap().as_slice(),
+                [_, crate::events::Event::InstallRefused(_)]
+            ));
+
+            assert!(!open(services(), Vec::new()).await);
+        });
+    }
+
     #[test]
     fn a_link_names_one_path_or_url() {
         assert_eq!(

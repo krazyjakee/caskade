@@ -9,8 +9,8 @@ use caskade_app::commands::store_accounts as app;
 use caskade_core::{
     accounts::AccountService,
     store_accounts::{
-        AuthFlow, AuthInput, Ownership, ProviderCapabilities, RefreshOutcome, RemovalPreview,
-        StoreAccount, StoreAccountSummary, StoreAccounts,
+        AuthFlow, AuthInput, ProviderCapabilities, RefreshOutcome, RemovalPreview, StoreAccount,
+        StoreAccountSummary, StoreAccounts,
     },
 };
 use tauri::{AppHandle, Manager, Runtime, State};
@@ -120,17 +120,6 @@ pub fn store_connect_cancel(accounts: State<'_, StoreAccounts>, flow_id: String)
     app::store_connect_cancel(&accounts, &flow_id);
 }
 
-/// Finishes the sign-in a callback link names. The link carries a code:
-/// it is never logged.
-pub async fn callback<R: Runtime>(app: &AppHandle<R>, link: tauri::Url) {
-    let Some(accounts) = app.try_state::<StoreAccounts>() else {
-        return;
-    };
-    let signed_in = app.try_state::<AccountService>();
-    app::callback(&accounts, signed_in.as_deref(), &link).await;
-    crate::main_window::raise(app);
-}
-
 /// Where a game's play time comes from (#169): tracked sessions, and what
 /// each store or launcher reported.
 #[tauri::command]
@@ -172,16 +161,6 @@ pub async fn owned_install<R: Runtime>(
 #[specta::specta]
 pub fn owned_install_cancel(accounts: State<'_, StoreAccounts>, entry_id: String) {
     app::owned_install_cancel(&accounts, &entry_id);
-}
-
-/// The store accounts that own a game.
-#[tauri::command]
-#[specta::specta]
-pub async fn game_ownership(
-    accounts: State<'_, StoreAccounts>,
-    game_id: String,
-) -> Result<Vec<Ownership>, CommandError> {
-    app::game_ownership(&accounts, &game_id).await
 }
 
 #[cfg(test)]

@@ -1,6 +1,8 @@
 //! Themes IPC (#139, #140), forwarded to `caskade_app::commands::themes`;
 //! stylesheets and previews are served on `caskade-theme:`.
-pub use app::{ResolvedTheme, SAFE_MODE_NOTICE, SafeMode, is_theme_folder, plugin_folders};
+pub use app::{ResolvedTheme, SafeMode};
+#[cfg(test)]
+use app::{SAFE_MODE_NOTICE, is_theme_folder};
 // The webview's event, which the app sends as `caskade_app`'s.
 pub use crate::events::ThemeReloaded;
 use caskade_app::commands::themes as app;
@@ -9,25 +11,11 @@ use crate::error::CommandError;
 use caskade_core::settings::SettingsService;
 use caskade_core::themes::{ThemeInfo, ThemeService};
 use caskade_plugin_host::PluginHost;
-use std::path::Path;
 use tauri::Manager;
 
 /// Safe mode: the one tests manage, otherwise the process's.
 fn safe_mode<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> bool {
     app::safe_mode(app.try_state::<SafeMode>().map(|mode| *mode))
-}
-
-/// Loads `folder` in place as a dev theme, telling the webview after every
-/// change. Must run inside the async runtime. Returns its id.
-pub fn load_dev<R: tauri::Runtime>(
-    app: &tauri::AppHandle<R>,
-    folder: &Path,
-) -> Result<String, String> {
-    app::load_dev(
-        crate::events::sink(app.clone()),
-        app.try_state::<ThemeService>().as_deref(),
-        folder,
-    )
 }
 
 /// The theme to apply for `id`, or for `core.appearance.theme` without one:
@@ -49,14 +37,6 @@ pub async fn theme_resolve<R: tauri::Runtime>(
         id,
     )
     .await
-}
-
-/// Whether Caskade started in safe mode (`--safe-mode`,
-/// `CASKADE_SAFE_MODE=1`): the default theme and no custom CSS.
-#[tauri::command]
-#[specta::specta]
-pub fn appearance_safe_mode<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> bool {
-    safe_mode(&app)
 }
 
 /// Every installed theme with its problems; previews come back as URLs.

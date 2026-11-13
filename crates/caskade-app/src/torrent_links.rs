@@ -377,37 +377,19 @@ pub(crate) mod linux {
     }
 
     pub fn desktop_entry(program: &str, previous: &[(&str, String)]) -> io::Result<String> {
+        // An `Exec` line can't carry one.
+        if program.chars().any(char::is_control) {
+            return Err(io::Error::other("Caskade's path has a control character"));
+        }
         let mimes = MIMES.map(|(mime, _)| format!("{mime};")).concat();
         let mut entry = format!(
             "[Desktop Entry]\nType=Application\nName=Caskade\nComment=Install games from magnet links and torrent files\nExec={} %u\nTerminal=false\nNoDisplay=true\nMimeType={mimes}\n",
-            exec_arg(program)?
+            caskade_core::login_item::exec_arg(program)
         );
         for (key, app) in previous {
             entry.push_str(&format!("{key}={app}\n"));
         }
         Ok(entry)
-    }
-
-    /// `program` as a quoted `Exec` argument: the Desktop Entry spec's
-    /// quoting, then its string escape on top, and `%` doubled.
-    fn exec_arg(program: &str) -> io::Result<String> {
-        let mut quoted = String::from("\"");
-        for c in program.chars() {
-            match c {
-                '"' | '`' | '$' => {
-                    quoted.push_str("\\\\");
-                    quoted.push(c);
-                }
-                '\\' => quoted.push_str("\\\\\\\\"),
-                '%' => quoted.push_str("%%"),
-                c if c.is_control() => {
-                    return Err(io::Error::other("Caskade's path has a control character"));
-                }
-                c => quoted.push(c),
-            }
-        }
-        quoted.push('"');
-        Ok(quoted)
     }
 
     /// `list` (a `mimeapps.list`) without `file` in our MIME types' default

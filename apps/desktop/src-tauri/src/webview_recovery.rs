@@ -2,7 +2,7 @@
 //! restart budget are `caskade_player::recovery`'s; here the main window
 //! reloads, restarts Caskade, or asks when restarts keep failing.
 
-pub use caskade_player::recovery::*;
+use caskade_player::recovery::{Policy, Restarts, Step};
 use std::path::PathBuf;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -34,12 +34,11 @@ pub fn watch<R: Runtime>(window: &WebviewWindow<R>, restarts: PathBuf) {
         let attached = window.with_webview(move |platform| {
             let result =
                 caskade_webview2::watch_controller(&platform.controller(), move |failed| {
-                    log("main window", &failed);
+                    caskade_player::recovery::log("main window", &failed);
                     // Off WebView2's callback: a restart waits for the event
                     // loop, and the dialog blocks.
                     let app = app.clone();
-                    let failure = failure_of(failed.kind);
-                    std::thread::spawn(move || recover(&app, failure, failed.url));
+                    std::thread::spawn(move || recover(&app, failed.kind, failed.url));
                 });
             if let Err(error) = result {
                 tracing::warn!(%error, "can't watch the webview's processes");
@@ -53,11 +52,10 @@ pub fn watch<R: Runtime>(window: &WebviewWindow<R>, restarts: PathBuf) {
     {
         let app = window.app_handle().clone();
         if let Err(error) = window.with_webview(move |platform| {
-            attach_webkit(&platform.inner(), move |failed| {
-                log("main window", &failed);
+            caskade_player::recovery::attach_webkit(&platform.inner(), move |failed| {
+                caskade_player::recovery::log("main window", &failed);
                 let app = app.clone();
-                let failure = failure_of(failed.kind);
-                std::thread::spawn(move || recover(&app, failure, failed.url));
+                std::thread::spawn(move || recover(&app, failed.kind, failed.url));
             });
         }) {
             tracing::warn!(%error, "can't watch WebKit's web process");
@@ -65,25 +63,18 @@ pub fn watch<R: Runtime>(window: &WebviewWindow<R>, restarts: PathBuf) {
     }
 }
 
-fn recover<R: Runtime>(app: &AppHandle<R>, failure: Failure, url: Option<String>) {
+fn recover<R: Runtime>(app: &AppHandle<R>, failure: caskade_webview2::Kind, url: Option<String>) {
     let state = app.state::<Recovery>();
     if state.asking.load(Ordering::Relaxed) || state.restarting.load(Ordering::Relaxed) {
         return;
     }
     if let Some(url) = url.and_then(|url| route(&url)) {
-        *state
-            .route
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner) = Some(url);
+        *caskade_core::lock(&state.route) = Some(url);
     }
-    let step = state
-        .policy
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner)
-        .next(failure, Instant::now());
+    let step = caskade_core::lock(&state.policy).next(failure, Instant::now());
     // The page failed on the GPU renderer Caskade picked: restart on
     // WebKit's own rather than reload into the same failure.
-    let step = if step != Step::Wait && crate::webkit::record_gpu_failure() {
+    let step = if step != Step::Wait && caskade_player::webkit::record_gpu_failure() {
         Step::Restart
     } else {
         step
@@ -106,11 +97,7 @@ fn restart_or_ask<R: Runtime>(app: &AppHandle<R>, state: &Recovery) {
     if state.restarting.swap(true, Ordering::Relaxed) {
         return;
     }
-    if let Some(route) = state
-        .route
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner)
-        .as_ref()
+    if let Some(route) = caskade_core::lock(&state.route).as_ref()
         && let Some(path) = route_path()
         && let Err(error) = std::fs::write(path, route)
     {
@@ -188,9 +175,11 @@ pub fn take_route() -> Option<String> {
     }
     route(parsed.as_str())
 }
+/// Restarts Caskade from the main thread; when it can't get there, a later
+/// failure may try again.
 fn restart<R: Runtime>(app: &AppHandle<R>) {
     let handle = app.clone();
-    let _ = app.run_on_main_thread(move || {
+    let queued = app.run_on_main_thread(move || {
         use tauri_plugin_window_state::AppHandleExt;
         if !crate::commands::console::is_on(&handle)
             && let Err(error) = handle.save_window_state(crate::window_state::flags())
@@ -199,6 +188,12 @@ fn restart<R: Runtime>(app: &AppHandle<R>) {
         }
         handle.request_restart();
     });
+    if let Err(error) = queued {
+        tracing::error!(%error, "couldn't restart Caskade");
+        if let Some(state) = app.try_state::<Recovery>() {
+            state.restarting.store(false, Ordering::Relaxed);
+        }
+    }
 }
 
 #[cfg(test)]

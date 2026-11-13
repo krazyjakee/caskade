@@ -43,7 +43,6 @@ required-features = ["dev-tools"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tracing-appender = "0.2"
 caskade-core = { path = "../../../crates/caskade-core" }
 # The application layer this adapter forwards to (#86).
 caskade-app = { path = "../../../crates/caskade-app" }
@@ -85,14 +84,10 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tracing = "0.1"
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "sync", "net", "fs", "io-util", "time", "macros"] }
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-# The `--launch` caller's hidden window on Windows (`launch_cli.rs`): the tao and wry Tauri
+# The `--launch` caller's hidden window on Windows (`launch_cli.rs`): the tao Tauri
 # already builds, with the same features.
 tao = { version = "0.37", default-features = false, features = ["rwh_06", "x11"] }
-wry = { version = "0.57", default-features = false, features = ["os-webview", "linux-body", "x11"] }
 url = "2"
-# A share link as a QR code in console mode (#247): SVG only, no image crates.
-qrcode = { version = "=0.14.1", default-features = false, features = ["svg"] }
 
 # Reads WebKitGTK's rendering policy (`webkit.rs`) and watches its web
 # process (`webview_recovery.rs`); wry already builds it.

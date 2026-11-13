@@ -11,7 +11,7 @@ use tauri::State;
 
 use crate::error::CommandError;
 
-pub use app::{TransferDirection, TransferState, TransferView};
+pub use app::TransferView;
 
 /// Copies `game_id` from `device_id` to this computer, into the storage
 /// root `root_id` (the default when absent), as an install job.

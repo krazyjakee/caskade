@@ -6,7 +6,22 @@ use caskade_core::{
     devices::{MemoryKeyStore, Reach},
 };
 use serde_json::json;
-use tauri::test::{mock_builder, mock_context, noop_assets};
+use tauri::{
+    Manager,
+    test::{mock_builder, mock_context, noop_assets},
+};
+
+/// Sends what's running elsewhere to the webview as the app does
+/// (`caskade_app::start`), and manages `presence`.
+fn setup<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    presence: Presence,
+    devices: Devices,
+    store: LibraryStore,
+) {
+    app::setup(crate::events::sink(app.clone()), &presence, devices, store);
+    app.manage(presence);
+}
 
 /// Nothing runs elsewhere with no paired devices, and the answer comes from
 /// memory at once.

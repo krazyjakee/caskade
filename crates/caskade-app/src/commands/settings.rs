@@ -1,20 +1,22 @@
 //! Settings: the sections, reading, changing and resetting one. Validation,
 //! persistence and change events are the core's (`caskade_core::settings`).
 use caskade_core::settings::{SettingsSection, SettingsService, SettingsSnapshot};
+use caskade_plugin_host::PluginHost;
 
 use crate::error::{CommandError, report};
 
-/// Every settings section. A plugin's (`plugins.<id>`) schema goes through
-/// `translate` with the plugin's id, for its titles and descriptions from
-/// its own catalog (#219).
+/// Every settings section. A plugin's (`plugins.<id>`) comes with its
+/// titles and descriptions from the plugin's own catalog (#219).
 pub fn settings_sections(
     settings: &SettingsService,
-    translate: impl Fn(&str, &mut serde_json::Value),
+    plugins: Option<&PluginHost>,
 ) -> Result<Vec<SettingsSection>, CommandError> {
     let mut sections = settings.sections().map_err(report)?;
-    for section in &mut sections {
-        if let Some(id) = section.namespace.strip_prefix("plugins.") {
-            translate(id, &mut section.schema);
+    if let Some(plugins) = plugins {
+        for section in &mut sections {
+            if let Some(id) = section.namespace.strip_prefix("plugins.") {
+                plugins.translate_settings_schema(id, &mut section.schema);
+            }
         }
     }
     Ok(sections)

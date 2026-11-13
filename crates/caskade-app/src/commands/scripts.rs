@@ -1,10 +1,8 @@
 //! Lifecycle scripts (#179): listing and changing the global, emulator
-//! profile and game scripts, and stopping a launch while its before-launch
-//! scripts run. Who may change a scope is
+//! profile and game scripts, and testing one. Who may change a scope is
 //! [`crate::permissions::script_scope`].
 use caskade_core::{
     db::LibraryStore,
-    launch::LaunchService,
     scripts::{self, LifecycleScript, ScriptScope, ScriptStep, ScriptTest, ScriptTests},
 };
 use std::sync::LazyLock;
@@ -75,13 +73,6 @@ pub async fn lifecycle_scripts_order(
         .order_lifecycle_scripts(scope, ids)
         .await
         .map_err(report)
-}
-
-/// Stops the game's launch while its before-launch scripts run; false
-/// when it isn't at that point.
-pub async fn launch_cancel(service: &LaunchService, game_id: &str) -> Result<bool, CommandError> {
-    crate::permissions::enforce("launch_cancel", serde_json::Value::default)?;
-    Ok(service.cancel_start(game_id))
 }
 
 /// The steps a launch of the game (through the profile) takes, in order,

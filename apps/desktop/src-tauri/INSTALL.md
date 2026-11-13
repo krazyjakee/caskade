@@ -6,11 +6,11 @@ The core owns the job state and the installer implements filesystem execution.
 
 Commands generated in `src/api/bindings.ts`:
 
-- `installStart(input, rootId)` and `fetchStart(input, rootId)` return an initial queued snapshot.
+- `installStart(input, rootId)` returns an initial queued snapshot.
 - `jobsList()`, `jobGet(id)`, `jobCancel(id)` observe/cancel jobs.
 - `jobAnswer(id, revision, {type:"select", index})` selects from the current backend question. Stale revisions and invalid indexes fail without dismissing the question. `{type:"cancel"}` declines it. Observed outside-root directories and reinstall-after-move notices require explicit adoption/reinstall rather than automatic directory moves.
 - `jobRetry(id, candidateIndex)` retries a stopped install using a retained backend alternative. A source that now produces different candidates requires a new review.
-- `uninstallGame(entryId)`, `verifyGame(entryId)`, `moveGame(entryId, targetRootId)` operate on managed library records. Move and uninstall share the launch exclusion; native installers retain their recorded uninstall behavior.
+- `uninstallGame(entryId)` and `moveGame(entryId, targetRootId)` operate on managed library records. Move and uninstall share the launch exclusion; native installers retain their recorded uninstall behavior.
 - `chooseInstallFiles()` returns selected native paths (empty on cancel); `chooseInstallFolder()` returns a path or null. The picker uses the dialog plugin. No shell or filesystem plugin permission is granted to the webview.
 
 `jobChanged` carries a complete `JobSnapshot` on each change. `phase` is
@@ -18,8 +18,7 @@ Commands generated in `src/api/bindings.ts`:
 or `cancelled`, and ambiguity is `needsUser`. Clients merge by increasing
 revision because asynchronous delivery and initial list responses may arrive
 in different orders. `dependencies`, `warnings`, `candidates` and the selected
-candidate index feed the Advanced view. Verification returns file differences
-on the snapshot without mutating the installed tree.
+candidate index feed the Advanced view.
 
 ## Bundled 7-Zip
 

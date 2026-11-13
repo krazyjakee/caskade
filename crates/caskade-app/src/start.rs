@@ -32,9 +32,6 @@ pub struct Shell {
     /// The environment that lets a started program take focus from the
     /// window (an X11 startup notification, say).
     pub activation: Arc<dyn Fn() -> Vec<(String, String)> + Send + Sync>,
-    /// The key Caskade's releases are signed with, which the add-on
-    /// catalogue is checked against too.
-    pub release_key: Option<String>,
 }
 
 /// What [`open`] brings up: the library, accounts, settings and the launch
@@ -247,11 +244,10 @@ pub fn start(core: Core, shell: Shell) -> Services {
     if let Err(error) = caskade_sources::register_settings(&settings) {
         tracing::error!(%error, "discovery settings unavailable");
     }
-    let discovery = caskade_sources::register(
-        &bus,
+    let discovery = caskade_sources::DiscoveryService::new(
         store.clone(),
+        bus.clone(),
         caskade_discovery::HostEnv::live(),
-        &caskade_discovery::Config::default(),
     );
     let (storage_source, install, install_requests) = match crate::commands::install::services(
         store.clone(),
@@ -542,7 +538,10 @@ pub fn start(core: Core, shell: Shell) -> Services {
         ));
     }
     // The add-on catalogue (#181): read from its cache, fetched on demand.
-    let catalogue = crate::commands::addons::service(paths.cache.join("addons"), shell.release_key);
+    let catalogue = crate::commands::addons::service(
+        paths.cache.join("addons"),
+        crate::self_update::public_key(),
+    );
     let addon_media = catalogue.as_ref().map(|catalogue| {
         AddonMedia(artwork.clone().map(|cache| {
             if crate::commands::addons::local_origin(catalogue) {
@@ -828,7 +827,9 @@ fn store_accounts(
     let accounts = caskade_core::store_accounts::StoreAccounts::with_secrets(
         store.clone(),
         bus.clone(),
-        Arc::new(caskade_core::store_accounts::StoreKeychain),
+        Arc::new(caskade_core::secrets::Keychain::new(
+            caskade_core::store_accounts::KEYCHAIN_SERVICE,
+        )),
     );
     accounts.set_settings(settings.clone());
     // Stores whose libraries Caskade reads (#166–#168).

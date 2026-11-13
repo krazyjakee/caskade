@@ -3,8 +3,6 @@
 //! process makes; here the page is told when WebKit paints on the CPU
 //! (`data-paint="cpu"`), so ambient loops pause.
 
-pub use caskade_player::webkit::*;
-
 /// Sets `data-paint="cpu"` on the page's `<html>` when WebKit paints on the
 /// CPU anyway (no GPU compositing for this display or driver). The
 /// `paint-cpu` token set then pauses ambient loops, which would otherwise

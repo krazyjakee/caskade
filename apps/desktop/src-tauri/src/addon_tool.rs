@@ -13,17 +13,6 @@ use caskade_core::{
 use caskade_plugin_host::{HostOptions, Limits, PluginHost, PluginServices, PluginStatus};
 use std::path::Path;
 
-/// The release key in `tauri.conf.json`, which the published catalogue is
-/// signed with.
-pub fn release_key() -> Option<String> {
-    let config: serde_json::Value =
-        serde_json::from_str(include_str!("../tauri.conf.json")).ok()?;
-    config
-        .pointer("/plugins/updater/pubkey")?
-        .as_str()
-        .map(str::to_owned)
-}
-
 /// Checks `location` (a path or an address) as `author::check` does, then
 /// each plugin release with the plugin host (its manifest, that its
 /// API and permissions are the ones the catalogue shows, and that it

@@ -36,6 +36,9 @@ serde_json = "1"
 specta = { version = "=2.0.0-rc.26", features = ["derive"] }
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "sync", "time", "macros", "net", "io-util"] }
 tracing = "0.1"
+# The shells' logs (`logging.rs`): stderr and daily files.
+tracing-appender = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 url = "2"
 # Caskade's own updates without Tauri (`self_update.rs`): the core's HTTP
 # client settings (rustls on ring), and the release key's signatures.
@@ -59,6 +62,8 @@ wiremock = "0.6"
 minisign = "=0.10.0"
 # `test_programs`: programs a test writes and runs without ETXTBSY (#118).
 caskade-core = { path = "../caskade-core", features = ["test-utils"] }
+# Mints a share link for the deep-link tests.
+caskade-sync = { path = "../caskade-sync" }
 tempfile = "=3.27.0"
 
 [lints]

@@ -257,8 +257,6 @@ fn each_account_s_progress_shows_with_its_states_through_the_app() {
         .invoke_handler(tauri::generate_handler![
             commands::game_achievements,
             commands::game_achievements_refresh,
-            commands::game_achievement_summary,
-            commands::game_achievement_links,
         ])
         .build(mock_context(noop_assets()))
         .unwrap();
@@ -327,9 +325,6 @@ fn each_account_s_progress_shows_with_its_states_through_the_app() {
         ),
         (json!(2), json!(1), json!(3))
     );
-    let links = invoke(&window, "game_achievement_links", json!({"gameId": smb})).unwrap();
-    assert_eq!(links[0]["method"]["type"], "hash");
-    assert_eq!(links[0]["method"]["hash"], json!(rom_hash));
 
     // Stale: Steam can't be reached; the last answer stays, with why.
     tauri::async_runtime::block_on(async {
@@ -344,16 +339,6 @@ fn each_account_s_progress_shows_with_its_states_through_the_app() {
     assert_eq!(stale["sync"]["status"], "ready");
     assert!(!stale["sync"]["error"].is_null(), "stale data says why");
     assert_eq!(stale["unlocked"], 1, "progress already seen stays");
-    let summary = invoke(
-        &window,
-        "game_achievement_summary",
-        json!({"gameId": portal}),
-    )
-    .unwrap();
-    assert_eq!(
-        (summary["unlocked"].clone(), summary["total"].clone()),
-        (json!(1), json!(2))
-    );
 
     // The child doesn't see the admin's Steam account; the shared
     // RetroAchievements account shows to everyone.

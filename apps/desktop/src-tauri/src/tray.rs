@@ -36,7 +36,7 @@
 
 use crate::main_window;
 pub use caskade_app::tray::{Close, Tray, quit_label, show_label};
-use caskade_core::settings::{GeneralSettings, SettingsService};
+use caskade_core::settings::SettingsService;
 use std::time::Duration;
 use tauri::image::Image;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
@@ -173,24 +173,15 @@ fn hide_before_exit<R: Runtime>(app: &AppHandle<R>) -> bool {
 /// Everything but the icon: the state, the setting and the close handler.
 pub fn attach<R: Runtime>(app: &AppHandle<R>, settings: &SettingsService) {
     app.manage(Tray::default());
-    app.state::<Tray>()
-        .follow(&tauri::async_runtime::block_on(general(settings)));
-    tauri::async_runtime::spawn({
-        let app = app.clone();
-        let settings = settings.clone();
-        let mut changes = settings.subscribe();
-        async move {
-            use tokio::sync::broadcast::error::RecvError;
-            loop {
-                match changes.recv().await {
-                    Ok(changed) if changed.namespace == "core.general" => {}
-                    Ok(_) | Err(RecvError::Lagged(_)) => continue,
-                    Err(RecvError::Closed) => break,
-                }
-                app.state::<Tray>().follow(&general(&settings).await);
-            }
-        }
-    });
+    // Followed before the window can close, so the first close obeys it.
+    app.state::<Tray>().follow(&tauri::async_runtime::block_on(
+        settings.read_or_default("core.general"),
+    ));
+    let handle = app.clone();
+    tauri::async_runtime::spawn(caskade_app::tray::follow_settings(
+        settings.clone(),
+        move |general| handle.state::<Tray>().follow(general),
+    ));
     let Some(window) = app.get_webview_window("main") else {
         return;
     };
@@ -225,10 +216,6 @@ pub fn attach<R: Runtime>(app: &AppHandle<R>, settings: &SettingsService) {
             }
         }
     });
-}
-
-async fn general(service: &SettingsService) -> GeneralSettings {
-    service.read_or_default("core.general").await
 }
 
 /// The menu's items, relabelled when the language changes.

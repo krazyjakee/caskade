@@ -6,6 +6,7 @@
 //! (`0` keeps it out), or by the `core.console` setting: `auto` follows
 //! gamescope (Steam Deck game mode), then the mode it was last left in.
 
+pub use caskade_core::device_type::in_gamescope;
 use caskade_core::settings::{ConsoleSettings, SettingsService};
 
 /// How Caskade was started, for the first mode.
@@ -55,14 +56,6 @@ impl Startup {
 /// `--console` among `args` (the first one is the program).
 pub fn wants_console(args: &[String]) -> bool {
     args.iter().skip(1).any(|arg| arg == "--console")
-}
-
-/// gamescope sets `GAMESCOPE_WAYLAND_DISPLAY` for its clients; Steam's game
-/// mode also sets `SteamGamepadUI`.
-pub fn in_gamescope(var: impl Fn(&str) -> Option<String>) -> bool {
-    var("GAMESCOPE_WAYLAND_DISPLAY").is_some_and(|value| !value.is_empty())
-        || var("XDG_CURRENT_DESKTOP").is_some_and(|value| value.eq_ignore_ascii_case("gamescope"))
-        || var("SteamGamepadUI").as_deref() == Some("1")
 }
 
 /// The console mode settings section.

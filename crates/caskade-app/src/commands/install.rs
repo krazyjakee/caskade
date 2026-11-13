@@ -111,16 +111,6 @@ pub async fn job_recover(
         .map_err(|e| e.to_string())
 }
 
-pub async fn fetch_start(
-    state: &InstallService,
-    input: String,
-    root_id: Option<String>,
-) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("fetch_start", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
-    state.fetch(input, root_id).await.map_err(|e| e.to_string())
-}
-
 pub async fn uninstall_game(
     state: &InstallService,
     launch: &LaunchService,
@@ -147,12 +137,6 @@ pub async fn remove_game(
         .remove_game(&game_id, launch.clone())
         .await
         .map_err(crate::error::report)
-}
-
-pub async fn verify_game(state: &InstallService, entry_id: String) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("verify_game", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
-    state.verify(entry_id).await.map_err(|e| e.to_string())
 }
 
 pub async fn move_game(
@@ -196,7 +180,6 @@ pub fn services(
         .map_err(|e| caskade_core::Error::Invalid(e.to_string()))?;
     let source = caskade_sources::storage::StorageSource::new(store.clone(), bus.clone(), repair)
         .with_remounts(storage.clone(), caskade_discovery::HostEnv::live(), paths);
-    source.register();
     let service = InstallService::new(store, bus, caskade_core::install::InstallOptions::default());
     let service = match sidecar {
         Ok(path) => match service.clone().with_sidecar(path) {

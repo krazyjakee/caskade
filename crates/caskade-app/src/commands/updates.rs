@@ -17,11 +17,6 @@ pub async fn game_updates(
     updates.game(game_id).await.map_err(report)
 }
 
-/// The installs with a newer release out.
-pub async fn updates_available(updates: &Updates) -> Result<Vec<GameUpdate>, CommandError> {
-    updates.available().await.map_err(report)
-}
-
 /// Asks the install's provider for its newest release now.
 pub async fn game_update_check(
     updates: &Updates,

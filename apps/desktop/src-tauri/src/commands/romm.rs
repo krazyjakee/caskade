@@ -72,27 +72,11 @@ pub async fn romm_sync(
     app::romm_sync(&state, id).await
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn romm_cache_status(state: State<'_>) -> Result<CacheStatus, CommandError> {
-    app::romm_cache_status(&state).await
-}
-
 /// Removes every download except pinned games.
 #[tauri::command]
 #[specta::specta]
 pub async fn romm_cache_clear(state: State<'_>) -> Result<CacheStatus, CommandError> {
     app::romm_cache_clear(&state).await
-}
-
-/// A RomM game's cache state; `null` for other entries.
-#[tauri::command]
-#[specta::specta]
-pub async fn romm_game_status(
-    state: State<'_>,
-    entry_id: String,
-) -> Result<Option<RommGameStatus>, CommandError> {
-    app::romm_game_status(&state, entry_id).await
 }
 
 /// "Keep downloaded".

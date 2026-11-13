@@ -303,11 +303,6 @@ pub async fn streaming_skip(
         .map_err(report)
 }
 
-/// The OS's name for this computer.
-fn sysinfo_host_name() -> Option<String> {
-    caskade_streaming::pairing::this_host_name()
-}
-
 /// Forgets a paired device on this device.
 pub async fn streaming_forget_host(
     host_id: String,
@@ -349,7 +344,9 @@ pub async fn streaming_pair_with(
     let linked = linked.cloned();
     let name = match &linked {
         Some(linked) => linked.device_name().await,
-        None => caskade_streaming::pairing::device_name(&sysinfo_host_name().unwrap_or_default()),
+        None => caskade_streaming::pairing::device_name(
+            &caskade_streaming::pairing::this_host_name().unwrap_or_default(),
+        ),
     };
     let (client, hosts) = (client.clone(), hosts.clone());
     let pairing = {

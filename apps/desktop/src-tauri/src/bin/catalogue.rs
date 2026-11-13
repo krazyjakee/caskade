@@ -100,8 +100,7 @@ fn check(args: &[String]) -> Result<(), String> {
             Err(_) => key.to_owned(),
         }),
         (None, true) => Some(
-            caskade_desktop::addon_tool::release_key()
-                .ok_or("tauri.conf.json has no updater key")?,
+            caskade_app::self_update::public_key().ok_or("tauri.conf.json has no updater key")?,
         ),
         (None, false) => None,
     };

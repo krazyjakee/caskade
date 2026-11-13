@@ -4,13 +4,33 @@ pub use caskade_app::commands::install_picker::InstallPicker;
 use std::sync::Arc;
 use tauri_plugin_dialog::{DialogExt, FilePath};
 
-pub(super) fn native_path(path: FilePath) -> Result<String, String> {
+fn native_path(path: FilePath) -> Result<String, String> {
     path.into_path()
         .map_err(|e| e.to_string())?
         .into_os_string()
         .into_string()
         .map_err(|_| caskade_core::tr!("selected path is not UTF-8"))
 }
+/// The folder the user picks in the OS's dialog titled `title`; `None` when
+/// they cancel.
+pub(super) async fn pick_folder<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    title: String,
+) -> Result<Option<String>, String> {
+    let (send, receive) = tokio::sync::oneshot::channel();
+    app.dialog()
+        .file()
+        .set_title(title)
+        .pick_folder(move |path| {
+            let _ = send.send(path);
+        });
+    receive
+        .await
+        .map_err(|_| caskade_core::tr!("The folder chooser closed without an answer."))?
+        .map(native_path)
+        .transpose()
+}
+
 /// The OS's file dialogs, through Tauri's dialog plugin.
 pub fn native<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> InstallPicker {
     let files_app = app.clone();
@@ -37,18 +57,7 @@ pub fn native<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> InstallPicker {
         folder: Arc::new(move || {
             let app = app.clone();
             Box::pin(async move {
-                let (send, receive) = tokio::sync::oneshot::channel();
-                app.dialog()
-                    .file()
-                    .set_title(caskade_core::tr!("Choose game folder to install"))
-                    .pick_folder(move |path| {
-                        let _ = send.send(path);
-                    });
-                receive
-                    .await
-                    .map_err(|_| caskade_core::tr!("folder dialog closed without a response"))?
-                    .map(native_path)
-                    .transpose()
+                pick_folder(&app, caskade_core::tr!("Choose game folder to install")).await
             })
         }),
     }

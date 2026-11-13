@@ -30,6 +30,18 @@ pub struct Services {
     pub saves: Option<SaveVersions>,
 }
 
+impl Services {
+    /// A started app's.
+    pub fn of(started: &crate::start::Services) -> Self {
+        Self {
+            accounts: started.accounts.clone(),
+            store: started.store.clone(),
+            launches: started.launch.clone(),
+            saves: Some(started.save_versions.clone()),
+        }
+    }
+}
+
 /// Takes launches at `endpoint` for as long as the app runs.
 pub fn listen(services: Services, endpoint: channel::Endpoint) {
     crate::runtime::spawn(async move {

@@ -9,7 +9,7 @@ use caskade_plugin_host::PluginHost;
 use std::path::{Path, PathBuf};
 use tauri::Manager;
 
-pub use app::{DevPlugins, folder_from_args};
+pub use app::DevPlugins;
 
 /// Loads `folder` as a dev plugin unless it is already watched.
 pub async fn load<R: tauri::Runtime>(

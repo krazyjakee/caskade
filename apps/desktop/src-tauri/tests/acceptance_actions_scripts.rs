@@ -82,7 +82,6 @@ fn app(store: &LibraryStore) -> (tauri::App<MockRuntime>, tauri::WebviewWindow<M
             actions::game_actions,
             actions::game_tool_run,
             scripts::lifecycle_script_save,
-            scripts::launch_cancel,
             launch::launch_game_with,
         ])
         .build(mock_context(noop_assets()))
@@ -226,7 +225,7 @@ fn a_mod_manager_action_with_lifecycle_scripts_tracks_the_game_in_phase_order() 
 }
 
 #[test]
-fn a_time_limit_and_a_cancel_stop_the_launch_and_clean_up() {
+fn a_time_limit_stops_the_launch_and_cleans_up() {
     let temp = tempfile::tempdir().unwrap();
     let store = tauri::async_runtime::block_on(LibraryStore::in_memory()).unwrap();
     let (_app, window) = app(&store);
@@ -260,43 +259,10 @@ fn a_time_limit_and_a_cancel_stop_the_launch_and_clean_up() {
     );
     assert_eq!(lines(&slow_log), ["cleanup after_exit failed Play pid="]);
 
-    // A launch waiting on its before-launch step is cancelled.
-    let wait_dir = temp.path().join("wait");
-    fs::create_dir(&wait_dir).unwrap();
-    let (wait_game, wait_entry) = game(&store, &wait_dir, "Long Prep");
-    let wait_log = temp.path().join("wait.log");
-    let scope = json!({"type": "game", "gameId": wait_game});
-    save_script(
-        &window,
-        logging(&scope, "before_launch", "prep", &wait_log, "sleep 30; "),
+    assert!(
+        tauri::async_runtime::block_on(store.sessions_for_game(&slow_game, 5))
+            .unwrap()
+            .is_empty(),
+        "no session for a launch that never started"
     );
-    save_script(
-        &window,
-        logging(&scope, "after_exit", "cleanup", &wait_log, ""),
-    );
-    let launching = std::thread::spawn({
-        let window = window.clone();
-        let entry = wait_entry.clone();
-        move || {
-            invoke(
-                &window,
-                "launch_game_with",
-                json!({"entryId": entry, "choice": null}),
-            )
-        }
-    });
-    wait("the launch to wait on its script", || {
-        invoke(&window, "launch_cancel", json!({"gameId": wait_game})).unwrap() == json!(true)
-    });
-    let cancelled = launching.join().unwrap().unwrap_err();
-    assert_eq!(cancelled["code"], "cancelled", "{cancelled}");
-    assert_eq!(lines(&wait_log), ["cleanup after_exit cancelled Play pid="]);
-    for game in [&slow_game, &wait_game] {
-        assert!(
-            tauri::async_runtime::block_on(store.sessions_for_game(game, 5))
-                .unwrap()
-                .is_empty(),
-            "no session for a launch that never started"
-        );
-    }
 }

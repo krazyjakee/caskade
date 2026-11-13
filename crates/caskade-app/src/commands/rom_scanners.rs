@@ -80,14 +80,6 @@ pub async fn rom_scan_start(
         .map_err(report)
 }
 
-/// A scan, while it's retained.
-pub fn rom_scan_get(emulation: &EmulationService, id: &str) -> Result<ScanJob, CommandError> {
-    emulation
-        .scanners()
-        .get(id)
-        .ok_or_else(|| conflict(no_scan()))
-}
-
 /// Retained scans, newest first, so a review survives a reload.
 pub fn rom_scan_jobs(emulation: &EmulationService) -> Vec<ScanJob> {
     emulation.scanners().jobs()

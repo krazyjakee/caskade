@@ -2,6 +2,7 @@ use super::*;
 use crate::commands::test_ipc::{assert_report, invoke};
 use caskade_core::{AppPaths, db::LibraryStore};
 use serde_json::{Value, json};
+use std::path::Path;
 use tauri::{
     Listener, Manager,
     test::{MockRuntime, mock_builder, mock_context, noop_assets},
@@ -34,7 +35,6 @@ impl Run {
         let specta = tauri_specta::Builder::<MockRuntime>::new()
             .commands(tauri_specta::collect_commands![
                 theme_resolve::<MockRuntime>,
-                appearance_safe_mode::<MockRuntime>,
                 themes_list::<MockRuntime>,
                 theme_stylesheet,
                 crate::commands::settings::settings_get,
@@ -156,17 +156,10 @@ fn safe_mode_starts_on_the_default_theme() {
     neon(&temp.path().join("themes"));
     let run = Run::start(temp.path(), false);
     run.choose("dev.example.neon");
-    assert_eq!(
-        invoke(&run.window, "appearance_safe_mode", json!({})),
-        Ok(json!(false))
-    );
+    assert_eq!(run.active()["safeMode"], false);
     drop(run);
 
     let run = Run::start(temp.path(), true);
-    assert_eq!(
-        invoke(&run.window, "appearance_safe_mode", json!({})),
-        Ok(json!(true))
-    );
     let active = run.active();
     assert_eq!(active["id"], "caskade.default");
     assert_eq!(active["requested"], "dev.example.neon");
@@ -219,7 +212,13 @@ fn a_dev_theme_folder_is_watched_and_the_webview_told_of_each_edit() {
     let id = tauri::async_runtime::block_on({
         let handle = run.app.handle().clone();
         let folder = folder.clone();
-        async move { load_dev(&handle, &folder) }
+        async move {
+            app::load_dev(
+                crate::events::sink(handle.clone()),
+                handle.try_state::<ThemeService>().as_deref(),
+                &folder,
+            )
+        }
     })
     .unwrap();
     assert_eq!(id, "dev.example.neon");

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use tauri_specta::Event;
 
-pub use caskade_app::events::{LIBRARY_WINDOW, LibraryChange};
+pub use caskade_app::events::LIBRARY_WINDOW;
 
 /// A webview event for each app layer event type, named as it is.
 macro_rules! webview_events {
@@ -52,7 +52,6 @@ webview_events!(
     PluginsChanged,
     PluginReloaded,
     AccountChanged,
-    LifecycleScriptsRan,
     AchievementsChanged,
     BackgroundChanged,
     RommDownloadChanged,
@@ -74,7 +73,6 @@ webview_events!(
     SystemStatsSampled,
     AppUpdateChanged,
     InputActionEvent,
-    Hello,
     GamesRefreshChanged,
     SaveVersionsChanged,
 );

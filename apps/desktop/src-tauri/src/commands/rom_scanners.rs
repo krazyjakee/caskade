@@ -64,12 +64,6 @@ pub async fn rom_scan_start(
     app::rom_scan_start(&state, &scanner_id, mode).await
 }
 
-#[tauri::command]
-#[specta::specta]
-pub fn rom_scan_get(state: State<'_>, id: String) -> Result<ScanJob, CommandError> {
-    app::rom_scan_get(&state, &id)
-}
-
 /// Retained scans, newest first, so a review survives a reload.
 #[tauri::command]
 #[specta::specta]

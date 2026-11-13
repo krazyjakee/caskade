@@ -1,8 +1,6 @@
 //! Device-local save locations for the game editor (#238).
 use crate::error::CommandError;
 pub use app::*;
-// The webview's event, which the app sends as `caskade_app`'s.
-pub use crate::events::SaveVersionsChanged;
 use caskade_app::commands::saves as app;
 use caskade_core::{
     db::LibraryStore,

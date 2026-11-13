@@ -13,7 +13,7 @@ use caskade_core::{
     bus::Bus,
     db::LibraryStore,
     launch::LaunchService,
-    romm::secrets::MemorySecrets,
+    secrets::MemorySecrets,
     settings::SettingsService,
     store_accounts::{StoreAccounts, epic::EpicProvider, gog::GogProvider, steam::SteamProvider},
 };

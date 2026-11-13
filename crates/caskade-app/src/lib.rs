@@ -13,6 +13,7 @@ pub mod events;
 pub mod game_focus;
 pub mod launch_cli;
 pub mod link_handler;
+pub mod logging;
 pub mod navigation;
 pub mod onboarding;
 pub mod permissions;

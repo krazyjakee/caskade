@@ -5,13 +5,13 @@ mod acceptance_achievements;
 mod acceptance_actions_scripts;
 mod account_libraries;
 mod backup_roundtrip;
+mod bindings;
 mod bridge;
 // Needs X and the built frontend: `--features e2e`, then `-- --ignored`.
 // Unix only: it starts the app on an Xvfb display (caskade-test-desktop).
 #[cfg(all(feature = "e2e", unix))]
 mod console_e2e;
 mod discovery_controller;
-mod hello;
 mod igdb;
 #[path = "../src/commands/test_ipc.rs"]
 mod ipc;

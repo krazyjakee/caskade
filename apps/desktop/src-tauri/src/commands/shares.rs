@@ -8,11 +8,11 @@
 use caskade_app::commands::shares as app;
 use caskade_core::install::JobSnapshot;
 use caskade_share::{ReceivedShare, ShareExpiry, ShareInfo, ShareRecord, Shares};
-use tauri::{AppHandle, Manager, Runtime, State};
+use tauri::State;
 
 use crate::error::CommandError;
 
-pub use app::{ShareCreated, is_share_link};
+pub use app::ShareCreated;
 
 /// Shares release `entry_id` until `expiry`.
 #[tauri::command]
@@ -112,35 +112,6 @@ pub async fn confirm_share_collection(
     request_id: String,
 ) -> Result<caskade_core::model::Collection, CommandError> {
     app::confirm_share_collection(&requests, &accounts, &request_id).await
-}
-
-/// Asks a share link's sharer what it shares, then queues it for
-/// confirmation and brings the window up; when the link doesn't work, the
-/// UI is told why. Never logs the link: it's a credential.
-pub async fn open_share_link<R: Runtime>(app: &AppHandle<R>, link: String) {
-    if let Err(error) = queue_share_link(app, link).await {
-        tracing::info!("an opened share link didn't queue");
-        crate::events::sink(app.clone()).send(caskade_app::events::Event::InstallRefused(
-            caskade_app::events::InstallRefused(error),
-        ));
-    }
-    crate::main_window::raise(app);
-}
-
-/// Queues `link` (a share link) as an install request; the reason when its
-/// sharer refuses it, it expired, or nobody may install here.
-pub async fn queue_share_link<R: Runtime>(
-    app: &AppHandle<R>,
-    link: String,
-) -> Result<super::install_requests::InstallRequest, String> {
-    crate::permissions::require(app, caskade_core::accounts::Permission::Install)?;
-    let (Some(shares), Some(requests)) = (
-        app.try_state::<Shares>(),
-        app.try_state::<super::install_requests::InstallRequests>(),
-    ) else {
-        return Err(caskade_core::tr!("receiving shares isn't available"));
-    };
-    app::queue_share_link(&crate::events::sink(app.clone()), &shares, &requests, link).await
 }
 
 #[cfg(test)]

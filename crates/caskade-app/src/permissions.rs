@@ -94,7 +94,6 @@ pub fn access(command: &str) -> Option<Access> {
         | "plugin_ui_render"
         | "plugin_messages"
         | "rom_scanners_list"
-        | "rom_scan_get"
         | "rom_scan_jobs"
         | "rom_exclusions"
         | "igdb_games"
@@ -111,8 +110,6 @@ pub fn access(command: &str) -> Option<Access> {
         | "lifecycle_scripts"
         | "lifecycle_scripts_effective"
         | "game_achievements"
-        | "game_achievement_summary"
-        | "game_achievement_links"
         | "game_achievement_icon"
         | "game_age_ratings"
         | "game_age_check"
@@ -143,14 +140,10 @@ pub fn access(command: &str) -> Option<Access> {
         | "games_refresh_status"
         | "game_updates"
         | "game_ports"
-        | "updates_available"
         | "romm_overview"
-        | "romm_cache_status"
-        | "romm_game_status"
         | "themes_list"
         | "theme_stylesheet"
         | "theme_resolve"
-        | "appearance_safe_mode"
         | "themes_reload"
         | "input_devices"
         | "console_initial_mode"
@@ -171,8 +164,7 @@ pub fn access(command: &str) -> Option<Access> {
         | "notification_mark_unread"
         | "notifications_mark_all_read" => Open,
         // The window's own state and pickers that only answer a path.
-        "hello"
-        | "choose_install_files"
+        "choose_install_files"
         | "choose_install_folder"
         | "storage_choose_directory"
         | "set_console_mode"
@@ -199,7 +191,6 @@ pub fn access(command: &str) -> Option<Access> {
         | "job_pause"
         // Takes a finished job out of Activity; its files stay.
         | "job_remove"
-        | "verify_game"
         | "launch_game"
         | "launch_game_with"
         // Saves before a launch and a conflict's choice (#239): they write
@@ -212,12 +203,9 @@ pub fn access(command: &str) -> Option<Access> {
         | "game_tool_run"
         // A trailer starts the video window, a process of its own.
         | "video_play"
-        | "launch_cancel"
         | "lifecycle_script_test_cancel"
         | "game_achievements_refresh"
         | "game_achievements_cancel"
-        | "game_achievement_link_set"
-        | "game_achievement_link_clear"
         | "game_age_approve"
         | "guide_stop_game"
         | "plugin_request"
@@ -306,7 +294,6 @@ pub fn access(command: &str) -> Option<Access> {
         // `deep_link::open`), installs, ROM scans and RomM imports and
         // downloads, games added by hand, uninstalls, removals and moves.
         "install_start"
-        | "fetch_start"
         | "request_install_input"
         | "request_dropped_install"
         | "confirm_install_request"
@@ -410,7 +397,6 @@ pub fn access(command: &str) -> Option<Access> {
         "store_providers"
         | "store_accounts_list"
         | "store_account_removal_preview"
-        | "game_ownership"
         | "game_playtime"
         | "game_owned_releases"
         | "store_auth_flows" => Open,

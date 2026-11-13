@@ -141,22 +141,10 @@ fn all_synced(
     Ok(reports.into_iter().filter_map(Result::ok).collect())
 }
 
-pub async fn romm_cache_status(state: &RommService) -> Result<CacheStatus, CommandError> {
-    state.cache_status().await.map_err(report)
-}
-
 /// Removes every download except pinned games.
 pub async fn romm_cache_clear(state: &RommService) -> Result<CacheStatus, CommandError> {
     crate::permissions::enforce("romm_cache_clear", serde_json::Value::default)?;
     state.clear_cache().await.map_err(report)
-}
-
-/// A RomM game's cache state; `null` for other entries.
-pub async fn romm_game_status(
-    state: &RommService,
-    entry_id: String,
-) -> Result<Option<RommGameStatus>, CommandError> {
-    state.game_status(&entry_id).await.map_err(report)
 }
 
 /// "Keep downloaded".

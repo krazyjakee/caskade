@@ -33,10 +33,6 @@ pub use app::{AppRelease, AppUpdatePhase, AppUpdateStatus, ENDPOINT};
 pub type AppUpdater<P = Update> = app::AppUpdater<P>;
 
 const CHECK_TIMEOUT: Duration = Duration::from_secs(30);
-/// The whole download, which is the size of the app.
-const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(30 * 60);
-/// Download progress reaches the webview at most this often.
-const PROGRESS_EVERY: Duration = Duration::from_millis(250);
 
 /// Why a copy of Caskade from `bundle` can't replace itself.
 pub fn unavailable_reason(bundle: Option<BundleType>) -> Option<Message> {
@@ -113,7 +109,7 @@ async fn find<R: Runtime>(app: &AppHandle<R>, endpoint: &str) -> Result<Option<U
 /// background; the status follows through `AppUpdateChanged`.
 pub fn install<R: Runtime>(app: AppHandle<R>) -> Result<AppUpdateStatus, String> {
     let (mut update, status) = app.state::<AppUpdater>().begin_install()?;
-    update.timeout = Some(DOWNLOAD_TIMEOUT);
+    update.timeout = Some(app::DOWNLOAD_TIMEOUT);
     tauri::async_runtime::spawn({
         let app = app.clone();
         async move {
@@ -128,7 +124,7 @@ pub fn install<R: Runtime>(app: AppHandle<R>) -> Result<AppUpdateStatus, String>
                 .download(
                     |chunk, total| {
                         let status = updater.progress(chunk as u64, total);
-                        if sent.elapsed() >= PROGRESS_EVERY {
+                        if sent.elapsed() >= app::PROGRESS_EVERY {
                             sent = Instant::now();
                             if let Some(total) = total.filter(|total| *total > 0) {
                                 activity.set_label(caskade_core::tr!(
@@ -202,7 +198,7 @@ pub async fn install_now<R: Runtime>(app: &AppHandle<R>) -> Result<Option<String
     let Some(mut update) = find(app, ENDPOINT).await? else {
         return Ok(None);
     };
-    update.timeout = Some(DOWNLOAD_TIMEOUT);
+    update.timeout = Some(app::DOWNLOAD_TIMEOUT);
     let bytes = update.download(|_, _| {}, || {}).await.map_err(|error| {
         caskade_core::tr!("Couldn't download the update: {error}", error = error)
     })?;
@@ -237,16 +233,7 @@ pub fn watch<R: Runtime>(
     settings: SettingsService,
 ) -> tokio::task::JoinHandle<()> {
     tokio::spawn(async move {
-        tokio::time::sleep(app::FIRST_CHECK).await;
-        loop {
-            if app.state::<AppUpdater>().status().unavailable.is_none()
-                && app::automatic(&settings).await
-                && let Err(error) = check(&app).await
-            {
-                tracing::debug!(%error, "automatic app update check skipped");
-            }
-            tokio::time::sleep(app::CHECK_EVERY).await;
-        }
+        app::watch(app.state::<AppUpdater>().inner(), &settings, || check(&app)).await;
     })
 }
 

@@ -93,10 +93,6 @@ pub struct InstallRequests {
 /// How long an unconfirmed request waits.
 const EXPIRY: Duration = Duration::from_secs(600);
 
-fn locked<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
-    mutex.lock().unwrap_or_else(|e| e.into_inner())
-}
-
 struct Claim {
     queue: InstallRequests,
     request: InstallRequest,
@@ -107,7 +103,8 @@ struct Claim {
 impl Drop for Claim {
     fn drop(&mut self) {
         if !self.complete
-            && let Some(p) = locked(&self.queue.pending).get_mut(&self.request.request_id)
+            && let Some(p) =
+                caskade_core::lock(&self.queue.pending).get_mut(&self.request.request_id)
         {
             p.claimed = false;
         }
@@ -167,7 +164,7 @@ impl InstallRequests {
     }
     /// The queue, without unclaimed requests that expired.
     fn live(&self) -> std::sync::MutexGuard<'_, BTreeMap<String, Pending>> {
-        let mut pending = locked(&self.pending);
+        let mut pending = caskade_core::lock(&self.pending);
         pending.retain(|_, p| p.claimed || p.created.elapsed() < EXPIRY);
         pending
     }
@@ -217,7 +214,7 @@ impl InstallRequests {
             .collect()
     }
     pub fn dismiss(&self, id: &str) -> Result<(), String> {
-        let mut pending = locked(&self.pending);
+        let mut pending = caskade_core::lock(&self.pending);
         if pending.get(id).is_some_and(|p| p.claimed) {
             return Err(caskade_core::tr!("request is already being confirmed"));
         }
@@ -227,7 +224,7 @@ impl InstallRequests {
             .ok_or_else(|| caskade_core::tr!("unknown or expired request"))
     }
     fn claim(&self, id: &str) -> Result<Claim, String> {
-        let mut pending = locked(&self.pending);
+        let mut pending = caskade_core::lock(&self.pending);
         let p = pending
             .get_mut(id)
             .ok_or_else(|| caskade_core::tr!("unknown or expired request"))?;
@@ -259,7 +256,7 @@ impl InstallRequests {
                 .receive(&link, root_id)
                 .await
                 .map_err(|e| e.to_string())?;
-            locked(&self.pending).remove(id);
+            caskade_core::lock(&self.pending).remove(id);
             claim.complete = true;
             return Ok(job);
         }
@@ -269,7 +266,7 @@ impl InstallRequests {
                 .copy_from_device(peer.target(), root_id)
                 .await
                 .map_err(|e| e.to_string())?;
-            locked(&self.pending).remove(id);
+            caskade_core::lock(&self.pending).remove(id);
             claim.complete = true;
             return Ok(job);
         }
@@ -283,7 +280,7 @@ impl InstallRequests {
             .install_with(claim.request.value.clone(), root_id, hints)
             .await
             .map_err(|e| e.to_string())?;
-        locked(&self.pending).remove(id);
+        caskade_core::lock(&self.pending).remove(id);
         claim.complete = true;
         Ok(job)
     }
@@ -308,7 +305,7 @@ impl InstallRequests {
             .receive_collection(&link, account)
             .await
             .map_err(|e| e.to_string())?;
-        locked(&self.pending).remove(id);
+        caskade_core::lock(&self.pending).remove(id);
         claim.complete = true;
         Ok(collection)
     }
@@ -539,7 +536,7 @@ mod tests {
         assert!(queue.dismiss(&request.request_id).is_err());
         drop(claim);
         assert_eq!(queue.pending(), vec![request.clone()]);
-        locked(&queue.pending)
+        caskade_core::lock(&queue.pending)
             .get_mut(&request.request_id)
             .unwrap()
             .created = Instant::now() - Duration::from_secs(601);

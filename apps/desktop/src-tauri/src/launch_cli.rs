@@ -1,37 +1,13 @@
 //! `caskade --launch <game id> [--entry <id>] [--action <id>]` (#256):
 //! `caskade_app::launch_cli`, with what only the desktop app does: holding
 //! the caller's process (on Windows with a hidden window, so that WM_CLOSE
-//! ends it) and handing the server the app's services.
+//! ends it).
 
 pub use caskade_app::launch_cli::*;
-use tauri::{AppHandle, Manager, Runtime};
 
 /// Runs the caller for `request` and exits with its code. Never returns.
 pub fn main(request: Request) -> ! {
     hold(move || caller(request))
-}
-
-/// Takes launches at `endpoint` for as long as the app runs, once the
-/// library, accounts and the launch service are managed.
-pub fn listen<R: Runtime>(app: &AppHandle<R>, endpoint: Endpoint) {
-    let services = server::Services {
-        accounts: app
-            .state::<caskade_core::accounts::AccountService>()
-            .inner()
-            .clone(),
-        store: app
-            .state::<caskade_core::db::LibraryStore>()
-            .inner()
-            .clone(),
-        launches: app
-            .state::<caskade_core::launch::LaunchService>()
-            .inner()
-            .clone(),
-        saves: app
-            .try_state::<caskade_core::saves::versions::SaveVersions>()
-            .map(|versions| versions.inner().clone()),
-    };
-    server::listen(services, endpoint);
 }
 
 /// Waits for `work` on POSIX, where a signal ends the process and so the

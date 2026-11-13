@@ -48,17 +48,17 @@ async fn respond(host: &PluginHost, method: &Method, path: &str) -> Response<Vec
     let Some(folder) = host.folder(&id).filter(|_| host.enabled(&id)) else {
         return empty(StatusCode::NOT_FOUND);
     };
-    match locate(&folder, relative) {
-        Ok(file) => match tauri::async_runtime::spawn_blocking({
-            let file = file.clone();
-            move || std::fs::read(file)
-        })
-        .await
-        {
-            Ok(Ok(bytes)) => served(bytes, mime(&file)),
-            _ => empty(StatusCode::NOT_FOUND),
-        },
-        Err(status) => empty(status),
+    let relative = relative.to_owned();
+    let found = tauri::async_runtime::spawn_blocking(move || {
+        let file = locate(&folder, &relative)?;
+        let bytes = std::fs::read(&file).map_err(|_| StatusCode::NOT_FOUND)?;
+        Ok((bytes, file))
+    })
+    .await;
+    match found {
+        Ok(Ok((bytes, file))) => served(bytes, mime(&file)),
+        Ok(Err(status)) => empty(status),
+        Err(_) => empty(StatusCode::NOT_FOUND),
     }
 }
 

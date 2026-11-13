@@ -4,11 +4,11 @@
 //! Quit. The window's frame is also saved once it settles after a move or a
 //! resize.
 
-use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
 use std::time::Duration;
 use tauri::plugin::TauriPlugin;
 use tauri::{AppHandle, Manager, Runtime, WindowEvent};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+use tokio::sync::mpsc::{self, UnboundedReceiver};
 
 /// How long the window has to stay put before its frame is saved.
 const SETTLE: Duration = Duration::from_millis(500);
@@ -82,37 +82,33 @@ pub fn save_on_change<R: Runtime>(app: &AppHandle<R>) {
     let Some(window) = app.get_webview_window("main") else {
         return;
     };
-    let (changed, changes) = mpsc::channel();
+    let (changed, mut changes) = mpsc::unbounded_channel();
     window.on_window_event(move |event| {
         if matches!(event, WindowEvent::Moved(_) | WindowEvent::Resized(_)) {
             let _ = changed.send(());
         }
     });
     let app = app.clone();
-    let spawned = std::thread::Builder::new()
-        .name("window-state".into())
-        .spawn(move || {
-            settle(&changes, SETTLE, || {
-                // On the main thread: window-state holds its cache's lock
-                // while it asks the window for its frame, and the main
-                // thread takes that lock for every move.
-                let handle = app.clone();
-                let _ = app.run_on_main_thread(move || save(&handle));
-            });
-        });
-    if let Err(error) = spawned {
-        tracing::warn!(%error, "the window's place is saved only on quit");
-    }
+    tauri::async_runtime::spawn(async move {
+        settle(&mut changes, SETTLE, || {
+            // On the main thread: window-state holds its cache's lock
+            // while it asks the window for its frame, and the main
+            // thread takes that lock for every move.
+            let handle = app.clone();
+            let _ = app.run_on_main_thread(move || save(&handle));
+        })
+        .await;
+    });
 }
 
 /// Calls `save` once the changes stop for `quiet`, until the sender is gone.
-fn settle(changes: &Receiver<()>, quiet: Duration, save: impl Fn()) {
-    while changes.recv().is_ok() {
+async fn settle(changes: &mut UnboundedReceiver<()>, quiet: Duration, save: impl Fn()) {
+    while changes.recv().await.is_some() {
         loop {
-            match changes.recv_timeout(quiet) {
-                Ok(()) => continue,
-                Err(RecvTimeoutError::Timeout) => break,
-                Err(RecvTimeoutError::Disconnected) => return,
+            match tokio::time::timeout(quiet, changes.recv()).await {
+                Ok(Some(())) => continue,
+                Ok(None) => return,
+                Err(_) => break,
             }
         }
         save();
@@ -133,28 +129,33 @@ fn save<R: Runtime>(app: &AppHandle<R>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Arc;
     use std::sync::atomic::{AtomicUsize, Ordering};
+    use tokio::time::sleep;
 
-    #[test]
-    fn a_burst_of_changes_saves_once() {
-        let (changed, changes) = mpsc::channel();
-        let saves = &AtomicUsize::new(0);
-        std::thread::scope(|scope| {
-            scope.spawn(move || {
-                settle(&changes, Duration::from_millis(50), || {
+    #[tokio::test]
+    async fn a_burst_of_changes_saves_once() {
+        let (changed, mut changes) = mpsc::unbounded_channel();
+        let saves = Arc::new(AtomicUsize::new(0));
+        let settling = tokio::spawn({
+            let saves = saves.clone();
+            async move {
+                settle(&mut changes, Duration::from_millis(50), || {
                     saves.fetch_add(1, Ordering::SeqCst);
-                });
-            });
-            for _ in 0..5 {
-                changed.send(()).unwrap();
-                std::thread::sleep(Duration::from_millis(5));
+                })
+                .await;
             }
-            std::thread::sleep(Duration::from_millis(200));
-            assert_eq!(saves.load(Ordering::SeqCst), 1);
-            changed.send(()).unwrap();
-            std::thread::sleep(Duration::from_millis(200));
-            assert_eq!(saves.load(Ordering::SeqCst), 2);
-            drop(changed);
         });
+        for _ in 0..5 {
+            changed.send(()).unwrap();
+            sleep(Duration::from_millis(5)).await;
+        }
+        sleep(Duration::from_millis(200)).await;
+        assert_eq!(saves.load(Ordering::SeqCst), 1);
+        changed.send(()).unwrap();
+        sleep(Duration::from_millis(200)).await;
+        assert_eq!(saves.load(Ordering::SeqCst), 2);
+        drop(changed);
+        settling.await.unwrap();
     }
 }

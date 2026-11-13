@@ -12,13 +12,11 @@ fn scripts_are_saved_ordered_and_deleted_within_their_scope() {
     let game = tauri::async_runtime::block_on(store.upsert_game(&Game::new("Scripted"))).unwrap();
     let app = mock_builder()
         .manage(store.clone())
-        .manage(LaunchService::new(store.clone()))
         .invoke_handler(tauri::generate_handler![
             lifecycle_scripts,
             lifecycle_script_save,
             lifecycle_script_delete,
-            lifecycle_scripts_order,
-            launch_cancel
+            lifecycle_scripts_order
         ])
         .build(mock_context(noop_assets()))
         .unwrap();
@@ -75,10 +73,6 @@ fn scripts_are_saved_ordered_and_deleted_within_their_scope() {
         )
         .unwrap(),
         true
-    );
-    assert_eq!(
-        invoke(&window, "launch_cancel", json!({"gameId": game.id})).unwrap(),
-        false
     );
 }
 

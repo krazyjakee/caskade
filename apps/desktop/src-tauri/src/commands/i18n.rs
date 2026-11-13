@@ -10,16 +10,10 @@ pub use crate::events::LocaleChanged;
 
 use caskade_core::settings::SettingsService;
 use tauri::{AppHandle, Runtime};
-use tokio::sync::watch;
 /// Switches to the Language setting before the window loads, then follows
 /// it and tells the webview of each change.
 pub fn setup<R: Runtime>(app: &AppHandle<R>, settings: &SettingsService) {
     app::setup(crate::events::sink(app.clone()), settings);
-}
-
-/// Tells the webview of each change of `changes`, until the core goes away.
-pub async fn announce<R: Runtime>(app: AppHandle<R>, changes: watch::Receiver<String>) {
-    app::announce(crate::events::sink(app), changes).await;
 }
 
 /// The language in use, what System means here, and the languages there
