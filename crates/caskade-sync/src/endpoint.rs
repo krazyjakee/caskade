@@ -10,7 +10,7 @@ use iroh::Watcher as _;
 
 use async_trait::async_trait;
 use futures_util::{Stream, StreamExt as _};
-use iroh::endpoint::{Connection, VarInt, presets};
+use iroh::endpoint::{Connection, PortmapperConfig, VarInt, presets};
 use iroh::protocol::{AcceptError, ProtocolHandler, Router};
 use iroh::{Endpoint, EndpointAddr, EndpointId, RelayMode};
 
@@ -103,7 +103,8 @@ impl Reach {
         }
     }
 
-    /// One socket on 127.0.0.1, no relays and no address lookup, for tests.
+    /// One socket on 127.0.0.1, no relays, address lookup or router port
+    /// mapping, for tests.
     pub fn loopback() -> Self {
         Self {
             relays: Relays::Never,
@@ -167,7 +168,7 @@ impl Config {
         }
     }
 
-    async fn bind(&self) -> Result<Endpoint> {
+    fn builder(&self) -> iroh::endpoint::Builder {
         let reach = &self.reach;
         // The N0 presets when looking devices up over the internet; Minimal
         // (the crypto provider only) otherwise.
@@ -191,11 +192,16 @@ impl Config {
                     builder.bind_addr(SocketAddrV6::new(Ipv6Addr::UNSPECIFIED, port, 0, 0))
                 })
                 .expect("unspecified addresses are valid bind addresses"),
+            // Port mapping uses its own sockets: a loopback bind alone
+            // still lets it probe the real router.
             Ip::Loopback { port } => builder
+                .portmapper_config(PortmapperConfig::Disabled)
                 .clear_ip_transports()
                 .bind_addr(SocketAddrV4::new(Ipv4Addr::LOCALHOST, port.unwrap_or(0)))
                 .expect("127.0.0.1 is a valid bind address"),
-            Ip::Off => builder.clear_ip_transports(),
+            Ip::Off => builder
+                .portmapper_config(PortmapperConfig::Disabled)
+                .clear_ip_transports(),
         };
         // The only place the device key leaves `Identity`: straight into
         // iroh's builder.
@@ -203,6 +209,10 @@ impl Config {
             builder = builder.secret_key(identity.secret_key().clone());
         }
         builder
+    }
+
+    async fn bind(&self) -> Result<Endpoint> {
+        self.builder()
             .bind()
             .await
             .map_err(|source| Error::Bind { source })
@@ -622,5 +632,34 @@ impl InternetChanges {
     /// Waits for the next change; `false` once the endpoint is gone.
     pub async fn next(&mut self) -> bool {
         self.0.next().await.is_some()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // iroh exposes no getter for the builder's portmapper configuration.
+    // Check the actual builder passed to bind, before it can send probes.
+    fn portmapper(config: Config, expected: &str) {
+        let builder = format!("{:?}", config.builder());
+        assert!(builder.contains(expected), "{builder}");
+    }
+
+    #[test]
+    fn loopback_endpoints_do_not_probe_the_router() {
+        portmapper(Config::loopback(), "portmapper_config: Disabled");
+    }
+
+    #[test]
+    fn relay_only_endpoints_do_not_probe_the_router() {
+        let mut config = Config::default();
+        config.reach.ip = Ip::Off;
+        portmapper(config, "portmapper_config: Disabled");
+    }
+
+    #[test]
+    fn network_endpoints_keep_port_mapping() {
+        portmapper(Config::default(), "portmapper_config: Enabled");
     }
 }

@@ -214,6 +214,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 ### Devices, sync, saves and shares
 
 - **Transport**: iroh endpoints; devices found over mDNS (service `caskade`), n0 lookup and relays unless `core.sync.neverRelay`. Game files only move over endpoints with no relay transport (`DirectDialer`, `SwarmDialer`, `FileServer`).
+- **Router discovery**: loopback-only sync and file-transfer endpoints, and endpoints without IP sockets, disable router port mapping (UPnP, PCP and NAT-PMP). Binding only to loopback does not disable iroh's portmapper by itself; tests check the builders' configuration before binding (#135).
 - **Protocol**: `caskade/sync/1`, one byte-identical refusal for anything unauthorised, line-framed JSON with read bounds.
 - **Pairing**: code pairing with a nonce commitment, or single-use 10-minute `caskade://pair` links accepted by an admin. Grants never reach the webview.
 - **Library sync**: changes captured by diffing snapshots against `sync_fields` (only after the library was written), last writer wins per field by hybrid logical clock, tombstones for deletions, games matched across devices by identity (`sync_game_ids`). A session travels as one record plus its device as a separate `device` field, so it keeps the device that played it when forwarded, and Home's game list names that device from `paired_devices` when it isn't this one.

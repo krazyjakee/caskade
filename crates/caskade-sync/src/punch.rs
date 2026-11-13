@@ -97,6 +97,7 @@ pub(crate) fn relay_free(identity: Option<&Identity>, loopback: bool) -> Builder
         .clear_address_lookup();
     if loopback {
         builder = builder
+            .portmapper_config(PortmapperConfig::Disabled)
             .clear_ip_transports()
             .bind_addr(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0))
             .expect("127.0.0.1 is a valid bind address");
@@ -206,5 +207,22 @@ impl Drop for FileServer {
         if let Some(knocking) = self.knocking.take() {
             knocking.abort();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn loopback_transfers_do_not_probe_the_router() {
+        let builder = format!("{:?}", relay_free(None, true));
+        assert!(builder.contains("portmapper_config: Disabled"), "{builder}");
+    }
+
+    #[test]
+    fn network_transfers_keep_port_mapping() {
+        let builder = format!("{:?}", relay_free(None, false));
+        assert!(builder.contains("portmapper_config: Enabled"), "{builder}");
     }
 }
