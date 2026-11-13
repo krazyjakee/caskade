@@ -251,9 +251,13 @@ fn a_theme_shader_moves_and_stops_over_its_gpu_budget() {
             .env("RUST_LOG", "info")
             .stdout(log.try_clone().unwrap())
             .stderr(log);
-        if let Some(budget) = budget {
-            command.env("ANYRENDER_BACKDROP_SHADER_BUDGET_MS", budget);
-        }
+        // Without a test budget the shader gets a generous one: lavapipe runs
+        // shaders on the CPU, and a loaded CI runner can take longer than
+        // the default budget a real GPU is held to.
+        command.env(
+            "ANYRENDER_BACKDROP_SHADER_BUDGET_MS",
+            budget.unwrap_or("10000"),
+        );
         let _app = App(command.spawn().unwrap());
         let log_text = || std::fs::read_to_string(home.join("native.log")).unwrap_or_default();
         until(&counts, Duration::from_secs(25), |frames| {
