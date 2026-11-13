@@ -58,6 +58,44 @@ opt-level = 3
 [profile.dev.package.miniz_oxide]
 opt-level = 3
 
+# The native window's rasterisers (#147): unoptimized, vello's strips and
+# fearless_simd's kernels (a call per SIMD op) took 112 ms of a Home
+# frame's scene commands (3.7 ms with these; release 2.0 ms) and debug
+# grid scrolling's median frame from 17 to 761 ms. Only these crates: the
+# rest of the frame is spread over Stylo, Dioxus and the app, and these add
+# about a second to a cold build and nothing to an edit's.
+[profile.dev.package.vello_common]
+opt-level = 3
+
+[profile.dev.package.vello_cpu]
+opt-level = 3
+
+[profile.dev.package.vello_gpu]
+opt-level = 3
+
+[profile.dev.package.fearless_simd]
+opt-level = 3
+
+[profile.dev.package.kurbo]
+opt-level = 3
+
+[profile.dev.package.peniko]
+opt-level = 3
+
+# Glyph outlines.
+[profile.dev.package.glifo]
+opt-level = 3
+
+[profile.dev.package.skrifa]
+opt-level = 3
+
+[profile.dev.package.read-fonts]
+opt-level = 3
+
+# Swizzles every pixel of a CPU-drawn frame.
+[profile.dev.package.softbuffer_window_renderer]
+opt-level = 3
+
 [workspace.lints.rust]
 unsafe_code = "forbid"
 
