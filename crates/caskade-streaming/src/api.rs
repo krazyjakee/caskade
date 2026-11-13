@@ -19,6 +19,10 @@ use url::Url;
 /// Where Caskade's own host answers.
 pub const LOCAL: &str = "https://127.0.0.1:47990/";
 
+/// How long an app added or deleted may take: the host then reads every
+/// app's cover again, seconds on a large library (#145).
+const SAVE_TIMEOUT: Duration = Duration::from_secs(120);
+
 /// Trusts exactly one certificate: the host's own.
 #[derive(Debug)]
 struct Pinned {
@@ -281,7 +285,9 @@ impl HostApi {
     pub async fn add_app(&self, app: &App) -> Result<()> {
         let mut body = serde_json::to_value(app)?;
         body["index"] = serde_json::json!(-1);
-        self.post_json("api/apps", body).await
+        self.send(self.post("api/apps", &body)?.timeout(SAVE_TIMEOUT))
+            .await?;
+        Ok(())
     }
 
     /// Devices waiting to pair (Sunshine 2026.906 and later): they expire
@@ -290,14 +296,16 @@ impl HostApi {
         Ok(self.json::<Pairings>("api/pin").await?.pairings)
     }
 
+    fn post(&self, path: &str, body: &serde_json::Value) -> Result<reqwest::RequestBuilder> {
+        Ok(self
+            .client
+            .post(self.url(path)?)
+            .header(reqwest::header::CONTENT_TYPE, "application/json")
+            .body(serde_json::to_vec(body)?))
+    }
+
     async fn post_json(&self, path: &str, body: serde_json::Value) -> Result<()> {
-        self.send(
-            self.client
-                .post(self.url(path)?)
-                .header(reqwest::header::CONTENT_TYPE, "application/json")
-                .body(serde_json::to_vec(&body)?),
-        )
-        .await?;
+        self.send(self.post(path, &body)?).await?;
         Ok(())
     }
 
@@ -340,8 +348,12 @@ impl HostApi {
     }
 
     pub async fn delete_app(&self, index: usize) -> Result<()> {
-        self.send(self.client.delete(self.url(&format!("api/apps/{index}"))?))
-            .await?;
+        self.send(
+            self.client
+                .delete(self.url(&format!("api/apps/{index}"))?)
+                .timeout(SAVE_TIMEOUT),
+        )
+        .await?;
         Ok(())
     }
 }

@@ -8,6 +8,14 @@
 //! command) runs this Caskade; on a user's own Sunshine (#258) those are
 //! the only apps Caskade adds or removes. Changes are applied in batches,
 //! a moment after the library changes, never per row.
+//!
+//! Every app the host saves makes it read and hash every app's cover
+//! again: seconds on a large library, so a save per game kept it busy for
+//! hours (#145). On Caskade's own Linux host, whose list is Caskade's
+//! alone, a batch writes the list file whole and makes one save
+//! ([`sync_whole`]). On Windows the file is in the administrator-only
+//! folder, and a user's own host isn't Caskade's: apps go one at a time
+//! through the API ([`sync`]).
 
 use super::{
     StreamingHost,
@@ -22,7 +30,8 @@ use caskade_core::{
     model::{ArtworkKind, GameEntry, GameFilter, InstallState, LaunchSpec, ListGames},
 };
 use std::{
-    path::PathBuf,
+    collections::HashSet,
+    path::{Path, PathBuf},
     sync::{Arc, Mutex},
     time::Duration,
 };
@@ -199,6 +208,78 @@ pub async fn sync(api: &HostApi, caskade: &Caskade, offers: &[Offer]) -> Result<
     Ok(published)
 }
 
+/// Which offer an app is, for matching a list against the offers.
+fn key(offer: &Offer) -> Option<(&str, &str)> {
+    match offer {
+        Offer::Game { title, game_id, .. } => Some((title, game_id)),
+        Offer::Console => None,
+    }
+}
+
+/// What making `listed` (the host's apps: Caskade's offer, or `None` for
+/// any other app) exactly `offers` adds and removes. A second copy of an
+/// offer is removed.
+fn difference(listed: &[Option<Offer>], offers: &[Offer]) -> Published {
+    let wanted: HashSet<_> = offers.iter().map(key).collect();
+    let mut kept = HashSet::new();
+    let removed = listed
+        .iter()
+        .filter(|app| {
+            !app.as_ref()
+                .map(key)
+                .is_some_and(|key| wanted.contains(&key) && kept.insert(key))
+        })
+        .count();
+    Published {
+        added: wanted.len() - kept.len(),
+        removed,
+    }
+}
+
+/// Makes the whole app list of Caskade's own host exactly `offers`: no
+/// other app stays, an earlier Caskade build's included. The list file
+/// (`list`) is written whole without the last app, which then goes
+/// through the API: that one save makes the host read the file (#145).
+/// Nothing is sent when the list is `offers` already.
+pub async fn sync_whole(
+    api: &HostApi,
+    list: &Path,
+    caskade: &Caskade,
+    offers: &[Offer],
+) -> Result<Published> {
+    let mut file = std::fs::read(list)
+        .ok()
+        .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok())
+        .filter(serde_json::Value::is_object)
+        .unwrap_or_else(|| serde_json::json!({ "env": {} }));
+    let listed: Vec<Option<Offer>> = file
+        .get("apps")
+        .and_then(serde_json::Value::as_array)
+        .map(|apps| {
+            apps.iter()
+                .map(|app| {
+                    serde_json::from_value::<App>(app.clone())
+                        .ok()
+                        .and_then(|app| caskade.owns(&app))
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    let published = difference(&listed, offers);
+    if published == Published::default() {
+        return Ok(published);
+    }
+    let mut apps: Vec<App> = offers.iter().map(|offer| caskade.app(offer)).collect();
+    let Some(last) = apps.pop() else {
+        // Nothing to add makes the host read the file: one at a time.
+        return sync(api, caskade, offers).await;
+    };
+    file["apps"] = serde_json::to_value(&apps)?;
+    crate::util::write_atomically(list, serde_json::to_vec_pretty(&file)?)?;
+    api.add_app(&last).await?;
+    Ok(published)
+}
+
 /// Removes every one of Caskade's apps, and only those.
 pub async fn withdraw(api: &HostApi, caskade: &Caskade) -> Result<usize> {
     Ok(sync(api, caskade, &[]).await?.removed)
@@ -219,6 +300,11 @@ pub trait Target: Send + Sync {
     /// Whether the host answers now.
     fn ready(&self) -> bool;
     async fn api(&self) -> Result<HostApi>;
+    /// The app list file Caskade may write whole ([`sync_whole`]): its own
+    /// Linux host's. `None`: apps go one at a time through the API.
+    async fn app_list(&self) -> Option<PathBuf> {
+        None
+    }
     /// Drops the client `api` keeps, after a call through it failed: the
     /// host may have new credentials or a new certificate.
     fn forget_api(&self) {}
@@ -234,6 +320,10 @@ impl Target for StreamingHost {
 
     async fn api(&self) -> Result<HostApi> {
         StreamingHost::api(self).await
+    }
+
+    async fn app_list(&self) -> Option<PathBuf> {
+        self.own_app_list().await
     }
 
     fn forget_api(&self) {
@@ -382,9 +472,12 @@ impl Publisher {
         }
         let offers = self.offers().await?;
         let api = self.inner.target.api().await?;
-        let published = sync(&api, &self.caskade().await, &offers)
-            .await
-            .inspect_err(|_| self.inner.target.forget_api())?;
+        let caskade = self.caskade().await;
+        let published = match self.inner.target.app_list().await {
+            Some(list) => sync_whole(&api, &list, &caskade, &offers).await,
+            None => sync(&api, &caskade, &offers).await,
+        }
+        .inspect_err(|_| self.inner.target.forget_api())?;
         *caskade_core::lock(&self.inner.batches) += 1;
         if published != Published::default() {
             tracing::info!(

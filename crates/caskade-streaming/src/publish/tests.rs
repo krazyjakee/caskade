@@ -17,6 +17,8 @@ use wiremock::{Mock, MockServer, matchers::path_regex};
 struct Fake {
     api: HostApi,
     ready: AtomicBool,
+    /// The app list file Caskade may write whole: its own host's.
+    list: Option<PathBuf>,
 }
 
 #[async_trait::async_trait]
@@ -26,6 +28,9 @@ impl Target for Fake {
     }
     async fn api(&self) -> Result<HostApi> {
         Ok(self.api.clone())
+    }
+    async fn app_list(&self) -> Option<PathBuf> {
+        self.list.clone()
     }
     async fn flatpak(&self) -> bool {
         false
@@ -44,6 +49,21 @@ struct Fixture {
 
 const PROGRAM: &str = "/opt/caskade/caskade";
 
+/// A client for `server`'s API, behind TLS.
+async fn client(server: &MockServer) -> HostApi {
+    let served = cert();
+    let front = tls_front(*server.address(), &served).await;
+    HostApi::new(
+        format!("https://{front}/").parse().unwrap(),
+        Credentials {
+            user: "u".into(),
+            password: "p".into(),
+        },
+        served.der.clone(),
+    )
+    .unwrap()
+}
+
 async fn fixture() -> Fixture {
     let temp = tempfile::tempdir().unwrap();
     let store = LibraryStore::in_memory().await.unwrap();
@@ -56,20 +76,10 @@ async fn fixture() -> Fixture {
         .respond_with(apps.clone())
         .mount(&server)
         .await;
-    let served = cert();
-    let front = tls_front(*server.address(), &served).await;
-    let api = HostApi::new(
-        format!("https://{front}/").parse().unwrap(),
-        Credentials {
-            user: "u".into(),
-            password: "p".into(),
-        },
-        served.der.clone(),
-    )
-    .unwrap();
     let target = Arc::new(Fake {
-        api,
+        api: client(&server).await,
         ready: AtomicBool::new(true),
+        list: None,
     });
     let publisher = Publisher::new(
         store.clone(),
@@ -303,6 +313,143 @@ async fn a_cover_goes_to_the_host_as_a_png() {
         image::ImageFormat::Png
     );
     assert_eq!((png.width(), png.height()), (600, 800));
+}
+
+/// Sunshine's saves as it makes them: an added app goes at the end of the
+/// list file, which is sorted by name and written again (and every app's
+/// cover read again, which is what makes a save slow).
+#[derive(Clone)]
+struct SavingHost {
+    list: PathBuf,
+    saves: Arc<std::sync::atomic::AtomicUsize>,
+}
+
+impl wiremock::Respond for SavingHost {
+    fn respond(&self, request: &wiremock::Request) -> wiremock::ResponseTemplate {
+        let mut file: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(&self.list).unwrap()).unwrap();
+        if request.method.as_str() != "POST" {
+            return wiremock::ResponseTemplate::new(405);
+        }
+        let mut app: serde_json::Value = serde_json::from_slice(&request.body).unwrap();
+        app.as_object_mut().unwrap().remove("index");
+        let apps = file["apps"].as_array_mut().unwrap();
+        apps.push(app);
+        apps.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
+        std::fs::write(&self.list, serde_json::to_vec(&file).unwrap()).unwrap();
+        self.saves.fetch_add(1, Ordering::SeqCst);
+        wiremock::ResponseTemplate::new(200).set_body_json(serde_json::json!({ "status": true }))
+    }
+}
+
+/// Caskade's own host gets a batch in one save, however many games it
+/// holds (#145), and none when nothing changed; its list is Caskade's, so
+/// an earlier build's apps and a second copy go.
+#[tokio::test]
+async fn its_own_host_gets_a_batch_in_one_save() {
+    let temp = tempfile::tempdir().unwrap();
+    let store = LibraryStore::in_memory().await.unwrap();
+    let list = temp.path().join("apps.json");
+    let earlier = Caskade {
+        program: "/usr/bin/caskade".into(),
+        flatpak_host: false,
+    };
+    let this = Caskade {
+        program: PROGRAM.into(),
+        flatpak_host: false,
+    };
+    let (hades, _) = installed(&store, "Hades").await;
+    let stale = Offer::Game {
+        title: "Hades".into(),
+        game_id: hades.id.clone(),
+        image: None,
+    };
+    let start = serde_json::json!({
+        "env": { "PATH": "$(PATH)" },
+        "apps": [earlier.app(&stale), this.app(&stale), this.app(&stale)],
+    });
+    std::fs::write(&list, serde_json::to_vec(&start).unwrap()).unwrap();
+    let host = SavingHost {
+        list: list.clone(),
+        saves: Arc::default(),
+    };
+    let server = MockServer::start().await;
+    Mock::given(path_regex("^/api/apps(/[0-9]+)?$"))
+        .respond_with(host.clone())
+        .mount(&server)
+        .await;
+    let target = Arc::new(Fake {
+        api: client(&server).await,
+        ready: AtomicBool::new(true),
+        list: Some(list.clone()),
+    });
+    for title in ["Celeste", "Balatro", "Tunic"] {
+        installed(&store, title).await;
+    }
+    let publisher = Publisher::new(
+        store.clone(),
+        target,
+        None,
+        None,
+        &AppPaths::under(temp.path()),
+    )
+    .unwrap()
+    .with(PROGRAM.into(), Duration::from_millis(10));
+    let listed = || -> Vec<(String, Option<String>)> {
+        let file: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(&list).unwrap()).unwrap();
+        file["apps"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|app| {
+                let app: App = serde_json::from_value(app.clone()).unwrap();
+                (app.name.clone(), app.cmd.clone())
+            })
+            .collect()
+    };
+
+    let published = publisher.publish().await.unwrap().unwrap();
+    assert_eq!(host.saves.load(Ordering::SeqCst), 1);
+    assert_eq!(
+        published,
+        Published {
+            added: 4,
+            removed: 2
+        }
+    );
+    let names: Vec<String> = listed().into_iter().map(|(name, _)| name).collect();
+    assert_eq!(names, ["Balatro", "Caskade", "Celeste", "Hades", "Tunic"]);
+    assert!(
+        listed().iter().all(|(_, cmd)| cmd
+            .as_deref()
+            .is_none_or(|cmd| cmd.starts_with(&format!("\"{PROGRAM}\"")))),
+        "{:?}",
+        listed()
+    );
+    let file: serde_json::Value = serde_json::from_slice(&std::fs::read(&list).unwrap()).unwrap();
+    assert_eq!(file["env"]["PATH"], "$(PATH)", "the rest of the file stays");
+
+    // Nothing changed: nothing is sent.
+    assert_eq!(
+        publisher.publish().await.unwrap(),
+        Some(Published::default())
+    );
+    assert_eq!(host.saves.load(Ordering::SeqCst), 1);
+
+    // A game more: one more save.
+    installed(&store, "Outer Wilds").await;
+    publisher.publish().await.unwrap();
+    assert_eq!(host.saves.load(Ordering::SeqCst), 2);
+    assert!(listed().iter().any(|(name, _)| name == "Outer Wilds"));
+    assert_eq!(listed().len(), 6);
+    let requests = server.received_requests().await.unwrap();
+    assert!(
+        requests
+            .iter()
+            .all(|request| request.method.as_str() == "POST"),
+        "only the saves reach the host"
+    );
 }
 
 /// An AppImage start's entries start the AppImage, not the mount it runs

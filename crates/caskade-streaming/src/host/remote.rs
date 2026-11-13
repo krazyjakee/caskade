@@ -54,6 +54,19 @@ impl StreamingHost {
         self.checked(self.api().await?.unpair_all().await)
     }
 
+    /// The app list file of Caskade's own Linux host, which the publisher
+    /// writes whole ([`crate::publish::sync_whole`]); `None` on Windows,
+    /// where it is in the administrator-only folder, and for a user's own
+    /// host, whose other apps aren't Caskade's.
+    pub(crate) async fn own_app_list(&self) -> Option<std::path::PathBuf> {
+        if self.inner.os == caskade_core::emulation::OperatingSystem::Windows
+            || self.existing_mode().await
+        {
+            return None;
+        }
+        self.running_files().ok().map(|files| files.apps())
+    }
+
     /// The running host's API (publishing games, pairing).
     /// Made once and kept until hosting changes or a call through it fails:
     /// making it reads the keychain and the certificate.

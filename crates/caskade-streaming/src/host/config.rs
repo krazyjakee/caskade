@@ -91,8 +91,10 @@ pub fn render(config: &HostConfig) -> String {
 /// Picture"): Caskade adds its own through the API.
 pub const EMPTY_APPS: &str = "{\n  \"env\": {},\n  \"apps\": []\n}\n";
 
-/// Writes `sunshine.conf`, and the app list when there is none yet: once
-/// Sunshine runs, the list is its own and changes only through the API.
+/// Writes `sunshine.conf`, and the app list when there is none yet. Once
+/// Sunshine runs, the list changes through the API, or on Linux by the
+/// publisher writing it whole and making one save through the API
+/// (`publish::sync_whole`).
 pub fn write(files: &HostFiles, config: &HostConfig) -> Result<()> {
     std::fs::create_dir_all(&files.dir)?;
     write_atomically(&files.conf(), render(config).as_bytes())?;
