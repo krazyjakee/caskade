@@ -66,7 +66,7 @@ If moving to a custom domain, update the canonical and alternate URL base in
 
 The captures came from the retired webview app's fixture preview, through a
 Playwright script removed with it (#143). Until a native capture script
-exists, take new ones from the native app on a private desktop with fixtures:
+exists (#150), take new ones from the native app on a private desktop with fixtures:
 
 ```sh
 cargo build -p caskade-native

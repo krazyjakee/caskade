@@ -81,7 +81,7 @@ What it does is in the [product spec](PRODUCT-SPEC.md). Public contracts for ext
 
 ### 4.1 Processes and windows
 
-The installed `caskade` is the native app's executable (`caskade-native`, shipped under the name earlier releases' shortcuts, `caskade://` handler and launch caller point at). It handles the launch caller before any app runtime or event loop, through `caskade_player::launch_cli` (including the hidden WM_CLOSE window on Windows), and performs Windows administrator steps before starting the app. The Tauri shell that started it before #143, and its `--legacy` switch, are gone; profiles, settings, sign-ins and window state carried over unchanged.
+The installed `caskade` is the native app's executable (`caskade-native`, shipped under the name earlier releases' shortcuts, `caskade://` handler and launch caller point at). It handles the launch caller before any app runtime or event loop, through `caskade_player::launch_cli` (including the hidden WM_CLOSE window on Windows), and performs Windows administrator steps before starting the app. The Tauri shell that started it before #143, and its `--legacy` switch, are gone. Profiles, settings, sign-ins and the startup settings carry over unchanged; the one piece of shell-local state that doesn't is the window's place, which the native app keeps in `native-window.json` rather than the Tauri window-state plugin's file, so the first native start opens at its default size.
 
 Entry points:
 
