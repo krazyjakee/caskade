@@ -2,7 +2,7 @@
 # Regenerates vendor/blitz/crates: Blitz, anyrender and Stylo at the revisions
 # in PINS with Caskade's patches (patches/<repo>/*.patch, in order), each crate
 # as a standalone package (normalize.py). The root workspace (caskade-native)
-# and apps/native-proto both build these through [patch] entries.
+# builds these through [patch] entries.
 #
 #   vendor/blitz/update.sh [work dir]
 #

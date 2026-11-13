@@ -118,8 +118,8 @@ overrides `BLITZ_PREFERS_REDUCED_MOTION`.
 
 ## Theme animations against WebKit
 
-`apps/native-proto/scripts/gallery.sh` renders
-[`assets/gallery.html`](../../apps/native-proto/assets/gallery.html) (every
+`apps/native-proto/scripts/gallery.sh` (deleted on 12 Nov 2026 with the
+prototype; in git history) rendered `assets/gallery.html` (every
 animation in `themes/` on the elements the theme styles) with the app's
 compiled CSS in Blitz and in WebKitGTK 2.52 (MiniBrowser), each on a private
 Xvfb, moves the pointer onto the card, and takes 24 screenshots 125 ms apart:
@@ -154,7 +154,9 @@ revision, and vello_hybrid does animate on a real GPU.
 | All theme animations in `themes/` run as they do in WebKit | **Met**, with the two differences above |
 
 To run on a vsynced display (monitors on; the window opens on top without
-taking the focus; about a minute each):
+taking the focus; about a minute each). Historical: these commands need
+`apps/native-proto` restored from git history (it was deleted on
+12 Nov 2026):
 
 ```sh
 cd apps/native-proto

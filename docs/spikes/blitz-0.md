@@ -18,8 +18,8 @@ monitors were off (DPMS) all session.
 
 ## What was built
 
-[`apps/native-proto`](../../apps/native-proto/README.md), a throwaway binary
-with its own Cargo workspace and lockfile:
+`apps/native-proto`, a throwaway binary with its own Cargo workspace and
+lockfile (deleted on 12 Nov 2026; it and its scripts are in git history):
 
 - Blitz `9f9c8e3` (0.3.0-beta.4, the spike's commit), anyrender `812644a`,
   Dioxus 0.8.0-alpha.3; Blitz's default renderer, `vello_hybrid`, unless noted.
@@ -158,6 +158,9 @@ still measured per-frame work on the real GPU:
 | macOS | no Mac | build there, then `display-suite.sh` |
 | Steam Deck in gamescope | no Deck | `gamescope -W 1280 -H 800 -r 60 -- apps/native-proto/scripts/display-suite.sh …` |
 
+Historical: these commands need `apps/native-proto` restored from git
+history (it was deleted on 12 Nov 2026).
+
 ```sh
 # a library copy as scripts/run.sh makes one; the prototype built into bin/
 apps/native-proto/scripts/display-suite.sh --bin bin --home ~/blitz0-home \
@@ -244,5 +247,5 @@ an issue for, not in the approach. Work goes on as follows:
    translations (#91), input and focus (#92, including click-to-focus) and
    the test strategy (#95).
 6. **Pins:** Blitz `9f9c8e3`, anyrender `812644a`, Dioxus 0.8.0-alpha.3 are
-   the measured baseline; move them only together, and rerun these
-   measurements (the scripts in `apps/native-proto`) on every bump.
+   the measured baseline; move them only together, and rerun the native
+   app's checks on every bump (`vendor/blitz/README.md`).

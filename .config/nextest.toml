@@ -14,7 +14,7 @@ slow-timeout = { period = "60s", terminate-after = 3 }
 
 # Only downloads from real external services retry. Local wiremock tests do not.
 [[profile.default.overrides]]
-filter = 'test(/^packages_delegate::/) | test(/^fetch_resolvers_live::/) | test(proton_first_download)'
+filter = 'test(/^packages_delegate::/) | test(/^fetch_resolvers_live::/)'
 test-group = 'network'
 retries = 2
 
@@ -34,8 +34,8 @@ store-failure-output = true
 filter = 'test(/^moving_transactions::cancellation_at_every_event/)'
 slow-timeout = { period = "120s", terminate-after = 5 }
 
-# Invoke with CASKADE_TEST_NATIVE=1 and --run-ignored all. The dedicated nightly
-# performance job runs the 3 GiB T10 case, rather than every native run.
+# Invoke with CASKADE_TEST_NATIVE=1 and --run-ignored all. The 3 GiB T10 case
+# runs by hand (crates/caskade-installer/docs/ci.md, Local-only runs).
 [profile.native]
 fail-fast = false
 test-threads = 1
@@ -53,7 +53,7 @@ filter = 'all()'
 test-group = 'native'
 
 [[profile.native.overrides]]
-filter = 'test(/^packages_delegate::/) | test(/^fetch_resolvers_live::/) | test(proton_first_download)'
+filter = 'test(/^packages_delegate::/) | test(/^fetch_resolvers_live::/)'
 retries = 2
 
 # Discovery profiles intentionally work with pinned nextest 0.9.114: custom

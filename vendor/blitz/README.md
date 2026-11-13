@@ -3,14 +3,12 @@
 `crates/` holds the Blitz, anyrender, Stylo and Taffy crates Caskade's native UI
 builds: the upstream revisions in [`PINS`](PINS) with the patch series in
 [`patches/`](patches/) applied, each crate rewritten as a standalone package.
-Both builds take them through `[patch]` entries for the four git sources:
+The root workspace's `caskade-native` takes them through `[patch]` entries
+for the four git sources (root `Cargo.toml`).
 
-- the root workspace's `caskade-native` (root `Cargo.toml`);
-- the prototype, `apps/native-proto` (its own `Cargo.toml`).
-
-`apps/native/Cargo.toml` and the prototype keep their upstream git
-dependencies at the same revisions; the patches redirect them here, so
-`Cargo.lock` only records these crates without a source.
+`apps/native/Cargo.toml` keeps its upstream git dependencies at the same
+revisions; the patches redirect them here, so `Cargo.lock` only records these
+crates without a source.
 
 Don't edit `crates/` by hand: it is generated. The root workspace excludes
 `vendor/`, so these crates are not workspace members and Caskade's clippy,
@@ -58,9 +56,8 @@ features that enable them. Run it twice and nothing changes.
    checkout). Export before running `update.sh` again: it resets the
    `caskade` branch to the exported series, and unexported commits are
    left only in the checkout's reflog.
-3. `vendor/blitz/update.sh <work dir>` and build both:
-   `cargo build -p caskade-native` and, in `apps/native-proto`,
-   `cargo build --profile proto`.
+3. `vendor/blitz/update.sh <work dir>` and build:
+   `cargo build -p caskade-native`.
 4. Commit `patches/`, `crates/` and any lockfile change together.
 
 ## Bumping a pin
@@ -71,9 +68,9 @@ dependency: bump it with Blitz's.
 
 1. In `PINS`, set the new revisions (and the crate lists, if the upstream
    crates changed).
-2. Bump the git `rev`s to match: `apps/native/Cargo.toml` and
-   `apps/native-proto/Cargo.toml` (Blitz's `dioxus-native`, `blitz-*`), and
-   Dioxus's crates.io versions there if Blitz's workspace moved them.
+2. Bump the git `rev`s to match in `apps/native/Cargo.toml` (Blitz's
+   `dioxus-native`, `blitz-*`), and Dioxus's crates.io versions there if
+   Blitz's workspace moved them.
 3. `vendor/blitz/update.sh <work dir>`. A patch that no longer applies stops
    it: rebase it in the checkout (`git am --abort`, fix, commit), then export
    the series again as above. Drop patches that landed upstream: go through
@@ -81,11 +78,12 @@ dependency: bump it with Blitz's.
    workarounds those rows name.
 4. If the set of crates the root lockfile takes from these repos changed,
    update the root `Cargo.toml`'s `[patch]` lists (one entry per crate the
-   lockfile names; the prototype's lists follow `PINS`).
-5. `cargo update -p dioxus-native` (root) and `cargo update` in
-   `apps/native-proto` for the new revisions; check that the root lockfile
+   lockfile names).
+5. `cargo update -p dioxus-native` for the new revisions; check that the root lockfile
    moved only these crates and their new dependencies: iroh's crates keep
    their versions (never `cargo update` them), and no `aws-lc-*` package
    appears (`grep aws-lc Cargo.lock`; nothing checks this automatically).
-6. Rerun BLITZ-0's and BLITZ-3's measurements (`apps/native-proto/scripts`,
-   `docs/spikes/blitz-0.md` and `blitz-3.md`) and note what moved.
+6. Run the native app's checks (`just test-native`, `just test-native-window`)
+   and the idle bench (`scripts/idle-bench`), and note what moved. The
+   BLITZ-0 prototype whose scripts `docs/spikes/blitz-0.md` and `blitz-3.md`
+   cite (`apps/native-proto`) is in git history.

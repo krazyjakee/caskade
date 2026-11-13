@@ -1,4 +1,4 @@
-# `cargo audit` (app.yml's Rust dependency advisories, #157). Each ignored
+# `cargo audit` (the ci.yml Rust job's dependency advisories, #157). Each ignored
 # advisory says why it can't reach Caskade and when to look again.
 [advisories]
 ignore = [
