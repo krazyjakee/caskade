@@ -1,9 +1,7 @@
 //! Testing a script from the settings, and the order a game's scripts run
 //! in (#180). A test runs through the same [`ScriptRunner`] as a launch,
 //! with a context marked as a test (`CASKADE_TEST=1`).
-use super::{
-    ContextValue, LifecycleScript, ScriptContext, ScriptPhase, ScriptRun, ScriptRunner, ScriptScope,
-};
+use super::{ContextValue, LifecycleScript, ScriptContext, ScriptPhase, ScriptRun, ScriptRunner};
 use crate::{
     db::LibraryStore,
     model::{InstallLocation, built_in_action_id},
@@ -143,23 +141,7 @@ pub async fn effective_order(
     game_id: Option<&str>,
     profile_id: Option<&str>,
 ) -> crate::Result<Vec<ScriptStep>> {
-    let scope = |scope: ScriptScope| async move { store.lifecycle_scripts(&scope).await };
-    let set = super::ScriptSet {
-        global: scope(ScriptScope::Global).await?,
-        profile: match profile_id {
-            Some(id) => {
-                scope(ScriptScope::Profile {
-                    profile_id: id.into(),
-                })
-                .await?
-            }
-            None => vec![],
-        },
-        game: match game_id {
-            Some(id) => scope(ScriptScope::Game { game_id: id.into() }).await?,
-            None => vec![],
-        },
-    };
+    let set = store.scripts_for_launch(game_id, profile_id).await?;
     Ok([
         ScriptPhase::BeforeLaunch,
         ScriptPhase::AfterStart,
@@ -182,7 +164,7 @@ mod tests {
     use super::*;
     use crate::{
         model::{Game, GameEntry, LaunchSpec, SourceId},
-        scripts::{ScriptCommand, ScriptStatus, Shell},
+        scripts::{ScriptCommand, ScriptScope, ScriptStatus, Shell},
     };
     use caskade_discovery::InstallState;
 

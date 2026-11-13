@@ -57,15 +57,6 @@ pub async fn resolve(
     root: Option<StorageRoot>,
     aliases: Option<AliasStore>,
     plugins: Arc<dyn PluginRunner>,
-) -> Result<PreparedLaunch> {
-    resolve_with_runners(entry, root, aliases, plugins, RunnerPaths::default()).await
-}
-
-pub async fn resolve_with_runners(
-    entry: &GameEntry,
-    root: Option<StorageRoot>,
-    aliases: Option<AliasStore>,
-    plugins: Arc<dyn PluginRunner>,
     runners: RunnerPaths,
 ) -> Result<PreparedLaunch> {
     if !matches!(entry.state, InstallState::Installed) {
@@ -268,7 +259,7 @@ fn windows_command(
         .ok_or_else(|| LaunchError::Invalid(crate::tr!("Windows game has no install directory")))?;
     let prefix = prefix
         .map(|p| p.path.clone())
-        .unwrap_or_else(|| PathBuf::from(".caskade/prefix"));
+        .unwrap_or_else(|| PathBuf::from(crate::install::MANAGED_PREFIX));
     let prefix = if managed {
         relative(&prefix)?;
         confined_prefix(real, &prefix)?

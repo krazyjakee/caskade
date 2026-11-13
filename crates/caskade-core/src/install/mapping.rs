@@ -15,7 +15,7 @@ pub const STORAGE_SOURCE: SourceId = SourceId::new("caskade-storage");
 /// The library source of installs handed to another launcher or emulator.
 pub const HANDOFF_SOURCE: SourceId = SourceId::new("caskade-handoff");
 /// The prefix of a managed Windows game, relative to its install folder.
-pub const MANAGED_PREFIX: &str = ".caskade/prefix";
+pub use caskade_installer::runtime::proton::PREFIX as MANAGED_PREFIX;
 
 /// The library game and entry for a managed install. The entry is keyed on
 /// the install's stable `caskade-install` id, so moves and renames keep it.

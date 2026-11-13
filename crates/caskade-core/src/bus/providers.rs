@@ -15,16 +15,8 @@ pub const PLUGIN_SOURCE_PREFIX: &str = "plugin:";
 #[async_trait]
 pub trait LibrarySource: Send + Sync {
     fn id(&self) -> &str;
-    /// The games for a library update to import, or none for a source that
-    /// [imports itself](Self::imports_itself).
+    /// The games for a library update to import.
     async fn scan(&self) -> Result<Vec<DetectedGame>, String>;
-    /// `true` for a source that imports its own games during `scan` and
-    /// returns none, because it reconciles entries the library import
-    /// doesn't know about. The ROM scanners do (#135): ROM files, disc sets
-    /// and emulator launches. Such sources run after every library update.
-    fn imports_itself(&self) -> bool {
-        false
-    }
 }
 
 /// What an install handler is asked about (#55): the input and the

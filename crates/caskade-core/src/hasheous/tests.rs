@@ -61,7 +61,7 @@ fn zip_of(entries: &[(&str, String)]) -> Vec<u8> {
 }
 
 fn md5_hex(bytes: &[u8]) -> String {
-    hex(&md5::Md5::digest(bytes))
+    format!("{:x}", md5::Md5::digest(bytes))
 }
 
 /// Serves `zip` as the only dump, listed with `md5` (its own by default).

@@ -5,7 +5,7 @@
 //! The Windows dump alone has ~600k ROMs, so rows are kept small: dumps are
 //! integer ids and hashes are binary.
 
-use super::{DumpGame, DumpRom, LocalDump, MetadataId, RomHashes, RomMatch, hex};
+use super::{DumpGame, DumpRom, LocalDump, MetadataId, RomHashes, RomMatch};
 use crate::{Error, Result};
 use serde_json::Value;
 use sqlx::{AssertSqlSafe, QueryBuilder, Sqlite, SqlitePool};
@@ -158,7 +158,7 @@ impl Index {
             Ok::<_, Error>((tx, id, games))
         };
         let (parsed, inserted) = tokio::join!(parse, insert);
-        parsed.map_err(|error| Error::Io(std::io::Error::other(error)))??;
+        parsed??;
         let (mut tx, id, games) = inserted?;
         sqlx::query("UPDATE dumps SET md5=?, size=?, modified=?, games=? WHERE id=?")
             .bind(md5.to_ascii_lowercase())
@@ -419,6 +419,10 @@ fn text(value: Option<&Value>) -> Option<String> {
         Value::Number(number) => Some(number.to_string()),
         _ => None,
     }
+}
+
+fn hex(bytes: &[u8]) -> String {
+    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
 /// `len` bytes written as hex digits, in either case.

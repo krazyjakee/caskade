@@ -170,6 +170,27 @@ impl Catalog {
         self.emulators.get(id).map(|sourced| &sourced.item)
     }
 
+    /// The definition and definition profile a built-in profile named
+    /// `profile` of the emulator `definition` is based on, or what's missing.
+    pub fn built_in(
+        &self,
+        definition: Option<&str>,
+        profile: &str,
+    ) -> Result<(&EmulatorDefinition, &DefinitionProfile), String> {
+        let definition = definition
+            .ok_or_else(|| crate::tr!("a built-in profile needs an emulator definition"))?;
+        let definition = self
+            .emulator(definition)
+            .ok_or_else(|| crate::tr!("Caskade doesn't know this emulator."))?;
+        let base = definition.profile(profile).ok_or_else(|| {
+            crate::tr!(
+                "{emulator} no longer has this profile.",
+                emulator = definition.name
+            )
+        })?;
+        Ok((definition, base))
+    }
+
     pub fn emulators(&self) -> impl Iterator<Item = &EmulatorDefinition> {
         self.emulators.values().map(|sourced| &sourced.item)
     }

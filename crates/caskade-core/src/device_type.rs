@@ -27,37 +27,12 @@ use crate::settings::SettingsService;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
-pub enum DeviceType {
+pub enum DeviceKind {
     #[default]
     Desktop,
     Laptop,
     Handheld,
     Tv,
-}
-
-#[cfg(feature = "net")]
-impl From<DeviceType> for crate::devices::DeviceKind {
-    fn from(kind: DeviceType) -> Self {
-        match kind {
-            DeviceType::Desktop => Self::Desktop,
-            DeviceType::Laptop => Self::Laptop,
-            DeviceType::Handheld => Self::Handheld,
-            DeviceType::Tv => Self::Tv,
-        }
-    }
-}
-
-#[cfg(feature = "net")]
-impl From<crate::devices::DeviceKind> for DeviceType {
-    fn from(kind: crate::devices::DeviceKind) -> Self {
-        use crate::devices::DeviceKind;
-        match kind {
-            DeviceKind::Desktop => Self::Desktop,
-            DeviceKind::Laptop => Self::Laptop,
-            DeviceKind::Handheld => Self::Handheld,
-            DeviceKind::Tv => Self::Tv,
-        }
-    }
 }
 
 /// Product names of handheld PCs, as their DMI reports them.
@@ -97,20 +72,20 @@ const WINDOWS_NAMES: &[&str] = &["SystemProductName", "SystemFamily"];
 const WINDOWS_BATTERIES: &str = r"SYSTEM\CurrentControlSet\Enum\ACPI\PNP0C0A";
 
 /// This device, detected once per run.
-pub fn detected() -> DeviceType {
-    static DETECTED: std::sync::OnceLock<DeviceType> = std::sync::OnceLock::new();
+pub fn detected() -> DeviceKind {
+    static DETECTED: std::sync::OnceLock<DeviceKind> = std::sync::OnceLock::new();
     *DETECTED.get_or_init(detect)
 }
 
 /// This device, as far as it can be told.
 #[cfg(windows)]
-pub fn detect() -> DeviceType {
+pub fn detect() -> DeviceKind {
     detect_windows(&caskade_discovery::registry::NativeRegistry::default())
 }
 
 /// This device, as far as it can be told.
 #[cfg(not(windows))]
-pub fn detect() -> DeviceType {
+pub fn detect() -> DeviceKind {
     detect_in(
         Path::new("/"),
         in_gamescope(|name| std::env::var(name).ok()),
@@ -118,7 +93,7 @@ pub fn detect() -> DeviceType {
 }
 
 /// Detection against a filesystem rooted at `root` (tests use a folder).
-pub fn detect_in(root: &Path, gamescope: bool) -> DeviceType {
+pub fn detect_in(root: &Path, gamescope: bool) -> DeviceKind {
     let read = |path: &str| {
         std::fs::read_to_string(root.join(path))
             .map(|text| text.trim().to_ascii_lowercase())
@@ -130,7 +105,7 @@ pub fn detect_in(root: &Path, gamescope: bool) -> DeviceType {
         read("sys/class/dmi/id/board_name"),
     ];
     if names.iter().any(|name| names_a_handheld(name)) {
-        return DeviceType::Handheld;
+        return DeviceKind::Handheld;
     }
     let battery = std::fs::read_dir(root.join("sys/class/power_supply")).is_ok_and(|entries| {
         entries
@@ -139,31 +114,31 @@ pub fn detect_in(root: &Path, gamescope: bool) -> DeviceType {
     });
     if gamescope {
         return if battery {
-            DeviceType::Handheld
+            DeviceKind::Handheld
         } else {
-            DeviceType::Tv
+            DeviceKind::Tv
         };
     }
     match read("sys/class/dmi/id/chassis_type").parse::<u32>() {
-        Ok(TABLET_CHASSIS) if battery => DeviceType::Handheld,
-        Ok(chassis) if LAPTOP_CHASSIS.contains(&chassis) => DeviceType::Laptop,
-        _ => DeviceType::Desktop,
+        Ok(TABLET_CHASSIS) if battery => DeviceKind::Handheld,
+        Ok(chassis) if LAPTOP_CHASSIS.contains(&chassis) => DeviceKind::Laptop,
+        _ => DeviceKind::Desktop,
     }
 }
 
 /// Detection against a Windows registry (tests use one in memory). Windows
 /// has no gamescope, and a battery alone makes a laptop: a Windows tablet
 /// keeps the desktop shell until the user says otherwise.
-pub fn detect_windows(registry: &dyn Registry) -> DeviceType {
+pub fn detect_windows(registry: &dyn Registry) -> DeviceKind {
     if windows_names(registry)
         .iter()
         .any(|name| names_a_handheld(name))
     {
-        DeviceType::Handheld
+        DeviceKind::Handheld
     } else if windows_battery(registry) {
-        DeviceType::Laptop
+        DeviceKind::Laptop
     } else {
-        DeviceType::Desktop
+        DeviceKind::Desktop
     }
 }
 
@@ -212,15 +187,15 @@ pub fn in_gamescope(var: impl Fn(&str) -> Option<String>) -> bool {
 }
 
 /// The fields a kind of device starts with, by section.
-pub fn first_defaults(kind: DeviceType) -> Vec<(&'static str, Value)> {
+pub fn first_defaults(kind: DeviceKind) -> Vec<(&'static str, Value)> {
     match kind {
-        DeviceType::Desktop | DeviceType::Laptop => Vec::new(),
-        DeviceType::Handheld => vec![
+        DeviceKind::Desktop | DeviceKind::Laptop => Vec::new(),
+        DeviceKind::Handheld => vec![
             ("core.console", json!({ "active": true })),
             ("core.emulation", json!({ "desktopFullscreen": true })),
             ("core.appearance", json!({ "uiScale": 115 })),
         ],
-        DeviceType::Tv => vec![
+        DeviceKind::Tv => vec![
             ("core.console", json!({ "active": true })),
             ("core.emulation", json!({ "desktopFullscreen": true })),
             ("core.appearance", json!({ "uiScale": 125 })),
@@ -236,7 +211,7 @@ fn invalid(error: impl std::fmt::Display) -> crate::Error {
 /// Returns the sections written.
 pub async fn apply_first_defaults(
     settings: &SettingsService,
-    kind: DeviceType,
+    kind: DeviceKind,
 ) -> Result<Vec<&'static str>> {
     let mut written = Vec::new();
     for (namespace, fields) in first_defaults(kind) {
@@ -264,7 +239,7 @@ pub async fn apply_first_defaults(
 pub async fn settle_new_device(
     settings: &SettingsService,
     store: &crate::db::LibraryStore,
-    kind: DeviceType,
+    kind: DeviceKind,
 ) -> Result<Vec<&'static str>> {
     let setup = settings.get("core.onboarding").await.map_err(invalid)?;
     if setup.revision > 0 {
@@ -305,12 +280,12 @@ mod tests {
     #[test]
     fn handhelds_laptops_tvs_and_desktops_are_told_apart() {
         let deck = machine(&[("sys/class/dmi/id/product_name", "Jupiter\n")], true);
-        assert_eq!(detect_in(deck.path(), false), DeviceType::Handheld);
+        assert_eq!(detect_in(deck.path(), false), DeviceKind::Handheld);
         let ally = machine(
             &[("sys/class/dmi/id/product_name", "ROG Ally RC71L_RC71L")],
             true,
         );
-        assert_eq!(detect_in(ally.path(), false), DeviceType::Handheld);
+        assert_eq!(detect_in(ally.path(), false), DeviceKind::Handheld);
         let laptop = machine(
             &[
                 ("sys/class/dmi/id/product_name", "ThinkPad X1"),
@@ -318,20 +293,20 @@ mod tests {
             ],
             true,
         );
-        assert_eq!(detect_in(laptop.path(), false), DeviceType::Laptop);
+        assert_eq!(detect_in(laptop.path(), false), DeviceKind::Laptop);
         let desktop = machine(&[("sys/class/dmi/id/chassis_type", "3")], false);
-        assert_eq!(detect_in(desktop.path(), false), DeviceType::Desktop);
+        assert_eq!(detect_in(desktop.path(), false), DeviceKind::Desktop);
         // gamescope: a handheld with a battery, a TV box without.
-        assert_eq!(detect_in(desktop.path(), true), DeviceType::Tv);
+        assert_eq!(detect_in(desktop.path(), true), DeviceKind::Tv);
         let unknown_handheld = machine(&[], true);
         assert_eq!(
             detect_in(unknown_handheld.path(), true),
-            DeviceType::Handheld
+            DeviceKind::Handheld
         );
         // Nothing readable at all: a desktop.
         assert_eq!(
             detect_in(Path::new("/nonexistent-root"), false),
-            DeviceType::Desktop
+            DeviceKind::Desktop
         );
         assert!(in_gamescope(
             |name| (name == "SteamGamepadUI").then(|| "1".into())

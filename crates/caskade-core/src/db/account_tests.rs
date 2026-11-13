@@ -166,7 +166,7 @@ async fn each_account_sees_only_its_own_collections() {
             .await
             .unwrap();
     assert_eq!(left, 0);
-    assert_eq!(store.collections(&first).await.unwrap().len(), 1);
+    assert_eq!(store.collection_summaries(&first).await.unwrap().len(), 1);
 }
 
 #[tokio::test]

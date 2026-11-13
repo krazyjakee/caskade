@@ -6,13 +6,7 @@ use crate::{
     model::PlaySession,
     scripts::{ScriptContext, ScriptPhase, ScriptReport, ScriptSet},
 };
-use std::{
-    collections::BTreeMap,
-    path::Path,
-    process::Stdio,
-    sync::{Arc, Mutex},
-    time::Duration,
-};
+use std::{path::Path, process::Stdio, time::Duration};
 use tokio_util::sync::CancellationToken;
 
 impl LaunchService {
@@ -117,44 +111,6 @@ impl LaunchService {
     pub(super) async fn report(&self, report: &ScriptReport) {
         if !report.runs.is_empty() {
             self.hooks.scripts(report).await;
-        }
-    }
-
-    /// While `game` runs its before-launch scripts, [`Self::cancel_start`]
-    /// stops them and the launch.
-    pub(super) fn starting(&self, game: &str) -> Starting {
-        let cancel = CancellationToken::new();
-        crate::lock(&self.starting).insert(game.into(), cancel.clone());
-        Starting {
-            game: game.into(),
-            starting: Arc::clone(&self.starting),
-            cancel,
-        }
-    }
-
-    /// Stops `game_id`'s launch while its before-launch scripts run; false
-    /// when it isn't at that point.
-    pub fn cancel_start(&self, game_id: &str) -> bool {
-        match crate::lock(&self.starting).get(game_id) {
-            Some(cancel) => {
-                cancel.cancel();
-                true
-            }
-            None => false,
-        }
-    }
-}
-
-/// A game running its before-launch scripts; dropping it ends that.
-pub(super) struct Starting {
-    game: String,
-    starting: Arc<Mutex<BTreeMap<String, CancellationToken>>>,
-    pub(super) cancel: CancellationToken,
-}
-impl Drop for Starting {
-    fn drop(&mut self) {
-        if let Ok(mut starting) = self.starting.lock() {
-            starting.remove(&self.game);
         }
     }
 }

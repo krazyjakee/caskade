@@ -20,34 +20,43 @@
 //! Pairing links live in memory: a restart invalidates links not used yet.
 
 mod addresses;
+mod endpoint;
 mod gate;
+mod pairing;
+mod types;
 pub use gate::ShareAdmission;
+pub use pairing::inspect_link;
+pub use types::{
+    DeviceLink, DeviceOs, DevicesStatus, IdentityStatus, NearbyDevice, PairedDevice, Pairing,
+    PairingLinkInfo, PairingLinkTarget, PairingState, ThisDevice,
+};
+
+pub use crate::device_type::DeviceKind;
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock, Weak};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::Duration;
 
 use async_trait::async_trait;
-use caskade_sync::pairing::{accept_link, pair_with_link};
-use caskade_sync::punch::OpenPort;
+use caskade_sync::pairing::accept_link;
 use caskade_sync::{
-    CodePairing, Config, DeviceInfo, EndpointAddr, EndpointId, Grant, Identity, KeyStore,
-    LINK_LIFETIME, Link, Loaded, Lost, Paired, PairingLink, Purpose, Session, Sessions,
-    SyncEndpoint, TransportAddr,
+    CodePairing, DeviceInfo, EndpointAddr, EndpointId, Grant, Identity, KeyStore, Link, Purpose,
+    Session, Sessions, SyncEndpoint,
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
-use tokio::sync::{oneshot, watch};
+use tokio::sync::watch;
 
 use crate::accounts::{AccountService, Permission};
 use crate::db::{LibraryStore, PairedDeviceRecord};
 use crate::settings::SettingsService;
 use crate::sync::policy::SyncSettings;
-use crate::{Error, Result};
+use crate::{Error, Result, now_ms};
 
+use endpoint::{Forwarder, addr_text, parse_addr};
 use gate::Gate;
+use pairing::ActivePairing;
 
 /// The OS keychain the device key lives in, and what a session is opened for.
 pub use caskade_sync::{Keychain, Purpose as ConnectionPurpose, Session as DeviceSession};
@@ -55,17 +64,9 @@ pub use caskade_sync::{Keychain, Purpose as ConnectionPurpose, Session as Device
 /// ([`Devices::with_reach`]).
 pub use caskade_sync::{MemoryKeyStore, Reach};
 
-/// The settings section holding Never use relays and the listening port
-/// (shared with #227's category choices).
-pub const NAMESPACE: &str = "core.sync";
-
 /// This device's last endpoint id, name and kind, in the settings table (not
 /// a section: the user edits them through [`Devices`]).
 pub const DEVICE_KEY: &str = "sync.device";
-
-/// How long a pairing link's address waits for a relay before it's minted
-/// with local addresses only.
-const LINK_ADDR_WAIT: Duration = Duration::from_secs(2);
 
 /// How often forgotten devices not told yet are tried again.
 const FORGET_RETRY: Duration = Duration::from_secs(5 * 60);
@@ -73,171 +74,6 @@ const FORGET_RETRY: Duration = Duration::from_secs(5 * 60);
 /// last exchange: library sync reaches each one every minute, so three
 /// minutes without a failure means it's still in reach.
 const LAST_LINK_FOR_MS: i64 = 3 * 60 * 1000;
-/// How often an endpoint that won't bind is tried again, and how long apart.
-const BIND_TRIES: u32 = 20;
-const BIND_RETRY: Duration = Duration::from_millis(250);
-
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub enum DeviceKind {
-    #[default]
-    Desktop,
-    Laptop,
-    Handheld,
-    Tv,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub enum DeviceOs {
-    Linux,
-    Windows,
-    Mac,
-}
-
-/// How a device is reached right now.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub enum DeviceLink {
-    Lan,
-    Direct,
-    Relay,
-    Offline,
-}
-
-/// Where this device's identity stands.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub enum IdentityStatus {
-    /// Being read from the keychain.
-    Starting,
-    Ready,
-    /// The keychain lost this device's key. A new identity needs asking:
-    /// paired devices must pair again.
-    Missing,
-    /// The keychain entry isn't a key; the same choice as `missing`.
-    Unreadable,
-    /// The keychain didn't answer; sync waits.
-    KeychainUnavailable,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct ThisDevice {
-    /// Its endpoint id, once the identity is ready.
-    pub id: Option<String>,
-    pub name: String,
-    pub kind: DeviceKind,
-    pub os: DeviceOs,
-    /// Addresses on this network other devices reach it at.
-    pub lan_addresses: Vec<String>,
-    /// Whether the internet can be reached (a relay answers); `None` when
-    /// it can't be told (Never use relays is on, or the endpoint isn't up).
-    /// Devices on this network sync without it.
-    pub internet: Option<bool>,
-    pub never_relay: bool,
-    pub port: Option<u16>,
-    pub identity: IdentityStatus,
-    /// The endpoint is running: other devices can reach this one.
-    pub listening: bool,
-}
-
-/// A device paired with this one. Its grants stay in the core.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct PairedDevice {
-    pub id: String,
-    pub name: String,
-    pub kind: DeviceKind,
-    pub os: DeviceOs,
-    pub link: DeviceLink,
-    /// Where it was last reached.
-    pub addresses: Vec<String>,
-    pub last_sync_ms: Option<i64>,
-    pub paired_at_ms: i64,
-    /// Library sync with it is running now.
-    pub syncing: bool,
-    /// Why the last sync failed, if it did.
-    pub sync_error: Option<String>,
-}
-
-/// A Caskade device on this network that isn't paired.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct NearbyDevice {
-    pub id: String,
-    pub name: String,
-    pub kind: DeviceKind,
-    pub os: DeviceOs,
-    pub addresses: Vec<String>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub enum PairingState {
-    /// Codes on screen, waiting for one or both users.
-    Waiting,
-    Paired,
-    /// Cancelled on either device; nothing was stored.
-    Cancelled,
-    /// The connection failed or timed out; nothing was stored.
-    Failed,
-}
-
-/// A code pairing: both devices show `code`, and both users confirm.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct Pairing {
-    pub device_id: String,
-    pub name: String,
-    pub kind: DeviceKind,
-    pub os: DeviceOs,
-    pub code: String,
-    /// The other device started it.
-    pub incoming: bool,
-    /// This device's user confirmed.
-    pub confirmed: bool,
-    pub state: PairingState,
-}
-
-/// A pairing link to show or copy. It works once, until `expires_at_ms`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct PairingLinkInfo {
-    pub url: String,
-    pub expires_at_ms: i64,
-}
-
-/// A pairing link opened from outside the app (a `caskade://pair` link),
-/// shown for an admin to accept. The link itself stays in the app.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct PairingLinkTarget {
-    /// The device it pairs with.
-    pub device_id: String,
-    pub expires_at_ms: i64,
-    pub expired: bool,
-}
-
-/// Reads a pairing link without using it.
-pub fn inspect_link(text: &str) -> Result<PairingLinkTarget> {
-    let link = PairingLink::parse(text).map_err(pairing_error)?;
-    Ok(PairingLinkTarget {
-        device_id: link.peer().to_string(),
-        expires_at_ms: millis(link.expires_at()),
-        expired: link.expired(SystemTime::now()),
-    })
-}
-
-/// Everything Settings → Devices shows.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct DevicesStatus {
-    pub this_device: ThisDevice,
-    pub devices: Vec<PairedDevice>,
-    pub nearby: Vec<NearbyDevice>,
-    pub pairing: Option<Pairing>,
-}
 
 /// What `sync.device` holds.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -315,24 +151,6 @@ struct State {
     bound_with: Option<(bool, Option<u16>)>,
     /// The relays the endpoint was bound with.
     relays: Option<caskade_sync::Relays>,
-}
-
-struct ActivePairing {
-    peer: EndpointId,
-    info: DeviceInfo,
-    code: String,
-    incoming: bool,
-    confirmed: bool,
-    state: PairingState,
-    decide: Option<oneshot::Sender<bool>>,
-}
-
-struct Forwarder(tokio::task::JoinHandle<()>);
-
-impl Drop for Forwarder {
-    fn drop(&mut self) {
-        self.0.abort();
-    }
 }
 
 impl Devices {
@@ -435,7 +253,7 @@ impl Devices {
                     } => {
                         // Only the connection options rebind: category
                         // choices share the section.
-                        if changed.is_some_and(|changed| changed.namespace == NAMESPACE) {
+                        if changed.is_some_and(|changed| changed.namespace == SyncSettings::NAMESPACE) {
                             let settings = inner.settings().await;
                             let wanted = Some((settings.never_relay, settings.port));
                             if inner.lock().bound_with != wanted {
@@ -485,91 +303,6 @@ impl Devices {
         self.inner.save_record(&record).await?;
         self.inner.announce().await;
         Ok(())
-    }
-
-    /// Starts pairing with a nearby device: both show the code.
-    pub async fn pair_nearby(&self, device_id: &str) -> Result<Pairing> {
-        self.admin()?;
-        let peer = parse_id(device_id)?;
-        let endpoint = self.inner.endpoint()?;
-        if !self.inner.gate.reserve_pairing() {
-            return Err(Error::Invalid(crate::tr!("another pairing is in progress")));
-        }
-        let addrs = endpoint
-            .nearby()
-            .into_iter()
-            .find(|nearby| nearby.id == peer)
-            .map(|nearby| nearby.addrs)
-            .unwrap_or_default();
-        let addr = EndpointAddr::from_parts(peer, addrs.into_iter().map(TransportAddr::Ip));
-        let me = self.inner.me().await;
-        let begun = async {
-            let session = endpoint.connect(addr, Purpose::Pair, None).await?;
-            CodePairing::begin(session, &me).await
-        }
-        .await;
-        let pairing = match begun {
-            Ok(pairing) => pairing,
-            Err(error) => {
-                self.inner.gate.release_pairing();
-                return Err(pairing_error(error));
-            }
-        };
-        let decision = self.inner.show_pairing(&pairing, false);
-        let inner = self.inner.clone();
-        tokio::spawn(async move { inner.finish_pairing(pairing, decision).await });
-        self.inner
-            .pairing()
-            .ok_or_else(|| Error::Invalid(crate::tr!("pairing was cancelled")))
-    }
-
-    /// This user confirms the codes match.
-    pub async fn confirm_pairing(&self, device_id: &str) -> Result<()> {
-        self.admin()?;
-        self.inner.decide(device_id, true)
-    }
-
-    /// This user cancels the pairing, or dismisses a finished one.
-    pub async fn cancel_pairing(&self, device_id: &str) -> Result<()> {
-        self.admin()?;
-        self.inner.decide(device_id, false)
-    }
-
-    /// A link that pairs another device with this one from anywhere. It works
-    /// once, for ten minutes.
-    pub async fn pairing_link(&self) -> Result<PairingLinkInfo> {
-        self.admin()?;
-        let endpoint = self.inner.endpoint()?;
-        let grant = Grant::generate();
-        let expires = SystemTime::now() + LINK_LIFETIME;
-        self.inner.gate.offer_link(grant, expires);
-        let addr = endpoint.shareable_addr(LINK_ADDR_WAIT).await;
-        let link = PairingLink::new(addr, grant, expires);
-        Ok(PairingLinkInfo {
-            url: link.to_url(),
-            expires_at_ms: millis(expires),
-        })
-    }
-
-    /// Pairs with the device a pasted pairing link names.
-    pub async fn accept_pairing_link(&self, text: &str) -> Result<PairedDevice> {
-        self.admin()?;
-        let link = PairingLink::parse(text).map_err(pairing_error)?;
-        let endpoint = self.inner.endpoint()?;
-        if link.peer() == endpoint.id() {
-            return Err(Error::Invalid(crate::tr!(
-                "that pairing link is this device's own"
-            )));
-        }
-        let me = self.inner.me().await;
-        let paired = pair_with_link(&endpoint, &link, &me, Grant::generate())
-            .await
-            .map_err(pairing_error)?;
-        self.inner.store_paired(&paired).await?;
-        self.inner
-            .paired_device(&paired.peer.to_string())
-            .await
-            .ok_or_else(|| Error::Invalid(crate::tr!("pairing was cancelled")))
     }
 
     /// Forgets a paired device: it's refused from now on, and told when it
@@ -711,116 +444,16 @@ impl Devices {
             })
     }
 
-    /// This device's address for a link: every local address, plus the
-    /// relay once there is one, waiting at most `wait` (#246).
-    pub async fn link_addr(&self, wait: Duration) -> Result<EndpointAddr> {
-        Ok(self.inner.endpoint()?.shareable_addr(wait).await)
-    }
-
     /// Serves folders offered to other devices (#233). Set before the
     /// endpoint starts: its protocols are fixed when it binds.
     pub fn set_copy_provider(&self, provider: caskade_sync::copy::CopyProtocol) {
         let _ = self.inner.copy_provider.set(provider);
     }
 
-    /// An endpoint with this device's key and no relay transport, for
-    /// pulling game files (#233): none can pass through a relay.
-    pub async fn direct_dialer(&self) -> Result<caskade_sync::copy::DirectDialer> {
-        let key = self.inner.lock().key.clone();
-        let Some(key) = key else {
-            return Err(Error::Invalid(crate::tr!(
-                "this device has no identity to connect with"
-            )));
-        };
-        let mut dialer = self.inner.dialer.lock().await;
-        if let Some((id, dialer)) = dialer.as_ref()
-            && *id == key.id()
-        {
-            return Ok(dialer.clone());
-        }
-        let bound = caskade_sync::copy::DirectDialer::bind(Some(&key), self.inner.on_loopback())
-            .await
-            .map_err(|error| Error::Invalid(error.to_string()))?;
-        *dialer = Some((key.id(), bound.clone()));
-        Ok(bound)
-    }
-
-    /// [`Devices::direct_dialer`] for fetching from several providers at
-    /// once (shares, #249): this device's key, no relay transport, only the
-    /// direct addresses it's given.
-    pub async fn swarm_dialer(&self) -> Result<caskade_sync::swarm::SwarmDialer> {
-        let key = self.inner.lock().key.clone();
-        let Some(key) = key else {
-            return Err(Error::Invalid(crate::tr!(
-                "this device has no identity to connect with"
-            )));
-        };
-        let mut swarm = self.inner.swarm.lock().await;
-        if let Some((id, dialer)) = swarm.as_ref()
-            && *id == key.id()
-        {
-            return Ok(dialer.clone());
-        }
-        let bound = caskade_sync::swarm::SwarmDialer::bind(Some(&key), self.inner.on_loopback())
-            .await
-            .map_err(|error| Error::Invalid(error.to_string()))?;
-        *swarm = Some((key.id(), bound.clone()));
-        Ok(bound)
-    }
-
-    /// A port of its own for one transfer through two routers
-    /// (`caskade_sync::punch`), with a relay's word on its public address.
-    /// `None` with no relay to ask (Connect only directly), or none that
-    /// answers.
-    async fn open_port(&self) -> Option<(Identity, OpenPort)> {
-        let (key, relays) = {
-            let state = self.inner.lock();
-            (state.key.clone()?, state.relays.clone()?)
-        };
-        Some((key, caskade_sync::punch::open_port(&relays).await?))
-    }
-
-    /// [`Devices::direct_dialer`] on a port of its own, and the addresses to
-    /// tell the other device: for a device no plain dial reaches. Close it
-    /// after the transfer.
-    pub async fn punched_dialer(
-        &self,
-    ) -> Option<(caskade_sync::copy::DirectDialer, Vec<SocketAddr>)> {
-        let (key, open) = self.open_port().await?;
-        caskade_sync::copy::DirectDialer::bind_on(&key, &open)
-            .await
-            .ok()
-    }
-
-    /// [`Devices::swarm_dialer`] on a port of its own: see
-    /// [`Devices::punched_dialer`].
-    pub async fn punched_swarm(
-        &self,
-    ) -> Option<(caskade_sync::swarm::SwarmDialer, Vec<SocketAddr>)> {
-        let (key, open) = self.open_port().await?;
-        caskade_sync::swarm::SwarmDialer::bind_on(&key, &open)
-            .await
-            .ok()
-    }
-
-    /// What this device serves, on a port of its own for `peer`, who dials
-    /// from `theirs`. Close it after the transfer.
-    pub async fn file_server(
-        &self,
-        peer: EndpointId,
-        theirs: &[SocketAddr],
-    ) -> Option<caskade_sync::punch::FileServer> {
-        let blobs = self.inner.copy_provider.get()?.clone();
-        let (key, open) = self.open_port().await?;
-        caskade_sync::punch::FileServer::bind(&key, &open, blobs, peer, theirs)
-            .await
-            .ok()
-    }
-
     /// Records how sync with a device is going, for the status.
     pub fn set_sync_state(&self, device_id: &str, sync: DeviceSync) {
         let changed = {
-            let mut states = self.inner.sync.lock().unwrap_or_else(|e| e.into_inner());
+            let mut states = crate::lock(&self.inner.sync);
             states.insert(device_id.to_owned(), sync.clone()) != Some(sync)
         };
         if changed {
@@ -872,7 +505,7 @@ impl Devices {
 
 impl Inner {
     fn lock(&self) -> std::sync::MutexGuard<'_, State> {
-        self.state.lock().unwrap_or_else(|e| e.into_inner())
+        crate::lock(&self.state)
     }
 
     fn on_loopback(&self) -> bool {
@@ -884,7 +517,7 @@ impl Inner {
     }
 
     fn sync_states(&self) -> HashMap<String, DeviceSync> {
-        self.sync.lock().unwrap_or_else(|e| e.into_inner()).clone()
+        crate::lock(&self.sync).clone()
     }
 
     fn endpoint(&self) -> Result<SyncEndpoint> {
@@ -899,7 +532,7 @@ impl Inner {
             Ok(Some(value)) => serde_json::from_value(value).unwrap_or_default(),
             // Until the user names its kind, what it looks like (#244).
             _ => DeviceRecord {
-                kind: crate::device_type::detected().into(),
+                kind: crate::device_type::detected(),
                 ..DeviceRecord::default()
             },
         }
@@ -914,10 +547,7 @@ impl Inner {
     }
 
     async fn settings(&self) -> SyncSettings {
-        match self.settings.get() {
-            Some(settings) => settings.read_or_default(NAMESPACE).await,
-            None => SyncSettings::default(),
-        }
+        SyncSettings::read(self.settings.get()).await
     }
 
     /// This device as it introduces itself.
@@ -959,143 +589,6 @@ impl Inner {
             })
             .collect::<HashMap<EndpointId, Grant>>();
         self.gate.set_paired(admitted, forgotten);
-    }
-
-    async fn load_identity(self: &Arc<Self>) {
-        let record = self.record().await;
-        let known = record.id.as_deref().and_then(|id| id.parse().ok());
-        let status = match Identity::load(self.keys.clone(), known).await {
-            Loaded::Ready { identity, .. } => {
-                self.identity_ready(identity).await;
-                return;
-            }
-            Loaded::NeedsConfirmation {
-                reason: Lost::Missing,
-            } => IdentityStatus::Missing,
-            Loaded::NeedsConfirmation {
-                reason: Lost::Unreadable,
-            } => IdentityStatus::Unreadable,
-            Loaded::Unavailable => IdentityStatus::KeychainUnavailable,
-        };
-        tracing::warn!(?status, "sync waits for the device key");
-        self.lock().identity = status;
-        self.changed();
-    }
-
-    async fn identity_ready(self: &Arc<Self>, identity: Identity) {
-        let mut record = self.record().await;
-        let id = identity.id().to_string();
-        if record.id.as_deref() != Some(&id) {
-            record.id = Some(id);
-            if let Err(error) = self.save_record(&record).await {
-                tracing::warn!(%error, "this device's id not saved");
-            }
-        }
-        {
-            let mut state = self.lock();
-            state.identity = IdentityStatus::Ready;
-            state.key = Some(identity);
-        }
-        self.bind().await;
-    }
-
-    /// (Re)binds the endpoint with the current settings.
-    async fn bind(self: &Arc<Self>) {
-        let _binding = self.binding.lock().await;
-        let (old, key) = {
-            let mut state = self.lock();
-            state.forwarders.clear();
-            (state.endpoint.take(), state.key.clone())
-        };
-        if let Some(old) = old {
-            let _ = old.shutdown().await;
-        }
-        let Some(identity) = key else {
-            self.changed();
-            return;
-        };
-        let settings = self.settings().await;
-        self.lock().bound_with = Some((settings.never_relay, settings.port));
-        let reach = (self.reach)(Reach::network(settings.never_relay, settings.port));
-        self.loopback.store(
-            matches!(reach.ip, caskade_sync::Ip::Loopback { .. }),
-            Ordering::Relaxed,
-        );
-        self.lock().relays = Some(reach.relays.clone());
-        let config = Config {
-            identity: Some(identity),
-            reach,
-            device: self.me().await,
-            blobs: self.copy_provider.get().cloned(),
-            ..Config::default()
-        };
-        let handler = Arc::new(Handler(Arc::downgrade(self)));
-        // The endpoint just closed may hold a fixed port a moment longer.
-        let mut tries = 0;
-        let bound = loop {
-            let bound = SyncEndpoint::bind(config.clone(), self.gate.clone(), handler.clone());
-            match bound.await {
-                Err(_) if tries < BIND_TRIES => tries += 1,
-                bound => break bound,
-            }
-            tokio::time::sleep(BIND_RETRY).await;
-        };
-        match bound {
-            Ok(endpoint) => {
-                let forwarders = self.forward(&endpoint);
-                let mut state = self.lock();
-                state.endpoint = Some(endpoint);
-                state.forwarders = forwarders;
-            }
-            Err(error) => tracing::warn!(%error, "sync endpoint not started"),
-        }
-        self.changed();
-        let this = self.clone();
-        tokio::spawn(async move { this.tell_forgotten().await });
-    }
-
-    /// Link and nearby changes become revisions.
-    fn forward(self: &Arc<Self>, endpoint: &SyncEndpoint) -> Vec<Forwarder> {
-        let mut forwarders = Vec::new();
-        let mut links = endpoint.links().subscribe();
-        let weak = Arc::downgrade(self);
-        forwarders.push(Forwarder(tokio::spawn(async move {
-            while let Ok(_) | Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) =
-                links.recv().await
-            {
-                let Some(inner) = weak.upgrade() else { break };
-                inner.changed();
-            }
-        })));
-        // Relay connections coming and going: the internet came or went.
-        let mut relays = endpoint.internet_changes();
-        let weak = Arc::downgrade(self);
-        forwarders.push(Forwarder(tokio::spawn(async move {
-            while relays.next().await {
-                let Some(inner) = weak.upgrade() else { break };
-                inner.changed();
-            }
-        })));
-        if let Some(lan) = endpoint.lan() {
-            let mut nearby = lan.subscribe();
-            let weak = Arc::downgrade(self);
-            forwarders.push(Forwarder(tokio::spawn(async move {
-                loop {
-                    let found = match nearby.recv().await {
-                        Ok(caskade_sync::NearbyChanged::Found(found)) => Some(found.id),
-                        Ok(_) | Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => None,
-                        Err(_) => break,
-                    };
-                    let Some(inner) = weak.upgrade() else { break };
-                    if let Some(found) = found {
-                        let _ = inner.reachable.send(found.to_string());
-                    }
-                    inner.changed();
-                    inner.tell_forgotten().await;
-                }
-            })));
-        }
-        forwarders
     }
 
     async fn status(&self) -> DevicesStatus {
@@ -1181,100 +674,6 @@ impl Inner {
             .map(|device| view(device, endpoint.as_ref(), &self.sync_states()))
     }
 
-    fn pairing(&self) -> Option<Pairing> {
-        self.lock().pairing.as_ref().map(ActivePairing::view)
-    }
-
-    /// Puts a pairing's codes on screen; the receiver gets this user's
-    /// decision.
-    fn show_pairing(&self, pairing: &CodePairing, incoming: bool) -> oneshot::Receiver<bool> {
-        let (decide, decision) = oneshot::channel();
-        self.lock().pairing = Some(ActivePairing {
-            peer: pairing.peer(),
-            info: pairing.peer_info().clone(),
-            code: pairing.code().to_owned(),
-            incoming,
-            confirmed: false,
-            state: PairingState::Waiting,
-            decide: Some(decide),
-        });
-        self.changed();
-        decision
-    }
-
-    async fn finish_pairing(&self, pairing: CodePairing, decision: oneshot::Receiver<bool>) {
-        let peer = pairing.peer();
-        let result = pairing
-            .finish(async { decision.await.unwrap_or(false) }, Grant::generate())
-            .await;
-        let outcome = match result {
-            Ok(paired) => match self.store_paired(&paired).await {
-                Ok(()) => PairingState::Paired,
-                Err(error) => {
-                    tracing::warn!(%error, "pairing not stored");
-                    PairingState::Failed
-                }
-            },
-            Err(caskade_sync::Error::Cancelled) => PairingState::Cancelled,
-            Err(error) => {
-                tracing::info!(%error, "pairing ended");
-                PairingState::Failed
-            }
-        };
-        self.gate.release_pairing();
-        if let Some(active) = self.lock().pairing.as_mut().filter(|p| p.peer == peer) {
-            active.state = outcome;
-            active.decide = None;
-        }
-        self.changed();
-    }
-
-    fn decide(&self, device_id: &str, confirmed: bool) -> Result<()> {
-        let mut state = self.lock();
-        let Some(active) = state
-            .pairing
-            .as_mut()
-            .filter(|p| p.peer.to_string() == device_id)
-        else {
-            return Err(Error::Invalid(crate::tr!("no pairing with that device")));
-        };
-        match active.decide.take() {
-            Some(decide) => {
-                let _ = decide.send(confirmed);
-                active.confirmed = confirmed;
-                if !confirmed {
-                    active.state = PairingState::Cancelled;
-                }
-            }
-            // Finished: cancelling dismisses it.
-            None if !confirmed => state.pairing = None,
-            None => {}
-        }
-        drop(state);
-        self.changed();
-        Ok(())
-    }
-
-    async fn store_paired(&self, paired: &Paired) -> Result<()> {
-        let record = PairedDeviceRecord {
-            endpoint_id: paired.peer.to_string(),
-            name: paired.info.name.clone(),
-            kind: name_of(&DeviceKind::from(paired.info.kind)),
-            os: name_of(&DeviceOs::from(paired.info.os)),
-            addresses: paired.addr.addrs.iter().map(addr_text).collect(),
-            wol_macs: Vec::new(),
-            last_sync_ms: None,
-            grant_in: paired.grant_in.to_hex(),
-            grant_out: paired.grant_out.to_hex(),
-            paired_at_ms: now_ms(),
-            forgotten_at_ms: None,
-        };
-        self.store.save_paired_device(&record).await?;
-        self.gate.pair(paired.peer, paired.grant_in);
-        self.changed();
-        Ok(())
-    }
-
     /// Tells forgotten devices they were forgotten, when they can be reached;
     /// each is deleted once told (or once it refuses: it forgot this one too).
     async fn tell_forgotten(&self) {
@@ -1318,21 +717,6 @@ impl Inner {
         let _ = self.store.delete_paired_device(&peer.to_string()).await;
         let _ = self.store.sync_forget_copies(&peer.to_string()).await;
         self.changed();
-    }
-}
-
-impl ActivePairing {
-    fn view(&self) -> Pairing {
-        Pairing {
-            device_id: self.peer.to_string(),
-            name: self.info.name.clone(),
-            kind: self.info.kind.into(),
-            os: self.info.os.into(),
-            code: self.code.clone(),
-            incoming: self.incoming,
-            confirmed: self.confirmed,
-            state: self.state,
-        }
     }
 }
 
@@ -1459,41 +843,9 @@ fn link_of(
     }
 }
 
-/// The user-facing error for a pairing failure.
-fn pairing_error(error: caskade_sync::Error) -> Error {
-    use caskade_sync::Error as E;
-    Error::Invalid(match error {
-        E::NotALink => crate::tr!("that isn't a Caskade pairing link"),
-        E::LinkExpired => {
-            crate::tr!("this pairing link has expired; make a new one on the other device")
-        }
-        E::LinkRefused => crate::tr!(
-            "this pairing link was already used or has expired; make a new one on the other device"
-        ),
-        E::Refused => crate::tr!("the other device isn't accepting a pairing right now"),
-        E::Cancelled => crate::tr!("pairing was cancelled"),
-        _ => crate::tr!("couldn't reach the other device"),
-    })
-}
-
 fn parse_id(id: &str) -> Result<EndpointId> {
     id.parse()
         .map_err(|_| Error::Invalid(crate::tr!("that isn't a device id")))
-}
-
-fn addr_text(addr: &TransportAddr) -> String {
-    match addr {
-        TransportAddr::Ip(addr) => addr.to_string(),
-        TransportAddr::Relay(url) => url.to_string(),
-        _ => String::new(),
-    }
-}
-
-fn parse_addr(text: &str) -> Option<TransportAddr> {
-    if let Ok(addr) = text.parse::<SocketAddr>() {
-        return Some(TransportAddr::Ip(addr));
-    }
-    text.parse().ok().map(TransportAddr::Relay)
 }
 
 fn name_of<T: Serialize>(value: &T) -> String {
@@ -1513,60 +865,4 @@ fn host_name() -> String {
         .map(|name| caskade_sync::device::clean_name(&name))
         .filter(|name| !name.is_empty())
         .unwrap_or_else(|| "Caskade".to_owned())
-}
-
-fn millis(time: SystemTime) -> i64 {
-    time.duration_since(UNIX_EPOCH).map_or(0, |since| {
-        i64::try_from(since.as_millis()).unwrap_or(i64::MAX)
-    })
-}
-
-fn now_ms() -> i64 {
-    millis(SystemTime::now())
-}
-
-impl From<caskade_sync::DeviceKind> for DeviceKind {
-    fn from(kind: caskade_sync::DeviceKind) -> Self {
-        use caskade_sync::DeviceKind as K;
-        match kind {
-            K::Desktop => Self::Desktop,
-            K::Laptop => Self::Laptop,
-            K::Handheld => Self::Handheld,
-            K::Tv => Self::Tv,
-        }
-    }
-}
-
-impl From<DeviceKind> for caskade_sync::DeviceKind {
-    fn from(kind: DeviceKind) -> Self {
-        match kind {
-            DeviceKind::Desktop => Self::Desktop,
-            DeviceKind::Laptop => Self::Laptop,
-            DeviceKind::Handheld => Self::Handheld,
-            DeviceKind::Tv => Self::Tv,
-        }
-    }
-}
-
-impl From<caskade_sync::DeviceOs> for DeviceOs {
-    fn from(os: caskade_sync::DeviceOs) -> Self {
-        use caskade_sync::DeviceOs as O;
-        match os {
-            O::Linux => Self::Linux,
-            O::Windows => Self::Windows,
-            O::Mac => Self::Mac,
-        }
-    }
-}
-
-impl From<caskade_sync::Link> for DeviceLink {
-    fn from(link: caskade_sync::Link) -> Self {
-        use caskade_sync::Link as L;
-        match link {
-            L::Lan => Self::Lan,
-            L::Direct => Self::Direct,
-            L::Relay => Self::Relay,
-            L::Offline => Self::Offline,
-        }
-    }
 }

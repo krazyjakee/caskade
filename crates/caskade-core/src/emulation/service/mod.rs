@@ -15,7 +15,8 @@ pub use emulators::{
     ProfileDraft, ProfileView,
 };
 pub use games::{DiscView, GameEmulation, Readiness};
-pub use install::{Command, command, emulator_dir, host_os, installed, which};
+pub(crate) use install::flatpak_installations;
+pub use install::{Command, command, emulator_dir, host_os, installed};
 pub use platforms::{CompatibleProfile, EmulationOverview, PlatformView};
 
 use emulators::bios_entry;
@@ -31,9 +32,8 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::{
-    collections::BTreeMap,
     path::{Path, PathBuf},
-    sync::{Arc, Mutex},
+    sync::Arc,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
@@ -119,7 +119,7 @@ struct Inner {
     search_path: Option<Vec<PathBuf>>,
     /// The machine detection looks at.
     env: caskade_discovery::HostEnv,
-    jobs: Mutex<BTreeMap<String, detection::DetectState>>,
+    jobs: crate::emulation::job_table::JobTable<DetectJob, caskade_discovery::Cancel>,
     hashes: super::BiosHashes,
     scans: Arc<super::ScanShared>,
 }
@@ -142,7 +142,7 @@ impl EmulationService {
                 caskade_dir: None,
                 search_path: None,
                 env: caskade_discovery::HostEnv::live(),
-                jobs: Mutex::default(),
+                jobs: Default::default(),
                 hashes: super::BiosHashes::default(),
                 scans: Arc::default(),
             }),

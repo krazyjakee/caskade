@@ -6,10 +6,10 @@
 //! Downloads outside the installer (#277): an emulator, a Hasheous dump and
 //! the save manifest reach a Deck that can't reach the internet.
 
+use crate::cores::within;
 use std::io::Write;
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
 
 use caskade_core::accounts::AccountService;
 use caskade_core::bus::Bus;
@@ -92,18 +92,6 @@ impl Core {
 /// How long, in seconds, a wait here may take on a loaded machine (#37):
 /// pairing, syncing and installing all write to a disk that can stall.
 const LOADED: u64 = 300;
-
-async fn within<F, Fut>(what: &str, seconds: u64, check: F)
-where
-    F: Fn() -> Fut,
-    Fut: std::future::Future<Output = bool>,
-{
-    let deadline = Instant::now() + Duration::from_secs(seconds);
-    while !check().await {
-        assert!(Instant::now() < deadline, "{what} within {seconds} s");
-        tokio::time::sleep(Duration::from_millis(100)).await;
-    }
-}
 
 async fn finished(service: &InstallService, id: &str) -> JobSnapshot {
     within(&format!("job {id} finishes"), LOADED, || async {

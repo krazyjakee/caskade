@@ -97,7 +97,6 @@ fn request<'a>(
         regions,
         global_exclusions: &[],
         limits: ScanLimits::default(),
-        identifier: None,
     }
 }
 #[test]

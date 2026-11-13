@@ -5,7 +5,6 @@ use crate::{
     Error, Result,
     bus::Event,
     emulation::{DetectedInstall, EmulatorInstall, PlatformSettings, ProfileRef, detect},
-    lock,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -45,9 +44,16 @@ pub struct DetectImport {
     pub defaults_set: Vec<String>,
 }
 
-pub(super) struct DetectState {
-    job: DetectJob,
-    cancel: caskade_discovery::Cancel,
+impl crate::emulation::job_table::TableJob for DetectJob {
+    fn id(&self) -> &str {
+        &self.id
+    }
+    fn revision(&mut self) -> &mut u32 {
+        &mut self.revision
+    }
+    fn finished(&self) -> bool {
+        self.status != DetectStatus::Running
+    }
 }
 
 impl EmulationService {
@@ -57,13 +63,7 @@ impl EmulationService {
     }
 
     fn update_job(&self, id: &str, change: impl FnOnce(&mut DetectJob)) -> Option<DetectJob> {
-        let job = {
-            let mut jobs = lock(&self.inner.jobs);
-            let state = jobs.get_mut(id)?;
-            change(&mut state.job);
-            state.job.revision += 1;
-            state.job.clone()
-        };
+        let job = self.inner.jobs.update(id, change)?;
         self.inner
             .bus
             .emit(Event::EmulationDetectChanged(Box::new(job.clone())));
@@ -85,27 +85,8 @@ impl EmulationService {
             results: Vec::new(),
             error: None,
         };
-        {
-            let mut jobs = lock(&self.inner.jobs);
-            // Finished detections beyond the last few are dropped.
-            if jobs.len() >= 8 {
-                let finished: Vec<String> = jobs
-                    .iter()
-                    .filter(|(_, state)| state.job.status != DetectStatus::Running)
-                    .map(|(id, _)| id.clone())
-                    .collect();
-                for id in finished.iter().take(jobs.len() - 7) {
-                    jobs.remove(id);
-                }
-            }
-            jobs.insert(
-                job.id.clone(),
-                DetectState {
-                    job: job.clone(),
-                    cancel: cancel.clone(),
-                },
-            );
-        }
+        // Finished detections beyond the last few are dropped.
+        self.inner.jobs.insert(job.clone(), cancel.clone(), Some(7));
         self.inner
             .bus
             .emit(Event::EmulationDetectChanged(Box::new(job.clone())));
@@ -148,28 +129,20 @@ impl EmulationService {
     }
 
     pub fn detect_get(&self, id: &str) -> Option<DetectJob> {
-        lock(&self.inner.jobs)
-            .get(id)
-            .map(|state| state.job.clone())
+        self.inner.jobs.job(id)
     }
 
     /// The most recent detection, e.g. the one a library scan started.
     pub fn detect_latest(&self) -> Option<DetectJob> {
-        lock(&self.inner.jobs)
-            .values()
-            .map(|state| state.job.clone())
-            .max_by(|a, b| a.id.cmp(&b.id))
+        self.inner.jobs.jobs().pop()
     }
 
     pub fn detect_cancel(&self, id: &str) -> Result<DetectJob> {
-        let cancel = lock(&self.inner.jobs)
-            .get(id)
-            .map(|state| state.cancel.clone())
-            .ok_or_else(|| {
-                Error::Invalid(crate::tr!(
-                    "This detection is no longer available. Run it again."
-                ))
-            })?;
+        let (_, cancel) = self.inner.jobs.get(id).ok_or_else(|| {
+            Error::Invalid(crate::tr!(
+                "This detection is no longer available. Run it again."
+            ))
+        })?;
         cancel.cancel();
         self.update_job(id, |job| {
             if job.status == DetectStatus::Running {

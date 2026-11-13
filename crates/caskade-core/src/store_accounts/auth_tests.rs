@@ -2,7 +2,7 @@
 //! against a fake browser store and fake keychains.
 
 use super::*;
-use crate::romm::secrets::{MemorySecrets, SecretStore};
+use crate::secrets::{MemorySecrets, SecretStore};
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 
 const TOKEN: &str = "secret-access-token-0123456789";

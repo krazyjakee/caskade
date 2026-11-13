@@ -27,8 +27,7 @@ fold for Windows-authored playlists.
 Output games group by folder, platform and cleaned title, with numeric disc
 order. `GameRom` paths remain scanner-relative; archive matches retain the
 archive path for the emulator and never create extracted paths. Region and
-filename properties remain available to review. An optional `RomIdentifier`
-is the extension point for future DAT/serial identification; none is shipped.
+filename properties remain available to review.
 
 Tests use the generated `caskade-emulation-fixtures` tree: exactly 1,000 physical
 files, 963 expected groups, 983 top-level ROMs and 20 two-disc sets. The timed

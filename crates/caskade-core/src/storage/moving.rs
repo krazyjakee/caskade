@@ -180,7 +180,7 @@ impl StorageService {
                 "the target location cannot execute games"
             )));
         }
-        if !target_caps.symlinks && source_dir.join(".caskade/prefix").exists() {
+        if !target_caps.symlinks && source_dir.join(crate::install::MANAGED_PREFIX).exists() {
             return Err(StorageError::Invalid(crate::tr!(
                 "the target cannot hold this game's prefix links; choose a location with symlink support"
             )));

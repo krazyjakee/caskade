@@ -429,16 +429,6 @@ impl Updates {
         Ok(rows.iter().map(|row| self.view(row)).collect())
     }
 
-    /// The installs with an update available.
-    pub async fn available(&self) -> Result<Vec<GameUpdate>> {
-        let rows = self.inner.store.followed_updates().await?;
-        Ok(rows
-            .iter()
-            .filter(|row| row.available())
-            .map(|row| self.view(row))
-            .collect())
-    }
-
     /// The update to offer before `entry_id` is played, if any. A check
     /// older than the settings' interval (one the background watch hasn't
     /// got to yet) is redone first, for a few seconds at most, unless one

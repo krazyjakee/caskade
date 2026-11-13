@@ -91,13 +91,13 @@ pub struct Registry {
 
 impl Registry {
     pub fn register(&self, kind: Arc<dyn BlobKind>) {
-        let mut kinds = self.kinds.write().unwrap_or_else(|e| e.into_inner());
+        let mut kinds = crate::write(&self.kinds);
         kinds.retain(|known| known.name() != kind.name());
         kinds.push(kind);
     }
 
     fn kinds(&self) -> Vec<Arc<dyn BlobKind>> {
-        self.kinds.read().unwrap_or_else(|e| e.into_inner()).clone()
+        crate::read(&self.kinds).clone()
     }
 }
 

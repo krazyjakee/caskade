@@ -212,6 +212,16 @@ pub(super) fn folded_glob(word: &str) -> String {
     pattern
 }
 
+/// A title as a key: case, accents' composition and punctuation aside.
+pub(crate) fn title_key(title: &str) -> String {
+    icu_normalizer::ComposingNormalizer::new_nfkc()
+        .normalize(title)
+        .chars()
+        .flat_map(char::to_lowercase)
+        .filter(|character| character.is_alphanumeric())
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

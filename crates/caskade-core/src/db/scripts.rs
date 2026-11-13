@@ -47,10 +47,10 @@ impl LibraryStore {
     }
 
     /// The scripts a launch of `game_id` (through `profile_id`, for an
-    /// emulated game) runs with.
+    /// emulated game) runs with; without a game, the global and profile ones.
     pub async fn scripts_for_launch(
         &self,
-        game_id: &str,
+        game_id: Option<&str>,
         profile_id: Option<&str>,
     ) -> Result<ScriptSet> {
         Ok(ScriptSet {
@@ -64,11 +64,15 @@ impl LibraryStore {
                 }
                 None => vec![],
             },
-            game: self
-                .lifecycle_scripts(&ScriptScope::Game {
-                    game_id: game_id.into(),
-                })
-                .await?,
+            game: match game_id {
+                Some(game_id) => {
+                    self.lifecycle_scripts(&ScriptScope::Game {
+                        game_id: game_id.into(),
+                    })
+                    .await?
+                }
+                None => vec![],
+            },
         })
     }
 

@@ -3,7 +3,7 @@
 //! separates from them again (`kept_apart`). The service lives in
 //! `crate::metadata`.
 
-use super::{LibraryStore, games::write_game, missing};
+use super::{LibraryStore, games::write_game, missing, sync_identity::normal_title};
 use crate::{
     Result,
     model::{validation as v, *},
@@ -49,7 +49,7 @@ impl LibraryStore {
                 .as_deref()
                 .and_then(|date| date.get(..4)?.parse().ok());
             by_title
-                .entry(words(title))
+                .entry(normal_title(title))
                 .or_default()
                 .push((year, index));
         }
@@ -167,17 +167,6 @@ impl LibraryStore {
         tx.commit().await?;
         Ok(game)
     }
-}
-
-/// A title's words, lowercased, without punctuation: "Bubsy II" and
-/// "BUBSY: II" are one title.
-pub(super) fn words(title: &str) -> String {
-    title
-        .split(|c: char| !c.is_alphanumeric())
-        .filter(|word| !word.is_empty())
-        .map(str::to_lowercase)
-        .collect::<Vec<_>>()
-        .join(" ")
 }
 
 /// Says why games sharing `title` stay more than one game, for the logs:

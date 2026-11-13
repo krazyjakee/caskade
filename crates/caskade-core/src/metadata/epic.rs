@@ -62,7 +62,7 @@ impl EpicOffers {
         let mut found = HashMap::new();
         let mut ask = Vec::new();
         {
-            let known = self.known.lock().unwrap_or_else(|error| error.into_inner());
+            let known = crate::lock(&self.known);
             for namespace in namespaces {
                 match known.get(namespace) {
                     Some(offers) => {
@@ -75,10 +75,7 @@ impl EpicOffers {
         for namespace in ask {
             match self.offers(namespace).await {
                 Ok(offers) => {
-                    self.known
-                        .lock()
-                        .unwrap_or_else(|error| error.into_inner())
-                        .insert(namespace.clone(), offers.clone());
+                    crate::lock(&self.known).insert(namespace.clone(), offers.clone());
                     found.insert(namespace.clone(), offers);
                 }
                 Err(error) => {

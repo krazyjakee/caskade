@@ -29,7 +29,7 @@ const NETWORKS_FOR: Duration = Duration::from_secs(30);
 /// This machine's networks, as listed at most [`NETWORKS_FOR`] ago.
 pub(super) fn networks() -> Networks {
     static LISTED: Mutex<Option<(Instant, Networks)>> = Mutex::new(None);
-    let mut listed = LISTED.lock().unwrap_or_else(|e| e.into_inner());
+    let mut listed = crate::lock(&LISTED);
     if let Some((at, networks)) = listed.as_ref()
         && at.elapsed() < NETWORKS_FOR
     {

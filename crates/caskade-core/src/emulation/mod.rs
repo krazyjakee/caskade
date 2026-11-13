@@ -13,6 +13,7 @@ mod config;
 mod definition;
 mod detect;
 mod handoff;
+mod job_table;
 pub mod scan;
 mod scanners;
 mod service;
@@ -40,12 +41,13 @@ pub use scanners::{
     ROMS_SOURCE, ReviewChoice, ReviewGame, ReviewRom, RomFolderSetup, RomOverride, ScanJob,
     ScanMode, ScanShared, ScanStatus, ScanSummary, ScannerCount, ScannerService, ScannerView,
 };
+pub(crate) use service::flatpak_installations;
 pub use service::{
     AddableProfile, ArgsDrift, ArgvPreview, Availability, BiosEntry, Command, CompatibleProfile,
     DefinitionInfo, DefinitionProfileInfo, DetectImport, DetectJob, DetectStatus, DiscView,
     EmulationCatalog, EmulationOverview, EmulationService, EmulatorStatus, EmulatorView,
     GameEmulation, PlatformInfo, PlatformView, ProfileDraft, ProfileView, Readiness, VariableInfo,
-    command, emulator_dir, host_os, installed, which,
+    command, emulator_dir, host_os, installed,
 };
 pub use setup::{
     BiosFetch, BiosFuture, BiosProvider, EmulatorSetup, Installable, ManagedEmulator,

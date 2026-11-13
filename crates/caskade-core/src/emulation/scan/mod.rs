@@ -74,9 +74,6 @@ pub struct ScanRequest<'a> {
     pub regions: &'a [Region],
     pub global_exclusions: &'a [String],
     pub limits: ScanLimits,
-    /// Reserved for DAT/serial identification: supplied by the caller, not IO
-    /// performed by this pure pipeline. No identifier is shipped yet.
-    pub identifier: Option<&'a dyn RomIdentifier>,
 }
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -96,15 +93,6 @@ pub struct RomFile {
 pub struct ArchiveMember {
     pub path: PathBuf,
     pub size: u64,
-}
-pub trait RomIdentifier: Send + Sync {
-    fn identify(&self, file: &RomFile, parsed: &ParsedName) -> Option<IdentifiedRom>;
-}
-#[derive(Debug, Clone)]
-pub struct IdentifiedRom {
-    pub title: String,
-    pub platform: String,
-    pub regions: Vec<String>,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]

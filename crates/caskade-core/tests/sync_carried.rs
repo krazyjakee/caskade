@@ -3,6 +3,7 @@
 //! defaults; game scripts, launch actions and hand-made achievement links,
 //! by the release they belong to.
 
+use crate::engines::exchange;
 use caskade_core::bus::Bus;
 use caskade_core::db::{LibraryStore, PluginRow};
 use caskade_core::emulation::{Emulator, EmulatorInstall, EmulatorProfile};
@@ -52,23 +53,6 @@ async fn device(name: char) -> Device {
     }
 }
 
-/// Both ways, until neither has anything new.
-async fn sync(a: &Device, b: &Device) {
-    for _ in 0..2 {
-        for (from, to) in [(a, b), (b, a)] {
-            from.engine.capture().await.unwrap();
-            loop {
-                let cursor = to.engine.seen().await.unwrap();
-                let changes = from.engine.changes_for(&cursor, 100).await.unwrap();
-                if changes.is_empty() {
-                    break;
-                }
-                to.engine.receive(&changes).await.unwrap();
-            }
-        }
-    }
-}
-
 async fn get(device: &Device, namespace: &str, field: &str) -> Value {
     device.settings.get(namespace).await.unwrap().value[field].clone()
 }
@@ -98,7 +82,7 @@ async fn appearance_and_the_rating_board_follow_the_user_and_defaults_never_win(
     // A new device, set up after the Desk's choices: its defaults are newer,
     // and still don't replace them.
     let laptop = device('b').await;
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     for device in [&desk, &laptop] {
         assert_eq!(get(device, "core.appearance", "density").await, "compact");
         assert_eq!(get(device, "core.appearance", "accent").await, "#ff8800");
@@ -109,7 +93,7 @@ async fn appearance_and_the_rating_board_follow_the_user_and_defaults_never_win(
 
     // Set back to its default on the Laptop: back to the default everywhere.
     set(&laptop, "core.appearance", "density", json!("comfortable")).await;
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert_eq!(
         get(&desk, "core.appearance", "density").await,
         "comfortable"
@@ -121,11 +105,11 @@ async fn appearance_and_the_rating_board_follow_the_user_and_defaults_never_win(
 async fn appearance_set_to_this_device_only_stays_here_until_turned_back_on() {
     let desk = device('a').await;
     let laptop = device('b').await;
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     set_category(&laptop, "appearance", "thisDeviceOnly").await;
     set(&desk, "core.appearance", "density", json!("compact")).await;
     set(&laptop, "core.appearance", "cardSize", json!(240)).await;
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert_eq!(
         get(&laptop, "core.appearance", "density").await,
         "comfortable"
@@ -199,7 +183,7 @@ async fn game_scripts_arrive_turned_off() {
     for device in [&desk, &laptop] {
         set_category(device, "gameScripts", "sync").await;
     }
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     let arrived = game_scripts(&laptop, &laptop_game).await;
     assert_eq!(arrived.len(), 1);
     assert_eq!(arrived[0].id, script.id);
@@ -217,7 +201,7 @@ async fn game_scripts_arrive_turned_off() {
     let mut renamed = script.clone();
     renamed.name = "Mount the drive".into();
     desk.store.save_lifecycle_script(&renamed).await.unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     let here = &game_scripts(&laptop, &laptop_game).await[0];
     assert_eq!(
         (here.name.as_str(), here.enabled),
@@ -227,7 +211,7 @@ async fn game_scripts_arrive_turned_off() {
     let mut changed = renamed.clone();
     changed.command = shell("rm -rf ~/saves");
     desk.store.save_lifecycle_script(&changed).await.unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     let here = &game_scripts(&laptop, &laptop_game).await[0];
     assert_eq!(here.command, shell("rm -rf ~/saves"));
     assert!(!here.enabled);
@@ -243,7 +227,7 @@ async fn game_scripts_arrive_turned_off() {
         .delete_lifecycle_script(&script.id)
         .await
         .unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert!(game_scripts(&laptop, &laptop_game).await.is_empty());
 }
 
@@ -301,7 +285,7 @@ async fn launch_actions_and_their_choices_follow_the_release_where_they_can_be_b
         .await
         .unwrap();
 
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     let actions = laptop.store.game_actions(&laptop_entry).await.unwrap();
     assert_eq!(actions.len(), 1);
     assert_eq!(actions[0].id, flatpak.id);
@@ -328,7 +312,7 @@ async fn launch_actions_and_their_choices_follow_the_release_where_they_can_be_b
 
     // Removed on the Laptop: gone from the Desk, and so is its default.
     laptop.store.delete_game_action(&flatpak.id).await.unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     let left = desk.store.game_actions(&desk_entry).await.unwrap();
     assert_eq!(left.len(), 1);
     assert_eq!(left[0].name, "Config");
@@ -358,7 +342,7 @@ async fn a_hand_made_achievement_link_follows_its_release() {
         })
         .await
         .unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     let links = laptop
         .store
         .achievement_links(std::slice::from_ref(&laptop_entry))
@@ -372,7 +356,7 @@ async fn a_hand_made_achievement_link_follows_its_release() {
         .delete_achievement_link(&desk_entry, "retroachievements")
         .await
         .unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert!(
         laptop
             .store
@@ -432,7 +416,7 @@ async fn a_preferred_emulator_applies_where_that_emulator_is_installed() {
         bios_dir: None,
     };
     desk.store.set_platform_settings(&settings).await.unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     // The Laptop has no mGBA: nothing changes there.
     assert_eq!(default_emulator(&laptop, "gba").await, None);
 
@@ -443,11 +427,11 @@ async fn a_preferred_emulator_applies_where_that_emulator_is_installed() {
         default_emulator(&laptop, "gba").await.as_deref(),
         Some("laptop-mgba")
     );
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     // Clearing the Desk's default is no reason to clear the Laptop's.
     settings.default = None;
     desk.store.set_platform_settings(&settings).await.unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert_eq!(
         default_emulator(&laptop, "gba").await.as_deref(),
         Some("laptop-mgba")
@@ -482,7 +466,7 @@ async fn a_preferred_emulator_missing_here_is_offered_and_can_be_set_aside() {
             .await
             .unwrap();
     }
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     let offers = emulator_offers(&laptop.engine).await.unwrap();
     let offered: Vec<_> = offers
         .iter()
@@ -524,7 +508,7 @@ async fn a_preferred_emulator_missing_here_is_offered_and_can_be_set_aside() {
     };
     set_category(&laptop, "preferredEmulators", "thisDeviceOnly").await;
     desk.store.set_platform_settings(&settings).await.unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert!(emulator_offers(&laptop.engine).await.unwrap().is_empty());
 }
 
@@ -553,7 +537,7 @@ async fn each_device_offers_its_add_ons_and_nothing_installs_itself() {
         .upsert_plugin_state(&plugin(false))
         .await
         .unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
 
     // Each knows what the other has, under the other's id.
     let desk_id = "a".repeat(64);
@@ -602,7 +586,7 @@ async fn each_device_offers_its_add_ons_and_nothing_installs_itself() {
         .delete_plugin_state("dev.example.stats")
         .await
         .unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert_eq!(
         offered(&laptop, format!("{desk_id}|dev.example.stats"), EXISTS).await,
         None
@@ -650,7 +634,7 @@ async fn each_device_s_default_admin_is_the_household_s_and_joins_a_real_one() {
         )
         .await
         .unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     // No second "Player" on either, and the Desk's collection is the
     // Laptop's own default admin's there.
     assert_eq!(names(&desk).await, ["Player"]);
@@ -670,7 +654,7 @@ async fn each_device_s_default_admin_is_the_household_s_and_joins_a_real_one() {
         )
         .await
         .unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert_eq!(names(&laptop).await, ["Ada"]);
     assert_eq!(names(&desk).await, ["Ada"]);
     assert!(owns(&laptop, &desk_admin, "Couch").await);

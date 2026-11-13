@@ -3,59 +3,21 @@
 //! them by the store ids their identities carry, applies hand-set matches,
 //! and starts as soon as they arrive rather than at its next hourly check.
 
+use crate::engines::{Device, device, exchange};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Duration;
 
-use caskade_core::accounts::AccountService;
 use caskade_core::artwork::ArtworkCache;
 use caskade_core::bus::Bus;
-use caskade_core::db::LibraryStore;
 use caskade_core::emulation::Catalog;
 use caskade_core::hasheous::Hasheous;
 use caskade_core::igdb::{Igdb, StoreId};
 use caskade_core::metadata::{IgdbMatch, MatchSource, Metadata};
 use caskade_core::model::{ArtworkKind, ExternalId, Game, GameEntry};
-use caskade_core::sync::SyncEngine;
 use serde_json::{Value, json};
 use wiremock::matchers::{method, path, path_regex};
 use wiremock::{Mock, MockServer, Request, ResponseTemplate};
-
-struct Device {
-    engine: SyncEngine,
-    store: LibraryStore,
-}
-
-async fn device(name: char) -> Device {
-    let store = LibraryStore::in_memory().await.unwrap();
-    AccountService::open(store.clone(), Bus::default())
-        .await
-        .unwrap();
-    Device {
-        engine: SyncEngine::new(store.clone(), name.to_string().repeat(64)),
-        store,
-    }
-}
-
-async fn send(from: &Device, to: &Device) {
-    loop {
-        let cursor = to.engine.seen().await.unwrap();
-        let changes = from.engine.changes_for(&cursor, 100).await.unwrap();
-        if changes.is_empty() {
-            break;
-        }
-        to.engine.receive(&changes).await.unwrap();
-    }
-}
-
-async fn sync(a: &Device, b: &Device) {
-    for _ in 0..3 {
-        a.engine.capture().await.unwrap();
-        b.engine.capture().await.unwrap();
-        send(a, b).await;
-        send(b, a).await;
-    }
-}
 
 /// A game with one entry carrying `ids`.
 async fn game(device: &Device, title: &str, ids: Vec<ExternalId>) -> String {
@@ -176,7 +138,7 @@ async fn a_game_from_another_device_is_matched_by_its_store_ids_and_filled_in() 
     let laptop = device('b').await;
     game(&desk, "Portal 2", vec![ExternalId::Steam { app_id: 620 }]).await;
 
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     // A title only: its entries, metadata and artwork stayed on the desk.
     let portal = only_game(&laptop).await;
     assert!(portal.description.is_empty());
@@ -233,14 +195,14 @@ async fn a_match_set_by_hand_on_another_device_is_filled_in_here() {
         .await
         .unwrap();
 
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert!(
         arrivals.load(Ordering::SeqCst) > 0,
         "the receiving device is told games arrived"
     );
     let arrived = arrivals.load(Ordering::SeqCst);
     // Nothing new: nobody is told again.
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert_eq!(arrivals.load(Ordering::SeqCst), arrived);
 
     let witcher = only_game(&laptop).await;
@@ -267,7 +229,7 @@ async fn games_arriving_start_matching_without_waiting_for_the_hourly_check() {
     tokio::time::sleep(Duration::from_millis(500)).await;
 
     game(&desk, "Portal 2", vec![ExternalId::Steam { app_id: 620 }]).await;
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     let portal = only_game(&laptop).await;
     let filled = tokio::time::timeout(Duration::from_secs(30), async {
         loop {
@@ -322,7 +284,7 @@ async fn a_game_matched_without_a_store_id_takes_its_devices_igdb_id() {
     let witcher = game(&desk, "The Witcher 3", vec![]).await;
     matched_there(&desk, &witcher, 1942).await;
 
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     let synced = only_game(&laptop).await;
     assert!(synced.description.is_empty());
 
@@ -348,7 +310,7 @@ async fn store_ids_here_are_asked_about_before_the_other_devices_match() {
     // The same game on the laptop, from Steam.
     let here = game(&laptop, "Portal 2", vec![ExternalId::Steam { app_id: 620 }]).await;
 
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert_eq!(only_game(&laptop).await.id, here, "the two are one game");
 
     let report = metadata(&laptop, dir.path(), &server).run().await.unwrap();

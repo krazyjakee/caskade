@@ -191,6 +191,8 @@ impl TrackingTarget {
 /// always checked against PID + start time (never PID alone).
 pub struct ProcessTracker {
     target: TrackingTarget,
+    /// Whether all of the target's paths are canonical yet.
+    resolved: bool,
     baseline: BTreeSet<ProcessIdentity>,
     lineage: BTreeMap<u32, ProcessIdentity>,
     games: BTreeSet<ProcessIdentity>,
@@ -200,6 +202,7 @@ impl ProcessTracker {
     pub fn new(target: TrackingTarget, baseline: &ProcessSnapshot) -> Self {
         Self {
             target,
+            resolved: false,
             baseline: baseline.processes.iter().map(|p| p.identity).collect(),
             lineage: BTreeMap::new(),
             games: BTreeSet::new(),
@@ -241,6 +244,22 @@ impl ProcessTracker {
     }
 
     pub fn observe(&mut self, snapshot: &ProcessSnapshot) -> Vec<ProcessIdentity> {
+        // Once, not on every comparison of every poll; a path that
+        // doesn't exist yet is tried again on the next.
+        if !self.resolved {
+            let target = &mut self.target;
+            self.resolved = true;
+            for path in (target.real_dir.iter_mut())
+                .chain(target.alias_dir.iter_mut())
+                .chain(&mut target.executables)
+                .chain(&mut target.excluded_executables)
+            {
+                match std::fs::canonicalize(&*path) {
+                    Ok(canonical) => *path = canonical,
+                    Err(_) => self.resolved = false,
+                }
+            }
+        }
         let current: BTreeMap<_, _> = snapshot
             .processes
             .iter()
@@ -306,17 +325,19 @@ impl ProcessTracker {
 fn normalized(path: &Path) -> PathBuf {
     std::fs::canonicalize(path).unwrap_or_else(|_| path.to_owned())
 }
+/// Whether `a` is `b`, a canonical path.
 fn equal(a: &Path, b: &Path) -> bool {
-    let (a, b) = (normalized(a), normalized(b));
+    let a = normalized(a);
     if cfg!(windows) {
         a.to_string_lossy()
             .eq_ignore_ascii_case(&b.to_string_lossy())
     } else {
-        a == b
+        a == *b
     }
 }
+/// Whether `path` is inside `root`, a canonical path.
 fn below(path: &Path, root: &Path) -> bool {
-    let (path, root) = (normalized(path), normalized(root));
+    let path = normalized(path);
     if cfg!(windows) {
         let (path, root) = (
             path.to_string_lossy().to_lowercase(),

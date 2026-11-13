@@ -13,20 +13,19 @@
 //! transaction per change, so sync never blocks the UI or a game launch.
 
 use std::collections::{HashMap, HashSet};
-use std::sync::{Arc, Mutex, OnceLock, RwLock};
+use std::sync::{Arc, Mutex, RwLock};
 use std::time::Duration;
 
 use async_trait::async_trait;
 use tokio::sync::{Notify, mpsc};
 use tokio::time::Instant;
 
-use super::clock::now_ms;
-use super::engine::SyncEngine;
+use super::engine::{Hooks, SyncEngine};
 use super::exchange::{self, Options};
-use crate::Result;
 use crate::db::LibraryStore;
 use crate::devices::{ConnectionPurpose, DeviceSession, DeviceSync, Devices};
 use crate::settings::SettingsService;
+use crate::{Result, now_ms};
 
 /// How often this device's changes are looked for. A capture reads every
 /// synced table, so it runs only when the library was written since the
@@ -52,21 +51,10 @@ pub struct SyncService {
 struct Inner {
     store: LibraryStore,
     devices: Devices,
-    settings: OnceLock<SettingsService>,
-    /// Handed to each engine: a RomM server another device removed.
-    romm_removed: OnceLock<Arc<dyn Fn(String) + Send + Sync>>,
+    /// What every engine is handed.
+    hooks: Arc<Hooks>,
     /// The engine for this device's current identity.
     engine: RwLock<Option<Arc<SyncEngine>>>,
-    /// Kinds of file exchanged after the changes (save files, #239).
-    blobs: super::blobs::Registry,
-    /// What's running here and on paired devices (#240).
-    presence: OnceLock<super::presence::Presence>,
-    /// Where artwork files are, for each engine (#273).
-    artwork: OnceLock<crate::artwork::ArtworkCache>,
-    /// Handed to each engine: this device's default admin joined another's.
-    account_joined: OnceLock<Arc<dyn Fn(String, String) + Send + Sync>>,
-    /// Handed to each engine: games or hand-set matches arrived (#75).
-    games_arrived: OnceLock<Arc<dyn Fn() + Send + Sync>>,
     /// Devices an exchange is running with.
     busy: Mutex<HashSet<String>>,
     /// Something wants an exchange now: devices to sync.
@@ -85,14 +73,8 @@ impl SyncService {
             inner: Arc::new(Inner {
                 store,
                 devices: devices.clone(),
-                settings: OnceLock::new(),
-                romm_removed: OnceLock::new(),
+                hooks: Arc::default(),
                 engine: RwLock::default(),
-                blobs: super::blobs::Registry::default(),
-                presence: OnceLock::new(),
-                artwork: OnceLock::new(),
-                account_joined: OnceLock::new(),
-                games_arrived: OnceLock::new(),
                 busy: Mutex::default(),
                 due,
                 due_rx: tokio::sync::Mutex::new(due_rx),
@@ -105,45 +87,37 @@ impl SyncService {
 
     /// Reads the category choices (`core.sync.categories`) from `settings`.
     pub fn set_settings(&self, settings: SettingsService) {
-        let _ = self.inner.settings.set(settings);
+        self.inner.hooks.set_settings(settings);
     }
 
     /// What to do when another device removed a RomM server (the app
     /// removes its downloaded ROMs through `RommService::remove_server`).
     pub fn on_romm_removed(&self, removed: impl Fn(String) + Send + Sync + 'static) {
-        let _ = self.inner.romm_removed.set(Arc::new(removed));
+        self.inner.hooks.on_romm_removed(removed);
     }
 
     /// What to do when this device's untouched default admin joined an
     /// admin from another device (the app hands the signed-in account over:
     /// `AccountService::joined`).
     pub fn on_account_joined(&self, joined: impl Fn(String, String) + Send + Sync + 'static) {
-        let _ = self.inner.account_joined.set(Arc::new(joined));
+        self.inner.hooks.on_account_joined(joined);
     }
 
     /// What to do after games or hand-set IGDB matches arrived from another
     /// device: their metadata and artwork are this device's to look up
     /// (`Metadata::wake`, #75).
     pub fn on_games_arrived(&self, arrived: impl Fn() + Send + Sync + 'static) {
-        let arrived: Arc<dyn Fn() + Send + Sync> = Arc::new(arrived);
-        if let Some(engine) = self.inner.engine() {
-            let arrived = arrived.clone();
-            engine.on_games_arrived(move || arrived());
-        }
-        let _ = self.inner.games_arrived.set(arrived);
+        self.inner.hooks.on_games_arrived(arrived);
     }
 
     /// Exchanges `kind`'s files with every paired device, after the changes.
     pub fn register_blobs(&self, kind: Arc<dyn super::blobs::BlobKind>) {
-        self.inner.blobs.register(kind);
+        self.inner.hooks.blobs().register(kind);
     }
 
     /// Exchanges presence (#240) at the end of each exchange.
     pub fn set_presence(&self, presence: super::presence::Presence) {
-        if let Some(engine) = self.inner.engine() {
-            engine.set_presence(presence.clone());
-        }
-        let _ = self.inner.presence.set(presence);
+        self.inner.hooks.set_presence(presence);
     }
 
     /// The user's own artwork travels with its files, from and into
@@ -153,10 +127,7 @@ impl SyncService {
             store: self.inner.store.clone(),
             cache: cache.clone(),
         }));
-        if let Some(engine) = self.inner.engine() {
-            engine.set_artwork_cache(cache.clone());
-        }
-        let _ = self.inner.artwork.set(cache);
+        self.inner.hooks.set_artwork_cache(cache);
     }
 
     /// The engine, once this device's identity is ready.
@@ -179,44 +150,24 @@ impl SyncService {
 impl Inner {
     fn engine(&self) -> Option<Arc<SyncEngine>> {
         let device = self.devices.listening_id()?;
-        let current = self
-            .engine
-            .read()
-            .unwrap_or_else(|e| e.into_inner())
-            .clone();
+        let current = crate::read(&self.engine).clone();
         if let Some(engine) = current.filter(|engine| engine.device() == device) {
             return Some(engine);
         }
         // A new identity is a new device: a new engine with its id.
-        let mut engine = SyncEngine::new(self.store.clone(), device);
-        engine.set_blobs(self.blobs.clone());
-        if let Some(presence) = self.presence.get() {
-            engine.set_presence(presence.clone());
-        }
-        if let Some(cache) = self.artwork.get() {
-            engine.set_artwork_cache(cache.clone());
-        }
-        if let Some(joined) = self.account_joined.get().cloned() {
-            engine.on_account_joined(move |from, into| joined(from, into));
-        }
-        if let Some(arrived) = self.games_arrived.get().cloned() {
-            engine.on_games_arrived(move || arrived());
-        }
-        let engine = Arc::new(engine);
-        if let Some(settings) = self.settings.get() {
-            engine.set_settings(settings.clone());
-        }
-        if let Some(removed) = self.romm_removed.get().cloned() {
-            engine.on_romm_removed(move |id| removed(id));
-        }
-        *self.engine.write().unwrap_or_else(|e| e.into_inner()) = Some(engine.clone());
+        let engine = Arc::new(SyncEngine::with_hooks(
+            self.store.clone(),
+            device,
+            self.hooks.clone(),
+        ));
+        *crate::write(&self.engine) = Some(engine.clone());
         Some(engine)
     }
 
     async fn run(self: Arc<Self>) {
         let mut due_rx = self.due_rx.lock().await;
         let mut reachable = self.devices.reachable();
-        let mut settings = self.settings.get().map(SettingsService::subscribe);
+        let mut settings = self.hooks.settings().map(SettingsService::subscribe);
         let mut capture = tokio::time::interval(CAPTURE);
         let mut compact = tokio::time::interval(COMPACT);
         let mut next: HashMap<String, Instant> = HashMap::new();
@@ -284,7 +235,7 @@ impl Inner {
                         None => std::future::pending().await,
                     }
                 } => {
-                    if changed.is_some_and(|changed| changed.namespace == "core.sync")
+                    if changed.is_some_and(|changed| changed.namespace == super::policy::SyncSettings::NAMESPACE)
                         && let Some(engine) = self.engine()
                     {
                         self.categories_changed(&engine).await;
@@ -350,17 +301,11 @@ impl Inner {
     }
 
     fn claim(&self, device: &str) -> bool {
-        self.busy
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .insert(device.to_owned())
+        crate::lock(&self.busy).insert(device.to_owned())
     }
 
     fn release(&self, device: &str) {
-        self.busy
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .remove(device);
+        crate::lock(&self.busy).remove(device);
         self.done.notify_waiters();
     }
 
@@ -396,7 +341,7 @@ impl Inner {
             exchanged
         }
         .await;
-        self.finish(device, result.map(|_| ())).await
+        self.finish(device, result).await
     }
 
     /// Records how an exchange with `device` ended.
@@ -450,6 +395,6 @@ impl caskade_sync::Sessions for Inbound {
         );
         let result = exchange::exchange(&engine, &device, &mut session, &Options::default()).await;
         session.end().await;
-        inner.finish(&device, result.map(|_| ())).await;
+        inner.finish(&device, result).await;
     }
 }

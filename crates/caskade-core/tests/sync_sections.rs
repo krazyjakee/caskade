@@ -3,6 +3,7 @@
 //! category keeps syncing, and the UI scale never travels. Turned back on,
 //! what waited applies and the section is sent again in full.
 
+use crate::engines::exchange;
 use caskade_core::bus::Bus;
 use caskade_core::db::LibraryStore;
 use caskade_core::paths::AppPaths;
@@ -36,23 +37,6 @@ async fn device(name: char) -> Device {
     }
 }
 
-/// Both ways, until neither has anything new.
-async fn sync(a: &Device, b: &Device) {
-    for _ in 0..2 {
-        for (from, to) in [(a, b), (b, a)] {
-            from.engine.capture().await.unwrap();
-            loop {
-                let cursor = to.engine.seen().await.unwrap();
-                let changes = from.engine.changes_for(&cursor, 100).await.unwrap();
-                if changes.is_empty() {
-                    break;
-                }
-                to.engine.receive(&changes).await.unwrap();
-            }
-        }
-    }
-}
-
 async fn get(device: &Device, namespace: &str, field: &str) -> Value {
     device.settings.get(namespace).await.unwrap().value[field].clone()
 }
@@ -78,12 +62,12 @@ async fn keep_here(device: &Device, namespace: &str, here: bool) {
 async fn a_section_kept_on_this_device_doesnt_change_on_the_other() {
     let desk = device('a').await;
     let deck = device('b').await;
-    sync(&desk, &deck).await;
+    exchange(&desk.engine, &deck.engine).await;
     keep_here(&deck, "core.appearance", true).await;
 
     set(&desk, "core.appearance", "density", json!("compact")).await;
     set(&deck, "core.appearance", "cardSize", json!(240)).await;
-    sync(&desk, &deck).await;
+    exchange(&desk.engine, &deck.engine).await;
     // Neither side's appearance reached the other.
     assert_eq!(
         get(&deck, "core.appearance", "density").await,
@@ -93,13 +77,13 @@ async fn a_section_kept_on_this_device_doesnt_change_on_the_other() {
 
     // The rest still syncs: the rating board (another section), both ways.
     set(&desk, "core.accounts", "ratingBoard", json!("esrb")).await;
-    sync(&desk, &deck).await;
+    exchange(&desk.engine, &deck.engine).await;
     assert_eq!(get(&deck, "core.accounts", "ratingBoard").await, "esrb");
 
     // Kept on the Desk instead: the Deck's rating board stays there.
     keep_here(&desk, "core.accounts", true).await;
     set(&deck, "core.accounts", "ratingBoard", json!("pegi")).await;
-    sync(&desk, &deck).await;
+    exchange(&desk.engine, &deck.engine).await;
     assert_eq!(get(&desk, "core.accounts", "ratingBoard").await, "esrb");
 }
 
@@ -107,13 +91,13 @@ async fn a_section_kept_on_this_device_doesnt_change_on_the_other() {
 async fn turned_back_on_a_section_takes_what_waited_and_is_sent_again() {
     let desk = device('a').await;
     let deck = device('b').await;
-    sync(&desk, &deck).await;
+    exchange(&desk.engine, &deck.engine).await;
     keep_here(&deck, "core.appearance", true).await;
     // The engine has seen the categories as they start.
     deck.engine.capture().await.unwrap();
     assert!(deck.engine.turned_on().await.is_empty());
     set(&desk, "core.appearance", "density", json!("compact")).await;
-    sync(&desk, &deck).await;
+    exchange(&desk.engine, &deck.engine).await;
     assert_eq!(
         get(&deck, "core.appearance", "density").await,
         "comfortable"
@@ -132,7 +116,7 @@ async fn the_ui_scale_suits_each_screen_and_never_travels() {
     let tv = device('b').await;
     set(&tv, "core.appearance", "uiScale", json!(125)).await;
     set(&tv, "core.appearance", "density", json!("compact")).await;
-    sync(&desk, &tv).await;
+    exchange(&desk.engine, &tv.engine).await;
     assert_eq!(get(&desk, "core.appearance", "uiScale").await, 100);
     assert_eq!(get(&desk, "core.appearance", "density").await, "compact");
 }

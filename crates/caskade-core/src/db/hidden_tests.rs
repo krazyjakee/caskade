@@ -1,6 +1,7 @@
 //! Hidden games: out of every library view, kept through re-imports and
 //! merges, and listed for Settings.
 use super::LibraryStore;
+use super::test_support::import;
 use crate::model::{Game, GameEntry, GameFilter, ListGames, SourceId};
 
 async fn titles(store: &LibraryStore, query: Option<&str>) -> Vec<String> {
@@ -19,17 +20,6 @@ async fn hidden_titles(store: &LibraryStore) -> Vec<String> {
     let page = store.hidden_games(0, 100).await.unwrap();
     assert_eq!(page.total as usize, page.items.len());
     page.items.into_iter().map(|game| game.title).collect()
-}
-
-/// Imports `title` from `source`/`key`, as discovery would.
-async fn import(store: &LibraryStore, title: &str, source: &'static str, key: &str) -> String {
-    let game = Game::new(title);
-    let entry = GameEntry::new(&game.id, SourceId::new(source), key);
-    store
-        .import_group(&game, &[entry], None)
-        .await
-        .unwrap()
-        .game_id
 }
 
 #[tokio::test]

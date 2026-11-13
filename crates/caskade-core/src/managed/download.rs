@@ -1,6 +1,6 @@
 //! Downloads release files into the cache, with progress.
 
-use crate::{Error, Result};
+use crate::{Error, Result, error::net};
 use std::{path::Path, sync::OnceLock, time::Duration};
 use tokio::io::AsyncWriteExt;
 use tokio_util::sync::CancellationToken;
@@ -32,9 +32,6 @@ pub(crate) fn client() -> Result<reqwest::Client> {
         .map_err(net)?;
     Ok(CLIENT.get_or_init(|| client).clone())
 }
-
-// Without the URL: download hosts sign theirs.
-pub(crate) use crate::error::net;
 
 /// Streams `url` into `to` (through a `.part` file), reporting the bytes
 /// so far and the total when known. A device nearby that has the file

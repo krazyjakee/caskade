@@ -25,6 +25,13 @@ pub enum Error {
     Forbidden(String),
 }
 
+/// A blocking task that panicked or was cancelled.
+impl From<tokio::task::JoinError> for Error {
+    fn from(error: tokio::task::JoinError) -> Self {
+        Error::Io(std::io::Error::other(error))
+    }
+}
+
 /// A network failure as an [`Error`], for people: what went wrong and why,
 /// naming the host but not the URL (URLs can carry signed query
 /// parameters). A host that can't be reached or doesn't answer in time is

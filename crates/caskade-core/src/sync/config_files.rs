@@ -21,7 +21,7 @@
 
 use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, Mutex};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -86,7 +86,7 @@ pub struct EmulatorConfig {
 
 struct Inner {
     store: LibraryStore,
-    catalog: RwLock<Arc<Catalog>>,
+    catalog: Arc<Catalog>,
     os: OperatingSystem,
     folders: OsFolders,
     dir: PathBuf,
@@ -135,7 +135,7 @@ impl EmulatorConfig {
         Self {
             inner: Arc::new(Inner {
                 store,
-                catalog: RwLock::new(catalog),
+                catalog,
                 os,
                 folders,
                 dir,
@@ -149,27 +149,10 @@ impl EmulatorConfig {
         }
     }
 
-    /// The emulator catalog changed (plugins, a reload).
-    pub fn set_catalog(&self, catalog: Arc<Catalog>) {
-        *self
-            .inner
-            .catalog
-            .write()
-            .unwrap_or_else(|e| e.into_inner()) = catalog;
-    }
-
-    fn catalog(&self) -> Arc<Catalog> {
-        self.inner
-            .catalog
-            .read()
-            .unwrap_or_else(|e| e.into_inner())
-            .clone()
-    }
-
     /// Each emulator here with `[config]` files: its definition, its named
     /// folders and its expanded patterns.
     async fn installs(&self) -> Result<Vec<(String, Roots, Vec<String>)>> {
-        let catalog = self.catalog();
+        let catalog = &self.inner.catalog;
         let mut installs = Vec::new();
         for emulator in self.inner.store.emulators().await? {
             let Some(definition) = emulator
@@ -291,11 +274,7 @@ impl EmulatorConfig {
     /// Writes `bytes` (checked as `hash`) for every entry waiting on it,
     /// into each install's folder of that name.
     async fn arrived(&self, hash: &str, bytes: Vec<u8>) -> Result<()> {
-        let entries = self
-            .inner
-            .wanted
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
+        let entries = crate::lock(&self.inner.wanted)
             .remove(hash)
             .unwrap_or_default();
         if entries.is_empty() {
@@ -401,14 +380,7 @@ impl BlobKind for EmulatorConfig {
     }
 
     async fn wanted(&self) -> Result<Vec<String>> {
-        Ok(self
-            .inner
-            .wanted
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .keys()
-            .cloned()
-            .collect())
+        Ok(crate::lock(&self.inner.wanted).keys().cloned().collect())
     }
 
     async fn has(&self, hash: &str) -> bool {
@@ -467,7 +439,7 @@ impl BlobKind for EmulatorConfig {
             return;
         };
         let seen = self.inner.seen.lock().await;
-        let mut wanted = self.inner.wanted.lock().unwrap_or_else(|e| e.into_inner());
+        let mut wanted = crate::lock(&self.inner.wanted);
         for entry in note.files {
             let here = installs.iter().any(|(definition, roots, _)| {
                 *definition == entry.definition && roots.place(&entry.root, &entry.path).is_some()

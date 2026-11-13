@@ -100,10 +100,14 @@ async fn read(request: reqwest::RequestBuilder) -> Result<Vec<u8>, Failure> {
     if !gzip {
         return Ok(bytes);
     }
-    let mut decoded = Vec::new();
-    flate2::read::GzDecoder::new(bytes.as_slice())
-        .take(MAX_RESPONSE as u64 + 1)
-        .read_to_end(&mut decoded)?;
+    let decoded = tokio::task::spawn_blocking(move || {
+        let mut decoded = Vec::new();
+        flate2::read::GzDecoder::new(bytes.as_slice())
+            .take(MAX_RESPONSE as u64 + 1)
+            .read_to_end(&mut decoded)
+            .map(|_| decoded)
+    })
+    .await??;
     if decoded.len() > MAX_RESPONSE {
         return Err(too_large().into());
     }

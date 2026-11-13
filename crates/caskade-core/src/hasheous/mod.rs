@@ -20,14 +20,13 @@ mod index;
 mod tests;
 
 use crate::{
-    Error, Result,
+    Result,
     bus::{Bus, Event},
     db::LibraryStore,
     emulation::{EmulationService, OperatingSystem},
 };
 use index::Index;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::BTreeSet,
     path::{Path, PathBuf},
@@ -87,7 +86,7 @@ struct Listing {
 }
 
 /// An id a metadata source gives a game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MetadataId {
     /// `IGDB`, `RetroAchievements`, `TheGamesDb`, …
@@ -97,7 +96,7 @@ pub struct MetadataId {
 }
 
 /// A game in a dump.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DumpGame {
     /// The dump (platform) it is in.
@@ -109,7 +108,7 @@ pub struct DumpGame {
 }
 
 /// A ROM (or disc image) of a game, with the hashes the dump has.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DumpRom {
     pub name: String,
@@ -120,7 +119,7 @@ pub struct DumpRom {
     pub sha256: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RomMatch {
     pub game: DumpGame,
@@ -129,7 +128,7 @@ pub struct RomMatch {
 
 /// What is known about a file. The strongest hash given decides the match;
 /// a CRC alone also needs the size when one is given.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RomHashes {
     pub sha256: Option<String>,
@@ -140,7 +139,7 @@ pub struct RomHashes {
 }
 
 /// A dump that is downloaded and indexed.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LocalDump {
     pub name: String,
@@ -151,7 +150,7 @@ pub struct LocalDump {
 }
 
 /// What one [`Hasheous::sync`] did.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncReport {
     pub downloaded: Vec<String>,
@@ -533,15 +532,10 @@ async fn md5_file(path: PathBuf) -> Result<String> {
             let mut file = std::fs::File::open(path)?;
             let mut hasher = md5::Md5::new();
             std::io::copy(&mut file, &mut hasher)?;
-            Ok(hex(&hasher.finalize()))
+            Ok(format!("{:x}", hasher.finalize()))
         },
     )
-    .await
-    .map_err(|error| Error::Io(std::io::Error::other(error)))?
-}
-
-fn hex(bytes: &[u8]) -> String {
-    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
+    .await?
 }
 
 async fn write_atomic(path: &Path, bytes: &[u8]) -> Result<()> {

@@ -35,7 +35,7 @@ struct State {
 
 impl Gate {
     fn state(&self) -> std::sync::MutexGuard<'_, State> {
-        self.state.lock().unwrap_or_else(|e| e.into_inner())
+        crate::lock(&self.state)
     }
 
     pub fn set_paired(&self, paired: HashMap<EndpointId, Grant>, forgotten: HashSet<EndpointId>) {

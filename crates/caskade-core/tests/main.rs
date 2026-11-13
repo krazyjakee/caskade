@@ -12,6 +12,7 @@ mod device_defaults;
 mod devices;
 #[cfg(feature = "net")]
 mod emulator_config;
+mod engines;
 #[cfg(feature = "net")]
 mod game_copy;
 mod i18n;

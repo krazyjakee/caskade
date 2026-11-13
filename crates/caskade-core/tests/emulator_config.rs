@@ -5,9 +5,10 @@
 //! folder; one changed later on the Deck goes back; and nothing travels
 //! while the category is off.
 
+use crate::cores::within;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use caskade_core::accounts::AccountService;
 use caskade_core::bus::Bus;
@@ -64,18 +65,6 @@ impl Core {
             .into_iter()
             .find(|device| device.id == id && !device.syncing)
             .and_then(|device| device.last_sync_ms)
-    }
-}
-
-async fn within<F, Fut>(what: &str, seconds: u64, check: F)
-where
-    F: Fn() -> Fut,
-    Fut: std::future::Future<Output = bool>,
-{
-    let deadline = Instant::now() + Duration::from_secs(seconds);
-    while !check().await {
-        assert!(Instant::now() < deadline, "{what} within {seconds} s");
-        tokio::time::sleep(Duration::from_millis(100)).await;
     }
 }
 

@@ -92,7 +92,6 @@ struct Inner {
     devices: Devices,
     settings: SettingsService,
     dir: PathBuf,
-    budget: u64,
     kept: tokio::sync::Mutex<Vec<Kept>>,
     /// What each paired device said it keeps, by device id.
     heard: Mutex<HashMap<String, Vec<Kept>>>,
@@ -122,17 +121,6 @@ impl PeerDownloads {
         settings: SettingsService,
         cache: &Path,
     ) -> Self {
-        Self::with_budget(transfers, devices, settings, cache, BUDGET)
-    }
-
-    /// [`new`](Self::new), keeping at most `budget` bytes.
-    pub fn with_budget(
-        transfers: Transfers,
-        devices: Devices,
-        settings: SettingsService,
-        cache: &Path,
-        budget: u64,
-    ) -> Self {
         let dir = cache.join("peer-downloads");
         let kept: Vec<Kept> = std::fs::read(dir.join(INDEX))
             .ok()
@@ -145,7 +133,6 @@ impl PeerDownloads {
                 devices,
                 settings,
                 dir,
-                budget,
                 kept: tokio::sync::Mutex::new(kept),
                 heard: Mutex::default(),
                 http: reqwest::Client::builder()
@@ -193,9 +180,7 @@ impl PeerDownloads {
     }
 
     async fn on(&self) -> bool {
-        self.inner
-            .settings
-            .read_or_default::<SyncSettings>("core.sync")
+        SyncSettings::read(Some(&self.inner.settings))
             .await
             .peer_downloads
     }
@@ -222,11 +207,11 @@ impl PeerDownloads {
                 known.urls.push(url);
             }
             known.validator = file.validator.clone().or(known.validator.take());
-            known.kept_ms = crate::sync::clock::now_ms();
+            known.kept_ms = crate::now_ms();
             self.save(&kept);
             return Ok(());
         }
-        if file.size > self.inner.budget {
+        if file.size > BUDGET {
             return Ok(());
         }
         let name = file
@@ -246,8 +231,7 @@ impl PeerDownloads {
             }
             Ok(())
         })
-        .await
-        .map_err(|error| Error::Invalid(error.to_string()))??;
+        .await??;
         let offered = match self
             .inner
             .transfers
@@ -267,7 +251,7 @@ impl PeerDownloads {
             urls: vec![url],
             validator: file.validator.clone(),
             root: offered.root,
-            kept_ms: crate::sync::clock::now_ms(),
+            kept_ms: crate::now_ms(),
             release: None,
             version: None,
         });
@@ -277,7 +261,7 @@ impl PeerDownloads {
         let mut gone = Vec::new();
         kept.retain(|kept| {
             total += kept.size;
-            let stays = total <= self.inner.budget;
+            let stays = total <= BUDGET;
             if !stays {
                 gone.push(kept.sha256.clone());
             }
@@ -375,11 +359,7 @@ impl PeerDownloads {
     ) -> Result<PathBuf> {
         caskade_installer::fetch::safe_file_name(&kept.name)
             .map_err(|_| Error::Invalid("a file name that isn't one".into()))?;
-        let tag = format!(
-            "near:{}:{}",
-            kept.sha256,
-            crate::sync::clock::now_ms().unsigned_abs()
-        );
+        let tag = format!("near:{}:{}", kept.sha256, crate::now_ms().unsigned_abs());
         let transfers = &self.inner.transfers;
         let fetched = async {
             transfers

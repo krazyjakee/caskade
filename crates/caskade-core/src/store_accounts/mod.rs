@@ -26,7 +26,7 @@ pub use install::{
     this_system,
 };
 mod secrets;
-pub use secrets::{KEYCHAIN_SERVICE, StoreKeychain};
+pub use secrets::KEYCHAIN_SERVICE;
 #[cfg(test)]
 mod auth_tests;
 #[cfg(test)]
@@ -290,16 +290,17 @@ impl StoreAccounts {
         Self::with_secrets(
             store,
             bus,
-            Arc::new(crate::romm::secrets::MemorySecrets::default()),
+            Arc::new(crate::secrets::MemorySecrets::default()),
         )
     }
 
-    /// Sign-ins in `secrets` ([`StoreKeychain`] in the app); in memory for
-    /// the session when it fails.
+    /// Sign-ins in `secrets` (the [`Keychain`](crate::secrets::Keychain)
+    /// under [`KEYCHAIN_SERVICE`] in the app); in memory for the session
+    /// when it fails.
     pub fn with_secrets(
         store: LibraryStore,
         bus: Bus,
-        secrets: Arc<dyn crate::romm::secrets::SecretStore>,
+        secrets: Arc<dyn crate::secrets::SecretStore>,
     ) -> Self {
         Self {
             inner: Arc::new(Inner {
@@ -967,10 +968,5 @@ impl StoreAccounts {
         crate::lock(&self.inner.flights).remove(id);
         self.changed();
         Ok(preview)
-    }
-
-    /// The store accounts that own `game_id`.
-    pub async fn ownership(&self, game_id: &str) -> Result<Vec<Ownership>> {
-        self.inner.store.ownership(game_id).await
     }
 }

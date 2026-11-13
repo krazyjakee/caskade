@@ -1,7 +1,7 @@
 //! Background scan jobs, the review list and its submission.
 
 use super::{
-    JobState, ReviewChoice, ReviewGame, ReviewRom, ScanJob, ScanMode, ScanStatus, ScannerService,
+    ReviewChoice, ReviewGame, ReviewRom, ScanJob, ScanMode, ScanStatus, ScannerService,
     entry_paths,
     overrides::{Choices, Found, review_choices},
     rom_path,
@@ -11,22 +11,16 @@ use crate::{
     bus::Event,
     emulation::{
         RomScanner,
+        job_table::TableJob,
         scan::{CancellationToken, ScanPhase, ScanProgress},
     },
-    lock,
     model::new_id,
 };
 use std::collections::HashMap;
 
 impl ScannerService {
     fn update_job(&self, id: &str, change: impl FnOnce(&mut ScanJob)) -> Option<ScanJob> {
-        let job = {
-            let mut jobs = lock(&self.shared.jobs);
-            let state = jobs.get_mut(id)?;
-            change(&mut state.job);
-            state.job.revision += 1;
-            state.job.clone()
-        };
+        let job = self.shared.jobs.update(id, change)?;
         self.bus
             .emit(Event::EmulationScanChanged(Box::new(job.clone())));
         Some(job)
@@ -54,27 +48,10 @@ impl ScannerService {
             warnings: Vec::new(),
             error: None,
         };
-        {
-            let mut jobs = lock(&self.shared.jobs);
-            // Finished scans beyond the last few are dropped.
-            let finished: Vec<String> = jobs
-                .iter()
-                .filter(|(_, state)| {
-                    !matches!(state.job.status, ScanStatus::Running | ScanStatus::Review)
-                })
-                .map(|(id, _)| id.clone())
-                .collect();
-            for id in finished.iter().take(finished.len().saturating_sub(7)) {
-                jobs.remove(id);
-            }
-            jobs.insert(
-                job.id.clone(),
-                JobState {
-                    job: job.clone(),
-                    cancel: cancel.clone(),
-                },
-            );
-        }
+        // Finished scans beyond the last few are dropped.
+        self.shared
+            .jobs
+            .insert(job.clone(), cancel.clone(), Some(7));
         self.bus
             .emit(Event::EmulationScanChanged(Box::new(job.clone())));
         let service = self.clone();
@@ -179,32 +156,23 @@ impl ScannerService {
     }
 
     pub fn get(&self, id: &str) -> Option<ScanJob> {
-        lock(&self.shared.jobs)
-            .get(id)
-            .map(|state| state.job.clone())
+        self.shared.jobs.job(id)
     }
 
     /// Retained scans, newest first; the UI resumes a review from here.
     pub fn jobs(&self) -> Vec<ScanJob> {
-        let mut jobs: Vec<ScanJob> = lock(&self.shared.jobs)
-            .values()
-            .map(|state| state.job.clone())
-            .collect();
-        jobs.sort_by(|a, b| b.id.cmp(&a.id));
+        let mut jobs = self.shared.jobs.jobs();
+        jobs.reverse();
         jobs
     }
 
     pub fn cancel(&self, id: &str) -> Option<ScanJob> {
-        let running = {
-            let jobs = lock(&self.shared.jobs);
-            let state = jobs.get(id)?;
-            state.cancel.cancel();
-            matches!(state.job.status, ScanStatus::Running | ScanStatus::Review)
-        };
-        if running {
-            self.update_job(id, |job| job.status = ScanStatus::Cancelled)
+        let (job, cancel) = self.shared.jobs.get(id)?;
+        cancel.cancel();
+        if job.finished() {
+            Some(job)
         } else {
-            self.get(id)
+            self.update_job(id, |job| job.status = ScanStatus::Cancelled)
         }
     }
 
@@ -261,9 +229,11 @@ impl ScannerService {
             job.status = ScanStatus::Running;
             job.mode = ScanMode::Import;
         });
-        let cancel = lock(&self.shared.jobs)
+        let cancel = self
+            .shared
+            .jobs
             .get(job_id)
-            .map(|state| state.cancel.clone())
+            .map(|(_, cancel)| cancel)
             .unwrap_or_default();
         let outcome = self.import_now(&job.scanner_id, &cancel, |_| {}).await;
         if let Ok(summary) = &outcome {

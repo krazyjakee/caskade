@@ -120,6 +120,29 @@ fn appearance_v2(mut previous: serde_json::Value) -> Result<serde_json::Value> {
     Ok(previous)
 }
 
+/// `core.discovery` 1 → 2: drops the choices nothing ever read
+/// (`rescanAfterLauncherInstall`, `mergeDuplicates`,
+/// `preferLauncherMetadata`, `deepScans.romDirectories`).
+fn discovery_v2(mut previous: serde_json::Value) -> Result<serde_json::Value> {
+    let object = previous
+        .as_object_mut()
+        .ok_or(super::SettingsError::Stored)?;
+    for key in [
+        "rescanAfterLauncherInstall",
+        "mergeDuplicates",
+        "preferLauncherMetadata",
+    ] {
+        object.remove(key);
+    }
+    if let Some(deep) = object
+        .get_mut("deepScans")
+        .and_then(serde_json::Value::as_object_mut)
+    {
+        deep.remove("romDirectories");
+    }
+    Ok(previous)
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct LauncherSettings {
@@ -154,7 +177,6 @@ impl Default for LauncherSettings {
 pub struct DeepScanSettings {
     pub custom_folders: bool,
     pub external_drives: bool,
-    pub rom_directories: bool,
     pub portable_executables: bool,
     pub wine_prefixes: bool,
     pub full_disk: bool,
@@ -167,10 +189,7 @@ pub struct DiscoverySettings {
     pub background_refresh: bool,
     #[schemars(regex(pattern = "^(1h|6h|12h|24h|7d)$"))]
     pub refresh_interval: String,
-    pub rescan_after_launcher_install: bool,
     pub watch_folders: bool,
-    pub merge_duplicates: bool,
-    pub prefer_launcher_metadata: bool,
     pub deep_scans: DeepScanSettings,
     pub os_checks: BTreeMap<String, BTreeMap<String, bool>>,
     /// Absolute custom scan roots, used only with deepScans.customFolders.
@@ -225,10 +244,7 @@ impl Default for DiscoverySettings {
             scan_on_startup: true,
             background_refresh: true,
             refresh_interval: "24h".into(),
-            rescan_after_launcher_install: true,
             watch_folders: true,
-            merge_duplicates: true,
-            prefer_launcher_metadata: true,
             deep_scans: DeepScanSettings::default(),
             os_checks,
             scan_paths: Vec::new(),
@@ -491,10 +507,10 @@ impl SettingsService {
             "core.launchers",
             1,
         )?)?;
-        self.register(SectionDefinition::typed::<DiscoverySettings>(
-            "core.discovery",
-            1,
-        )?)?;
+        self.register(
+            SectionDefinition::typed::<DiscoverySettings>("core.discovery", 2)?
+                .migration(1, discovery_v2)?,
+        )?;
         self.register(SectionDefinition::typed::<StorageSettings>(
             "core.storage",
             1,
@@ -543,7 +559,10 @@ impl SettingsService {
             1,
         )?)?;
         self.register(
-            SectionDefinition::typed::<crate::sync::policy::SyncSettings>("core.sync", 1)?,
+            SectionDefinition::typed::<crate::sync::policy::SyncSettings>(
+                crate::sync::policy::SyncSettings::NAMESPACE,
+                1,
+            )?,
         )?;
         self.register(SectionDefinition::typed::<AccountsSettings>(
             "core.accounts",

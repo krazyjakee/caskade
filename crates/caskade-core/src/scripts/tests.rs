@@ -350,9 +350,9 @@ mod processes {
 
     #[test]
     fn programs_are_found_on_the_path() {
-        assert!(find_program(Path::new("sh")).is_some());
-        assert!(find_program(Path::new("no-such-interpreter-xyz")).is_none());
-        assert!(find_program(Path::new("/bin/sh")).is_some());
+        assert!(find_program(Path::new("sh"), None).is_some());
+        assert!(find_program(Path::new("no-such-interpreter-xyz"), None).is_none());
+        assert!(find_program(Path::new("/bin/sh"), None).is_some());
     }
     use std::path::Path;
 }

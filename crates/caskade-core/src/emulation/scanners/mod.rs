@@ -27,7 +27,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::{
-    collections::{BTreeMap, HashMap},
+    collections::HashMap,
     path::Path,
     sync::{Arc, Mutex},
 };
@@ -186,16 +186,23 @@ pub struct ScanJob {
     pub error: Option<String>,
 }
 
-struct JobState {
-    job: ScanJob,
-    cancel: CancellationToken,
+impl super::job_table::TableJob for ScanJob {
+    fn id(&self) -> &str {
+        &self.id
+    }
+    fn revision(&mut self) -> &mut u32 {
+        &mut self.revision
+    }
+    fn finished(&self) -> bool {
+        !matches!(self.status, ScanStatus::Running | ScanStatus::Review)
+    }
 }
 
 /// Scan jobs and per-scanner locks, shared by every `ScannerService` of one
 /// emulation service.
 #[derive(Default)]
 pub struct ScanShared {
-    jobs: Mutex<BTreeMap<String, JobState>>,
+    jobs: super::job_table::JobTable<ScanJob, CancellationToken>,
     busy: Mutex<HashMap<String, Arc<tokio::sync::Mutex<()>>>>,
 }
 

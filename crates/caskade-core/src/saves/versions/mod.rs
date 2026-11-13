@@ -325,7 +325,7 @@ impl SaveVersions {
     pub async fn syncing(&self) -> bool {
         match self.inner.settings.get() {
             Some(settings) => settings
-                .read_or_default::<SyncSettings>("core.sync")
+                .read_or_default::<SyncSettings>(SyncSettings::NAMESPACE)
                 .await
                 .allows(Category::Saves),
             None => true,
@@ -399,8 +399,7 @@ impl SaveVersions {
             };
             (manifest, sources)
         })
-        .await
-        .map_err(|error| Error::Io(std::io::Error::other(error)))?;
+        .await?;
         if manifest.size() > MAX_BYTES {
             return Err(Error::Invalid(crate::tr!(
                 "This game's saves are too large to keep versions of."
@@ -463,15 +462,14 @@ impl SaveVersions {
             }
             blobs.put_bytes(&kept.bytes())
         })
-        .await
-        .map_err(|error| Error::Io(std::io::Error::other(error)))??;
+        .await??;
         let version = SaveVersion {
             id: uuid::Uuid::now_v7().to_string(),
             game_id: game_id.to_owned(),
             account_id: account.clone(),
             device_id: self.device(),
             session_id: session_id.map(str::to_owned),
-            created_at_ms: crate::sync::clock::now_ms(),
+            created_at_ms: crate::now_ms(),
             content_hash: content.clone(),
             size_bytes: manifest.size(),
             file_count: u32::try_from(manifest.files.len()).unwrap_or(u32::MAX),
@@ -517,10 +515,7 @@ impl SaveVersions {
     }
 
     fn manifest(&self, hash: &str) -> Option<Manifest> {
-        let bytes = self.inner.blobs.get_bytes(hash).ok()?;
-        (hash_bytes(&bytes) == hash)
-            .then(|| serde_json::from_slice(&bytes).ok())
-            .flatten()
+        manifest(&self.inner.blobs, hash)
     }
 
     /// Before a launch: keeps what changed here, then puts a newer save from
@@ -610,8 +605,7 @@ impl SaveVersions {
             }
             Ok::<_, Error>(warnings)
         })
-        .await
-        .map_err(|error| Error::Io(std::io::Error::other(error)))??;
+        .await??;
         let (disk, _, _, _) = self.on_disk(entry_id).await?;
         self.store()
             .set_save_head(game_id, account, &version.id, &disk.hash())
@@ -663,7 +657,7 @@ impl SaveVersions {
             account_id: account.clone(),
             device_id: self.device(),
             session_id: None,
-            created_at_ms: crate::sync::clock::now_ms(),
+            created_at_ms: crate::now_ms(),
             content_hash: chosen.content_hash.clone(),
             size_bytes: chosen.size_bytes,
             file_count: chosen.file_count,
@@ -761,44 +755,60 @@ impl SaveVersions {
         self.store().delete_save_versions(&drop).await?;
         let referenced = self.referenced().await?;
         let blobs = self.inner.blobs.clone();
-        tokio::task::spawn_blocking(move || blobs.collect_garbage(&referenced))
-            .await
-            .map_err(|error| Error::Io(std::io::Error::other(error)))??;
+        tokio::task::spawn_blocking(move || blobs.collect_garbage(&referenced)).await??;
         Ok(())
     }
 
     /// Every blob a version here names: file lists and their files.
     async fn referenced(&self) -> Result<HashSet<String>> {
-        let mut referenced = HashSet::new();
-        for content in self.store().save_content_hashes().await? {
-            if let Some(manifest) = self.manifest(&content) {
-                referenced.extend(manifest.files.into_iter().map(|file| file.hash));
+        let contents = self.store().save_content_hashes().await?;
+        let blobs = self.inner.blobs.clone();
+        Ok(tokio::task::spawn_blocking(move || {
+            let mut referenced = HashSet::new();
+            for content in contents {
+                if let Some(manifest) = manifest(&blobs, &content) {
+                    referenced.extend(manifest.files.into_iter().map(|file| file.hash));
+                }
+                referenced.insert(content);
             }
-            referenced.insert(content);
-        }
-        Ok(referenced)
+            referenced
+        })
+        .await?)
     }
 
     /// Blobs the versions here name and this device lacks: a file list,
     /// then once it's here, its files.
     pub async fn wanted(&self) -> Result<Vec<String>> {
-        let mut wanted = Vec::new();
-        for content in self.store().save_content_hashes().await? {
-            match self.manifest(&content) {
-                Some(manifest) => wanted.extend(
-                    manifest
-                        .files
-                        .into_iter()
-                        .map(|file| file.hash)
-                        .filter(|hash| !self.inner.blobs.has(hash)),
-                ),
-                None => wanted.push(content),
+        let contents = self.store().save_content_hashes().await?;
+        let blobs = self.inner.blobs.clone();
+        Ok(tokio::task::spawn_blocking(move || {
+            let mut wanted = Vec::new();
+            for content in contents {
+                match manifest(&blobs, &content) {
+                    Some(manifest) => wanted.extend(
+                        manifest
+                            .files
+                            .into_iter()
+                            .map(|file| file.hash)
+                            .filter(|hash| !blobs.has(hash)),
+                    ),
+                    None => wanted.push(content),
+                }
             }
-        }
-        wanted.sort();
-        wanted.dedup();
-        Ok(wanted)
+            wanted.sort();
+            wanted.dedup();
+            wanted
+        })
+        .await?)
     }
+}
+
+/// The file list stored as `hash`, if it is here and intact.
+fn manifest(blobs: &BlobStore, hash: &str) -> Option<Manifest> {
+    let bytes = blobs.get_bytes(hash).ok()?;
+    (hash_bytes(&bytes) == hash)
+        .then(|| serde_json::from_slice(&bytes).ok())
+        .flatten()
 }
 
 /// Keeps a version after every play session.

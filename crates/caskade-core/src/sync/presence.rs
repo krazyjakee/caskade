@@ -105,11 +105,7 @@ impl Presence {
 
     /// The account playing here now.
     pub fn set_account(&self, account: impl Fn() -> Option<String> + Send + Sync + 'static) {
-        *self
-            .inner
-            .account
-            .write()
-            .unwrap_or_else(|e| e.into_inner()) = Arc::new(account);
+        *crate::write(&self.inner.account) = Arc::new(account);
     }
 
     /// Fires whenever another device's presence changes here.
@@ -143,8 +139,7 @@ impl Presence {
 
     /// The sessions running here, in this device's ids.
     async fn local(&self) -> Result<Vec<Session>> {
-        let account =
-            (self.inner.account.read().unwrap_or_else(|e| e.into_inner()))().unwrap_or_default();
+        let account = (crate::read(&self.inner.account))().unwrap_or_default();
         Ok(self
             .inner
             .store
@@ -162,7 +157,7 @@ impl Presence {
 
     fn receive(&self, device: &str, playing: Vec<Playing>) {
         let changed = {
-            let mut remote = self.inner.remote.lock().unwrap_or_else(|e| e.into_inner());
+            let mut remote = crate::lock(&self.inner.remote);
             let before = remote.get(device).map(|received| received.playing.clone());
             remote.insert(
                 device.to_owned(),
@@ -185,7 +180,7 @@ impl Presence {
         let status = devices.status().await;
         let now = crate::now_ms();
         let fresh = i64::try_from(FRESH.as_millis()).unwrap_or(i64::MAX);
-        let remote = self.inner.remote.lock().unwrap_or_else(|e| e.into_inner());
+        let remote = crate::lock(&self.inner.remote);
         let mut playing: Vec<Playing> = status
             .devices
             .iter()
@@ -201,13 +196,7 @@ impl Presence {
 
     /// Forgets what a device said (it was forgotten, say).
     pub fn forget(&self, device: &str) {
-        let removed = self
-            .inner
-            .remote
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .remove(device)
-            .is_some();
+        let removed = crate::lock(&self.inner.remote).remove(device).is_some();
         if removed {
             let _ = self.inner.changed.send(());
         }

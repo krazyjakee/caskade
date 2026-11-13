@@ -157,6 +157,18 @@ impl Default for SyncSettings {
 }
 
 impl SyncSettings {
+    /// The settings section these choices live in.
+    pub const NAMESPACE: &str = "core.sync";
+
+    /// The saved choices; the defaults without `settings` or when they're
+    /// unreadable.
+    pub async fn read(settings: Option<&crate::settings::SettingsService>) -> Self {
+        match settings {
+            Some(settings) => settings.read_or_default(Self::NAMESPACE).await,
+            None => Self::default(),
+        }
+    }
+
     pub fn state(&self, category: Category) -> CategoryState {
         self.categories
             .get(&category)
@@ -841,7 +853,7 @@ pub const SETTINGS: &[Rule] = &[
         "achievement refresh preferences belong to this device",
     ),
     local(
-        "core.sync",
+        SyncSettings::NAMESPACE,
         "this device's category choices govern sending and applying; they do not overwrite another device's choices",
     ),
     local(

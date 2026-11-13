@@ -106,7 +106,6 @@ async fn checks_find_newer_releases_and_respect_the_user_s_choices() {
     // Just checked: Play offers it without asking GitHub again.
     let offered = f.updates.before_play(&game.id).await.unwrap().unwrap();
     assert_eq!(offered.checked_at_ms, update.checked_at_ms);
-    assert_eq!(f.updates.available().await.unwrap().len(), 1);
 
     let skipped = f.updates.skip(&game.id, Some("v1.1".into())).await.unwrap();
     assert!(!skipped.available);

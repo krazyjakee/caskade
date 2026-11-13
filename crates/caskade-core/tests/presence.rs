@@ -3,6 +3,7 @@
 //! ends; reading presence never waits on the network, and a device that
 //! can't be reached stops counting.
 
+use crate::cores::within;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -34,15 +35,14 @@ impl Core {
 
     /// The game starts here, as the launch service records and announces it.
     async fn start(&self) -> PlaySession {
-        let session =
-            PlaySession::new(&self.game, &self.entry, caskade_core::sync::clock::now_ms());
+        let session = PlaySession::new(&self.game, &self.entry, caskade_core::now_ms());
         self.store.start_session(&session).await.unwrap();
         self.bus.emit(Event::GameStarted(event(&session)));
         session
     }
 
     async fn exit(&self, session: &PlaySession) {
-        let now = caskade_core::sync::clock::now_ms();
+        let now = caskade_core::now_ms();
         let ended = self
             .store
             .finish_session(&session.id, now, 1000)
@@ -128,18 +128,6 @@ async fn pair(a: &Core, b: &Core) {
             .any(|d| d.id == b_id)
     })
     .await;
-}
-
-async fn within<F, Fut>(what: &str, seconds: u64, check: F)
-where
-    F: Fn() -> Fut,
-    Fut: std::future::Future<Output = bool>,
-{
-    let deadline = Instant::now() + Duration::from_secs(seconds);
-    while !check().await {
-        assert!(Instant::now() < deadline, "{what} within {seconds} s");
-        tokio::time::sleep(Duration::from_millis(100)).await;
-    }
 }
 
 #[tokio::test(flavor = "multi_thread")]

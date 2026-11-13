@@ -5,6 +5,7 @@
 //! The Windows device is a fixture machine, so the Windows paths run as
 //! path logic on any host.
 
+use crate::cores::within;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -215,18 +216,6 @@ async fn exchange_now(a: &Core, b: &Core) {
     session.end().await;
     // The other side finishes keeping what it received.
     tokio::time::sleep(Duration::from_millis(300)).await;
-}
-
-async fn within<F, Fut>(what: &str, seconds: u64, check: F)
-where
-    F: Fn() -> Fut,
-    Fut: std::future::Future<Output = bool>,
-{
-    let deadline = Instant::now() + Duration::from_secs(seconds);
-    while !check().await {
-        assert!(Instant::now() < deadline, "{what} within {seconds} s");
-        tokio::time::sleep(Duration::from_millis(100)).await;
-    }
 }
 
 async fn session(core: &Core) -> caskade_core::saves::versions::SaveVersion {

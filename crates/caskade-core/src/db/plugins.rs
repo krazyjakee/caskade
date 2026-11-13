@@ -6,11 +6,11 @@ use super::LibraryStore;
 use crate::{Error, Result, now_ms};
 
 /// The longest key a plugin may store.
-pub const PLUGIN_KEY_MAX: usize = 256;
+const PLUGIN_KEY_MAX: usize = 256;
 /// The largest value a plugin may store under one key.
-pub const PLUGIN_VALUE_MAX: usize = 64 * 1024;
+const PLUGIN_VALUE_MAX: usize = 64 * 1024;
 /// The most a plugin may store in total.
-pub const PLUGIN_KV_TOTAL_MAX: usize = 4 * 1024 * 1024;
+const PLUGIN_KV_TOTAL_MAX: usize = 4 * 1024 * 1024;
 
 /// One installed plugin's persisted state.
 #[derive(Debug, Clone, PartialEq)]

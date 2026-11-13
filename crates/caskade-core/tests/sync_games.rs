@@ -3,47 +3,8 @@
 //! games by store id, IGDB id or title, and keep that match through renames,
 //! merges and games kept apart.
 
-use caskade_core::accounts::AccountService;
-use caskade_core::bus::Bus;
-use caskade_core::db::LibraryStore;
+use crate::engines::{Device, device, exchange};
 use caskade_core::model::{ExternalId, Game, GameEdit, GameEntry, PlaySession, TextEdit};
-use caskade_core::sync::SyncEngine;
-
-struct Device {
-    engine: SyncEngine,
-    store: LibraryStore,
-}
-
-async fn device(name: char) -> Device {
-    let store = LibraryStore::in_memory().await.unwrap();
-    AccountService::open(store.clone(), Bus::default())
-        .await
-        .unwrap();
-    Device {
-        engine: SyncEngine::new(store.clone(), name.to_string().repeat(64)),
-        store,
-    }
-}
-
-async fn send(from: &Device, to: &Device) {
-    loop {
-        let cursor = to.engine.seen().await.unwrap();
-        let changes = from.engine.changes_for(&cursor, 100).await.unwrap();
-        if changes.is_empty() {
-            break;
-        }
-        to.engine.receive(&changes).await.unwrap();
-    }
-}
-
-async fn sync(a: &Device, b: &Device) {
-    for _ in 0..3 {
-        a.engine.capture().await.unwrap();
-        b.engine.capture().await.unwrap();
-        send(a, b).await;
-        send(b, a).await;
-    }
-}
 
 /// A game with one entry per `(source, external id, store id)`.
 async fn game(
@@ -116,7 +77,7 @@ async fn the_same_steam_game_is_one_game_with_both_devices_sessions() {
     )
     .await;
 
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
 
     // One Doom on each, holding both sessions.
     let laptop_games = all_games(&laptop).await;
@@ -186,7 +147,7 @@ async fn a_game_kept_apart_on_one_device_stays_apart_on_the_other() {
         ],
     )
     .await;
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert_eq!(all_games(&laptop).await.len(), 1);
 
     // On the desk, the GOG release is separated into a game of its own.
@@ -196,7 +157,7 @@ async fn a_game_kept_apart_on_one_device_stays_apart_on_the_other() {
         .separate_entry(&desk_entries[1], &platforms, &platforms)
         .await
         .unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
 
     // The laptop separates the same release, and keeps it apart.
     let games = all_games(&laptop).await;
@@ -222,7 +183,7 @@ async fn a_game_kept_apart_on_one_device_stays_apart_on_the_other() {
         String::new()
     )));
     // And nothing merges them back on another round.
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert_eq!(all_games(&laptop).await.len(), 2);
     assert_eq!(all_games(&desk).await.len(), 2);
 }
@@ -234,7 +195,7 @@ async fn renaming_a_game_doesnt_break_the_match() {
     // Matched by title, platform and year: no store ids in common.
     let (desk_game, _) = game(&desk, "Hollow Knight", &[]).await;
     let (laptop_game, _) = game(&laptop, "Hollow Knight", &[]).await;
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert_eq!(all_games(&laptop).await.len(), 1);
 
     let rename = GameEdit {
@@ -245,7 +206,7 @@ async fn renaming_a_game_doesnt_break_the_match() {
         .edit_game(&desk_game, &rename, None)
         .await
         .unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     let shown = laptop.store.game(&laptop_game).await.unwrap().unwrap();
     assert_eq!(shown.title, "HK", "the rename arrived on the same game");
     assert_eq!(all_games(&laptop).await.len(), 1);
@@ -255,7 +216,7 @@ async fn renaming_a_game_doesnt_break_the_match() {
         .set_game_favorite(&desk_game, true)
         .await
         .unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert!(
         laptop
             .store
@@ -271,7 +232,7 @@ async fn renaming_a_game_doesnt_break_the_match() {
         .set_game_hidden(&laptop_game, true)
         .await
         .unwrap();
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     assert!(desk.store.game(&desk_game).await.unwrap().unwrap().hidden);
     assert_eq!(all_games(&desk).await.len(), 1);
 }
@@ -309,7 +270,7 @@ async fn machine_specific_ids_never_match_games() {
         &[("manual", "b", ExternalId::Steam { app_id: 42 })],
     )
     .await;
-    sync(&desk, &laptop).await;
+    exchange(&desk.engine, &laptop.engine).await;
     let titles: Vec<String> = all_games(&laptop)
         .await
         .into_iter()
@@ -400,7 +361,7 @@ async fn a_session_keeps_the_device_it_was_played_on_through_sync() {
     assert_eq!(played_on(&den, "Celeste").await, None);
 
     // The laptop, where Celeste isn't installed, names the den.
-    sync(&den, &laptop).await;
+    exchange(&den.engine, &laptop.engine).await;
     assert_eq!(
         played_on(&laptop, "Celeste").await,
         Some(caskade_core::model::PlayedOn {
@@ -409,7 +370,7 @@ async fn a_session_keeps_the_device_it_was_played_on_through_sync() {
         })
     );
     // Forwarded by the laptop, the TV keeps the den, which it has no name for.
-    sync(&laptop, &tv).await;
+    exchange(&laptop.engine, &tv.engine).await;
     assert_eq!(
         played_on(&tv, "Celeste").await,
         Some(caskade_core::model::PlayedOn {
@@ -431,7 +392,7 @@ async fn a_session_keeps_the_device_it_was_played_on_through_sync() {
         .id;
     played(&laptop, &laptop_celeste, &entry, 5_000_000, 10).await;
     assert_eq!(played_on(&laptop, "Celeste").await, None);
-    sync(&den, &laptop).await;
+    exchange(&den.engine, &laptop.engine).await;
     assert_eq!(
         played_on(&den, "Celeste").await,
         Some(caskade_core::model::PlayedOn {

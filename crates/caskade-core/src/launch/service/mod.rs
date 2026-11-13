@@ -1,12 +1,12 @@
 use super::{
     EmulatorLaunches, LaunchChoice, LaunchCommand, LaunchError, LaunchEvent, LaunchHooks,
     LaunchTicket, NoHooks, NoPluginRunner, PlayGate, PluginRunner, PreparedLaunch, Result,
-    RunnerPaths, SessionStatus, actions, resolve_with_runners, store_error,
+    RunnerPaths, SessionStatus, actions, resolve, store_error,
 };
 use crate::{
     model::{GameAction, GameEntry, InstallLocation, LaunchSpec, PlaySession},
     now_ms,
-    scripts::{ScriptContext, ScriptPhase, ScriptRunner, ScriptSet, ScriptStatus},
+    scripts::{ScriptContext, ScriptPhase, ScriptRunner, ScriptSet},
     sessions::{RecoveryState, ScriptState, SessionRepository},
     tracking::{LiveTracker, ProcessMonitor, ProcessTracker},
 };
@@ -103,7 +103,6 @@ pub struct LaunchService {
     runner_timeout: Duration,
     running: Arc<Mutex<BTreeMap<String, CancellationToken>>>,
     script_runner: ScriptRunner,
-    starting: Arc<Mutex<BTreeMap<String, CancellationToken>>>,
     /// The trackers of the sessions being followed: what [`Self::stop`]
     /// asks for processes newer than the stored ones.
     pub(super) live: Arc<Mutex<BTreeMap<String, LiveTracker>>>,
@@ -135,7 +134,6 @@ impl LaunchService {
             runner_timeout: RUNNER_TIMEOUT,
             running: Arc::default(),
             script_runner: ScriptRunner::default(),
-            starting: Arc::default(),
             live: Arc::default(),
             stopped: Arc::default(),
             streamer: Arc::default(),
@@ -371,33 +369,22 @@ impl LaunchService {
             .repository
             .scripts(&entry.game_id, context.profile_id.as_deref())
             .await?;
-        let starting = self.starting(&entry.game_id);
         let before = self
             .script_runner
             .run_phase(
                 &scripts,
                 ScriptPhase::BeforeLaunch,
                 &context,
-                &starting.cancel,
+                &CancellationToken::new(),
             )
             .await;
         self.report(&before).await;
         if let Some(failed) = before.failed() {
-            let cancelled = failed.status == ScriptStatus::Cancelled;
-            self.cleanup(
-                &scripts,
-                &context,
-                if cancelled { "cancelled" } else { "failed" },
-            )
-            .await;
-            return Err(if cancelled {
-                LaunchError::Cancelled
-            } else {
-                LaunchError::Refused(crate::tr!(
-                    "The before-launch script {why}, so the game wasn't started.",
-                    why = failed.describe()
-                ))
-            });
+            self.cleanup(&scripts, &context, "failed").await;
+            return Err(LaunchError::Refused(crate::tr!(
+                "The before-launch script {why}, so the game wasn't started.",
+                why = failed.describe()
+            )));
         }
         let mut state = RecoveryState::pending(prepared.target.clone());
         state.action = Some(action.id.clone());
@@ -561,7 +548,7 @@ impl LaunchService {
                 .resolve(entry, root)
                 .await
         } else {
-            resolve_with_runners(
+            resolve(
                 entry,
                 root,
                 self.aliases.clone(),

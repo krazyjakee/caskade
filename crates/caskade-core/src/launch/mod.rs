@@ -22,7 +22,7 @@ pub use command::{EmulationLaunch, LaunchCommand, managed_path, uri_command};
 pub use events::{LaunchEvent, LaunchTicket, SessionStatus};
 pub use hooks::LaunchPreparer;
 pub use hooks::{LaunchHooks, NoHooks, NoPluginRunner, PlayGate, PluginRunner};
-pub use resolve::{PreparedLaunch, resolve, resolve_with_runners};
+pub use resolve::{PreparedLaunch, resolve};
 pub use service::{GameLease, LaunchConfig, LaunchHandle, LaunchService};
 pub use stream::{ClientLine, HostBusy, StreamLauncher, StreamStart};
 pub use web::{

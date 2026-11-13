@@ -140,15 +140,6 @@ impl CachedArtwork {
             .collect();
         artwork
     }
-
-    /// Grids/lists/details explicitly select bounded thumbnails, never a
-    /// fallback to the original full-size image.
-    pub fn thumbnail_uri(&self, size: u32) -> Option<String> {
-        self.thumbnails
-            .iter()
-            .find(|t| t.size == size)
-            .map(|t| format!("caskade-asset://localhost/{}", t.path))
-    }
 }
 pub(super) fn valid_hash(hash: &str) -> bool {
     hash.len() == 64

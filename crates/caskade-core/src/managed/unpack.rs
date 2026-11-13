@@ -62,29 +62,40 @@ pub(crate) fn unpack(file: &Path, into: &Path) -> Result<()> {
 }
 
 fn extract(archive: &Path, into: &Path) -> Result<()> {
-    fs::create_dir_all(into)?;
-    use caskade_installer::{
-        formats::archive::{self, ArchiveOptions, NoopControl},
-        safety::{Limits, SafeDir, open_staging},
-    };
-    let packed = fs::metadata(archive)?.len();
-    let root = open_staging(into).map_err(|error| invalid(error.to_string()))?;
-    let case_sensitive = !cfg!(any(windows, target_os = "macos"));
-    let mut dir = SafeDir::new(root, Limits::default(), packed, case_sensitive);
-    archive::extract_path(
-        archive,
-        &mut dir,
-        &ArchiveOptions::default(),
-        &mut NoopControl,
-    )
-    .map_err(|error| {
+    extract_into(archive, into)?.map_err(|error| {
         invalid(crate::tr!(
             "couldn't unpack {archive}: {error}",
             archive = archive.display(),
             error = error
         ))
-    })?;
-    Ok(())
+    })
+}
+
+/// Unpacks `archive` into `into` with the installer's bounded extractor.
+/// The outer error is the file system's, the inner one the archive's.
+pub(crate) fn extract_into(
+    archive: &Path,
+    into: &Path,
+) -> std::io::Result<std::result::Result<(), String>> {
+    use caskade_installer::{
+        formats::archive::{self, ArchiveOptions, NoopControl},
+        safety::{Limits, SafeDir, open_staging},
+    };
+    fs::create_dir_all(into)?;
+    let packed = fs::metadata(archive)?.len();
+    let root = match open_staging(into) {
+        Ok(root) => root,
+        Err(error) => return Ok(Err(error.to_string())),
+    };
+    let case_sensitive = !cfg!(any(windows, target_os = "macos"));
+    let mut dir = SafeDir::new(root, Limits::default(), packed, case_sensitive);
+    Ok(archive::extract_path(
+        archive,
+        &mut dir,
+        &ArchiveOptions::default(),
+        &mut NoopControl,
+    )
+    .map_err(|error| error.to_string()))
 }
 
 /// Copies the apps out of a disk image.

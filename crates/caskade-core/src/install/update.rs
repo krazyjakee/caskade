@@ -88,7 +88,12 @@ impl InstallService {
             version,
             launch,
         };
-        let cancel = self.add_job(snapshot.clone(), Some(target), DiscoveryHints::default());
+        let cancel = self.add_job(
+            snapshot.clone(),
+            Some(target),
+            DiscoveryHints::default(),
+            None,
+        );
         self.spawn_update(id, input, root, cancel);
         Ok(snapshot)
     }
@@ -353,17 +358,14 @@ fn set_aside_dir(root: &Path, id: &str) -> Result<PathBuf> {
 }
 
 async fn move_dir(from: PathBuf, to: PathBuf) -> Result<()> {
-    tokio::task::spawn_blocking(move || std::fs::rename(from, to))
-        .await
-        .map_err(|e| Error::Invalid(e.to_string()))??;
+    tokio::task::spawn_blocking(move || std::fs::rename(from, to)).await??;
     Ok(())
 }
 
 async fn read_manifest(dir: &Path) -> Result<InstallManifest> {
     let dir = dir.to_path_buf();
     tokio::task::spawn_blocking(move || InstallManifest::read(&dir))
-        .await
-        .map_err(|e| Error::Invalid(e.to_string()))?
+        .await?
         .map_err(|e| Error::Invalid(e.to_string()))
 }
 

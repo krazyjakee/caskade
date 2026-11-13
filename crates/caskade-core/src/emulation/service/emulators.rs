@@ -348,17 +348,7 @@ impl EmulationService {
                 args,
                 ..
             } => {
-                let definition_id = definition
-                    .ok_or_else(|| crate::tr!("a built-in profile needs an emulator definition"))?;
-                let definition = catalog
-                    .emulator(definition_id)
-                    .ok_or_else(|| crate::tr!("Caskade doesn't know this emulator."))?;
-                let base = definition.profile(definition_profile).ok_or_else(|| {
-                    crate::tr!(
-                        "{emulator} no longer has this profile.",
-                        emulator = definition.name
-                    )
-                })?;
+                let (definition, base) = catalog.built_in(definition, definition_profile)?;
                 let drift = match args {
                     ArgsOverride::Replace { replaced, .. }
                         if !replaced.is_empty() && *replaced != base.args =>

@@ -88,15 +88,6 @@ impl Clock {
     }
 }
 
-/// The wall clock, in milliseconds since the Unix epoch.
-pub fn now_ms() -> i64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map_or(0, |since| {
-            i64::try_from(since.as_millis()).unwrap_or(i64::MAX)
-        })
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

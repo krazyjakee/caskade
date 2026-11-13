@@ -4,7 +4,7 @@
 //! is never changed.
 
 use caskade_core::db::LibraryStore;
-use caskade_core::device_type::{DeviceType, detect_windows, settle_new_device};
+use caskade_core::device_type::{DeviceKind, detect_windows, settle_new_device};
 use caskade_core::model::Game;
 use caskade_core::paths::AppPaths;
 use caskade_core::settings::SettingsService;
@@ -95,7 +95,7 @@ fn windows_machines_are_told_apart_by_firmware_names_and_battery() {
     ] {
         assert_eq!(
             detect_windows(&windows(values)),
-            DeviceType::Handheld,
+            DeviceKind::Handheld,
             "{values:?}"
         );
     }
@@ -105,25 +105,25 @@ fn windows_machines_are_told_apart_by_firmware_names_and_battery() {
         ("SystemProductName", "HP Pavilion Desktop"),
         ("BaseBoardProduct", "83E1"),
     ]);
-    assert_eq!(detect_windows(&desktop), DeviceType::Desktop);
+    assert_eq!(detect_windows(&desktop), DeviceKind::Desktop);
     // Only a battery that is here now counts.
     assert_eq!(
         detect_windows(&with_battery(desktop.clone(), false)),
-        DeviceType::Desktop
+        DeviceKind::Desktop
     );
     assert_eq!(
         detect_windows(&with_battery(desktop, true)),
-        DeviceType::Laptop
+        DeviceKind::Laptop
     );
     assert_eq!(
         detect_windows(&with_battery(
             windows(&[("SystemProductName", "83E1")]),
             true
         )),
-        DeviceType::Handheld
+        DeviceKind::Handheld
     );
     // Nothing readable at all: a desktop.
-    assert_eq!(detect_windows(&MemoryRegistry::new()), DeviceType::Desktop);
+    assert_eq!(detect_windows(&MemoryRegistry::new()), DeviceKind::Desktop);
 }
 
 /// The real registry, on CI's `windows-elevation` job: Windows runs the reader
@@ -137,13 +137,13 @@ fn windows_this_machine_names_itself_and_is_no_handheld() {
     println!("names {names:?}, battery {}", windows_battery(&registry));
     println!("detected {:?}", detect());
     assert!(!names.is_empty(), "the firmware's names didn't read");
-    assert_ne!(detect(), DeviceType::Handheld);
+    assert_ne!(detect(), DeviceKind::Handheld);
 }
 
 #[tokio::test]
 async fn a_new_handheld_starts_in_console_mode_and_a_desktop_doesnt() {
     let (store, settings, _temp) = fresh().await;
-    let written = settle_new_device(&settings, &store, DeviceType::Handheld)
+    let written = settle_new_device(&settings, &store, DeviceKind::Handheld)
         .await
         .unwrap();
     assert_eq!(
@@ -162,7 +162,7 @@ async fn a_new_handheld_starts_in_console_mode_and_a_desktop_doesnt() {
     console["active"] = json!(false);
     settings.set("core.console", console, None).await.unwrap();
     assert!(
-        settle_new_device(&settings, &store, DeviceType::Handheld)
+        settle_new_device(&settings, &store, DeviceKind::Handheld)
             .await
             .unwrap()
             .is_empty()
@@ -171,7 +171,7 @@ async fn a_new_handheld_starts_in_console_mode_and_a_desktop_doesnt() {
 
     let (store, settings, _temp) = fresh().await;
     assert!(
-        settle_new_device(&settings, &store, DeviceType::Desktop)
+        settle_new_device(&settings, &store, DeviceKind::Desktop)
             .await
             .unwrap()
             .is_empty()
@@ -186,7 +186,7 @@ async fn an_existing_library_keeps_its_settings() {
     let (store, settings, _temp) = fresh().await;
     store.upsert_game(&Game::new("Hades")).await.unwrap();
     assert!(
-        settle_new_device(&settings, &store, DeviceType::Tv)
+        settle_new_device(&settings, &store, DeviceKind::Tv)
             .await
             .unwrap()
             .is_empty()
@@ -197,7 +197,7 @@ async fn an_existing_library_keeps_its_settings() {
     setup["completed"] = json!(true);
     settings.set("core.onboarding", setup, None).await.unwrap();
     assert!(
-        settle_new_device(&settings, &store, DeviceType::Tv)
+        settle_new_device(&settings, &store, DeviceKind::Tv)
             .await
             .unwrap()
             .is_empty()

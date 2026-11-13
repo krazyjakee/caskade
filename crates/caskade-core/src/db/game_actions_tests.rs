@@ -1,17 +1,8 @@
 //! What a game's menu changes or opens: its favourite mark, and the folder
 //! an entry's files are in.
 use super::LibraryStore;
+use super::test_support::import;
 use crate::model::{Game, GameEntry, InstallLocation, SourceId, StorageRoot};
-
-async fn import(store: &LibraryStore, title: &str, source: &'static str, key: &str) -> String {
-    let game = Game::new(title);
-    let entry = GameEntry::new(&game.id, SourceId::new(source), key);
-    store
-        .import_group(&game, &[entry], None)
-        .await
-        .unwrap()
-        .game_id
-}
 
 #[tokio::test]
 async fn a_favourite_stays_one_through_rescans_and_can_be_unmarked() {

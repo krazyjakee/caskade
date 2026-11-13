@@ -1,6 +1,9 @@
 //! Where an emulator install lives on this machine and the command it runs.
 
-use crate::emulation::{EmulatorInstall, OsFolders};
+use crate::{
+    emulation::{EmulatorInstall, OsFolders},
+    scripts::find_program,
+};
 use caskade_installer::OperatingSystem;
 use std::path::{Path, PathBuf};
 
@@ -55,33 +58,21 @@ pub fn command(install: &EmulatorInstall) -> Command {
     }
 }
 
-/// A binary on `$PATH`, or in `search_path` when one is set (tests).
-pub fn which(binary: &str, search_path: Option<&[PathBuf]>) -> Option<PathBuf> {
-    let dirs = match search_path {
-        Some(dirs) => dirs.to_vec(),
-        None => std::env::split_paths(&std::env::var_os("PATH")?).collect(),
-    };
-    dirs.iter().find_map(|dir| {
-        let candidate = dir.join(binary);
-        if candidate.is_file() {
-            return Some(candidate);
-        }
-        cfg!(windows)
-            .then(|| dir.join(format!("{binary}.exe")))
-            .filter(|candidate| candidate.is_file())
-    })
-}
-
 /// Flatpak installations, user first.
-fn flatpak_app(app_id: &str, folders: &OsFolders) -> Option<PathBuf> {
+pub(crate) fn flatpak_installations(folders: &OsFolders) -> Vec<PathBuf> {
     let user = folders
         .user_home
         .as_ref()
-        .map(|home| home.join(".local/share/flatpak/app").join(app_id));
-    let system = Some(PathBuf::from("/var/lib/flatpak/app").join(app_id));
-    [user, system]
+        .map(|home| home.join(".local/share/flatpak"));
+    user.into_iter()
+        .chain([PathBuf::from("/var/lib/flatpak")])
+        .collect()
+}
+
+fn flatpak_app(app_id: &str, folders: &OsFolders) -> Option<PathBuf> {
+    flatpak_installations(folders)
         .into_iter()
-        .flatten()
+        .map(|installation| installation.join("app").join(app_id))
         .find(|dir| dir.is_dir())
 }
 
@@ -93,9 +84,8 @@ pub fn emulator_dir(
 ) -> Option<PathBuf> {
     match install {
         EmulatorInstall::Folder { dir, .. } => Some(dir.clone()),
-        EmulatorInstall::Path { binary } => {
-            which(binary, search_path).and_then(|path| path.parent().map(Path::to_path_buf))
-        }
+        EmulatorInstall::Path { binary } => find_program(Path::new(binary), search_path)
+            .and_then(|path| path.parent().map(Path::to_path_buf)),
         EmulatorInstall::Flatpak { app_id } => folders
             .user_home
             .as_ref()
@@ -113,7 +103,7 @@ pub fn installed(
 ) -> bool {
     match install {
         EmulatorInstall::Folder { dir, executable } => dir.join(executable).is_file(),
-        EmulatorInstall::Path { binary } => which(binary, search_path).is_some(),
+        EmulatorInstall::Path { binary } => find_program(Path::new(binary), search_path).is_some(),
         EmulatorInstall::Flatpak { app_id } => flatpak_app(app_id, folders).is_some(),
         EmulatorInstall::AppImage { file } => file.is_file(),
         EmulatorInstall::AppBundle { bundle } => bundle.is_dir(),

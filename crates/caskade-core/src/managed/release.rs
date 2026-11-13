@@ -39,9 +39,7 @@ pub(crate) struct Release {
 /// puts it in the target's place with the user's files from the old
 /// install. A failure leaves the old install as it was.
 pub(crate) async fn install_release(release: Release) -> Result<EmulatorInstall> {
-    tokio::task::spawn_blocking(move || swap_in(release))
-        .await
-        .map_err(|error| Error::Invalid(error.to_string()))?
+    tokio::task::spawn_blocking(move || swap_in(release)).await?
 }
 
 fn swap_in(release: Release) -> Result<EmulatorInstall> {
@@ -124,7 +122,5 @@ fn swap_in(release: Release) -> Result<EmulatorInstall> {
 /// went.
 pub(crate) async fn remove_release(dir: &Path) -> Result<usize> {
     let dir = dir.to_path_buf();
-    tokio::task::spawn_blocking(move || unpack::remove_shipped(&dir))
-        .await
-        .map_err(|error| Error::Invalid(error.to_string()))?
+    tokio::task::spawn_blocking(move || unpack::remove_shipped(&dir)).await?
 }

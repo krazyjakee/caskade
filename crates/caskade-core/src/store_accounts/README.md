@@ -67,8 +67,8 @@ another account), which lose only its entries; `remove` does it.
 
 ## App
 
-`commands/store_accounts.rs`: `store_providers`, `store_accounts_list`,
-`game_ownership` and `store_account_removal_preview` are reads,
+`commands/store_accounts.rs`: `store_providers`, `store_accounts_list`
+and `store_account_removal_preview` are reads,
 `store_account_refresh` needs someone signed in, and
 `store_account_disconnect` / `store_account_remove` are for admins.
 `StoreAccountsChanged` follows every change.

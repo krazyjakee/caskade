@@ -145,7 +145,8 @@ async fn dolphin(endpoint: &Url, artifact: &str) -> Result<Resolved> {
         system: String,
         url: String,
     }
-    use super::download::{client, net};
+    use super::download::client;
+    use crate::error::net;
     // A few KiB. The download client has no total timeout (releases are
     // large), so this small request brings its own.
     const MAX_BODY: usize = 1 << 20;

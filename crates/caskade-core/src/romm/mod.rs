@@ -21,7 +21,7 @@
 //! games keep launching and the others show as unavailable (an entry
 //! state of `broken` with the reason).
 //!
-//! Credentials are kept in the OS keychain ([`secrets`]).
+//! Credentials are kept in the OS keychain ([`crate::secrets`]).
 //!
 //! [`LaunchPreparer`]: crate::launch::LaunchPreparer
 //! [`LaunchSpec::Emulator`]: crate::model::LaunchSpec::Emulator
@@ -32,13 +32,12 @@ mod bios;
 mod cache;
 #[cfg(feature = "net")]
 mod client;
-pub mod secrets;
 pub mod settings;
 mod sync;
 mod watch;
 
+use crate::secrets::SecretStore;
 pub use api::{RemoteCollection, RemoteFile, RemotePlatform, RemoteRom};
-pub use secrets::{KeychainSecrets, MemorySecrets, SecretStore};
 pub use settings::{
     NAMESPACE, RommAuth, RommCacheSettings, RommPlatformMapping, RommServerConfig, RommSettings,
     register_settings,
@@ -68,6 +67,9 @@ use tokio_util::sync::CancellationToken;
 
 /// Library sources of RomM servers are `romm:<server id>`.
 pub const SOURCE_PREFIX: &str = "romm:";
+
+/// The keychain service RomM credentials are filed under.
+const KEYCHAIN_SERVICE: &str = "dev.caskade.romm";
 
 pub fn source_id(server: &str) -> SourceId {
     SourceId::from(format!("{SOURCE_PREFIX}{server}"))
@@ -184,7 +186,7 @@ fn sign_in_complete(config: &RommServerConfig, has_secret: bool) -> bool {
 }
 
 /// A ROM downloaded into the cache.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CachedRom {
     /// The ROM's folder in the cache.
@@ -198,7 +200,7 @@ pub struct CachedRom {
 }
 
 /// A remote ROM in the library (the `romm_roms` table).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RommRom {
     pub server_id: String,
@@ -229,7 +231,7 @@ pub struct RommRom {
 pub const COVER_RETRY: std::time::Duration = std::time::Duration::from_secs(7 * 24 * 3600);
 
 /// A cover that didn't come, and when.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CoverUnavailable {
     pub location: String,
@@ -476,7 +478,7 @@ impl RommService {
                 settings,
                 emulation,
                 artwork: None,
-                secrets: Arc::new(KeychainSecrets),
+                secrets: Arc::new(crate::secrets::Keychain::new(KEYCHAIN_SERVICE)),
                 timeouts: Timeouts::default(),
                 watch_every: watch::CHECK,
                 fallback_cache: fallback_cache.into(),
@@ -499,7 +501,7 @@ impl RommService {
         self
     }
 
-    /// Another credential store (tests use [`MemorySecrets`]). Configure
+    /// Another credential store (tests use [`MemorySecrets`](crate::secrets::MemorySecrets)). Configure
     /// before cloning.
     pub fn with_secrets(mut self, secrets: Arc<dyn SecretStore>) -> Self {
         if let Some(inner) = Arc::get_mut(&mut self.inner) {

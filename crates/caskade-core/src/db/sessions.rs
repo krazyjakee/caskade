@@ -155,14 +155,6 @@ impl LibraryStore {
             .map(session)
             .collect()
     }
-    pub async fn delete_session(&self, id: &str) -> Result<bool> {
-        Ok(sqlx::query("DELETE FROM play_sessions WHERE id=?")
-            .bind(id)
-            .execute(&self.pool)
-            .await?
-            .rows_affected()
-            > 0)
-    }
 }
 async fn insert(store: &LibraryStore, record: &PlaySession) -> Result<()> {
     sqlx::query(concat!("INSERT INTO play_sessions(id,game_id,entry_id,started_at_ms,ended_at_ms,duration_ms,heartbeat_at_ms,tracking_json,device_id) VALUES(?,?,?,?,?,?,?,?,", this_device!(), ")"))

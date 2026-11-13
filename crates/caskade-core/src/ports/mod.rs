@@ -252,10 +252,7 @@ impl Ports {
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
             Err(error) => return Err(error.into()),
         };
-        let catalogue = tokio::task::spawn_blocking(move || parse(&bytes))
-            .await
-            .map_err(|error| Error::Invalid(error.to_string()))?
-            .map_err(|error| Error::Invalid(error.to_string()))?;
+        let catalogue = tokio::task::spawn_blocking(move || parse(&bytes)).await??;
         let catalogue = Arc::new(catalogue);
         *loaded = Some(catalogue.clone());
         Ok(Some(catalogue))
@@ -313,8 +310,7 @@ impl Ports {
                 let (catalogue, bytes) = tokio::task::spawn_blocking(move || {
                     parse(&bytes).map(|catalogue| (catalogue, bytes))
                 })
-                .await
-                .map_err(|error| Error::Invalid(error.to_string()))?
+                .await?
                 .map_err(|error| Error::Invalid(error.to_string()))?;
                 let projects = catalogue.projects.len() as u32;
                 tokio::fs::create_dir_all(&self.inner.dir).await?;

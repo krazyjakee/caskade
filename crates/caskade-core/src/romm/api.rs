@@ -91,7 +91,7 @@ pub(crate) struct RomPage {
 }
 
 /// A file of a ROM (`RomFileSchema`).
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RemoteFile {
     #[serde(default)]
@@ -116,7 +116,7 @@ pub struct RemoteFile {
 }
 
 /// RomM's metadata block (`RomMetadataSchema`).
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RemoteMetadata {
     #[serde(default)]
@@ -133,7 +133,7 @@ const MAX_ALIASES: usize = 256;
 const MAX_TEXT: usize = 4096;
 
 /// A ROM (`SimpleRomSchema`): one game on the server, with one or more files.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RemoteRom {
     pub id: u32,

@@ -55,13 +55,6 @@ enum Message {
     },
 }
 
-/// How an exchange went.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct Exchanged {
-    pub sent: usize,
-    pub received: usize,
-}
-
 /// Options for tests.
 #[derive(Debug, Clone, Default)]
 pub struct Options {
@@ -80,7 +73,7 @@ pub async fn exchange(
     peer: &str,
     session: &mut caskade_sync::Session,
     options: &Options,
-) -> Result<Exchanged> {
+) -> Result<()> {
     engine.capture().await?;
     let seen = engine.seen().await?;
     let (writer, reader) = session.split();
@@ -107,7 +100,6 @@ pub async fn exchange(
     }
 
     let send = async {
-        let mut sent = 0;
         let mut pages = 0;
         // Categories turned back on here go again in full.
         let replay = engine.store().sync_peer_replay(peer).await?;
@@ -141,7 +133,6 @@ pub async fn exchange(
                 if options.fail_after_pages.is_some_and(|limit| pages >= limit) {
                     return Err(Error::Invalid("stopped sending".into()));
                 }
-                sent += changes.len();
                 pages += 1;
                 writer
                     .write(&Message::Page { changes })
@@ -164,7 +155,6 @@ pub async fn exchange(
             if options.fail_after_pages.is_some_and(|limit| pages >= limit) {
                 return Err(Error::Invalid("stopped sending".into()));
             }
-            sent += changes.len();
             pages += 1;
             writer
                 .write(&Message::Page { changes })
@@ -172,10 +162,9 @@ pub async fn exchange(
                 .map_err(interrupted)?;
         }
         writer.write(&Message::Done).await.map_err(interrupted)?;
-        Ok::<_, Error>((sent, cursor))
+        Ok::<_, Error>(())
     };
     let receive = async {
-        let mut received = 0;
         loop {
             match reader
                 .read::<Message>(MAX_LINE)
@@ -183,7 +172,7 @@ pub async fn exchange(
                 .map_err(interrupted)?
             {
                 Message::Page { changes } => {
-                    received += engine.receive(&changes).await?;
+                    engine.receive(&changes).await?;
                 }
                 Message::Done => break,
                 Message::Hello { .. } | Message::Ack { .. } => {
@@ -193,11 +182,11 @@ pub async fn exchange(
                 }
             }
         }
-        Ok::<_, Error>(received)
+        Ok::<_, Error>(())
     };
     let (sent, received) = tokio::join!(send, receive);
-    let (sent, _cursor) = sent?;
-    let received = received?;
+    sent?;
+    received?;
     // Both sides have applied what they received: each says what it has now,
     // which is what compaction may count on, and the exchange ends only when
     // the other side is done too.
@@ -219,7 +208,7 @@ pub async fn exchange(
     }
     // Last, what's running on each device (#240).
     super::presence::exchange(engine, peer, writer, reader).await?;
-    Ok(Exchanged { sent, received })
+    Ok(())
 }
 
 /// Marks `categories` to send to every paired device again in full.

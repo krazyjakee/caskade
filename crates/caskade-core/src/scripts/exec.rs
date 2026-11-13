@@ -39,9 +39,10 @@ pub trait ScriptExecutor: Send + Sync {
 #[derive(Debug, Clone, Default)]
 pub struct ProcessExecutor;
 
-/// `program` on `PATH` (with Windows' extensions), or as given when it is a
-/// path. `None` when it isn't there.
-pub fn find_program(program: &Path) -> Option<PathBuf> {
+/// `program` on `PATH` (or in `search_path` when one is set: tests), with
+/// Windows' extensions, or as given when it is a path. `None` when it isn't
+/// there.
+pub fn find_program(program: &Path, search_path: Option<&[PathBuf]>) -> Option<PathBuf> {
     if program.components().count() > 1 || program.is_absolute() {
         return program.is_file().then(|| program.to_owned());
     }
@@ -55,7 +56,11 @@ pub fn find_program(program: &Path) -> Option<PathBuf> {
     } else {
         vec![String::new()]
     };
-    std::env::split_paths(&std::env::var_os("PATH")?).find_map(|dir| {
+    let dirs: Vec<PathBuf> = match search_path {
+        Some(dirs) => dirs.to_vec(),
+        None => std::env::split_paths(&std::env::var_os("PATH")?).collect(),
+    };
+    dirs.iter().find_map(|dir| {
         extensions.iter().find_map(|ext| {
             let mut name = program.as_os_str().to_owned();
             name.push(ext);
@@ -79,7 +84,7 @@ fn not_started(error: String) -> ExecOutcome {
 #[async_trait]
 impl ScriptExecutor for ProcessExecutor {
     async fn run(&self, request: ScriptRequest, cancel: CancellationToken) -> ExecOutcome {
-        let Some(program) = find_program(&request.program) else {
+        let Some(program) = find_program(&request.program, None) else {
             return not_started(crate::tr!(
                 "“{program}” wasn't found; check that it is installed and the path is right",
                 program = request.program.display()
@@ -93,8 +98,7 @@ impl ScriptExecutor for ProcessExecutor {
                 path = cwd.display()
             ));
         }
-        let mut command = tokio::process::Command::new(&program);
-        // Not inside Caskade's AppImage (#274).
+        let mut command = tokio::process::Command::from(crate::quiet::command(&program));
         crate::managed::outside_own_appimage(command.as_std_mut());
         #[cfg(windows)]
         if request.verbatim_args {
@@ -117,11 +121,6 @@ impl ScriptExecutor for ProcessExecutor {
         }
         #[cfg(unix)]
         command.process_group(0);
-        #[cfg(windows)]
-        {
-            // No console window flashing up for a script.
-            command.creation_flags(0x0800_0000);
-        }
         let mut child = match command.spawn() {
             Ok(child) => child,
             Err(error) => return not_started(error.to_string()),

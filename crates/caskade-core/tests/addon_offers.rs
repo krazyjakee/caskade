@@ -2,6 +2,7 @@
 //! syncing, each device offers what another has and it lacks, and nothing
 //! installs or turns on by itself.
 
+use crate::engines::exchange;
 use caskade_core::bus::Bus;
 use caskade_core::db::{LibraryStore, PluginRow};
 use caskade_core::paths::AppPaths;
@@ -47,22 +48,6 @@ async fn addons(device: &Device, state: &str) {
         .unwrap();
 }
 
-async fn sync(a: &Device, b: &Device) {
-    for _ in 0..2 {
-        for (from, to) in [(a, b), (b, a)] {
-            from.engine.capture().await.unwrap();
-            loop {
-                let cursor = to.engine.seen().await.unwrap();
-                let changes = from.engine.changes_for(&cursor, 100).await.unwrap();
-                if changes.is_empty() {
-                    break;
-                }
-                to.engine.receive(&changes).await.unwrap();
-            }
-        }
-    }
-}
-
 fn plugin(id: &str) -> PluginRow {
     PluginRow {
         id: id.into(),
@@ -93,13 +78,13 @@ async fn turning_plugins_and_themes_on_offers_the_other_devices_add_ons_and_inst
         .unwrap();
 
     // Off (the default): nothing offered.
-    sync(&desk, &deck).await;
+    exchange(&desk.engine, &deck.engine).await;
     assert!(addon_offers(&deck.engine).await.unwrap().is_empty());
 
     for device in [&desk, &deck] {
         addons(device, "sync").await;
     }
-    sync(&desk, &deck).await;
+    exchange(&desk.engine, &deck.engine).await;
     let desk_id = "a".repeat(64);
     assert_eq!(
         addon_offers(&deck.engine).await.unwrap(),

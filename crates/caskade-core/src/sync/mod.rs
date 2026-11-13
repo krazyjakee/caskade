@@ -1,4 +1,5 @@
-//! Core-side declarations consumed by the device change exchange.
+//! Sync between the user's devices: the change log engine, its service,
+//! the exchange with a paired device and what rides along with it.
 #[cfg(feature = "net")]
 pub mod artwork;
 #[cfg(feature = "net")]

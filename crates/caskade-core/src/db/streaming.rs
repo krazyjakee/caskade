@@ -5,6 +5,7 @@
 
 use super::{
     LibraryStore,
+    collation::title_key,
     games::{save_entry, save_game},
 };
 use crate::{
@@ -14,7 +15,7 @@ use crate::{
 use std::collections::{BTreeMap, BTreeSet};
 
 /// The source of a host's releases.
-pub fn stream_source(host_id: &str) -> SourceId {
+fn stream_source(host_id: &str) -> SourceId {
     format!("stream:{host_id}").into()
 }
 
@@ -42,16 +43,6 @@ fn stream_launch(host_id: &str, app: &StreamApp) -> LaunchSpec {
         host: host_id.to_owned(),
         app: app.name.clone(),
     }
-}
-
-/// A title as a key: case, accents' composition and punctuation aside.
-fn title_key(title: &str) -> String {
-    icu_normalizer::ComposingNormalizer::new_nfkc()
-        .normalize(title)
-        .chars()
-        .flat_map(char::to_lowercase)
-        .filter(|character| character.is_alphanumeric())
-        .collect()
 }
 
 impl LibraryStore {

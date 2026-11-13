@@ -2,14 +2,16 @@
 //! appears on another without its password, which that device then asks for;
 //! each device keeps its own emulator and profile for a server's platforms.
 
+use crate::engines::exchange;
 use std::sync::Arc;
 
 use caskade_core::bus::Bus;
 use caskade_core::db::LibraryStore;
 use caskade_core::emulation::{Catalog, EmulationService};
 use caskade_core::romm::{
-    MemorySecrets, RommAuth, RommPlatformMapping, RommServerConfig, RommService, register_settings,
+    RommAuth, RommPlatformMapping, RommServerConfig, RommService, register_settings,
 };
+use caskade_core::secrets::MemorySecrets;
 use caskade_core::settings::SettingsService;
 use caskade_core::sync::SyncEngine;
 
@@ -63,22 +65,6 @@ async fn device(name: char) -> Device {
     }
 }
 
-async fn sync(a: &Device, b: &Device) {
-    for _ in 0..2 {
-        for (from, to) in [(a, b), (b, a)] {
-            from.engine.capture().await.unwrap();
-            loop {
-                let cursor = to.engine.seen().await.unwrap();
-                let changes = from.engine.changes_for(&cursor, 100).await.unwrap();
-                if changes.is_empty() {
-                    break;
-                }
-                to.engine.receive(&changes).await.unwrap();
-            }
-        }
-    }
-}
-
 fn home(emulator: Option<&str>) -> RommServerConfig {
     RommServerConfig {
         auth: RommAuth::Password,
@@ -104,7 +90,7 @@ async fn a_romm_server_arrives_without_its_password_and_keeps_local_emulators() 
         .save_server(home(Some("snes9x")), Some("hunter2".into()))
         .await
         .unwrap();
-    sync(&desk, &tv).await;
+    exchange(&desk.engine, &tv.engine).await;
 
     // The server is there, its definition whole...
     let overview = tv.romm.overview().await.unwrap();
@@ -161,7 +147,7 @@ async fn a_romm_server_arrives_without_its_password_and_keeps_local_emulators() 
     let mut renamed = home(Some("mesen"));
     renamed.name = "Attic RomM".into();
     desk.romm.save_server(renamed, None).await.unwrap();
-    sync(&desk, &tv).await;
+    exchange(&desk.engine, &tv.engine).await;
     let on_tv = tv.romm.overview().await.unwrap().settings;
     let on_tv = on_tv.server("home").unwrap();
     assert_eq!(on_tv.name, "Attic RomM");
@@ -183,7 +169,7 @@ async fn a_romm_server_arrives_without_its_password_and_keeps_local_emulators() 
             .on_romm_removed(move |id| removed.lock().unwrap().push(id));
     }
     desk.romm.remove_server("home").await.unwrap();
-    sync(&desk, &tv).await;
+    exchange(&desk.engine, &tv.engine).await;
     assert_eq!(*removed.lock().unwrap(), ["home"]);
     assert!(
         tv.romm

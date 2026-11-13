@@ -64,7 +64,7 @@ impl SessionRepository for LibraryStore {
         game_id: &str,
         profile_id: Option<&str>,
     ) -> Result<crate::scripts::ScriptSet> {
-        self.scripts_for_launch(game_id, profile_id)
+        self.scripts_for_launch(Some(game_id), profile_id)
             .await
             .map_err(error)
     }

@@ -148,14 +148,14 @@ fn release_urls_are_github_downloads_with_their_checksum() {
     let catalogue = parse(&serde_json::to_vec(&plans()).unwrap()).unwrap();
     let zelda = &catalogue.projects[3];
     assert_eq!(
-        install::url_for(zelda, &zelda.games[0].targets["linux"]).unwrap(),
+        install::release_url(zelda, &zelda.games[0].targets["linux"]).unwrap(),
         format!(
             "https://github.com/zelda64recomp/zelda64recomp/releases/download/v1.2.2/Zelda64Recompiled-Linux-X64.zip#sha256={SHA}"
         )
     );
     let folder = &catalogue.projects[0];
     assert_eq!(
-        install::url_for(folder, &folder.games[0].targets["linux"]).unwrap(),
+        install::release_url(folder, &folder.games[0].targets["linux"]).unwrap(),
         "https://github.com/example/mm-folder-port/releases/download/1.0/port%20linux.zip"
     );
 }

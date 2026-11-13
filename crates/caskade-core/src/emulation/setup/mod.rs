@@ -24,7 +24,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::{
-    collections::{BTreeMap, HashMap},
+    collections::HashMap,
     path::PathBuf,
     sync::{Arc, Mutex},
     time::Instant,
@@ -128,6 +128,18 @@ impl SetupStatus {
     }
 }
 
+impl super::job_table::TableJob for SetupJob {
+    fn id(&self) -> &str {
+        &self.id
+    }
+    fn revision(&mut self) -> &mut u32 {
+        &mut self.revision
+    }
+    fn finished(&self) -> bool {
+        self.status.finished()
+    }
+}
+
 /// One emulator install or update (§3.4).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
 #[serde(rename_all = "camelCase")]
@@ -165,7 +177,7 @@ struct Inner {
     hosts: Hosts,
     /// The `flatpak` program.
     flatpak: PathBuf,
-    jobs: Mutex<BTreeMap<String, jobs::JobState>>,
+    jobs: super::job_table::JobTable<SetupJob, jobs::Control>,
     /// `core.updates`; `None` checks every 6 hours.
     settings: Mutex<Option<SettingsService>>,
     /// Running games, so an emulator in use isn't replaced.
@@ -201,7 +213,7 @@ impl EmulatorSetup {
                 cache: paths.cache.join("emulators"),
                 hosts: Hosts::default(),
                 flatpak: "flatpak".into(),
-                jobs: Mutex::default(),
+                jobs: Default::default(),
                 settings: Mutex::default(),
                 launch: Mutex::default(),
                 bios: Mutex::default(),

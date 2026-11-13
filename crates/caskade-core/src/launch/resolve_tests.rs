@@ -44,6 +44,7 @@ async fn a_managed_windows_game_starts_on_its_game_drive() {
         Some(storage),
         None,
         Arc::new(super::super::NoPluginRunner),
+        RunnerPaths::default(),
     )
     .await
     .unwrap();
@@ -83,9 +84,15 @@ async fn external_wine_prefix_keeps_its_own_drive_mappings() {
         cwd: Some(game),
         env: BTreeMap::new(),
     });
-    let prepared = resolve(&entry, None, None, Arc::new(super::super::NoPluginRunner))
-        .await
-        .unwrap();
+    let prepared = resolve(
+        &entry,
+        None,
+        None,
+        Arc::new(super::super::NoPluginRunner),
+        RunnerPaths::default(),
+    )
+    .await
+    .unwrap();
     if !cfg!(windows) {
         assert_eq!(
             prepared.command.args,
@@ -167,6 +174,7 @@ async fn managed_prefix_cannot_follow_a_symlink_into_another_prefix() {
         }),
         None,
         Arc::new(super::super::NoPluginRunner),
+        RunnerPaths::default(),
     )
     .await;
     if !cfg!(windows) {

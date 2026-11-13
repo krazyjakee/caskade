@@ -426,3 +426,36 @@ async fn stream_quality_changes_alone_and_keeps_a_value_saved_before() {
     ));
     assert_eq!(read().await.quality.fps, Some(30));
 }
+
+#[tokio::test]
+async fn discovery_v1_loses_the_choices_nothing_read() {
+    let store = LibraryStore::in_memory().await.unwrap();
+    let service = SettingsService::new(store.clone());
+    service
+        .register_core(&crate::AppPaths::under(std::path::Path::new("fixture")))
+        .unwrap();
+    let mut old = service.get("core.discovery").await.unwrap().value;
+    old["scanOnStartup"] = json!(false);
+    old["rescanAfterLauncherInstall"] = json!(true);
+    old["mergeDuplicates"] = json!(true);
+    old["preferLauncherMetadata"] = json!(false);
+    old["deepScans"]["romDirectories"] = json!(true);
+    store
+        .set_setting(
+            "settings.section.core.discovery",
+            &json!({"schemaVersion":1,"revision":2,"value":old}),
+        )
+        .await
+        .unwrap();
+    let migrated = service.get("core.discovery").await.unwrap();
+    assert_eq!((migrated.version, migrated.revision), (2, 3));
+    assert_eq!(migrated.value["scanOnStartup"], json!(false));
+    for key in [
+        "rescanAfterLauncherInstall",
+        "mergeDuplicates",
+        "preferLauncherMetadata",
+    ] {
+        assert!(migrated.value.get(key).is_none(), "{key}");
+    }
+    assert!(migrated.value["deepScans"].get("romDirectories").is_none());
+}

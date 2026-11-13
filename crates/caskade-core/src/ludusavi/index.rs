@@ -1,6 +1,6 @@
 use super::{Game, StoreId, manifest};
 use crate::Result;
-use icu_normalizer::ComposingNormalizer;
+use crate::db::title_key;
 use sqlx::{
     ConnectOptions, SqliteConnection, SqlitePool,
     sqlite::{SqliteConnectOptions, SqlitePoolOptions},
@@ -12,15 +12,6 @@ CREATE TABLE games(title TEXT PRIMARY KEY, data TEXT NOT NULL);
 CREATE TABLE names(name TEXT NOT NULL, title TEXT NOT NULL, PRIMARY KEY(name,title));
 CREATE TABLE ids(store TEXT NOT NULL, id TEXT NOT NULL, title TEXT NOT NULL, PRIMARY KEY(store,id,title));
 ";
-
-fn normalized(title: &str) -> String {
-    ComposingNormalizer::new_nfkc()
-        .normalize(title)
-        .chars()
-        .flat_map(char::to_lowercase)
-        .filter(|character| character.is_alphanumeric())
-        .collect()
-}
 
 /// The built index, read-only, opened as patiently as the library.
 pub(super) async fn open(path: &Path) -> Result<SqlitePool> {
@@ -102,7 +93,7 @@ pub(super) async fn build(dir: &Path, bytes: Vec<u8>) -> Result<u32> {
         // Ignore unresolved/cyclic aliases, as Ludusavi's loose schema does.
         if let Some(target) = manifest::target(&aliases, title) {
             sqlx::query("INSERT OR IGNORE INTO names(name,title) VALUES(?,?)")
-                .bind(normalized(title))
+                .bind(title_key(title))
                 .bind(target)
                 .execute(&mut *tx)
                 .await?;
@@ -127,7 +118,7 @@ pub(super) async fn by_title(pool: &SqlitePool, title: &str) -> Result<Vec<Game>
     let rows: Vec<String> = sqlx::query_scalar(
         "SELECT data FROM games JOIN names USING(title) WHERE name=? ORDER BY title",
     )
-    .bind(normalized(title))
+    .bind(title_key(title))
     .fetch_all(pool)
     .await?;
     rows.into_iter()

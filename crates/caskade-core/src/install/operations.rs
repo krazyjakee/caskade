@@ -280,7 +280,7 @@ impl InstallService {
             ..JobSnapshot::queued(kind, title, input, root_id)
         };
         let id = snapshot.id.clone();
-        let cancel = self.add_job(snapshot.clone(), None, DiscoveryHints::default());
+        let cancel = self.add_job(snapshot.clone(), None, DiscoveryHints::default(), None);
         let service = self.clone();
         tokio::spawn(async move {
             let label = match kind {
@@ -367,90 +367,6 @@ impl InstallService {
             .map_err(|e| Error::Invalid(e.to_string()))?;
         self.inner.store.delete_entry(&entry.id).await?;
         Ok(())
-    }
-    pub async fn verify(&self, entry_id: String) -> Result<JobSnapshot> {
-        let (entry, root, game) = self.managed_entry(&entry_id).await?;
-        Ok(self.queue_operation(
-            JobKind::Verify,
-            entry.external_id,
-            entry_id,
-            Some(root.id),
-            JobPhase::Install,
-            move |service, id, cancel| async move {
-                let report = caskade_installer::exec::with_root_exclusive(
-                    &root.path,
-                    cancel,
-                    move |_, token| -> pipeline::PipelineResult<Verification> {
-                        if token.is_cancelled() {
-                            return Err(caskade_installer::exec::ExecError::Cancelled.into());
-                        }
-                        let manifest = InstallManifest::read(&game)
-                            .map_err(|e| Error::Invalid(e.to_string()))?;
-                        let report = manifest
-                            .verify(&game)
-                            .map_err(|e| Error::Invalid(e.to_string()))?;
-                        Ok(Verification {
-                            valid: report.is_ok(),
-                            checked_files: report.checked_files,
-                            missing: report
-                                .missing
-                                .iter()
-                                .map(|p| p.as_path().to_string_lossy().into_owned())
-                                .collect(),
-                            changed: report
-                                .changed
-                                .iter()
-                                .map(|p| p.path.as_path().to_string_lossy().into_owned())
-                                .collect(),
-                        })
-                    },
-                )
-                .await
-                .map_err(|e| Error::Invalid(e.to_string()))?;
-                service.update(&id, |job| {
-                    job.status = JobStatus::Completed;
-                    job.verification = Some(report);
-                });
-                Ok(())
-            },
-        ))
-    }
-    pub async fn fetch(&self, input: String, root_id: Option<String>) -> Result<JobSnapshot> {
-        if pipeline::input::remote(&input).is_none() {
-            return Err(Error::Invalid(crate::tr!(
-                "fetch requires an HTTP or HTTPS URL"
-            )));
-        }
-        let root = self.root(root_id.as_deref()).await?;
-        Ok(self.queue_operation(
-            JobKind::Fetch,
-            title_of(&input),
-            input.clone(),
-            Some(root.id.clone()),
-            JobPhase::Download,
-            move |service, id, cancel| async move {
-                let preferences = service.preferences().await?;
-                service
-                    .inner
-                    .downloads
-                    .set_limit(preferences.concurrent_downloads as usize);
-                let _permit = service.inner.downloads.acquire(&cancel).await?;
-                service.update(&id, |job| job.status = JobStatus::Downloading);
-                let mut ctx = service.context(&id, cancel);
-                ctx.config = preferences.config();
-                ctx.host = lock(&service.inner.host).clone();
-                let host =
-                    pipeline::actual_host(&ctx).map_err(|e| Error::Invalid(e.to_string()))?;
-                let prepared = pipeline::input::prepare(input, &root.path, &id, &host, &ctx)
-                    .await
-                    .map_err(|e| Error::Invalid(e.to_string()))?;
-                service.update(&id, |job| {
-                    job.status = JobStatus::Completed;
-                    job.target_dir = Some(prepared.path);
-                });
-                Ok(())
-            },
-        ))
     }
     pub async fn move_game(
         &self,

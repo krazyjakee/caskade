@@ -76,8 +76,7 @@ impl SaveVersions {
             blobs.put_bytes(&manifest.bytes())?;
             Ok::<_, Error>(manifest)
         })
-        .await
-        .map_err(|error| Error::Io(std::io::Error::other(error)))??;
+        .await??;
         let content = manifest.hash();
         if let Some(known) = self
             .store()
@@ -94,7 +93,7 @@ impl SaveVersions {
             account_id: account,
             device_id: self.device(),
             session_id: None,
-            created_at_ms: crate::sync::clock::now_ms(),
+            created_at_ms: crate::now_ms(),
             content_hash: content,
             size_bytes: manifest.size(),
             file_count: u32::try_from(manifest.files.len()).unwrap_or(u32::MAX),

@@ -408,9 +408,13 @@ impl EmulatorLaunches {
                 (dir.join(executable), Vec::new(), Some(dir.clone()))
             }
             EmulatorInstall::Path { binary } => (
-                emulation::which(binary, self.service.search_path()).ok_or_else(|| {
-                    LaunchError::Invalid(crate::tr!("`{binary}` is not on PATH", binary = binary))
-                })?,
+                crate::scripts::find_program(Path::new(binary), self.service.search_path())
+                    .ok_or_else(|| {
+                        LaunchError::Invalid(crate::tr!(
+                            "`{binary}` is not on PATH",
+                            binary = binary
+                        ))
+                    })?,
                 Vec::new(),
                 None,
             ),
@@ -439,17 +443,9 @@ impl EmulatorLaunches {
     }
 
     fn installations(&self) -> Vec<PathBuf> {
-        self.installations.clone().unwrap_or_else(|| {
-            let user = self
-                .service
-                .folders()
-                .user_home
-                .as_ref()
-                .map(|home| home.join(".local/share/flatpak"));
-            user.into_iter()
-                .chain([PathBuf::from("/var/lib/flatpak")])
-                .collect()
-        })
+        self.installations
+            .clone()
+            .unwrap_or_else(|| emulation::flatpak_installations(self.service.folders()))
     }
 
     /// Whether the app's own permissions and overrides already expose `dir`.
@@ -603,20 +599,9 @@ fn templates<'a>(
             hooks,
             ..
         } => {
-            let definition = emulator
-                .definition
-                .as_deref()
-                .and_then(|id| catalog.emulator(id))
-                .ok_or_else(|| {
-                    LaunchError::Invalid(crate::tr!("the emulator's definition is not available"))
-                })?;
-            let base = definition.profile(definition_profile).ok_or_else(|| {
-                LaunchError::Invalid(crate::tr!(
-                    "{emulator} has no profile {profile}",
-                    emulator = definition.name,
-                    profile = format!("{definition_profile:?}")
-                ))
-            })?;
+            let (definition, base) = catalog
+                .built_in(emulator.definition.as_deref(), definition_profile)
+                .map_err(LaunchError::Invalid)?;
             Ok(Templates {
                 vars: &definition.vars,
                 display: Some(&definition.display),

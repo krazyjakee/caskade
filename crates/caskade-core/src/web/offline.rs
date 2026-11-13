@@ -173,8 +173,7 @@ impl WebGames {
         let dir = dir.to_owned();
         let (files, bytes) =
             tokio::task::spawn_blocking(move || Bundle::open(dir).map(|bundle| bundle.stats()))
-                .await
-                .map_err(|error| crate::Error::Invalid(error.to_string()))??;
+                .await??;
         if files == 0 {
             return Ok(false);
         }

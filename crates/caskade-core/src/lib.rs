@@ -2,10 +2,9 @@
 //! library store, artwork cache, settings, launch pipeline, process
 //! tracking, play sessions and the in-process hook bus.
 //!
-//! The crate has no Tauri dependency: `apps/desktop/src-tauri` is a thin
-//! adapter over it, so everything here is unit-testable and can back a CLI
-//! or headless service later. The library emits `tracing` events and spans
-//! without setting a global subscriber.
+//! The crate has no Tauri dependency: `caskade-app` builds every app
+//! shell's commands on it, so everything here is unit-testable. The library
+//! emits `tracing` events and spans without setting a global subscriber.
 
 pub mod accounts;
 pub mod artwork;
@@ -60,6 +59,7 @@ pub mod remote_play;
 pub mod romm;
 pub mod saves;
 pub mod scripts;
+pub mod secrets;
 pub mod sessions;
 pub mod settings;
 pub mod storage;

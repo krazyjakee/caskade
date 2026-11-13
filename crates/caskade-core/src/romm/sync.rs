@@ -23,7 +23,7 @@ use crate::{
     emulation::{ArgsOverride, Catalog, EmulatorTarget, GameRom},
     model::{ArtworkKind, Game, GameEntry, InstallLocation, InstallState, LaunchSpec},
 };
-use std::path::Path;
+use std::{collections::HashMap, path::Path};
 
 /// Who started a sync: only the user's confirms removals an earlier sync
 /// held back.
@@ -259,6 +259,7 @@ impl RommService {
             .map(|rom| (rom.rom_id, rom))
             .collect();
         let known = existing.len();
+        let mut entries = self.entries(&config.id).await?;
         let cache_root = self.cache_root().await?;
         let mut report = RommSyncReport {
             server_id: config.id.clone(),
@@ -309,7 +310,18 @@ impl RommService {
                     continue;
                 }
                 let title = rom.title();
-                let previous = existing.remove(&rom.id);
+                let previous = match existing.remove(&rom.id) {
+                    Some(record) => match entries.remove(&record.entry_id) {
+                        Some(entry) => Some((record, entry)),
+                        None => self
+                            .inner
+                            .store
+                            .get_entry(&record.entry_id)
+                            .await?
+                            .map(|entry| (record, entry)),
+                    },
+                    None => None,
+                };
                 let change = self
                     .upsert(
                         config,
@@ -414,18 +426,14 @@ impl RommService {
         (platform_id, platform_name): (&str, &str),
         target: &EmulatorTarget,
         rom: super::RemoteRom,
-        previous: Option<RommRom>,
+        previous: Option<(RommRom, GameEntry)>,
     ) -> Result<Change> {
         let store = &self.inner.store;
         let source = source_id(&config.id);
         let title = rom.title();
         let placeholder_dir = cache_root.join(&config.id).join(rom.id.to_string());
         let size = (rom.fs_size_bytes > 0).then_some(rom.fs_size_bytes);
-        let previous_entry = match &previous {
-            Some(previous) => store.get_entry(&previous.entry_id).await?,
-            None => None,
-        };
-        if let (Some(mut record), Some(entry)) = (previous, previous_entry) {
+        if let Some((mut record, entry)) = previous {
             let remote_changed = record.rom != rom || record.platform_id != platform_id;
             if remote_changed {
                 // What IGDB filled in where RomM had nothing gives way to
@@ -661,45 +669,57 @@ impl RommService {
     /// unavailable, with the reason.
     pub(super) async fn mark_unavailable(&self, config: &RommServerConfig) -> Result<()> {
         let reason = self.unavailable(&config.id).await;
+        let mut entries = self.entries(&config.id).await?;
         for rom in self.inner.store.romm_roms(&config.id).await? {
             // Lost on the server's disk keeps saying so.
             if rom.cache.is_some() || rom.rom.missing_from_fs {
                 continue;
             }
-            self.set_entry_state(
-                &rom.entry_id,
-                InstallState::Broken {
-                    reason: reason.clone(),
-                },
-            )
-            .await?;
-        }
-        Ok(())
-    }
-
-    /// The server answers again: its games are playable again.
-    pub(super) async fn mark_available(&self, server: &str) -> Result<()> {
-        for rom in self.inner.store.romm_roms(server).await? {
-            if rom.rom.missing_from_fs && rom.cache.is_none() {
-                continue;
-            }
-            if let Some(entry) = self.inner.store.get_entry(&rom.entry_id).await?
-                && matches!(entry.state, InstallState::Broken { .. })
-            {
-                self.set_entry_state(&rom.entry_id, InstallState::Installed)
+            if let Some(entry) = entries.remove(&rom.entry_id) {
+                let reason = reason.clone();
+                self.set_entry_state(entry, InstallState::Broken { reason })
                     .await?;
             }
         }
         Ok(())
     }
 
-    pub(super) async fn set_entry_state(&self, entry_id: &str, state: InstallState) -> Result<()> {
-        let store = &self.inner.store;
-        if let Some(mut entry) = store.get_entry(entry_id).await?
-            && entry.state != state
-        {
+    /// The server answers again: its games are playable again.
+    pub(super) async fn mark_available(&self, server: &str) -> Result<()> {
+        let mut entries = self.entries(server).await?;
+        for rom in self.inner.store.romm_roms(server).await? {
+            if rom.rom.missing_from_fs && rom.cache.is_none() {
+                continue;
+            }
+            if let Some(entry) = entries.remove(&rom.entry_id)
+                && matches!(entry.state, InstallState::Broken { .. })
+            {
+                self.set_entry_state(entry, InstallState::Installed).await?;
+            }
+        }
+        Ok(())
+    }
+
+    /// The library entries of `server`'s ROMs, by id.
+    async fn entries(&self, server: &str) -> Result<HashMap<String, GameEntry>> {
+        Ok(self
+            .inner
+            .store
+            .entries_for_source(source_id(server).as_str())
+            .await?
+            .into_iter()
+            .map(|entry| (entry.id.clone(), entry))
+            .collect())
+    }
+
+    pub(super) async fn set_entry_state(
+        &self,
+        mut entry: GameEntry,
+        state: InstallState,
+    ) -> Result<()> {
+        if entry.state != state {
             entry.state = state;
-            store.upsert_entry(&entry).await?;
+            self.inner.store.upsert_entry(&entry).await?;
             self.inner.bus.emit(Event::LibraryGameUpdated {
                 game_id: entry.game_id,
             });

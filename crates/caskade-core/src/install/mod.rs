@@ -25,14 +25,17 @@ pub mod nearby;
 mod operations;
 mod pause;
 mod peer;
+mod progress;
 mod recovery;
 mod remove;
 mod rescan;
 mod roms;
+mod run;
 mod settings;
 mod source;
 mod update;
 pub use operations::{JobAnswer, Verification};
+use progress::Progress;
 pub use recovery::Recovery;
 pub use settings::{InstallerRunnerResolver, ProtonBuilds, proton_builds, runner_paths};
 
@@ -102,14 +105,6 @@ struct Job {
     attach: Option<AttachTo>,
     /// Stopping to pause, not to cancel (#131).
     pausing: bool,
-}
-
-/// A run's input, downloaded or read, and what installing it needs.
-struct Ready {
-    prepared: pipeline::input::Prepared,
-    host: caskade_installer::host::HostCaps,
-    job_id: String,
-    preferences: crate::settings::InstallerSettings,
 }
 
 struct Inner {
@@ -235,8 +230,7 @@ impl InstallService {
             }
             Ok::<_, Error>(())
         })
-        .await
-        .map_err(|e| Error::Invalid(e.to_string()))??;
+        .await??;
         Ok(root)
     }
 
@@ -255,21 +249,7 @@ impl InstallService {
         root_id: Option<String>,
         hints: DiscoveryHints,
     ) -> Result<JobSnapshot> {
-        let root = self.root(root_id.as_deref()).await?;
-        let title = hints
-            .installer_title
-            .clone()
-            .unwrap_or_else(|| title_of(&input));
-        let snapshot = JobSnapshot::queued(
-            JobKind::Install,
-            title,
-            input.clone(),
-            Some(root.id.clone()),
-        );
-        let cancel = self.add_job(snapshot.clone(), None, hints);
-        self.lifecycle(&snapshot);
-        self.spawn_install(snapshot.id.clone(), input, root, cancel);
-        Ok(snapshot)
+        self.queue_install(input, root_id, hints, None).await
     }
 
     /// [`install_with`](Self::install_with), finishing as another release
@@ -295,6 +275,19 @@ impl InstallService {
                     reason: crate::tr!("the program the release names"),
                 });
         }
+        self.queue_install(input, root_id, hints, Some(attach))
+            .await
+    }
+
+    /// Lists a new install job for `input` into `root_id` (or the default
+    /// root) and starts it.
+    async fn queue_install(
+        &self,
+        input: String,
+        root_id: Option<String>,
+        hints: DiscoveryHints,
+        attach: Option<AttachTo>,
+    ) -> Result<JobSnapshot> {
         let root = self.root(root_id.as_deref()).await?;
         let title = hints
             .installer_title
@@ -306,10 +299,7 @@ impl InstallService {
             input.clone(),
             Some(root.id.clone()),
         );
-        let cancel = self.add_job(snapshot.clone(), None, hints);
-        if let Some(job) = lock(&self.inner.jobs).get_mut(&snapshot.id) {
-            job.attach = Some(attach);
-        }
+        let cancel = self.add_job(snapshot.clone(), None, hints, attach);
         self.lifecycle(&snapshot);
         self.spawn_install(snapshot.id.clone(), input, root, cancel);
         Ok(snapshot)
@@ -331,6 +321,7 @@ impl InstallService {
         snapshot: JobSnapshot,
         update: Option<update::UpdateTarget>,
         hints: DiscoveryHints,
+        attach: Option<AttachTo>,
     ) -> CancellationToken {
         let cancel = CancellationToken::new();
         lock(&self.inner.jobs).insert(
@@ -344,450 +335,12 @@ impl InstallService {
                 hints,
                 peer: None,
                 peer_fetcher: None,
-                attach: None,
+                attach,
                 pausing: false,
             },
         );
         self.publish(&snapshot);
         cancel
-    }
-
-    async fn run(
-        &self,
-        id: &str,
-        input: String,
-        root: StorageRoot,
-        cancel: CancellationToken,
-    ) -> Result<()> {
-        let mut ctx = self.context(id, cancel.clone());
-        let Some(ready) = self
-            .prepare_run(id, &input, &root, &mut ctx, &cancel)
-            .await?
-        else {
-            return Ok(());
-        };
-        let source = ready.prepared.path.clone();
-        let download = ready.prepared.download_url.clone();
-        let remote = pipeline::input::downloads(&input);
-        let cleanup = source::SourceCleanup::capture(
-            self,
-            &ready.prepared,
-            &input,
-            // A copy's received folder is Caskade's own, never the user's to
-            // keep or bin (#233).
-            if lock(&self.inner.jobs)
-                .get(id)
-                .is_some_and(|job| job.peer.is_some())
-            {
-                crate::settings::SourceHandling::Delete
-            } else {
-                ready.preferences.source_handling
-            },
-            cancel.clone(),
-        )
-        .await?;
-
-        // Install, one job per root at a time.
-        let root_lock = self.root_lock(&root.id);
-        let _guard = tokio::select! {
-            _ = cancel.cancelled() => return Err(Error::Invalid(crate::tr!("cancelled"))),
-            guard = root_lock.lock() => guard,
-        };
-        self.update(id, |job| {
-            job.status = JobStatus::Installing;
-            job.phase = Some(JobPhase::Install);
-            // The download's last report isn't the install's.
-            job.progress = None;
-        });
-        let outcome = pipeline::install_prepared(
-            ready.prepared,
-            root.path.clone(),
-            ready.job_id,
-            ready.host,
-            ready.preferences.keep_downloads,
-            false,
-            &ctx,
-        )
-        .await
-        .map_err(|error| {
-            self.failed(
-                id,
-                &*error,
-                caskade_installer::failure::Probe {
-                    stage: self.running_stage(id),
-                    source: Some(&source),
-                    remote,
-                    root: Some(&root.path),
-                },
-            )
-        })?;
-        self.sync_plans(id);
-        self.finish(
-            id,
-            &root,
-            &input,
-            (&source, download.as_ref()),
-            outcome,
-            (cleanup, cancel),
-        )
-        .await
-    }
-
-    /// Sets `ctx` up for a run into `root`, then downloads `input` (under
-    /// the download limit) or reads it. `None` when the job now waits on a
-    /// question.
-    async fn prepare_run(
-        &self,
-        id: &str,
-        input: &str,
-        root: &StorageRoot,
-        ctx: &mut Context,
-        cancel: &CancellationToken,
-    ) -> Result<Option<Ready>> {
-        let preferences = self.preferences().await?;
-        ctx.config = preferences.config();
-        ctx.host = lock(&self.inner.host).clone();
-        self.inner
-            .downloads
-            .set_limit(preferences.concurrent_downloads as usize);
-        if let Some(storage) = self.storage()
-            && ctx.folder_template.is_none()
-        {
-            ctx.folder_template = Some(
-                storage
-                    .folder_template(&root.id)
-                    .await
-                    .map_err(|error| Error::Invalid(error.to_string()))?,
-            );
-        }
-        let failed =
-            |error: Box<dyn std::error::Error + Send + Sync>| Error::Invalid(error.to_string());
-        let mut host = pipeline::actual_host(ctx).map_err(failed)?;
-        if let Some(storage) = self.storage() {
-            let caps = storage
-                .capabilities(&root.id)
-                .await
-                .map_err(|e| Error::Invalid(e.to_string()))?;
-            host.filesystem = caskade_installer::host::FileSystemCaps {
-                writable: caps.writable,
-                exec_bits: caps.executable,
-                symlinks: caps.symlinks,
-                case_sensitive: caps.case_sensitive,
-            };
-        }
-        let job_id = pipeline::input::job_id(input, Some(id.to_owned())).map_err(failed)?;
-        let remote = pipeline::input::downloads(input);
-        ctx.config.policy.execution = preferences.execution_for(remote);
-
-        // Download (or resolve) under the download limit.
-        let prepared = {
-            let _permit = if remote {
-                self.update(id, |job| {
-                    job.status = JobStatus::Downloading;
-                    job.phase = Some(JobPhase::Download);
-                });
-                Some(self.inner.downloads.acquire(cancel).await?)
-            } else {
-                None
-            };
-            // A copy from another device is an installed game's folder:
-            // installed as it is, never planned by what its files look like
-            // (#76).
-            let copied = lock(&self.inner.jobs)
-                .get(id)
-                .is_some_and(|job| job.peer.is_some());
-            let prepared = if copied {
-                pipeline::input::prepare_portable(input.into(), ctx).await
-            } else {
-                pipeline::input::prepare(input.to_owned(), &root.path, &job_id, &host, ctx).await
-            };
-            match prepared {
-                Ok(prepared) => prepared,
-                Err(error) => {
-                    if let Some(pipeline::NeedsDecision(question)) =
-                        error.downcast_ref::<pipeline::NeedsDecision>()
-                    {
-                        self.update(id, |job| {
-                            job.status = JobStatus::NeedsUser;
-                            job.question = Some(question.clone());
-                        });
-                        return Ok(None);
-                    }
-                    return Err(self.failed(
-                        id,
-                        &*error,
-                        caskade_installer::failure::Probe {
-                            stage: caskade_installer::failure::FailureStage::Inspect,
-                            source: (!remote).then(|| std::path::Path::new(input)),
-                            remote,
-                            root: Some(&root.path),
-                        },
-                    ));
-                }
-            }
-        };
-        if remote {
-            self.inner.bus.emit(Event::InstallDownloaded {
-                job_id: id.to_owned(),
-            });
-        }
-        let handlers = self.inner.bus.install_handlers();
-        if !handlers.is_empty() {
-            let input = crate::bus::InstallInput {
-                path: prepared.path.clone(),
-                artifact: prepared.artifact.clone(),
-            };
-            ctx.handlers = hooks::propose(handlers, &input).await;
-        }
-        Ok(Some(Ready {
-            prepared,
-            host,
-            job_id,
-            preferences,
-        }))
-    }
-
-    /// Stores what the install produced and finishes the job.
-    async fn finish(
-        &self,
-        id: &str,
-        root: &StorageRoot,
-        input: &str,
-        (source, download): (&std::path::Path, Option<&url::Url>),
-        outcome: InstallOutcome,
-        retirement: (Option<source::SourceCleanup>, CancellationToken),
-    ) -> Result<()> {
-        let store = &self.inner.store;
-        match outcome {
-            InstallOutcome::Installed(installed) => {
-                let (cleanup, cancel) = retirement;
-                let manifest = InstallManifest::read(&root.path.join(&installed.dir))
-                    .map_err(|error| Error::Invalid(error.to_string()))?;
-                let (game, mut entry) = from_manifest(&root.id, &installed.dir, &manifest)?;
-                // A copy from another device is a release of the game the
-                // user copied, while it's still here (#233), and a port one
-                // of the game it was installed for.
-                let (copied, attach) = {
-                    let jobs = lock(&self.inner.jobs);
-                    let job = jobs.get(id);
-                    (
-                        job.and_then(|job| job.peer.as_ref().map(|peer| peer.game_id.clone())),
-                        job.and_then(|job| job.attach.clone()),
-                    )
-                };
-                let target = copied.or_else(|| attach.as_ref().map(|to| to.game_id.clone()));
-                let existing = match target {
-                    Some(game_id) => store.game(&game_id).await?,
-                    None => None,
-                };
-                let mut attach_warnings = Vec::new();
-                let (game, added) = match (existing, attach) {
-                    (Some(existing), Some(attach)) => {
-                        attach_warnings =
-                            attach::apply(&root.path.join(&installed.dir), &attach, &mut entry)
-                                .await
-                                .into_iter()
-                                .map(|message| caskade_installer::Warning {
-                                    code: "attach".into(),
-                                    message,
-                                    path: None,
-                                })
-                                .collect();
-                        (existing, false)
-                    }
-                    (Some(existing), None) => (existing, false),
-                    (None, _) => (store.upsert_game(&game).await?, true),
-                };
-                entry.game_id = game.id.clone();
-                let entry = store.upsert_entry(&entry).await?;
-                self.track(&entry.id, &manifest, download).await;
-                let cleanup_warning = match cleanup {
-                    Some(cleanup) => cleanup.finish(cancel).await,
-                    None => None,
-                };
-                self.inner.bus.emit(if added {
-                    Event::LibraryGameAdded {
-                        game_id: game.id.clone(),
-                    }
-                } else {
-                    Event::LibraryGameUpdated {
-                        game_id: game.id.clone(),
-                    }
-                });
-                let after_warning = hooks::notify::<hooks::InstallAfter>(
-                    &self.inner.bus,
-                    hooks::InstalledGame {
-                        job_id: id.to_owned(),
-                        game_id: game.id.clone(),
-                        title: game.title.clone(),
-                        dir: root.path.join(&installed.dir),
-                    },
-                )
-                .await;
-                self.update(id, |job| {
-                    job.status = JobStatus::Completed;
-                    job.title = game.title.clone();
-                    job.warnings = installed
-                        .warnings
-                        .iter()
-                        .cloned()
-                        .chain(cleanup_warning)
-                        .chain(after_warning)
-                        .chain(attach_warnings.iter().cloned())
-                        .collect();
-                    job.game_id = Some(game.id.clone());
-                    job.target_dir = Some(root.path.join(&installed.dir));
-                    job.dependencies = installed.dependencies.clone();
-                });
-            }
-            InstallOutcome::HandOff(caskade_installer::HandOff::Rom { platform, files }) => {
-                self.finish_roms(id, &platform, &files, source).await?;
-            }
-            InstallOutcome::HandOff(handoff) => {
-                let (game, entry) = from_handoff(&handoff, &title_of(input), source);
-                let game = store.upsert_game(&game).await?;
-                store.upsert_entry(&entry).await?;
-                self.inner.bus.emit(Event::LibraryGameAdded {
-                    game_id: game.id.clone(),
-                });
-                self.update(id, |job| {
-                    job.status = JobStatus::Completed;
-                    job.title = game.title.clone();
-                    job.game_id = Some(game.id.clone());
-                });
-            }
-            InstallOutcome::NeedsUser(question) => {
-                self.update(id, |job| {
-                    job.status = JobStatus::NeedsUser;
-                    job.question = Some(question.clone());
-                });
-            }
-            // Why, in words, with what can be done (#76): never the
-            // installer's reason as it is.
-            InstallOutcome::Unsupported(reason) => {
-                self.record_failure(
-                    id,
-                    caskade_installer::failure::Failure::unsupported(
-                        &reason,
-                        Some(source.to_path_buf()),
-                    ),
-                );
-                self.update(id, |job| {
-                    job.status = JobStatus::Failed;
-                    job.error = job.failure.as_ref().map(|failure| failure.summary.clone());
-                });
-            }
-        }
-        Ok(())
-    }
-
-    /// Finishes handed-off ROMs: into a ROM scanner's
-    /// folder if the user picks one, otherwise where they are.
-    async fn finish_roms(
-        &self,
-        id: &str,
-        installer_platform: &str,
-        files: &[std::path::PathBuf],
-        source: &std::path::Path,
-    ) -> Result<()> {
-        let emulation = lock(&self.inner.emulation).clone();
-        let platform = emulation
-            .as_ref()
-            .and_then(|emulation| {
-                crate::emulation::platform_for(&emulation.catalog(), installer_platform, files)
-            })
-            .unwrap_or_else(|| installer_platform.to_owned());
-        let base = if source.is_dir() {
-            source
-        } else {
-            source.parent().unwrap_or(source)
-        };
-        if self
-            .route_roms(id, emulation.as_ref(), &platform, base, files)
-            .await?
-        {
-            return Ok(());
-        }
-        self.import_roms(id, emulation.as_ref(), &platform, base, files)
-            .await
-    }
-
-    /// Imports ROMs where they are (§9 step 2), updating the game when the
-    /// same ROM was installed before. The job says when no scanner or
-    /// emulator handles the platform yet.
-    async fn import_roms(
-        &self,
-        id: &str,
-        emulation: Option<&crate::emulation::EmulationService>,
-        platform: &str,
-        base: &std::path::Path,
-        files: &[std::path::PathBuf],
-    ) -> Result<()> {
-        let store = &self.inner.store;
-        let platform = platform.to_owned();
-        let catalog = emulation.map(|emulation| emulation.catalog());
-        let (game, mut entry) =
-            crate::emulation::rom_entry(&platform, base, files, catalog.as_deref());
-        let game = match store
-            .entry_by_source(entry.source_id.as_str(), &entry.external_id)
-            .await?
-        {
-            Some(existing) => {
-                entry.id = existing.id;
-                entry.game_id = existing.game_id.clone();
-                store
-                    .game(&existing.game_id)
-                    .await?
-                    .ok_or_else(|| Error::Invalid(crate::tr!("the ROM's game is missing")))?
-            }
-            None => store.upsert_game(&game).await?,
-        };
-        store.upsert_entry(&entry).await?;
-
-        let name = catalog
-            .as_deref()
-            .and_then(|catalog| catalog.platform(&platform))
-            .map_or(platform.clone(), |platform| platform.short.clone());
-        let warning = |code: &str, message: String| caskade_installer::Warning {
-            code: code.into(),
-            message,
-            path: None,
-        };
-        let mut warnings = Vec::new();
-        let scanned = store
-            .scanners()
-            .await?
-            .iter()
-            .any(|scanner| scanner.platform.as_deref() == Some(platform.as_str()));
-        if !scanned {
-            warnings.push(warning(
-                "rom_scanner_suggested",
-                format!("Add a ROM scanner for {name} in Settings → Emulators to keep its ROMs together."),
-            ));
-        }
-        let has_default = store
-            .get_platform_settings(&platform)
-            .await?
-            .is_some_and(|settings| settings.default.is_some());
-        if !has_default {
-            warnings.push(warning(
-                "rom_no_emulator",
-                format!("No emulator for {name} yet — configure one in Settings → Emulators."),
-            ));
-        }
-        self.inner.bus.emit(Event::LibraryGameAdded {
-            game_id: game.id.clone(),
-        });
-        self.inner.bus.emit(Event::EmulationChanged {
-            scope: "platforms".into(),
-        });
-        self.update(id, |job| {
-            job.status = JobStatus::Completed;
-            job.title = game.title.clone();
-            job.game_id = Some(game.id.clone());
-            job.warnings = warnings;
-        });
-        Ok(())
     }
 
     /// Cancels a queued, running or paused job.
@@ -947,119 +500,6 @@ fn title_of(input: &str) -> String {
         input.to_owned()
     } else {
         name.to_owned()
-    }
-}
-
-/// How often a job's progress reaches the bus at most. The fetch engine
-/// reports every network chunk (64 KiB) and extraction every file, so an
-/// unthrottled sink would publish thousands of job snapshots a second.
-const PROGRESS_INTERVAL: Duration = Duration::from_millis(200);
-
-/// Installer progress as job progress, throttled to [`PROGRESS_INTERVAL`].
-///
-/// The first report, a phase or message change (`started`, `verifying`,
-/// `completed`, …) and a report that reaches its total are published straight
-/// away. Other reports inside the interval only replace the pending report,
-/// which the next publish supersedes and dropping the sink flushes while the
-/// job still runs, so the newest numbers are never lost.
-struct Progress {
-    service: InstallService,
-    job_id: String,
-    throttle: Mutex<Throttle>,
-}
-
-#[derive(Default)]
-struct Throttle {
-    published_at: Option<Instant>,
-    /// The phase and message of the last report, published or not.
-    last: Option<(JobPhase, String)>,
-    /// The phase whose completed report was published, so a stream of
-    /// reports at their total (or a zero total) is still throttled.
-    completed: Option<JobPhase>,
-    pending: Option<(JobPhase, JobProgress)>,
-}
-
-impl Progress {
-    fn new(service: InstallService, job_id: String) -> Self {
-        Self {
-            service,
-            job_id,
-            throttle: Mutex::default(),
-        }
-    }
-
-    fn publish(&self, phase: JobPhase, progress: JobProgress) {
-        // Cheap when the plan set is unchanged: no snapshot is published.
-        self.service.sync_plans(&self.job_id);
-        self.service.update(&self.job_id, |job| {
-            job.phase = Some(phase);
-            job.progress = Some(progress.clone());
-        });
-        self.service.inner.bus.emit(Event::InstallProgress {
-            job_id: self.job_id.clone(),
-            phase,
-            progress,
-        });
-    }
-}
-
-impl EventSink for Progress {
-    fn emit(&self, event: JobEvent) {
-        let phase = JobPhase::from(event.phase);
-        let progress = JobProgress {
-            bytes: event.bytes,
-            total_bytes: event.total_bytes,
-            files: event.files,
-            eta_secs: event.eta_secs,
-            message: event.message,
-        };
-        let now = Instant::now();
-        {
-            let mut throttle = lock(&self.throttle);
-            let changed = throttle
-                .last
-                .as_ref()
-                .is_none_or(|(last, message)| *last != phase || *message != progress.message);
-            let complete = progress
-                .total_bytes
-                .is_some_and(|total| progress.bytes >= total);
-            let completes = complete && throttle.completed != Some(phase);
-            let due = throttle
-                .published_at
-                .is_none_or(|at| now.duration_since(at) >= PROGRESS_INTERVAL);
-            if changed {
-                throttle.last = Some((phase, progress.message.clone()));
-            }
-            if !(changed || completes || due) {
-                throttle.pending = Some((phase, progress));
-                return;
-            }
-            if complete {
-                throttle.completed = Some(phase);
-            }
-            throttle.published_at = Some(now);
-            throttle.pending = None;
-        }
-        self.publish(phase, progress);
-    }
-}
-
-impl Drop for Progress {
-    fn drop(&mut self) {
-        let pending = self
-            .throttle
-            .get_mut()
-            .unwrap_or_else(|poisoned| poisoned.into_inner())
-            .pending
-            .take();
-        // A finished job keeps its last snapshot: its outcome is the news.
-        let running = self
-            .service
-            .job(&self.job_id)
-            .is_some_and(|job| !job.status.is_finished());
-        if let Some((phase, progress)) = pending.filter(|_| running) {
-            self.publish(phase, progress);
-        }
     }
 }
 

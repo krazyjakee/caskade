@@ -20,49 +20,95 @@
 //! with an older value.
 
 use std::collections::{BTreeSet, HashMap, HashSet};
+use std::sync::{Arc, OnceLock};
 
 use serde_json::Value;
 use tokio::sync::Mutex;
 
 use super::change::{Change, EXISTS, Entity, join_key, key_parts};
-use super::clock::{Clock, Hlc, Stamp, now_ms};
+use super::clock::{Clock, Hlc, Stamp};
 use super::policy::{Category, SyncSettings};
-use crate::Result;
 use crate::db::{Applied, FieldKey, FieldState, LibraryStore, Seen};
 use crate::settings::SettingsService;
+use crate::{Result, now_ms};
 
-/// The settings section holding the category choices.
-const NAMESPACE: &str = "core.sync";
-
-/// This device's change log.
-pub struct SyncEngine {
-    store: LibraryStore,
-    device: String,
-    settings: std::sync::OnceLock<SettingsService>,
-    state: Mutex<State>,
+/// What an engine is handed from outside, each set once. A
+/// [`SyncService`](super::service::SyncService) shares one among the engines
+/// of each identity this device has.
+#[derive(Default)]
+pub(super) struct Hooks {
+    settings: OnceLock<SettingsService>,
     /// Called with a RomM server's id when another device removed it, to
     /// remove its downloaded ROMs here (the policy's `Receive::RommServer`).
-    romm_removed: std::sync::OnceLock<std::sync::Arc<dyn Fn(String) + Send + Sync>>,
+    romm_removed: OnceLock<Arc<dyn Fn(String) + Send + Sync>>,
     /// Called with an untouched default admin and the admin from another
     /// device it joined (`LibraryStore::sync_join_stand_in`).
-    account_joined: std::sync::OnceLock<std::sync::Arc<dyn Fn(String, String) + Send + Sync>>,
+    account_joined: OnceLock<Arc<dyn Fn(String, String) + Send + Sync>>,
     /// Where artwork files are: an `artwork` change applies once its file
     /// is here (#273).
-    artwork: std::sync::OnceLock<crate::artwork::ArtworkCache>,
-    /// The wall clock: tests set one that's wrong.
-    time: std::sync::RwLock<std::sync::Arc<dyn Fn() -> i64 + Send + Sync>>,
+    artwork: OnceLock<crate::artwork::ArtworkCache>,
     /// Called after games arrived here or a hand-set IGDB match did, so
     /// this device fills them in itself: their metadata and artwork stay on
     /// each device (#75).
-    games_arrived: std::sync::OnceLock<std::sync::Arc<dyn Fn() + Send + Sync>>,
-    /// Games or matches arrived since [`Self::games_arrived`] was last called.
-    arrived: std::sync::atomic::AtomicBool,
+    games_arrived: OnceLock<Arc<dyn Fn() + Send + Sync>>,
     /// Files that travel after the changes (save files, #239).
     #[cfg(feature = "net")]
     blobs: super::blobs::Registry,
     /// What's running on this device and the others (#240).
     #[cfg(feature = "net")]
-    presence: std::sync::OnceLock<super::presence::Presence>,
+    presence: OnceLock<super::presence::Presence>,
+}
+
+impl Hooks {
+    /// Reads the category choices (`core.sync`) from `settings`.
+    pub(super) fn set_settings(&self, settings: SettingsService) {
+        let _ = self.settings.set(settings);
+    }
+
+    pub(super) fn settings(&self) -> Option<&SettingsService> {
+        self.settings.get()
+    }
+
+    pub(super) fn on_romm_removed(&self, removed: impl Fn(String) + Send + Sync + 'static) {
+        let _ = self.romm_removed.set(Arc::new(removed));
+    }
+
+    pub(super) fn on_account_joined(
+        &self,
+        joined: impl Fn(String, String) + Send + Sync + 'static,
+    ) {
+        let _ = self.account_joined.set(Arc::new(joined));
+    }
+
+    pub(super) fn set_artwork_cache(&self, cache: crate::artwork::ArtworkCache) {
+        let _ = self.artwork.set(cache);
+    }
+
+    pub(super) fn on_games_arrived(&self, arrived: impl Fn() + Send + Sync + 'static) {
+        let _ = self.games_arrived.set(Arc::new(arrived));
+    }
+
+    #[cfg(feature = "net")]
+    pub(super) fn blobs(&self) -> &super::blobs::Registry {
+        &self.blobs
+    }
+
+    #[cfg(feature = "net")]
+    pub(super) fn set_presence(&self, presence: super::presence::Presence) {
+        let _ = self.presence.set(presence);
+    }
+}
+
+/// This device's change log.
+pub struct SyncEngine {
+    store: LibraryStore,
+    device: String,
+    state: Mutex<State>,
+    hooks: Arc<Hooks>,
+    /// The wall clock: tests set one that's wrong.
+    time: std::sync::RwLock<Arc<dyn Fn() -> i64 + Send + Sync>>,
+    /// Games or matches arrived since [`Hooks::games_arrived`] was last called.
+    arrived: std::sync::atomic::AtomicBool,
 }
 
 #[derive(Default)]
@@ -121,84 +167,77 @@ fn field_rank(field: &str) -> u8 {
 impl SyncEngine {
     /// The log of `store`, for this device (its endpoint id).
     pub fn new(store: LibraryStore, device: impl Into<String>) -> Self {
+        Self::with_hooks(store, device, Arc::default())
+    }
+
+    pub(super) fn with_hooks(
+        store: LibraryStore,
+        device: impl Into<String>,
+        hooks: Arc<Hooks>,
+    ) -> Self {
         Self {
             store,
             device: device.into(),
-            settings: std::sync::OnceLock::new(),
             state: Mutex::default(),
-            romm_removed: std::sync::OnceLock::new(),
-            artwork: std::sync::OnceLock::new(),
-            account_joined: std::sync::OnceLock::new(),
-            time: std::sync::RwLock::new(std::sync::Arc::new(now_ms)),
-            games_arrived: std::sync::OnceLock::new(),
+            hooks,
+            time: std::sync::RwLock::new(Arc::new(now_ms)),
             arrived: std::sync::atomic::AtomicBool::new(false),
-            #[cfg(feature = "net")]
-            blobs: super::blobs::Registry::default(),
-            #[cfg(feature = "net")]
-            presence: std::sync::OnceLock::new(),
         }
     }
 
     /// The kinds of blob exchanged after the changes (#239).
     #[cfg(feature = "net")]
     pub fn blobs(&self) -> &super::blobs::Registry {
-        &self.blobs
+        self.hooks.blobs()
     }
 
     /// What to do when this device's default admin joined one from another
     /// device (the app hands the signed-in account over).
     pub fn on_account_joined(&self, joined: impl Fn(String, String) + Send + Sync + 'static) {
-        let _ = self.account_joined.set(std::sync::Arc::new(joined));
+        self.hooks.on_account_joined(joined);
     }
 
     /// The artwork cache, where `artwork` changes' files arrive.
     pub fn set_artwork_cache(&self, cache: crate::artwork::ArtworkCache) {
-        let _ = self.artwork.set(cache);
-    }
-
-    /// Exchanges `blobs`' kinds, shared with other engines (a new identity
-    /// gets a new engine with the same kinds).
-    #[cfg(feature = "net")]
-    pub fn set_blobs(&mut self, blobs: super::blobs::Registry) {
-        self.blobs = blobs;
+        self.hooks.set_artwork_cache(cache);
     }
 
     /// Presence exchanged at the end of each exchange (#240).
     #[cfg(feature = "net")]
     pub fn presence(&self) -> Option<super::presence::Presence> {
-        self.presence.get().cloned()
+        self.hooks.presence.get().cloned()
     }
 
     #[cfg(feature = "net")]
     pub fn set_presence(&self, presence: super::presence::Presence) {
-        let _ = self.presence.set(presence);
+        self.hooks.set_presence(presence);
     }
 
     /// What to do when another device removed a RomM server: the app removes
     /// its downloaded ROMs and library games through `RommService`.
     pub fn on_romm_removed(&self, removed: impl Fn(String) + Send + Sync + 'static) {
-        let _ = self.romm_removed.set(std::sync::Arc::new(removed));
+        self.hooks.on_romm_removed(removed);
     }
 
     /// What to do after games or hand-set IGDB matches arrived from another
     /// device: the app looks them up (`Metadata::wake`). Called once per
     /// apply that brought any.
     pub fn on_games_arrived(&self, arrived: impl Fn() + Send + Sync + 'static) {
-        let _ = self.games_arrived.set(std::sync::Arc::new(arrived));
+        self.hooks.on_games_arrived(arrived);
     }
 
     /// Replaces the wall clock this device reads (tests: a clock set wrong).
     pub fn set_wall_clock(&self, clock: impl Fn() -> i64 + Send + Sync + 'static) {
-        *self.time.write().unwrap_or_else(|e| e.into_inner()) = std::sync::Arc::new(clock);
+        *crate::write(&self.time) = Arc::new(clock);
     }
 
     fn now(&self) -> i64 {
-        (self.time.read().unwrap_or_else(|e| e.into_inner()))()
+        (crate::read(&self.time))()
     }
 
     /// Reads the category choices (`core.sync`) from `settings`.
     pub fn set_settings(&self, settings: SettingsService) {
-        let _ = self.settings.set(settings);
+        self.hooks.set_settings(settings);
     }
 
     pub fn device(&self) -> &str {
@@ -211,10 +250,7 @@ impl SyncEngine {
 
     /// The category choices.
     pub async fn categories(&self) -> SyncSettings {
-        match self.settings.get() {
-            Some(settings) => settings.read_or_default(NAMESPACE).await,
-            None => SyncSettings::default(),
-        }
+        SyncSettings::read(self.hooks.settings()).await
     }
 
     async fn load(&self, state: &mut State) -> Result<()> {
@@ -435,7 +471,7 @@ impl SyncEngine {
                     Mapped::To(target, value)
                         if super::settings::namespace(change.entity).is_some() =>
                     {
-                        let Some(settings) = self.settings.get() else {
+                        let Some(settings) = self.hooks.settings() else {
                             continue;
                         };
                         if super::settings::apply(settings, &self.store, change, value.clone())
@@ -460,6 +496,7 @@ impl SyncEngine {
                         {
                             Some(synced) => {
                                 match self
+                                    .hooks
                                     .artwork
                                     .get()
                                     .and_then(|cache| cache.cached(&synced.hash).ok().flatten())
@@ -537,13 +574,13 @@ impl SyncEngine {
         if self
             .arrived
             .swap(false, std::sync::atomic::Ordering::Relaxed)
-            && let Some(arrived) = self.games_arrived.get()
+            && let Some(arrived) = self.hooks.games_arrived.get()
         {
             arrived();
         }
         if applied > 0
             && let Some((from, into)) = self.store.sync_join_stand_in(&self.device).await?
-            && let Some(joined) = self.account_joined.get()
+            && let Some(joined) = self.hooks.account_joined.get()
         {
             joined(from, into);
         }
@@ -736,7 +773,7 @@ impl SyncEngine {
     /// definition, as `policy` projects `core.romm` (no secrets, no cache, no
     /// emulator or profile choices).
     async fn settings_snapshot(&self, values: &mut HashMap<crate::db::FieldKey, Value>) {
-        let Some(settings) = self.settings.get() else {
+        let Some(settings) = self.hooks.settings() else {
             return;
         };
         super::settings::snapshot(settings, values).await;
@@ -782,7 +819,7 @@ impl SyncEngine {
         target: &str,
         value: Option<Value>,
     ) -> Result<bool> {
-        let Some(settings) = self.settings.get() else {
+        let Some(settings) = self.hooks.settings() else {
             return Ok(false);
         };
         if let Some(current) = self
@@ -844,7 +881,7 @@ impl SyncEngine {
             .await?;
         if value.is_none()
             && existing.is_some()
-            && let Some(removed) = self.romm_removed.get()
+            && let Some(removed) = self.hooks.romm_removed.get()
         {
             removed(target.to_owned());
         }

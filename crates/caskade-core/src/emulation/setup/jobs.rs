@@ -11,22 +11,18 @@ use crate::{
         InstallSource, PlatformSettings, ProfileRef, VarContext, bios_dirs, emulator_dir,
         vars::Expander,
     },
-    lock,
 };
 use std::path::{Path, PathBuf};
 #[cfg(feature = "net")]
 use std::time::{Duration, Instant};
 use tokio_util::sync::CancellationToken;
 
-pub(super) struct JobState {
-    job: SetupJob,
-    cancel: CancellationToken,
-    plan: Plan,
-}
+/// A job's cancel token and plan.
+pub(super) type Control = (CancellationToken, Plan);
 
 /// What a job does besides installing.
 #[derive(Debug, Clone, Default)]
-struct Plan {
+pub(super) struct Plan {
     /// Keep the installed emulator; only add profiles and their files.
     reuse: bool,
     /// The definition profile wanted (a platform's RetroArch core); `None`
@@ -46,41 +42,27 @@ impl EmulatorSetup {
     }
 
     fn update_job(&self, id: &str, change: impl FnOnce(&mut SetupJob)) -> Option<SetupJob> {
-        let job = {
-            let mut jobs = lock(&self.inner.jobs);
-            let state = jobs.get_mut(id)?;
-            change(&mut state.job);
-            state.job.revision += 1;
-            state.job.clone()
-        };
+        let job = self.inner.jobs.update(id, change)?;
         self.publish(&job);
         Some(job)
     }
 
     /// Every job since startup, oldest first.
     pub fn jobs(&self) -> Vec<SetupJob> {
-        lock(&self.inner.jobs)
-            .values()
-            .map(|state| state.job.clone())
-            .collect()
+        self.inner.jobs.jobs()
     }
 
     pub fn job(&self, id: &str) -> Option<SetupJob> {
-        lock(&self.inner.jobs)
-            .get(id)
-            .map(|state| state.job.clone())
+        self.inner.jobs.job(id)
     }
 
     /// Cancels a job that hasn't finished.
     pub fn cancel(&self, id: &str) -> Result<SetupJob> {
-        let state = lock(&self.inner.jobs)
-            .get(id)
-            .map(|state| (state.cancel.clone(), state.job.clone()))
-            .ok_or_else(|| {
-                Error::Invalid(crate::tr!("This emulator install is no longer listed."))
-            })?;
-        state.0.cancel();
-        Ok(state.1)
+        let (job, (cancel, _)) = self.inner.jobs.get(id).ok_or_else(|| {
+            Error::Invalid(crate::tr!("This emulator install is no longer listed."))
+        })?;
+        cancel.cancel();
+        Ok(job)
     }
 
     /// Installs the platform's recommended emulator (§2.4).
@@ -137,9 +119,12 @@ impl EmulatorSetup {
                 emulator = definition.name
             )));
         }
-        let busy = lock(&self.inner.jobs)
-            .values()
-            .any(|state| state.job.definition_id == definition_id && !state.job.status.finished());
+        let busy = self
+            .inner
+            .jobs
+            .jobs()
+            .iter()
+            .any(|job| job.definition_id == definition_id && !job.status.finished());
         if busy {
             return Err(Error::Invalid(crate::tr!(
                 "{emulator} is already being installed",
@@ -163,14 +148,9 @@ impl EmulatorSetup {
             error: None,
         };
         let cancel = CancellationToken::new();
-        lock(&self.inner.jobs).insert(
-            job.id.clone(),
-            JobState {
-                job: job.clone(),
-                cancel: cancel.clone(),
-                plan,
-            },
-        );
+        self.inner
+            .jobs
+            .insert(job.clone(), (cancel.clone(), plan), None);
         self.publish(&job);
         let service = self.clone();
         let id = job.id.clone();
@@ -197,9 +177,10 @@ impl EmulatorSetup {
     }
 
     async fn run(&self, id: &str, cancel: &CancellationToken) -> Result<()> {
-        let (job, plan) = lock(&self.inner.jobs)
+        let (job, (_, plan)) = self
+            .inner
+            .jobs
             .get(id)
-            .map(|state| (state.job.clone(), state.plan.clone()))
             .ok_or_else(|| Error::Invalid(crate::tr!("the job is gone")))?;
         let catalog = self.inner.emulation.catalog();
         let definition = catalog
@@ -349,7 +330,7 @@ impl EmulatorSetup {
 
     #[cfg(feature = "net")]
     async fn release_nearby(&self, definition: &str) -> Option<source::Resolved> {
-        let near = lock(&self.inner.near).clone()?;
+        let near = crate::lock(&self.inner.near).clone()?;
         let (url, file, version) = near.release(&Self::release_key(definition)).await?;
         Some(source::Resolved { version, url, file })
     }
@@ -361,7 +342,7 @@ impl EmulatorSetup {
 
     #[cfg(feature = "net")]
     async fn keep_release(&self, definition: &str, resolved: &source::Resolved) {
-        let near = lock(&self.inner.near).clone();
+        let near = crate::lock(&self.inner.near).clone();
         if let Some(near) = near {
             near.keep_release(
                 &Self::release_key(definition),
@@ -669,8 +650,7 @@ impl EmulatorSetup {
                     self.download(id, &url, &download, cancel).await?;
                     let (file, path) = (file.clone(), path.clone());
                     tokio::task::spawn_blocking(move || unpack::take(&download, &file, &path))
-                        .await
-                        .map_err(|error| Error::Invalid(error.to_string()))?
+                        .await?
                 }
                 .await;
                 if let Err(error) = fetched {

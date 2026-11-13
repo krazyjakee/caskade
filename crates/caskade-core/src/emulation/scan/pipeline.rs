@@ -140,20 +140,7 @@ pub fn scan_files(
             ));
             continue;
         };
-        let mut parsed = parse_name(Path::new(path), request.regions);
-        let platform =
-            if let Some(identity) = request.identifier.and_then(|id| id.identify(file, &parsed)) {
-                if !request.platforms.iter().any(|p| p.id == identity.platform) {
-                    return Err(ScanError::Invalid(crate::tr!(
-                        "identifier returned an incompatible platform"
-                    )));
-                }
-                parsed.title = identity.title;
-                parsed.regions = identity.regions;
-                identity.platform
-            } else {
-                platform
-            };
+        let parsed = parse_name(Path::new(path), request.regions);
         if parsed.title.is_empty() {
             report.warnings.push(warning(
                 path,

@@ -1,6 +1,6 @@
-//! SQLite library store: migrations, repositories, FTS5 search (#105).
-//! Async SQLite library repository. One bundled SQLite is shared with
-//! discovery; no process-global database, runtime, or logging configuration.
+//! The async SQLite library store (#105): migrations, repositories and FTS5
+//! search. One bundled SQLite is shared with discovery; no process-global
+//! database, runtime, or logging configuration.
 #[cfg(test)]
 mod account_tests;
 mod accounts;
@@ -12,6 +12,7 @@ mod actions;
 #[cfg(test)]
 mod actions_tests;
 mod collation;
+pub(crate) use collation::title_key;
 mod compat;
 mod emulation;
 mod game_edit;
@@ -20,12 +21,12 @@ mod icons;
 mod igdb;
 pub use igdb::{GameAgeRatings, IgdbOwned};
 mod plugins;
-pub use plugins::{PLUGIN_KEY_MAX, PLUGIN_KV_TOTAL_MAX, PLUGIN_VALUE_MAX, PluginRow};
+pub use plugins::PluginRow;
 mod imports;
 mod managed;
 mod managed_tools;
 mod streaming;
-pub use streaming::{StreamApp, StreamSync, stream_source};
+pub use streaming::{StreamApp, StreamSync};
 mod manual;
 pub use imports::{ImportedGroup, SourceRemoval};
 mod notifications;
@@ -64,20 +65,27 @@ mod sync_artwork;
 mod sync_carried;
 mod sync_copies;
 mod sync_data;
+mod sync_identity;
 mod sync_log;
+mod sync_snapshot;
 #[cfg(test)]
 mod write_lock_tests;
 mod writes;
 pub use sync_accounts::is_marker as is_stand_in_marker;
 pub use sync_artwork::SyncedArtwork;
-pub use sync_copies::{AnnouncedCopy, CopyLocation, PEER_PREFIX, PeerCopyRecord, this_os};
-pub use sync_data::{Applied, SESSIONS_SOURCE, Snapshot, normal_title};
+pub use sync_copies::{AnnouncedCopy, CopyLocation, PeerCopyRecord, this_os};
+pub use sync_data::Applied;
 pub use sync_log::{FieldKey, FieldState, Seen};
+pub use sync_snapshot::Snapshot;
 mod popularity;
 pub use paired_devices::PairedDeviceRecord;
 pub use playtime::{PlaytimeBreakdown, PlaytimeImport, RemoteTotal, ReportedPlaytime};
+#[cfg(test)]
+mod query_tests;
 mod sessions;
 mod store_accounts;
+#[cfg(test)]
+mod test_support;
 #[cfg(test)]
 mod tests;
 mod updates;

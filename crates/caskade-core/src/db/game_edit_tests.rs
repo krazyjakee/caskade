@@ -1,23 +1,15 @@
 //! Manual game edits (#171): validated patches, conflicts, and the user's
 //! fields kept through automatic writes, imports, merges and separation.
 use super::LibraryStore;
+use super::test_support::import_game;
 use crate::model::*;
-
-async fn import(store: &LibraryStore, game: &Game, source: &'static str, key: &str) -> String {
-    let entry = GameEntry::new(&game.id, SourceId::new(source), key);
-    store
-        .import_group(game, &[entry], None)
-        .await
-        .unwrap()
-        .game_id
-}
 
 async fn portal(store: &LibraryStore) -> Game {
     let mut game = Game::new("Portal 2");
     game.description = "From the launcher.".into();
     game.genres = vec!["Puzzle".into()];
     game.release_date = Some("2011-04-19".into());
-    let id = import(store, &game, "steam", "620").await;
+    let id = import_game(store, &game, "steam", "620").await;
     store.game(&id).await.unwrap().unwrap()
 }
 
@@ -332,7 +324,7 @@ async fn a_rescan_keeps_the_users_fields() {
     saved(store.edit_game(&game.id, &edit, None).await.unwrap());
     let mut proposed = Game::new("Portal 2");
     proposed.description = "Rescanned.".into();
-    let id = import(&store, &proposed, "steam", "620").await;
+    let id = import_game(&store, &proposed, "steam", "620").await;
     assert_eq!(id, game.id);
     let stored = store.game(&id).await.unwrap().unwrap();
     assert_eq!(
@@ -348,7 +340,7 @@ async fn a_merge_keeps_both_games_fields_and_notes() {
     let mut other = Game::new("Portal 2 (GOG)");
     other.description = "From GOG.".into();
     other.notes = "GOG notes.".into();
-    let other_id = import(&store, &other, "gog", "portal2").await;
+    let other_id = import_game(&store, &other, "gog", "portal2").await;
     let other = store.game(&other_id).await.unwrap().unwrap();
 
     let edit = GameEdit {

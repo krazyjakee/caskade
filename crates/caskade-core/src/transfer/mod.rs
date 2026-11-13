@@ -31,25 +31,26 @@
 //! page, and the receiver makes the bundle that game's offline copy. One
 //! played from its page alone has nothing to copy, and is refused.
 
+mod receive;
 pub mod rom;
+mod send;
 pub mod web;
 
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex, Weak};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use async_trait::async_trait;
+use caskade_sync::EndpointId;
 use caskade_sync::copy::{CopyGate, CopyStore, Offered};
-use caskade_sync::{EndpointId, Session, Sessions};
 use serde::{Deserialize, Serialize};
-use tokio::sync::{broadcast, mpsc};
+use tokio::sync::broadcast;
 
 use crate::db::LibraryStore;
 use crate::devices::{ConnectionPurpose, Devices};
-use crate::install::{FetchFailure, Fetched, PeerCopyTarget, PeerFetcher, PeerProgress};
-use crate::model::{GameRuntime, InstallLocation, InstallState, LaunchSpec};
 use crate::{Error, Result};
+
+use send::Serve;
 
 /// How long an offered folder stays offered to a device that may come back
 /// for the rest.
@@ -302,11 +303,7 @@ impl Transfers {
 
     /// Copies going on, both ways.
     pub fn transfers(&self) -> Vec<TransferRecord> {
-        let mut records: Vec<TransferRecord> = self
-            .inner
-            .outgoing
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
+        let mut records: Vec<TransferRecord> = crate::lock(&self.inner.outgoing)
             .iter()
             .map(|((peer, _), outgoing)| TransferRecord {
                 id: format!("send:{peer}:{}", outgoing.entry),
@@ -323,10 +320,7 @@ impl Transfers {
             })
             .collect();
         records.extend(
-            self.inner
-                .incoming
-                .lock()
-                .unwrap_or_else(|e| e.into_inner())
+            crate::lock(&self.inner.incoming)
                 .iter()
                 .map(|(job, incoming)| TransferRecord {
                     id: job.clone(),
@@ -434,386 +428,6 @@ impl Transfers {
     }
 }
 
-/// `copy` sessions from paired devices: they ask for a release.
-struct Serve(Weak<Inner>);
-
-#[async_trait]
-impl Sessions for Serve {
-    async fn opened(&self, session: Session) {
-        let Some(inner) = self.0.upgrade() else {
-            return session.end().await;
-        };
-        Transfers { inner }.serve(session).await;
-    }
-}
-
-impl Transfers {
-    async fn serve(&self, mut session: Session) {
-        let peer = session.peer();
-        let entry = match session.reader().read(MAX_LINE).await {
-            Ok(Message::Request { entry }) => entry,
-            Ok(Message::Send {
-                entry,
-                game,
-                title,
-                size,
-            }) => return self.requested(session, entry, game, title, size).await,
-            _ => return session.end().await,
-        };
-        match self.offer(&entry, peer, &mut session).await {
-            Ok(()) => {
-                let mut server = None;
-                // Until the device says it has everything, or goes.
-                loop {
-                    match tokio::time::timeout(OFFER_LIFETIME, session.reader().read(MAX_LINE))
-                        .await
-                    {
-                        Ok(Ok(Message::Done)) => {
-                            self.withdraw(&entry, peer).await;
-                            break;
-                        }
-                        Ok(Ok(Message::Punch { addrs })) => {
-                            if server.is_none() {
-                                server = self.inner.devices.file_server(peer, &addrs).await;
-                            }
-                            let addrs = server
-                                .as_ref()
-                                .map(caskade_sync::punch::FileServer::addrs)
-                                .unwrap_or_default();
-                            let _ = session.writer().write(&Message::Punch { addrs }).await;
-                        }
-                        Ok(Ok(_)) => continue,
-                        // Gone: the offer stays a while, to resume.
-                        _ => break,
-                    }
-                }
-                session.end().await;
-                if let Some(server) = server {
-                    server.close().await;
-                }
-            }
-            Err(reason) => {
-                let _ = session
-                    .writer()
-                    .write(&Message::Refused {
-                        reason: reason.to_string(),
-                    })
-                    .await;
-                session.end().await;
-            }
-        }
-    }
-
-    /// Another device asks this one to copy a game from it: queued for
-    /// confirmation here, or started (the app decides, `on_send`).
-    async fn requested(
-        &self,
-        mut session: Session,
-        entry: String,
-        game: String,
-        title: String,
-        size: Option<u64>,
-    ) {
-        let peer = session.peer().to_string();
-        let answer = match self.inner.on_send.get() {
-            Some(handler) => {
-                let game_id = self
-                    .inner
-                    .store
-                    .sync_mapped_game(&peer, &game)
-                    .await
-                    .ok()
-                    .flatten();
-                handler(SendRequest {
-                    device_id: peer,
-                    entry_id: entry,
-                    game_id,
-                    title,
-                    size,
-                });
-                Message::Queued
-            }
-            None => Message::Refused {
-                reason: crate::tr!("this device doesn't take copies"),
-            },
-        };
-        let _ = session.writer().write(&answer).await;
-        session.end().await;
-    }
-
-    /// The folder release `entry` is in, its program relative to it, and
-    /// whether it's a Windows build; refused when it can't be copied.
-    pub async fn source(&self, entry: &str) -> Result<(PathBuf, String, Option<String>, bool)> {
-        let not_here = || Error::Invalid(crate::tr!("that game isn't installed on this device"));
-        let entry = self
-            .inner
-            .store
-            .get_entry(entry)
-            .await?
-            .ok_or_else(not_here)?;
-        let source = entry.source_id.as_str();
-        if source.starts_with("peer:")
-            || source.starts_with("store:")
-            || source.starts_with("stream:")
-        {
-            return Err(not_here());
-        }
-        if !matches!(entry.state, InstallState::Installed) {
-            return Err(Error::Invalid(crate::tr!(
-                "the game isn't fully installed on this device"
-            )));
-        }
-        // Its ROM files go instead (`rom`): its folder may hold every game
-        // of the platform.
-        if rom::emulated(&entry) {
-            return Err(Error::Invalid(crate::tr!(
-                "an emulated game goes as its ROM files, not its folder"
-            )));
-        }
-        // A web game goes as its offline copy, when it has one (`web`).
-        let web = web::is_web(&entry)
-            .then(|| web::describe(&entry))
-            .transpose()?;
-        let folder = match &entry.location {
-            Some(InstallLocation::Managed { root_id, rel_dir }) => {
-                let root = self.inner.store.get_root(root_id).await?.ok_or_else(|| {
-                    Error::Invalid(crate::tr!("the game's storage isn't available"))
-                })?;
-                root.path.join(rel_dir)
-            }
-            Some(InstallLocation::External { path })
-                if matches!(entry.launch, Some(LaunchSpec::Executable { .. })) =>
-            {
-                if path.is_dir() {
-                    path.clone()
-                } else {
-                    path.parent().map(Path::to_path_buf).ok_or_else(not_here)?
-                }
-            }
-            Some(InstallLocation::External { .. }) => {
-                return Err(Error::Invalid(crate::tr!(
-                    "it starts through its store's launcher here; install it from the store there"
-                )));
-            }
-            None => return Err(not_here()),
-        };
-        if !folder.is_dir() {
-            return Err(Error::Invalid(crate::tr!("the game's folder isn't there")));
-        }
-        if web.is_some() && !folder.join(crate::web::bundle::MANIFEST).is_file() {
-            return Err(Error::Invalid(crate::tr!(
-                "the offline copy's files aren't there"
-            )));
-        }
-        let launch = match &entry.launch {
-            Some(LaunchSpec::Executable { path, .. }) => {
-                let relative = if path.is_absolute() {
-                    path.strip_prefix(&folder).ok().map(Path::to_path_buf)
-                } else {
-                    Some(path.clone())
-                };
-                relative.and_then(|path| {
-                    let parts: Vec<String> = path
-                        .components()
-                        .filter_map(|part| match part {
-                            std::path::Component::Normal(part) => part.to_str().map(str::to_owned),
-                            _ => None,
-                        })
-                        .collect();
-                    (!parts.is_empty()).then(|| parts.join("/"))
-                })
-            }
-            _ => None,
-        };
-        let title = self
-            .inner
-            .store
-            .game(&entry.game_id)
-            .await?
-            .map(|game| game.title)
-            .unwrap_or_default();
-        let windows = matches!(entry.runtime, GameRuntime::Windows { .. });
-        Ok((folder, title, launch, windows))
-    }
-
-    /// Offers release `entry` to `peer` on `session`: reads its files (or
-    /// takes an earlier offer of it), lets `peer` fetch them, and says so.
-    async fn offer(&self, entry: &str, peer: EndpointId, session: &mut Session) -> Result<()> {
-        let earlier = {
-            let offers = self.inner.offers.lock().unwrap_or_else(|e| e.into_inner());
-            offers
-                .get(entry)
-                .map(|offer| (offer.offered.clone(), offer.what.clone()))
-        };
-        let (offered, what) = match earlier {
-            Some(earlier) => earlier,
-            None => {
-                let (folder, what) = self.what_to_send(entry).await?;
-                let tag = format!("copy/{entry}");
-                let (tx, mut rx) = mpsc::unbounded_channel();
-                let reading = self.inner.sending.offer(&folder, &tag, move |done, total| {
-                    let _ = tx.send((done, total));
-                });
-                tokio::pin!(reading);
-                let mut last = std::time::Instant::now();
-                let offered = loop {
-                    tokio::select! {
-                        offered = &mut reading => break offered.map_err(sync_error)?,
-                        Some((done, total)) = rx.recv() => {
-                            if last.elapsed() >= Duration::from_millis(500) {
-                                last = std::time::Instant::now();
-                                let _ = session
-                                    .writer()
-                                    .write(&Message::Preparing { done, total })
-                                    .await;
-                            }
-                        }
-                    }
-                };
-                self.inner
-                    .offers
-                    .lock()
-                    .unwrap_or_else(|e| e.into_inner())
-                    .insert(
-                        entry.to_owned(),
-                        Offer {
-                            offered: offered.clone(),
-                            tag: tag.clone(),
-                            what: what.clone(),
-                            peers: HashSet::new(),
-                        },
-                    );
-                (offered, what)
-            }
-        };
-        self.inner
-            .gate
-            .allow(peer, &offered.root)
-            .map_err(sync_error)?;
-        if let Some(offer) = self
-            .inner
-            .offers
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .get_mut(entry)
-        {
-            offer.peers.insert(peer);
-        }
-        self.inner
-            .outgoing
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .entry((peer, entry.to_owned()))
-            .or_insert_with(|| Outgoing {
-                entry: entry.to_owned(),
-                title: what.title.clone(),
-                root: offered.root.clone(),
-                size: offered.size,
-                started_at_ms: crate::now_ms(),
-            });
-        self.changed();
-        // Offered for a while, then withdrawn whatever happened.
-        let this = self.clone();
-        let (key, until) = (entry.to_owned(), OFFER_LIFETIME);
-        tokio::spawn(async move {
-            tokio::time::sleep(until).await;
-            this.withdraw(&key, peer).await;
-        });
-        session
-            .writer()
-            .write(&Message::Offer {
-                root: offered.root,
-                size: offered.size,
-                files: offered.files,
-                title: what.title,
-                launch: what.launch,
-                windows: what.windows,
-                rom: what.rom,
-                web: what.web,
-            })
-            .await
-            .map_err(sync_error)
-    }
-
-    /// What release `entry` sends: its folder, title, program and whether
-    /// it's a Windows build, and for a web game its page; or, for an
-    /// emulated release, its ROM files put together on their own and what
-    /// they are.
-    async fn what_to_send(&self, entry: &str) -> Result<(PathBuf, Described)> {
-        let release = self.inner.store.get_entry(entry).await?;
-        if !release.as_ref().is_some_and(rom::emulated) {
-            let (folder, title, launch, windows) = self.source(entry).await?;
-            let web = release
-                .as_ref()
-                .filter(|release| web::is_web(release))
-                .map(web::describe)
-                .transpose()?;
-            return Ok((
-                folder,
-                Described {
-                    title,
-                    launch,
-                    windows,
-                    rom: None,
-                    web,
-                },
-            ));
-        }
-        let (release, copy, files) = rom::describe(&self.inner.store, entry).await?;
-        if !matches!(release.state, InstallState::Installed) {
-            return Err(Error::Invalid(crate::tr!(
-                "the game isn't fully installed on this device"
-            )));
-        }
-        let folder = rom::put_together(&self.inner.outgoing_dir.join(entry), files).await?;
-        let title = self
-            .inner
-            .store
-            .game(&release.game_id)
-            .await?
-            .map(|game| game.title)
-            .unwrap_or_default();
-        Ok((
-            folder,
-            Described {
-                title,
-                launch: None,
-                windows: false,
-                rom: Some(copy),
-                web: None,
-            },
-        ))
-    }
-
-    /// `peer` has release `entry`, or its offer ran out: withdrawn, and let
-    /// go once nobody else is fetching it.
-    async fn withdraw(&self, entry: &str, peer: EndpointId) {
-        let released = {
-            let mut offers = self.inner.offers.lock().unwrap_or_else(|e| e.into_inner());
-            let Some(offer) = offers.get_mut(entry) else {
-                return;
-            };
-            self.inner.gate.revoke(peer, &offer.offered.root);
-            offer.peers.remove(&peer);
-            if offer.peers.is_empty() {
-                offers.remove(entry).map(|offer| offer.tag)
-            } else {
-                None
-            }
-        };
-        self.inner
-            .outgoing
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .remove(&(peer, entry.to_owned()));
-        if let Some(tag) = released {
-            let _ = self.inner.sending.release(&tag).await;
-            let _ = tokio::fs::remove_dir_all(self.inner.outgoing_dir.join(entry)).await;
-        }
-        self.changed();
-    }
-}
-
 /// A size for a message: "3.2 GB", "820 MB".
 pub fn readable_size(bytes: u64) -> String {
     const GB: f64 = 1e9;
@@ -826,267 +440,23 @@ pub fn readable_size(bytes: u64) -> String {
     }
 }
 
-fn waiting(why: String) -> FetchFailure {
-    FetchFailure::Waiting(why)
-}
-
-impl Transfers {
-    /// Makes a way through both routers for `session`'s copy: a port of its
-    /// own at each end, and each dialling the other (`caskade_sync::punch`).
-    async fn through_routers(
-        &self,
-        session: &mut Session,
-        peer: EndpointId,
-    ) -> Option<(
-        caskade_sync::copy::DirectDialer,
-        caskade_sync::copy::Connection,
-    )> {
-        let (dialer, addrs) = self.inner.devices.punched_dialer().await?;
-        let answer = async {
-            session
-                .writer()
-                .write(&Message::Punch { addrs })
-                .await
-                .ok()?;
-            match tokio::time::timeout(PUNCH_WAIT * 2, session.reader().read(MAX_LINE)).await {
-                Ok(Ok(Message::Punch { addrs })) if !addrs.is_empty() => Some(addrs),
-                _ => None,
-            }
-        };
-        let connection = match answer.await {
-            Some(theirs) => tokio::time::timeout(DIAL_WAIT, dialer.connect(peer, &theirs))
-                .await
-                .ok()
-                .and_then(std::result::Result::ok),
-            None => None,
-        };
-        match connection {
-            Some(connection) => Some((dialer, connection)),
-            None => {
-                dialer.close().await;
-                None
-            }
-        }
-    }
-}
-
-#[async_trait]
-impl PeerFetcher for Transfers {
-    async fn fetch(
-        &self,
-        target: &PeerCopyTarget,
-        root: &Path,
-        job: &str,
-        cancel: caskade_installer::exec::CancellationToken,
-        progress: Arc<dyn Fn(PeerProgress) + Send + Sync>,
-    ) -> std::result::Result<Fetched, FetchFailure> {
-        let device = target.device_name.as_str();
-        let peer: EndpointId = target
-            .device_id
-            .parse()
-            .map_err(|_| FetchFailure::Failed(Error::Invalid(crate::tr!("that isn't a device"))))?;
-        let unreachable = || crate::tr!("Waiting for {device} to be in reach", device = device);
-        let mut session = self
-            .inner
-            .devices
-            .connect(&target.device_id, ConnectionPurpose::Copy)
-            .await
-            .map_err(|_| waiting(unreachable()))?;
-        session
-            .writer()
-            .write(&Message::Request {
-                entry: target.entry_id.clone(),
-            })
-            .await
-            .map_err(|_| waiting(unreachable()))?;
-        let (root_hash, size, title, launch, rom, web) = loop {
-            let frame = tokio::time::timeout(FRAME_WAIT, session.reader().read(MAX_LINE)).await;
-            match frame {
-                Ok(Ok(Message::Preparing { done, total })) => {
-                    progress(PeerProgress::Preparing { done, total });
-                }
-                Ok(Ok(Message::Offer {
-                    root,
-                    size,
-                    title,
-                    launch,
-                    rom,
-                    web,
-                    ..
-                })) => break (root, size, title, launch, rom, web),
-                Ok(Ok(Message::Refused { reason })) => {
-                    return Err(FetchFailure::Failed(Error::Invalid(reason)));
-                }
-                Ok(Ok(_)) => continue,
-                _ => return Err(waiting(unreachable())),
-            }
-        };
-        let store = self.inner.receiving.clone();
-        let have = store.local_bytes(&root_hash).await.unwrap_or(0).min(size);
-        // What's still to come in the cache, and the install in the root:
-        // twice the game where both are on one disk.
-        let _ = std::fs::create_dir_all(&self.inner.incoming_dir);
-        let cache_free = fs2::available_space(&self.inner.incoming_dir).unwrap_or(u64::MAX);
-        let root_free = fs2::available_space(root).unwrap_or(u64::MAX);
-        let to_come = size.saturating_sub(have);
-        let same_disk = fs2::total_space(&self.inner.incoming_dir).ok()
-            == fs2::total_space(root).ok()
-            && cache_free == root_free;
-        let short = if same_disk {
-            to_come.saturating_add(size).saturating_sub(root_free)
-        } else {
-            to_come
-                .saturating_sub(cache_free)
-                .max(size.saturating_sub(root_free))
-        };
-        if short > 0 {
-            return Err(FetchFailure::Failed(Error::Invalid(crate::tr!(
-                "there isn't enough room for the copy: {short} more is needed",
-                short = readable_size(short)
-            ))));
-        }
-        if session.direct_path(PUNCH_WAIT).await.is_none() {
-            return Err(waiting(crate::tr!(
-                "Only a relay reaches {device}: the copy waits for a direct connection",
-                device = device
-            )));
-        }
-        let addrs = session.direct_addrs();
-        let dialer = self
-            .inner
-            .devices
-            .direct_dialer()
-            .await
-            .map_err(FetchFailure::Failed)?;
-        let plain = tokio::time::timeout(PLAIN_WAIT, dialer.connect(peer, &addrs)).await;
-        let (connection, punched) = match plain {
-            Ok(Ok(connection)) => (connection, None),
-            _ => match self.through_routers(&mut session, peer).await {
-                Some((dialer, connection)) => (connection, Some(dialer)),
-                None => {
-                    return Err(waiting(crate::tr!(
-                        "{device} can't be reached directly yet: the copy waits for a direct connection",
-                        device = device
-                    )));
-                }
-            },
-        };
-        self.inner
-            .incoming
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .insert(
-                job.to_owned(),
-                Incoming {
-                    device_id: target.device_id.clone(),
-                    title: title.clone(),
-                    done: have,
-                    total: size,
-                    started_at_ms: crate::now_ms(),
-                },
-            );
-        self.changed();
-        progress(PeerProgress::Receiving {
-            done: have,
-            total: size,
-        });
-        let tag = format!("copy/{job}");
-        let this = self.clone();
-        let key = job.to_owned();
-        let report = progress.clone();
-        let fetching = store.fetch(connection, &root_hash, &tag, move |bytes| {
-            let done = have.saturating_add(bytes).min(size);
-            if let Some(incoming) = this
-                .inner
-                .incoming
-                .lock()
-                .unwrap_or_else(|e| e.into_inner())
-                .get_mut(&key)
-            {
-                incoming.done = done;
-            }
-            report(PeerProgress::Receiving { done, total: size });
-        });
-        let fetched = tokio::select! {
-            _ = cancel.cancelled() => Err(caskade_sync::Error::Copy { reason: "cancelled".into() }),
-            fetched = fetching => fetched,
-        };
-        if let Some(dialer) = punched {
-            dialer.close().await;
-        }
-        let finished = |this: &Self| {
-            this.inner
-                .incoming
-                .lock()
-                .unwrap_or_else(|e| e.into_inner())
-                .remove(job);
-            this.changed();
-        };
-        if let Err(error) = fetched {
-            finished(self);
-            tracing::debug!(%error, "a copy stopped; what arrived stays");
-            return Err(waiting(unreachable()));
-        }
-        let _ = session.writer().write(&Message::Done).await;
-        session.end().await;
-        let staging = self.inner.incoming_dir.join(job);
-        let folder = staging.join(folder_name(&title));
-        let _ = std::fs::remove_dir_all(&staging);
-        let exported = store.export(&root_hash, &folder).await;
-        finished(self);
-        exported.map_err(|error| FetchFailure::Failed(sync_error(error)))?;
-        let game_id = Some(&target.game_id)
-            .filter(|game| !game.is_empty())
-            .map(String::as_str);
-        // An emulated release: placed as a game of its platform, not
-        // installed (#279). A web game's offline copy: made that game's
-        // offline copy, not installed (#76); a device on an older Caskade
-        // doesn't say so, and its bundle does.
-        let web = match (&rom, web) {
-            (None, None) => web::in_folder(&folder),
-            (_, web) => web,
-        };
-        let placed = match (&rom, &web) {
-            (Some(rom), _) => Some(
-                rom::place(
-                    &self.inner.store,
-                    self.emulator_installer(),
-                    rom,
-                    &folder,
-                    root,
-                    &title,
-                    game_id,
-                )
-                .await
-                .map_err(FetchFailure::Failed)?,
-            ),
-            (None, Some(web)) => Some(
-                web::place(&self.inner.store, &web.url, &folder, root, &title, game_id)
-                    .await
-                    .map_err(FetchFailure::Failed)?,
-            ),
-            (None, None) => None,
-        };
-        Ok(Fetched {
-            folder,
-            title,
-            launch,
-            placed,
-        })
-    }
-
-    async fn finished(&self, _root: &Path, job: &str) {
-        let _ = tokio::fs::remove_dir_all(self.inner.incoming_dir.join(job)).await;
-        let _ = self.inner.receiving.release(&format!("copy/{job}")).await;
-    }
-
-    fn sending(&self, entry_id: &str) -> bool {
-        self.inner
-            .outgoing
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .values()
-            .any(|outgoing| outgoing.entry == entry_id)
+/// How many more bytes a copy of `size`, `have` of them already in
+/// `incoming`, needs to arrive there and be installed under `root`: what's
+/// still to come in the cache and the install in the root, twice the game
+/// where both are on one disk. 0 when there's room.
+pub fn shortfall(incoming: &Path, root: &Path, size: u64, have: u64) -> u64 {
+    let _ = std::fs::create_dir_all(incoming);
+    let cache_free = fs2::available_space(incoming).unwrap_or(u64::MAX);
+    let root_free = fs2::available_space(root).unwrap_or(u64::MAX);
+    let to_come = size.saturating_sub(have);
+    let same_disk =
+        fs2::total_space(incoming).ok() == fs2::total_space(root).ok() && cache_free == root_free;
+    if same_disk {
+        to_come.saturating_add(size).saturating_sub(root_free)
+    } else {
+        to_come
+            .saturating_sub(cache_free)
+            .max(size.saturating_sub(root_free))
     }
 }
 

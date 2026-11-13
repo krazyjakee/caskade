@@ -8,11 +8,11 @@ use async_trait::async_trait;
 
 use super::blobs::Incoming;
 use super::{RemoteSaves, SaveVersions};
+use crate::Result;
 use crate::devices::{DeviceLink, Devices, PairedDevice};
 use crate::sync::SyncService;
 use crate::sync::blobs::{BlobKind, BlobWriter};
 use crate::sync::policy::Category;
-use crate::{Error, Result};
 
 /// Save files as blobs: the versions' file lists, then their files.
 pub struct SaveBlobs(pub SaveVersions);
@@ -38,9 +38,7 @@ impl BlobKind for SaveBlobs {
     async fn read(&self, hash: &str, offset: u64, len: usize) -> Result<Vec<u8>> {
         let blobs = self.0.blobs().clone();
         let hash = hash.to_owned();
-        tokio::task::spawn_blocking(move || blobs.read(&hash, offset, len))
-            .await
-            .map_err(|error| Error::Io(std::io::Error::other(error)))?
+        tokio::task::spawn_blocking(move || blobs.read(&hash, offset, len)).await?
     }
 
     async fn receive(&self, hash: &str) -> Result<Box<dyn BlobWriter>> {
@@ -63,9 +61,7 @@ impl BlobWriter for Receiving {
         let Some(incoming) = self.0.take() else {
             return Ok(false);
         };
-        tokio::task::spawn_blocking(move || incoming.finish())
-            .await
-            .map_err(|error| Error::Io(std::io::Error::other(error)))?
+        tokio::task::spawn_blocking(move || incoming.finish()).await?
     }
 }
 
@@ -124,7 +120,7 @@ impl RemoteSaves for SyncRefresh {
                 match requested {
                     None if device.syncing => true,
                     None => {
-                        *requested = Some(crate::sync::clock::now_ms());
+                        *requested = Some(crate::now_ms());
                         self.sync.sync_now(id);
                         true
                     }

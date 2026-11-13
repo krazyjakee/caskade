@@ -164,7 +164,7 @@ impl InstallService {
                 Some(root.id.clone()),
             )
         };
-        let cancel = self.add_job(snapshot.clone(), None, DiscoveryHints::default());
+        let cancel = self.add_job(snapshot.clone(), None, DiscoveryHints::default(), None);
         if let Some(job) = lock(&self.inner.jobs).get_mut(&snapshot.id) {
             job.peer = Some(target);
             job.peer_fetcher = fetcher;

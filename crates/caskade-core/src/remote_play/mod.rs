@@ -15,7 +15,7 @@
 //! local broadcast address and waits for it to come into reach.
 
 use std::collections::HashMap;
-use std::net::{Ipv4Addr, SocketAddrV4, UdpSocket};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::{Arc, Mutex, Weak};
 use std::time::Duration;
 
@@ -119,12 +119,7 @@ impl RemotePlay {
 
     /// How the app's start of request `id` went.
     pub fn finished(&self, id: &str, outcome: PlayOutcome) {
-        let sender = self
-            .inner
-            .waiting
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .remove(id);
+        let sender = crate::lock(&self.inner.waiting).remove(id);
         if let Some(sender) = sender {
             let _ = sender.send(outcome);
         }
@@ -154,7 +149,12 @@ impl RemotePlay {
                 )));
             }
             progress(PlayProgress::Waking);
-            wake(&macs);
+            let targets = wake_targets(&[]);
+            for mac in macs.iter().filter_map(|mac| parse_mac(mac)) {
+                if let Err(error) = wake(mac, &targets).await {
+                    tracing::warn!(%error, "Wake-on-LAN");
+                }
+            }
             self.wait_for(device_id).await?;
         }
         progress(PlayProgress::Starting);
@@ -222,15 +222,9 @@ impl RemotePlay {
     }
 
     async fn allowed(&self) -> bool {
-        match self.inner.settings.get() {
-            Some(settings) => {
-                settings
-                    .read_or_default::<SyncSettings>("core.sync")
-                    .await
-                    .remote_play
-            }
-            None => true,
-        }
+        SyncSettings::read(self.inner.settings.get())
+            .await
+            .remote_play
     }
 
     async fn serve(&self, mut session: Session) {
@@ -247,11 +241,7 @@ impl RemotePlay {
                     Some(handler) => {
                         let id = crate::model::new_id();
                         let (sender, receiver) = oneshot::channel();
-                        self.inner
-                            .waiting
-                            .lock()
-                            .unwrap_or_else(|e| e.into_inner())
-                            .insert(id.clone(), sender);
+                        crate::lock(&self.inner.waiting).insert(id.clone(), sender);
                         let _ = session.writer().write(&Message::Accepted).await;
                         handler(PlayRequest {
                             id: id.clone(),
@@ -259,11 +249,7 @@ impl RemotePlay {
                             game_id,
                         });
                         let outcome = tokio::time::timeout(START_WAIT, receiver).await;
-                        self.inner
-                            .waiting
-                            .lock()
-                            .unwrap_or_else(|e| e.into_inner())
-                            .remove(&id);
+                        crate::lock(&self.inner.waiting).remove(&id);
                         match outcome {
                             Ok(Ok(PlayOutcome::Started)) => Message::Started,
                             Ok(Ok(PlayOutcome::NotStarted(reason))) => refuse(reason),
@@ -334,31 +320,55 @@ pub fn magic_packet(mac: [u8; 6]) -> [u8; 102] {
     packet
 }
 
-/// Sends a magic packet for each of `macs` to every local broadcast
-/// address, on the usual ports.
-pub fn wake(macs: &[String]) {
-    let Ok(socket) = UdpSocket::bind(SocketAddrV4::new(Ipv4Addr::UNSPECIFIED, 0)) else {
-        return;
-    };
-    let _ = socket.set_broadcast(true);
-    let mut targets = vec![Ipv4Addr::BROADCAST];
-    for interface in netdev::get_interfaces() {
-        if interface.is_loopback() {
-            continue;
-        }
-        for net in &interface.ipv4 {
-            targets.push(net.broadcast());
-        }
+/// The ports Moonlight sends magic packets to: the usual ones and the
+/// streaming ports, which a router may forward.
+pub const WAKE_PORTS: [u16; 6] = [7, 9, 47998, 47999, 48000, 48010];
+
+/// Where the magic packet for a host at `addresses` goes: every network's
+/// broadcast address and each address, on each of [`WAKE_PORTS`]. The
+/// all-networks address alone leaves by the default route, which on a machine
+/// with a second card or a VPN isn't the network the host sleeps on.
+pub fn wake_targets(addresses: &[IpAddr]) -> Vec<SocketAddr> {
+    targets_through(&network_broadcasts(), addresses)
+}
+
+fn targets_through(broadcasts: &[Ipv4Addr], addresses: &[IpAddr]) -> Vec<SocketAddr> {
+    std::iter::once(Ipv4Addr::BROADCAST)
+        .chain(broadcasts.iter().copied())
+        .map(IpAddr::V4)
+        .chain(addresses.iter().copied().filter(IpAddr::is_ipv4))
+        .flat_map(|address| WAKE_PORTS.map(|port| SocketAddr::new(address, port)))
+        .collect()
+}
+
+/// The broadcast address of each network this machine is on.
+fn network_broadcasts() -> Vec<Ipv4Addr> {
+    let mut broadcasts: Vec<Ipv4Addr> = netdev::get_interfaces()
+        .iter()
+        .filter(|interface| !interface.is_loopback())
+        .flat_map(|interface| interface.ipv4.iter().map(|net| net.broadcast()))
+        .collect();
+    broadcasts.sort();
+    broadcasts.dedup();
+    broadcasts
+}
+
+/// Sends the magic packet for `mac` to `targets`.
+pub async fn wake(mac: [u8; 6], targets: &[SocketAddr]) -> Result<()> {
+    let socket =
+        tokio::net::UdpSocket::bind(SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), 0)).await?;
+    socket.set_broadcast(true)?;
+    let packet = magic_packet(mac);
+    let mut sent = false;
+    for target in targets {
+        sent |= socket.send_to(&packet, target).await.is_ok();
     }
-    targets.sort();
-    targets.dedup();
-    for mac in macs.iter().filter_map(|mac| parse_mac(mac)) {
-        let packet = magic_packet(mac);
-        for target in &targets {
-            for port in [9, 7] {
-                let _ = socket.send_to(&packet, SocketAddrV4::new(*target, port));
-            }
-        }
+    if sent {
+        Ok(())
+    } else {
+        Err(Error::Invalid(crate::tr!(
+            "the wake-up message couldn't be sent"
+        )))
     }
 }
 
@@ -378,5 +388,21 @@ mod tests {
         assert_eq!(parse_mac("a0-b1-c2-d3-e4-f5"), Some(mac));
         assert_eq!(parse_mac("nope"), None);
         assert_eq!(parse_mac("a0:b1:c2:d3:e4"), None);
+    }
+
+    #[test]
+    fn a_wake_up_leaves_by_every_network_not_just_the_default_route() {
+        let targets = targets_through(
+            &[Ipv4Addr::new(192, 168, 77, 255)],
+            &[IpAddr::from([192, 168, 77, 12])],
+        );
+        for address in [
+            [255, 255, 255, 255],
+            [192, 168, 77, 255],
+            [192, 168, 77, 12],
+        ] {
+            let target = SocketAddr::new(IpAddr::from(address), 9);
+            assert!(targets.contains(&target), "{target} in {targets:?}");
+        }
     }
 }

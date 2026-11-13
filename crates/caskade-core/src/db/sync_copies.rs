@@ -22,7 +22,7 @@ use crate::model::{GameEntry, GameRuntime, InstallLocation, InstallState, Launch
 use crate::sync::change::{EXISTS, Entity, key_parts};
 
 /// The source of another device's copies.
-pub const PEER_PREFIX: &str = "peer:";
+pub(super) const PEER_PREFIX: &str = "peer:";
 
 /// Where a copy lives on its device.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]

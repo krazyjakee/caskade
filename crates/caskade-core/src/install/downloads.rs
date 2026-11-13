@@ -11,7 +11,7 @@ pub(super) struct Permit {
 impl DownloadQueue {
     pub fn new(limit: usize) -> Arc<Self> {
         Arc::new(Self {
-            state: Mutex::new((limit.max(1), 0)),
+            state: Mutex::new((limit.clamp(1, 8), 0)),
             changed: Default::default(),
         })
     }

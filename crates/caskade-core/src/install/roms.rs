@@ -206,8 +206,7 @@ impl InstallService {
         caskade_jobs::blocking(crate::tr!("Placing ROMs"), move || {
             transfer(&base, &files, &folder, copy)
         })
-        .await
-        .map_err(|error| Error::Invalid(error.to_string()))??;
+        .await??;
         let summary = emulation.scanners().scan_import(&scanner.id).await?;
         // The game whose ROMs are the files just placed.
         let store = &self.inner.store;
@@ -252,6 +251,123 @@ impl InstallService {
             job.title = title;
             job.game_id = Some(game_id);
             job.warnings = Vec::new();
+        });
+        Ok(())
+    }
+}
+
+impl InstallService {
+    /// Finishes handed-off ROMs: into a ROM scanner's
+    /// folder if the user picks one, otherwise where they are.
+    pub(super) async fn finish_roms(
+        &self,
+        id: &str,
+        installer_platform: &str,
+        files: &[std::path::PathBuf],
+        source: &std::path::Path,
+    ) -> Result<()> {
+        let emulation = lock(&self.inner.emulation).clone();
+        let platform = emulation
+            .as_ref()
+            .and_then(|emulation| {
+                crate::emulation::platform_for(&emulation.catalog(), installer_platform, files)
+            })
+            .unwrap_or_else(|| installer_platform.to_owned());
+        let base = if source.is_dir() {
+            source
+        } else {
+            source.parent().unwrap_or(source)
+        };
+        if self
+            .route_roms(id, emulation.as_ref(), &platform, base, files)
+            .await?
+        {
+            return Ok(());
+        }
+        self.import_roms(id, emulation.as_ref(), &platform, base, files)
+            .await
+    }
+
+    /// Imports ROMs where they are (§9 step 2), updating the game when the
+    /// same ROM was installed before. The job says when no scanner or
+    /// emulator handles the platform yet.
+    async fn import_roms(
+        &self,
+        id: &str,
+        emulation: Option<&crate::emulation::EmulationService>,
+        platform: &str,
+        base: &std::path::Path,
+        files: &[std::path::PathBuf],
+    ) -> Result<()> {
+        let store = &self.inner.store;
+        let platform = platform.to_owned();
+        let catalog = emulation.map(|emulation| emulation.catalog());
+        let (game, mut entry) =
+            crate::emulation::rom_entry(&platform, base, files, catalog.as_deref());
+        let game = match store
+            .entry_by_source(entry.source_id.as_str(), &entry.external_id)
+            .await?
+        {
+            Some(existing) => {
+                entry.id = existing.id;
+                entry.game_id = existing.game_id.clone();
+                store
+                    .game(&existing.game_id)
+                    .await?
+                    .ok_or_else(|| Error::Invalid(crate::tr!("the ROM's game is missing")))?
+            }
+            None => store.upsert_game(&game).await?,
+        };
+        store.upsert_entry(&entry).await?;
+
+        let name = catalog
+            .as_deref()
+            .and_then(|catalog| catalog.platform(&platform))
+            .map_or(platform.clone(), |platform| platform.short.clone());
+        let warning = |code: &str, message: String| caskade_installer::Warning {
+            code: code.into(),
+            message,
+            path: None,
+        };
+        let mut warnings = Vec::new();
+        let scanned = store
+            .scanners()
+            .await?
+            .iter()
+            .any(|scanner| scanner.platform.as_deref() == Some(platform.as_str()));
+        if !scanned {
+            warnings.push(warning(
+                "rom_scanner_suggested",
+                crate::tr!(
+                    "Add a ROM scanner for {name} in Settings → Emulators to keep its ROMs together.",
+                    name = name
+                ),
+            ));
+        }
+        let has_default = store
+            .get_platform_settings(&platform)
+            .await?
+            .is_some_and(|settings| settings.default.is_some());
+        if !has_default {
+            warnings.push(warning(
+                "rom_no_emulator",
+                crate::tr!(
+                    "No emulator for {name} yet — configure one in Settings → Emulators.",
+                    name = name
+                ),
+            ));
+        }
+        self.inner.bus.emit(Event::LibraryGameAdded {
+            game_id: game.id.clone(),
+        });
+        self.inner.bus.emit(Event::EmulationChanged {
+            scope: "platforms".into(),
+        });
+        self.update(id, |job| {
+            job.status = JobStatus::Completed;
+            job.title = game.title.clone();
+            job.game_id = Some(game.id.clone());
+            job.warnings = warnings;
         });
         Ok(())
     }

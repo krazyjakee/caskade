@@ -49,7 +49,7 @@ fn executable(path: &Path) {
     std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o755)).unwrap();
 }
 #[tokio::test(flavor = "multi_thread")]
-async fn question_selection_then_verify_and_uninstall_use_server_owned_records() {
+async fn question_selection_then_uninstall_use_server_owned_records() {
     let t = tempfile::tempdir().unwrap();
     let root = t.path().join("Games");
     let (store, service, launch) = setup(&root).await;
@@ -103,24 +103,9 @@ async fn question_selection_then_verify_and_uninstall_use_server_owned_records()
     assert!(
         matches!(&entry.launch,Some(crate::model::LaunchSpec::Executable{path,..}) if path==&chosen)
     );
-    let verify = service.verify(entry.id.clone()).await.unwrap();
-    let verified = stopped(&service, &verify.id).await;
-    assert!(verified.verification.unwrap().valid);
     let Some(InstallLocation::Managed { rel_dir, .. }) = &entry.location else {
         panic!()
     };
-    let payload = root.join(rel_dir).join(&chosen);
-    let original = std::fs::read(&payload).unwrap();
-    std::fs::write(&payload, b"changed").unwrap();
-    let verify = service.verify(entry.id.clone()).await.unwrap();
-    assert!(
-        !stopped(&service, &verify.id)
-            .await
-            .verification
-            .unwrap()
-            .valid
-    );
-    std::fs::write(&payload, original).unwrap();
     let lease = launch.try_game_lease(&entry.game_id).unwrap();
     assert!(
         service
@@ -137,40 +122,6 @@ async fn question_selection_then_verify_and_uninstall_use_server_owned_records()
     assert!(store.get_entry(&entry.id).await.unwrap().is_none());
     assert!(!root.join(rel_dir).exists());
     assert!(source.exists());
-}
-
-#[cfg(feature = "net")]
-#[tokio::test(flavor = "multi_thread")]
-async fn standalone_fetch_reports_download_phase_without_creating_a_library_game() {
-    use wiremock::{
-        Mock, MockServer, ResponseTemplate,
-        matchers::{method, path},
-    };
-    let t = tempfile::tempdir().unwrap();
-    let (store, service, _) = setup(&t.path().join("Games")).await;
-    let server = MockServer::start().await;
-    Mock::given(method("GET"))
-        .and(path("/game.bin"))
-        .respond_with(
-            ResponseTemplate::new(200)
-                .insert_header("Content-Type", "application/octet-stream")
-                .set_body_bytes(b"fixture download".to_vec()),
-        )
-        .mount(&server)
-        .await;
-    let job = service
-        .fetch(format!("{}/game.bin", server.uri()), None)
-        .await
-        .unwrap();
-    let finished = stopped(&service, &job.id).await;
-    assert_eq!(finished.status, JobStatus::Completed, "{finished:?}");
-    assert_eq!(finished.phase, Some(JobPhase::Download));
-    assert_eq!(
-        std::fs::read(finished.target_dir.unwrap()).unwrap(),
-        b"fixture download"
-    );
-    assert!(store.in_flight_sessions().await.unwrap().is_empty());
-    assert!(finished.game_id.is_none());
 }
 
 #[tokio::test(flavor = "multi_thread")]

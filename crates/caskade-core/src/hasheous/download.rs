@@ -2,7 +2,7 @@
 //! file next to its destination and renamed into place only when its size
 //! and MD5 match the listing.
 
-use super::{Listed, hex};
+use super::Listed;
 use crate::{Error, Result, error::net};
 use md5::Digest;
 use std::{path::Path, time::Duration};
@@ -108,7 +108,7 @@ pub(super) async fn fetch(base: &str, listed: &Listed, to: &Path) -> Result<()> 
                 dump = listed.name
             )));
         }
-        if !hex(&hasher.finalize()).eq_ignore_ascii_case(&listed.md5hash) {
+        if !format!("{:x}", hasher.finalize()).eq_ignore_ascii_case(&listed.md5hash) {
             return Err(invalid(crate::tr!(
                 "{dump} does not match its MD5",
                 dump = listed.name

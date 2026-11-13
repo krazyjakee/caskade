@@ -1,7 +1,7 @@
 //! Games added by hand (#174): duplicates of one being added, and adding
 //! it. What a target starts is worked out in `crate::manual`.
 
-use super::{LibraryStore, same_game::words};
+use super::{LibraryStore, sync_identity::normal_title};
 use crate::{
     Error, Result,
     launch::validate_target,
@@ -48,7 +48,7 @@ impl LibraryStore {
                 }
             }
         }
-        let wanted = words(title);
+        let wanted = normal_title(title);
         if !wanted.is_empty() {
             let page = self
                 .list_games(&ListGames {
@@ -67,7 +67,7 @@ impl LibraryStore {
                 };
                 let same = std::iter::once(&game.title)
                     .chain(&game.aliases)
-                    .any(|name| words(name) == wanted);
+                    .any(|name| normal_title(name) == wanted);
                 if same {
                     found.push(DuplicateGame {
                         game_id: game.id,

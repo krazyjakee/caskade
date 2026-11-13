@@ -69,8 +69,10 @@ impl LibraryStore {
         request: &ListGames,
         account: Option<&str>,
     ) -> Result<GamePage> {
-        self.list_with_collection(request, None, false, account)
-            .await
+        Ok(self
+            .list_with_collection(request, None, false, account, false)
+            .await?
+            .0)
     }
     /// The hidden games, by title (Settings lists them to show again).
     pub async fn hidden_games(&self, offset: u32, limit: u32) -> Result<GamePage> {
@@ -79,7 +81,10 @@ impl LibraryStore {
             limit,
             ..Default::default()
         };
-        self.list_with_collection(&request, None, true, None).await
+        Ok(self
+            .list_with_collection(&request, None, true, None, false)
+            .await?
+            .0)
     }
     /// One of `account`'s collections' games; another account's collection
     /// is not found.
@@ -94,23 +99,21 @@ impl LibraryStore {
             .get_collection(account, id)
             .await?
             .ok_or_else(|| missing("collection", id))?;
-        self.collection_page(&collection, account, offset, limit)
-            .await
+        let (request, members) = collection_query(&collection, offset, limit);
+        Ok(self
+            .list_with_collection(&request, members, false, Some(account), false)
+            .await?
+            .0)
     }
     /// Every collection of `account`'s as its card shows it: pinned ones
     /// first, then by name.
     pub async fn collection_summaries(&self, account: &str) -> Result<Vec<CollectionSummary>> {
         let mut out = Vec::new();
         for collection in self.collection_list(account).await? {
-            let page = self.collection_page(&collection, account, 0, 4).await?;
-            let (request, members) = collection_query(&collection, 0, 0);
-            let mut playtime = QueryBuilder::<Sqlite>::new("SELECT coalesce(sum(");
-            playtime
-                .push(PLAYTIME)
-                .push("),0) FROM games g WHERE g.hidden=0");
-            filters(&mut playtime, &request, members, false);
-            age_visibility(&mut playtime, &request, Some(account));
-            let playtime_ms: i64 = playtime.build_query_scalar().fetch_one(&self.pool).await?;
+            let (request, members) = collection_query(&collection, 0, 4);
+            let (page, playtime_ms) = self
+                .list_with_collection(&request, members, false, Some(account), true)
+                .await?;
             out.push(CollectionSummary {
                 id: collection.id,
                 name: collection.name,
@@ -119,7 +122,7 @@ impl LibraryStore {
                 kind: collection.kind,
                 updated_at_ms: collection.updated_at_ms,
                 games: page.total,
-                playtime_ms: playtime_ms as u64,
+                playtime_ms,
                 covers: page
                     .items
                     .into_iter()
@@ -129,34 +132,32 @@ impl LibraryStore {
         }
         Ok(out)
     }
-    /// A collection is its account's, so it browses as the Library does for
-    /// that account: games held back by age limits show only where a smart
-    /// collection searches by title, locked.
-    async fn collection_page(
-        &self,
-        collection: &Collection,
-        account: &str,
-        offset: u32,
-        limit: u32,
-    ) -> Result<GamePage> {
-        let (request, members) = collection_query(collection, offset, limit);
-        self.list_with_collection(&request, members, false, Some(account))
-            .await
-    }
+    /// A page of games, and with `playtime` their total playtime (0
+    /// without). A collection is its account's, so it browses as the
+    /// Library does for that account: games held back by age limits show
+    /// only where a smart collection searches by title, locked.
     async fn list_with_collection(
         &self,
         request: &ListGames,
         collection: Option<&str>,
         hidden: bool,
         account: Option<&str>,
-    ) -> Result<GamePage> {
+        playtime: bool,
+    ) -> Result<(GamePage, u64)> {
         request.validate()?;
         let mut tx = self.pool.begin().await?;
-        let mut count = QueryBuilder::<Sqlite>::new("SELECT count(*) FROM games g WHERE g.hidden=");
-        count.push_bind(hidden);
+        let mut count = QueryBuilder::<Sqlite>::new("SELECT count(*),");
+        if playtime {
+            count.push("coalesce(sum(").push(PLAYTIME).push("),0)");
+        } else {
+            count.push("0");
+        }
+        count
+            .push(" FROM games g WHERE g.hidden=")
+            .push_bind(hidden);
         filters(&mut count, request, collection, hidden);
         age_visibility(&mut count, request, account);
-        let total: i64 = count.build_query_scalar().fetch_one(&mut *tx).await?;
+        let (total, playtime_ms): (i64, i64) = count.build_query_as().fetch_one(&mut *tx).await?;
         // The page's ids come first, sorted by their key alone, so the full
         // rows and their artwork are read for the page only, not for every
         // game the offset skips (deep pages of 8,000 games: 100 ms -> 10 ms).
@@ -250,10 +251,13 @@ impl LibraryStore {
                 },
             )
             .collect::<Vec<_>>();
-        Ok(GamePage {
-            items,
-            total: total as u64,
-        })
+        Ok((
+            GamePage {
+                items,
+                total: total as u64,
+            },
+            playtime_ms as u64,
+        ))
     }
     /// The platforms of the visible games in `filter`, by name, each with its
     /// games' count, playtime and last play. A game on two platforms counts

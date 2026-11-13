@@ -25,7 +25,8 @@ use std::collections::{BTreeSet, HashMap};
 use serde_json::{Value, json};
 use sqlx::SqliteConnection;
 
-use super::{FieldKey, SESSIONS_SOURCE, decode};
+use super::sync_data::SESSIONS_SOURCE;
+use super::{FieldKey, decode};
 use crate::Result;
 use crate::emulation::{PlatformSettings, ProfileRef};
 use crate::model::{AchievementLink, LinkMethod};

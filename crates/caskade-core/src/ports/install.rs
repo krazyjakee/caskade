@@ -126,7 +126,7 @@ impl Ports {
 
 /// The release file's address on GitHub, with its SHA-256 as a fragment
 /// the download checks.
-fn release_url(project: &Project, target: &Target) -> Result<String> {
+pub(super) fn release_url(project: &Project, target: &Target) -> Result<String> {
     if project.host != Host::GitHub {
         return Err(Error::Invalid(crate::tr!(
             "only ports on GitHub install from Caskade"
@@ -185,9 +185,4 @@ async fn rom_paths(
         }
     }
     Ok(paths)
-}
-
-#[cfg(test)]
-pub(super) fn url_for(project: &Project, target: &Target) -> Result<String> {
-    release_url(project, target)
 }

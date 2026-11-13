@@ -194,9 +194,7 @@ pub async fn proton_builds(settings: &SettingsService) -> Result<ProtonBuilds> {
     if preferences.compatibility_runner == CompatibilityRunner::SystemWine {
         preferences.compatibility_runner = CompatibilityRunner::Proton;
     }
-    let host = tokio::task::spawn_blocking(HostCaps::detect)
-        .await
-        .map_err(|e| Error::Invalid(e.to_string()))?;
+    let host = tokio::task::spawn_blocking(HostCaps::detect).await?;
     let mut filtered = host.clone();
     preferences
         .compatibility_runner

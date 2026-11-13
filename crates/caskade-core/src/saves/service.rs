@@ -135,8 +135,7 @@ impl Saves {
                 .unwrap_or_else(|| automatic.clone());
             (automatic, locations, warnings, roots)
         })
-        .await
-        .map_err(|error| crate::Error::Io(std::io::Error::other(error)))?;
+        .await?;
         warnings.extend(scan_warnings);
         warnings.sort();
         warnings.dedup();
@@ -321,7 +320,7 @@ impl Saves {
         while seen.insert(title.clone()) {
             let local = secondary
                 .iter()
-                .find(|game| title_key(&game.title) == title_key(&title));
+                .find(|game| crate::db::title_key(&game.title) == crate::db::title_key(&title));
             if let Some(alias) = local.and_then(|game| game.alias.as_ref()) {
                 title.clone_from(alias);
                 continue;
@@ -375,14 +374,6 @@ fn store_name(entry: &GameEntry, ids: &[ExternalId]) -> Option<String> {
         }
     }
     ids.first().map(|id| id.kind().to_owned())
-}
-fn title_key(title: &str) -> String {
-    icu_normalizer::ComposingNormalizer::new_nfkc()
-        .normalize(title)
-        .chars()
-        .flat_map(char::to_lowercase)
-        .filter(|character| character.is_alphanumeric())
-        .collect()
 }
 fn overlay(games: &mut [ludusavi::Game], secondary: &[ludusavi::Game]) {
     for game in games {

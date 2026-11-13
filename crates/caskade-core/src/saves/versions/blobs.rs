@@ -21,11 +21,7 @@ pub struct BlobStore {
 
 /// `sha256:<hex>` of `bytes`.
 pub fn hash_bytes(bytes: &[u8]) -> String {
-    format!("{SCHEME}{}", hex(&Sha256::digest(bytes)))
-}
-
-fn hex(bytes: &[u8]) -> String {
-    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
+    format!("{SCHEME}{:x}", Sha256::digest(bytes))
 }
 
 /// The hex digest of a well-formed hash; nothing else names a file.
@@ -52,7 +48,7 @@ pub fn hash_file(path: &Path) -> Result<(String, u64)> {
         hasher.update(&buffer[..read]);
         size += read as u64;
     }
-    Ok((format!("{SCHEME}{}", hex(&hasher.finalize())), size))
+    Ok((format!("{SCHEME}{:x}", hasher.finalize()), size))
 }
 
 impl BlobStore {
@@ -115,7 +111,7 @@ impl BlobStore {
                 size += read as u64;
             }
             output.sync_all()?;
-            Ok::<_, Error>((format!("{SCHEME}{}", hex(&hasher.finalize())), size))
+            Ok::<_, Error>((format!("{SCHEME}{:x}", hasher.finalize()), size))
         })();
         match result {
             Ok((hash, size)) => {
@@ -251,7 +247,7 @@ impl Incoming {
     /// `true` when it matched and was kept.
     pub fn finish(mut self) -> Result<bool> {
         self.file.sync_all()?;
-        let actual = format!("{SCHEME}{}", hex(&self.hasher.finalize_reset()));
+        let actual = format!("{SCHEME}{:x}", self.hasher.finalize_reset());
         if actual != self.hash {
             let _ = fs::remove_file(&self.partial);
             return Ok(false);

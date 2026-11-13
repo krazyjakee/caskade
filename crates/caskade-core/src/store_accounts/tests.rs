@@ -225,7 +225,7 @@ async fn owned_games_are_library_items_that_are_not_installed() {
     assert_eq!((summary.owned, summary.lost, summary.installed), (2, 0, 0));
     assert!(summary.account.sync.last_ok_ms.is_some() && summary.account.sync.error.is_none());
     assert_eq!(summary.capabilities.as_ref().unwrap().name, "STEAM");
-    let owners = world.accounts.ownership(&game_id).await.unwrap();
+    let owners = world.store.ownership(&game_id).await.unwrap();
     assert_eq!(owners[0].product_id, entitlements[0].product.product_id);
 }
 
@@ -345,7 +345,7 @@ async fn accounts_owning_the_same_game_keep_their_own_records() {
         world.store.entitlements(&b.id).await.unwrap()[0].game_id,
         Some(game.clone())
     );
-    assert_eq!(world.accounts.ownership(&game).await.unwrap().len(), 2);
+    assert_eq!(world.store.ownership(&game).await.unwrap().len(), 2);
     // A's library no longer lists it: only A lost it.
     world.steam.owns(&[]);
     assert_eq!(refresh(&world, &a).await.lost, 1);

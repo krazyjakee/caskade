@@ -270,15 +270,6 @@ impl LibraryStore {
         .map(collection_from_row)
         .collect()
     }
-    pub async fn collections(&self, account: &str) -> Result<Vec<Collection>> {
-        let mut out = Vec::new();
-        for collection in self.collection_list(account).await? {
-            if let Some(collection) = self.get_collection(account, &collection.id).await? {
-                out.push(collection);
-            }
-        }
-        Ok(out)
-    }
     pub async fn delete_collection(&self, account: &str, id: &str) -> Result<bool> {
         Ok(
             sqlx::query("DELETE FROM collections WHERE id=? AND account_id=?")

@@ -42,12 +42,10 @@ impl ScannerService {
                 regions: &regions,
                 global_exclusions: &global,
                 limits: ScanLimits::default(),
-                identifier: None,
             };
             scan::scan_folder_with_progress(&request, &cancel, &mut progress)
         })
-        .await
-        .map_err(|error| Error::Invalid(crate::tr!("ROM scan task: {error}", error = error)))?
+        .await?
         .map_err(scan_error)?;
         let warnings = report
             .warnings

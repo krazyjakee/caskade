@@ -414,8 +414,17 @@ async fn deleting_an_account_deletes_its_collections() {
         .await
         .unwrap();
     assert!(accounts.delete(&second.id).await.unwrap());
-    assert!(store.collections(&second.id).await.unwrap().is_empty());
-    assert_eq!(store.collections(&admin.id).await.unwrap().len(), 1);
+    assert!(
+        store
+            .collection_summaries(&second.id)
+            .await
+            .unwrap()
+            .is_empty()
+    );
+    assert_eq!(
+        store.collection_summaries(&admin.id).await.unwrap().len(),
+        1
+    );
     assert!(
         store
             .game_collection_ids(&second.id, &game.id)

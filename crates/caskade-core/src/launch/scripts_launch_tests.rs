@@ -1,5 +1,5 @@
 //! Lifecycle scripts (#179) around real launches: phase order, a failing
-//! or cancelled before-launch script, cleanup when a start fails, utility
+//! before-launch script, cleanup when a start fails, utility
 //! actions, restart recovery and a slow script beside the game.
 use super::{test_support::fast_config, *};
 use crate::{
@@ -235,63 +235,6 @@ async fn a_failing_before_launch_script_stops_the_launch_and_cleans_up() {
     assert_eq!(reports[0].phase, Some(ScriptPhase::BeforeLaunch));
     assert_eq!(reports[0].runs[0].stderr, "no disc\n");
     assert_eq!(reports[1].phase, Some(ScriptPhase::AfterExit));
-}
-
-#[tokio::test]
-async fn a_slow_before_launch_script_can_be_cancelled() {
-    let temp = tempfile::tempdir().unwrap();
-    let store = LibraryStore::in_memory().await.unwrap();
-    let played = temp.path().join("played");
-    let entry = release(
-        &store,
-        temp.path(),
-        &format!("touch '{}'", played.display()),
-    )
-    .await;
-    let log = temp.path().join("log");
-    store
-        .save_lifecycle_script(&shell(
-            game_scope(&entry),
-            ScriptPhase::BeforeLaunch,
-            "Slow",
-            "sleep 30",
-        ))
-        .await
-        .unwrap();
-    store
-        .save_lifecycle_script(&logging(
-            game_scope(&entry),
-            ScriptPhase::AfterExit,
-            "cleanup",
-            &log,
-        ))
-        .await
-        .unwrap();
-    let service = service(&store, Arc::default());
-    assert!(!service.cancel_start(&entry.game_id));
-    let launching = {
-        let service = service.clone();
-        let entry = entry.id.clone();
-        tokio::spawn(async move { service.launch(&entry).await.map(|_| ()) })
-    };
-    let mut cancelled = false;
-    for _ in 0..200 {
-        if service.cancel_start(&entry.game_id) {
-            cancelled = true;
-            break;
-        }
-        tokio::time::sleep(Duration::from_millis(10)).await;
-    }
-    assert!(cancelled);
-    assert!(matches!(
-        launching.await.unwrap(),
-        Err(LaunchError::Cancelled)
-    ));
-    assert!(!played.exists());
-    assert_eq!(lines(&log), ["cleanup after_exit cancelled"]);
-    // The game is free to launch again.
-    assert!(!service.cancel_start(&entry.game_id));
-    assert!(store.in_flight_sessions().await.unwrap().is_empty());
 }
 
 #[tokio::test]

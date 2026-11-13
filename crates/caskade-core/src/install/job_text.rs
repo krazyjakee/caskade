@@ -183,20 +183,20 @@ const TEXTS: &[Known] = &[
         || tr!("Presets have not yet been hand-checked against a native installer version."),
     ),
     (
-        "Install directory cannot be preset without a package-specific recipe.",
-        || tr!("Install directory cannot be preset without a package-specific recipe."),
+        "Install directory cannot be preset for this installer family.",
+        || tr!("Install directory cannot be preset for this installer family."),
     ),
     (
-        "Installer language cannot be preset without a package-specific recipe.",
-        || tr!("Installer language cannot be preset without a package-specific recipe."),
+        "Installer language cannot be preset for this installer family.",
+        || tr!("Installer language cannot be preset for this installer family."),
     ),
     (
-        "Shortcut suppression needs a package-specific recipe.",
-        || tr!("Shortcut suppression needs a package-specific recipe."),
+        "Shortcut suppression cannot be preset for this installer family.",
+        || tr!("Shortcut suppression cannot be preset for this installer family."),
     ),
     (
-        "Launch-at-finish suppression needs a package-specific recipe.",
-        || tr!("Launch-at-finish suppression needs a package-specific recipe."),
+        "Launch-at-finish suppression cannot be preset for this installer family.",
+        || tr!("Launch-at-finish suppression cannot be preset for this installer family."),
     ),
 ];
 

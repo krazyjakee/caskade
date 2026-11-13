@@ -273,16 +273,6 @@ impl LibraryStore {
         Ok(rows.into_iter().filter_map(change).collect())
     }
 
-    /// Whether any change waits to apply.
-    pub async fn sync_has_pending(&self) -> Result<bool> {
-        Ok(
-            sqlx::query_scalar::<_, i64>("SELECT count(*) FROM sync_changes WHERE applied=0")
-                .fetch_one(&self.pool)
-                .await?
-                > 0,
-        )
-    }
-
     /// Up to `limit` changes a device that has `cursor` hasn't seen, in
     /// order per device, leaving out `skip`'s entities.
     pub async fn sync_changes_after(

@@ -4,8 +4,8 @@
 //! device has the household's library, accounts and collections, and keeps
 //! its own storage, emulators and hardware settings.
 
+use crate::cores::within;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
 
 use caskade_core::accounts::{
     AccountAccess, AccountRole, AccountService, AccountUpdate, NewAccount,
@@ -106,18 +106,6 @@ async fn core_with(name: &str, reach: Reach) -> Core {
     .await;
     core.devices.rename(name).await.unwrap();
     core
-}
-
-async fn within<F, Fut>(what: &str, seconds: u64, check: F)
-where
-    F: Fn() -> Fut,
-    Fut: std::future::Future<Output = bool>,
-{
-    let deadline = Instant::now() + Duration::from_secs(seconds);
-    while !check().await {
-        assert!(Instant::now() < deadline, "{what} within {seconds} s");
-        tokio::time::sleep(Duration::from_millis(100)).await;
-    }
 }
 
 /// The household's desktop: a library, two accounts (the admin with a

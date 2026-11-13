@@ -280,25 +280,8 @@ fn walk(dir: &Path) -> Result<Vec<PathBuf>> {
     Ok(files)
 }
 
-/// Unpacks an archive into `into` with the installer's bounded extractor.
 fn unpack(archive: &Path, into: &Path) -> Result<()> {
-    use caskade_installer::{
-        formats::archive::{self, ArchiveOptions, NoopControl},
-        safety::{Limits, SafeDir, open_staging},
-    };
-    std::fs::create_dir_all(into)?;
-    let packed = std::fs::metadata(archive)?.len();
-    let root = open_staging(into).map_err(|error| RommError::Extract(error.to_string()))?;
-    let case_sensitive = !cfg!(any(windows, target_os = "macos"));
-    let mut dir = SafeDir::new(root, Limits::default(), packed, case_sensitive);
-    archive::extract_path(
-        archive,
-        &mut dir,
-        &ArchiveOptions::default(),
-        &mut NoopControl,
-    )
-    .map_err(|error| RommError::Extract(error.to_string()))?;
-    Ok(())
+    crate::managed::unpack::extract_into(archive, into)?.map_err(RommError::Extract)
 }
 
 /// What the emulator opens, relative to the ROM's folder: a playlist, the
@@ -495,11 +478,6 @@ impl RommService {
         })
     }
 
-    pub async fn cache_status(&self) -> Result<CacheStatus> {
-        let settings = self.settings().await?;
-        self.cache_status_with(&settings).await
-    }
-
     pub(super) async fn cache_status_with(&self, settings: &RommSettings) -> Result<CacheStatus> {
         let store = &self.inner.store;
         let mut games = Vec::new();
@@ -570,7 +548,8 @@ impl RommService {
                 self.evict_rom(rom).await?;
             }
         }
-        self.cache_status().await
+        let settings = self.settings().await?;
+        self.cache_status_with(&settings).await
     }
 
     /// Downloading or running now.
@@ -602,11 +581,14 @@ impl RommService {
             return self.remove_from_library(&rom).await;
         }
         self.inner.store.save_romm_rom(&rom).await?;
+        let Some(entry) = self.inner.store.get_entry(&rom.entry_id).await? else {
+            return Ok(());
+        };
         if self.offline(&rom.server_id) {
             let reason = self.unavailable(&rom.server_id).await;
-            self.set_entry_state(&rom.entry_id, InstallState::Broken { reason })
+            self.set_entry_state(entry, InstallState::Broken { reason })
                 .await?;
-        } else if let Some(entry) = self.inner.store.get_entry(&rom.entry_id).await? {
+        } else {
             self.inner.bus.emit(Event::LibraryGameUpdated {
                 game_id: entry.game_id,
             });

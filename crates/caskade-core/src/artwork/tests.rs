@@ -17,6 +17,14 @@ fn png(width: u32, height: u32) -> Vec<u8> {
     bytes.into_inner()
 }
 
+/// `art`'s `size` thumbnail as the webview asks for it.
+fn thumbnail_uri(art: &CachedArtwork, size: u32) -> Option<String> {
+    art.thumbnails
+        .iter()
+        .find(|t| t.size == size)
+        .map(|t| format!("caskade-asset://localhost/{}", t.path))
+}
+
 #[tokio::test]
 async fn shared_cache_bytes_round_trip_as_distinct_game_associations() {
     let store = crate::db::LibraryStore::in_memory().await.unwrap();
@@ -45,7 +53,7 @@ async fn shared_cache_bytes_round_trip_as_distinct_game_associations() {
     assert!(store.artwork_for_game(&first.id).await.unwrap().is_empty());
     assert_eq!(store.artwork_for_game(&second.id).await.unwrap(), [two]);
     assert_eq!(
-        serve(&cache, &cached.thumbnail_uri(320).unwrap())
+        serve(&cache, &thumbnail_uri(&cached, 320).unwrap())
             .await
             .status,
         200
@@ -98,10 +106,10 @@ async fn thumbnails_are_bounded_keep_alpha_and_are_generated_only_once() {
             old
         );
     }
-    let grid = art.thumbnail_uri(320).unwrap();
+    let grid = thumbnail_uri(&art, 320).unwrap();
     assert!(grid.ends_with("/thumb-320.webp"));
     assert!(!grid.contains("original"));
-    assert!(art.thumbnail_uri(4000).is_none());
+    assert!(thumbnail_uri(&art, 4000).is_none());
 }
 
 #[tokio::test]
@@ -182,7 +190,9 @@ async fn protocol_and_import_cannot_follow_cache_links_outside_the_cache() {
     fs::remove_file(&target).unwrap();
     symlink(&secret, &target).unwrap();
     assert_ne!(
-        serve(&cache, &art.thumbnail_uri(320).unwrap()).await.status,
+        serve(&cache, &thumbnail_uri(&art, 320).unwrap())
+            .await
+            .status,
         200
     );
     assert!(cache.import_bytes(bytes).await.is_err());
@@ -217,7 +227,9 @@ async fn malformed_oversized_and_interrupted_artwork_is_bounded_or_recovered() {
     fs::remove_file(root.path().join(&art.thumbnails[0].path)).unwrap();
     assert_eq!(cache.import_bytes(bytes).await.unwrap(), art);
     assert_eq!(
-        serve(&cache, &art.thumbnail_uri(96).unwrap()).await.status,
+        serve(&cache, &thumbnail_uri(&art, 96).unwrap())
+            .await
+            .status,
         200
     );
 }

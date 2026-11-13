@@ -408,9 +408,8 @@ impl ManagedTools {
         let Some(dir) = managed.dir.map(PathBuf::from) else {
             return Ok(true);
         };
-        let missing = tokio::task::spawn_blocking(move || super::unpack::missing_shipped(&dir))
-            .await
-            .map_err(|error| Error::Invalid(error.to_string()))?;
+        let missing =
+            tokio::task::spawn_blocking(move || super::unpack::missing_shipped(&dir)).await?;
         if !missing.is_empty() {
             tracing::warn!(tool = id, missing = missing.len(), "tool files missing");
         }

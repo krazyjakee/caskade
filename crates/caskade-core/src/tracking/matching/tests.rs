@@ -221,3 +221,23 @@ fn wine_process_name_or_windows_argv_needs_game_cwd_or_parent() {
         1
     );
 }
+#[cfg(unix)]
+#[test]
+fn a_target_folder_made_after_the_first_poll_still_matches() {
+    let temp = tempfile::tempdir().unwrap();
+    let root = temp.path().canonicalize().unwrap();
+    std::fs::create_dir(root.join("real")).unwrap();
+    std::fs::write(root.join("real/game"), "").unwrap();
+    let target = TrackingTarget {
+        real_dir: Some(root.join("link")),
+        ..Default::default()
+    };
+    let game = process(1, None, root.join("real/game").to_str().unwrap());
+    let snapshot = ProcessSnapshot {
+        processes: vec![game],
+    };
+    let mut t = ProcessTracker::new(target, &ProcessSnapshot::default());
+    assert!(t.observe(&snapshot).is_empty());
+    std::os::unix::fs::symlink(root.join("real"), root.join("link")).unwrap();
+    assert_eq!(t.observe(&snapshot).len(), 1);
+}

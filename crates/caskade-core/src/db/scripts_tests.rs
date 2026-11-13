@@ -49,7 +49,10 @@ async fn each_scope_keeps_its_own_scripts_in_order() {
         .order_lifecycle_scripts(&ScriptScope::Global, &[vpn.id.clone(), mount.id.clone()])
         .await
         .unwrap();
-    let set = store.scripts_for_launch(&played.id, None).await.unwrap();
+    let set = store
+        .scripts_for_launch(Some(&played.id), None)
+        .await
+        .unwrap();
     assert_eq!(names(&set.global), ["VPN", "Mount"]);
     assert_eq!(set.game, std::slice::from_ref(&mine));
     assert!(set.profile.is_empty());
