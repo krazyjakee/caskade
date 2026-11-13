@@ -19,7 +19,7 @@ use caskade_ui_input::keys::{Modifiers as KeyModifiers, key_action, starts_typin
 use caskade_ui_input::spatial;
 use caskade_ui_input::{Action, GlyphFamily, InputSource};
 use dioxus_native::NodeHandle;
-use dioxus_native::prelude::dioxus_core::{ElementId, Runtime};
+use dioxus_native::prelude::dioxus_core::{ElementId, Runtime, spawn_forever};
 use dioxus_native::prelude::dioxus_html::PlatformEventData;
 use dioxus_native::prelude::*;
 use std::any::Any;
