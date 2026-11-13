@@ -6,6 +6,7 @@
 //! event loop has to host a webview. `recovery` is what every Caskade
 //! webview does when its processes fail.
 
+pub mod launch_cli;
 pub mod recovery;
 pub mod video_player;
 pub mod web_player;

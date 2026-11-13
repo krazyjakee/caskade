@@ -270,6 +270,7 @@ fn console_mode_end_to_end_with_a_pad_only() {
 
     let mut app = desktop
         .command(env!("CARGO_BIN_EXE_caskade"))
+        .arg("--legacy")
         .arg("--console")
         .current_dir(root)
         .env("HOME", &home)

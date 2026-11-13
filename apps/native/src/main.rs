@@ -1,11 +1,14 @@
 //! Caskade's native app (#87): the main window rendered by Blitz, running
 //! the same application layer as the Tauri app (`caskade-app`). It ships
-//! beside the Tauri app until it reaches parity (BLITZ-33).
+//! as the default UI, with the legacy Tauri app retained temporarily.
 //!
 //! One winit event loop (Blitz's shell) owns the main thread. Web games and
 //! videos open in windows of their own, in a process of their own: this
 //! executable started again with `--web-game` or `--video`
 //! (`caskade-player`), so no webview shares the loop.
+
+// The default app must not open a console window on Windows.
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 // What screen readers get, as text, for the tests (#83, #93).
 #[cfg(test)]
@@ -70,6 +73,27 @@ const ASYNC_WORKERS: usize = 4;
 static KEEPER: OnceLock<shell::Keeper> = OnceLock::new();
 
 fn main() {
+    // These entry points must run before the app's runtime or event loop.
+    // The streaming host starts this executable directly on Windows.
+    #[cfg(windows)]
+    {
+        let args: Vec<String> = std::env::args().collect();
+        if args
+            .iter()
+            .any(|arg| arg == caskade_streaming::elevation::windows::ELEVATED_ARG)
+        {
+            std::process::exit(caskade_streaming::elevation::windows::perform(&args));
+        }
+    }
+    if let Some(request) = caskade_player::launch_cli::from_args(std::env::args()) {
+        match request {
+            Ok(request) => caskade_player::launch_cli::main(request),
+            Err(usage) => {
+                eprintln!("{usage}");
+                std::process::exit(caskade_player::launch_cli::code::USAGE);
+            }
+        }
+    }
     // `--shots <folder>`: the reference screens' screenshots (#90). A
     // build without them says so instead of starting the app.
     #[cfg(not(feature = "shots"))]

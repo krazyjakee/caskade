@@ -141,6 +141,87 @@ fn profile(home: &Path) -> AppPaths {
     }
 }
 
+/// Native is now the program published to streaming hosts and shortcuts.
+/// Its launch caller must speak the existing channel protocol and wait for
+/// the game's end, rather than open or forward to its own main window.
+#[test]
+#[ignore = "starts the app on a private Xvfb display and bus: run with -- --ignored"]
+fn the_launch_caller_waits_for_the_game_and_returns_its_exit_code() {
+    use caskade_player::launch_cli::{Endpoint, Reply, channel::Listener, code};
+    use tokio::io::{AsyncBufReadExt, AsyncWriteExt};
+
+    struct Caller(Child);
+    impl Drop for Caller {
+        fn drop(&mut self) {
+            let _ = self.0.kill();
+            let _ = self.0.wait();
+        }
+    }
+
+    let desktop = PrivateDesktop::start();
+    let temp = tempfile::tempdir().unwrap();
+    let home = temp.path();
+    let paths = profile(home);
+    paths.create().unwrap();
+    caskade_app::runtime::block_on(async {
+        let mut listener = Listener::bind(&Endpoint::for_paths(&paths)).await.unwrap();
+        let mut caller = Caller(
+            desktop
+                .command(env!("CARGO_BIN_EXE_caskade-native"))
+                .args(["--launch", "a-game", "--entry", "a-release"])
+                .env("HOME", home)
+                .env("XDG_DATA_HOME", home.join("data"))
+                .env("XDG_CONFIG_HOME", home.join("config"))
+                .env("XDG_CACHE_HOME", home.join("cache"))
+                .env("XDG_STATE_HOME", home.join("state"))
+                .spawn()
+                .unwrap(),
+        );
+        let result = async {
+            let stream = tokio::time::timeout(Duration::from_secs(15), listener.accept())
+                .await
+                .expect("the native caller never connected")
+                .unwrap();
+            let (read, mut write) = tokio::io::split(stream);
+            let mut request = String::new();
+            tokio::io::BufReader::new(read)
+                .read_line(&mut request)
+                .await
+                .unwrap();
+            let request: caskade_player::launch_cli::Request =
+                serde_json::from_str(&request).unwrap();
+            assert_eq!(request.game_id, "a-game");
+            assert_eq!(request.entry_id.as_deref(), Some("a-release"));
+            let mut started = serde_json::to_vec(&Reply::Started {
+                session_id: "session".into(),
+                title: "A game".into(),
+            })
+            .unwrap();
+            started.push(b'\n');
+            write.write_all(&started).await.unwrap();
+            assert!(
+                caller.0.try_wait().unwrap().is_none(),
+                "the caller must wait for the game"
+            );
+            let mut ended = serde_json::to_vec(&Reply::Ended {
+                how: caskade_player::launch_cli::Ending::Crashed,
+            })
+            .unwrap();
+            ended.push(b'\n');
+            write.write_all(&ended).await.unwrap();
+        };
+        // The timeout also cleans up a caller that unexpectedly starts the UI.
+        let outcome = tokio::time::timeout(Duration::from_secs(20), result).await;
+        let status = wait(&mut caller.0, Duration::from_secs(5));
+        outcome.expect("the launch caller didn't finish its exchange");
+        assert_eq!(status.and_then(|status| status.code()), Some(code::CRASHED));
+        assert!(
+            windows(desktop.display()).is_empty(),
+            "the caller opened a window"
+        );
+    });
+}
+
 #[test]
 #[ignore = "starts the app on a private Xvfb display and bus: run with -- --ignored"]
 fn starts_restores_its_window_plays_a_web_game_and_a_video_and_quits() {

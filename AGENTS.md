@@ -2,7 +2,7 @@
 
 Guidance for coding agents in this repository. `CLAUDE.md` imports this file; edit only this one.
 
-Caskade is a cross-platform game library and launcher in Rust (Tauri 2) with a React UI. Read these before changing anything substantial:
+Caskade is a cross-platform game library and launcher in Rust with a native Dioxus/Blitz UI by default. The legacy Tauri 2/React app is retained temporarily for comparison (`just legacy`, or `caskade --legacy` from an installed bundle). Read these before changing anything substantial:
 
 - [docs/MISSION.md](docs/MISSION.md): what Caskade is for.
 - [docs/PRODUCT-SPEC.md](docs/PRODUCT-SPEC.md): what it does and what is planned.
@@ -25,9 +25,9 @@ Cargo commands share one heavy lane: run them under `flock /tmp/caskade-heavy.lo
 | Task                                             | Command                                                                                                                                                                                                                        |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Install                                          | `pnpm install`                                                                                                                                                                                                                 |
-| App with hot reload                              | `just dev` (Vite on :1420, one at a time)                                                                                                                                                                                      |
+| Native app                                      | `just dev`; legacy with hot reload: `just legacy` (Vite on :1420, one at a time)                                                                                                                                                                                      |
 | UI in a browser, no core                         | `just web` (`VITE_CASKADE_FIXTURES=1` for fixtures)                                                                                                                                                                            |
-| Build                                            | `flock /tmp/caskade-heavy.lock cargo build -p caskade-core -p caskade-desktop`                                                                                                                                                 |
+| Build                                            | `flock /tmp/caskade-heavy.lock cargo build` (native is the default workspace member)                                                                                                                                                 |
 | Lint                                             | `flock /tmp/caskade-heavy.lock cargo clippy --workspace --all-targets --features caskade-desktop/dev-tools -- -D warnings`; Windows: add `--target x86_64-pc-windows-gnu -p caskade-core -p caskade-desktop -p caskade-native` |
 | Test the app                                     | `just test-app` (core and adapter), `pnpm test` (Vitest), `just test-native` and `just test-native-window` (the native UI, [docs/native-testing.md](docs/native-testing.md))                                                   |
 | One integration test file                        | `cargo test -p <crate> --test it <file>::` (each crate's `tests/*.rs` compile into one `it` binary; a new file needs `mod <file>;` in `tests/main.rs`)                                                                         |
@@ -37,7 +37,7 @@ Cargo commands share one heavy lane: run them under `flock /tmp/caskade-heavy.lo
 | Translations                                     | `just i18n`, then commit the `.pot` and `.po` changes; `just i18n-check` gates CI                                                                                                                                              |
 | Tokens and anatomy docs                          | `pnpm --filter @caskade/tokens build`, `pnpm --filter @caskade/ui docs`, then `CASKADE_WRITE_ANATOMY=1 cargo test -p caskade-native anatomy` (generated; never edit `docs/theming/tokens.md` or `anatomy.md` by hand)          |
 | Plugin schema                                    | `CASKADE_WRITE_SCHEMA=1 cargo test -p caskade-plugin-host`                                                                                                                                                                     |
-| App bundle                                       | `just build-app`                                                                                                                                                                                                               |
+| App bundle                                       | `just build-app` (native by default, legacy included)                                                                                                                                                                                                               |
 | Anything that starts the app outside a Rust test | `scripts/private-desktop.sh -- <command>` (its own Xvfb and D-Bus); `scripts/tray-race/run.sh <binary>` (tray quit race, #122); `scripts/tray-race/decoy.sh -- <command>` (checks a command leaves a desktop alone)            |
 
 ## Rules that tests or reviews enforce

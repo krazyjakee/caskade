@@ -14,13 +14,23 @@ you publish the draft: the updater reads
 `https://github.com/krazyjakee/caskade/releases/latest/download/latest.json`,
 and `releases/latest` skips drafts and prereleases.
 
-Every bundle carries both apps: the Tauri app, and the native app
-(`caskade-native`, #110) beside it as a second executable until the cutover
-(BLITZ-33). They install, update and uninstall together. `caskade --native`
-(or `Caskade.AppImage --native`) starts the native one from the same install;
-it is `/usr/bin/caskade-native` from the deb, `caskade-native.exe` in the
-install folder on Windows and `Caskade.app/Contents/MacOS/caskade-native` on
-macOS.
+Every bundle carries the default native app and the legacy Tauri/React app,
+retained temporarily for comparison. They install, update and uninstall together.
+Shortcuts, `caskade` and `Caskade.AppImage` start native. `caskade --legacy`
+(or `Caskade.AppImage --legacy`) starts the legacy UI; put the selector first,
+for example `caskade --legacy --console`. Quit one before starting the other
+on the same profile. `--native` remains an alias for the default.
+
+The native executable is `/usr/bin/caskade-native` from the deb,
+`caskade-native.exe` in the install folder on Windows and
+`Caskade.app/Contents/MacOS/caskade-native` on macOS. The `caskade` entry point
+hands normal starts to it before starting Tauri. The launch caller and Windows
+administrator steps still run in that entry point; native handles them too
+when its executable is started directly. Local `just build-app` and release
+CI stage native with `scripts/native-sidecar.py` and package it through
+`apps/desktop/native-app.conf.json`, so both include it. On Windows the NSIS
+hooks check for the running native executable before install and uninstall,
+as the bundler already checks for the legacy executable.
 
 The jobs, in order:
 
@@ -179,15 +189,18 @@ python3 -m http.server 8000 --bind 127.0.0.1
 In another terminal, from the repo, build an AppImage that calls itself 0.0.1:
 
 ```sh
-cd apps/desktop
-CASKADE_UPDATER_ENDPOINT=http://127.0.0.1:8000/latest.json \
-  flock /tmp/caskade-heavy.lock pnpm tauri build --debug --bundles appimage --config '{"version":"0.0.1"}'
+# In a checkout whose Rust package versions are 0.0.1:
+CASKADE_UPDATER_ENDPOINT=http://127.0.0.1:8000/latest.json just build-app
 ```
 
 Run `Caskade_0.0.1_amd64.AppImage` from
 `${CARGO_TARGET_DIR:-target}/debug/bundle/appimage/`, press Check now under
 Settings → General → Caskade updates, then Download and install. After the restart, the app should report 0.2.0. A debug build accepts
 the plain `http` feed with a warning; a release build refuses it.
+
+Check that the installed shortcut opens native and that `caskade --legacy`
+opens the retained UI after native has quit. Verify a second native start,
+`--console`, a `caskade://` link and `--launch` as well.
 
 The other bundles test the same way on their own OS: download the
 `-setup.exe` or the right `.app.tar.gz`, point `latest.json` at it, and build

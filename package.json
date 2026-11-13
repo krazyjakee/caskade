@@ -3,7 +3,8 @@
   "private": true,
   "packageManager": "pnpm@9.15.9",
   "scripts": {
-    "dev": "pnpm --filter @caskade/desktop dev",
+    "dev": "just dev",
+    "web": "pnpm --filter @caskade/desktop dev",
     "build": "pnpm --filter @caskade/desktop build",
     "typecheck": "pnpm -r typecheck",
     "lint": "biome check .",

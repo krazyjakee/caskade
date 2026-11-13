@@ -6,18 +6,23 @@ default:
 install:
     pnpm install
 
-# Run the desktop app (Tauri) with hot reload
-dev:
-    pnpm tauri dev
+# Build and run the native app
+dev *args:
+    just native {{args}}
+
+# Run the legacy Tauri/React app with hot reload
+legacy *args:
+    pnpm tauri dev -- -- --legacy {{args}}
 
 # Run only the UI in a browser with hot reload (http://localhost:1420)
 web:
-    pnpm dev
+    pnpm web
 
 # Run the native app (#87): the main window rendered by Blitz, without Tauri
 native *args:
     flock /tmp/caskade-heavy.lock cargo build -p caskade-native
-    "$(cargo metadata --format-version 1 --no-deps | python3 -c 'import json,sys;print(json.load(sys.stdin)["target_directory"])')/debug/caskade-native" {{args}}
+    flock /tmp/caskade-heavy.lock python3 scripts/tauri-sidecar.py --dev
+    "$(flock /tmp/caskade-heavy.lock cargo metadata --format-version 1 --no-deps | python3 -c 'import json,sys;print(json.load(sys.stdin)["target_directory"])')/debug/caskade-native" {{args}}
 
 # Test the native UI as CI does (docs/native-testing.md): its headless component and view tests, then its screenshots (vello_cpu) against the committed images and Chromium's
 test-native *args:
@@ -37,17 +42,23 @@ native-shots:
 native-css:
     node apps/native/scripts/build-css.mjs
 
-# Production build of the UI (no app bundle)
+# Build the native app (no app bundle)
 build:
+    flock /tmp/caskade-heavy.lock cargo build -p caskade-native
+
+# Production build of the legacy browser UI (no app bundle)
+build-web:
     pnpm build
 
 # Debug build of the desktop app with Linux bundles (deb, AppImage)
 build-app:
-    flock /tmp/caskade-heavy.lock pnpm tauri build --debug
+    flock /tmp/caskade-heavy.lock cargo build -p caskade-native
+    flock /tmp/caskade-heavy.lock python3 scripts/native-sidecar.py --profile debug
+    flock /tmp/caskade-heavy.lock pnpm tauri build --debug --config native-app.conf.json
 
 # Build desktop binaries and write Cargo's HTML timing report (no cache cleaning)
 build-timings *args:
-    flock /tmp/caskade-heavy.lock cargo build -p caskade-desktop --bins --timings {{args}}
+    flock /tmp/caskade-heavy.lock cargo build -p caskade-native --bins --timings {{args}}
 
 # Scaffold a plugin: just plugin-new my-plugin [--id dev.me.hello] [--no-backend] …
 plugin-new *args:

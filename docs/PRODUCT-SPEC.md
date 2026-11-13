@@ -22,7 +22,9 @@ Why it exists is in the [mission](MISSION.md). How it is built is in the [tech s
 
 ## 3. Surfaces
 
-Caskade has two shells over the same views:
+The native Dioxus/Blitz app is the default for development and installed launches. The legacy Tauri/React UI remains available temporarily through `just legacy` or `caskade --legacy`. Both use the same library and application services; quit one before starting the other on the same profile. Plugins with API 0.1 JavaScript UI need the legacy app; native renders API 0.2 component trees.
+
+Caskade has two modes over the same views:
 
 - **Desktop mode**: a window with a sidebar, a topbar that is also the title bar, and a status bar. Mouse, keyboard and drag and drop.
 - **Console mode**: fullscreen, larger type and cards, a hint bar showing what each pad button does, and an on-screen keyboard. It starts by itself under gamescope, on a handheld or TV (detected), with `--console`, or from the setting. The guide button brings Caskade back over a running game.

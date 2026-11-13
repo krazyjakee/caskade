@@ -120,6 +120,8 @@ rfd = { version = "0.16", default-features = false, features = ["common-controls
 # reads the registry.
 [target.'cfg(windows)'.dependencies]
 windows-registry = "0.6"
+# Administrator steps when the streaming host starts this executable directly.
+caskade-streaming = { path = "../../crates/caskade-streaming" }
 
 [dev-dependencies]
 # The accessibility test reads Blitz's AccessKit tree (#83).

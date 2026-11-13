@@ -47,7 +47,8 @@ the token contracts; the `run-e2e` label too):
 | The window tests | `just test-native-window` |
 | Rewrite the screenshots after a deliberate change | `just native-shots` |
 | Chromium's reference for `text_pixels` | `apps/native/scripts/text-oracle.sh` |
-| Run the app | `just native` (your display) or `scripts/private-desktop.sh -- <binary>` |
+| Run the app | `just dev` (native by default, your display; `just native` is also available) or `scripts/private-desktop.sh -- <binary>` |
+| Compare with legacy | `just legacy` (your display), or `caskade --legacy` from an installed bundle; quit native first on the same profile |
 
 A new test that starts the app uses `caskade_test_desktop::PrivateDesktop`;
 one that only renders uses a headless document.

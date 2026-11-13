@@ -60,9 +60,9 @@ Style only through the `--cs-*` tokens, through their Tailwind utilities (`bg-su
 
 ## 6. Components and anatomy
 
-- Build from `@caskade/ui`: form controls on React Aria Components, `SettingsSection`/`SettingRow`, menus, `ErrorNotice`. Add a component there when two places need it.
+- Build from `apps/native/src/ui` in native and `@caskade/ui` in legacy: form controls, `SettingsSection`/`SettingRow`, menus, `ErrorNotice` (React Aria Components in legacy). Add a shared component when two places need it.
 - Style interaction state with React Aria's data attributes (`data-hovered`, `data-selected`, `data-focus-visible`), not `:hover` or `:checked`.
-- Give every component a `data-cs` root and `data-part`s, and domain state as `data-status` (and similar). Add them to the anatomy catalogue (`packages/ui/src/anatomy.ts`): they are public API for themes. A native (RSX) component declares the same entry in `apps/native/src/anatomy.rs`, word for word apart from the component it names; until the native UI is the default, a test holds the two catalogues together. Class names are not, and CSS never selects on classes.
+- Give every component a `data-cs` root and `data-part`s, and domain state as `data-status` (and similar). Add them to the anatomy catalogue (`packages/ui/src/anatomy.ts`): they are public API for themes. A native (RSX) component declares the same entry in `apps/native/src/anatomy.rs`, word for word apart from the component it names; while the legacy UI is retained, a test holds the two catalogues together. Class names are not, and CSS never selects on classes.
 - A control inside a `SettingRow` is labelled by its row. A second control in the same row needs its own `aria-label`.
 
 ## 7. Writing

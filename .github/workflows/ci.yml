@@ -146,6 +146,8 @@ jobs:
       # The native app's stylesheet (#90): Tailwind over apps/native/src.
       - name: Native app stylesheet
         run: node apps/native/scripts/build-css.mjs --check
+      - name: Native bundle staging
+        run: python3 -m unittest discover -s scripts -p test_native_sidecar.py
       # The anatomy generator (#90, #93): the webview's catalogue as data
       # writes its contract; caskade-native's tests check anatomy.md.
       - name: Native anatomy generator

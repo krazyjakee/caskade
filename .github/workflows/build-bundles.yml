@@ -103,10 +103,9 @@ jobs:
         shell: bash
         run: echo '{"bundle":{"createUpdaterArtifacts":true}}' > apps/desktop/updater-artifacts.conf.json
 
-      # caskade-native (#110), the Blitz app that ships beside the Tauri one
-      # until the cutover (BLITZ-33), goes into the same bundles as a second
-      # executable (Tauri's externalBin): the same installers and the same
-      # signed updates carry both. Its own updater replaces these bundles.
+      # The native UI is the default. The caskade entry point starts the
+      # caskade-native beside it; --legacy runs the retained Tauri UI.
+      # The same installers and signed updates carry both executables.
       - name: Build the native app
         shell: bash
         env:
@@ -116,11 +115,7 @@ jobs:
           # caskade.exe: a fresh Windows has no VCRUNTIME140.dll.
           case "$TARGET" in *-windows-msvc) export RUSTFLAGS="${RUSTFLAGS:-} -C target-feature=+crt-static" ;; esac
           cargo build --release --locked -p caskade-native --target "$TARGET"
-          exe=
-          case "$TARGET" in *-windows-*) exe=.exe ;; esac
-          mkdir -p apps/desktop/src-tauri/binaries
-          cp "target/$TARGET/release/caskade-native$exe" "apps/desktop/src-tauri/binaries/caskade-native-$TARGET$exe"
-          echo '{"bundle":{"externalBin":["binaries/7zz","binaries/caskade-native"]}}' > apps/desktop/native-app.conf.json
+          python scripts/native-sidecar.py --target "$TARGET" --profile release
 
       # Builds through beforeBuildCommand (the 7-Zip sidecar for the target,
       # then the UI). No key here: --no-sign skips the updater signatures.

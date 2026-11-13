@@ -2075,6 +2075,7 @@ dependencies = [
  "caskade-installer",
  "caskade-player",
  "caskade-share",
+ "caskade-streaming",
  "caskade-system-stats",
  "caskade-test-desktop",
  "caskade-ui-data",

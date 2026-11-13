@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import platform
 import shutil
+import subprocess
 
 ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("sevenzip_download", ROOT / "scripts/7zz-download.py")
@@ -45,8 +46,27 @@ def prepare(target):
     return {"target": target, "program": str(destination), "verified": record}
 
 
+def stage_dev(record, target_dir):
+    """Put the verified extractor beside the host's debug native executable."""
+    source = Path(record["program"])
+    destination = Path(target_dir) / "debug"
+    destination.mkdir(parents=True, exist_ok=True)
+    windows = "-windows-" in record["target"]
+    shutil.copy2(source, destination / ("7zz.exe" if windows else "7zz"))
+    if windows:
+        shutil.copy2(source.with_name("7z.dll"), destination / "7z.dll")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", default=os.environ.get("TAURI_ENV_TARGET_TRIPLE") or native_target())
+    parser.add_argument("--dev", action="store_true", help="also stage beside the host debug native app (run under the Cargo lock)")
     args = parser.parse_args()
-    print(json.dumps(prepare(args.target), indent=2))
+    if args.dev and args.target != native_target():
+        parser.error("--dev stages a host build; omit --target")
+    record = prepare(args.target)
+    if args.dev:
+        metadata = json.loads(subprocess.check_output(
+            ["cargo", "metadata", "--format-version", "1", "--no-deps"], cwd=ROOT))
+        stage_dev(record, metadata["target_directory"])
+    print(json.dumps(record, indent=2))

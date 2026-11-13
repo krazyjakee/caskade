@@ -1,6 +1,6 @@
 # Caskade
 
-A game library and launcher for Windows, Linux and macOS, written in Rust with a Tauri 2 shell and a React UI.
+A game library and launcher for Windows, Linux and macOS, written in Rust with a native Dioxus/Blitz UI. The legacy Tauri 2 and React app is retained temporarily for comparison.
 
 Every game you own, on every device in your home, in one library: store and launcher games, emulated games with emulators set up for you, web games, fan ports, and games streamed from another PC in the house. Devices pair and keep the library, saves and playtime in step directly, with no account and no server. It has a desktop mode, a fullscreen console mode for gamepads, themes and WebAssembly plugins.
 
@@ -22,15 +22,18 @@ You need:
 - Node with pnpm 9
 - `just`
 - Python 3, which fetches the pinned 7-Zip sidecar
-- On Linux, Tauri's WebKitGTK build dependencies, `libudev-dev` and `libasound2-dev` (the native app's first-run sounds). App bundles also need `libayatana-appindicator3-dev`: the Tauri CLI finds the tray library through pkg-config and bundles it
+- On Linux, GTK and WebKitGTK build dependencies (web games and videos still use a webview), `libudev-dev` and `libasound2-dev` (the native app's first-run sounds). App bundles also need `libayatana-appindicator3-dev`: the Tauri CLI finds the tray library through pkg-config and bundles it
 - For the plugin host tests: `rustup target add wasm32-wasip2`
 
 ```sh
 pnpm install
-just dev        # desktop app with hot reload
-just web        # UI only, in a browser, without the Rust core
+just dev        # build and run the native app
+just legacy     # legacy Tauri/React app with hot reload
+just web        # legacy UI only, in a browser, without the Rust core
 just test-app   # core and adapter tests, then Vitest
 ```
+
+`pnpm dev` also starts native; `pnpm web` previews the legacy UI. Bare `cargo build` and `cargo run` select the native app. Installed shortcuts and `caskade` start native; `caskade --legacy` (or `Caskade.AppImage --legacy`) starts the retained legacy UI. Quit one UI before starting the other on the same profile.
 
 `just --list` shows the other recipes: `test-installer`, `test-discovery`, `bindings`, `build-app` and `plugin-new`. The Cargo recipes serialize builds through `flock` (util-linux), so they assume Linux.
 
