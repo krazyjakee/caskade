@@ -240,6 +240,12 @@ impl VelloHybridWindowRenderer {
 fn build_wgpu_context(config: &VelloHybridRendererOptions) -> WGPUContext {
     let features =
         config.features.unwrap_or_default() | Features::CLEAR_TEXTURE | Features::PIPELINE_CACHE;
+    #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+    let features = if crate::gpu_timing::enabled() {
+        features | Features::TIMESTAMP_QUERY | Features::TIMESTAMP_QUERY_INSIDE_ENCODERS
+    } else {
+        features
+    };
     WGPUContext::with_features_and_limits(Some(features), config.limits.clone())
 }
 
@@ -397,6 +403,11 @@ impl WindowRenderer for VelloHybridWindowRenderer {
 
             let adapter = &device_handle.adapter;
             let info = adapter.get_info();
+            #[cfg(feature = "log_frame_times")]
+            eprintln!(
+                "GPU adapter: {} ({:?}, {:?}), driver {} {}",
+                info.name, info.device_type, info.backend, info.driver, info.driver_info
+            );
             if !allow_software_adapter && info.device_type == wgpu::DeviceType::Cpu {
                 let _ = sender.send(Err(format!(
                     "a software adapter: {} ({:?})",
@@ -648,6 +659,9 @@ impl VelloHybridWindowRenderer {
                     label: Some("Render scene"),
                 });
 
+        #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+        let gpu_timer = crate::gpu_timing::GpuTimer::begin(render_surface.device(), &mut encoder);
+
         let image_manager = ImageManager {
             renderer: &mut state.renderer,
             resources: &mut state.resources,
@@ -743,7 +757,13 @@ impl VelloHybridWindowRenderer {
             &mut self.cached_images,
         )
         .finish_frame();
+        #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+        if let Some(gpu_timer) = &gpu_timer {
+            gpu_timer.end(&mut encoder);
+        }
         render_surface.queue().submit([encoder.finish()]);
+        #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+        let gpu_readback = gpu_timer.map(|timer| timer.map());
         timer.record_time("render");
 
         drop(texture_view);
@@ -786,6 +806,10 @@ impl VelloHybridWindowRenderer {
 
         timer.record_time("wait");
         timer.print_times("vello_hybrid: ");
+        #[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+        if let Some((timer, ready)) = gpu_readback {
+            timer.print(ready, render_surface.queue().get_timestamp_period());
+        }
 
         // Empty the Vello scene (memory optimisation)
         self.scene.reset();

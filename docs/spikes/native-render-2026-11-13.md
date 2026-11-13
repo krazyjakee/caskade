@@ -5,6 +5,10 @@ Measured master `d23dceda84b9a1822ca6a3ffdff37df2d2df9282` on an AMD Ryzen 9
 idle backdrop repaints, and stale virtual-grid dimensions after resizing.
 The managed streaming host has an independent CPU problem.
 
+The [hardware GPU follow-up](native-gpu-2026-11-13.md) records explicit RTX
+3090 selection, device-clock timestamps, real cached artwork and a capture
+overhead control. It separates GPU execution from private-window presentation.
+
 No application behaviour was changed. The running desktop app was only
 observed: process/thread counters, logs, database game count and a screenshot
 of its own window. All scripted input and additional windows used private

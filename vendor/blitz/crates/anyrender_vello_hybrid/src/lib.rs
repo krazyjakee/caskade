@@ -2,6 +2,8 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod filters;
+#[cfg(all(feature = "log_frame_times", not(target_arch = "wasm32")))]
+mod gpu_timing;
 mod image_cache;
 mod scene;
 #[cfg(all(target_arch = "wasm32", feature = "webgl"))]
