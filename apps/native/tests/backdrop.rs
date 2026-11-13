@@ -277,11 +277,20 @@ fn a_theme_shader_moves_and_stops_over_its_gpu_budget() {
         assert!(!log_text().contains("didn't compile"), "{}", log_text());
         match budget {
             None => {
-                assert!(
-                    later.backdrop - settled.backdrop >= 10,
-                    "the shader didn't move: {settled:?} → {later:?}"
-                );
+                // On a CI runner's lavapipe a frame of it can take seconds:
+                // wait for a few more rather than a rate.
+                let moved = until(&counts, Duration::from_secs(20), |frames| {
+                    frames.backdrop >= settled.backdrop + 3
+                })
+                .unwrap_or_else(|| {
+                    panic!(
+                        "the shader didn't move: {settled:?} → {:?}\n{}",
+                        frames(&counts),
+                        log_text()
+                    )
+                });
                 assert!(!log_text().contains("stop moving"));
+                assert_eq!(moved.document, settled.document);
             }
             Some(_) => {
                 assert!(
