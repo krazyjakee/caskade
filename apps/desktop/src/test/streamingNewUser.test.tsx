@@ -164,7 +164,10 @@ it("no catalog text can show a name, but the settings search's own words", () =>
     Object.fromEntries(
       SEARCH_WORDS.map((words) => [
         words,
-        ["apps/desktop/src/views/settings/searchIndex.ts", "apps/native/src/settings/search/search_index.rs"],
+        [
+          "apps/desktop/src/views/settings/searchIndex.ts",
+          "apps/native/src/settings/search/search_index.rs",
+        ],
       ]),
     ),
   );
