@@ -40,10 +40,6 @@ use caskade_emulation_fixtures::{FakeEmulator, Invocation};
 use caskade_test_desktop::PrivateDesktop;
 use std::time::{Duration, Instant};
 
-// Each run renders an app in software. Sharing a small CI runner between
-// two of them turns renderer contention into missed input deadlines.
-static ONE_RUN: std::sync::Mutex<()> = std::sync::Mutex::new(());
-
 const SCRIPT: &str = "\
 # A fresh profile: first-run setup (#97) first. Up to its top bar, and
 # Skip setup, which opens the library.
@@ -76,7 +72,6 @@ wait-text Welcome back
 #[test]
 #[ignore = "drives the built app on a private Xvfb display and bus: run with -- --ignored"]
 fn a_scripted_pad_drives_the_native_app_with_no_key_or_pointer_event() {
-    let _run = caskade_core::lock(&ONE_RUN);
     let desktop = PrivateDesktop::start();
     let temp = tempfile::tempdir().unwrap();
     run(&desktop, temp.path(), SCRIPT, &[], &[]);
@@ -302,6 +297,16 @@ async fn seed(paths: &AppPaths, root: &Path) -> Seeded {
     let store = LibraryStore::open_default(paths).await.unwrap();
     let settings = SettingsService::new(store.clone());
     settings.register_core(paths).unwrap();
+    // These games are local fixtures. Matching them must not download
+    // Hasheous dumps or query the metadata server during the pad run.
+    settings
+        .set(
+            "core.metadata",
+            serde_json::json!({ "online": false }),
+            None,
+        )
+        .await
+        .unwrap();
     let mut onboarding = settings.get("core.onboarding").await.unwrap().value;
     onboarding["completed"] = true.into();
     onboarding["sounds"] = false.into();
@@ -408,7 +413,6 @@ fn make_executable(path: &Path) {
 #[test]
 #[ignore = "drives the built app on a private Xvfb display and bus: run with -- --ignored"]
 fn console_mode_end_to_end_with_a_pad_only() {
-    let _run = caskade_core::lock(&ONE_RUN);
     let desktop = PrivateDesktop::start_sized("1600x1000x24");
     let temp = tempfile::tempdir().unwrap();
     let home = temp.path();

@@ -47,6 +47,47 @@ fn app() -> Element {
     }
 }
 
+fn frame_owner_app() -> Element {
+    rsx! { InputRoot { console: true, FrameOwner {} } }
+}
+
+#[component]
+fn FrameOwner() -> Element {
+    let mut shown = use_signal(|| true);
+    let input = use_input();
+    use_effect(move || {
+        if shown() {
+            spawn(async move {
+                crate::data::sleep(Duration::from_millis(50)).await;
+                shown.set(false);
+            });
+        } else {
+            input.navigated("ready");
+        }
+    });
+    rsx! {
+        if shown() { FrameStarter {} }
+        div { "data-focus-section": "main",
+            button { "data-focus-default": "true", style: at(300, 100, 140, 40), "Ready" }
+        }
+    }
+}
+
+#[component]
+fn FrameStarter() -> Element {
+    let input = use_input();
+    use_hook(move || input.settle());
+    rsx! {}
+}
+
+#[test]
+fn focus_checks_outlive_the_component_that_started_them() {
+    let _one = caskade_core::lock(&ONE_WINDOW);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let window = Window::open_with(frame_owner_app);
+    assert_eq!(window.focused(), "Ready");
+}
+
 #[component]
 fn Demo() -> Element {
     let mut open = use_signal(|| false);
