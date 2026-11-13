@@ -1,6 +1,4 @@
-//! Home's themeable roots (#98), word for word the webview's
-//! (`packages/ui/src/anatomy.ts`) apart from the component each names. Its
-//! hero is `ui::hero`'s entry.
+//! Home's themeable roots (#98). Its hero is `ui::hero`'s entry.
 
 use caskade_ui_theme::anatomy::{Entry, Source};
 

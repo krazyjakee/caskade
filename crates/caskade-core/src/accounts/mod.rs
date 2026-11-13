@@ -24,8 +24,8 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::sync::{Arc, RwLock};
 
-/// The avatars an account may pick: the set `@caskade/ui` ships
-/// (`packages/ui/src/avatars.ts`), in the same order. An id keeps its image
+/// The avatars an account may pick: the set the app ships
+/// (`apps/native/src/ui/avatar.rs`), in the same order. An id keeps its image
 /// across releases; a removed one would show initials. The first is the
 /// one new accounts and the migrated admin get.
 pub const AVATARS: &[&str] = &[

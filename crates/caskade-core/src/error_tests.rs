@@ -255,17 +255,16 @@ fn docs_list_every_code_and_hint() {
             docs.contains(&format!("`{name}`")),
             "docs/TECH-SPEC.md lacks `{name}`"
         );
-        // Every code and hint has a plain sentence or label in the webview.
-        if hints
-            .iter()
-            .any(|hint| serde_json::to_value(hint).unwrap() == name.as_str())
-        {
-            let labels = include_str!("../../../apps/desktop/src/api/reply.ts");
-            assert!(
-                labels.contains(&format!("  {name}: ")),
-                "reply.ts lacks a label for {name}"
-            );
-        }
+    }
+    // Every hint has a label in the UI's words (`caskade_ui_data::labels`,
+    // whose match is exhaustive; this names the file to fix).
+    let labels = include_str!("../../caskade-ui-data/src/labels.rs");
+    for hint in hints {
+        let arm = format!("RecoveryHint::{hint:?} =>");
+        assert!(
+            labels.contains(&arm),
+            "caskade-ui-data/src/labels.rs lacks a label for {hint:?}"
+        );
     }
 }
 

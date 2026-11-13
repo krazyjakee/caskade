@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """Generate the third-party notices Settings → About → Licenses shows offline.
 
-Inventories what the desktop app ships and writes one compact JSON file the UI
-imports (apps/desktop/src/views/settings/about/notices.generated.json):
+Inventories what the app bundle ships and writes one compact JSON file the
+native app embeds (apps/native/assets/notices.generated.json):
 
 - Rust crates: `cargo metadata`, the normal (non-dev, non-build) dependency
-  graphs of both binaries the bundles ship, `caskade-desktop` and
-  `caskade-native`, for every target platform (a superset of what any one
-  platform's binaries link).
-- JavaScript packages: the packages in the UI's production bundle, fonts
-  included (apps/desktop/scripts/shipped-packages.mjs builds it in memory).
-  Not `pnpm licenses list --prod`: that follows workspace packages' tooling
-  (`@caskade/i18n`'s Lingui CLI) and auto-installed peers (Lingui's Babel
-  macro) and lists hundreds of build-time packages that never ship (#130).
+  graph of the binary the bundle ships, `caskade-native`, for every target
+  platform (a superset of what any one platform's binary links). The
+  vendored crates (vendor/, patched in by the workspace's Cargo.toml) are
+  among them.
+- Fonts: the app's own (apps/native/assets/fonts, each with its
+  LICENSE-<family>) and the built-in themes' (themes/<theme>/assets/fonts
+  with its OFL.txt, for every theme crates/caskade-core/src/themes.rs
+  embeds).
+- Icons: lucide's path data, which apps/native/src/ui/icons.rs draws
+  (apps/native/assets/LICENSE-lucide).
 - 7-Zip: the upstream License.txt of each pinned sidecar package the release
   builds bundle (scripts/7zz-pins.json), verified and cached by
   scripts/7zz-download.py (the first run downloads them).
@@ -30,9 +32,14 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUTPUT = ROOT / "apps/desktop/src/views/settings/about/notices.generated.json"
-# The binaries the bundles ship (#110 added the native one).
-APP_CRATES = ("caskade-desktop", "caskade-native")
+OUTPUT = ROOT / "apps/native/assets/notices.generated.json"
+# The binaries the bundle ships.
+APP_CRATES = ("caskade-native",)
+APP_FONTS = ROOT / "apps/native/assets/fonts"
+# Where the built-in themes are embedded, one `builtin_theme!("<folder>": …)` each.
+BUILTIN_THEMES = ROOT / "crates/caskade-core/src/themes.rs"
+LUCIDE = ROOT / "apps/native/assets/LICENSE-lucide"
+OFL = "SIL Open Font License, Version 1.1"
 # The packages each release target bundles (release.yml's matrix).
 SEVEN_ZIP_PACKAGES = {"Linux": "linux-x64", "macOS": "macos-x64", "Windows": "windows-x64"}
 
@@ -157,20 +164,56 @@ def rust_packages():
         }
 
 
-def js_packages():
-    shipped = json.loads(run(["node", "scripts/shipped-packages.mjs"], cwd=ROOT / "apps/desktop"))
-    for entry in shipped:
-        if entry["name"].startswith("@caskade/"):
-            continue
-        yield {
-            "name": entry["name"],
-            "version": entry["version"],
-            "license": entry["license"],
-            "repository": entry["repository"],
-            "authors": [entry["author"]] if entry.get("author") else [],
-            "files": license_files(Path(entry["path"])),
-            "ecosystem": "js",
-        }
+def font(licence, files):
+    """A font family from its licence file: its project's name and home from the copyright line."""
+    text = read(licence)
+    assert OFL in text, f"{licence.relative_to(ROOT)} isn't the {OFL}"
+    lines = copyright_lines([licence], [])
+    project = re.search(r"The (.+?) Project Authors", lines[0]) if lines else None
+    home = re.search(r"\((https?://[^)\s]+)\)", lines[0]) if lines else None
+    stem = re.sub(r"-latin.*$", "", files[0].stem) if files else licence.stem
+    return {
+        "name": project.group(1) if project else stem.replace("-", " ").title(),
+        "version": "",
+        "license": "OFL-1.1",
+        "repository": home.group(1) if home else "",
+        "authors": [],
+        "files": [licence],
+        "ecosystem": "font",
+    }
+
+
+def fonts():
+    for licence in sorted(APP_FONTS.glob("LICENSE-*")):
+        family = licence.name.removeprefix("LICENSE-")
+        files = sorted(APP_FONTS.glob(f"{family}-*.woff2"))
+        assert files, f"{licence.relative_to(ROOT)} licenses no font"
+        yield font(licence, files)
+    licensed = {p.name.removeprefix("LICENSE-") for p in APP_FONTS.glob("LICENSE-*")}
+    for path in APP_FONTS.glob("*.woff2"):
+        assert any(path.name.startswith(f"{family}-") for family in licensed), f"{path.name} has no LICENSE-<family>"
+    themes = re.findall(r'builtin_theme!\(\s*"([^"]+)":', BUILTIN_THEMES.read_text())
+    assert themes, f"no built-in themes in {BUILTIN_THEMES.relative_to(ROOT)}"
+    for theme in themes:
+        folder = ROOT / "themes" / theme / "assets/fonts"
+        files = sorted(folder.glob("*.woff2"))
+        if files:
+            licence = folder / "OFL.txt"
+            assert licence.is_file(), f"{folder.relative_to(ROOT)} has fonts but no OFL.txt"
+            yield font(licence, files)
+
+
+def icons():
+    yield {
+        "name": "Lucide",
+        "version": "",
+        # ISC, with the icons derived from Feather under MIT.
+        "license": "ISC AND MIT",
+        "repository": "https://lucide.dev",
+        "authors": [],
+        "files": [LUCIDE],
+        "ecosystem": "icons",
+    }
 
 
 def seven_zip():
@@ -198,7 +241,7 @@ def main():
     args = parser.parse_args()
 
     texts, groups = {}, {}
-    for package in [*rust_packages(), *js_packages()]:
+    for package in [*rust_packages(), *fonts(), *icons()]:
         for term in terms(package["license"]):
             if term not in texts:
                 text = text_for(term, package["files"])

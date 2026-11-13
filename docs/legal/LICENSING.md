@@ -1,6 +1,6 @@
 # Licenses
 
-Revision: 2026-10-28
+Revision: 2026-11-13
 
 ## Caskade
 
@@ -14,13 +14,13 @@ Caskade is released under the MIT License (the repository's `LICENSE` file):
 >
 > THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Caskade's own code, its built-in themes, its icons and its platform artwork are the project's work. Everything else Caskade ships is listed below and under Open-source packages, with the licence each comes under.
+Caskade's own code, its built-in themes (apart from their fonts), its app icon and its platform artwork are the project's work. Everything else Caskade ships is listed below and under Open-source packages, with the licence each comes under.
 
 ## Components bundled with every build
 
 - **7-Zip** (the `7zz` program; Windows builds also ship `7z.dll`), version pinned in `scripts/7zz-pins.json`. Caskade runs it to unpack archives and installers. It comes under the GNU LGPL with BSD 3-clause parts and the unRAR licence restriction; its full licence text is below, and every installed copy also has it as `licenses/7zip-License.txt`. Source: [7-Zip releases](https://github.com/ip7z/7zip/releases).
-- **Fonts**: Oxanium, JetBrains Mono and Inter, from the `@fontsource-variable` packages, under the SIL Open Font License 1.1. They are listed with their copyright holders under Open-source packages.
-- **Rust crates** compiled into the Caskade program and **JavaScript packages** compiled into its interface, listed under Open-source packages with their licence texts.
+- **Fonts**: Oxanium, JetBrains Mono and Inter, and the fonts of the built-in themes, under the SIL Open Font License 1.1. They are listed with their copyright holders under Open-source packages.
+- **Rust crates** compiled into the Caskade program, and the **Lucide icons** its interface draws, listed under Open-source packages with their licence texts.
 - **Emulator definitions and platform catalogue**: some platform names, identifiers, executable patterns, ROM extensions and command profiles are adapted from [Playnite](https://github.com/JosefNemec/Playnite) (MIT License, Copyright (c) 2020 Josef Nemec; the MIT text is under Open-source packages). BIOS file names and hashes are factual metadata from libretro's databases and documentation, and platform slugs and IGDB identifiers come from RomM's public platform lists. No emulator binaries, cores, BIOS files or ROMs are included. Details: `crates/caskade-sources/THIRD-PARTY.md`.
 
 ## Platform-specific components

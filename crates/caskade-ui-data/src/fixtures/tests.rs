@@ -6,7 +6,10 @@ use caskade_core::{
 };
 use std::time::Duration;
 
-const FIXTURES_TS: &str = include_str!("../../../../apps/desktop/src/api/fixtures.ts");
+/// The fixture library, game by game (#139): what the webview's
+/// `fixtures.ts` showed, so fixtures mode keeps the library its screenshots,
+/// tests and docs were made on.
+const GAMES_JSON: &str = include_str!("games.json");
 
 fn all(limit: u32) -> ListGames {
     ListGames {
@@ -17,36 +20,43 @@ fn all(limit: u32) -> ListGames {
     }
 }
 
-/// The rules these games follow are `fixtures.ts`'s, so the two fixture
-/// libraries don't drift apart unnoticed.
+/// The games follow `games.json`, record by record, so the fixture
+/// library doesn't drift unnoticed.
 #[test]
-fn the_games_follow_fixtures_ts() {
-    for rule in [
-        "title: `Fixture Game ${String(index + 1).padStart(4, \"0\")}`",
-        "genre: index % 2 ? \"Adventure\" : \"Strategy\"",
-        "status: index % 5 === 0 ? \"not-installed\" : \"installed\"",
-        "favorite: index % 3 === 0",
-        "playtimeSeconds: index * 1200",
-        "releaseDate: index % 4 === 0 ? null : \"2024-02-29\"",
-        "title: `${platform.split(\" \").at(-1)} Fixture ${index + 1}`",
-        "playtimeSeconds: daysAgo === null ? 0 : (index + 1) * 2700",
-        "daysAgo === null || index > 0",
-    ] {
-        assert!(FIXTURES_TS.contains(rule), "fixtures.ts changed: {rule}");
+fn the_games_are_the_maintained_fixtures() {
+    let want: Vec<serde_json::Value> = serde_json::from_str(GAMES_JSON).unwrap();
+    let games = library_games(DEFAULT_COUNT);
+    assert_eq!(games.len(), want.len());
+    for (game, want) in games.iter().zip(&want) {
+        let got = serde_json::json!({
+            "id": game.id,
+            "entryId": game.entry_id,
+            "title": game.title,
+            "genre": game.genre,
+            "platform": game.platform,
+            "installed": game.installed,
+            "emulated": game.emulated,
+            "favorite": game.favorite,
+            "playtimeSeconds": game.playtime_ms / 1000,
+            "lastPlayedDaysAgo": game.last_played_days_ago,
+            "releaseDate": game.release_date,
+        });
+        assert_eq!(&got, want);
+        assert_eq!(game.playtime_ms % 1000, 0, "{}", game.id);
     }
-    for (platform, count, days_ago) in EMULATED {
-        let days = days_ago.map_or("null".to_owned(), |days| days.to_string());
-        let row = format!("[\"{platform}\", {count}, {days}],");
-        assert!(FIXTURES_TS.contains(&row), "fixtures.ts lacks {row}");
+    for (platform, ..) in EMULATED {
+        assert!(
+            want.iter().any(|game| game["platform"] == platform),
+            "games.json lacks {platform}"
+        );
     }
-    assert!(FIXTURES_TS.contains(&format!("createFixtureGames(count = {DEFAULT_COUNT})")));
 }
 
-/// The fixture library answers as `fixtures.ts`'s does, record by record:
+/// The fixture library answers as `games.json` has it, record by record:
 /// every game, with its title, genre, platform, favourite, installed state,
 /// play time and last play.
 #[tokio::test(flavor = "multi_thread")]
-async fn fixtures_mode_has_the_webviews_fixture_games() {
+async fn fixtures_mode_has_the_fixture_games() {
     let fixtures = open(DEFAULT_COUNT).await.unwrap();
     let expected = library_games(DEFAULT_COUNT);
     assert_eq!(expected.len(), 24 + 29);

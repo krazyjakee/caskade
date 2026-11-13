@@ -1,6 +1,6 @@
-//! The library's themeable roots (#99): choosing several games and the
-//! Emulated tab's platforms, word for word the webview's
-//! (`packages/ui/src/anatomy.ts`) apart from the component each names.
+//! The library's themeable roots (#99): the grid or list of games and its
+//! letters, choosing several games, the Emulated tab's platforms, the
+//! collection dialog and adding a web game.
 
 use caskade_ui_theme::anatomy::{Entry, Source};
 
@@ -10,6 +10,10 @@ pub const ANATOMY: &[Entry] = &[
     GAMES_REFRESH_START,
     BULK_EDITOR,
     PLATFORM_CARD,
+    VIRTUAL_LIBRARY,
+    ALPHABET_BAR,
+    COLLECTION_DIALOG,
+    ADD_WEB_GAME,
 ];
 
 pub const SELECTION_BAR: Entry = Entry {
@@ -102,5 +106,70 @@ pub const PLATFORM_CARD: Entry = Entry {
         "PlatformGrid (apps/native/src/library/platform_grid.rs)",
         Source::App,
         "A platform in the library's breakdown of emulated games; opens its games.",
+    )
+};
+
+pub const VIRTUAL_LIBRARY: Entry = Entry {
+    parts: &[
+        (
+            "table-header",
+            "The list's column headers; in the Library view, Title, Last played and Playtime sort by it.",
+        ),
+        ("rows", "Holds the rows, as tall as all of them."),
+        (
+            "virtual-row",
+            "One row of games on screen; `data-row` is its number.",
+        ),
+        ("placeholder", "A game not loaded yet."),
+    ],
+    states: &[("data-layout", &["grid", "list"])],
+    contains: &["game-row", "game-card"],
+    ..Entry::new(
+        "virtual-library",
+        "VirtualLibrary (apps/native/src/library/grid.rs)",
+        Source::App,
+        "The games of the Library view or a collection's page (#94, #102), as a grid of cards or a list of rows; only the rows on screen are drawn. LT and RT page through them, letter by letter when sorted by title. `data-layout` is `grid` or `list`.",
+    )
+};
+
+pub const ALPHABET_BAR: Entry = Entry {
+    parts: &[(
+        "letter",
+        "One initial some game starts with (`#` for numbers and symbols); `data-selected` on the letter on screen.",
+    )],
+    ..Entry::new(
+        "alphabet-bar",
+        "VirtualLibrary (apps/native/src/library/grid.rs)",
+        Source::App,
+        "The letters beside a long library sorted by title; each jumps to its games.",
+    )
+};
+
+pub const COLLECTION_DIALOG: Entry = Entry {
+    parts: &[
+        (
+            "rules",
+            "A smart collection's rules: which games, platform, title and sort.",
+        ),
+        ("matches", "How many games match the rules now."),
+        ("save", "Create or Save (a `button`)."),
+    ],
+    contains: &["segmented", "text-field", "select", "button"],
+    ..Entry::new(
+        "collection-dialog",
+        "CollectionDialog (apps/native/src/library/collection_dialog.rs)",
+        Source::App,
+        "Makes a collection, or edits one's name, description and rules (#99): from New Collection in Collections, Save as collection in the library (a smart one with the view's rules) and a collection's Edit… or Edit rules…. A new one is Manual or Smart.",
+    )
+};
+
+pub const ADD_WEB_GAME: Entry = Entry {
+    parts: &[("add", "Adds the game (a `button`).")],
+    contains: &["text-field", "checkbox", "button"],
+    ..Entry::new(
+        "add-web-game",
+        "AddWebGame (apps/native/src/library/web.rs)",
+        Source::App,
+        "Add web game in the library's Web tab (#99): the address of the page the game plays on and, where Caskade can keep offline copies, Play offline; with it, Caskade then asks where to keep the copy and opens the guided capture.",
     )
 };

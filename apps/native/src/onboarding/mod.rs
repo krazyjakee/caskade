@@ -50,11 +50,11 @@ pub const ONBOARDING: Entry = Entry {
         ),
         (
             "mode",
-            "Desktop or console mode; React Aria's `data-selected` marks the choice.",
+            "Desktop or console mode; `data-selected` marks the choice.",
         ),
         (
             "language",
-            "A language, or System; React Aria's `data-selected` marks the choice.",
+            "A language, or System; `data-selected` marks the choice.",
         ),
         ("next", "Continue, Set up, or Open my library."),
         (

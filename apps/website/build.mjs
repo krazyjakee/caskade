@@ -59,7 +59,7 @@ await mkdir(new URL("sv/", output), { recursive: true });
 await cp(new URL("assets/", root), new URL("assets/", output), { recursive: true });
 await cp(new URL("site.css", root), new URL("assets/site.css", output));
 await cp(new URL("../../packages/tokens/tokens.css", root), new URL("assets/tokens.css", output));
-await cp(new URL("../desktop/public/caskade.svg", root), new URL("assets/caskade.svg", output));
+await cp(new URL("../native/icons/caskade.svg", root), new URL("assets/caskade.svg", output));
 
 for (const [index, language] of languages.entries()) {
   const prefix = language === "en" ? "./" : "../";

@@ -1,5 +1,4 @@
-//! The library's scroll benchmark (#94), as the webview's
-//! `apps/desktop/tests/library-scroll.py`: `CASKADE_LIBRARY_BENCH=<report>`
+//! The library's scroll benchmark (#94): `CASKADE_LIBRARY_BENCH=<report>`
 //! (debug builds, or the `bench` feature, in fixtures mode) fills the window
 //! with the virtual grid (or list: `CASKADE_LIBRARY_BENCH_LAYOUT=list`) over
 //! the fixture library, scrolls it from top to bottom a step per frame,

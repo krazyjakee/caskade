@@ -30,9 +30,9 @@ const QUIT: &str = "tray.quit";
 const HIDDEN_BEFORE_EXIT: std::time::Duration = std::time::Duration::from_millis(500);
 
 #[cfg(target_os = "macos")]
-const ICON: &[u8] = include_bytes!("../../desktop/src-tauri/icons/tray-template.png");
+const ICON: &[u8] = include_bytes!("../icons/tray-template.png");
 #[cfg(not(target_os = "macos"))]
-const ICON: &[u8] = include_bytes!("../../desktop/src-tauri/icons/tray.png");
+const ICON: &[u8] = include_bytes!("../icons/tray.png");
 
 static STATE: LazyLock<Tray> = LazyLock::new(Tray::default);
 

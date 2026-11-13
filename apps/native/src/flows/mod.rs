@@ -49,6 +49,12 @@ pub const ANATOMY: &[Entry] = &[
     anatomy::ACCOUNT_PROFILE,
     anatomy::ROMM,
     anatomy::ROMM_SERVERS,
+    anatomy::ADD_GAME,
+    anatomy::INSTALL_URL,
+    anatomy::INSTALL_ROOT_PICKER,
+    anatomy::STREAM_PAIR_PROMPT,
+    anatomy::PAIR_REQUEST,
+    anatomy::STOP_HOST,
 ];
 
 /// The flows that come over any view: pairing (#226), games other devices

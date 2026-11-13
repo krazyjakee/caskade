@@ -1,26 +1,23 @@
-//! The native UI's anatomy catalogue (#90): one entry per themeable root,
-//! declared beside its component and listed here. Each must match the
-//! webview's entry (`packages/ui/src/anatomy.ts`) word for word, apart
-//! from the component it names; the tests check that, and that every
-//! `data-cs` the native sources render is catalogued.
-//!
-//! `docs/theming/anatomy.md` is written from it (#93) by
-//! `caskade_ui_theme::anatomy`: the native entry for each root the native
-//! UI renders, the webview's (`packages/ui/anatomy-entries.json`) for the
-//! rest until their views are ported. A test checks the docs are current;
+//! The anatomy catalogue (#90, #139): one entry per themeable root,
+//! declared beside its component and listed here. It is the theming
+//! contract's single source: `caskade_ui_theme::anatomy` writes
+//! `docs/theming/anatomy.md` and `crates/caskade-theme/anatomy.json` (the
+//! contract `caskade-theme` checks themes against) from it. The tests check
+//! both are current, that the catalogue holds together and that every
+//! `data-cs` the native sources render is catalogued;
 //! `CASKADE_WRITE_ANATOMY=1 cargo test -p caskade-native anatomy` writes
 //! them.
 
 use caskade_ui_theme::anatomy::{Entry, Source};
 
-/// Every catalogued root the native UI renders. The RSX components of #93
-/// add theirs here.
-// Read by the tests now, and by the docs at the cutover (BLITZ-33).
+/// Every catalogued root. The RSX components of #93 add theirs here.
+// Read by the tests, which write the docs and the contract from it.
 #[cfg_attr(not(test), allow(dead_code))]
 pub fn catalogue() -> Vec<Entry> {
-    let mut all = vec![OSK];
+    let mut all = vec![WEBSITE];
     all.extend_from_slice(crate::ui::ANATOMY);
     all.push(crate::settings::ANATOMY);
+    all.extend_from_slice(crate::settings::anatomy::PANELS);
     all.extend_from_slice(crate::accounts::ANATOMY);
     all.extend_from_slice(crate::onboarding::ANATOMY);
     all.extend_from_slice(&crate::settings::addons::ANATOMY);
@@ -34,6 +31,7 @@ pub fn catalogue() -> Vec<Entry> {
     all.extend_from_slice(crate::home::ANATOMY);
     all.push(crate::store::STORE_LINKS);
     all.extend_from_slice(crate::collections::ANATOMY);
+    all.extend([OSK, GUIDE_MENU]);
     all
 }
 
@@ -59,187 +57,189 @@ const OSK: Entry = Entry {
     )
 };
 
+/// The quick menu a pad's guide button opens (`input/guide.rs`).
+const GUIDE_MENU: Entry = Entry::new(
+    "guide-menu",
+    "GuideMenu (apps/native/src/input/guide.rs)",
+    Source::App,
+    "The quick menu a pad's guide button opens over everything while a game runs: the game's title, Return to game, Stop game (asked once more) and Game details. For a game streamed from another device, End stream stops it there.",
+);
+
+/// The public website's page (`apps/website`), which shares the app's
+/// tokens and branding: its `check.py` holds the page to these parts.
+const WEBSITE: Entry = Entry {
+    parts: &[
+        ("skip", "Keyboard skip link to the main content."),
+        (
+            "header",
+            "Brand, primary navigation, language dropdown and download link.",
+        ),
+        ("main-nav", "The main page navigation links."),
+        ("header-actions", "The language dropdown and download link."),
+        (
+            "language-trigger",
+            "Native popover button with the current language flag and name.",
+        ),
+        (
+            "language-options",
+            "Language links with flags; aria-current marks the current page.",
+        ),
+        ("brand", "Caskade's mark and name."),
+        (
+            "button",
+            "A link styled as a button; data-variant is primary or small when set.",
+        ),
+        ("hero", "Introduction and desktop and console screenshots."),
+        ("hero-copy", "The main heading, introduction and actions."),
+        ("eyebrow", "A short section introduction."),
+        ("status-dot", "A decorative accent beside the introduction."),
+        ("intro", "The landing page introduction."),
+        (
+            "actions",
+            "Download and source link groups, including platform installer choices.",
+        ),
+        ("text-link", "A text link to a project resource."),
+        ("hero-note", "Free software and privacy summary."),
+        (
+            "screenshots",
+            "Actual app captures with a sample library, linking to the full images.",
+        ),
+        (
+            "screenshot-main",
+            "The cropped desktop screenshot and its link to the full capture.",
+        ),
+        (
+            "screenshot-console",
+            "The cropped console screenshot and its link to the full capture.",
+        ),
+        ("screenshot-label", "A mode label below a screenshot."),
+        ("sources", "Examples of supported library sources."),
+        (
+            "video",
+            "The introductory video and its direct YouTube link.",
+        ),
+        (
+            "video-player",
+            "A responsive, lazy-loaded YouTube privacy-enhanced embed.",
+        ),
+        (
+            "features",
+            "The library, household and emulation feature overview.",
+        ),
+        ("section-heading", "A section's introduction and heading."),
+        ("feature-grid", "The three feature descriptions."),
+        (
+            "feature",
+            "One feature; data-feature is library, household or retro.",
+        ),
+        ("feature-number", "A decorative feature index."),
+        (
+            "principles",
+            "Local ownership, offline use, privacy and customisation.",
+        ),
+        ("principle-list", "The three product principles."),
+        ("downloads", "Platform status and download links."),
+        ("download-grid", "The three platform download panels."),
+        (
+            "platform",
+            "A platform's status, formats and direct installer links.",
+        ),
+        (
+            "platform-title",
+            "Platform name, icon and optional status badge.",
+        ),
+        ("badge", "The Linux reference-platform label."),
+        (
+            "release-note",
+            "Download instructions and the release archive link.",
+        ),
+        ("faq", "Native details disclosures with common questions."),
+        ("closing", "The final download invitation."),
+        ("footer", "Project documentation, source and licence links."),
+    ],
+    ..Entry::new(
+        "website",
+        "apps/website/index.html (static GitHub Pages site)",
+        Source::Website,
+        "The public landing page, sharing the app's tokens and branding.",
+    )
+};
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use caskade_ui_theme::anatomy::{contract, markdown};
+    use std::collections::BTreeSet;
+    use std::path::Path;
 
-    /// Roots the native UI renders that the webview doesn't catalogue yet,
-    /// with the issue that will.
-    const NOT_YET: &[(&str, &str)] = &[
-        (
-            "new-collection",
-            "#102: the webview's New Collection tile isn't catalogued either",
-        ),
-        (
-            "add-games",
-            "#102: the webview's AddGamesDialog isn't catalogued either",
-        ),
-        (
-            "activity-job",
-            "#101: the webview's JobCard isn't catalogued either",
-        ),
-        (
-            "job-question",
-            "#101: the webview's QuestionDialog isn't catalogued either",
-        ),
-        (
-            "install-confirmation",
-            "#101: the webview's InstallConfirmation isn't catalogued either",
-        ),
-        (
-            "guide-menu",
-            "#93: the webview's GuideMenu isn't catalogued either",
-        ),
-        (
-            "virtual-library",
-            "#93: the webview's VirtualLibrary isn't catalogued either",
-        ),
-        ("alphabet-bar", "#99: the Library view's AlphabetBar"),
-        (
-            "collection-picker",
-            "#99: the webview's CollectionPicker isn't catalogued either",
-        ),
-        (
-            "collection-dialog",
-            "#99: the webview's CollectionDialog isn't catalogued either",
-        ),
-        (
-            "add-web-game",
-            "#99: the webview's AddWebGame isn't catalogued either",
-        ),
-        (
-            "update-offer",
-            "#100: the webview's UpdateBeforePlayDialog isn't catalogued either",
-        ),
-        (
-            "playing-elsewhere",
-            "#100: the webview's PlayingElsewhereDialog isn't catalogued either",
-        ),
-        (
-            "save-conflict",
-            "#100: the webview's SaveConflictDialog isn't catalogued either",
-        ),
-        (
-            "save-arriving",
-            "#100: the webview's WaitForSave isn't catalogued either",
-        ),
-        (
-            "play-choice",
-            "#100: the webview's PlayChoice isn't catalogued either",
-        ),
-        (
-            "emulation",
-            "#100: the webview's EmulatedEntry isn't catalogued either",
-        ),
-        (
-            "saves-panel",
-            "#100: the webview's SavesPanel isn't catalogued either",
-        ),
-        (
-            "add-game",
-            "#108: the webview's AddGame isn't catalogued either",
-        ),
-        (
-            "install-root-picker",
-            "#108: the webview's InstallRootPicker isn't catalogued either",
-        ),
-        (
-            "install-url",
-            "#108: the webview's install-from-link dialog isn't catalogued either",
-        ),
-        (
-            "stream-pair-prompt",
-            "#108: the webview's StreamPairingHost isn't catalogued either",
-        ),
-        (
-            "pair-request",
-            "#108: the webview's PairRequestForm isn't catalogued either",
-        ),
-        (
-            "stop-host",
-            "#108: the webview's StopHostDialog isn't catalogued either",
-        ),
-        (
-            "streaming-settings",
-            "#105: the webview's StreamingSettings isn't catalogued either",
-        ),
-        (
-            "streaming-existing",
-            "#105: the webview's streaming ExistingDialog isn't catalogued either",
-        ),
-        (
-            "streaming-client",
-            "#105: the webview's streaming PairedDevices row isn't catalogued either",
-        ),
-        (
-            "streaming-program",
-            "#105: the webview's streaming UpdatesSection row isn't catalogued either",
-        ),
-        (
-            "stream-host",
-            "#105: the webview's streaming HostRow isn't catalogued either",
-        ),
-        (
-            "pair-dialog",
-            "#105: the webview's streaming PairDialog isn't catalogued either",
-        ),
-        (
-            "schema-settings",
-            "#103: the webview's SchemaSettings isn't catalogued either",
-        ),
-        (
-            "discovery-settings",
-            "#104: the webview's LibraryDiscoverySettings isn't catalogued either",
-        ),
-        (
-            "discovery-review",
-            "#104: the webview's ReviewList isn't catalogued either",
-        ),
-        (
-            "storage-settings",
-            "#104: the webview's StoragePanel isn't catalogued either",
-        ),
-        (
-            "plugin-review",
-            "#104: the webview's plugin ReviewDialog isn't catalogued either",
-        ),
-    ];
-
-    /// The webview's catalogue, as `pnpm --filter @caskade/ui docs`
-    /// writes it.
-    fn webview() -> Vec<Entry> {
-        caskade_ui_theme::anatomy::from_json(include_str!(
-            "../../../packages/ui/anatomy-entries.json"
-        ))
-        .expect("the webview's catalogue")
-    }
-
-    #[test]
-    fn every_entry_is_the_webviews() {
-        let problems = caskade_ui_theme::anatomy::differences(
-            &catalogue(),
-            &caskade_ui_theme::anatomy::markdown(&webview()),
-        );
-        assert!(problems.is_empty(), "{}", problems.join("\n\n"));
-    }
-
-    /// `docs/theming/anatomy.md` is the native components' catalogue, with
-    /// the webview's entries for the roots only it renders yet.
-    #[test]
-    fn the_anatomy_docs_are_the_native_catalogues() {
-        use caskade_ui_theme::anatomy::{GENERATED, markdown_by, with_native};
-        let docs =
-            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../docs/theming/anatomy.md");
-        let text = markdown_by(&with_native(&webview(), &catalogue()), GENERATED);
+    /// Writes `path` (from the repository's root) with `text` under
+    /// `CASKADE_WRITE_ANATOMY`, else fails when it isn't `text`.
+    fn current(path: &str, text: &str) {
+        let file = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .join(path);
         if std::env::var_os("CASKADE_WRITE_ANATOMY").is_some() {
-            std::fs::write(&docs, &text).unwrap();
+            std::fs::write(&file, text).unwrap();
             return;
         }
-        let current = std::fs::read_to_string(&docs).unwrap_or_default();
+        let on_disk = std::fs::read_to_string(&file).unwrap_or_default();
         assert!(
-            current == text,
-            "docs/theming/anatomy.md is stale: CASKADE_WRITE_ANATOMY=1 cargo test -p caskade-native anatomy"
+            on_disk == text,
+            "{path} is stale: CASKADE_WRITE_ANATOMY=1 cargo test -p caskade-native anatomy"
         );
+    }
+
+    /// `docs/theming/anatomy.md` is the catalogue's.
+    #[test]
+    fn the_anatomy_docs_are_the_catalogues() {
+        current("docs/theming/anatomy.md", &markdown(&catalogue()));
+    }
+
+    /// The contract `caskade-theme` checks themes against is the
+    /// catalogue's.
+    #[test]
+    fn the_theme_contract_is_the_catalogues() {
+        current("crates/caskade-theme/anatomy.json", &contract(&catalogue()));
+    }
+
+    /// Each root is catalogued once, with its parts and state attributes
+    /// once each, and contains only catalogued roots.
+    #[test]
+    fn the_catalogue_holds_together() {
+        let all = catalogue();
+        let mut names = BTreeSet::new();
+        let mut problems = Vec::new();
+        for entry in &all {
+            if !names.insert(entry.name) {
+                problems.push(format!("{} is catalogued twice", entry.name));
+            }
+            let mut parts = BTreeSet::new();
+            for (part, _) in entry.parts {
+                if !parts.insert(*part) {
+                    problems.push(format!("{} lists the part {part} twice", entry.name));
+                }
+            }
+            let mut states = BTreeSet::new();
+            for (attribute, values) in entry.states {
+                if !states.insert(*attribute) || values.is_empty() {
+                    problems.push(format!(
+                        "{}'s {attribute} is listed twice or has no values",
+                        entry.name
+                    ));
+                }
+            }
+        }
+        for entry in &all {
+            for inner in entry.contains {
+                if !names.contains(inner) {
+                    problems.push(format!(
+                        "{} contains {inner}, which isn't catalogued",
+                        entry.name
+                    ));
+                }
+            }
+        }
+        assert!(problems.is_empty(), "{}", problems.join("\n"));
     }
 
     /// Every `data-cs` a component renders is catalogued: it's the
@@ -281,10 +281,8 @@ mod tests {
                 }
             }
         }
-        let known = |name: &str| {
-            catalogue().iter().any(|entry| entry.name == name)
-                || NOT_YET.iter().any(|(root, _)| *root == name)
-        };
+        let all = catalogue();
+        let known = |name: &str| all.iter().any(|entry| entry.name == name);
         let missing: Vec<_> = found.iter().filter(|(name, _)| !known(name)).collect();
         assert!(missing.is_empty(), "not catalogued: {missing:?}");
         assert!(found.iter().any(|(name, _)| name == "osk"), "{found:?}");

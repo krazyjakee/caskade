@@ -44,7 +44,7 @@ class Page(HTMLParser):
 
 
 pages = {path.resolve(): Page(path) for path in ROOT.rglob("*.html")}
-anatomy = json.loads((ROOT.parents[2] / "packages/ui/anatomy.json").read_text())
+anatomy = json.loads((ROOT.parents[2] / "crates/caskade-theme/anatomy.json").read_text())
 parts = set(anatomy["roots"]["website"]["parts"])
 assert {page.language for page in pages.values()} == {"en", "sv"}, "Both languages must build"
 for path, page in pages.items():

@@ -511,7 +511,7 @@ fn SimilarGames(game: IgdbGame) -> Element {
     }
 }
 
-/// [`WhereToBuy`]'s list, word for word the webview's catalogue entry.
+/// [`WhereToBuy`]'s list in the anatomy catalogue.
 pub const STORE_LINKS: Entry = Entry {
     parts: &[("store-link", "One store; `data-store` names it.")],
     ..Entry::new(

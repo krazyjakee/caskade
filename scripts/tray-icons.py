@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Writes the tray icons from the app icon (apps/desktop/src-tauri/icons/source.png).
+"""Writes the tray icons from the app icon (apps/native/icons/source.png).
 
 The app icon is the glyph on a dark square, which reads as a black block in
 light trays. The tray icons keep only the glyph, on a transparent background:
@@ -15,7 +15,7 @@ from pathlib import Path
 
 from PIL import Image
 
-ICONS = Path(__file__).resolve().parent.parent / "apps/desktop/src-tauri/icons"
+ICONS = Path(__file__).resolve().parent.parent / "apps/native/icons"
 SIZE = 64
 # The share of the icon left empty around the glyph.
 MARGIN = 0.04

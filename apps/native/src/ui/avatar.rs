@@ -1,10 +1,9 @@
-//! An account's picture and the picker of one, as `@caskade/ui`'s
-//! `Avatar` and `AvatarPicker`, with `avatars.ts`'s shipped avatars drawn
-//! the same way: SVG data URLs, so they need no network and stay crisp.
+//! An account's picture and the picker of one, with the shipped avatars
+//! drawn as SVG data URLs, so they need no network and stay crisp.
 //!
 //! An id (`avatar:<name>`) names the same picture in every release; the core
-//! keeps the same list (`caskade_core::accounts::AVATARS`), and a test keeps
-//! the three in step.
+//! keeps the same list (`caskade_core::accounts::AVATARS`), and tests keep
+//! it in step and each picture as `assets/avatars/<name>.svg` has it.
 
 use std::sync::OnceLock;
 
@@ -113,7 +112,7 @@ struct Drawing {
     glyph: &'static str,
 }
 
-/// `avatars.ts`'s drawings, in the picker's order; the first is the default.
+/// The drawings, in the picker's order; the first is the default.
 const DRAWINGS: &[Drawing] = &[
     Drawing {
         name: "default",
@@ -324,7 +323,7 @@ pub fn avatar_info(id: Option<&str>) -> Option<AvatarInfo> {
         .map(|index| AvatarInfo { index })
 }
 
-/// An HSL colour as hex, as `avatars.ts` computes it.
+/// An HSL colour as hex, as the webview computed it.
 fn hex(h: f64, s: f64, l: f64) -> String {
     let sat = s / 100.0;
     let light = l / 100.0;
@@ -648,7 +647,7 @@ mod tests {
 
     #[test]
     fn colours_and_escapes_match_the_webviews() {
-        // avatars.ts's hex() for the default avatar's tones (hue 200).
+        // The webview's hex() for the default avatar's tones (hue 200).
         assert_eq!(hex(200.0, 95.0, 86.0), "#b9e7fd");
         assert_eq!(hex(200.0, 90.0, 62.0), "#47bbf5");
         assert_eq!(hex(200.0, 70.0, 9.0), "#071c27");
@@ -658,31 +657,37 @@ mod tests {
         );
     }
 
-    /// Every avatar's image is the webview's, byte for byte: avatars.ts's
-    /// own `svg` draws them (`scripts/avatars-json.mjs`). Skipped without
-    /// Node.
+    /// Every avatar draws as `assets/avatars/<name>.svg`, byte for byte:
+    /// the pictures the webview shipped, so an id keeps its image. After
+    /// changing a drawing on purpose, `CASKADE_WRITE_AVATARS=1 cargo test
+    /// -p caskade-native avatar` rewrites them.
     #[test]
-    fn every_avatar_is_drawn_as_the_webview_draws_it() {
-        let script = concat!(env!("CARGO_MANIFEST_DIR"), "/scripts/avatars-json.mjs");
-        let Ok(output) = std::process::Command::new("node").arg(script).output() else {
-            eprintln!("no node: skipped");
-            return;
-        };
-        assert!(
-            output.status.success(),
-            "{}",
-            String::from_utf8_lossy(&output.stderr)
-        );
-        let webview: std::collections::BTreeMap<String, String> =
-            serde_json::from_slice(&output.stdout).expect("the avatars' JSON");
-        assert_eq!(webview.len(), DRAWINGS.len());
-        for avatar in avatars() {
-            let name = avatar.id().trim_start_matches("avatar:").to_owned();
-            assert_eq!(
-                Some(avatar.url()),
-                webview.get(&name).map(String::as_str),
-                "{name}"
-            );
+    fn every_avatar_is_drawn_as_shipped() {
+        let folder = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/avatars");
+        let write = std::env::var_os("CASKADE_WRITE_AVATARS").is_some();
+        for drawing in DRAWINGS {
+            let path = folder.join(format!("{}.svg", drawing.name));
+            if write {
+                std::fs::write(&path, svg(drawing)).unwrap();
+            }
+            let shipped = std::fs::read_to_string(&path).unwrap_or_default();
+            assert_eq!(svg(drawing), shipped, "{}", path.display());
         }
+        let files = std::fs::read_dir(&folder)
+            .unwrap()
+            .filter(|entry| {
+                let path = entry.as_ref().unwrap().path();
+                path.extension().is_some_and(|extension| extension == "svg")
+            })
+            .count();
+        assert_eq!(files, DRAWINGS.len(), "an avatar's file without a drawing");
+        let default = avatar_info(Some(DEFAULT_AVATAR)).unwrap();
+        assert_eq!(
+            default.url(),
+            format!(
+                "data:image/svg+xml,{}",
+                encode_uri_component(&std::fs::read_to_string(folder.join("default.svg")).unwrap())
+            )
+        );
     }
 }

@@ -1,7 +1,7 @@
 //! Settings search (#46, ported in #103): what each section holds, as a
 //! static table of translatable labels and the other words people look for
-//! them by (the webview's `searchIndex.ts`, entry for entry, with the same
-//! messages and contexts, so they share translations). The search never
+//! them by (begun as the webview's `searchIndex.ts`, entry for entry, with
+//! the same messages and contexts, so they share translations). The search never
 //! reads the panels: a label here is written as its panel shows it, which
 //! is also how the panel's row is found and highlighted once the section
 //! opens (`ui::Found`).

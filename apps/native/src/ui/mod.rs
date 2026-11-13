@@ -1,10 +1,10 @@
 //! The component library (#93): `@caskade/ui` and react-aria's behaviour in
 //! RSX, on the input layer (`crate::input`) and `caskade_ui_i18n`.
 //!
-//! Every component renders the webview's anatomy (`data-cs`, `data-part`,
-//! the state and interaction attributes themes select), declares its
-//! [`Entry`] beside its code ([`ANATOMY`], checked against the webview's
-//! catalogue in `crate::anatomy`), and behaves as the WAI-ARIA APG has it:
+//! Every component renders its anatomy (`data-cs`, `data-part`, the state
+//! and interaction attributes themes select), declares its [`Entry`]
+//! beside its code ([`ANATOMY`], listed in `crate::anatomy`'s catalogue),
+//! and behaves as the WAI-ARIA APG has it:
 //! Enter and Space as native controls take them, a pad's A as a click (the
 //! input layer's), Back and Escape through `use_input_action`.
 

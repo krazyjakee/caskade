@@ -544,10 +544,10 @@ mod tests {
         assert_eq!(check(r#"} [data-cs="hero"] { color: hotpink; }"#).len(), 1);
     }
 
-    /// The order the webview's entry declares (`apps/desktop/src/styles/index.css`).
+    /// The order the stylesheet entry declares (`apps/native/styles/index.css`).
     #[test]
     fn the_layer_order_is_the_entrys() {
-        let entry = include_str!("../../../apps/desktop/src/styles/index.css");
+        let entry = include_str!("../../../apps/native/styles/index.css");
         assert!(
             entry.contains(LAYER_ORDER),
             "index.css changed its layer order"

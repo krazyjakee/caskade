@@ -1,5 +1,4 @@
-//! How the library shows a platform (#99, the webview's
-//! `views/library/platforms/catalog.ts`): a short title, what kind of
+//! How the library shows a platform (#99): a short title, what kind of
 //! machine it is and its hardware render, keyed by the emulation
 //! catalogue's platform ids (`crates/caskade-sources/emulation/platforms.toml`)
 //! and found by any of its names. The renders are the webview's own files,
@@ -156,28 +155,24 @@ pub fn is_pc(name: &str) -> bool {
 mod tests {
     use super::*;
 
-    /// The webview's catalogue, which this one copies until the cutover.
-    const WEBVIEW: &str = include_str!("../../../desktop/src/views/library/platforms/catalog.ts");
-
+    /// No two looks answer to the same name (the lookup would keep only
+    /// one), and each says what it is.
     #[test]
-    fn the_looks_are_the_webviews() {
+    fn each_name_finds_one_look() {
+        let mut seen = HashMap::new();
         for look in LOOKS {
-            let at = WEBVIEW
-                .find(&format!("  {}: {{", look.id))
-                .unwrap_or_else(|| panic!("{} isn't in catalog.ts", look.id));
-            let entry = &WEBVIEW[at..];
-            let entry = &entry[..entry.find("\n  },").or_else(|| entry.find("},\n")).unwrap()];
-            for text in [look.title, look.maker, look.kind].iter().chain(look.names) {
-                assert!(
-                    entry.contains(&format!("{text:?}")),
-                    "{}: {text:?} isn't in catalog.ts's entry",
-                    look.id
-                );
+            assert!(
+                !look.title.is_empty() && !look.maker.is_empty() && !look.kind.is_empty(),
+                "{}",
+                look.id
+            );
+            for name in [look.id, look.title].iter().chain(look.names) {
+                if let Some(other) = seen.insert(key(name), look.id) {
+                    assert_eq!(other, look.id, "{name:?} names {other} and {}", look.id);
+                }
             }
         }
-        let ids =
-            WEBVIEW.matches(": {\n    title:").count() + WEBVIEW.matches(": { title:").count();
-        assert_eq!(ids, LOOKS.len(), "catalog.ts has looks this doesn't");
+        assert!(LOOKS.len() > 40, "{} looks", LOOKS.len());
     }
 
     #[test]

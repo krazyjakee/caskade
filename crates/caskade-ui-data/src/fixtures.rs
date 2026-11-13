@@ -1,14 +1,12 @@
 //! Fixtures mode (#89): the real core and app layer over an in-memory
-//! library of synthetic games, for UI development and tests. It replaces
-//! the webview's `VITE_CASKADE_FIXTURES`; the games are the ones its
-//! `apps/desktop/src/api/fixtures.ts` shows (`createFixtureGames` and
-//! `createEmulatedFixtureGames`), so both UIs can be compared on the same
-//! library. No contributor's library is copied.
+//! library of synthetic games, for UI development and tests. It replaced
+//! the webview's `VITE_CASKADE_FIXTURES` and keeps the games its
+//! `fixtures.ts` showed; `fixtures/games.json` lists them game by game and
+//! a test holds [`library_games`] to it (#139). No contributor's library is
+//! copied.
 //!
-//! Filters, sorts and search are the core's own here, not a re-implementation:
-//! where `fixtures.ts` approximates the core (its Installed filter leaves
-//! emulated games out; the core counts their installed releases), fixtures
-//! mode answers as the app does.
+//! Filters, sorts and search are the core's own here, not a
+//! re-implementation, so fixtures mode answers as the app does.
 
 use caskade_app::events::{Emit, Event, Events};
 use caskade_core::{
@@ -27,12 +25,11 @@ use crate::plugins::Plugins;
 use crate::stores::Stores;
 use crate::{Discovery, Library, Settings, Themes};
 
-/// How many plain games fixtures mode makes unless asked for another number
-/// (`createFixtureGames`'s default).
+/// How many plain games fixtures mode makes unless asked for another number.
 pub const DEFAULT_COUNT: usize = 24;
 
 /// The emulated games' platforms, how many games each has, and how many days
-/// ago its first game was played (`None`: never), as `fixtures.ts` has them.
+/// ago its first game was played (`None`: never).
 pub const EMULATED: [(&str, usize, Option<u32>); 8] = [
     ("Super Nintendo Entertainment System", 6, Some(2)),
     ("Nintendo 64", 4, Some(9)),
@@ -46,7 +43,7 @@ pub const EMULATED: [(&str, usize, Option<u32>); 8] = [
 
 const DAY_MS: i64 = 86_400_000;
 
-/// One synthetic game, as `fixtures.ts` describes it.
+/// One synthetic game, as `fixtures/games.json` lists it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FixtureGame {
     pub id: String,
@@ -63,7 +60,7 @@ pub struct FixtureGame {
     pub release_date: Option<&'static str>,
 }
 
-/// `count` plain PC games (`createFixtureGames(count)`).
+/// `count` plain PC games.
 pub fn games(count: usize) -> Vec<FixtureGame> {
     (0..count)
         .map(|index| FixtureGame {
@@ -86,7 +83,7 @@ pub fn games(count: usize) -> Vec<FixtureGame> {
         .collect()
 }
 
-/// The emulated games on several consoles (`createEmulatedFixtureGames`).
+/// The emulated games on several consoles.
 pub fn emulated_games() -> Vec<FixtureGame> {
     EMULATED
         .iter()
@@ -115,8 +112,7 @@ pub fn emulated_games() -> Vec<FixtureGame> {
         .collect()
 }
 
-/// What fixtures mode shows: `count` plain games and the emulated ones, as
-/// the webview's fixtures mode does.
+/// What fixtures mode shows: `count` plain games and the emulated ones.
 pub fn library_games(count: usize) -> Vec<FixtureGame> {
     let mut games = games(count);
     games.extend(emulated_games());
@@ -125,7 +121,7 @@ pub fn library_games(count: usize) -> Vec<FixtureGame> {
 
 /// Writes `games` into `store`, played as of `now_ms`. Play time is a total
 /// the "fixture" launcher reported, so a game can have play time without a
-/// last play, as `fixtures.ts`'s can.
+/// last play.
 pub async fn seed(
     store: &LibraryStore,
     games: &[FixtureGame],
@@ -235,8 +231,8 @@ pub fn themes_folder() -> std::path::PathBuf {
     std::env::temp_dir().join(format!("caskade-fixture-themes-{}", std::process::id()))
 }
 
-/// Opens the fixture library with `count` plain games (`DEFAULT_COUNT` is
-/// what the webview shows) and the emulated ones, its bus bridged to
+/// Opens the fixture library with `count` plain games (`DEFAULT_COUNT`
+/// unless a test needs another number) and the emulated ones, its bus bridged to
 /// [`Fixtures::events`] as the app's is.
 pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
     let store = LibraryStore::in_memory().await?;

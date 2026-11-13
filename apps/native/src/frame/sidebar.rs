@@ -152,7 +152,7 @@ pub fn Sidebar() -> Element {
     }
 }
 
-/// Caskade's mark (`public/caskade.svg`), at `class`'s size (Settings →
+/// Caskade's mark (`icons/caskade.svg`), at `class`'s size (Settings →
 /// About shows it too).
 #[component]
 pub(crate) fn Brand(#[props(default = "size-9".to_owned())] class: String) -> Element {

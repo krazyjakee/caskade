@@ -25,40 +25,31 @@ fn the_sections_are_the_routers_in_the_lists_order() {
     }
 }
 
-/// The search index is the webview's entry for entry: the same sections,
-/// sub-sections and labels (so the same translations).
+/// Every entry of the search index sits in a section the router knows,
+/// with a label, once. (It began as the webview's `searchIndex.ts`, entry
+/// for entry, so its labels keep their translations.)
 #[test]
-fn the_search_index_is_the_webviews() {
-    let source = include_str!("../../../desktop/src/views/settings/searchIndex.ts");
-    let table = &source[source.find("export const settingsSearchIndex").unwrap()..];
-    // Each entry: its tab, and its sub-section when it names one before
-    // its label.
-    let theirs: Vec<(&str, Option<&str>)> = table
-        .match_indices("tab: \"")
-        .map(|(at, found)| {
-            let rest = &table[at + found.len()..];
-            let tab = rest.split('"').next().unwrap();
-            let entry = &rest[..rest.find("label:").unwrap()];
-            let section = entry
-                .split("section: \"")
-                .nth(1)
-                .map(|rest| rest.split('"').next().unwrap());
-            (tab, section)
-        })
-        .collect();
-    let ours: Vec<(&str, Option<&str>)> = INDEX
-        .iter()
-        .map(|entry| (entry.tab, entry.section))
-        .collect();
-    assert_eq!(ours, theirs);
+fn the_search_index_names_known_sections_once() {
+    let mut seen = std::collections::BTreeSet::new();
     for entry in INDEX {
         let label = (entry.label)();
         assert!(
-            source.contains(&format!("msg`{label}`"))
-                || source.contains(&format!("message: \"{label}\"")),
-            "{label:?} is the webview's label"
+            SETTINGS_TABS.contains(&entry.tab),
+            "{label:?} is in {}",
+            entry.tab
+        );
+        assert!(
+            !label.trim().is_empty(),
+            "an entry in {} has no label",
+            entry.tab
+        );
+        assert!(
+            seen.insert((entry.tab, entry.section, label.clone())),
+            "{label:?} is in {} twice",
+            entry.tab
         );
     }
+    assert!(INDEX.len() > 100, "{} entries", INDEX.len());
 }
 
 // ── Search ──

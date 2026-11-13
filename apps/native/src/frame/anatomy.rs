@@ -1,5 +1,4 @@
-//! The frame's themeable roots (#96), word for word the webview's
-//! (`packages/ui/src/anatomy.ts`) apart from the component each names.
+//! The frame's themeable roots (#96).
 
 use caskade_ui_theme::anatomy::{Entry, Source};
 

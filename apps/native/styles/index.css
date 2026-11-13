@@ -13,8 +13,10 @@
 @import "@caskade/tokens/tokens.css" layer(cs.tokens);
 @import "./base.css" layer(cs.base);
 
-/* @caskade/ui is styled with the same utilities. */
-@source "../../../../packages/ui/src";
+/* The native app's markup: Tailwind finds the class names in its Rust
+   sources. build-css.mjs leaves the dev-only screens out of the app's own
+   sheet. */
+@source "../src";
 
 /*
  * Expose semantic tokens to Tailwind. `inline` makes utilities reference the

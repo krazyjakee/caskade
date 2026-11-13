@@ -3,8 +3,8 @@
 //! `theme.css` and `assets/`: tokens, CSS, fonts and images, never code.
 //!
 //! [`Theme::load`] validates a theme against the theming contract (the
-//! token manifest from `packages/tokens` and the anatomy catalogue from
-//! `packages/ui`) and keeps its compiled parts; [`compile`] joins an
+//! token manifest from `packages/tokens` and the anatomy contract the
+//! native UI's catalogue writes) and keeps its compiled parts; [`compile`] joins an
 //! `extends` chain into one stylesheet in the `cs.theme` cascade layer.
 //! Every problem names its file and, where it has one, its line and column.
 //!

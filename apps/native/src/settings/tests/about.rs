@@ -99,7 +99,7 @@ fn the_packages_open_by_licence() {
         window.find_in(mit, "aria-expanded", "true").is_some()
     });
     let text = window.text(mit);
-    assert!(text.contains("Rust crate") || text.contains("JavaScript package"));
+    assert!(text.contains("Rust crate"));
     assert!(
         text.contains("Permission is hereby granted"),
         "the MIT licence's text follows"

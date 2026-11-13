@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# The library's scroll benchmark (#94), as the webview's
-# apps/desktop/tests/library-scroll.py: the native app, in fixtures mode with
+# The library's scroll benchmark (#94): the native app, in fixtures mode with
 # 10,000 games, scrolls its virtual grid and list top to bottom a step per
 # frame, on a desktop of its own (scripts/private-desktop.sh) with a profile
 # of its own. Prints each layout's report: frame times (p50, p95, max, in

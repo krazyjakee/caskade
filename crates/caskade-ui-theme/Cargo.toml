@@ -9,8 +9,6 @@ publish = false
 [dependencies]
 # AppearanceSettings and translations.
 caskade-core = { path = "../caskade-core" }
-# The webview catalogue as data, for the anatomy docs' generator.
-serde_json = "1"
 
 [lints]
 workspace = true

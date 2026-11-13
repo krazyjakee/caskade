@@ -151,10 +151,11 @@ it("the app reads no undeclared --cs-* token", () => {
       const path = join(dir, name);
       if (name === "node_modules" || name === "bindings.ts") return [];
       if (statSync(path).isDirectory()) return sources(path);
-      return /\.(css|tsx?)$/.test(name) && !/\.test\.tsx?$/.test(name) ? [path] : [];
+      return /\.(css|rs|tsx?)$/.test(name) && !/\.test\.tsx?$/.test(name) ? [path] : [];
     });
   const roots = [
-    join(root, "apps/desktop/src"),
+    join(root, "apps/native/src"),
+    join(root, "apps/native/styles"),
     ...readdirSync(join(root, "packages")).map((p) => join(root, "packages", p, "src")),
   ];
   const undeclared = new Set<string>();

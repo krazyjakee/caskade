@@ -1,6 +1,5 @@
-//! The search's index, data only (the webview's `searchIndex.ts`): every
-//! preference and group inside the sections, and other words for each
-//! section.
+//! The search's index, data only: every preference and group inside the
+//! sections, and other words for each section.
 
 use super::*;
 

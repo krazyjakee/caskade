@@ -20,10 +20,9 @@ use crate::ui::{Icon, Link, Svg};
 const LICENSING: &str = include_str!("../../../../docs/legal/LICENSING.md");
 const TERMS: &str = include_str!("../../../../docs/legal/TERMS.md");
 const PRIVACY: &str = include_str!("../../../../docs/legal/PRIVACY.md");
-/// The notices `scripts/legal-notices.py` writes: what the bundles ship,
-/// this binary's crates among them.
-const NOTICES: &str =
-    include_str!("../../../desktop/src/views/settings/about/notices.generated.json");
+/// The notices `scripts/legal-notices.py` writes: what the bundle ships
+/// (this binary's crates, its fonts and icons, 7-Zip).
+const NOTICES: &str = include_str!("../../assets/notices.generated.json");
 
 const HOME: &str = "https://github.com/krazyjakee/caskade";
 const ISSUES: &str = "https://github.com/krazyjakee/caskade/issues";
@@ -461,10 +460,12 @@ fn PackageGroup(group: Group) -> Element {
                         ul { class: "flex flex-col gap-3 text-sm",
                             for item in group.packages.iter() {
                                 li { key: "{item.ecosystem}:{item.name}@{item.version}", class: "min-w-0",
-                                    span { class: "font-mono text-fg", "{item.name} {item.version}" }
+                                    span { class: "font-mono text-fg",
+                                        if item.version.is_empty() { "{item.name}" } else { "{item.name} {item.version}" }
+                                    }
                                     span { class: "text-xs text-fg-muted",
                                         " · "
-                                        if item.ecosystem == "rust" { {t!("Rust crate")} } else { {t!("JavaScript package")} }
+                                        {kind(&item.ecosystem)}
                                     }
                                     if !item.copyright.is_empty() {
                                         span { class: "block text-xs text-fg-muted", {item.copyright.join(" · ")} }
@@ -513,7 +514,7 @@ fn Packages() -> Element {
             div { class: "text-sm leading-relaxed text-fg-muted",
                 h3 { class: "font-display text-2xl font-semibold tracking-wide text-fg", {t!("Open-source packages")} }
                 p { class: "mt-3",
-                    {t!("Caskade is built with {crates} Rust crates and {packages} JavaScript packages, grouped here by licence. Open a licence for its packages, their copyright holders and the licence's text. Where a licence reads \"A OR B\", the package may be used under either.", crates = rust, packages = all.len() - rust)}
+                    {t!("Caskade is built with {crates} Rust crates and ships {assets} fonts and icon sets, grouped here by licence. Open a licence for its packages, their copyright holders and the licence's text. Where a licence reads \"A OR B\", the package may be used under either.", crates = rust, assets = all.len() - rust)}
                 }
             }
             ul { "aria-label": t!("Licences"), class: "flex flex-col gap-2",
@@ -754,6 +755,15 @@ fn Markdown(source: &'static str) -> Element {
                 }
             }
         }
+    }
+}
+
+/// What kind of package a notice's entry is, in words.
+fn kind(ecosystem: &str) -> String {
+    match ecosystem {
+        "rust" => t!("Rust crate"),
+        "font" => t!("Font"),
+        _ => t!("Icon set"),
     }
 }
 

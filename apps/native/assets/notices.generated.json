@@ -418,13 +418,6 @@
         },
         {
           "name": "base64",
-          "version": "0.21.7",
-          "ecosystem": "rust",
-          "repository": "https://github.com/marshallpierce/rust-base64",
-          "copyright": ["Copyright (c) 2015 Alice Maz"]
-        },
-        {
-          "name": "base64",
           "version": "0.22.1",
           "ecosystem": "rust",
           "repository": "https://github.com/marshallpierce/rust-base64",
@@ -612,20 +605,6 @@
           "copyright": ["Copyright (c) 2014-2025 Alex Crichton and Contributors"]
         },
         {
-          "name": "camino",
-          "version": "1.2.6",
-          "ecosystem": "rust",
-          "repository": "https://github.com/camino-rs/camino",
-          "copyright": ["Copyright: Without Boats, Ashley Williams, Steve Klabnik, Rain"]
-        },
-        {
-          "name": "cargo-platform",
-          "version": "0.1.9",
-          "ecosystem": "rust",
-          "repository": "https://github.com/rust-lang/cargo",
-          "copyright": []
-        },
-        {
           "name": "cbc",
           "version": "0.1.2",
           "ecosystem": "rust",
@@ -781,20 +760,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/RustCrypto/formats",
           "copyright": ["Copyright (c) 2020-2026 The RustCrypto Project Developers"]
-        },
-        {
-          "name": "const-random",
-          "version": "0.1.18",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tkaitchuck/constrandom",
-          "copyright": ["Copyright (c) 2016 Amanieu d'Antras"]
-        },
-        {
-          "name": "const-random-macro",
-          "version": "0.1.16",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tkaitchuck/constrandom",
-          "copyright": ["Copyright (c) 2016 Amanieu d'Antras"]
         },
         {
           "name": "const-serialize",
@@ -977,13 +942,6 @@
           "version": "0.10.1",
           "ecosystem": "rust",
           "repository": "https://github.com/mmastrac/rust-ctor",
-          "copyright": ["Copyright: Matt Mastracci"]
-        },
-        {
-          "name": "ctor",
-          "version": "1.0.13",
-          "ecosystem": "rust",
-          "repository": "https://github.com/mmastrac/linktime",
           "copyright": ["Copyright: Matt Mastracci"]
         },
         {
@@ -1293,13 +1251,6 @@
           "copyright": ["Copyright: Jane Lusby"]
         },
         {
-          "name": "dlv-list",
-          "version": "0.5.2",
-          "ecosystem": "rust",
-          "repository": "https://github.com/sgodwincs/dlv-list-rs",
-          "copyright": ["Copyright (c) 2022 Scott Godwin"]
-        },
-        {
           "name": "document-features",
           "version": "0.2.12",
           "ecosystem": "rust",
@@ -1366,13 +1317,6 @@
           "copyright": ["Copyright (c) 2015"]
         },
         {
-          "name": "embed_plist",
-          "version": "1.2.2",
-          "ecosystem": "rust",
-          "repository": "https://github.com/nvzqz/embed-plist-rs",
-          "copyright": ["Copyright (c) 2020 Nikolai Vazquez"]
-        },
-        {
           "name": "embedded-io",
           "version": "0.4.0",
           "ecosystem": "rust",
@@ -1437,13 +1381,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/indexmap-rs/equivalent",
           "copyright": ["Copyright (c) 2016--2023"]
-        },
-        {
-          "name": "erased-serde",
-          "version": "0.4.11",
-          "ecosystem": "rust",
-          "repository": "https://github.com/dtolnay/erased-serde",
-          "copyright": ["Copyright: David Tolnay"]
         },
         {
           "name": "errno",
@@ -1792,13 +1729,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/linebender/vello",
           "copyright": ["Copyright 2025 the Vello Authors"]
-        },
-        {
-          "name": "glob",
-          "version": "0.3.4",
-          "ecosystem": "rust",
-          "repository": "https://github.com/rust-lang/glob",
-          "copyright": ["Copyright (c) 2014 The Rust Project Developers"]
         },
         {
           "name": "gloo-timers",
@@ -2375,20 +2305,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/js-sys",
           "copyright": ["Copyright (c) 2014 Alex Crichton"]
-        },
-        {
-          "name": "json-patch",
-          "version": "4.2.0",
-          "ecosystem": "rust",
-          "repository": "https://github.com/idubrov/json-patch",
-          "copyright": ["Copyright (c) 2017 Ivan Dubrov"]
-        },
-        {
-          "name": "jsonptr",
-          "version": "0.7.1",
-          "ecosystem": "rust",
-          "repository": "https://github.com/chanced/jsonptr",
-          "copyright": ["Copyright 2024 Chance Dinkins", "Copyright (c) 2022 Chance Dinkins"]
         },
         {
           "name": "keccak",
@@ -2978,13 +2894,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/danieldg/ordered-stream",
           "copyright": ["Copyright: Daniel De Graaf, Zeeshan Ali Khan"]
-        },
-        {
-          "name": "osakit",
-          "version": "0.3.1",
-          "ecosystem": "rust",
-          "repository": "https://github.com/mdevils/rust-osakit",
-          "copyright": ["Copyright (c) 2024 Marat Dulin"]
         },
         {
           "name": "parking",
@@ -3795,13 +3704,6 @@
           "copyright": ["Copyright: Erick Tryzelaar, David Tolnay"]
         },
         {
-          "name": "serde-untagged",
-          "version": "0.1.9",
-          "ecosystem": "rust",
-          "repository": "https://github.com/dtolnay/serde-untagged",
-          "copyright": ["Copyright: David Tolnay"]
-        },
-        {
           "name": "serde_bytes",
           "version": "0.11.19",
           "ecosystem": "rust",
@@ -3818,13 +3720,6 @@
         {
           "name": "serde_derive",
           "version": "1.0.228",
-          "ecosystem": "rust",
-          "repository": "https://github.com/serde-rs/serde",
-          "copyright": ["Copyright: Erick Tryzelaar, David Tolnay"]
-        },
-        {
-          "name": "serde_derive_internals",
-          "version": "0.29.1",
           "ecosystem": "rust",
           "repository": "https://github.com/serde-rs/serde",
           "copyright": ["Copyright: Erick Tryzelaar, David Tolnay"]
@@ -3898,20 +3793,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/RustCrypto/formats",
           "copyright": ["Copyright (c) 2022-2025 The RustCrypto Project Developers"]
-        },
-        {
-          "name": "serialize-to-javascript",
-          "version": "0.1.2",
-          "ecosystem": "rust",
-          "repository": "https://github.com/chippers/serialize-to-javascript",
-          "copyright": ["Copyright (c) 2021 Chip Reed"]
-        },
-        {
-          "name": "serialize-to-javascript-impl",
-          "version": "0.1.2",
-          "ecosystem": "rust",
-          "repository": "https://github.com/chippers/serialize-to-javascript",
-          "copyright": ["Copyright (c) 2021 Chip Reed"]
         },
         {
           "name": "servo_arc",
@@ -4261,16 +4142,6 @@
           "copyright": ["Copyright (c) 2018 Yevhenii Reizner"]
         },
         {
-          "name": "swift-rs",
-          "version": "1.0.9",
-          "ecosystem": "rust",
-          "repository": "https://github.com/Brendonovich/swift-rs",
-          "copyright": [
-            "Copyright 2023 The swift-rs developers",
-            "Copyright (c) 2023 The swift-rs Developers"
-          ]
-        },
-        {
           "name": "symlink",
           "version": "0.1.0",
           "ecosystem": "rust",
@@ -4346,92 +4217,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/composefs/tar-rs",
           "copyright": ["Copyright: Alex Crichton"]
-        },
-        {
-          "name": "tauri",
-          "version": "2.12.5",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/tauri",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
-        },
-        {
-          "name": "tauri-codegen",
-          "version": "2.7.4",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/tauri",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
-        },
-        {
-          "name": "tauri-macros",
-          "version": "2.7.4",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/tauri",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
-        },
-        {
-          "name": "tauri-plugin-deep-link",
-          "version": "2.6.2",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/plugins-workspace",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
-        },
-        {
-          "name": "tauri-plugin-dialog",
-          "version": "2.8.3",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/plugins-workspace",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
-        },
-        {
-          "name": "tauri-plugin-fs",
-          "version": "2.7.1",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/plugins-workspace",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
-        },
-        {
-          "name": "tauri-plugin-single-instance",
-          "version": "2.5.4",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/plugins-workspace",
-          "copyright": [
-            "Copyright (c) 2017 - Present The Tauri Programme in the Commons Conservancy"
-          ]
-        },
-        {
-          "name": "tauri-plugin-updater",
-          "version": "2.14.1",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/plugins-workspace",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
-        },
-        {
-          "name": "tauri-plugin-window-state",
-          "version": "2.5.0",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/plugins-workspace",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
-        },
-        {
-          "name": "tauri-runtime",
-          "version": "2.12.2",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/tauri",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
-        },
-        {
-          "name": "tauri-runtime-wry",
-          "version": "2.12.3",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/tauri",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
-        },
-        {
-          "name": "tauri-utils",
-          "version": "2.10.2",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/tauri",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
         },
         {
           "name": "tempfile",
@@ -4635,13 +4420,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/chipsenkbeil/typed-path",
           "copyright": ["Copyright: Chip Senkbeil"]
-        },
-        {
-          "name": "typeid",
-          "version": "1.0.3",
-          "ecosystem": "rust",
-          "repository": "https://github.com/dtolnay/typeid",
-          "copyright": ["Copyright: David Tolnay"]
         },
         {
           "name": "typenum",
@@ -5068,13 +4846,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/retep998/winapi-rs",
           "copyright": ["Copyright: Peter Atashian"]
-        },
-        {
-          "name": "window-vibrancy",
-          "version": "0.8.1",
-          "ecosystem": "rust",
-          "repository": "https://github.com/tauri-apps/tauri-plugin-vibrancy",
-          "copyright": ["Copyright (c) 2020-2022 Tauri Programme within The Commons Conservancy"]
         },
         {
           "name": "windows",
@@ -5532,20 +5303,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/RustCrypto/utils",
           "copyright": ["Copyright (c) 2019-2026 The RustCrypto Project Developers"]
-        },
-        {
-          "name": "@tauri-apps/api",
-          "version": "2.12.4",
-          "ecosystem": "js",
-          "repository": "https://github.com/tauri-apps/tauri#readme",
-          "copyright": ["Copyright (c) 2017 - Present Tauri Apps Contributors"]
-        },
-        {
-          "name": "@tauri-apps/plugin-dialog",
-          "version": "2.8.3",
-          "ecosystem": "js",
-          "repository": "https://github.com/tauri-apps/plugins-workspace",
-          "copyright": []
         }
       ]
     },
@@ -5700,13 +5457,6 @@
           "copyright": ["Copyright (c) 2023 Kirill Chibisov"]
         },
         {
-          "name": "cargo_metadata",
-          "version": "0.19.2",
-          "ecosystem": "rust",
-          "repository": "https://github.com/oli-obk/cargo_metadata",
-          "copyright": ["Copyright: Oliver Schneider"]
-        },
-        {
           "name": "cfb",
           "version": "0.14.0",
           "ecosystem": "rust",
@@ -5805,13 +5555,6 @@
           "copyright": ["Copyright (c) 2017 Ted Driggs"]
         },
         {
-          "name": "darling",
-          "version": "0.24.1",
-          "ecosystem": "rust",
-          "repository": "https://github.com/TedDriggs/darling",
-          "copyright": ["Copyright (c) 2017 Ted Driggs"]
-        },
-        {
           "name": "darling_core",
           "version": "0.20.11",
           "ecosystem": "rust",
@@ -5833,13 +5576,6 @@
           "copyright": ["Copyright (c) 2017 Ted Driggs"]
         },
         {
-          "name": "darling_core",
-          "version": "0.24.1",
-          "ecosystem": "rust",
-          "repository": "https://github.com/TedDriggs/darling",
-          "copyright": ["Copyright (c) 2017 Ted Driggs"]
-        },
-        {
           "name": "darling_macro",
           "version": "0.20.11",
           "ecosystem": "rust",
@@ -5856,13 +5592,6 @@
         {
           "name": "darling_macro",
           "version": "0.23.0",
-          "ecosystem": "rust",
-          "repository": "https://github.com/TedDriggs/darling",
-          "copyright": ["Copyright (c) 2017 Ted Driggs"]
-        },
-        {
-          "name": "darling_macro",
-          "version": "0.24.1",
           "ecosystem": "rust",
           "repository": "https://github.com/TedDriggs/darling",
           "copyright": ["Copyright (c) 2017 Ted Driggs"]
@@ -6267,13 +5996,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/mdsteele/rust-icns",
           "copyright": ["Copyright (c) 2016 Matthew D. Steele"]
-        },
-        {
-          "name": "ico",
-          "version": "0.6.0",
-          "ecosystem": "rust",
-          "repository": "https://github.com/mdsteele/rust-ico",
-          "copyright": ["Copyright (c) 2018 Matthew D. Steele"]
         },
         {
           "name": "igd-next",
@@ -6704,13 +6426,6 @@
           "copyright": ["Copyright (c) 2015 Jonathan Reem"]
         },
         {
-          "name": "ordered-multimap",
-          "version": "0.7.3",
-          "ecosystem": "rust",
-          "repository": "https://github.com/sgodwincs/ordered-multimap-rs",
-          "copyright": ["Copyright (c) 2018 sgodwincs"]
-        },
-        {
           "name": "outref",
           "version": "0.5.2",
           "ecosystem": "rust",
@@ -6994,13 +6709,6 @@
           "copyright": ["Copyright (c) 2014 The rusqlite developers"]
         },
         {
-          "name": "rust-ini",
-          "version": "0.21.1",
-          "ecosystem": "rust",
-          "repository": "https://github.com/zonyitoo/rust-ini",
-          "copyright": ["Copyright (c) 2014 Y. T. CHUNG"]
-        },
-        {
           "name": "rustls-cert-file-reader",
           "version": "0.4.2",
           "ecosystem": "rust",
@@ -7037,13 +6745,6 @@
         },
         {
           "name": "schemars",
-          "version": "0.8.22",
-          "ecosystem": "rust",
-          "repository": "https://github.com/GREsau/schemars",
-          "copyright": ["Copyright (c) 2019 Graham Esau"]
-        },
-        {
-          "name": "schemars",
           "version": "0.9.0",
           "ecosystem": "rust",
           "repository": "https://github.com/GREsau/schemars",
@@ -7052,13 +6753,6 @@
         {
           "name": "schemars",
           "version": "1.2.3",
-          "ecosystem": "rust",
-          "repository": "https://github.com/GREsau/schemars",
-          "copyright": ["Copyright (c) 2019 Graham Esau"]
-        },
-        {
-          "name": "schemars_derive",
-          "version": "0.8.22",
           "ecosystem": "rust",
           "repository": "https://github.com/GREsau/schemars",
           "copyright": ["Copyright (c) 2019 Graham Esau"]
@@ -7176,27 +6870,6 @@
           "copyright": ["Copyright: Oscar Beaumont"]
         },
         {
-          "name": "specta-serde",
-          "version": "0.0.13",
-          "ecosystem": "rust",
-          "repository": "https://github.com/specta-rs/specta",
-          "copyright": ["Copyright: Oscar Beaumont"]
-        },
-        {
-          "name": "specta-typescript",
-          "version": "0.0.13",
-          "ecosystem": "rust",
-          "repository": "https://github.com/specta-rs/specta",
-          "copyright": ["Copyright: Oscar Beaumont"]
-        },
-        {
-          "name": "specta-util",
-          "version": "0.0.13",
-          "ecosystem": "rust",
-          "repository": "https://github.com/specta-rs/specta",
-          "copyright": ["Copyright: Oscar Beaumont"]
-        },
-        {
           "name": "spin",
           "version": "0.10.1",
           "ecosystem": "rust",
@@ -7290,20 +6963,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/myrrlyn/tap",
           "copyright": ["Copyright (c) 2017 Elliot Linder <darfink@gmail.com>"]
-        },
-        {
-          "name": "tauri-specta",
-          "version": "2.0.0-rc.26",
-          "ecosystem": "rust",
-          "repository": "https://github.com/specta-rs/tauri-specta",
-          "copyright": ["Copyright (c) 2022 Oscar Beaumont"]
-        },
-        {
-          "name": "tauri-specta-macros",
-          "version": "2.0.0-rc.26",
-          "ecosystem": "rust",
-          "repository": "https://github.com/specta-rs/tauri-specta",
-          "copyright": ["Copyright (c) 2022 Oscar Beaumont"]
         },
         {
           "name": "tokio",
@@ -7432,13 +7091,6 @@
           "copyright": ["Copyright 2019 Artúr Barnabás Kovács"]
         },
         {
-          "name": "trim-in-place",
-          "version": "0.1.8",
-          "ecosystem": "rust",
-          "repository": "https://github.com/magiclen/trim-in-place",
-          "copyright": ["Copyright (c) 2020 magiclen.org (Ron Li)"]
-        },
-        {
           "name": "try-lock",
           "version": "0.2.5",
           "ecosystem": "rust",
@@ -7472,13 +7124,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/kornelski/rust_urlencoding",
           "copyright": ["© 2016 Bertram Truong", "© 2021 Kornel Lesiński"]
-        },
-        {
-          "name": "urlpattern",
-          "version": "0.6.0",
-          "ecosystem": "rust",
-          "repository": "https://github.com/denoland/rust-urlpattern",
-          "copyright": ["Copyright (c) 2021 the Deno authors"]
         },
         {
           "name": "uuid-simd",
@@ -7866,139 +7511,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/z-galaxy/zbus/",
           "copyright": ["Copyright: Zeeshan Ali Khan, turbocooler"]
-        },
-        {
-          "name": "@lingui/core",
-          "version": "6.10.1",
-          "ecosystem": "js",
-          "repository": "https://lingui.dev",
-          "copyright": ["Copyright (c) 2017-2022 Tomáš Ehrlich, (c) 2022-2023 Crowdin."]
-        },
-        {
-          "name": "@lingui/message-utils",
-          "version": "6.10.1",
-          "ecosystem": "js",
-          "repository": "https://lingui.dev",
-          "copyright": ["Copyright (c) 2017-2022 Tomáš Ehrlich, (c) 2022-2023 Crowdin."]
-        },
-        {
-          "name": "@lingui/react",
-          "version": "6.10.1",
-          "ecosystem": "js",
-          "repository": "https://lingui.dev",
-          "copyright": ["Copyright (c) 2017-2022 Tomáš Ehrlich, (c) 2022-2023 Crowdin."]
-        },
-        {
-          "name": "@messageformat/date-skeleton",
-          "version": "1.1.0",
-          "ecosystem": "js",
-          "repository": "http://messageformat.github.io/messageformat/api/date-skeleton/",
-          "copyright": []
-        },
-        {
-          "name": "@messageformat/parser",
-          "version": "5.2.0",
-          "ecosystem": "js",
-          "repository": "http://messageformat.github.io/messageformat/api/parser/",
-          "copyright": []
-        },
-        {
-          "name": "@tanstack/history",
-          "version": "1.162.5",
-          "ecosystem": "js",
-          "repository": "https://tanstack.com/router",
-          "copyright": ["Copyright (c) 2021-present Tanner Linsley"]
-        },
-        {
-          "name": "@tanstack/query-core",
-          "version": "5.105.0",
-          "ecosystem": "js",
-          "repository": "https://tanstack.com/query",
-          "copyright": ["Copyright (c) 2021-present Tanner Linsley"]
-        },
-        {
-          "name": "@tanstack/react-query",
-          "version": "5.105.0",
-          "ecosystem": "js",
-          "repository": "https://tanstack.com/query",
-          "copyright": ["Copyright (c) 2021-present Tanner Linsley"]
-        },
-        {
-          "name": "@tanstack/react-router",
-          "version": "1.170.46",
-          "ecosystem": "js",
-          "repository": "https://tanstack.com/router",
-          "copyright": ["Copyright (c) 2021-present Tanner Linsley"]
-        },
-        {
-          "name": "@tanstack/react-store",
-          "version": "0.11.2",
-          "ecosystem": "js",
-          "repository": "https://tanstack.com/store",
-          "copyright": ["Copyright (c) 2021 Tanner Linsley"]
-        },
-        {
-          "name": "@tanstack/react-virtual",
-          "version": "3.14.23",
-          "ecosystem": "js",
-          "repository": "https://tanstack.com/virtual",
-          "copyright": ["Copyright (c) 2021-present Tanner Linsley"]
-        },
-        {
-          "name": "@tanstack/router-core",
-          "version": "1.171.39",
-          "ecosystem": "js",
-          "repository": "https://tanstack.com/router",
-          "copyright": ["Copyright (c) 2021-present Tanner Linsley"]
-        },
-        {
-          "name": "@tanstack/store",
-          "version": "0.11.2",
-          "ecosystem": "js",
-          "repository": "https://tanstack.com/store",
-          "copyright": ["Copyright (c) 2021 Tanner Linsley"]
-        },
-        {
-          "name": "@tanstack/virtual-core",
-          "version": "3.19.8",
-          "ecosystem": "js",
-          "repository": "https://tanstack.com/virtual",
-          "copyright": ["Copyright (c) 2021-present Tanner Linsley"]
-        },
-        {
-          "name": "clsx",
-          "version": "2.1.1",
-          "ecosystem": "js",
-          "repository": "lukeed/clsx",
-          "copyright": ["Copyright: Luke Edwards"]
-        },
-        {
-          "name": "react",
-          "version": "19.3.1",
-          "ecosystem": "js",
-          "repository": "https://react.dev/",
-          "copyright": []
-        },
-        {
-          "name": "react-dom",
-          "version": "19.3.1",
-          "ecosystem": "js",
-          "repository": "https://react.dev/",
-          "copyright": []
-        },
-        {
-          "name": "scheduler",
-          "version": "0.28.0",
-          "ecosystem": "js",
-          "repository": "https://react.dev/",
-          "copyright": []
-        },
-        {
-          "name": "use-sync-external-store",
-          "version": "1.7.0",
-          "ecosystem": "js",
-          "repository": "https://github.com/react/react",
-          "copyright": []
         }
       ]
     },
@@ -8366,41 +7878,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/zopfli-rs/zopfli",
           "copyright": ["Copyright 2011 Google Inc."]
-        },
-        {
-          "name": "@internationalized/number",
-          "version": "3.6.9",
-          "ecosystem": "js",
-          "repository": "https://github.com/adobe/react-spectrum",
-          "copyright": ["Copyright 2019 Adobe"]
-        },
-        {
-          "name": "@internationalized/string",
-          "version": "3.2.10",
-          "ecosystem": "js",
-          "repository": "https://github.com/adobe/react-spectrum",
-          "copyright": ["Copyright 2019 Adobe"]
-        },
-        {
-          "name": "react-aria",
-          "version": "3.53.1",
-          "ecosystem": "js",
-          "repository": "https://github.com/adobe/react-spectrum",
-          "copyright": ["Copyright 2019 Adobe"]
-        },
-        {
-          "name": "react-aria-components",
-          "version": "1.22.1",
-          "ecosystem": "js",
-          "repository": "https://github.com/adobe/react-spectrum",
-          "copyright": ["Copyright 2019 Adobe"]
-        },
-        {
-          "name": "react-stately",
-          "version": "3.51.0",
-          "ecosystem": "js",
-          "repository": "https://github.com/adobe/react-spectrum",
-          "copyright": ["Copyright 2019 Adobe"]
         }
       ]
     },
@@ -8594,13 +8071,6 @@
         },
         {
           "name": "objc2-metal",
-          "version": "0.3.2",
-          "ecosystem": "rust",
-          "repository": "https://github.com/madsmtm/objc2",
-          "copyright": []
-        },
-        {
-          "name": "objc2-osa-kit",
           "version": "0.3.2",
           "ecosystem": "rust",
           "repository": "https://github.com/madsmtm/objc2",
@@ -9648,13 +9118,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/gyscos/zstd-rs",
           "copyright": ["Copyright (c) 2026, Alexandre Bury"]
-        },
-        {
-          "name": "moo",
-          "version": "0.5.3",
-          "ecosystem": "js",
-          "repository": "https://github.com/tjvr/moo",
-          "copyright": ["Copyright (c) 2017, Tim Radvan (tjvr)"]
         }
       ]
     },
@@ -9812,15 +9275,62 @@
           "ecosystem": "rust",
           "repository": "https://github.com/briansmith/untrusted",
           "copyright": ["Copyright 2015-2016 Brian Smith."]
+        }
+      ]
+    },
+    {
+      "license": "OFL-1.1",
+      "packages": [
+        {
+          "name": "Inter",
+          "version": "",
+          "ecosystem": "font",
+          "repository": "https://github.com/rsms/inter",
+          "copyright": [
+            "Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter) Inter-Italic[opsz,wght].ttf: Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)"
+          ]
         },
         {
-          "name": "lucide-react",
-          "version": "1.61.0",
-          "ecosystem": "js",
-          "repository": "https://lucide.dev",
+          "name": "JetBrains Mono",
+          "version": "",
+          "ecosystem": "font",
+          "repository": "https://github.com/JetBrains/JetBrainsMono",
           "copyright": [
-            "Copyright (c) 2026 Lucide Icons and Contributors",
-            "Copyright (c) 2013-present Cole Bemis"
+            "Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono) JetBrainsMono-Italic[wght].ttf: Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)"
+          ]
+        },
+        {
+          "name": "Oxanium",
+          "version": "",
+          "ecosystem": "font",
+          "repository": "https://github.com/sevmeyer/oxanium",
+          "copyright": [
+            "Copyright 2019 The Oxanium Project Authors (https://github.com/sevmeyer/oxanium)"
+          ]
+        },
+        {
+          "name": "Manrope",
+          "version": "",
+          "ecosystem": "font",
+          "repository": "https://github.com/googlefonts/manrope",
+          "copyright": [
+            "Copyright 2018 The Manrope Project Authors (https://github.com/googlefonts/manrope)"
+          ]
+        },
+        {
+          "name": "Barlow",
+          "version": "",
+          "ecosystem": "font",
+          "repository": "https://github.com/jpt/barlow",
+          "copyright": ["Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)"]
+        },
+        {
+          "name": "Nunito",
+          "version": "",
+          "ecosystem": "font",
+          "repository": "https://github.com/googlefonts/nunito",
+          "copyright": [
+            "Copyright 2014 The Nunito Project Authors (https://github.com/googlefonts/nunito)"
           ]
         }
       ]
@@ -9953,32 +9463,6 @@
       ]
     },
     {
-      "license": "CC0-1.0",
-      "packages": [
-        {
-          "name": "hexf-parse",
-          "version": "0.2.1",
-          "ecosystem": "rust",
-          "repository": "https://github.com/lifthrasiir/hexf",
-          "copyright": ["Copyright: Kang Seonghoon"]
-        },
-        {
-          "name": "notify",
-          "version": "8.2.1",
-          "ecosystem": "rust",
-          "repository": "https://github.com/notify-rs/notify.git",
-          "copyright": ["Copyright: Félix Saparelli, Daniel Faust, Aron Heinecke"]
-        },
-        {
-          "name": "tiny-keccak",
-          "version": "2.0.2",
-          "ecosystem": "rust",
-          "repository": "https://github.com/debris/tiny-keccak",
-          "copyright": ["Copyright: debris"]
-        }
-      ]
-    },
-    {
       "license": "CDLA-Permissive-2.0",
       "packages": [
         {
@@ -10001,38 +9485,6 @@
           "ecosystem": "rust",
           "repository": "https://github.com/rustls/webpki-roots",
           "copyright": []
-        }
-      ]
-    },
-    {
-      "license": "OFL-1.1",
-      "packages": [
-        {
-          "name": "@fontsource-variable/inter",
-          "version": "5.3.0",
-          "ecosystem": "js",
-          "repository": "https://fontsource.org/fonts/inter",
-          "copyright": [
-            "Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter) Inter-Italic[opsz,wght].ttf: Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)"
-          ]
-        },
-        {
-          "name": "@fontsource-variable/jetbrains-mono",
-          "version": "5.3.0",
-          "ecosystem": "js",
-          "repository": "https://fontsource.org/fonts/jetbrains-mono",
-          "copyright": [
-            "Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono) JetBrainsMono-Italic[wght].ttf: Copyright 2020 The JetBrains Mono Project Authors (https://github.com/JetBrains/JetBrainsMono)"
-          ]
-        },
-        {
-          "name": "@fontsource-variable/oxanium",
-          "version": "5.3.0",
-          "ecosystem": "js",
-          "repository": "https://fontsource.org/fonts/oxanium",
-          "copyright": [
-            "Copyright 2019 The Oxanium Project Authors (https://github.com/sevmeyer/oxanium)"
-          ]
         }
       ]
     },
@@ -10157,6 +9609,25 @@
           "ecosystem": "rust",
           "repository": "https://github.com/r-efi/r-efi",
           "copyright": []
+        }
+      ]
+    },
+    {
+      "license": "CC0-1.0",
+      "packages": [
+        {
+          "name": "hexf-parse",
+          "version": "0.2.1",
+          "ecosystem": "rust",
+          "repository": "https://github.com/lifthrasiir/hexf",
+          "copyright": ["Copyright: Kang Seonghoon"]
+        },
+        {
+          "name": "notify",
+          "version": "8.2.1",
+          "ecosystem": "rust",
+          "repository": "https://github.com/notify-rs/notify.git",
+          "copyright": ["Copyright: Félix Saparelli, Daniel Faust, Aron Heinecke"]
         }
       ]
     },
@@ -10345,6 +9816,21 @@
           "ecosystem": "rust",
           "repository": "https://github.com/hasenbanck/ppmd-rust",
           "copyright": ["Copyright 2026 The ppmd-rust authors"]
+        }
+      ]
+    },
+    {
+      "license": "ISC AND MIT",
+      "packages": [
+        {
+          "name": "Lucide",
+          "version": "",
+          "ecosystem": "icons",
+          "repository": "https://lucide.dev",
+          "copyright": [
+            "Copyright (c) 2026 Lucide Icons and Contributors",
+            "Copyright (c) 2013-present Cole Bemis"
+          ]
         }
       ]
     },

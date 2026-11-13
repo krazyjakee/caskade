@@ -1,5 +1,4 @@
-//! How each platform looks, data only: its colours and art, copied from
-//! the webview's `catalog.ts` until the cutover.
+//! How each platform looks, data only: its colours and art.
 
 /// One platform's look.
 pub struct Look {
@@ -15,8 +14,7 @@ pub struct Look {
 }
 
 /// The neutral platform hardware artwork, for a platform without its own.
-pub(super) const GENERIC_ART: &[u8] =
-    include_bytes!("../../../../desktop/src/views/library/platforms/art/generic.webp");
+pub(super) const GENERIC_ART: &[u8] = include_bytes!("../../../assets/platforms/generic.webp");
 
 pub const LOOKS: &[Look] = &[
     Look {
@@ -30,7 +28,7 @@ pub const LOOKS: &[Look] = &[
             "Nintendo Famicom",
         ],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_nes.webp"
+            "../../../assets/platforms/nintendo_nes.webp"
         )),
     },
     Look {
@@ -44,7 +42,7 @@ pub const LOOKS: &[Look] = &[
             "Super Famicom",
         ],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_snes.webp"
+            "../../../assets/platforms/nintendo_snes.webp"
         )),
     },
     Look {
@@ -54,7 +52,7 @@ pub const LOOKS: &[Look] = &[
         kind: "64-bit console",
         names: &["N64"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_n64.webp"
+            "../../../assets/platforms/nintendo_n64.webp"
         )),
     },
     Look {
@@ -63,9 +61,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Nintendo",
         kind: "Handheld",
         names: &["Nintendo Game Boy", "GB"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_gb.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/nintendo_gb.webp")),
     },
     Look {
         id: "nintendo_gbc",
@@ -74,7 +70,7 @@ pub const LOOKS: &[Look] = &[
         kind: "Handheld",
         names: &["Nintendo Game Boy Color", "GBC"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_gbc.webp"
+            "../../../assets/platforms/nintendo_gbc.webp"
         )),
     },
     Look {
@@ -84,7 +80,7 @@ pub const LOOKS: &[Look] = &[
         kind: "Handheld",
         names: &["Nintendo Game Boy Advance", "GBA"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_gba.webp"
+            "../../../assets/platforms/nintendo_gba.webp"
         )),
     },
     Look {
@@ -93,9 +89,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Nintendo",
         kind: "Handheld",
         names: &["NDS"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_ds.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/nintendo_ds.webp")),
     },
     Look {
         id: "nintendo_gamecube",
@@ -104,7 +98,7 @@ pub const LOOKS: &[Look] = &[
         kind: "6th gen console",
         names: &["Nintendo GameCube", "GC", "NGC"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_gamecube.webp"
+            "../../../assets/platforms/nintendo_gamecube.webp"
         )),
     },
     Look {
@@ -114,7 +108,7 @@ pub const LOOKS: &[Look] = &[
         kind: "7th gen console",
         names: &["Nintendo Wii"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_wii.webp"
+            "../../../assets/platforms/nintendo_wii.webp"
         )),
     },
     Look {
@@ -124,7 +118,7 @@ pub const LOOKS: &[Look] = &[
         kind: "8th gen console",
         names: &["Nintendo Wii U", "WiiU"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_wiiu.webp"
+            "../../../assets/platforms/nintendo_wiiu.webp"
         )),
     },
     Look {
@@ -134,7 +128,7 @@ pub const LOOKS: &[Look] = &[
         kind: "Hybrid console",
         names: &["Nintendo Switch"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_switch.webp"
+            "../../../assets/platforms/nintendo_switch.webp"
         )),
     },
     Look {
@@ -144,7 +138,7 @@ pub const LOOKS: &[Look] = &[
         kind: "8-bit console",
         names: &["Sega Master System", "SMS", "Mark III"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sega_mastersystem.webp"
+            "../../../assets/platforms/sega_mastersystem.webp"
         )),
     },
     Look {
@@ -153,9 +147,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Sega",
         kind: "8-bit console",
         names: &["Sega SG-1000", "SG1000"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sega_sg1000.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/sega_sg1000.webp")),
     },
     Look {
         id: "sega_genesis",
@@ -164,7 +156,7 @@ pub const LOOKS: &[Look] = &[
         kind: "16-bit console",
         names: &["Sega Genesis", "Mega Drive", "Sega Mega Drive", "MD"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sega_genesis.webp"
+            "../../../assets/platforms/sega_genesis.webp"
         )),
     },
     Look {
@@ -173,9 +165,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Sega",
         kind: "32-bit console",
         names: &["Sega Saturn"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sega_saturn.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/sega_saturn.webp")),
     },
     Look {
         id: "sega_dreamcast",
@@ -184,7 +174,7 @@ pub const LOOKS: &[Look] = &[
         kind: "6th gen console",
         names: &["Sega Dreamcast", "DC"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sega_dreamcast.webp"
+            "../../../assets/platforms/sega_dreamcast.webp"
         )),
     },
     Look {
@@ -194,7 +184,7 @@ pub const LOOKS: &[Look] = &[
         kind: "32-bit console",
         names: &["Sony PlayStation", "PS1", "PSX", "PS"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sony_playstation.webp"
+            "../../../assets/platforms/sony_playstation.webp"
         )),
     },
     Look {
@@ -204,7 +194,7 @@ pub const LOOKS: &[Look] = &[
         kind: "6th gen console",
         names: &["Sony PlayStation 2", "PS2"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sony_playstation2.webp"
+            "../../../assets/platforms/sony_playstation2.webp"
         )),
     },
     Look {
@@ -214,7 +204,7 @@ pub const LOOKS: &[Look] = &[
         kind: "7th gen console",
         names: &["Sony PlayStation 3", "PS3"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sony_playstation3.webp"
+            "../../../assets/platforms/sony_playstation3.webp"
         )),
     },
     Look {
@@ -223,9 +213,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Sony",
         kind: "Handheld",
         names: &["Sony PlayStation Portable", "PlayStation Portable"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sony_psp.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/sony_psp.webp")),
     },
     Look {
         id: "nintendo_3ds",
@@ -234,7 +222,7 @@ pub const LOOKS: &[Look] = &[
         kind: "Handheld",
         names: &["3DS", "N3DS", "New Nintendo 3DS"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_3ds.webp"
+            "../../../assets/platforms/nintendo_3ds.webp"
         )),
     },
     Look {
@@ -244,7 +232,7 @@ pub const LOOKS: &[Look] = &[
         kind: "6th gen console",
         names: &["Microsoft Xbox"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/microsoft_xbox.webp"
+            "../../../assets/platforms/microsoft_xbox.webp"
         )),
     },
     Look {
@@ -254,7 +242,7 @@ pub const LOOKS: &[Look] = &[
         kind: "7th gen console",
         names: &["Microsoft Xbox 360", "X360"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/microsoft_xbox360.webp"
+            "../../../assets/platforms/microsoft_xbox360.webp"
         )),
     },
     Look {
@@ -264,7 +252,7 @@ pub const LOOKS: &[Look] = &[
         kind: "8th gen console",
         names: &["Sony PlayStation 4", "PS4"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sony_playstation4.webp"
+            "../../../assets/platforms/sony_playstation4.webp"
         )),
     },
     Look {
@@ -273,9 +261,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Arcade",
         kind: "Cabinet",
         names: &["MAME"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/arcade.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/arcade.webp")),
     },
     Look {
         id: "sony_psvita",
@@ -283,9 +269,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Sony",
         kind: "Handheld",
         names: &["Sony PlayStation Vita", "PlayStation Vita", "Vita", "PSV"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sony_psvita.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/sony_psvita.webp")),
     },
     Look {
         id: "sega_gamegear",
@@ -294,7 +278,7 @@ pub const LOOKS: &[Look] = &[
         kind: "Handheld",
         names: &["Sega Game Gear", "GG"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sega_gamegear.webp"
+            "../../../assets/platforms/sega_gamegear.webp"
         )),
     },
     Look {
@@ -303,9 +287,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Sega",
         kind: "Console add-on",
         names: &["Mega-CD", "Mega CD", "Sega Mega-CD"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sega_cd.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/sega_cd.webp")),
     },
     Look {
         id: "sega_32x",
@@ -313,9 +295,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Sega",
         kind: "Console add-on",
         names: &["Sega 32X"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/sega_32x.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/sega_32x.webp")),
     },
     Look {
         id: "nintendo_virtualboy",
@@ -324,7 +304,7 @@ pub const LOOKS: &[Look] = &[
         kind: "Stereoscopic console",
         names: &["Nintendo Virtual Boy", "VB"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nintendo_virtualboy.webp"
+            "../../../assets/platforms/nintendo_virtualboy.webp"
         )),
     },
     Look {
@@ -333,9 +313,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Atari",
         kind: "2nd gen console",
         names: &["Atari VCS", "2600"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/atari_2600.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/atari_2600.webp")),
     },
     Look {
         id: "atari_5200",
@@ -343,9 +321,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Atari",
         kind: "2nd gen console",
         names: &["Atari 5200 SuperSystem", "5200"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/atari_5200.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/atari_5200.webp")),
     },
     Look {
         id: "atari_7800",
@@ -353,9 +329,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Atari",
         kind: "3rd gen console",
         names: &["Atari 7800 ProSystem", "7800"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/atari_7800.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/atari_7800.webp")),
     },
     Look {
         id: "atari_lynx",
@@ -363,9 +337,7 @@ pub const LOOKS: &[Look] = &[
         maker: "Atari",
         kind: "Handheld",
         names: &["Atari Lynx"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/atari_lynx.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/atari_lynx.webp")),
     },
     Look {
         id: "atari_jaguar",
@@ -374,7 +346,7 @@ pub const LOOKS: &[Look] = &[
         kind: "64-bit console",
         names: &["Atari Jaguar"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/atari_jaguar.webp"
+            "../../../assets/platforms/atari_jaguar.webp"
         )),
     },
     Look {
@@ -390,7 +362,7 @@ pub const LOOKS: &[Look] = &[
             "TG16",
         ],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/nec_pcengine.webp"
+            "../../../assets/platforms/nec_pcengine.webp"
         )),
     },
     Look {
@@ -406,7 +378,7 @@ pub const LOOKS: &[Look] = &[
             "snk_neogeo",
         ],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/snk_neogeo_aes.webp"
+            "../../../assets/platforms/snk_neogeo_aes.webp"
         )),
     },
     Look {
@@ -416,7 +388,7 @@ pub const LOOKS: &[Look] = &[
         kind: "Handheld",
         names: &["SNK Neo Geo Pocket Color", "NGPC", "snk_neogeopocket_color"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/snk_neogeopocketcolor.webp"
+            "../../../assets/platforms/snk_neogeopocketcolor.webp"
         )),
     },
     Look {
@@ -426,7 +398,7 @@ pub const LOOKS: &[Look] = &[
         kind: "Handheld",
         names: &["Bandai WonderSwan Color", "WSC", "bandai_wonderswan_color"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/bandai_wonderswancolor.webp"
+            "../../../assets/platforms/bandai_wonderswancolor.webp"
         )),
     },
     Look {
@@ -436,7 +408,7 @@ pub const LOOKS: &[Look] = &[
         kind: "2nd gen console",
         names: &["Coleco ColecoVision", "Coleco Vision"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/coleco_colecovision.webp"
+            "../../../assets/platforms/coleco_colecovision.webp"
         )),
     },
     Look {
@@ -446,7 +418,7 @@ pub const LOOKS: &[Look] = &[
         kind: "2nd gen console",
         names: &["Mattel Intellivision"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/mattel_intellivision.webp"
+            "../../../assets/platforms/mattel_intellivision.webp"
         )),
     },
     Look {
@@ -456,7 +428,7 @@ pub const LOOKS: &[Look] = &[
         kind: "32-bit console",
         names: &["3DO Interactive Multiplayer", "Panasonic 3DO"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/panasonic_3do.webp"
+            "../../../assets/platforms/panasonic_3do.webp"
         )),
     },
     Look {
@@ -466,7 +438,7 @@ pub const LOOKS: &[Look] = &[
         kind: "Home computer",
         names: &["C64", "Commodore C64", "Commodore C64/128/MAX"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/commodore_64.webp"
+            "../../../assets/platforms/commodore_64.webp"
         )),
     },
     Look {
@@ -476,7 +448,7 @@ pub const LOOKS: &[Look] = &[
         kind: "Home computer",
         names: &["Commodore Amiga"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/commodore_amiga.webp"
+            "../../../assets/platforms/commodore_amiga.webp"
         )),
     },
     Look {
@@ -486,7 +458,7 @@ pub const LOOKS: &[Look] = &[
         kind: "Home computer",
         names: &["Microsoft MSX"],
         art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/microsoft_msx.webp"
+            "../../../assets/platforms/microsoft_msx.webp"
         )),
     },
     Look {
@@ -495,9 +467,7 @@ pub const LOOKS: &[Look] = &[
         maker: "PC",
         kind: "Home computer",
         names: &["MS-DOS", "PC DOS", "DOSBox"],
-        art: Some(include_bytes!(
-            "../../../../desktop/src/views/library/platforms/art/pc_dos.webp"
-        )),
+        art: Some(include_bytes!("../../../assets/platforms/pc_dos.webp")),
     },
     Look {
         id: "sony_playstation5",

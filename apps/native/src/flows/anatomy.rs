@@ -1,6 +1,4 @@
-//! The flows' catalogued roots (#108): each matches the webview's entry
-//! (`packages/ui/src/anatomy.ts`) word for word, apart from the
-//! component it names.
+//! The flows' catalogued roots (#108).
 
 use caskade_ui_theme::anatomy::{Entry, Source};
 
@@ -431,5 +429,80 @@ pub const ROMM_SERVERS: Entry = Entry {
         "RommPanel (apps/native/src/settings/emulation/romm.rs)",
         Source::App,
         "The RomM server list: each server's state, games, last sync and its action (Sync now, or Sign in when this device can't sign in).",
+    )
+};
+
+pub const ADD_GAME: Entry = Entry {
+    contains: &[
+        "button",
+        "menu",
+        "manual-game",
+        "receive-share",
+        "install-url",
+        "install-root-picker",
+    ],
+    ..Entry::new(
+        "add-game",
+        "AddGame (apps/native/src/flows/add_game.rs)",
+        Source::App,
+        "The library's Add game button and the dialogs it opens: install from a file, a folder or a link (each asks where the install goes), receive a shared game, or add a game by hand.",
+    )
+};
+
+pub const INSTALL_URL: Entry = Entry {
+    contains: &["text-field", "button"],
+    ..Entry::new(
+        "install-url",
+        "AddGame (apps/native/src/flows/add_game.rs)",
+        Source::App,
+        "Add game → Install from link…: a download or magnet link, then Add installation, which asks where the install goes.",
+    )
+};
+
+pub const INSTALL_ROOT_PICKER: Entry = Entry {
+    contains: &["button"],
+    ..Entry::new(
+        "install-root-picker",
+        "InstallRootPicker (apps/native/src/flows/storage.rs)",
+        Source::App,
+        "Chooses where an install goes: the storage locations, each with its path, free space and why it can't take the install, the estimated space, then Install here. Asked by Add game's installs, a received share, a web game kept offline and Activity's installs; it chooses by itself when there's one location or installs always go to the default. If the locations can't load, it says so with Try again.",
+    )
+};
+
+pub const STREAM_PAIR_PROMPT: Entry = Entry {
+    contains: &["pair-request", "button"],
+    ..Entry::new(
+        "stream-pair-prompt",
+        "StreamPairingHost (apps/native/src/flows/streaming.rs)",
+        Source::App,
+        "A device asking to play this device's games (#264, #265), over any view while this device lets others play, for an admin: the pairing form, and Not now. Not shown while Settings → Streaming is open, which lists the same requests.",
+    )
+};
+
+pub const PAIR_REQUEST: Entry = Entry {
+    parts: &[("ask", "Which device asks to stream games from this one.")],
+    contains: &["text-field", "button", "error-notice"],
+    ..Entry::new(
+        "pair-request",
+        "PairRequestForm (apps/native/src/flows/streaming.rs)",
+        Source::App,
+        "A device waiting to pair with this one to stream its games (#264, #265), in the prompt and in Settings → Streaming: the code it shows, the name to know it by, then Pair or Decline.",
+    )
+};
+
+pub const STOP_HOST: Entry = Entry {
+    parts: &[
+        (
+            "question",
+            "Which device is playing what, and the game to stream instead.",
+        ),
+        ("actions", "Cancel, and Stop and stream."),
+    ],
+    contains: &["button"],
+    ..Entry::new(
+        "stop-host",
+        "StopHostDialog (apps/native/src/flows/streaming.rs)",
+        Source::App,
+        "Stop the other game? (#264, #265): asked at Play when the device to stream from is playing another game; progress it hasn't saved is lost.",
     )
 };

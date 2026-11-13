@@ -14,6 +14,7 @@
 mod about;
 mod accounts;
 pub(crate) mod addons;
+pub mod anatomy;
 mod appearance;
 mod backup;
 mod devices;
@@ -535,6 +536,9 @@ fn SectionTab(
         div {
             id: "settings-tab-{id}",
             role: "tab",
+            // Screen readers name a tab only from its own label, not from
+            // the text inside it (#141).
+            "aria-label": (section.label)(),
             tabindex: if selected { "0" } else { "-1" },
             "aria-selected": if selected { "true" } else { "false" },
             "aria-controls": "settings-tab-{id}-panel",

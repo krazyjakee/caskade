@@ -9,8 +9,8 @@ use std::cell::RefCell;
 use std::num::NonZero;
 use std::rc::Rc;
 
-/// The webview's startup recording, shared.
-const STARTUP: &[u8] = include_bytes!("../../../desktop/src/onboarding/sounds/startup.wav");
+/// The startup recording.
+const STARTUP: &[u8] = include_bytes!("../../assets/sounds/startup.wav");
 
 const RATE: u32 = 44_100;
 /// The output's level, as the webview's master gain.

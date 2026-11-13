@@ -551,7 +551,7 @@ section squares those parts and turns off their glows:
 }
 ```
 
-Style interaction state through React Aria's attributes, such as
+Style interaction state through the components' `data-*` attributes, such as
 `[data-hovered]` above. A component's own `:hover` styles follow the same
 attributes.
 

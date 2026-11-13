@@ -74,14 +74,14 @@ body {
   }
 }
 
-/* A drop zone while files are dragged over it (drop/DropProvider.tsx). */
+/* A drop zone while files are dragged over it. */
 [data-drop-active] {
   outline: 2px dashed var(--cs-color-accent-strong);
   outline-offset: 4px;
   border-radius: var(--cs-radius-control);
 }
 
-/* A preference a settings search led to (views/settings/SettingsSearch.tsx). */
+/* A preference a settings search led to (ui/settings.rs). */
 [data-found] {
   outline: 2px solid var(--cs-color-accent-strong);
   outline-offset: 4px;

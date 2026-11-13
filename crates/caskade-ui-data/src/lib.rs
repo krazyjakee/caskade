@@ -9,9 +9,10 @@
 //! - [`Key`] names what a view reads; [`Changed::from_event`] says which keys
 //!   an app event makes stale, so a view refetches only what changed.
 //! - [`fixtures`] is an in-memory library for UI development and tests:
-//!   the real core and app layer over synthetic games, the same ones the
-//!   webview's `fixtures.ts` shows.
-//! - [`labels`] are the recovery hints' words, as the webview has them.
+//!   the real core and app layer over synthetic games, the ones
+//!   `fixtures/games.json` lists.
+//! - [`labels`] are the recovery hints' words: their source, which the
+//!   core's tests check every hint against.
 //!
 //! No UI toolkit: the native app's hooks (`apps/native/src/data`) turn keys
 //! and loads into signals and resources.

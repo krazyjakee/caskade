@@ -5,13 +5,13 @@ on:
     branches: [master]
     paths:
       - apps/website/**
-      - apps/desktop/public/caskade.svg
+      - apps/native/icons/caskade.svg
       - packages/tokens/tokens.css
       - .github/workflows/pages.yml
   pull_request:
     paths:
       - apps/website/**
-      - apps/desktop/public/caskade.svg
+      - apps/native/icons/caskade.svg
       - packages/tokens/tokens.css
       - .github/workflows/pages.yml
   release:

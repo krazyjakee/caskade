@@ -29,8 +29,7 @@ fn main() {
 "#,
     )
     .expect("the manifest is written");
-    let icon = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../desktop/src-tauri/icons/icon.ico");
+    let icon = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("icons/icon.ico");
     println!("cargo:rerun-if-changed={}", icon.display());
     let rc = out.join("caskade-native.rc");
     let path = |path: &std::path::Path| path.display().to_string().replace('\\', "/");

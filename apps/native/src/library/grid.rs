@@ -527,7 +527,7 @@ pub fn VirtualLibrary(
                                     key: "{letter.letter}",
                                     r#type: "button",
                                     "data-part": "letter",
-                                    "data-current": if current { "true" },
+                                    "data-selected": if current { "true" },
                                     aria_label: "{shown}",
                                     class: "rounded px-1 text-fg-muted",
                                     onclick: move |_| {

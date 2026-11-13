@@ -1,5 +1,4 @@
-//! The game page's themeable roots (#100), word for word the webview's
-//! (`packages/ui/src/anatomy.ts`) apart from the component each names.
+//! The game page's themeable roots (#100).
 
 use caskade_ui_theme::anatomy::{Entry, Source};
 
@@ -13,6 +12,13 @@ pub const ANATOMY: &[Entry] = &[
     GAME_EDITOR_DISCARD,
     GAME_ACTIONS,
     GAME_SAVES,
+    PLAY_CHOICE,
+    EMULATION,
+    SAVES_PANEL,
+    UPDATE_OFFER,
+    PLAYING_ELSEWHERE,
+    SAVE_CONFLICT,
+    SAVE_ARRIVING,
 ];
 
 pub const SCREENSHOT_VIEWER: Entry = Entry {
@@ -306,5 +312,172 @@ pub const GAME_SAVES: Entry = Entry {
         "SavesTab (apps/native/src/game/editor/saves.rs)",
         Source::App,
         "The game editor's Saves tab (#238): one release's save locations on this device, automatic or the user's own, and the manifest game it matches. Files and folders dropped on it are added.",
+    )
+};
+
+pub const PLAY_CHOICE: Entry = Entry {
+    parts: &[
+        (
+            "play-starts",
+            "Play starts: which play action Play starts, or Ask each time, when the release has more than one (a `select`'s trigger).",
+        ),
+        ("tools", "The release's tools, one button each."),
+    ],
+    contains: &["button", "select"],
+    ..Entry::new(
+        "play-choice",
+        "PlayChoice (apps/native/src/game/play_choice.rs)",
+        Source::App,
+        "On a game's page, under Play: which of the release's play actions Play starts, and its tools (#178).",
+    )
+};
+
+pub const EMULATION: Entry = Entry {
+    parts: &[
+        (
+            "readiness",
+            "What to set up before it can start, with Configure (to Settings → Emulators → Platforms).",
+        ),
+        (
+            "launch-with",
+            "Launch with: the platform's default, a compatible emulator profile, or Ask when launching (a `select`'s trigger).",
+        ),
+        (
+            "args",
+            "Extra arguments, added after the profile's (a `text-field`'s input).",
+        ),
+        ("save-args", "Saves the extra arguments (a `button`)."),
+        (
+            "disc",
+            "One disc image or ROM file: present or missing, and its path.",
+        ),
+        (
+            "bios",
+            "One BIOS file the platform uses: found, wrong dump, missing or unknown, and whether it's optional.",
+        ),
+    ],
+    states: &[(
+        "data-status",
+        &[
+            "ready",
+            "ask",
+            "no_emulator",
+            "profile_gone",
+            "not_installed",
+            "missing_files",
+            "invalid",
+            "missing_bios",
+            "rom_missing",
+            "not_emulated",
+        ],
+    )],
+    contains: &["status-dot", "select", "text-field", "button"],
+    ..Entry::new(
+        "emulation",
+        "EmulatedEntry (apps/native/src/game/emulation.rs)",
+        Source::App,
+        "An emulated release on a game's page, under Play from your library (#100): its platform and whether it can start, what to set up when it can't, the emulator and profile it launches with, extra arguments, and its discs and BIOS files. `data-status` is its readiness: `ready`, `ask` (it asks for an emulator when launching) or what stops it.",
+    )
+};
+
+pub const SAVES_PANEL: Entry = Entry {
+    parts: &[
+        (
+            "conflict",
+            "Says the game was played on more than one device since they last shared saves.",
+        ),
+        (
+            "choose",
+            "Choose a save…: opens the choice between the devices' saves (a `button`).",
+        ),
+        ("locations", "Where the saves are on this device."),
+        ("reveal", "Show in folder, for one location (a `button`)."),
+        ("versions", "The versions Caskade kept, newest first."),
+        (
+            "version",
+            "One version: when, the device and account that made it, why it was kept and its size; `data-status` is `current` (in use), `kept` or `arriving` (not on this device yet).",
+        ),
+        ("share", "Shares the version with someone (a `button`)."),
+        (
+            "restore",
+            "Restores the version; the save in use is kept as a version (a `button`).",
+        ),
+    ],
+    contains: &["button", "save-conflict", "share-game"],
+    ..Entry::new(
+        "saves-panel",
+        "SavesPanel (apps/native/src/game/saves.rs)",
+        Source::App,
+        "A game's saves on its page (#100): the versions Caskade kept with Restore and Share…, the one in use marked; choosing between devices' saves when both played; and where the saves are on this device, with Show in folder.",
+    )
+};
+
+pub const UPDATE_OFFER: Entry = Entry {
+    parts: &[
+        (
+            "progress",
+            "The update's progress once it started: updating, updated, or why it didn't finish.",
+        ),
+        ("skip", "Skip this version: stops offering it (a `button`)."),
+        ("play-now", "Plays without updating (a `button`)."),
+        (
+            "update",
+            "Update and play: installs the update, then plays once it has finished (a `button`).",
+        ),
+    ],
+    contains: &["button"],
+    ..Entry::new(
+        "update-offer",
+        "UpdateOffer (apps/native/src/game/launch.rs)",
+        Source::App,
+        "Update before playing? (#100): asked at Play when a newer version of the release is out; the version out and the one installed, What's new, then Skip this version, Play now, or Update and play. Once the update starts, its progress and Close.",
+    )
+};
+
+pub const PLAYING_ELSEWHERE: Entry = Entry {
+    parts: &[(
+        "play-anyway",
+        "Plays here as well; each device keeps its own save (a `button`).",
+    )],
+    contains: &["button"],
+    ..Entry::new(
+        "playing-elsewhere",
+        "PlayingElsewhereDialog (apps/native/src/game/launch.rs)",
+        Source::App,
+        "Asked at Play when the game is running on another device (#100): which devices play it and since when, that each device keeps its own save if it's played here too, then Cancel or Play anyway.",
+    )
+};
+
+pub const SAVE_CONFLICT: Entry = Entry {
+    parts: &[
+        (
+            "versions",
+            "The saves to choose from, newest first, one radio each: the device that made it, when, and its size.",
+        ),
+        (
+            "choose",
+            "Plays with the chosen save, or uses it from the Saves panel (a `button`).",
+        ),
+    ],
+    contains: &["button"],
+    ..Entry::new(
+        "save-conflict",
+        "SaveConflictDialog (apps/native/src/game/launch.rs)",
+        Source::App,
+        "Choose which save to play with (#100): the game was played on more than one device since they last shared saves. Asked at Play, and from the Saves panel's Choose a save…; this device's save is chosen to begin with, and the one not chosen is kept as a version.",
+    )
+};
+
+pub const SAVE_ARRIVING: Entry = Entry {
+    parts: &[(
+        "skip",
+        "Plays with the save on this device instead of waiting (a `button`).",
+    )],
+    contains: &["button"],
+    ..Entry::new(
+        "save-arriving",
+        "WaitForSave (apps/native/src/game/launch.rs)",
+        Source::App,
+        "Shown at Play while another device's newer save is on its way (#100): the device it comes from, then Cancel or Skip.",
     )
 };

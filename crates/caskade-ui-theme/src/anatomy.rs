@@ -1,23 +1,21 @@
 //! The anatomy catalogue for RSX components (#90): the selectors themes and
-//! plugins may target, as `packages/ui/src/anatomy.ts` has them for the
-//! webview. Every catalogued component renders `data-cs="<name>"` on its
-//! root, `data-part` on its parts and its domain state as the attributes in
-//! `states`. Class names are not API.
+//! plugins may target. Every catalogued component renders
+//! `data-cs="<name>"` on its root, `data-part` on its parts and its domain
+//! state as the attributes in `states`. Class names are not API.
 //!
 //! Components declare an [`Entry`] beside their code and the native app
-//! lists them in one catalogue (`apps/native/src/anatomy.rs`). [`markdown`]
-//! and [`contract`] write `docs/theming/anatomy.md` and `anatomy.json`
-//! exactly as `packages/ui/scripts/docs.ts` does; until the native UI is
-//! the default (BLITZ-33) the webview's `anatomy.ts` stays their source, and
-//! each native entry has to match its webview section word for word.
+//! lists them in one catalogue (`apps/native/src/anatomy.rs`), the single
+//! source of the theming contract (#139). [`markdown`] and [`contract`]
+//! write `docs/theming/anatomy.md` and `crates/caskade-theme/anatomy.json`
+//! from it, which `caskade-theme` checks themes against.
 
 use std::collections::BTreeSet;
 
-/// Where a root comes from, as `anatomy.ts`'s `source`.
+/// Where a root comes from.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Source {
-    /// The component library (`@caskade/ui`, the RSX components of #93);
-    /// `native` in `anatomy.ts` for one only the native UI still renders.
+    /// The component library (`apps/native/src/ui`, the RSX components of
+    /// #93).
     Ui,
     /// The app shell and its views.
     App,
@@ -76,9 +74,8 @@ impl Entry {
     }
 }
 
-/// Attributes any selector may use besides the catalogue's own, as
-/// `anatomy.ts`'s `contractAttributes`: on the root element (Appearance,
-/// console mode) and on parts.
+/// Attributes any selector may use besides the catalogue's own: on the
+/// root element (Appearance, console mode) and on parts.
 pub const ROOT_ATTRIBUTES: [&str; 6] = [
     "data-mode",
     "data-color-scheme",
@@ -108,7 +105,7 @@ fn cell(text: &str) -> String {
     text.replace('|', "\\|").replace('\n', " ")
 }
 
-/// The section `docs.ts` writes for `entry`, one line each.
+/// The docs' section for `entry`, one line each.
 pub fn section(entry: &Entry) -> Vec<String> {
     let mark = |key: &str| {
         if entry.app_only.contains(&key) {
@@ -177,7 +174,7 @@ pub fn section(entry: &Entry) -> Vec<String> {
     }
     if !entry.interaction.is_empty() {
         lines.push(format!(
-            "React Aria interaction: {}",
+            "Interaction: {}",
             entry
                 .interaction
                 .iter()
@@ -202,101 +199,11 @@ pub fn section(entry: &Entry) -> Vec<String> {
     lines
 }
 
-/// The webview's catalogue as data (`packages/ui/anatomy-entries.json`,
-/// which `pnpm --filter @caskade/ui docs` writes from `anatomy.ts`). The
-/// text is leaked: it's read once, by the docs' generator and its tests.
-pub fn from_json(text: &str) -> Result<Vec<Entry>, String> {
-    use serde_json::Value;
-    fn leak(text: &str) -> &'static str {
-        Box::leak(text.to_owned().into_boxed_str())
-    }
-    fn strings(value: &Value) -> &'static [&'static str] {
-        let list: Vec<&'static str> = value
-            .as_array()
-            .map(|items| items.iter().filter_map(Value::as_str).map(leak).collect())
-            .unwrap_or_default();
-        Box::leak(list.into_boxed_slice())
-    }
-    fn pairs<T>(value: &Value, item: impl Fn(&Value) -> T) -> &'static [(&'static str, T)] {
-        let list: Vec<(&'static str, T)> = value
-            .as_array()
-            .map(|items| {
-                items
-                    .iter()
-                    .map(|pair| (leak(pair[0].as_str().unwrap_or("")), item(&pair[1])))
-                    .collect()
-            })
-            .unwrap_or_default();
-        Box::leak(list.into_boxed_slice())
-    }
-    let list: Value = serde_json::from_str(text).map_err(|error| error.to_string())?;
-    list.as_array()
-        .ok_or("not a list of entries")?
-        .iter()
-        .map(|entry| {
-            Ok(Entry {
-                name: leak(entry["name"].as_str().unwrap_or("")),
-                rendered: leak(entry["rendered"].as_str().unwrap_or("")),
-                source: match entry["source"].as_str() {
-                    Some("ui" | "native") => Source::Ui,
-                    Some("app") => Source::App,
-                    Some("website") => Source::Website,
-                    other => return Err(format!("unknown source {other:?}")),
-                },
-                description: leak(entry["description"].as_str().unwrap_or("")),
-                parts: pairs(&entry["parts"], |what| leak(what.as_str().unwrap_or(""))),
-                states: pairs(&entry["states"], strings),
-                interaction: strings(&entry["interaction"]),
-                app_only: strings(&entry["appOnly"]),
-                contains: strings(&entry["contains"]),
-                slots: strings(&entry["slots"]),
-                container: entry["container"].as_bool().unwrap_or(false),
-            })
-        })
-        .collect()
-}
-
-/// The catalogue the docs list: the webview's (`webview`, in its order),
-/// with the native UI's entry for each root it renders (identical but for
-/// the component, which names both), then roots only the native UI has.
-pub fn with_native(webview: &[Entry], native: &[Entry]) -> Vec<Entry> {
-    let mut all: Vec<Entry> = webview
-        .iter()
-        .map(
-            |theirs| match native.iter().find(|ours| ours.name == theirs.name) {
-                Some(ours) => Entry {
-                    rendered: Box::leak(
-                        format!("{}; in the webview, {}", ours.rendered, theirs.rendered)
-                            .into_boxed_str(),
-                    ),
-                    ..*ours
-                },
-                None => *theirs,
-            },
-        )
-        .collect();
-    all.extend(
-        native
-            .iter()
-            .filter(|ours| !webview.iter().any(|theirs| theirs.name == ours.name))
-            .copied(),
-    );
-    all
-}
-
 /// The line `docs/theming/anatomy.md` starts with.
-pub const GENERATED: &str = "<!-- Generated from the native UI's components (apps/native/src/anatomy.rs) and, for roots only the webview renders yet, packages/ui/src/anatomy.ts: CASKADE_WRITE_ANATOMY=1 cargo test -p caskade-native anatomy. Do not edit. -->";
+pub const GENERATED: &str = "<!-- Generated from the native UI's components (apps/native/src/anatomy.rs): CASKADE_WRITE_ANATOMY=1 cargo test -p caskade-native anatomy. Do not edit. -->";
 
-/// The line `docs.ts` started the docs with, when it wrote them.
-const WEBVIEW_GENERATED: &str = "<!-- Generated by @caskade/ui from packages/ui/src/anatomy.ts (pnpm --filter @caskade/ui docs). Do not edit. -->";
-
-/// `docs/theming/anatomy.md` for `entries`, as `docs.ts` wrote it.
+/// `docs/theming/anatomy.md` for `entries`.
 pub fn markdown(entries: &[Entry]) -> String {
-    markdown_by(entries, WEBVIEW_GENERATED)
-}
-
-/// `docs/theming/anatomy.md` for `entries`, starting with `generated`.
-pub fn markdown_by(entries: &[Entry], generated: &str) -> String {
     let index = |source: Source| {
         entries
             .iter()
@@ -312,7 +219,7 @@ pub fn markdown_by(entries: &[Entry], generated: &str) -> String {
             .collect::<Vec<_>>()
     };
     let mut lines: Vec<String> = [
-        generated,
+        GENERATED,
         "",
         "# Anatomy catalogue",
         "",
@@ -324,14 +231,14 @@ pub fn markdown_by(entries: &[Entry], generated: &str) -> String {
         "parent: a card's art is `[data-cs=\"game-art\"][data-part=\"art\"]`.",
         "",
         "Domain state is an attribute on the root, such as `data-status` or",
-        "`data-variant`. Interaction state comes from React Aria",
-        "(`data-hovered`, `data-pressed`, `data-focus-visible`, `data-selected`,",
-        "`data-disabled`, …). Class names are not API and change without notice.",
+        "`data-variant`. Interaction state is an attribute too (`data-hovered`,",
+        "`data-pressed`, `data-focus-visible`, `data-selected`, `data-disabled`,",
+        "…). Class names are not API and change without notice.",
         "",
         "Parts and states marked (app only) are rendered only by the app's own",
         "variant of the component, such as the library's card.",
         "",
-        "## `@caskade/ui` components",
+        "## Components",
         "",
     ]
     .into_iter()
@@ -380,9 +287,9 @@ fn json_list(items: &[&str], indent: usize) -> String {
     format!("[\n{body}\n{}]", " ".repeat(indent))
 }
 
-/// `packages/ui/anatomy.json` for `entries`, as `docs.ts` writes it: roots
-/// with their parts, states and interaction, and every attribute a
-/// selector may use (the contract `caskade-theme` lints themes against).
+/// `crates/caskade-theme/anatomy.json` for `entries`: roots with their
+/// parts, states and interaction, and every attribute a selector may use
+/// (the contract `caskade-theme` lints themes against).
 pub fn contract(entries: &[Entry]) -> String {
     let mut attributes: BTreeSet<&str> = ["data-cs", "data-part"].into_iter().collect();
     attributes.extend(ROOT_ATTRIBUTES);
@@ -422,7 +329,6 @@ pub fn contract(entries: &[Entry]) -> String {
     } else {
         format!("{{\n{}\n  }}", roots.join(",\n"))
     };
-    // JavaScript sorts strings by UTF-16 code units; these are ASCII.
     let attributes: Vec<&str> = attributes.into_iter().collect();
     format!(
         "{{\n  \"roots\": {roots},\n  \"attributes\": {}\n}}\n",
@@ -430,106 +336,14 @@ pub fn contract(entries: &[Entry]) -> String {
     )
 }
 
-/// The sections of a generated `anatomy.md`, by root name.
-pub fn sections(markdown: &str) -> Vec<(String, String)> {
-    let mut out = Vec::new();
-    let mut current: Option<(String, Vec<&str>)> = None;
-    for line in markdown.lines() {
-        if let Some(name) = line
-            .strip_prefix("## `")
-            .and_then(|rest| rest.strip_suffix('`'))
-            .filter(|name| !name.starts_with('@'))
-        {
-            if let Some((name, lines)) = current.take() {
-                out.push((name, lines.join("\n")));
-            }
-            current = Some((name.to_owned(), vec![line]));
-        } else if line.starts_with("## ") {
-            if let Some((name, lines)) = current.take() {
-                out.push((name, lines.join("\n")));
-            }
-        } else if let Some((_, lines)) = &mut current {
-            lines.push(line);
-        }
-    }
-    if let Some((name, lines)) = current {
-        out.push((name, lines.join("\n")));
-    }
-    out
-}
-
-/// Where the native catalogue differs from the webview's `anatomy.md`
-/// (`webview`): a root it doesn't have, or a section that isn't word for
-/// word the same apart from the component it names as rendering it. Empty
-/// when they agree.
-pub fn differences(entries: &[Entry], webview: &str) -> Vec<String> {
-    let theirs = sections(webview);
-    let mut problems = Vec::new();
-    let mut seen = BTreeSet::new();
-    for entry in entries {
-        if !seen.insert(entry.name) {
-            problems.push(format!("{} is catalogued twice", entry.name));
-            continue;
-        }
-        // "Rendered by" names the webview's component until the cutover:
-        // the native entry names its own, and the rest has to match.
-        let rendered = |text: &str| {
-            text.lines()
-                .nth(2)
-                .and_then(|line| line.rsplit_once(" Rendered by "))
-                .map(|(_, rendered)| rendered.trim_end_matches('.').to_owned())
-        };
-        let ours = |rendered: Option<String>| {
-            let mut lines = section(entry);
-            lines[2] = format!(
-                "{} Rendered by {}.",
-                entry.description,
-                rendered.as_deref().unwrap_or(entry.rendered)
-            );
-            lines.join("\n")
-        };
-        match theirs.iter().find(|(name, _)| name == entry.name) {
-            None => problems.push(format!(
-                "{} isn't in the webview's catalogue (packages/ui/src/anatomy.ts)",
-                entry.name
-            )),
-            Some((_, text)) if text.trim_end() != ours(rendered(text)).trim_end() => {
-                problems.push(format!(
-                    "{} differs from the webview's catalogue:\n--- webview\n{}\n--- native\n{}",
-                    entry.name,
-                    text.trim_end(),
-                    ours(None).trim_end()
-                ))
-            }
-            Some(_) => {}
-        }
-    }
-    problems
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const WEBVIEW: &str = include_str!("../../../docs/theming/anatomy.md");
-
-    /// `game-art` as `anatomy.ts` has it, which the native app will render
-    /// (#93): its section is the webview's, word for word.
+    /// Markdown and JSON for a small catalogue, in the shape the docs and
+    /// `caskade-theme`'s contract have.
     #[test]
-    fn a_native_entry_writes_the_webviews_section() {
-        let theirs = sections(WEBVIEW);
-        assert!(theirs.len() > 80, "{} sections", theirs.len());
-        let (name, text) = &theirs[0];
-        // The first section, re-read from its own lines, round-trips.
-        assert!(text.starts_with(&format!("## `{name}`")));
-        let unknown = Entry::new("not-a-root", "nothing", Source::Ui, "Nothing.");
-        assert_eq!(differences(&[unknown], WEBVIEW).len(), 1);
-    }
-
-    /// Markdown and JSON for a small catalogue, against what `docs.ts`
-    /// writes for the same entries (its functions, run by hand on these).
-    #[test]
-    fn writes_what_docs_ts_writes() {
+    fn writes_the_docs_and_the_contract() {
         const ENTRY: Entry = Entry {
             parts: &[("title", "The game's | title."), ("art", "Its cover.")],
             states: &[("data-status", &["installed", "available"])],
@@ -549,48 +363,17 @@ mod tests {
              Slots: `actions` hold the caller's content; parts inside them belong to that content.\n\n\
              Container: its content comes from the caller, which may add parts of its own.\n\n\
              State on the root:\n\n- `data-status`: `installed`, `available`\n\n\
-             React Aria interaction: `data-hovered`, `data-pressed`\n\n\
+             Interaction: `data-hovered`, `data-pressed`\n\n\
              Contains: [`game-art`](#game-art)\n"
         );
         let json = contract(&[ENTRY]);
         assert!(json.starts_with(
             "{\n  \"roots\": {\n    \"game-card\": {\n      \"parts\": [\n        \"title\",\n        \"art\"\n      ],\n      \"states\": {\n        \"data-status\": [\n          \"installed\",\n          \"available\"\n        ]\n      },\n      \"interaction\": [\n        \"data-hovered\",\n        \"data-pressed\"\n      ]\n    }\n  },\n  \"attributes\": [\n    \"data-color-scheme\",\n"
         ), "{json}");
+        let docs = markdown(&[ENTRY]);
+        assert!(docs.starts_with(GENERATED));
         assert!(
-            markdown(&[ENTRY]).contains("- [`game-card`](#game-card): A game.\n\n## App shell")
+            docs.contains("## Components\n\n- [`game-card`](#game-card): A game.\n\n## App shell")
         );
-    }
-
-    /// The webview's catalogue as data (`anatomy-entries.json`, which
-    /// `docs.ts` writes and its `--check` keeps current) writes the
-    /// contract `docs.ts` writes, byte for byte.
-    #[test]
-    fn the_webviews_catalogue_writes_its_contract() {
-        let entries = from_json(include_str!("../../../packages/ui/anatomy-entries.json"))
-            .expect("the catalogue's JSON");
-        assert!(entries.len() > 80, "{} entries", entries.len());
-        assert_eq!(
-            contract(&entries),
-            include_str!("../../../packages/ui/anatomy.json")
-        );
-    }
-
-    /// A native entry takes its root's place, naming both components;
-    /// roots only the native UI renders come after the webview's.
-    #[test]
-    fn native_entries_take_their_roots_place() {
-        let webview = [
-            Entry::new("a", "A", Source::Ui, "First."),
-            Entry::new("b", "B", Source::Ui, "Second."),
-        ];
-        let native = [
-            Entry::new("b", "B (b.rs)", Source::Ui, "Second."),
-            Entry::new("c", "C (c.rs)", Source::App, "Third."),
-        ];
-        let all = with_native(&webview, &native);
-        let names: Vec<&str> = all.iter().map(|entry| entry.name).collect();
-        assert_eq!(names, ["a", "b", "c"]);
-        assert_eq!(all[1].rendered, "B (b.rs); in the webview, B");
-        assert!(markdown_by(&all, GENERATED).starts_with(GENERATED));
     }
 }

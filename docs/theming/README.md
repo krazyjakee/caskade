@@ -47,7 +47,7 @@ rewrites `packages/tokens/tokens.css` (imported by the app into the
 ## Anatomy selectors (#138)
 
 CSS reaches components through attributes, never class names. Every
-[`@caskade/ui`](../../packages/ui) and shell component renders:
+catalogued component renders:
 
 - `data-cs="<name>"` on its root, such as `[data-cs="game-card"]`.
 - `data-part="<part>"` on its parts, such as
@@ -55,26 +55,48 @@ CSS reaches components through attributes, never class names. Every
   enclosing root.
 - Domain state on the root, such as `data-status="installed"`,
   `data-variant` or `data-tone`.
-- React Aria's interaction state, such as `data-hovered`, `data-pressed`,
+- Interaction state, such as `data-hovered`, `data-pressed`,
   `data-focus-visible`, `data-selected` and `data-disabled`.
 
-The full list of roots, parts and states is [anatomy.md](anatomy.md). It is
-generated from the native app's components (#93, catalogued in
-`apps/native/src/anatomy.rs`) and, for the roots only the webview renders
-yet, from the catalogue in `packages/ui/src/anatomy.ts`, which plugins can
-also import from `@caskade/ui`. The two catalogues are checked to agree word
-for word, so themes apply to both apps unchanged. Anything not in the
-catalogue, including every class name, may change without notice. What
-Blitz still renders differently is in [blitz.md](blitz.md).
+The full list of roots, parts and states is [anatomy.md](anatomy.md). It and
+the contract themes are checked against
+([`crates/caskade-theme/anatomy.json`](../../crates/caskade-theme/anatomy.json))
+are generated from the native app's anatomy catalogue: each component
+declares its entry beside its code, listed in `apps/native/src/anatomy.rs`
+(#139). Anything not in the catalogue, including every class name, may
+change without notice. What Blitz still renders differently is in
+[blitz.md](blitz.md).
 
-Tests check both directions:
+Tests check that:
 
-- Each component in each documented state renders exactly the parts and
-  states its catalogue entry lists.
-- The stylesheets of the app and `packages/ui` may only use catalogued
-  `data-cs` and `data-part` selectors, and no class or id selectors.
+- Every `data-cs` the native sources render is catalogued, each root once,
+  and a root only contains catalogued roots.
+- `anatomy.md` and `anatomy.json` are current.
 
-After changing the catalogue, run `pnpm --filter @caskade/ui docs`.
+After changing the catalogue, run
+`CASKADE_WRITE_ANATOMY=1 cargo test -p caskade-native anatomy`.
+
+### Compatibility with the webview's catalogue (#139)
+
+The catalogue used to be the webview's (`packages/ui/src/anatomy.ts`), and
+the native one had to match it word for word. Every root, part and state it
+had is still in the contract, with these differences:
+
+- `alphabet-bar`: a `letter` is shown only for initials some game starts
+  with, so `data-disabled` is no longer set on one, and dragging along the
+  bar no longer jumps letter by letter. The letter on screen still carries
+  `data-selected`.
+- `play-choice` gained the `play-starts` part (the Play starts select).
+- Roots the native UI rendered without an entry are now catalogued:
+  `activity-job`, `add-game`, `add-games`, `add-web-game`,
+  `collection-dialog`, `collection-picker`, `discovery-review`,
+  `discovery-settings`, `emulation`, `guide-menu`, `install-confirmation`,
+  `install-root-picker`, `install-url`, `job-question`, `new-collection`,
+  `pair-dialog`, `pair-request`, `playing-elsewhere`, `plugin-review`,
+  `save-arriving`, `save-conflict`, `saves-panel`, `schema-settings`,
+  `stop-host`, `storage-settings`, `stream-host`, `stream-pair-prompt`,
+  `streaming-client`, `streaming-existing`, `streaming-program`,
+  `streaming-settings`, `update-offer` and `virtual-library`.
 
 ## User settings (#141)
 
@@ -135,7 +157,7 @@ as a frame along the cut corners. Small controls whose own border would hide
 an inner edge (the slider's thumb) keep it outside. Under forced colours the
 edge is drawn in `Highlight`.
 
-Focus shows on `:focus-visible` and React Aria's `data-focus-visible`. A
+Focus shows on `:focus-visible` and the component's `data-focus-visible`. A
 checkbox or switch carries the state on its root and draws the ring on a
 part: `[data-cs="checkbox"][data-focus-visible] [data-part="box"]`.
 A theme restyles focus through the tokens; a theme rule that moves a focused
@@ -381,27 +403,9 @@ property set by the theme or by a component without `!important`.
 
 ## M3 exit test (#145)
 
-`pnpm --filter @caskade/desktop test:themes` checks that a second theme
-restyles every core view through the contract alone. It starts the fixture
-dev server (`VITE_CASKADE_FIXTURES=1`) on a free port, compiles
-`themes/default` and `themes/paper` with `caskade-theme build` (under the
-heavy lock: don't wrap the command in `flock`), and opens Home, Library grid
-and list, a game, Store, Collections, a collection, Activity, the plugin
-route and every Settings tab in Chromium (`playwright-core`, no browser
-download: `--chrome <path>` or `CHROME_PATH`). Each theme is applied the way
-the app applies one, as the single `[data-cs-theme]` stylesheet, with its
-assets served on `caskade-theme.localhost`.
-
-For every view it records the computed colours, fonts, radii, borders and
-effects of each `data-cs` root and its parts. It fails when a view shows no
-colour, typography or radius change, when a root looks the same under both
-themes and isn't in the script's allowlist, when a token the theme declares
-doesn't compute on `<html>`, when an element built on a radius or font token
-doesn't take the theme's value, or when the theme's font doesn't load.
-Screenshots (`<view>-<theme>.png`) and the coverage report
-(`coverage.json`, `coverage.md`) are written to `target/theming/`. Other
-themes: `--base <dir> --theme <dir>`; precompiled sheets:
-`--css <dir>=<file>`; a running fixture server: `--url <origin>`. The fixture
-build has no plugins, so the plugin route shows only the shell. The runs
-cover Chromium on Linux; WebView2 and WKWebView are deferred, to W9 and M2 in
-`docs/manual-checks.md` (#8 lets them wait).
+The native screenshots (`cargo test -p caskade-native --features shots --test shots`,
+[docs/native-testing.md](../native-testing.md)) render the reference screens
+and the component gallery under every built-in theme and a catalogue theme,
+and compare them with committed images, so a theme that stops restyling a
+view through the contract shows up as a changed screenshot. The webview's
+Chromium script that did this before #143 was retired with the webview app.
