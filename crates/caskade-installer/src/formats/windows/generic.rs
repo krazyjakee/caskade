@@ -6,14 +6,8 @@ use crate::{
     },
     *,
 };
-use std::collections::BTreeMap;
 #[derive(Default)]
 pub struct GenericHandler;
-impl GenericHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for GenericHandler {
     fn id(&self) -> HandlerId {
         HandlerId("windows-generic".into())
@@ -79,116 +73,71 @@ pub(crate) fn propose(
         });
     }
     if let Some(runtime) = super::installer_runtime(context.host) {
-        for mode in [InstallerMode::Silent, InstallerMode::Interactive] {
-            if mode == InstallerMode::Silent && !silent {
-                continue;
-            }
-            let settings = SwitchSettings::from(&context.policy.preset_args);
-            let mut preset = build_args(
-                family,
-                if family == InstallerFamily::InstallShield {
-                    InstallerMode::Interactive
-                } else {
-                    mode
-                },
-                &settings,
-            )
+        let expect = node
+            .facts
+            .get("installer.expect")
+            .cloned()
+            .map(serde_json::from_value::<Vec<std::path::PathBuf>>)
+            .transpose()
             .map_err(|e| PlanError::Handler {
                 handler: handler.clone(),
                 message: e.to_string(),
-            })?;
-            if family == InstallerFamily::InstallShield && mode == InstallerMode::Silent {
-                preset.args =
-                    super::installshield::identified_msi_args(&settings).map_err(|e| {
-                        PlanError::Handler {
-                            handler: handler.clone(),
-                            message: e.to_string(),
-                        }
-                    })?;
+            })?
+            .unwrap_or_default();
+        for path in &expect {
+            if path
+                .to_str()
+                .is_none_or(|text| crate::safety::sanitize_path(text).is_err())
+            {
+                return Err(PlanError::Handler {
+                    handler: handler.clone(),
+                    message: "unsafe installer expected path".into(),
+                });
+            }
+        }
+        let settings = SwitchSettings::from(&context.policy.preset_args);
+        let run = super::Run {
+            handler: handler.clone(),
+            program: Program::Source(SourcePath::Artifact {
+                artifact: node.id.clone(),
+                path: ".".into(),
+            }),
+            leading_args: vec![],
+            timeout_secs: 1800,
+            expect,
+            may_prompt_elevation: true,
+            est_disk_bytes: None,
+            confidence: if burn || silent { 0.98 } else { 0.9 },
+            warning_code: "installer.preset",
+        };
+        let modes: &[InstallerMode] = if silent {
+            &[InstallerMode::Silent, InstallerMode::Interactive]
+        } else {
+            &[InstallerMode::Interactive]
+        };
+        let mut runs = super::run_candidates(run, runtime, modes, |mode| {
+            if family != InstallerFamily::InstallShield {
+                return build_args(family, mode, &settings);
+            }
+            let mut preset = build_args(family, InstallerMode::Interactive, &settings)?;
+            if mode == InstallerMode::Silent {
+                preset.args = super::installshield::identified_msi_args(&settings)?;
                 preset
                     .warnings
                     .retain(|message| !message.starts_with("Install directory cannot be preset"));
             }
-            let program = Program::Source(SourcePath::Artifact {
-                artifact: node.id.clone(),
-                path: ".".into(),
-            });
-            let expect = node
-                .facts
-                .get("installer.expect")
-                .cloned()
-                .map(serde_json::from_value::<Vec<std::path::PathBuf>>)
-                .transpose()
-                .map_err(|e| PlanError::Handler {
-                    handler: handler.clone(),
-                    message: e.to_string(),
-                })?
-                .unwrap_or_default();
-            for path in &expect {
-                if path
-                    .to_str()
-                    .is_none_or(|text| crate::safety::sanitize_path(text).is_err())
-                {
-                    return Err(PlanError::Handler {
-                        handler: handler.clone(),
-                        message: "unsafe installer expected path".into(),
-                    });
-                }
-            }
-            let step = if mode == InstallerMode::Silent {
-                Step::Run {
-                    program,
-                    args: preset.args,
-                    env: BTreeMap::new(),
-                    runtime: runtime.clone(),
-                    timeout_secs: 1800,
-                    expect,
-                }
-            } else {
-                Step::RunInteractive {
-                    program,
-                    args: preset.args,
-                    env: BTreeMap::new(),
-                    runtime: runtime.clone(),
-                    target_dir: ".".into(),
-                }
-            };
-            let mut warnings: Vec<_> = preset
-                .warnings
-                .into_iter()
-                .map(|message| Warning {
-                    code: "installer.preset".into(),
-                    message,
-                    path: None,
-                })
-                .collect();
-            if !silent {
-                warnings.push(Warning {
+            Ok(preset)
+        })?;
+        if !silent {
+            for candidate in &mut runs {
+                candidate.warnings.push(Warning {
                     code: "installer.interactive_fallback".into(),
                     message: "No verified silent contract for this installer variant; run the wizard with supported presets only.".into(),
                     path: None,
                 });
             }
-            candidates.push(Candidate {
-                handler: handler.clone(),
-                strategy: if mode == InstallerMode::Silent {
-                    Strategy::RunSilent
-                } else {
-                    Strategy::RunInteractive
-                },
-                confidence: if burn || silent { 0.98 } else { 0.9 },
-                fidelity: Fidelity::Native,
-                requires: Requirements {
-                    executes_code: true,
-                    runtime: Some(runtime.clone()),
-                    may_prompt_elevation: true,
-                    interactive: mode == InstallerMode::Interactive,
-                    est_disk_bytes: None,
-                },
-                steps: vec![step],
-                warnings,
-            });
         }
+        candidates.extend(runs);
     }
     Ok(Proposal {
         candidates,

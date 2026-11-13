@@ -162,7 +162,7 @@ async fn near(
 ) -> Option<crate::fetch::DownloadedFile> {
     let local = ctx.local.as_ref()?;
     crate::fetch::safe_file_name(job).ok()?;
-    let dir = root.join(".caskade/downloads").join(job).join("near");
+    let dir = root.join(crate::fetch::DOWNLOADS).join(job).join("near");
     fs::create_dir_all(&dir).ok()?;
     let sink = ctx.sink.clone();
     let job_id = job.to_owned();
@@ -390,12 +390,12 @@ pub fn fetch_engine(
 pub fn host(profile: Option<&str>) -> PipelineResult<HostCaps> {
     let mut host = if let Some(profile) = profile {
         let builtin = match profile.trim_end_matches(".toml") {
-            "windows" => Some(include_str!("../../tests/hosts/windows.toml")),
-            "linux" => Some(include_str!("../../tests/hosts/linux.toml")),
-            "linux-no-umu" => Some(include_str!("../../tests/hosts/linux-no-umu.toml")),
-            "linux-exfat-root" => Some(include_str!("../../tests/hosts/linux-exfat-root.toml")),
-            "macos" => Some(include_str!("../../tests/hosts/macos.toml")),
-            "macos-no-wine" => Some(include_str!("../../tests/hosts/macos-no-wine.toml")),
+            "windows" => Some(include_str!("../../data/hosts/windows.toml")),
+            "linux" => Some(include_str!("../../data/hosts/linux.toml")),
+            "linux-no-umu" => Some(include_str!("../../data/hosts/linux-no-umu.toml")),
+            "linux-exfat-root" => Some(include_str!("../../data/hosts/linux-exfat-root.toml")),
+            "macos" => Some(include_str!("../../data/hosts/macos.toml")),
+            "macos-no-wine" => Some(include_str!("../../data/hosts/macos-no-wine.toml")),
             _ => None,
         };
         match builtin {
@@ -415,8 +415,8 @@ pub fn host(profile: Option<&str>) -> PipelineResult<HostCaps> {
 
 pub fn planner() -> PipelineResult<PlanEngine> {
     let mut planner = PlanEngine::new();
-    planner.register(Box::new(ArchiveHandler::new()))?;
-    planner.register(Box::new(crate::formats::archive::sfx::SfxHandler::new()))?;
+    planner.register(Box::new(ArchiveHandler))?;
+    planner.register(Box::new(crate::formats::archive::sfx::SfxHandler))?;
     planner.register(Box::new(crate::formats::archive::sevenzip::SevenZipHandler))?;
     planner.register(Box::new(crate::formats::portable::FolderHandler))?;
     planner.register(Box::new(crate::formats::rom::RomHandler))?;
@@ -425,31 +425,25 @@ pub fn planner() -> PipelineResult<PlanEngine> {
         planner.register(Box::new(crate::formats::windows::msi::MsiHandler))?;
         planner.register(Box::new(crate::formats::windows::inno::InnoHandler))?;
         planner.register(Box::new(crate::formats::windows::nsis::NsisHandler))?;
-        planner.register(Box::new(crate::formats::windows::burn::BurnHandler::new()))?;
+        planner.register(Box::new(crate::formats::windows::burn::BurnHandler))?;
+        planner.register(Box::new(crate::formats::windows::generic::GenericHandler))?;
         planner.register(Box::new(
-            crate::formats::windows::generic::GenericHandler::new(),
+            crate::formats::windows::installshield::InstallShieldHandler,
         ))?;
-        planner.register(Box::new(
-            crate::formats::windows::installshield::InstallShieldHandler::new(),
-        ))?;
-        planner.register(Box::new(crate::formats::windows::wise::WiseHandler::new()))?;
+        planner.register(Box::new(crate::formats::windows::wise::WiseHandler))?;
     }
     #[cfg(feature = "macos-formats")]
-    planner.register(Box::new(crate::formats::macos::app::AppHandler::new()))?;
+    planner.register(Box::new(crate::formats::macos::app::AppHandler))?;
     #[cfg(feature = "macos-formats")]
-    planner.register(Box::new(crate::formats::macos::pkg::PkgHandler::new()))?;
+    planner.register(Box::new(crate::formats::macos::pkg::PkgHandler))?;
     #[cfg(feature = "macos-formats")]
-    planner.register(Box::new(crate::formats::macos::dmg::DmgHandler::new()))?;
+    planner.register(Box::new(crate::formats::macos::dmg::DmgHandler))?;
     #[cfg(feature = "linux-formats")]
     {
-        planner.register(Box::new(crate::formats::linux::deb::DebHandler::new()))?;
-        planner.register(Box::new(crate::formats::linux::rpm::RpmHandler::new()))?;
-        planner.register(Box::new(
-            crate::formats::linux::makeself::MakeselfHandler::new(),
-        ))?;
-        planner.register(Box::new(
-            crate::formats::linux::mojosetup::MojoSetupHandler::new(),
-        ))?;
+        planner.register(Box::new(crate::formats::linux::deb::DebHandler))?;
+        planner.register(Box::new(crate::formats::linux::rpm::RpmHandler))?;
+        planner.register(Box::new(crate::formats::linux::makeself::MakeselfHandler))?;
+        planner.register(Box::new(crate::formats::linux::mojosetup::MojoSetupHandler))?;
         planner.register(Box::new(crate::formats::linux::appimage::AppImageHandler))?;
         planner.register(Box::new(crate::formats::linux::flatpak::FlatpakHandler))?;
     }

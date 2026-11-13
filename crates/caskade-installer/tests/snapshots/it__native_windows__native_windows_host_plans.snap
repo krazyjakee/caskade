@@ -103,7 +103,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -169,7 +169,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -277,7 +277,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -343,7 +343,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -414,7 +414,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -505,7 +505,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -615,7 +615,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -681,7 +681,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -789,7 +789,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -855,7 +855,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -926,7 +926,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1017,7 +1017,7 @@ expression: snapshot
             },
             {
               "code": "inno.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1122,12 +1122,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1189,12 +1189,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1297,12 +1297,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1364,12 +1364,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1435,12 +1435,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1527,12 +1527,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1637,12 +1637,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1704,12 +1704,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1812,12 +1812,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1879,12 +1879,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -1950,12 +1950,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -2042,12 +2042,12 @@ expression: snapshot
             },
             {
               "code": "msi.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "msi.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -2154,12 +2154,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -2223,12 +2223,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -2333,12 +2333,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -2402,12 +2402,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -2475,12 +2475,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -2569,12 +2569,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -2681,12 +2681,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -2750,12 +2750,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -2860,12 +2860,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -2929,12 +2929,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -3002,12 +3002,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]
@@ -3096,12 +3096,12 @@ expression: snapshot
             },
             {
               "code": "nsis.preset",
-              "message": "Shortcut suppression needs a package-specific recipe.",
+              "message": "Shortcut suppression cannot be preset for this installer family.",
               "path": null
             },
             {
               "code": "nsis.preset",
-              "message": "Launch-at-finish suppression needs a package-specific recipe.",
+              "message": "Launch-at-finish suppression cannot be preset for this installer family.",
               "path": null
             }
           ]

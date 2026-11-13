@@ -149,7 +149,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -215,7 +215,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -317,7 +317,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -383,7 +383,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -516,7 +516,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -582,7 +582,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -684,7 +684,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -769,7 +769,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -953,7 +953,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -1019,7 +1019,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -1127,7 +1127,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -1193,7 +1193,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -1338,7 +1338,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -1404,7 +1404,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -1512,7 +1512,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -1603,7 +1603,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -1755,7 +1755,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -1821,7 +1821,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -1923,7 +1923,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -1989,7 +1989,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -2122,7 +2122,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -2188,7 +2188,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -2290,7 +2290,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -2375,7 +2375,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -2528,7 +2528,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -2594,7 +2594,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -2702,7 +2702,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -2768,7 +2768,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -2913,7 +2913,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -2979,7 +2979,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -3087,7 +3087,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -3178,7 +3178,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -3338,7 +3338,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -3404,7 +3404,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -3512,7 +3512,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -3578,7 +3578,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -3723,7 +3723,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -3789,7 +3789,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -3897,7 +3897,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -3988,7 +3988,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -4224,7 +4224,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -4290,7 +4290,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -4398,7 +4398,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -4464,7 +4464,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -4609,7 +4609,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -4675,7 +4675,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -4783,7 +4783,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -4874,7 +4874,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -5026,7 +5026,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -5092,7 +5092,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -5194,7 +5194,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -5260,7 +5260,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -5393,7 +5393,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -5459,7 +5459,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -5561,7 +5561,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -5646,7 +5646,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -5793,7 +5793,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -5859,7 +5859,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -5961,7 +5961,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -6027,7 +6027,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -6160,7 +6160,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -6226,7 +6226,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -6328,7 +6328,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -6413,7 +6413,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -6566,7 +6566,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -6632,7 +6632,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -6740,7 +6740,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -6806,7 +6806,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -6951,7 +6951,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -7017,7 +7017,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -7125,7 +7125,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -7216,7 +7216,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -7376,7 +7376,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -7442,7 +7442,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -7550,7 +7550,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -7616,7 +7616,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -7761,7 +7761,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -7827,7 +7827,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -7935,7 +7935,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -8026,7 +8026,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -8262,7 +8262,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -8328,7 +8328,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -8436,7 +8436,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -8502,7 +8502,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -8647,7 +8647,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -8713,7 +8713,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -8821,7 +8821,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -8912,7 +8912,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -9064,7 +9064,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -9130,7 +9130,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -9232,7 +9232,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -9298,7 +9298,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -9431,7 +9431,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -9497,7 +9497,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -9599,7 +9599,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -9684,7 +9684,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -9837,7 +9837,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -9903,7 +9903,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -10011,7 +10011,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -10077,7 +10077,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -10222,7 +10222,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -10288,7 +10288,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -10396,7 +10396,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -10487,7 +10487,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -10647,7 +10647,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -10713,7 +10713,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -10821,7 +10821,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -10887,7 +10887,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -11032,7 +11032,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -11098,7 +11098,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -11206,7 +11206,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -11297,7 +11297,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -11545,7 +11545,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -11611,7 +11611,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -11719,7 +11719,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -11785,7 +11785,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -11930,7 +11930,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -11996,7 +11996,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -12104,7 +12104,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]
@@ -12195,7 +12195,7 @@ expression: snapshot
               },
               {
                 "code": "inno.preset",
-                "message": "Launch-at-finish suppression needs a package-specific recipe.",
+                "message": "Launch-at-finish suppression cannot be preset for this installer family.",
                 "path": null
               }
             ]

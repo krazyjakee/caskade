@@ -14,7 +14,7 @@ use caskade_installer::{
     plan::{ExecutionPolicy, PlanEngine, Policy},
     probe::{ProbeEngine, ProbeLimits},
     safety::{Limits, SafeDir, open_staging},
-    testing::{FakeDiskSpace, FakeRuntime, RecordingSink, TestRoot},
+    testing::{FakeDiskSpace, FakeRuntime, RecordingSink, TestRoot, probe_tree},
 };
 use std::{
     collections::BTreeMap,
@@ -31,11 +31,11 @@ fn fixture(id: &str) -> fixtures::Fixture {
 }
 fn engine() -> ProbeEngine {
     let mut engine = ProbeEngine::default();
-    engine.register(Box::new(PkgProbe::new()));
+    engine.register(Box::new(PkgProbe));
     engine
 }
 fn host() -> HostCaps {
-    let mut host: HostCaps = toml::from_str(include_str!("hosts/macos.toml")).unwrap();
+    let mut host: HostCaps = caskade_installer::pipeline::input::host(Some("macos")).unwrap();
     host.packages.managers = BTreeMap::from([
         ("installer".into(), "/usr/sbin/installer".into()),
         ("pkgutil".into(), "/usr/sbin/pkgutil".into()),
@@ -45,7 +45,7 @@ fn host() -> HostCaps {
 }
 fn plans(node: &ArtifactNode, host: &HostCaps, policy: &Policy) -> PlanSet {
     let mut plan = PlanEngine::new();
-    plan.register(Box::new(PkgHandler::new())).unwrap();
+    plan.register(Box::new(PkgHandler)).unwrap();
     plan.plan(std::slice::from_ref(node), host, policy).unwrap()
 }
 fn writer(root: &Path, packed: u64) -> SafeDir {
@@ -160,9 +160,7 @@ async fn real_pkg_plan_executor_routes_archive_extractor_reprobes_and_executes_z
         fixture.assert_tree(&report.dir).unwrap();
         assert!(runtime.processes().is_empty());
         assert!(
-            extractor
-                .take_artifacts(&node.id)
-                .unwrap()
+            probe_tree(&report.dir)
                 .iter()
                 .any(|n| n.path.ends_with("Contents/MacOS/FixtureGame"))
         );
@@ -212,7 +210,7 @@ fn system_locations_and_active_scripts_delegate_without_caskade_question_and_pol
             ..Policy::default()
         };
         assert!(plans(&node, &host(), &never).candidates.is_empty());
-        let linux: HostCaps = toml::from_str(include_str!("hosts/linux.toml")).unwrap();
+        let linux: HostCaps = caskade_installer::pipeline::input::host(Some("linux")).unwrap();
         assert!(
             plans(&node, &linux, &Policy::default())
                 .candidates

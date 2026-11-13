@@ -46,6 +46,7 @@ relies on: moving the game later is a retarget, with no rewrites.
 - Windows uses the `junction` crate (safe API; no admin rights, no `unsafe` in
   this crate).
 - Executor orchestration (alias → staging for `Run` steps, `INSTALL_DIR` →
-  alias, retarget to the final directory on commit), the manifest alias ID,
-  uninstall removal, and the recipe `disable_alias` flag are wired through the
-  executor, manifest, uninstall and recipe seams of their owners.
+  alias, retarget to the final directory on commit), the manifest alias ID and
+  uninstall removal are wired through the executor, manifest and uninstall
+  seams of their owners. (The per-package recipes and their `disable_alias`
+  flag were removed; a caller that wants no alias omits it.)

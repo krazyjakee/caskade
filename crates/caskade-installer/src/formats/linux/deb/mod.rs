@@ -308,7 +308,7 @@ pub fn extract(
     dir: &mut SafeDir,
     options: &ArchiveOptions,
     control: &mut dyn ExtractionControl,
-) -> Result<(PackageInfo, Vec<crate::ArtifactNode>)> {
+) -> Result<PackageInfo> {
     control.checkpoint(0)?;
     let package = inspect(reader)?;
     if package.info.absolute_paths {
@@ -317,6 +317,6 @@ pub fn extract(
         ));
     }
     let view = PayloadReader::new(reader, package.data.offset, package.data.length)?;
-    let nodes = archive::extract(view, package.format, dir, options, control)?;
-    Ok((package.info, nodes))
+    archive::extract(view, package.format, dir, options, control)?;
+    Ok(package.info)
 }

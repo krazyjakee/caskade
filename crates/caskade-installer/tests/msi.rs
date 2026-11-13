@@ -33,13 +33,7 @@ fn corpus() -> Vec<fixtures::Fixture> {
         .collect()
 }
 fn host(name: &str) -> host::HostCaps {
-    toml::from_str(
-        &fs::read_to_string(
-            Path::new(env!("CARGO_MANIFEST_DIR")).join(format!("tests/hosts/{name}.toml")),
-        )
-        .unwrap(),
-    )
-    .unwrap()
+    caskade_installer::pipeline::input::host(Some(name)).unwrap()
 }
 fn probe(path: &Path) -> ArtifactNode {
     let mut probe = ProbeEngine::default();

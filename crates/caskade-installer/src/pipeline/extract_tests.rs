@@ -8,7 +8,9 @@ use crate::{
     probe::{ProbeEngine, ProbeLimits},
     runtime::{ProcessCommand, ProcessExit, ProcessId, Runtime, RuntimeError},
     safety::{Limits, SafeDir, open_staging},
-    testing::{FakeAction, FakeDiskSpace, FakeRuntime, FakeScript, RecordingSink, TestRoot},
+    testing::{
+        FakeAction, FakeDiskSpace, FakeRuntime, FakeScript, RecordingSink, TestRoot, probe_tree,
+    },
 };
 use std::time::Duration;
 
@@ -188,9 +190,10 @@ async fn cli_dmg_route_copies_discovers_records_and_always_detaches() {
             assert!(!manifest.record().launch_targets.is_empty());
             assert!(!manifest.record().files.is_empty());
             assert!(manifest.verify(&report.dir).unwrap().changed.is_empty());
-            assert_eq!(
-                extractor.dmg.take_artifacts(&artifact.id).unwrap()[0].format,
-                Format::AppBundle
+            assert!(
+                probe_tree(&report.dir)
+                    .iter()
+                    .any(|node| node.format == Format::AppBundle)
             );
         } else {
             assert!(result.is_err());

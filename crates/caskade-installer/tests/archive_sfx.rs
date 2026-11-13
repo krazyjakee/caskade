@@ -3,7 +3,7 @@ use caskade_installer::{
     formats::archive::{self, ArchiveOptions, ArchiveProbe, NoopControl, PayloadReader, sfx::*},
     probe::{PeProbe, ProbeEngine},
     safety::{Limits, SafeDir, open_staging},
-    testing::TestRoot,
+    testing::{TestRoot, probe_tree},
 };
 use std::{
     io::{Cursor, Read, Seek, SeekFrom},
@@ -22,8 +22,8 @@ fn fixture(id: &str) -> fixtures::Fixture {
 fn engine() -> ProbeEngine {
     let mut engine = ProbeEngine::default();
     engine.register(Box::new(PeProbe::new()));
-    engine.register(Box::new(SfxProbe::new()));
-    engine.register(Box::new(ArchiveProbe::new()));
+    engine.register(Box::new(SfxProbe));
+    engine.register(Box::new(ArchiveProbe));
     engine
 }
 
@@ -70,7 +70,7 @@ fn genuine_zip_and_seven_sfx_extract_list_and_reprobe_without_running_stubs() {
             payload.length,
             true,
         );
-        let nodes = extract_path(
+        extract_path(
             &path,
             root.path(),
             None,
@@ -81,9 +81,9 @@ fn genuine_zip_and_seven_sfx_extract_list_and_reprobe_without_running_stubs() {
         .unwrap();
         root.assert_sentinel_untouched();
         fixture.assert_tree(root.path()).unwrap();
-        assert!(nodes.iter().any(
-            |n| n.path == Path::new(&fixture.expected.launch_target) && n.format == Format::Pe
-        ));
+        assert!(probe_tree(root.path()).iter().any(|n| n.path
+            == Path::new(&fixture.expected.launch_target)
+            && n.format == Format::Pe));
         // Existing archive callers also recognise SFX without selecting a new API.
         assert!(
             !archive::list_path(&path, &ArchiveOptions::default())
@@ -139,12 +139,12 @@ async fn install(id: &str, tool: Option<archive::sevenzip::SevenZip>) {
     use std::{collections::BTreeMap, sync::Arc};
     let fixture = fixture(id);
     let node = engine().probe_path(&fixture.input()).unwrap().root;
-    let mut host: HostCaps = toml::from_str(include_str!("hosts/linux.toml")).unwrap();
+    let mut host: HostCaps = caskade_installer::pipeline::input::host(Some("linux")).unwrap();
     if tool.is_none() {
         host.seven_zip = None;
     }
     let mut planner = PlanEngine::new();
-    planner.register(Box::new(SfxHandler::new())).unwrap();
+    planner.register(Box::new(SfxHandler)).unwrap();
     let plans = planner
         .plan(std::slice::from_ref(&node), &host, &Policy::default())
         .unwrap();
@@ -179,9 +179,7 @@ async fn install(id: &str, tool: Option<archive::sevenzip::SevenZip>) {
     root.assert_sentinel_untouched();
     fixture.assert_tree(&report.dir).unwrap();
     assert!(
-        extractor
-            .take_artifacts(&node.id)
-            .unwrap()
+        probe_tree(&report.dir)
             .iter()
             .any(|n| n.format == Format::Pe)
     );

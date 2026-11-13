@@ -14,12 +14,12 @@ use crate::{
     },
     runtime::{
         NativeRuntime, Runtime,
-        proton::{Launcher, PrefixRuntime},
+        proton::{Launcher, PREFIX, PrefixRuntime},
     },
 };
 use std::{fs, path::Path, sync::Arc};
-/// Development CLI observation; application storage supplies its authoritative
-/// game process tracker through the same RunningCheck seam.
+/// The running-game check every relocator gets: any other process whose
+/// executable or working directory is inside the game folder.
 struct Processes;
 impl RunningCheck for Processes {
     fn running(&self, game: &Path) -> bool {
@@ -131,7 +131,7 @@ fn engine_at(
                     },
                     RuntimeSpec::Native => unreachable!(),
                 };
-                let prefix = path.join(".caskade/prefix");
+                let prefix = path.join(PREFIX);
                 if !prefix.is_dir()
                     || fs::symlink_metadata(&prefix)?.file_type().is_symlink()
                     || !dunce::canonicalize(&prefix)?.starts_with(path)
@@ -140,11 +140,11 @@ fn engine_at(
                         "CLI prefix must be a real game-local .caskade/prefix directory".into(),
                     ));
                 }
-                Arc::new(PrefixRegistry {
-                    runtime: Arc::new(PrefixRuntime::new(launcher)),
-                    prefix: destination.unwrap_or(path).join(".caskade/prefix"),
-                    game_dir: destination.unwrap_or(path).into(),
-                })
+                Arc::new(PrefixRegistry::new(
+                    Arc::new(PrefixRuntime::new(launcher)),
+                    destination.unwrap_or(path).join(PREFIX),
+                    destination.unwrap_or(path).into(),
+                ))
             }
         },
         None => Arc::new(NoRegistry),

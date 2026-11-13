@@ -13,16 +13,11 @@ use crate::{
 use std::{
     collections::BTreeMap,
     path::{Path, PathBuf},
-    sync::{Arc, Mutex},
+    sync::Arc,
     time::Duration,
 };
 #[derive(Default)]
 pub struct DmgProbe;
-impl DmgProbe {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl FormatProbe for DmgProbe {
     fn id(&self) -> &str {
         "macos-dmg"
@@ -53,11 +48,6 @@ impl FormatProbe for DmgProbe {
 }
 #[derive(Default)]
 pub struct DmgHandler;
-impl DmgHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for DmgHandler {
     fn id(&self) -> HandlerId {
         HandlerId("macos-dmg".into())
@@ -120,7 +110,6 @@ pub struct DmgExtractor {
     sources: BTreeMap<ArtifactId, PathBuf>,
     host: HostCaps,
     runtime: Arc<dyn Runtime>,
-    artifacts: Mutex<BTreeMap<ArtifactId, Vec<ArtifactNode>>>,
 }
 impl DmgExtractor {
     pub fn new(
@@ -132,14 +121,7 @@ impl DmgExtractor {
             sources,
             host,
             runtime,
-            artifacts: Mutex::default(),
         }
-    }
-    pub fn take_artifacts(&self, id: &ArtifactId) -> Option<Vec<ArtifactNode>> {
-        self.artifacts
-            .lock()
-            .expect("DMG artifacts poisoned")
-            .remove(id)
     }
     pub fn runtime(&self) -> &Arc<dyn Runtime> {
         &self.runtime
@@ -287,11 +269,7 @@ impl Extractor for DmgExtractor {
         // returning a copy/metadata error, and never consults its token.
         mounted.detach().map_err(map_error)?;
         context.checkpoint(0)?;
-        let nodes = copied.map_err(map_error)?;
-        self.artifacts
-            .lock()
-            .expect("DMG artifacts poisoned")
-            .insert(artifact.clone(), nodes);
+        copied.map_err(map_error)?;
         Ok(())
     }
 }

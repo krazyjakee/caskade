@@ -26,17 +26,17 @@ async fn install_and_uninstall(fixture: fixtures::Fixture, sidecar: Option<&Seve
     let root = TestRoot::new().unwrap();
     let source = fixture.input();
     let mut probe = ProbeEngine::default();
-    probe.register(Box::new(ArchiveProbe::new()));
+    probe.register(Box::new(ArchiveProbe));
     let artifact = probe.probe_path(&source).unwrap().root;
     let sources = BTreeMap::from([(artifact.id.clone(), source.clone())]);
     let mut planner = PlanEngine::new();
-    let mut host: HostCaps = toml::from_str(include_str!("hosts/linux.toml")).unwrap();
+    let mut host: HostCaps = caskade_installer::pipeline::input::host(Some("linux")).unwrap();
     let extractor: Arc<dyn Extractor> = if let Some(tool) = sidecar {
         host.seven_zip = Some(tool.program().into());
         planner.register(Box::new(SevenZipHandler)).unwrap();
         Arc::new(SevenZipExtractor::new(tool.clone(), sources.clone()))
     } else {
-        planner.register(Box::new(ArchiveHandler::new())).unwrap();
+        planner.register(Box::new(ArchiveHandler)).unwrap();
         Arc::new(ArchiveExtractor::new(sources.clone()))
     };
     let plans = planner

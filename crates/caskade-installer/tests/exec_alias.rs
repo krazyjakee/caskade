@@ -162,7 +162,7 @@ async fn failed_install_removes_its_alias_and_disabled_aliases_use_the_real_path
     assert_eq!(store.target(&id).unwrap(), None);
     assert!(!root.path().join("Indie Game").exists());
 
-    // A recipe that disables the alias simply omits with_aliases.
+    // A caller that wants no alias omits with_aliases.
     let report = run(&root, None, native(0), Arc::default()).await.unwrap();
     assert_eq!(report.alias, None);
     let real = root.path().join("Indie Game");

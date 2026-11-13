@@ -13,11 +13,6 @@ use std::{
 
 #[derive(Default)]
 pub struct AppHandler;
-impl AppHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 fn bundle_roots(node: &ArtifactNode) -> Vec<PathBuf> {
     let mut roots = BTreeSet::new();
     for child in &node.children {

@@ -238,7 +238,7 @@ fn rar_fixtures_complete_the_binary_pipeline_with_the_verified_sidecar() {
 fn all_host_profiles_and_custom_toml_plan_through_the_binary() {
     let input = fixtures_root().join("bin/unity.zip");
     let mut profiles = std::collections::BTreeMap::new();
-    let hosts = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/hosts");
+    let hosts = Path::new(env!("CARGO_MANIFEST_DIR")).join("data/hosts");
     for entry in fs::read_dir(hosts).unwrap() {
         let path = entry.unwrap().path();
         let name = path.file_stem().unwrap().to_str().unwrap();

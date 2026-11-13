@@ -163,10 +163,8 @@ fn fake_extraction_parses_progress_imports_safely_and_discards_scratch() {
     let sink = RecordingSink::default();
     let token = CancellationToken::new();
     let mut control = EventProgress::new("sidecar", &token, &sink);
-    let nodes = tool
-        .extract(&input, &scratch, &mut writer(&output), &mut control)
+    tool.extract(&input, &scratch, &mut writer(&output), &mut control)
         .unwrap();
-    assert_eq!(nodes.len(), 1);
     assert_eq!(std::fs::read(output.join("file")).unwrap(), b"payload");
     assert_eq!(*seen.lock().unwrap(), vec![12, 100]);
     assert_eq!(std::fs::read_dir(scratch).unwrap().count(), 0);
@@ -252,11 +250,9 @@ fn pinned_official_rar_fixtures_match_all_expected_trees() {
         );
         let listed = tool.list(&fixture.input(), &mut NoopControl).unwrap();
         assert!(!listed.is_empty());
-        let nodes = tool
-            .extract(&fixture.input(), &scratch, &mut dir, &mut NoopControl)
+        tool.extract(&fixture.input(), &scratch, &mut dir, &mut NoopControl)
             .unwrap_or_else(|e| panic!("{}: {e}", fixture.expected.id));
         fixture.assert_tree(&staging).unwrap();
-        assert!(!nodes.is_empty());
         assert_eq!(std::fs::read_dir(scratch).unwrap().count(), 0);
         count += 1;
     }
@@ -282,7 +278,7 @@ async fn pinned_official_sidecar_runs_through_executor() {
         .probe_path(&source)
         .unwrap()
         .root;
-    let mut host: HostCaps = toml::from_str(include_str!("hosts/linux.toml")).unwrap();
+    let mut host: HostCaps = caskade_installer::pipeline::input::host(Some("linux")).unwrap();
     host.seven_zip = Some(tool.program().into());
     let mut plans = PlanEngine::new();
     plans.register(Box::new(SevenZipHandler)).unwrap();
@@ -314,7 +310,6 @@ async fn pinned_official_sidecar_runs_through_executor() {
         .await
         .unwrap();
     fixture.assert_tree(&result.dir).unwrap();
-    assert!(extractor.take_artifacts(&node.id).is_some());
 }
 
 #[test]
@@ -355,7 +350,7 @@ async fn unsupported_native_codec_falls_back_after_executor_rollback() {
         .probe_path(&archive)
         .unwrap()
         .root;
-    let mut host: HostCaps = toml::from_str(include_str!("hosts/linux.toml")).unwrap();
+    let mut host: HostCaps = caskade_installer::pipeline::input::host(Some("linux")).unwrap();
     host.seven_zip = Some(tool.program().into());
     let mut planner = PlanEngine::new();
     planner.register(Box::new(ArchiveHandler)).unwrap();
@@ -390,5 +385,4 @@ async fn unsupported_native_codec_falls_back_after_executor_rollback() {
     assert_eq!(report.candidate.handler.0, "sevenzip");
     assert_eq!(report.failures.len(), 1);
     assert_eq!(std::fs::read(report.dir.join("game.sh")).unwrap(), payload);
-    assert!(extractor.take_artifacts(&node.id).is_some());
 }

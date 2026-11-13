@@ -1,7 +1,7 @@
 //! T5: generated hostile archives. Every attempt checks the outside sentinel,
 //! including clean failures and partially extracted trees awaiting rollback.
 use caskade_installer::{
-    ArtifactNode, Format,
+    Format,
     formats::archive::{self, ArchiveError, ArchiveOptions, NoopControl},
     safety::{Limits, NameEncoding, SafeDir, SafetyError, open_staging, sanitize_path},
     testing::TestRoot,
@@ -57,7 +57,7 @@ fn attempt(
     limits: Limits,
     options: &ArchiveOptions,
     sensitive: bool,
-) -> (TestRoot, archive::Result<Vec<ArtifactNode>>) {
+) -> (TestRoot, archive::Result<()>) {
     let root = TestRoot::new().unwrap();
     let mut dir = SafeDir::new(
         open_staging(root.path()).unwrap(),

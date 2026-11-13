@@ -17,7 +17,7 @@ use crate::{
     events::{EventSink, JobEvent, Phase},
     manifest::InstallManifest,
     runtime::alias::AliasStore,
-    scan::{Location, Reference, Via},
+    scan::{Location, Reference, RegistryValue, Via},
 };
 use sha2::{Digest, Sha256};
 use std::{
@@ -27,23 +27,13 @@ use std::{
 };
 use tokio_util::sync::CancellationToken;
 
-/// One registry value write. `hive` is `HKCU`/`HKLM`; data is raw bytes.
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-pub struct RegistryWrite {
-    pub hive: String,
-    pub key: String,
-    pub name: String,
-    pub value_type: String,
-    pub data: Vec<u8>,
-}
-
 /// Host (or prefix) registry access. `apply` receives all writes of a move
 /// at once so a Windows implementation can batch HKLM into one elevated
 /// `reg import` (one OS prompt); it is called again with the originals on
 /// rollback.
 pub trait RegistryStore: Send + Sync {
-    fn read(&self, hive: &str, key: &str, name: &str) -> io::Result<Option<RegistryWrite>>;
-    fn apply(&self, writes: &[RegistryWrite]) -> io::Result<()>;
+    fn read(&self, hive: &str, key: &str, name: &str) -> io::Result<Option<RegistryValue>>;
+    fn apply(&self, writes: &[RegistryValue]) -> io::Result<()>;
 }
 
 /// `.lnk` shortcuts are binary; a platform editor rewrites their target,
@@ -142,7 +132,7 @@ enum Undo {
         path: PathBuf,
         original: Vec<u8>,
     },
-    Registry(Vec<RegistryWrite>),
+    Registry(Vec<RegistryValue>),
     Alias {
         #[serde(rename = "base")]
         store: AliasStore,
@@ -423,7 +413,7 @@ impl Relocator {
                         continue;
                     };
                     if let Some(data) = replace_all(&original.data, &spellings) {
-                        registry.push((original.clone(), RegistryWrite { data, ..original }));
+                        registry.push((original.clone(), RegistryValue { data, ..original }));
                     }
                 }
             }
@@ -491,7 +481,7 @@ impl Relocator {
         spellings: &[(String, String)],
         request: &RepairRequest,
         rewritten: &std::collections::BTreeSet<String>,
-        registry: &[(RegistryWrite, RegistryWrite)],
+        registry: &[(RegistryValue, RegistryValue)],
         undo: &mut UndoLog,
     ) -> Result<(), RelocateError> {
         let path = game.join(crate::manifest::INSTALL_MANIFEST_PATH);
@@ -627,7 +617,9 @@ fn check_cancelled(cancel: &CancellationToken) -> Result<(), RelocateError> {
 }
 
 fn retarget_prefix_links(game: &Path, old: &Path, undo: &mut UndoLog) -> io::Result<()> {
-    let link = game.join(".caskade/prefix/drive_g/Game");
+    let link = game
+        .join(crate::runtime::proton::PREFIX)
+        .join(crate::runtime::proton::GAME_LINK);
     if let Ok(target) = fs::read_link(&link)
         && target.is_absolute()
         && target.starts_with(old)

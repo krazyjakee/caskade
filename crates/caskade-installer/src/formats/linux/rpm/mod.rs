@@ -197,11 +197,6 @@ pub fn inspect(reader: &mut (impl Read + Seek)) -> Result<Rpm> {
 
 #[derive(Default)]
 pub struct RpmHandler;
-impl RpmHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl crate::plan::Handler for RpmHandler {
     fn id(&self) -> crate::HandlerId {
         crate::HandlerId("rpm".into())

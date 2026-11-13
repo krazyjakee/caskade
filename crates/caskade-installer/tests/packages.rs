@@ -9,7 +9,7 @@ use caskade_installer::{
     plan::{PlanEngine, Policy},
     probe::ProbeEngine,
     safety::{Limits, SafeDir, open_staging},
-    testing::{FakeAction, FakeRuntime, FakeScript, TestRoot},
+    testing::{FakeAction, FakeRuntime, FakeScript, TestRoot, probe_tree},
 };
 use std::{collections::BTreeMap, io::Cursor, path::Path};
 
@@ -23,11 +23,11 @@ fn fixture(id: &str) -> fixtures::Fixture {
 }
 fn engine() -> ProbeEngine {
     let mut engine = ProbeEngine::default();
-    engine.register(Box::new(PackageProbe::new()));
+    engine.register(Box::new(PackageProbe));
     engine
 }
 fn host() -> HostCaps {
-    let mut host: HostCaps = toml::from_str(include_str!("hosts/linux.toml")).unwrap();
+    let mut host: HostCaps = caskade_installer::pipeline::input::host(Some("linux")).unwrap();
     host.packages.managers = BTreeMap::from([
         ("apt".into(), "/usr/bin/apt".into()),
         ("dpkg-query".into(), "/usr/bin/dpkg-query".into()),
@@ -40,8 +40,8 @@ fn host() -> HostCaps {
 }
 fn plans(node: &caskade_installer::ArtifactNode, host: &HostCaps) -> caskade_installer::PlanSet {
     let mut planner = PlanEngine::new();
-    planner.register(Box::new(DebHandler::new())).unwrap();
-    planner.register(Box::new(rpm::RpmHandler::new())).unwrap();
+    planner.register(Box::new(DebHandler)).unwrap();
+    planner.register(Box::new(rpm::RpmHandler)).unwrap();
     planner
         .plan(std::slice::from_ref(node), host, &Policy::default())
         .unwrap()
@@ -93,7 +93,7 @@ fn genuine_deb_and_rpm_metadata_listing_and_confined_payload_match_golden() {
             packed,
             true,
         );
-        let (info, nodes) = if id.starts_with("rpm") {
+        let info = if id.starts_with("rpm") {
             rpm::extract(
                 &mut std::fs::File::open(path).unwrap(),
                 &mut writer,
@@ -118,7 +118,11 @@ fn genuine_deb_and_rpm_metadata_listing_and_confined_payload_match_golden() {
                 .join("opt/caskade-fixture/maintainer-ran")
                 .exists()
         );
-        assert!(nodes.iter().any(|n| n.format == Format::Elf));
+        assert!(
+            probe_tree(root.path())
+                .iter()
+                .any(|n| n.format == Format::Elf)
+        );
     }
 }
 
@@ -281,9 +285,7 @@ async fn self_contained_packages_rewrite_final_desktop_references_skip_scripts_a
             Path::new(&fixture.expected.launch_target)
         );
         assert!(
-            extractor
-                .take_artifacts(&node.id)
-                .unwrap()
+            probe_tree(&report.dir)
                 .iter()
                 .any(|n| n.format == Format::Elf)
         );
@@ -470,7 +472,7 @@ fn dnf5_delegate_argv_omits_unsupported_subcommand_separator_and_validates_ident
     let mut spoofed = node;
     spoofed.facts.get_mut("linux.package").unwrap()["name"] = "--all".into();
     let mut plan = PlanEngine::new();
-    plan.register(Box::new(rpm::RpmHandler::new())).unwrap();
+    plan.register(Box::new(rpm::RpmHandler)).unwrap();
     assert!(plan.plan(&[spoofed], &host(), &Policy::default()).is_err());
 }
 

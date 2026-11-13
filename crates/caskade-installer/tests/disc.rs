@@ -226,7 +226,7 @@ async fn genuine_pc_iso_installs_nested_inno_via_the_real_executor_to_its_golden
         assert!(session.handoff().is_none());
         let installer = session.installer().unwrap();
         assert_eq!(installer.format, Format::Inno);
-        let host: HostCaps = toml::from_str(include_str!("hosts/linux.toml")).unwrap();
+        let host: HostCaps = caskade_installer::pipeline::input::host(Some("linux")).unwrap();
         let mut planner = PlanEngine::new();
         planner.register(Box::new(InnoHandler)).unwrap();
         let plans = planner

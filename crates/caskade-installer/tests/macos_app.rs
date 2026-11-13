@@ -26,7 +26,7 @@ fn fixture() -> fixtures::Fixture {
         .unwrap()
 }
 fn host() -> HostCaps {
-    toml::from_str(include_str!("hosts/macos.toml")).unwrap()
+    caskade_installer::pipeline::input::host(Some("macos")).unwrap()
 }
 fn writer(root: &Path) -> SafeDir {
     SafeDir::new(
@@ -196,7 +196,7 @@ async fn install_zip_fixture(root: &TestRoot) -> caskade_installer::exec::ExecRe
         .list_children(&mut std::fs::File::open(&input).unwrap(), &mut node, &id)
         .unwrap();
     let mut planner = PlanEngine::new();
-    planner.register(Box::new(AppHandler::new())).unwrap();
+    planner.register(Box::new(AppHandler)).unwrap();
     let plans = planner
         .plan(&[node.clone()], &host(), &Policy::default())
         .unwrap();

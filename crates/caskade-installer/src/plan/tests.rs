@@ -8,16 +8,7 @@ use crate::{
 use super::*;
 
 fn host(name: &str) -> HostCaps {
-    let source = match name {
-        "windows" => include_str!("../../tests/hosts/windows.toml"),
-        "linux" => include_str!("../../tests/hosts/linux.toml"),
-        "linux-no-umu" => include_str!("../../tests/hosts/linux-no-umu.toml"),
-        "linux-exfat-root" => include_str!("../../tests/hosts/linux-exfat-root.toml"),
-        "macos" => include_str!("../../tests/hosts/macos.toml"),
-        "macos-no-wine" => include_str!("../../tests/hosts/macos-no-wine.toml"),
-        _ => panic!("unknown test profile"),
-    };
-    toml::from_str(source).unwrap()
+    crate::pipeline::input::host(Some(name)).unwrap()
 }
 
 fn artifact() -> ArtifactNode {
@@ -583,109 +574,4 @@ fn registry_visits_claimed_children_and_passes_policy_presets() {
     let context = PlanContext::new(&caps, &policy).with_target_dir(std::path::Path::new("G:\\"));
     let plans = planner.plan_with_context(&[parent], &context).unwrap();
     assert_eq!(plans.candidates.len(), 1);
-}
-
-struct RecipeTestTransform {
-    mode: u8,
-}
-impl CandidateTransform for RecipeTestTransform {
-    fn preset_args(
-        &self,
-        artifact: &ArtifactNode,
-        base: &PresetArgs,
-    ) -> Result<PresetArgs, PlanError> {
-        let mut args = base.clone();
-        args.language = Some(artifact.id.0.clone());
-        Ok(args)
-    }
-    fn transform(
-        &self,
-        _: &ArtifactNode,
-        mut candidate: Candidate,
-    ) -> Result<Option<Candidate>, PlanError> {
-        match self.mode {
-            0 => candidate.steps.push(Step::Run {
-                program: Program::Tool("recipe-program".into()),
-                args: vec![],
-                env: BTreeMap::new(),
-                runtime: RuntimeSpec::Native,
-                timeout_secs: 30,
-                expect: vec![],
-            }),
-            1 => candidate.handler = HandlerId("spoofed".into()),
-            2 => candidate.confidence = f32::NAN,
-            3 => return Ok(None),
-            _ => {
-                return Err(PlanError::Override {
-                    message: "conflicting recipes".into(),
-                });
-            }
-        }
-        Ok(Some(candidate))
-    }
-}
-#[test]
-fn recipe_transforms_cannot_bypass_policy_or_candidate_validation() {
-    let policy = Policy {
-        execution: ExecutionPolicy::Never,
-        ..Default::default()
-    };
-    for mode in 0..5 {
-        let planner = engine(Proposal {
-            candidates: vec![candidate(Strategy::Extract)],
-            question: None,
-        })
-        .with_transform(Box::new(RecipeTestTransform { mode }));
-        let result = planner.plan(&[artifact()], &host("windows"), &policy);
-        match mode {
-            0 | 3 => assert!(result.unwrap().candidates.is_empty()),
-            1 => assert!(matches!(result, Err(PlanError::HandlerMismatch { .. }))),
-            2 => assert!(matches!(result, Err(PlanError::InvalidConfidence { .. }))),
-            _ => assert!(matches!(result, Err(PlanError::Override { .. }))),
-        }
-    }
-}
-
-#[test]
-fn recipe_presets_are_scoped_to_each_artifact_and_leave_the_caller_unchanged() {
-    struct PresetHandler;
-    impl Handler for PresetHandler {
-        fn id(&self) -> HandlerId {
-            HandlerId("test".into())
-        }
-        fn claims(&self, _: &ArtifactNode) -> bool {
-            true
-        }
-        fn propose(
-            &self,
-            artifact: &ArtifactNode,
-            context: &PlanContext<'_>,
-        ) -> Result<Proposal, PlanError> {
-            assert_eq!(
-                context.policy.preset_args.language.as_deref(),
-                Some(artifact.id.0.as_str())
-            );
-            assert!(!context.policy.preset_args.no_shortcuts);
-            Ok(Proposal::default())
-        }
-    }
-    let policy = Policy {
-        preset_args: PresetArgs {
-            language: Some("original".into()),
-            no_shortcuts: false,
-        },
-        ..Default::default()
-    };
-    let mut second = artifact();
-    second.id.0 = "second".into();
-    let mut planner = PlanEngine::new().with_transform(Box::new(RecipeTestTransform { mode: 3 }));
-    planner.register(Box::new(PresetHandler)).unwrap();
-    assert!(
-        planner
-            .plan(&[artifact(), second], &host("windows"), &policy)
-            .unwrap()
-            .candidates
-            .is_empty()
-    );
-    assert_eq!(policy.preset_args.language.as_deref(), Some("original"));
 }

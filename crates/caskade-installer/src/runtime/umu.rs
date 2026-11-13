@@ -12,9 +12,9 @@ use std::{
     path::{Component, Path, PathBuf},
 };
 
-pub const UMU_VERSION: &str = "1.4.4";
-pub const UMU_URL: &str = "https://github.com/Open-Wine-Components/umu-launcher/releases/download/1.4.4/umu-launcher-1.4.4-zipapp.tar";
-pub const UMU_SHA256: &str = "eb590691841f7fad3fc3ad8fd5db4ccb87849fe7948e62b28ece7a4ee48cc851";
+const UMU_VERSION: &str = "1.4.4";
+const UMU_URL: &str = "https://github.com/Open-Wine-Components/umu-launcher/releases/download/1.4.4/umu-launcher-1.4.4-zipapp.tar";
+const UMU_SHA256: &str = "eb590691841f7fad3fc3ad8fd5db4ccb87849fe7948e62b28ece7a4ee48cc851";
 /// The release archive is ~420 KiB; refuse anything far larger.
 const MAX_ARCHIVE_BYTES: u64 = 16 * 1024 * 1024;
 #[cfg(feature = "fetch")]
@@ -181,7 +181,7 @@ impl UmuBootstrap {
     /// [`ensure`](Self::ensure) that stops when `cancel` fires. Concurrent
     /// calls in this process share one download.
     #[cfg(feature = "fetch")]
-    pub async fn ensure_with(
+    pub(crate) async fn ensure_with(
         &self,
         cancel: &tokio_util::sync::CancellationToken,
     ) -> Result<PathBuf, UmuError> {

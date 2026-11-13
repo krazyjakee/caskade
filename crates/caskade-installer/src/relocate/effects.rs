@@ -2,13 +2,14 @@
 //! uninstall compares a created value with the data it held after the
 //! install, and an Uninstall registration with its fingerprint, so both are
 //! moved along with the registry, in the same transaction.
-use super::{RegistryStore, RegistryWrite, replace_all};
+use super::{RegistryStore, replace_all};
 use crate::{
-    RegistryValue,
+    RegistryHive, RegistryValue,
     manifest::{
         ExternalEffect, ExternalLocation,
         native::{RegistryEffect, UninstallRegistration},
     },
+    scan,
 };
 use std::io;
 
@@ -33,14 +34,10 @@ pub fn wow64_32bit_key(key: &str) -> Option<String> {
 /// `Software\WOW6432Node` path, as the reference scan reports it) is in the
 /// key a manifest effect records at `location` (`registry.<hive>.<bits>`).
 fn registry_key_matches(hive: &str, key: &str, location: &ExternalLocation) -> bool {
-    let lower = hive.to_ascii_lowercase().replace('_', "");
-    let machine = if lower == "hklm" || lower.contains("localmachine") {
-        true
-    } else if lower == "hkcu" || lower.contains("currentuser") {
-        false
-    } else {
+    let Some(hive) = RegistryHive::parse(hive) else {
         return false;
     };
+    let machine = hive == RegistryHive::LocalMachine;
     let recorded = location.path.as_str().replace('/', "\\");
     let expected = match location.scope.as_str() {
         "registry.hklm.64" if machine => recorded,
@@ -54,7 +51,7 @@ fn registry_key_matches(hive: &str, key: &str, location: &ExternalLocation) -> b
 
 /// Text of a string value as `winreg` reads it: UTF-16LE up to its trailing
 /// NULs, a multi-string's parts joined by newlines. `None` for other types.
-fn text(value: &RegistryWrite) -> Option<String> {
+fn text(value: &scan::RegistryValue) -> Option<String> {
     if !matches!(
         value.value_type.as_str(),
         "REG_SZ" | "REG_EXPAND_SZ" | "REG_MULTI_SZ"
@@ -77,7 +74,7 @@ fn text(value: &RegistryWrite) -> Option<String> {
     })
 }
 
-fn dword(value: &RegistryWrite) -> u32 {
+fn dword(value: &scan::RegistryValue) -> u32 {
     let Ok(bytes) = <[u8; 4]>::try_from(value.data.as_slice()) else {
         return 0;
     };
@@ -94,11 +91,11 @@ fn dword(value: &RegistryWrite) -> u32 {
 fn registration(
     location: &ExternalLocation,
     (hive, key): (&str, &str),
-    rewrites: &[(RegistryWrite, RegistryWrite)],
+    rewrites: &[(scan::RegistryValue, scan::RegistryValue)],
     store: &dyn RegistryStore,
     after: bool,
 ) -> io::Result<Option<UninstallRegistration>> {
-    let value = |name: &str| -> io::Result<Option<RegistryWrite>> {
+    let value = |name: &str| -> io::Result<Option<scan::RegistryValue>> {
         match rewrites.iter().find(|(original, _)| {
             original.hive == hive && original.key == key && original.name.eq_ignore_ascii_case(name)
         }) {
@@ -159,7 +156,7 @@ fn rewritten(value: &RegistryValue, spellings: &[(String, String)]) -> Option<Re
 /// changed keeps its old fingerprint, so uninstall still preserves it.
 pub fn follow_rewrites(
     effects: &mut [ExternalEffect],
-    rewrites: &[(RegistryWrite, RegistryWrite)],
+    rewrites: &[(scan::RegistryValue, scan::RegistryValue)],
     spellings: &[(String, String)],
     store: &dyn RegistryStore,
 ) -> io::Result<()> {
@@ -232,8 +229,8 @@ mod tests {
         }
     }
 
-    fn sz(hive: &str, key: &str, name: &str, text: &str) -> RegistryWrite {
-        RegistryWrite {
+    fn sz(hive: &str, key: &str, name: &str, text: &str) -> scan::RegistryValue {
+        scan::RegistryValue {
             hive: hive.into(),
             key: key.into(),
             name: name.into(),
@@ -244,9 +241,9 @@ mod tests {
 
     /// The registry after the move, keyed by (key, name).
     #[derive(Default)]
-    struct Store(Mutex<BTreeMap<(String, String), RegistryWrite>>);
+    struct Store(Mutex<BTreeMap<(String, String), scan::RegistryValue>>);
     impl Store {
-        fn put(&self, value: RegistryWrite) {
+        fn put(&self, value: scan::RegistryValue) {
             self.0.lock().unwrap().insert(
                 (
                     value.key.to_ascii_lowercase(),
@@ -257,7 +254,7 @@ mod tests {
         }
     }
     impl RegistryStore for Store {
-        fn read(&self, _: &str, key: &str, name: &str) -> io::Result<Option<RegistryWrite>> {
+        fn read(&self, _: &str, key: &str, name: &str) -> io::Result<Option<scan::RegistryValue>> {
             Ok(self
                 .0
                 .lock()
@@ -265,7 +262,7 @@ mod tests {
                 .get(&(key.to_ascii_lowercase(), name.to_ascii_lowercase()))
                 .cloned())
         }
-        fn apply(&self, writes: &[RegistryWrite]) -> io::Result<()> {
+        fn apply(&self, writes: &[scan::RegistryValue]) -> io::Result<()> {
             for write in writes {
                 self.put(write.clone());
             }
@@ -343,7 +340,7 @@ mod tests {
                 let data = replace_all(&original.data, &spellings).unwrap();
                 (
                     original.clone(),
-                    RegistryWrite {
+                    scan::RegistryValue {
                         data,
                         ..original.clone()
                     },
@@ -455,7 +452,7 @@ mod tests {
         }
         .fingerprint();
         let original = sz("HKLM", wow, "InstallLocation", r"C:\G\");
-        let written = RegistryWrite {
+        let written = scan::RegistryValue {
             data: replace_all(&original.data, &spellings).unwrap(),
             ..original.clone()
         };

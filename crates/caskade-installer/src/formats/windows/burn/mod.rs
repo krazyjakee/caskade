@@ -25,11 +25,6 @@ pub(crate) fn invalid(message: &str) -> BurnError {
 }
 #[derive(Default)]
 pub struct BurnHandler;
-impl BurnHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for BurnHandler {
     fn id(&self) -> HandlerId {
         HandlerId("burn".into())
@@ -47,11 +42,6 @@ impl Handler for BurnHandler {
 }
 #[derive(Default)]
 pub struct BurnProbe;
-impl BurnProbe {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl FormatProbe for BurnProbe {
     fn id(&self) -> &str {
         "burn"

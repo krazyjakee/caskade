@@ -94,11 +94,7 @@ pub fn digest(path: &Path) -> std::io::Result<(String, u64)> {
         size += read as u64;
         hash.update(&buffer[..read]);
     }
-    Ok((hex(&hash.finalize()), size))
-}
-
-fn hex(bytes: &[u8]) -> String {
-    bytes.iter().map(|byte| format!("{byte:02x}")).collect()
+    Ok((format!("{:x}", hash.finalize()), size))
 }
 
 #[cfg(test)]

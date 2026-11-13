@@ -1,6 +1,4 @@
 //! Bounded archive listing and streaming extraction through the safety layer.
-//! Extracted regular files are re-probed statically; their artifact trees can be
-//! sent back through the planner to find portable games or nested installers.
 
 mod common;
 mod handler;
@@ -21,10 +19,10 @@ pub use common::{
 pub use handler::{ArchiveExtractor, ArchiveHandler};
 pub use payload::PayloadReader;
 pub use probe::ArchiveProbe;
-#[cfg(feature = "linux-formats")]
+#[cfg(any(feature = "linux-formats", feature = "macos-formats"))]
 pub(crate) use tar::decoded;
 
-use crate::{ArtifactId, ArtifactNode, Format, probe::ProbeEngine, safety::SafeDir};
+use crate::{Format, probe::ProbeEngine, safety::SafeDir};
 use std::{
     io::{Read, Seek, SeekFrom},
     path::Path,
@@ -72,15 +70,14 @@ pub fn list(
     Ok(entries)
 }
 
-/// Stream one resolved archive into staging, then identify every completed
-/// regular file from its bytes. This never runs extracted programs.
+/// Stream one resolved archive into staging. This never runs extracted programs.
 pub fn extract(
     mut reader: impl Read + Seek,
     format: Format,
     dir: &mut SafeDir,
     options: &ArchiveOptions,
     control: &mut dyn ExtractionControl,
-) -> Result<Vec<ArtifactNode>> {
+) -> Result<()> {
     control.checkpoint(0)?;
     reader.seek(SeekFrom::Start(0))?;
     match format {
@@ -91,31 +88,7 @@ pub fn extract(
         }
         _ => return Err(ArchiveError::Unsupported(format!("{format:?}"))),
     }
-    probe_extracted(dir, control)
-}
-
-/// Identifies every completed regular file from its bytes.
-fn probe_extracted(
-    dir: &SafeDir,
-    control: &mut dyn ExtractionControl,
-) -> Result<Vec<ArtifactNode>> {
-    let mut engine = ProbeEngine::default();
-    engine.register(Box::new(ArchiveProbe));
-    let mut artifacts = Vec::new();
-    for path in dir.extracted_files() {
-        control.checkpoint(0)?;
-        let name = path
-            .to_str()
-            .ok_or(crate::safety::SafetyError::InvalidEncoding)?;
-        let mut file = dir.open_read(name)?;
-        let mut node = engine
-            .probe_reader(&mut file, path)
-            .map_err(|e| ArchiveError::Invalid(e.to_string()))?
-            .root;
-        node.id = ArtifactId(format!("extracted:{}", artifacts.len()));
-        artifacts.push(node);
-    }
-    Ok(artifacts)
+    Ok(())
 }
 
 /// File names of tarballs a release can wrap in another archive.
@@ -128,45 +101,43 @@ const TARBALLS: [&str; 9] = [
 /// their programs keep their executable bits through GitHub's artifacts.
 /// Only a top-level file named and identified as a tarball counts, never
 /// another kind of archive (a zip inside a zip may be a ROM set). Shares
-/// `dir`'s budget. Returns the files' artifacts, or `artifacts` unchanged.
+/// `dir`'s budget.
 pub fn unwrap_tarball(
     dir: &mut SafeDir,
-    artifacts: Vec<ArtifactNode>,
     options: &ArchiveOptions,
     control: &mut dyn ExtractionControl,
-) -> Result<Vec<ArtifactNode>> {
+) -> Result<()> {
     let only = {
         let mut files = dir.extracted_files();
         match (files.next(), files.next()) {
             (Some(only), None) => only.to_path_buf(),
-            _ => return Ok(artifacts),
+            _ => return Ok(()),
         }
     };
     let Some(name) = only.to_str().map(str::to_owned) else {
-        return Ok(artifacts);
+        return Ok(());
     };
     let lower = name.to_lowercase();
-    let format = match artifacts.as_slice() {
-        [node]
-            if only.components().count() == 1
-                && TARBALLS.iter().any(|ending| lower.ends_with(ending)) =>
-        {
-            node.format
-        }
-        _ => return Ok(artifacts),
-    };
+    if only.components().count() != 1 || !TARBALLS.iter().any(|ending| lower.ends_with(ending)) {
+        return Ok(());
+    }
+    let format = ProbeEngine::default()
+        .probe_reader(&mut dir.open_read(&name)?, &only)
+        .map_err(|e| ArchiveError::Invalid(e.to_string()))?
+        .root
+        .format;
     if !matches!(
         format,
         Format::Tar | Format::Gzip | Format::Xz | Format::Zstd | Format::Bzip2
     ) {
-        return Ok(artifacts);
+        return Ok(());
     }
     {
         let file = dir.open_read(&name)?;
         tar::extract(file, format, dir, options, control)?;
     }
     dir.remove_extracted(&name)?;
-    probe_extracted(dir, control)
+    Ok(())
 }
 
 /// Resolve multipart siblings before opening the parser. `SafeDir` must use the
@@ -176,7 +147,7 @@ pub fn extract_path(
     dir: &mut SafeDir,
     options: &ArchiveOptions,
     control: &mut dyn ExtractionControl,
-) -> Result<Vec<ArtifactNode>> {
+) -> Result<()> {
     let (reader, format) = handler::source(path)?;
     extract(reader, format, dir, options, control)
 }

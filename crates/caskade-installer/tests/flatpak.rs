@@ -28,15 +28,7 @@ fn probe() -> ArtifactNode {
     engine.probe_path(&source()).unwrap().root
 }
 fn host(name: &str) -> HostCaps {
-    let mut host: HostCaps = toml::from_str(
-        &fs::read_to_string(
-            Path::new(env!("CARGO_MANIFEST_DIR"))
-                .join("tests/hosts")
-                .join(format!("{name}.toml")),
-        )
-        .unwrap(),
-    )
-    .unwrap();
+    let mut host = caskade_installer::pipeline::input::host(Some(name)).unwrap();
     host.packages
         .managers
         .insert("flatpak".into(), "/usr/bin/flatpak".into());

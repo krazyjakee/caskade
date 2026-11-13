@@ -9,7 +9,7 @@ use caskade_installer::{
     plan::{ExecutionPolicy, PlanEngine, Policy},
     probe::ProbeEngine,
     safety::{Limits, SafeDir, open_staging},
-    testing::TestRoot,
+    testing::{TestRoot, probe_tree},
 };
 use std::{io::Cursor, path::Path};
 
@@ -21,12 +21,12 @@ fn corpus() -> Vec<fixtures::Fixture> {
 }
 fn engine() -> ProbeEngine {
     let mut engine = ProbeEngine::default();
-    engine.register(Box::new(MakeselfProbe::new()));
-    engine.register(Box::new(archive::ArchiveProbe::new()));
+    engine.register(Box::new(MakeselfProbe));
+    engine.register(Box::new(archive::ArchiveProbe));
     engine
 }
 fn host() -> HostCaps {
-    toml::from_str(include_str!("hosts/linux.toml")).unwrap()
+    caskade_installer::pipeline::input::host(Some("linux")).unwrap()
 }
 fn plans(
     node: &caskade_installer::ArtifactNode,
@@ -34,9 +34,9 @@ fn plans(
     execution: ExecutionPolicy,
 ) -> caskade_installer::PlanSet {
     let mut engine = PlanEngine::new();
-    engine.register(Box::new(MakeselfHandler::new())).unwrap();
+    engine.register(Box::new(MakeselfHandler)).unwrap();
     engine
-        .register(Box::new(mojosetup::MojoSetupHandler::new()))
+        .register(Box::new(mojosetup::MojoSetupHandler))
         .unwrap();
     engine
         .plan(
@@ -97,7 +97,7 @@ fn genuine_makeself_and_structural_mojo_fixtures_list_extract_and_discover() {
             packed,
             true,
         );
-        let nodes = extract(
+        extract(
             &mut std::fs::File::open(&path).unwrap(),
             &mut dir,
             &ArchiveOptions::default(),
@@ -106,7 +106,11 @@ fn genuine_makeself_and_structural_mojo_fixtures_list_extract_and_discover() {
         .unwrap();
         root.assert_sentinel_untouched();
         fixture.assert_tree(root.path()).unwrap();
-        assert!(nodes.iter().any(|n| n.format == Format::Elf));
+        assert!(
+            probe_tree(root.path())
+                .iter()
+                .any(|n| n.format == Format::Elf)
+        );
         let hints = mojosetup::discovery_hints(&dir);
         assert_eq!(
             hints.installer_title.as_deref(),
@@ -165,9 +169,7 @@ async fn both_shell_installers_install_statically_then_launch_on_linux() {
         );
         fixture.assert_tree(&report.dir).unwrap();
         assert!(
-            extractor
-                .take_artifacts(&node.id)
-                .unwrap()
+            probe_tree(&report.dir)
                 .iter()
                 .any(|n| n.format == Format::Elf)
         );

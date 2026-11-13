@@ -2,7 +2,7 @@
 mod adapter;
 mod header;
 use crate::{
-    ArtifactNode, Format,
+    Format,
     formats::archive::{self, ArchiveError, ArchiveOptions, ExtractionControl, PayloadReader},
     safety::SafeDir,
 };
@@ -32,22 +32,15 @@ pub(crate) fn payload_format(
         length += count;
     }
     let bytes = &bytes[..length];
-    let format = if bytes.starts_with(b"\x1f\x8b") {
-        Format::Gzip
-    } else if bytes.starts_with(b"\xfd7zXZ\0") {
-        Format::Xz
-    } else if bytes.starts_with(b"BZh") {
-        Format::Bzip2
-    } else if bytes.starts_with(b"\x28\xb5\x2f\xfd") {
-        Format::Zstd
-    } else if bytes.len() >= 262 && &bytes[257..262] == b"ustar" {
-        Format::Tar
+    if let Some(format) = crate::probe::compression(bytes) {
+        Ok(format)
+    } else if bytes.get(257..262) == Some(b"ustar") {
+        Ok(Format::Tar)
     } else {
-        return Err(ArchiveError::Unsupported(
+        Err(ArchiveError::Unsupported(
             "Makeself payload is not a supported tar stream".into(),
-        ));
-    };
-    Ok(format)
+        ))
+    }
 }
 /// Extract all embedded tar segments through one shared SafeDir budget. GOG
 /// MojoSetup inputs instead select and strip only their appended game-data ZIP.
@@ -56,20 +49,17 @@ pub fn extract(
     dir: &mut SafeDir,
     options: &ArchiveOptions,
     control: &mut dyn ExtractionControl,
-) -> archive::Result<Vec<ArtifactNode>> {
+) -> archive::Result<()> {
     control.checkpoint(0)?;
     let header = read_header(reader)?;
     if header.family == Family::MojoSetup {
         return super::mojosetup::extract(reader, dir, options, control);
     }
-    let mut nodes = Vec::new();
     for span in header.spans {
         control.checkpoint(0)?;
         let format = payload_format(reader, span)?;
         let view = PayloadReader::new(&mut *reader, span.offset, span.length)?;
-        // extract re-probes all completed files. Keep only its latest complete
-        // snapshot when multiple appended tar segments share the same budget.
-        nodes = archive::extract(view, format, dir, options, control)?;
+        archive::extract(view, format, dir, options, control)?;
     }
-    Ok(nodes)
+    Ok(())
 }

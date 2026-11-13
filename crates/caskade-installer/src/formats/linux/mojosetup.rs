@@ -18,7 +18,7 @@ pub fn extract(
     dir: &mut SafeDir,
     options: &ArchiveOptions,
     control: &mut dyn ExtractionControl,
-) -> archive::Result<Vec<ArtifactNode>> {
+) -> archive::Result<()> {
     let header = super::makeself::read_header(reader)?;
     if header.family != super::makeself::Family::MojoSetup {
         return Err(archive::ArchiveError::Unsupported("not MojoSetup".into()));
@@ -34,13 +34,13 @@ pub fn extract(
     if options.strip.is_none() {
         options.strip = Some(PathBuf::from("data/noarch"));
     }
-    let nodes = archive::extract(reader, Format::Zip, dir, &options, control)?;
-    if nodes.is_empty() {
+    archive::extract(reader, Format::Zip, dir, &options, control)?;
+    if dir.extracted_files().next().is_none() {
         return Err(archive::ArchiveError::Invalid(
             "MojoSetup ZIP contains no selected game data".into(),
         ));
     }
-    Ok(nodes)
+    Ok(())
 }
 
 /// Recover GOG's line-oriented gameinfo and conventional start script through
@@ -101,11 +101,6 @@ pub fn discover(root: &Path, host: &HostCaps) -> Result<Discovery, discover::Dis
 
 #[derive(Default)]
 pub struct MojoSetupHandler;
-impl MojoSetupHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for MojoSetupHandler {
     fn id(&self) -> HandlerId {
         HandlerId("mojosetup".into())

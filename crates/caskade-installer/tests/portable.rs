@@ -14,7 +14,7 @@ use caskade_installer::{
 };
 use std::{fs, path::Path, sync::Arc};
 fn host() -> HostCaps {
-    toml::from_str(include_str!("hosts/linux.toml")).unwrap()
+    caskade_installer::pipeline::input::host(Some("linux")).unwrap()
 }
 fn fixture() -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
@@ -170,15 +170,11 @@ fn fake_rom_header_and_suffix_produce_a_platform_handoff_on_every_host() {
         );
         let mut planner = PlanEngine::new();
         planner.register(Box::new(RomHandler)).unwrap();
-        for text in [
-            include_str!("hosts/windows.toml"),
-            include_str!("hosts/linux.toml"),
-            include_str!("hosts/macos.toml"),
-        ] {
+        for name in ["windows", "linux", "macos"] {
             let plans = planner
                 .plan(
                     std::slice::from_ref(&artifact),
-                    &toml::from_str(text).unwrap(),
+                    &caskade_installer::pipeline::input::host(Some(name)).unwrap(),
                     &Policy::default(),
                 )
                 .unwrap();

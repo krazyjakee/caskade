@@ -8,7 +8,7 @@ use caskade_installer::{
 use image::{DynamicImage, ImageFormat, Rgba, RgbaImage};
 
 fn host() -> HostCaps {
-    toml::from_str(include_str!("hosts/linux.toml")).unwrap()
+    caskade_installer::pipeline::input::host(Some("linux")).unwrap()
 }
 
 fn put(root: &Path, relative: &str, data: impl AsRef<[u8]>) {

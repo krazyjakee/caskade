@@ -173,7 +173,7 @@ async fn rpm_indie_delegate_installs_launches_and_uninstalls_inside_disposable_f
         children: Mutex::default(),
         commands: Mutex::default(),
     });
-    let mut host: HostCaps = toml::from_str(include_str!("hosts/linux.toml")).unwrap();
+    let mut host: HostCaps = caskade_installer::pipeline::input::host(Some("linux")).unwrap();
     host.packages.root = true;
     host.packages.managers = BTreeMap::from([("dnf".into(), "/usr/bin/dnf".into())]);
     let mut probe = ProbeEngine::default();

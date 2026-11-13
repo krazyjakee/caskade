@@ -17,14 +17,14 @@ use caskade_installer::{
     },
     reconcile::{ReconcileStatus, Reconciler},
     relocate::{
-        RegistryStore, RegistryWrite, Relocator, RunningCheck,
+        RegistryStore, Relocator, RunningCheck,
         backends::{NoShortcuts, PrefixRegistry},
     },
     runtime::{
         NativeRuntime, ProcessCommand, ProcessExit, ProcessId, Runtime, RuntimeError,
         proton::{Launcher, PrefixRuntime},
     },
-    scan::{Encoding, Location, Reference, Via},
+    scan::{self, Encoding, Location, Reference, Via},
     testing::{FakeDiskSpace, RecordingSink},
 };
 use sha2::{Digest, Sha256};
@@ -141,13 +141,9 @@ async fn explorer_move_then_scan_root_rewrites_a_real_private_wine_registry() {
         }),
         environment: environment(&prefix, home.path()),
     });
-    let registry = PrefixRegistry {
-        runtime: wine,
-        prefix: prefix.clone(),
-        game_dir: old.clone(),
-    };
+    let registry = PrefixRegistry::new(wine, prefix.clone(), old.clone());
     let windows_old = format!("Z:{}", old.to_str().unwrap().replace('/', "\\"));
-    let write = RegistryWrite {
+    let write = scan::RegistryValue {
         hive: "HKCU".into(),
         key: "Software\\CaskadeReconcileProof".into(),
         name: "InstallPath".into(),
@@ -206,11 +202,11 @@ async fn explorer_move_then_scan_root_rewrites_a_real_private_wine_registry() {
         }),
         environment: environment(&prefix, home.path()),
     });
-    let backend = Arc::new(PrefixRegistry {
-        runtime: wine.clone(),
-        prefix: prefix.clone(),
-        game_dir: new.clone(),
-    });
+    let backend = Arc::new(PrefixRegistry::new(
+        wine.clone(),
+        prefix.clone(),
+        new.clone(),
+    ));
     let scanner = Reconciler::new(Arc::new(Relocator {
         disk: Arc::new(FakeDiskSpace::fixed(u64::MAX)),
         sink: Arc::new(RecordingSink::default()),
@@ -320,16 +316,16 @@ async fn explorer_move_then_scan_root_rewrites_a_real_private_wine_registry() {
             String::from_utf8_lossy(&output.stderr)
         );
         stop(&moved_prefix, home.path());
-        let registry = PrefixRegistry {
-            runtime: Arc::new(Isolated {
+        let registry = PrefixRegistry::new(
+            Arc::new(Isolated {
                 wine: PrefixRuntime::new(Launcher::Wine {
                     wine: "wine".into(),
                 }),
                 environment: environment(&moved_prefix, home.path()),
             }),
-            prefix: moved_prefix,
-            game_dir: moved.clone(),
-        };
+            moved_prefix,
+            moved.clone(),
+        );
         let value = registry
             .read(&write.hive, &write.key, &write.name)
             .unwrap()

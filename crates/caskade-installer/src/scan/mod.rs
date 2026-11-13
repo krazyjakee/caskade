@@ -2,8 +2,6 @@
 //! Finds where an install path was written (game files, registry values the
 //! caller read, recorded out-of-root files) and rates how movable the game is.
 //! Nothing is executed or rewritten here.
-#[cfg(windows)]
-pub mod registry;
 mod variants;
 
 pub use crate::manifest::RelocationVerdict;
@@ -31,8 +29,9 @@ impl Default for ScanLimits {
     }
 }
 
-/// A registry value read by the caller: `winreg` on Windows, a prefix `.reg`
-/// reader (I4) or an installer's recorded `[Registry]` data elsewhere.
+/// A registry value read by the caller (`winreg` on Windows, a prefix `.reg`
+/// reader (I4) or an installer's recorded `[Registry]` data elsewhere), or
+/// one a move writes. `hive` is `HKCU`/`HKLM`; `data` is raw bytes.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RegistryValue {
     pub hive: String,

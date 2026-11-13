@@ -3,7 +3,7 @@ use crate::{
     ArtifactId, ArtifactNode, Candidate, DelegateCommand, Fidelity, Format, HandlerId,
     OperatingSystem, PayloadPlatform, Requirements, Role, RuntimeSpec, Step, Strategy, Warning,
     exec::{ExecError, Extractor, StepContext, source_argument},
-    formats::archive::ExtractionControl,
+    formats::archive::{self, ArchiveOptions, ExtractionControl},
     plan::{Handler, PlanContext, PlanError, Proposal},
     probe::{Detection, FormatProbe, ProbeError, ProbeSource},
     safety::SafeDir,
@@ -13,15 +13,9 @@ use std::{
     collections::BTreeMap,
     io::{BufRead, BufReader, Read, Seek, SeekFrom},
     path::{Path, PathBuf},
-    sync::Mutex,
 };
 #[derive(Default)]
 pub struct PkgProbe;
-impl PkgProbe {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl FormatProbe for PkgProbe {
     fn id(&self) -> &str {
         "macos-pkg"
@@ -89,11 +83,6 @@ const ADMIN_INSTALL_SCRIPT: &str = "on run argv\nset commandText to \"\"\nrepeat
 
 #[derive(Default)]
 pub struct PkgHandler;
-impl PkgHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for PkgHandler {
     fn id(&self) -> HandlerId {
         HandlerId("macos-pkg".into())
@@ -267,12 +256,14 @@ pub fn extract(
             .ok_or_else(|| invalid("missing component Payload"))?;
         let mut member = BufReader::new(xar.open_entry(&mut source, entry)?);
         let prefix = member.fill_buf()?;
-        let payload: Box<dyn Read + '_> = if prefix.starts_with(b"pbzx") {
+        let (pbzx, compression) = (
+            prefix.starts_with(b"pbzx"),
+            crate::probe::compression(prefix),
+        );
+        let payload: Box<dyn Read + '_> = if pbzx {
             Box::new(super::pbzx::Pbzx::new(member, max_bytes)?)
-        } else if prefix.starts_with(b"\x1f\x8b") {
-            Box::new(flate2::read::MultiGzDecoder::new(member))
-        } else if prefix.starts_with(b"\xfd7zXZ\0") {
-            Box::new(lzma_rust2::XzReader::new_mem_limit(member, true, 64 * 1024))
+        } else if let Some(format) = compression {
+            archive::decoded(member, format, &ArchiveOptions::default())?
         } else {
             Box::new(member)
         };
@@ -295,20 +286,10 @@ pub fn extract(
 #[derive(Default)]
 pub struct PkgExtractor {
     sources: BTreeMap<ArtifactId, PathBuf>,
-    artifacts: Mutex<BTreeMap<ArtifactId, Vec<ArtifactNode>>>,
 }
 impl PkgExtractor {
     pub fn new(sources: BTreeMap<ArtifactId, PathBuf>) -> Self {
-        Self {
-            sources,
-            ..Self::default()
-        }
-    }
-    pub fn take_artifacts(&self, id: &ArtifactId) -> Option<Vec<ArtifactNode>> {
-        self.artifacts
-            .lock()
-            .expect("package artifacts poisoned")
-            .remove(id)
+        Self { sources }
     }
 }
 fn exec_error(error: PkgError) -> ExecError {
@@ -346,25 +327,6 @@ impl Extractor for PkgExtractor {
         );
         context.checkpoint(0)?;
         result.map_err(exec_error)?;
-        let probe =
-            crate::probe::ProbeEngine::with_builtin_formats(crate::probe::ProbeLimits::default());
-        let mut nodes = Vec::new();
-        for path in dir.extracted_files() {
-            context.checkpoint(0)?;
-            let mut file = dir.open_read(&path.to_string_lossy())?;
-            let mut node = probe
-                .probe_reader(&mut file, path)
-                .map_err(|error| ExecError::Extract {
-                    message: error.to_string(),
-                })?
-                .root;
-            node.id = ArtifactId(format!("extracted:pkg:{}", nodes.len()));
-            nodes.push(node);
-        }
-        self.artifacts
-            .lock()
-            .expect("package artifacts poisoned")
-            .insert(artifact.clone(), nodes);
         Ok(())
     }
 }

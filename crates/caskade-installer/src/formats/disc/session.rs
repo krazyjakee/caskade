@@ -133,17 +133,17 @@ impl DiscSession {
             image.metadata()?.len(),
             true,
         );
-        let extracted = tool.extract(&image, scratch.path(), &mut writer, control)?;
+        tool.extract(&image, scratch.path(), &mut writer, control)?;
+        let extracted: Vec<_> = writer.extracted_files().map(Path::to_path_buf).collect();
         let engine = ProbeEngine::with_builtin_formats(Default::default());
         let mut artifacts = vec![];
-        for entry in extracted {
+        for path in extracted {
             control.checkpoint(0)?;
-            let name = entry
-                .path
+            let name = path
                 .to_str()
                 .ok_or_else(|| DiscError::Invalid("non-Unicode disc entry".into()))?;
             let mut node = engine
-                .probe_reader(&mut writer.open_read(name)?, &entry.path)
+                .probe_reader(&mut writer.open_read(name)?, &path)
                 .map_err(|e| DiscError::Invalid(e.to_string()))?
                 .root;
             node.id = ArtifactId(format!("disc-entry:{}", artifacts.len()));

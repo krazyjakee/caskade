@@ -1,7 +1,7 @@
 use super::*;
 use crate::{
-    ArtifactId, ArtifactNode, Candidate, Fidelity, Format, HandlerId, PayloadPlatform, Program,
-    Requirements, Role, RuntimeSpec, Step, Strategy, Warning,
+    ArtifactId, ArtifactNode, Format, HandlerId, PayloadPlatform, Program, Role, RuntimeSpec, Step,
+    Warning,
     plan::{
         Handler, PlanContext, PlanError, Proposal,
         presets::{InstallerFamily, InstallerMode, SwitchSettings, build_args},
@@ -11,16 +11,10 @@ use crate::{
 use std::{
     collections::BTreeMap,
     io::{Seek, SeekFrom},
-    path::PathBuf,
 };
 
 #[derive(Default)]
 pub struct MsiProbe;
-impl MsiProbe {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl FormatProbe for MsiProbe {
     fn id(&self) -> &str {
         "msi"
@@ -83,11 +77,6 @@ pub fn metadata_from_artifact(node: &ArtifactNode) -> Option<MsiMetadata> {
 
 #[derive(Default)]
 pub struct MsiHandler;
-impl MsiHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for MsiHandler {
     fn id(&self) -> HandlerId {
         HandlerId("msi".into())
@@ -101,97 +90,39 @@ impl Handler for MsiHandler {
         context: &PlanContext<'_>,
     ) -> std::result::Result<Proposal, PlanError> {
         let metadata = metadata_from_artifact(node);
-        let partial = metadata.as_ref().is_none_or(MsiMetadata::is_partial);
+        let partial = metadata.as_ref().is_none_or(MsiMetadata::is_partial).then(|| Warning { code: "msi.partial".into(), message: "Table extraction omits custom actions, external shortcuts and files outside the application directory".into(), path: None });
         let estimate = metadata.as_ref().and_then(MsiMetadata::unpacked_bytes);
-        let mut warnings = vec![];
-        if partial {
-            warnings.push(Warning { code: "msi.partial".into(), message: "Table extraction omits custom actions, external shortcuts and files outside the application directory".into(), path: None });
-        }
-        let mut candidates = vec![Candidate {
-            handler: self.id(),
-            strategy: Strategy::Extract,
-            confidence: if metadata.is_some() { 1.0 } else { 0.8 },
-            fidelity: if partial {
-                Fidelity::Partial
-            } else {
-                Fidelity::Exact
-            },
-            requires: Requirements {
-                est_disk_bytes: estimate,
-                ..Default::default()
-            },
-            steps: vec![Step::Extract {
-                from: node.id.clone(),
-                select: vec![],
-                strip: None,
-                to: PathBuf::from("."),
-            }],
-            warnings,
-        }];
+        let mut candidates = vec![super::super::extract_candidate(
+            self.id(),
+            node,
+            metadata.is_some(),
+            estimate,
+            partial,
+        )];
         if let Some(runtime) = super::super::installer_runtime(context.host) {
-            for (mode, strategy) in [
-                (InstallerMode::Silent, Strategy::RunSilent),
-                (InstallerMode::Interactive, Strategy::RunInteractive),
-            ] {
-                let preset = build_args(
-                    InstallerFamily::Msi,
-                    mode,
-                    &SwitchSettings::from(&context.policy.preset_args),
-                )
-                .map_err(|e| PlanError::Handler {
-                    handler: self.id(),
-                    message: e.to_string(),
-                })?;
-                let mut args = vec!["/i".into(), crate::exec::source_argument(&node.id)];
-                args.extend(preset.args);
-                let program = Program::Tool("msiexec".into());
-                let step = if mode == InstallerMode::Silent {
-                    Step::Run {
-                        program,
-                        args,
-                        env: BTreeMap::new(),
-                        runtime: runtime.clone(),
-                        timeout_secs: 900,
-                        expect: metadata
-                            .as_ref()
-                            .into_iter()
-                            .flat_map(|m| m.files.first())
-                            .map(|f| f.path.clone())
-                            .collect(),
-                    }
-                } else {
-                    Step::RunInteractive {
-                        program,
-                        args,
-                        env: BTreeMap::new(),
-                        runtime: runtime.clone(),
-                        target_dir: ".".into(),
-                    }
-                };
-                candidates.push(Candidate {
-                    handler: self.id(),
-                    strategy,
-                    confidence: 1.0,
-                    fidelity: Fidelity::Native,
-                    requires: Requirements {
-                        executes_code: true,
-                        runtime: Some(runtime.clone()),
-                        may_prompt_elevation: true,
-                        interactive: mode == InstallerMode::Interactive,
-                        est_disk_bytes: estimate,
-                    },
-                    steps: vec![step],
-                    warnings: preset
-                        .warnings
-                        .into_iter()
-                        .map(|message| Warning {
-                            code: "msi.preset".into(),
-                            message,
-                            path: None,
-                        })
-                        .collect(),
-                });
-            }
+            let settings = SwitchSettings::from(&context.policy.preset_args);
+            let run = super::super::Run {
+                handler: self.id(),
+                program: Program::Tool("msiexec".into()),
+                leading_args: vec!["/i".into(), crate::exec::source_argument(&node.id)],
+                timeout_secs: 900,
+                expect: metadata
+                    .as_ref()
+                    .into_iter()
+                    .flat_map(|m| m.files.first())
+                    .map(|f| f.path.clone())
+                    .collect(),
+                may_prompt_elevation: true,
+                est_disk_bytes: estimate,
+                confidence: 1.0,
+                warning_code: "msi.preset",
+            };
+            candidates.extend(super::super::run_candidates(
+                run,
+                runtime,
+                &[InstallerMode::Silent, InstallerMode::Interactive],
+                |mode| build_args(InstallerFamily::Msi, mode, &settings),
+            )?);
         }
         Ok(Proposal {
             candidates,

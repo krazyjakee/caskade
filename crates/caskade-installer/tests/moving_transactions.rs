@@ -6,8 +6,8 @@ use caskade_installer::{
     },
     reconcile::{ReconcileStatus, Reconciler},
     relocate::{
-        RegistryStore, RegistryWrite, RelocateError, RelocateRequest, Relocator, RunningCheck,
-        ShortcutEditor, replace_all,
+        RegistryStore, RelocateError, RelocateRequest, Relocator, RunningCheck, ShortcutEditor,
+        replace_all,
     },
     runtime::alias::AliasStore,
     scan::{self, ScanInput},
@@ -27,11 +27,11 @@ use tokio_util::sync::CancellationToken;
 
 #[derive(Default)]
 struct Registry {
-    values: Mutex<Vec<RegistryWrite>>,
+    values: Mutex<Vec<scan::RegistryValue>>,
     fail_once: AtomicBool,
 }
 impl RegistryStore for Registry {
-    fn read(&self, hive: &str, key: &str, name: &str) -> io::Result<Option<RegistryWrite>> {
+    fn read(&self, hive: &str, key: &str, name: &str) -> io::Result<Option<scan::RegistryValue>> {
         Ok(self
             .values
             .lock()
@@ -40,7 +40,7 @@ impl RegistryStore for Registry {
             .find(|v| v.hive == hive && v.key == key && v.name == name)
             .cloned())
     }
-    fn apply(&self, writes: &[RegistryWrite]) -> io::Result<()> {
+    fn apply(&self, writes: &[scan::RegistryValue]) -> io::Result<()> {
         let fail = self.fail_once.swap(false, Ordering::SeqCst);
         let mut values = self.values.lock().unwrap();
         for write in writes {
@@ -211,7 +211,7 @@ impl Fixture {
         let registry = Arc::new(Registry::default());
         *registry.values.lock().unwrap() = ["REG_SZ", "REG_EXPAND_SZ", "REG_MULTI_SZ"]
             .into_iter()
-            .map(|kind| RegistryWrite {
+            .map(|kind| scan::RegistryValue {
                 hive: "HKCU".into(),
                 key: "Software\\Moving".into(),
                 name: kind.into(),

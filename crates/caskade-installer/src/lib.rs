@@ -21,13 +21,13 @@ pub mod pipeline;
 pub mod plan;
 pub mod probe;
 pub mod quarantine;
-pub mod recipes;
 pub mod reconcile;
 pub mod redist;
 pub mod relocate;
 pub mod runtime;
 pub mod safety;
 pub mod scan;
+#[cfg(any(test, feature = "test-utils"))]
 pub mod testing;
 pub mod types;
 

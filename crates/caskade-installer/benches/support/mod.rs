@@ -66,7 +66,7 @@ pub fn discovery_tree(root: &Path) -> Result<()> {
     Ok(())
 }
 pub fn discovery(root: &Path) -> Result<Duration> {
-    let host: HostCaps = toml::from_str(include_str!("../../tests/hosts/linux.toml"))?;
+    let host: HostCaps = caskade_installer::pipeline::input::host(Some("linux"))?;
     let config = DiscoveryConfig {
         max_entries: 100_100,
         write_icon: false,

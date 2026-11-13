@@ -94,11 +94,11 @@ impl FetchEngine {
             return Ok(());
         }
         let root = dunce::canonicalize(root)?;
-        let _guard = job_lock(&root.join(".caskade/downloads").join(job_id))
+        let _guard = job_lock(&root.join(storage::DOWNLOADS).join(job_id))
             .lock_owned()
             .await;
         let capability = crate::safety::open_staging(&root)?;
-        let path = Path::new(".caskade/downloads").join(job_id);
+        let path = Path::new(storage::DOWNLOADS).join(job_id);
         if capability
             .symlink_metadata(&path)
             .is_err_and(|error| error.kind() == std::io::ErrorKind::NotFound)
@@ -123,10 +123,10 @@ impl FetchEngine {
     pub async fn cleanup_orphans(&self, root: &Path, active_jobs: &[String]) -> Result<()> {
         let root = dunce::canonicalize(root)?;
         let capability = crate::safety::open_staging(&root)?;
-        if !capability.try_exists(".caskade/downloads")? {
+        if !capability.try_exists(storage::DOWNLOADS)? {
             return Ok(());
         }
-        let downloads = storage::directory(&capability, Path::new(".caskade/downloads"), false)?;
+        let downloads = storage::directory(&capability, Path::new(storage::DOWNLOADS), false)?;
         let mut cleaned = vec![];
         for entry in downloads.entries()? {
             let entry = entry?;
@@ -141,7 +141,7 @@ impl FetchEngine {
             if active_jobs.contains(&job_id) {
                 continue;
             }
-            let _guard = job_lock(&root.join(".caskade/downloads").join(&job_id))
+            let _guard = job_lock(&root.join(storage::DOWNLOADS).join(&job_id))
                 .lock_owned()
                 .await;
             let storage = Storage::open(&root, &job_id)?;
@@ -244,7 +244,7 @@ impl FetchEngine {
             _ = token.cancelled() => return Err(FetchError::Cancelled),
             permit = self.queue.acquire() => permit.map_err(|_| FetchError::Cancelled)?,
         };
-        let lock = job_lock(&root.join(".caskade/downloads").join(job_id));
+        let lock = job_lock(&root.join(storage::DOWNLOADS).join(job_id));
         let _guard = tokio::select! {
             _ = token.cancelled() => return Err(FetchError::Cancelled),
             guard = lock.lock_owned() => guard,
@@ -593,7 +593,7 @@ impl FetchEngine {
         Ok(DownloadedFile {
             path: context
                 .root
-                .join(".caskade/downloads")
+                .join(storage::DOWNLOADS)
                 .join(context.job_id)
                 .join(state.file_name),
             source_url: request.url.clone(),

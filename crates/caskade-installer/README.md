@@ -87,7 +87,7 @@ candidates, their steps, retained alternatives and any required decision. It
 does not execute the plan. URL analysis downloads into the specified root first
 and keeps those files available for installation.
 
-Built-in profiles are embedded from `tests/hosts`:
+Built-in profiles are embedded from `data/hosts`:
 
 - `windows`
 - `linux`, `linux-no-umu`, `linux-exfat-root`

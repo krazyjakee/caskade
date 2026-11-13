@@ -34,8 +34,7 @@ pub struct Executor {
     aliases: Option<Aliases>,
 }
 
-/// Per-job alias configuration (#31). Callers omit it for games whose recipe
-/// disables the alias.
+/// Per-job alias configuration (#31). Callers that want no alias omit it.
 #[derive(Clone)]
 struct Aliases {
     store: AliasStore,

@@ -13,18 +13,20 @@ use serde_json::{Value, json};
 
 fn hosts() -> Vec<(&'static str, HostCaps)> {
     [
-        ("windows", include_str!("hosts/windows.toml")),
-        ("linux", include_str!("hosts/linux.toml")),
-        ("linux-no-umu", include_str!("hosts/linux-no-umu.toml")),
-        (
-            "linux-exfat-root",
-            include_str!("hosts/linux-exfat-root.toml"),
-        ),
-        ("macos", include_str!("hosts/macos.toml")),
-        ("macos-no-wine", include_str!("hosts/macos-no-wine.toml")),
+        "windows",
+        "linux",
+        "linux-no-umu",
+        "linux-exfat-root",
+        "macos",
+        "macos-no-wine",
     ]
     .into_iter()
-    .map(|(name, text)| (name, toml::from_str(text).unwrap()))
+    .map(|name| {
+        (
+            name,
+            caskade_installer::pipeline::input::host(Some(name)).unwrap(),
+        )
+    })
     .collect()
 }
 

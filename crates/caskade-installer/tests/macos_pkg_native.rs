@@ -92,10 +92,10 @@ async fn system_targeting_pkg_uses_installer_delegate_on_native_macos() {
     let mut host = HostCaps::detect();
     host.packages.root = true;
     let mut probe = ProbeEngine::default();
-    probe.register(Box::new(PkgProbe::new()));
+    probe.register(Box::new(PkgProbe));
     let node = probe.probe_path(&package).unwrap().root;
     let mut plan = PlanEngine::new();
-    plan.register(Box::new(PkgHandler::new())).unwrap();
+    plan.register(Box::new(PkgHandler)).unwrap();
     let plans = plan
         .plan(std::slice::from_ref(&node), &host, &Policy::default())
         .unwrap();

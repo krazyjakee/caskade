@@ -267,7 +267,7 @@ impl FormatProbe for PeProbe {
         {
             let mut archive = node.clone();
             archive.format = Format::Zip;
-            return crate::formats::archive::ArchiveProbe::new().list(source, &archive);
+            return crate::formats::archive::ArchiveProbe.list(source, &archive);
         }
         Ok(None)
     }

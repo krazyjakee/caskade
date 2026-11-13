@@ -23,16 +23,7 @@ use wiremock::{
 };
 
 fn host(name: &str) -> HostCaps {
-    toml::from_str(match name {
-        "windows" => include_str!("hosts/windows.toml"),
-        "linux" => include_str!("hosts/linux.toml"),
-        "linux-no-umu" => include_str!("hosts/linux-no-umu.toml"),
-        "linux-exfat-root" => include_str!("hosts/linux-exfat-root.toml"),
-        "macos" => include_str!("hosts/macos.toml"),
-        "macos-no-wine" => include_str!("hosts/macos-no-wine.toml"),
-        _ => panic!("unknown profile"),
-    })
-    .unwrap()
+    caskade_installer::pipeline::input::host(Some(name)).unwrap()
 }
 fn config(server: &MockServer) -> ResolverConfig {
     let base = Url::parse(&format!("{}/", server.uri())).unwrap();

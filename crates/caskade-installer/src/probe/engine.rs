@@ -135,31 +135,29 @@ impl ProbeEngine {
         {
             // Burn bundles are checked first: one bounded header/UX read
             // instead of repeated overlay scans by the other PE probes.
-            engine.register(Box::new(crate::formats::windows::burn::BurnProbe::new()));
-            engine.register(Box::new(crate::formats::windows::inno::InnoProbe::new()));
-            engine.register(Box::new(crate::formats::windows::msi::MsiProbe::new()));
-            engine.register(Box::new(crate::formats::windows::nsis::NsisProbe::new()));
+            engine.register(Box::new(crate::formats::windows::burn::BurnProbe));
+            engine.register(Box::new(crate::formats::windows::inno::InnoProbe));
+            engine.register(Box::new(crate::formats::windows::msi::MsiProbe));
+            engine.register(Box::new(crate::formats::windows::nsis::NsisProbe));
             engine.register(Box::new(super::PeProbe::new()));
         }
-        engine.register(Box::new(crate::formats::archive::sfx::SfxProbe::new()));
+        engine.register(Box::new(crate::formats::archive::sfx::SfxProbe));
         #[cfg(feature = "linux-formats")]
-        engine.register(Box::new(
-            crate::formats::linux::makeself::MakeselfProbe::new(),
-        ));
+        engine.register(Box::new(crate::formats::linux::makeself::MakeselfProbe));
         #[cfg(feature = "linux-formats")]
-        engine.register(Box::new(crate::formats::linux::deb::PackageProbe::new()));
+        engine.register(Box::new(crate::formats::linux::deb::PackageProbe));
         // Console discs are classified from their filesystem before the
         // suffix/header ROM catalogue sees shared .iso/.bin/.cue names.
         #[cfg(feature = "disc")]
         engine.register(Box::new(crate::formats::disc::DiscProbe));
         #[cfg(feature = "macos-formats")]
-        engine.register(Box::new(crate::formats::macos::pkg::PkgProbe::new()));
+        engine.register(Box::new(crate::formats::macos::pkg::PkgProbe));
         #[cfg(feature = "macos-formats")]
-        engine.register(Box::new(crate::formats::macos::dmg::DmgProbe::new()));
+        engine.register(Box::new(crate::formats::macos::dmg::DmgProbe));
         #[cfg(feature = "linux-formats")]
         engine.register(Box::new(crate::formats::linux::flatpak::FlatpakProbe));
         engine.register(Box::new(crate::formats::rom::RomProbe::default()));
-        engine.register(Box::new(crate::formats::archive::ArchiveProbe::new()));
+        engine.register(Box::new(crate::formats::archive::ArchiveProbe));
         engine
     }
     pub fn new(limits: ProbeLimits) -> Self {

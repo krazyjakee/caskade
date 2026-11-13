@@ -1,6 +1,6 @@
 use super::super::deb::{PackageError, Result, common::Budget};
 use crate::{
-    ArtifactNode, Format,
+    Format,
     formats::archive::{self, ArchiveOptions, Entry, EntryKind, ExtractionControl, PayloadReader},
     safety::{NameEncoding, SafeDir, SafetyError, decode_name, sanitize_path},
 };
@@ -239,22 +239,8 @@ pub fn extract(
     dir: &mut SafeDir,
     options: &ArchiveOptions,
     control: &mut dyn ExtractionControl,
-) -> Result<(super::super::deb::PackageInfo, Vec<ArtifactNode>)> {
+) -> Result<super::super::deb::PackageInfo> {
     let info = super::inspect(reader)?.info;
     entries(reader, options, Some(dir), control)?;
-    let engine = crate::probe::ProbeEngine::with_builtin_formats(Default::default());
-    let mut nodes = Vec::new();
-    for path in dir.extracted_files() {
-        let mut file = dir.open_read(
-            path.to_str()
-                .ok_or_else(|| PackageError::Invalid("payload name encoding".into()))?,
-        )?;
-        let mut node = engine
-            .probe_reader(&mut file, path)
-            .map_err(|e| PackageError::Invalid(e.to_string()))?
-            .root;
-        node.id = crate::ArtifactId(format!("rpm:entry:{}", nodes.len()));
-        nodes.push(node);
-    }
-    Ok((info, nodes))
+    Ok(info)
 }

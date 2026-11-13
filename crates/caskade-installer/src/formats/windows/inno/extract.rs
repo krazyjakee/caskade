@@ -2,7 +2,6 @@ use super::{
     InnoError, InnoLimits, InnoMetadata, Result, app_path, inspect_path, paths::selected_path,
 };
 use crate::{
-    ArtifactNode,
     formats::archive::{ArchiveOptions, ExtractionControl},
     safety::SafeDir,
 };
@@ -20,7 +19,7 @@ pub fn extract_path(
     options: &ArchiveOptions,
     limits: InnoLimits,
     control: &mut dyn ExtractionControl,
-) -> Result<(InnoMetadata, Vec<ArtifactNode>)> {
+) -> Result<InnoMetadata> {
     control.checkpoint(0)?;
     let metadata = inspect_path(path, limits)?;
     if metadata.password_required {
@@ -46,7 +45,6 @@ pub fn extract_path(
     let selected = builder
         .build()
         .map_err(|e| InnoError::Invalid(e.to_string()))?;
-    let mut written = Vec::new();
     for raw in &metadata.directories {
         if let Some(path) = app_path(raw)? {
             if path == Path::new(".") {
@@ -86,7 +84,6 @@ pub fn extract_path(
             control.checkpoint(size)?;
             let reader = installer.extract(file).map_err(invalid)?;
             write(directory, &name, reader, size, options.depth, control)?;
-            written.push(name);
         }
     } else {
         let mut installer = ::inno::Inno::open(path).map_err(invalid)?;
@@ -107,29 +104,9 @@ pub fn extract_path(
                 .ok_or_else(|| InnoError::Invalid("invalid installer filename".into()))?;
             crate::safety::sanitize_path(stem)?;
         }
-        stream(
-            &mut installer,
-            directory,
-            &selected,
-            options,
-            control,
-            &mut written,
-        )?;
+        stream(&mut installer, directory, &selected, options, control)?;
     }
-    let engine =
-        crate::probe::ProbeEngine::with_builtin_formats(crate::probe::ProbeLimits::default());
-    let mut artifacts = Vec::new();
-    for (index, name) in written.iter().enumerate() {
-        control.checkpoint(0)?;
-        let mut file = directory.open_read(name)?;
-        let mut node = engine
-            .probe_reader(&mut file, Path::new(name))
-            .map_err(invalid)?
-            .root;
-        node.id = crate::ArtifactId(format!("inno-entry:{index}"));
-        artifacts.push(node);
-    }
-    Ok((metadata, artifacts))
+    Ok(metadata)
 }
 fn invalid(error: impl std::fmt::Display) -> InnoError {
     InnoError::Invalid(error.to_string())
@@ -141,7 +118,6 @@ fn stream<R: Read + Seek>(
     selected: &globset::GlobSet,
     options: &ArchiveOptions,
     control: &mut dyn ExtractionControl,
-    written: &mut Vec<String>,
 ) -> Result<()> {
     let mut files = installer.streaming_files(|entry| {
         entry
@@ -162,7 +138,6 @@ fn stream<R: Read + Seek>(
         let size = entry.file_location().uncompressed_size();
         control.checkpoint(size)?;
         write(directory, &name, reader, size, options.depth, control)?;
-        written.push(name);
     }
     Ok(())
 }

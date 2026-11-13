@@ -7,11 +7,6 @@ use std::io::{Seek, SeekFrom};
 
 #[derive(Default)]
 pub struct ArchiveProbe;
-impl ArchiveProbe {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl FormatProbe for ArchiveProbe {
     fn id(&self) -> &str {
         "archive"
@@ -35,11 +30,7 @@ impl FormatProbe for ArchiveProbe {
         }
         // Avoid scanning a trailer for other known archives (or every extracted
         // ELF/PE file). Only ZIP candidates require this bounded fallback scan.
-        if header.starts_with(b"7z\xbc\xaf\x27\x1c")
-            || header.starts_with(b"\x1f\x8b")
-            || header.starts_with(b"\xfd7zXZ")
-            || header.starts_with(b"BZh")
-            || header.starts_with(b"\x28\xb5\x2f\xfd")
+        if header.starts_with(b"7z\xbc\xaf\x27\x1c") || crate::probe::compression(&header).is_some()
         {
             return Ok(None);
         }

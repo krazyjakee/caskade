@@ -633,8 +633,7 @@ mod tests {
             children: vec![],
             children_complete: true,
         };
-        let host: crate::host::HostCaps =
-            toml::from_str(include_str!("../../../tests/hosts/linux.toml")).unwrap();
+        let host: crate::host::HostCaps = crate::pipeline::input::host(Some("linux")).unwrap();
         let policy = crate::Policy::default();
         let proposal = AppImageHandler
             .propose(&artifact, &PlanContext::new(&host, &policy))

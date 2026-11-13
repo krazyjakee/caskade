@@ -36,7 +36,7 @@ fn attach(runtime: Arc<FakeRuntime>) -> dmg::Result<MountedImage> {
     )
 }
 fn host(os: OperatingSystem) -> HostCaps {
-    let mut host: HostCaps = toml::from_str(include_str!("hosts/macos.toml")).unwrap();
+    let mut host: HostCaps = caskade_installer::pipeline::input::host(Some("macos")).unwrap();
     host.os = os;
     host.packages
         .managers
@@ -261,7 +261,7 @@ fn mounted_apps_use_capability_copy_preserve_framework_links_and_cleanup_on_copy
 #[test]
 fn dmgs_are_mac_payloads_and_unsupported_off_macos_without_running_tools() {
     let mut plan = PlanEngine::new();
-    plan.register(Box::new(DmgHandler::new())).unwrap();
+    plan.register(Box::new(DmgHandler)).unwrap();
     let node = node();
     let policy = Policy {
         execution: ExecutionPolicy::Never,

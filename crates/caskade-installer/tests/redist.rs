@@ -7,11 +7,7 @@ use caskade_installer::{
 use std::path::{Path, PathBuf};
 
 fn host(name: &str) -> HostCaps {
-    toml::from_str(match name {
-        "windows" => include_str!("hosts/windows.toml"),
-        _ => include_str!("hosts/linux.toml"),
-    })
-    .unwrap()
+    caskade_installer::pipeline::input::host(Some(name)).unwrap()
 }
 
 fn fixtures() -> PathBuf {

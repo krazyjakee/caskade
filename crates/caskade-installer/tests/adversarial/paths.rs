@@ -130,7 +130,7 @@ fn unicode_normalisation_case_ancestors_and_duplicate_collisions() {
             ZipEntry::file(first.as_bytes(), b"one"),
             ZipEntry::file(second.as_bytes(), b"two"),
         ]);
-        let (_, result) = attempt(
+        let (root, result) = attempt(
             &zip,
             Format::Zip,
             Limits::default(),
@@ -140,8 +140,8 @@ fn unicode_normalisation_case_ancestors_and_duplicate_collisions() {
         if first == second {
             // zip's index deduplicates identical byte names. It may expose a
             // single safe member; spelling aliases must still fail below.
-            if let Ok(artifacts) = result {
-                assert_eq!(artifacts.len(), 1);
+            if result.is_ok() {
+                assert_eq!(std::fs::read_dir(root.path()).unwrap().count(), 1);
             }
         } else {
             assert!(result.is_err(), "{first:?}, {second:?}");

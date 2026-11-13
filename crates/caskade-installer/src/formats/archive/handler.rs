@@ -13,11 +13,6 @@ use std::{
 
 #[derive(Default)]
 pub struct ArchiveHandler;
-impl ArchiveHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for ArchiveHandler {
     fn id(&self) -> HandlerId {
         HandlerId("archive".into())
@@ -71,7 +66,6 @@ pub struct ArchiveExtractor {
     sources: BTreeMap<ArtifactId, PathBuf>,
     #[cfg(feature = "windows-formats")]
     burn: crate::formats::windows::burn::BurnExtractor,
-    artifacts: std::sync::Mutex<BTreeMap<ArtifactId, Vec<ArtifactNode>>>,
     #[cfg(feature = "linux-formats")]
     shell: crate::formats::linux::makeself::MakeselfExtractor,
     #[cfg(feature = "linux-formats")]
@@ -95,28 +89,7 @@ impl ArchiveExtractor {
             #[cfg(feature = "macos-formats")]
             mac_pkg: crate::formats::macos::pkg::PkgExtractor::new(sources.clone()),
             sources,
-            artifacts: std::sync::Mutex::default(),
         }
-    }
-    /// Provisional extraction output. Consume only after the executor reports
-    /// success; a later failed step may have rolled staging back.
-    pub fn take_artifacts(&self, artifact: &ArtifactId) -> Option<Vec<ArtifactNode>> {
-        #[cfg(feature = "macos-formats")]
-        if let Some(nodes) = self.mac_pkg.take_artifacts(artifact) {
-            return Some(nodes);
-        }
-        #[cfg(feature = "linux-formats")]
-        if let Some(nodes) = self.package.take_artifacts(artifact) {
-            return Some(nodes);
-        }
-        #[cfg(feature = "linux-formats")]
-        if let Some(nodes) = self.shell.take_artifacts(artifact) {
-            return Some(nodes);
-        }
-        self.artifacts
-            .lock()
-            .expect("archive artifacts poisoned")
-            .remove(artifact)
     }
     #[cfg(feature = "linux-formats")]
     pub fn take_discovery_hints(
@@ -222,16 +195,11 @@ impl Extractor for ArchiveExtractor {
         let (reader, format) = source(path).map_err(ExecError::from)?;
         let mut dir = context.open_destination(destination, reader.size())?;
         let options = ArchiveOptions::for_step(select, strip, &context.limits);
-        let mut artifacts = super::extract(reader, format, &mut dir, &options, &mut &*context)
+        super::extract(reader, format, &mut dir, &options, &mut &*context)
             .map_err(ExecError::from)?;
         if select.is_empty() && strip.is_none() {
-            artifacts = super::unwrap_tarball(&mut dir, artifacts, &options, &mut &*context)
-                .map_err(ExecError::from)?;
+            super::unwrap_tarball(&mut dir, &options, &mut &*context).map_err(ExecError::from)?;
         }
-        self.artifacts
-            .lock()
-            .expect("archive artifacts poisoned")
-            .insert(artifact.clone(), artifacts);
         Ok(())
     }
 }

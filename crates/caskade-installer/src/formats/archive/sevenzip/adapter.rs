@@ -7,7 +7,6 @@ use crate::{
 use std::{
     collections::BTreeMap,
     path::{Path, PathBuf},
-    sync::Mutex,
 };
 
 #[derive(Default)]
@@ -68,21 +67,10 @@ impl Handler for SevenZipHandler {
 pub struct SevenZipExtractor {
     tool: SevenZip,
     sources: BTreeMap<ArtifactId, PathBuf>,
-    artifacts: Mutex<BTreeMap<ArtifactId, Vec<ArtifactNode>>>,
 }
 impl SevenZipExtractor {
     pub fn new(tool: SevenZip, sources: BTreeMap<ArtifactId, PathBuf>) -> Self {
-        Self {
-            tool,
-            sources,
-            artifacts: Mutex::default(),
-        }
-    }
-    pub fn take_artifacts(&self, id: &ArtifactId) -> Option<Vec<ArtifactNode>> {
-        self.artifacts
-            .lock()
-            .expect("sidecar artifacts poisoned")
-            .remove(id)
+        Self { tool, sources }
     }
 }
 impl Extractor for SevenZipExtractor {
@@ -105,14 +93,8 @@ impl Extractor for SevenZipExtractor {
             .with_case_sensitivity(context.case_sensitive);
         tool.options.select = select.to_vec();
         tool.options.strip = strip.map(Path::to_path_buf);
-        let artifacts = tool
-            .extract(source, scratch.path(), &mut writer, &mut &*context)
-            .map_err(map_error)?;
-        self.artifacts
-            .lock()
-            .expect("sidecar artifacts poisoned")
-            .insert(id.clone(), artifacts);
-        Ok(())
+        tool.extract(source, scratch.path(), &mut writer, &mut &*context)
+            .map_err(map_error)
     }
 }
 fn map_error(error: SevenZipError) -> ExecError {
@@ -140,12 +122,6 @@ impl HybridArchiveExtractor {
             sfx: super::super::sfx::SfxExtractor::new(sources.clone()).with_sidecar(tool.clone()),
             sidecar: SevenZipExtractor::new(tool, sources),
         }
-    }
-    pub fn take_artifacts(&self, id: &ArtifactId) -> Option<Vec<ArtifactNode>> {
-        self.sidecar
-            .take_artifacts(id)
-            .or_else(|| self.sfx.take_artifacts(id))
-            .or_else(|| self.native.take_artifacts(id))
     }
     #[cfg(feature = "linux-formats")]
     pub fn take_discovery_hints(&self, id: &ArtifactId) -> Option<crate::discover::DiscoveryHints> {

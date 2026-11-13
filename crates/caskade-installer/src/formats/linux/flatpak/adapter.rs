@@ -152,7 +152,7 @@ pub struct FlatpakLaunchSpec {
     pub args: Vec<String>,
 }
 impl FlatpakMetadata {
-    pub fn uninstall_args(&self) -> Vec<String> {
+    fn uninstall_args(&self) -> Vec<String> {
         vec![
             "uninstall".into(),
             "--user".into(),

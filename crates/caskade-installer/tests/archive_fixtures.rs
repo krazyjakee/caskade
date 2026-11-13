@@ -2,6 +2,7 @@ use caskade_installer::{
     Format,
     formats::archive::*,
     safety::{Limits, SafeDir, open_staging},
+    testing::probe_tree,
 };
 use std::{
     collections::BTreeMap,
@@ -36,13 +37,14 @@ fn every_archive_fixture_lists_extracts_matches_tree_and_reprobes() {
             .map(|p| p.metadata().unwrap().len())
             .sum();
         let mut dir = writer(temp.path(), packed);
-        let artifacts = extract_path(
+        extract_path(
             &fixture.input(),
             &mut dir,
             &ArchiveOptions::default(),
             &mut NoopControl,
         )
         .unwrap_or_else(|e| panic!("extract {}: {e}", fixture.expected.id));
+        let artifacts = probe_tree(temp.path());
         fixture
             .assert_tree(temp.path())
             .unwrap_or_else(|e| panic!("{}: {e}", fixture.expected.id));
@@ -102,7 +104,7 @@ fn prepended_zip_offsets_exec_restoration_and_selection() {
         strip: Some("bundle".into()),
         ..ArchiveOptions::default()
     };
-    let nodes = extract(
+    extract(
         Cursor::new(prefixed),
         Format::Zip,
         &mut safe,
@@ -110,7 +112,7 @@ fn prepended_zip_offsets_exec_restoration_and_selection() {
         &mut NoopControl,
     )
     .unwrap();
-    assert_eq!(nodes.len(), 2);
+    assert_eq!(probe_tree(temp.path()).len(), 2);
     assert!(temp.path().join("Game").exists());
     assert!(!temp.path().join("readme.txt").exists());
     #[cfg(unix)]
@@ -200,10 +202,9 @@ fn metadata_limits_are_checked_before_archive_allocation() {
 }
 
 #[tokio::test]
-async fn archive_extractor_runs_through_executor_and_retains_reprobed_artifacts() {
+async fn archive_extractor_runs_through_executor() {
     use caskade_installer::{
         exec::{ExecRequest, Executor},
-        host::HostCaps,
         plan::{PlanEngine, Policy},
         testing::{FakeDiskSpace, RecordingSink},
     };
@@ -213,14 +214,14 @@ async fn archive_extractor_runs_through_executor_and_retains_reprobed_artifacts(
         .unwrap();
     let source = fixture.input();
     let mut probe = caskade_installer::probe::ProbeEngine::default();
-    probe.register(Box::new(ArchiveProbe::new()));
+    probe.register(Box::new(ArchiveProbe));
     let node = probe.probe_path(&source).unwrap().root;
     let mut plans = PlanEngine::new();
-    plans.register(Box::new(ArchiveHandler::new())).unwrap();
+    plans.register(Box::new(ArchiveHandler)).unwrap();
     let plans = plans
         .plan(
             std::slice::from_ref(&node),
-            &toml::from_str::<HostCaps>(include_str!("hosts/linux.toml")).unwrap(),
+            &caskade_installer::pipeline::input::host(Some("linux")).unwrap(),
             &Policy::default(),
         )
         .unwrap();
@@ -247,8 +248,11 @@ async fn archive_extractor_runs_through_executor_and_retains_reprobed_artifacts(
         .await
         .unwrap();
     fixture.assert_tree(&report.dir).unwrap();
-    let artifacts = extractor.take_artifacts(&node.id).unwrap();
-    assert!(artifacts.iter().any(|a| a.format == Format::Pe));
+    assert!(
+        probe_tree(&report.dir)
+            .iter()
+            .any(|a| a.format == Format::Pe)
+    );
     assert!(
         sink.events()
             .iter()
@@ -288,7 +292,7 @@ fn a_lone_tarball_in_an_archive_is_unpacked_in_its_place() {
         let temp = tempfile::tempdir().unwrap();
         let mut dir = writer(temp.path(), archive.len() as u64);
         let options = ArchiveOptions::default();
-        let artifacts = extract(
+        extract(
             Cursor::new(archive),
             Format::Zip,
             &mut dir,
@@ -296,20 +300,19 @@ fn a_lone_tarball_in_an_archive_is_unpacked_in_its_place() {
             &mut NoopControl,
         )
         .unwrap();
-        let artifacts = unwrap_tarball(&mut dir, artifacts, &options, &mut NoopControl).unwrap();
+        unwrap_tarball(&mut dir, &options, &mut NoopControl).unwrap();
         let mut files: Vec<String> = dir
             .extracted_files()
             .map(|path| path.to_string_lossy().replace('\\', "/"))
             .collect();
         files.sort();
-        (temp, files, artifacts)
+        (temp, files)
     };
 
-    let (temp, files, artifacts) = unpack(zip_of("Port.tar.gz", &tarball));
+    let (temp, files) = unpack(zip_of("Port.tar.gz", &tarball));
     assert_eq!(files, ["Port", "assets/menu.rml"]);
     assert!(!temp.path().join("Port.tar.gz").exists());
     assert!(temp.path().join("Port").is_file());
-    assert_eq!(artifacts.len(), 2);
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -321,7 +324,7 @@ fn a_lone_tarball_in_an_archive_is_unpacked_in_its_place() {
     }
 
     let romset = zip_of("pacman.zip", &zip_of("pacman.6e", b"rom"));
-    let (temp, files, _) = unpack(romset);
+    let (temp, files) = unpack(romset);
     assert_eq!(files, ["pacman.zip"]);
     assert!(temp.path().join("pacman.zip").is_file());
 }

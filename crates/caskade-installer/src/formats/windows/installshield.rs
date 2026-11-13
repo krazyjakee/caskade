@@ -8,11 +8,6 @@ use crate::{
 };
 #[derive(Default)]
 pub struct InstallShieldHandler;
-impl InstallShieldHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for InstallShieldHandler {
     fn id(&self) -> HandlerId {
         HandlerId("installshield".into())

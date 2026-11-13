@@ -59,7 +59,6 @@ mod portable;
 mod probe;
 mod probe_pe;
 mod proton;
-mod recipes;
 mod reconcile;
 mod reconcile_lock;
 mod reconcile_wine;

@@ -53,17 +53,13 @@ impl PrefixRuntime {
         }
     }
 
-    pub fn launcher(&self) -> &Launcher {
-        &self.launcher
-    }
-
     /// `WINEPREFIX` from the command, else `<cwd>/.caskade/prefix`.
-    pub fn prefix_for(command: &ProcessCommand) -> PathBuf {
+    pub(crate) fn prefix_for(command: &ProcessCommand) -> PathBuf {
         command
             .env
             .get("WINEPREFIX")
             .map(PathBuf::from)
-            .unwrap_or_else(|| command.cwd.join(".caskade/prefix"))
+            .unwrap_or_else(|| command.cwd.join(PREFIX))
     }
 
     /// The host command that runs `command` inside `prefix`.
@@ -172,7 +168,7 @@ impl PrefixRuntime {
 /// Game-owned programs run by their `G:\Game` path, so Wine sees a normal
 /// drive path and working directory (a host path would launch through
 /// `/unix` without either); programs outside the game keep their host path.
-pub fn windows_program(program: &Path, game_dir: &Path) -> String {
+fn windows_program(program: &Path, game_dir: &Path) -> String {
     match program.strip_prefix(game_dir) {
         Ok(inside) if program.has_root() && !inside.as_os_str().is_empty() => {
             let mut path = GAME_DIR.to_owned();
@@ -202,6 +198,11 @@ pub fn start_on_game_drive(command: &mut ProcessCommand, prefix: &Path, game_dir
         command.cwd = cwd;
     }
 }
+
+/// The game-local prefix, relative to the game directory.
+pub const PREFIX: &str = ".caskade/prefix";
+/// The link to the game directory, relative to its prefix (see `isolate`).
+pub const GAME_LINK: &str = "drive_g/Game";
 
 /// Windows path of the game directory inside a prefix. Installers refuse a
 /// bare drive root by default (Inno `AllowRootDirectory`, NSIS
@@ -235,7 +236,7 @@ fn replace_link(link: &Path, target: &Path) -> io::Result<()> {
 /// exFAT roots), and point `z:` at an empty directory. Proton recreates a
 /// missing `z:` as `/`, so it must exist; umu's protonfixes still maps its
 /// own `u:`/`w:`/`x:` drives inside the runtime container.
-pub fn isolate(prefix: &Path, game_dir: &Path) -> io::Result<()> {
+fn isolate(prefix: &Path, game_dir: &Path) -> io::Result<()> {
     let dosdevices = prefix.join("dosdevices");
     let drive = prefix.join("drive_g");
     let empty = prefix.join("caskade-no-host");
@@ -246,7 +247,7 @@ pub fn isolate(prefix: &Path, game_dir: &Path) -> io::Result<()> {
         Ok(inside) => inside.components().map(|_| "..").collect::<PathBuf>(),
         Err(_) => game_dir.to_path_buf(),
     };
-    replace_link(&drive.join("Game"), &target)?;
+    replace_link(&prefix.join(GAME_LINK), &target)?;
     replace_link(&dosdevices.join("g:"), Path::new("../drive_g"))?;
     replace_link(&dosdevices.join("z:"), Path::new("../caskade-no-host"))
 }

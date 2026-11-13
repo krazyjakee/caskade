@@ -1,6 +1,6 @@
 //! Documented Windows installer arguments. These are logical argv entries;
 //! runtimes own OS command-line serialization and must preserve NSIS's raw tail.
-//! Package-specific language/task/property names must come from a recipe.
+//! Package-specific language, task and property names are never preset.
 
 use std::{collections::BTreeMap, sync::OnceLock};
 
@@ -109,7 +109,7 @@ pub struct BuiltArgs {
 
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
 pub enum PresetError {
-    #[error("this installer family needs a package-specific silent recipe")]
+    #[error("this installer family has no generic silent argument contract")]
     SilentUnsupported,
     #[error("this installer family has no generic uninstall argument contract")]
     UninstallUnsupported,
@@ -181,31 +181,31 @@ pub fn build_args(
         );
     }
     if entry.dir_args.is_empty() {
-        warnings
-            .push("Install directory cannot be preset without a package-specific recipe.".into());
+        warnings.push("Install directory cannot be preset for this installer family.".into());
     }
     if !entry.dir_last {
         args.extend(expand(&entry.dir_args));
     }
     if settings.language.is_some() {
         if entry.language_args.is_empty() {
-            warnings.push(
-                "Installer language cannot be preset without a package-specific recipe.".into(),
-            );
+            warnings.push("Installer language cannot be preset for this installer family.".into());
         } else {
             args.extend(expand(&entry.language_args));
         }
     }
     if !settings.let_installers_create_shortcuts {
         if entry.no_shortcuts_args.is_empty() {
-            warnings.push("Shortcut suppression needs a package-specific recipe.".into());
+            warnings
+                .push("Shortcut suppression cannot be preset for this installer family.".into());
         } else {
             args.extend(expand(&entry.no_shortcuts_args));
         }
     }
     if settings.no_launch_at_finish {
         if entry.no_launch_args.is_empty() {
-            warnings.push("Launch-at-finish suppression needs a package-specific recipe.".into());
+            warnings.push(
+                "Launch-at-finish suppression cannot be preset for this installer family.".into(),
+            );
         } else {
             args.extend(expand(&entry.no_launch_args));
         }

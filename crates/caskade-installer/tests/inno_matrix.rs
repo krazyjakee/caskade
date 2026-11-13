@@ -9,7 +9,7 @@ use caskade_installer::{
     host::HostCaps,
     plan::{PlanEngine, Policy},
     probe::ProbeEngine,
-    testing::{FakeDiskSpace, FakeRuntime, RecordingSink, TestRoot},
+    testing::{FakeDiskSpace, FakeRuntime, RecordingSink, TestRoot, probe_tree},
 };
 use std::{
     collections::BTreeMap,
@@ -27,7 +27,7 @@ fn corpus() -> Vec<fixtures::Fixture> {
 }
 fn probe(path: &Path) -> ArtifactNode {
     let mut probe = ProbeEngine::default();
-    probe.register(Box::new(InnoProbe::new()));
+    probe.register(Box::new(InnoProbe));
     let node = probe.probe_path(path).unwrap().root;
     assert_eq!(
         node.format,
@@ -39,19 +39,11 @@ fn probe(path: &Path) -> ArtifactNode {
     node
 }
 fn host(name: &str) -> HostCaps {
-    toml::from_str(
-        &fs::read_to_string(
-            Path::new(env!("CARGO_MANIFEST_DIR"))
-                .join("tests/hosts")
-                .join(format!("{name}.toml")),
-        )
-        .unwrap(),
-    )
-    .unwrap()
+    caskade_installer::pipeline::input::host(Some(name)).unwrap()
 }
 fn planner() -> PlanEngine {
     let mut planner = PlanEngine::new();
-    planner.register(Box::new(InnoHandler::new())).unwrap();
+    planner.register(Box::new(InnoHandler)).unwrap();
     planner
 }
 
@@ -185,9 +177,8 @@ async fn every_plain_inno_fixture_extracts_exact_goldens_and_reprobes_through_ex
         fixture
             .assert_tree(&report.dir)
             .unwrap_or_else(|error| panic!("{}: {error}", fixture.expected.id));
-        let nodes = extractor.take_artifacts(&node.id).unwrap();
         assert!(
-            nodes
+            probe_tree(&report.dir)
                 .iter()
                 .any(|node| node.format == caskade_installer::Format::Pe
                     && node.path == Path::new("FixtureGame.exe"))

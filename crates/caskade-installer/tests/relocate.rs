@@ -2,8 +2,7 @@
 use caskade_installer::{
     events::JobEvent,
     relocate::{
-        RegistryStore, RegistryWrite, RelocateError, RelocateRequest, Relocator, RunningCheck,
-        ShortcutEditor,
+        RegistryStore, RelocateError, RelocateRequest, Relocator, RunningCheck, ShortcutEditor,
     },
     runtime::alias::AliasStore,
     scan::{self, ScanInput, ScanLimits},
@@ -24,24 +23,24 @@ type Key = (String, String, String);
 
 #[derive(Default)]
 struct FakeRegistry {
-    values: Mutex<BTreeMap<Key, RegistryWrite>>,
+    values: Mutex<BTreeMap<Key, scan::RegistryValue>>,
     /// Fail the n-th apply (1-based) after writing half of its values.
     fail_apply: AtomicUsize,
     applies: AtomicUsize,
 }
 impl FakeRegistry {
-    fn set(&self, write: RegistryWrite) {
+    fn set(&self, write: scan::RegistryValue) {
         self.values.lock().unwrap().insert(
             (write.hive.clone(), write.key.clone(), write.name.clone()),
             write,
         );
     }
-    fn snapshot(&self) -> BTreeMap<Key, RegistryWrite> {
+    fn snapshot(&self) -> BTreeMap<Key, scan::RegistryValue> {
         self.values.lock().unwrap().clone()
     }
 }
 impl RegistryStore for FakeRegistry {
-    fn read(&self, hive: &str, key: &str, name: &str) -> io::Result<Option<RegistryWrite>> {
+    fn read(&self, hive: &str, key: &str, name: &str) -> io::Result<Option<scan::RegistryValue>> {
         Ok(self
             .values
             .lock()
@@ -49,7 +48,7 @@ impl RegistryStore for FakeRegistry {
             .get(&(hive.into(), key.into(), name.into()))
             .cloned())
     }
-    fn apply(&self, writes: &[RegistryWrite]) -> io::Result<()> {
+    fn apply(&self, writes: &[scan::RegistryValue]) -> io::Result<()> {
         let call = self.applies.fetch_add(1, Ordering::SeqCst) + 1;
         let fail = call == self.fail_apply.load(Ordering::SeqCst);
         let keep = if fail { writes.len() / 2 } else { writes.len() };
@@ -156,7 +155,7 @@ fn setup() -> Setup {
     fs::write(&external, format!("[Desktop Entry]\nPath={real}\n")).unwrap();
     let registry = Arc::new(FakeRegistry::default());
     for (hive, value_type) in [("HKCU", "REG_SZ"), ("HKLM", "REG_EXPAND_SZ")] {
-        registry.set(RegistryWrite {
+        registry.set(scan::RegistryValue {
             hive: hive.into(),
             key: r"Software\Indie".into(),
             name: "InstallPath".into(),

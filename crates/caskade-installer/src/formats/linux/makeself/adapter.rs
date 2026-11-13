@@ -18,11 +18,6 @@ use std::{
 
 #[derive(Default)]
 pub struct MakeselfProbe;
-impl MakeselfProbe {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl FormatProbe for MakeselfProbe {
     fn id(&self) -> &str {
         "makeself"
@@ -114,7 +109,7 @@ impl FormatProbe for MakeselfProbe {
             let mut bounded = ProbeSource::new(&mut view, u64::MAX)?;
             let mut archive_node = node.clone();
             archive_node.format = format;
-            for mut child in ArchiveProbe::new()
+            for mut child in ArchiveProbe
                 .list(&mut bounded, &archive_node)?
                 .unwrap_or_default()
             {
@@ -142,11 +137,6 @@ impl FormatProbe for MakeselfProbe {
 
 #[derive(Default)]
 pub struct MakeselfHandler;
-impl MakeselfHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for MakeselfHandler {
     fn id(&self) -> HandlerId {
         HandlerId("makeself".into())
@@ -222,7 +212,6 @@ impl Handler for MakeselfHandler {
 #[derive(Default)]
 pub struct MakeselfExtractor {
     sources: BTreeMap<ArtifactId, PathBuf>,
-    artifacts: Mutex<BTreeMap<ArtifactId, Vec<ArtifactNode>>>,
     hints: Mutex<BTreeMap<ArtifactId, DiscoveryHints>>,
 }
 impl MakeselfExtractor {
@@ -231,12 +220,6 @@ impl MakeselfExtractor {
             sources,
             ..Self::default()
         }
-    }
-    pub fn take_artifacts(&self, id: &ArtifactId) -> Option<Vec<ArtifactNode>> {
-        self.artifacts
-            .lock()
-            .expect("shell artifacts poisoned")
-            .remove(id)
     }
     pub fn take_discovery_hints(&self, id: &ArtifactId) -> Option<DiscoveryHints> {
         self.hints.lock().expect("shell hints poisoned").remove(id)
@@ -256,16 +239,11 @@ impl Extractor for MakeselfExtractor {
         let mut file = File::open(path)?;
         let mut dir = context.open_destination(destination, file.seek(SeekFrom::End(0))?)?;
         let options = ArchiveOptions::for_step(select, strip, &context.limits);
-        let nodes = super::extract(&mut file, &mut dir, &options, &mut &*context)
-            .map_err(ExecError::from)?;
+        super::extract(&mut file, &mut dir, &options, &mut &*context).map_err(ExecError::from)?;
         self.hints
             .lock()
             .expect("shell hints poisoned")
             .insert(id.clone(), super::super::mojosetup::discovery_hints(&dir));
-        self.artifacts
-            .lock()
-            .expect("shell artifacts poisoned")
-            .insert(id.clone(), nodes);
         Ok(())
     }
 }

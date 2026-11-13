@@ -12,7 +12,7 @@ use caskade_installer::{
     },
     plan::PlanSet,
     safety::{Limits, SafeDir, open_staging},
-    testing::{FakeDiskSpace, FakeRuntime, RecordingSink, TestRoot},
+    testing::{FakeDiskSpace, FakeRuntime, RecordingSink, TestRoot, probe_tree},
 };
 use std::{
     collections::BTreeMap,
@@ -264,7 +264,7 @@ fn selective_sliced_extraction_preserves_streaming_checksums_and_normalized_path
         strip: Some("FixtureGame_Data".into()),
         ..ArchiveOptions::default()
     };
-    let (_, nodes) = extract_path(
+    extract_path(
         &input("inno5-sliced"),
         &mut safe,
         &options,
@@ -272,6 +272,7 @@ fn selective_sliced_extraction_preserves_streaming_checksums_and_normalized_path
         &mut NoopControl,
     )
     .unwrap();
+    let nodes = probe_tree(root.path());
     assert_eq!(nodes.len(), 1);
     assert_eq!(nodes[0].path, PathBuf::from("globalgamemanagers"));
     assert!(root.path().join("globalgamemanagers").is_file());

@@ -12,6 +12,7 @@ pub use reader::{CountingReader, ReadStats};
 
 mod engine;
 mod magic;
+pub(crate) use magic::compression;
 mod pe;
 mod source;
 pub(crate) use pe::parse_pe;

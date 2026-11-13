@@ -22,7 +22,7 @@ fn fixture() -> fixtures::Fixture {
 }
 
 fn host() -> HostCaps {
-    toml::from_str(include_str!("hosts/linux.toml")).unwrap()
+    caskade_installer::pipeline::input::host(Some("linux")).unwrap()
 }
 
 fn assert_fixture_icon(path: &Path) {

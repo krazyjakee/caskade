@@ -53,5 +53,5 @@ Criterion estimates: probe 13.59 ms, discovery 511.55 ms, TAR extraction 109.50 
 The first discovery assertion failed at 1,943.55 ms; production fix `7d37b61`
 reuses directory handles and parallelizes bounded header reads without dropping
 renamed-executable detection. The same unchanged workload now meets the budget.
-These measurements are local evidence; runner-specific I4/T10 acceptance remains
-on #22 until the native/nightly workflows execute there.
+These measurements are local evidence: no workflow runs the I4/T10 benches, so
+their acceptance is local only (`../docs/ci.md`, Local-only runs).

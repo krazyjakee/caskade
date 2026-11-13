@@ -13,7 +13,6 @@ use std::{
     fs::File,
     io::{Read, Seek, SeekFrom},
     path::{Path, PathBuf},
-    sync::Mutex,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -109,11 +108,6 @@ fn locate_node(
 
 #[derive(Default)]
 pub struct SfxProbe;
-impl SfxProbe {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl FormatProbe for SfxProbe {
     fn id(&self) -> &str {
         "sfx"
@@ -138,17 +132,12 @@ impl FormatProbe for SfxProbe {
         let mut bounded = ProbeSource::new(&mut view, u64::MAX)?;
         let mut archive = node.clone();
         archive.format = payload.format;
-        ArchiveProbe::new().list(&mut bounded, &archive)
+        ArchiveProbe.list(&mut bounded, &archive)
     }
 }
 
 #[derive(Default)]
 pub struct SfxHandler;
-impl SfxHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for SfxHandler {
     fn id(&self) -> HandlerId {
         HandlerId("sfx".into())
@@ -191,7 +180,7 @@ pub fn extract_path(
     dir: &mut SafeDir,
     options: &ArchiveOptions,
     control: &mut dyn ExtractionControl,
-) -> Result<Vec<ArtifactNode>> {
+) -> Result<()> {
     let mut file = File::open(path)?;
     let payload = locate(&mut file, options)?;
     if payload.format == Format::Rar {
@@ -222,25 +211,17 @@ pub fn extract_path(
 pub struct SfxExtractor {
     sources: BTreeMap<ArtifactId, PathBuf>,
     tool: Option<super::sevenzip::SevenZip>,
-    artifacts: Mutex<BTreeMap<ArtifactId, Vec<ArtifactNode>>>,
 }
 impl SfxExtractor {
     pub fn new(sources: BTreeMap<ArtifactId, PathBuf>) -> Self {
         Self {
             sources,
             tool: None,
-            artifacts: Mutex::default(),
         }
     }
     pub fn with_sidecar(mut self, tool: super::sevenzip::SevenZip) -> Self {
         self.tool = Some(tool);
         self
-    }
-    pub fn take_artifacts(&self, id: &ArtifactId) -> Option<Vec<ArtifactNode>> {
-        self.artifacts
-            .lock()
-            .expect("SFX artifacts poisoned")
-            .remove(id)
     }
 }
 impl Extractor for SfxExtractor {
@@ -268,7 +249,7 @@ impl Extractor for SfxExtractor {
             tool.with_limits(context.limits)
                 .with_case_sensitivity(context.case_sensitive)
         });
-        let artifacts = extract_path(
+        extract_path(
             path,
             scratch.path(),
             tool.as_ref(),
@@ -276,11 +257,6 @@ impl Extractor for SfxExtractor {
             &options,
             &mut &*context,
         )
-        .map_err(crate::exec::ExecError::from)?;
-        self.artifacts
-            .lock()
-            .expect("SFX artifacts poisoned")
-            .insert(id.clone(), artifacts);
-        Ok(())
+        .map_err(crate::exec::ExecError::from)
     }
 }

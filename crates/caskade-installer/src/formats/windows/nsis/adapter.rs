@@ -1,7 +1,7 @@
 use super::*;
 use crate::{
-    ArtifactId, ArtifactNode, Candidate, Fidelity, Format, HandlerId, PayloadPlatform, Program,
-    Requirements, Role, RuntimeSpec, SourcePath, Step, Strategy, Warning,
+    ArtifactId, ArtifactNode, Format, HandlerId, PayloadPlatform, Program, Role, RuntimeSpec,
+    SourcePath, Step, Warning,
     plan::{
         Handler, PlanContext, PlanError, Proposal,
         presets::{InstallerFamily, InstallerMode, SwitchSettings, build_args},
@@ -11,16 +11,10 @@ use crate::{
 use std::{
     collections::BTreeMap,
     io::{Seek, SeekFrom},
-    path::PathBuf,
 };
 
 #[derive(Default)]
 pub struct NsisProbe;
-impl NsisProbe {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl FormatProbe for NsisProbe {
     fn id(&self) -> &str {
         "nsis"
@@ -112,11 +106,6 @@ pub fn metadata_from_artifact(node: &ArtifactNode) -> Option<NsisMetadata> {
 
 #[derive(Default)]
 pub struct NsisHandler;
-impl NsisHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for NsisHandler {
     fn id(&self) -> HandlerId {
         HandlerId("nsis".into())
@@ -130,99 +119,42 @@ impl Handler for NsisHandler {
         context: &PlanContext<'_>,
     ) -> std::result::Result<Proposal, PlanError> {
         let metadata = metadata_from_artifact(node);
-        let partial = metadata.as_ref().is_none_or(NsisMetadata::is_partial);
+        let partial = metadata.as_ref().is_none_or(NsisMetadata::is_partial).then(|| Warning { code: "nsis.partial".into(), message: "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted".into(), path: None });
         let estimate = metadata.as_ref().and_then(NsisMetadata::unpacked_bytes);
-        let mut warnings = vec![];
-        if partial {
-            warnings.push(Warning { code: "nsis.partial".into(), message: "Static extraction suppresses shortcuts and omits registry, INI, plugin and launch actions; unresolved external destinations are omitted".into(), path: None });
-        }
-        let mut candidates = vec![Candidate {
-            handler: self.id(),
-            strategy: Strategy::Extract,
-            confidence: if metadata.is_some() { 1.0 } else { 0.8 },
-            fidelity: if partial {
-                Fidelity::Partial
-            } else {
-                Fidelity::Exact
-            },
-            requires: Requirements {
-                est_disk_bytes: estimate,
-                ..Default::default()
-            },
-            steps: vec![Step::Extract {
-                from: node.id.clone(),
-                select: vec![],
-                strip: None,
-                to: PathBuf::from("."),
-            }],
-            warnings,
-        }];
+        let mut candidates = vec![super::super::extract_candidate(
+            self.id(),
+            node,
+            metadata.is_some(),
+            estimate,
+            partial,
+        )];
         if let Some(runtime) = super::super::installer_runtime(context.host) {
-            for (mode, strategy) in [
-                (InstallerMode::Silent, Strategy::RunSilent),
-                (InstallerMode::Interactive, Strategy::RunInteractive),
-            ] {
-                let preset = build_args(
-                    InstallerFamily::Nsis,
-                    mode,
-                    &SwitchSettings::from(&context.policy.preset_args),
-                )
-                .map_err(|e| PlanError::Handler {
-                    handler: self.id(),
-                    message: e.to_string(),
-                })?;
-                let args = preset.args;
-                let program = Program::Source(SourcePath::Artifact {
+            let settings = SwitchSettings::from(&context.policy.preset_args);
+            let run = super::super::Run {
+                handler: self.id(),
+                program: Program::Source(SourcePath::Artifact {
                     artifact: node.id.clone(),
                     path: ".".into(),
-                });
-                let step = if mode == InstallerMode::Silent {
-                    Step::Run {
-                        program,
-                        args,
-                        env: BTreeMap::new(),
-                        runtime: runtime.clone(),
-                        timeout_secs: 900,
-                        expect: metadata
-                            .as_ref()
-                            .into_iter()
-                            .flat_map(|m| m.files.first())
-                            .filter_map(|f| f.path.clone())
-                            .collect(),
-                    }
-                } else {
-                    Step::RunInteractive {
-                        program,
-                        args,
-                        env: BTreeMap::new(),
-                        runtime: runtime.clone(),
-                        target_dir: ".".into(),
-                    }
-                };
-                candidates.push(Candidate {
-                    handler: self.id(),
-                    strategy,
-                    confidence: 1.0,
-                    fidelity: Fidelity::Native,
-                    requires: Requirements {
-                        executes_code: true,
-                        runtime: Some(runtime.clone()),
-                        may_prompt_elevation: true,
-                        interactive: mode == InstallerMode::Interactive,
-                        est_disk_bytes: estimate,
-                    },
-                    steps: vec![step],
-                    warnings: preset
-                        .warnings
-                        .into_iter()
-                        .map(|message| Warning {
-                            code: "nsis.preset".into(),
-                            message,
-                            path: None,
-                        })
-                        .collect(),
-                });
-            }
+                }),
+                leading_args: vec![],
+                timeout_secs: 900,
+                expect: metadata
+                    .as_ref()
+                    .into_iter()
+                    .flat_map(|m| m.files.first())
+                    .filter_map(|f| f.path.clone())
+                    .collect(),
+                may_prompt_elevation: true,
+                est_disk_bytes: estimate,
+                confidence: 1.0,
+                warning_code: "nsis.preset",
+            };
+            candidates.extend(super::super::run_candidates(
+                run,
+                runtime,
+                &[InstallerMode::Silent, InstallerMode::Interactive],
+                |mode| build_args(InstallerFamily::Nsis, mode, &settings),
+            )?);
         }
         Ok(Proposal {
             candidates,

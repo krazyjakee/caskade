@@ -8,8 +8,8 @@
 //! metadata and make static extraction Partial; they are never executed here.
 //!
 //! Register `InnoProbe` before the generic `PeProbe` in first-match registries.
-//! After successful execution, consume the extractor's discovery hints and
-//! reprobed artifacts. Native-only uninstall recording is coordinated by the
+//! After successful execution, consume the extractor's discovery hints.
+//! Native-only uninstall recording is coordinated by the
 //! Windows handler module so extracted installs never run a native uninstaller.
 mod adapter;
 mod extract;

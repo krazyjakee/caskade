@@ -14,7 +14,7 @@ pub(crate) use ranking::executes;
 #[cfg(test)]
 mod tests;
 
-pub use engine::{CandidateTransform, Handler, PlanContext, PlanEngine, PlanError, Proposal};
+pub use engine::{Handler, PlanContext, PlanEngine, PlanError, Proposal};
 pub use policy::{ExecutionPolicy, Policy, PresetArgs, WindowsMethod};
 
 pub use crate::types::{

@@ -18,7 +18,7 @@ fn engines() -> (ProbeEngine, PlanEngine) {
     let mut probes = ProbeEngine::default();
     probes.register(Box::new(ArchiveProbe));
     let mut planner = PlanEngine::default();
-    planner.register(Box::new(ArchiveHandler::new())).unwrap();
+    planner.register(Box::new(ArchiveHandler)).unwrap();
     (probes, planner)
 }
 
@@ -45,7 +45,7 @@ fn every_fixture_by_every_host_profile() {
     let tests = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests");
     let fixtures = tests.join("fixtures");
     let expectations = toml_files(&fixtures.join("expected"));
-    let profiles = toml_files(&tests.join("hosts"));
+    let profiles = toml_files(&Path::new(env!("CARGO_MANIFEST_DIR")).join("data/hosts"));
     let (probes, planner) = engines();
     let policy = Policy::default();
     let mut count = 0;

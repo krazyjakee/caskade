@@ -2,6 +2,21 @@ use std::path::Path;
 
 use super::{Detection, Format, PayloadPlatform, ProbeError, ProbeSource, Role};
 
+/// The compressed stream `bytes` starts with, if any.
+pub(crate) fn compression(bytes: &[u8]) -> Option<Format> {
+    if bytes.starts_with(b"\xfd7zXZ\x00") {
+        Some(Format::Xz)
+    } else if bytes.starts_with(b"\x1f\x8b\x08") {
+        Some(Format::Gzip)
+    } else if bytes.starts_with(b"\x28\xb5\x2f\xfd") {
+        Some(Format::Zstd)
+    } else if bytes.starts_with(b"BZh") {
+        Some(Format::Bzip2)
+    } else {
+        None
+    }
+}
+
 pub(super) fn detect(source: &mut ProbeSource<'_>) -> Result<Detection, ProbeError> {
     // This fixed-size header plus bounded trailer/offset reads keeps sparse and
     // very large inputs cheap. No read scales with the file's declared size.
@@ -16,14 +31,8 @@ pub(super) fn detect(source: &mut ProbeSource<'_>) -> Result<Detection, ProbeErr
     } else if header.starts_with(b"Rar!\x1a\x07\x00") || header.starts_with(b"Rar!\x1a\x07\x01\x00")
     {
         (Format::Rar, PayloadPlatform::Unknown)
-    } else if header.starts_with(b"\xfd7zXZ\x00") {
-        (Format::Xz, PayloadPlatform::Unknown)
-    } else if header.starts_with(b"\x1f\x8b\x08") {
-        (Format::Gzip, PayloadPlatform::Unknown)
-    } else if header.starts_with(b"\x28\xb5\x2f\xfd") {
-        (Format::Zstd, PayloadPlatform::Unknown)
-    } else if header.starts_with(b"BZh") {
-        (Format::Bzip2, PayloadPlatform::Unknown)
+    } else if let Some(format) = compression(&header) {
+        (format, PayloadPlatform::Unknown)
     } else if header.get(257..262) == Some(b"ustar") {
         (Format::Tar, PayloadPlatform::Unknown)
     } else if header.starts_with(b"!<arch>\n")

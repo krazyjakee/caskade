@@ -46,7 +46,7 @@ impl Storage {
     pub fn open(root: &Path, job_id: &str) -> Result<Self> {
         safe_file_name(job_id)?;
         let root = crate::safety::open_staging(root)?;
-        let job = directory(&root, &Path::new(".caskade/downloads").join(job_id), true)?;
+        let job = directory(&root, &Path::new(DOWNLOADS).join(job_id), true)?;
         let states = directory(&job, Path::new(".state"), true)?;
         Ok(Self { job, states })
     }
@@ -191,6 +191,8 @@ pub(super) fn directory(root: &Dir, path: &Path, create: bool) -> Result<Dir> {
     Ok(dir)
 }
 
+/// Every job's folder (`<job>/`, its states in `<job>/.state`), under the root.
+pub(crate) const DOWNLOADS: &str = ".caskade/downloads";
 /// Torrent data, one folder per info hash (`<hex>/meta.torrent`, `<hex>/data/`):
 /// a later job for the same torrent, after a restart too, verifies and
 /// reuses its pieces.
@@ -248,9 +250,9 @@ pub(super) fn remove_torrent(root: &Dir, hash: &str) -> Result<()> {
 pub(super) fn prune(root: &Path, job_id: &str) {
     if let Ok(root) = crate::safety::open_staging(root) {
         for path in [
-            Path::new(".caskade/downloads").join(job_id).join(".state"),
-            Path::new(".caskade/downloads").join(job_id),
-            PathBuf::from(".caskade/downloads"),
+            Path::new(DOWNLOADS).join(job_id).join(".state"),
+            Path::new(DOWNLOADS).join(job_id),
+            PathBuf::from(DOWNLOADS),
             PathBuf::from(".caskade"),
         ] {
             if root

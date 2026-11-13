@@ -28,19 +28,13 @@ fn probe(fixture: &fixtures::Fixture) -> ArtifactNode {
         .root
 }
 fn host(name: &str) -> HostCaps {
-    toml::from_str(match name {
-        "windows" => include_str!("hosts/windows.toml"),
-        "linux" => include_str!("hosts/linux.toml"),
-        "macos" => include_str!("hosts/macos.toml"),
-        _ => unreachable!(),
-    })
-    .unwrap()
+    caskade_installer::pipeline::input::host(Some(name)).unwrap()
 }
 fn plans(node: &ArtifactNode, host: &HostCaps, extract: bool) -> PlanSet {
     let mut engine = PlanEngine::new();
-    engine.register(Box::new(InnoHandler::new())).unwrap();
-    engine.register(Box::new(NsisHandler::new())).unwrap();
-    engine.register(Box::new(MsiHandler::new())).unwrap();
+    engine.register(Box::new(InnoHandler)).unwrap();
+    engine.register(Box::new(NsisHandler)).unwrap();
+    engine.register(Box::new(MsiHandler)).unwrap();
     engine
         .plan(
             std::slice::from_ref(node),

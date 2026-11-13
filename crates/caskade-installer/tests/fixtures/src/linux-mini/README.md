@@ -45,7 +45,8 @@ The minimal runtime is built from host ELF dependencies in a temporary directory
 never committed, distributed, or downloaded by the tests. Native sandbox launch
 requires the runner to permit bubblewrap's namespace setup.
 
-The native nextest profile runs these ignored tests in
-`installer-linux-native.yml` and uploads JUnit results. Steam Deck evidence must
+The native nextest profile runs these ignored tests in CI's
+`installer-linux-native` job (`.github/workflows/ci.yml`), which uploads JUnit
+results. Steam Deck evidence must
 be entered in [STEAM-DECK.md](STEAM-DECK.md); a Linux host run does not establish
 Deck acceptance.

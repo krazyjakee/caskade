@@ -5,11 +5,6 @@ use crate::{
 };
 #[derive(Default)]
 pub struct WiseHandler;
-impl WiseHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for WiseHandler {
     fn id(&self) -> HandlerId {
         HandlerId("wise".into())

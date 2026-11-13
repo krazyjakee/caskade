@@ -26,14 +26,14 @@ const RUNTIME: [&str; 4] = ["APPDIR", "APPIMAGE", "ARGV0", "OWD"];
 
 /// What to do to one inherited variable.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum EnvChange {
+enum EnvChange {
     Remove(OsString),
     Set(OsString, OsString),
 }
 
 /// The changes that take `vars` (a host environment) outside its AppImage:
 /// empty unless `APPDIR` is set to a folder.
-pub fn appimage_changes(vars: impl IntoIterator<Item = (OsString, OsString)>) -> Vec<EnvChange> {
+fn appimage_changes(vars: impl IntoIterator<Item = (OsString, OsString)>) -> Vec<EnvChange> {
     let vars: Vec<(OsString, OsString)> = vars.into_iter().collect();
     let Some(appdir) = vars
         .iter()
@@ -68,7 +68,7 @@ pub fn appimage_changes(vars: impl IntoIterator<Item = (OsString, OsString)>) ->
 }
 
 /// Applies `changes` to `command`, leaving what it set itself.
-pub fn apply_changes(command: &mut Command, changes: &[EnvChange]) {
+fn apply_changes(command: &mut Command, changes: &[EnvChange]) {
     let own: Vec<OsString> = command
         .get_envs()
         .map(|(key, _)| key.to_os_string())

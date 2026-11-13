@@ -26,16 +26,11 @@ fn fixture() -> fixtures::Fixture {
 }
 fn engine() -> ProbeEngine {
     let mut engine = ProbeEngine::default();
-    engine.register(Box::new(BurnProbe::new()));
+    engine.register(Box::new(BurnProbe));
     engine
 }
-fn host(profile: &str) -> HostCaps {
-    let text = match profile {
-        "windows" => include_str!("hosts/windows.toml"),
-        "macos" => include_str!("hosts/macos.toml"),
-        _ => include_str!("hosts/linux.toml"),
-    };
-    toml::from_str(text).unwrap()
+fn host(name: &str) -> HostCaps {
+    caskade_installer::pipeline::input::host(Some(name)).unwrap()
 }
 fn node(format: Format) -> ArtifactNode {
     ArtifactNode {
@@ -52,10 +47,10 @@ fn node(format: Format) -> ArtifactNode {
 }
 fn planner() -> PlanEngine {
     let mut p = PlanEngine::new();
-    p.register(Box::new(BurnHandler::new())).unwrap();
-    p.register(Box::new(GenericHandler::new())).unwrap();
-    p.register(Box::new(InstallShieldHandler::new())).unwrap();
-    p.register(Box::new(WiseHandler::new())).unwrap();
+    p.register(Box::new(BurnHandler)).unwrap();
+    p.register(Box::new(GenericHandler)).unwrap();
+    p.register(Box::new(InstallShieldHandler)).unwrap();
+    p.register(Box::new(WiseHandler)).unwrap();
     p
 }
 #[tokio::test]

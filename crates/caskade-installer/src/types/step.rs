@@ -55,6 +55,21 @@ pub enum RegistryHive {
     CurrentConfig,
 }
 
+impl RegistryHive {
+    /// HKCU or HKLM from the spellings of Inno (`HKeyLocalMachine`), MSI and
+    /// `.reg` files (`HKEY_CURRENT_USER`, `HKCU`); `None` for any other hive.
+    pub fn parse(name: &str) -> Option<Self> {
+        let lower = name.to_ascii_lowercase().replace('_', "");
+        if lower == "hkcu" || lower.contains("currentuser") {
+            Some(Self::CurrentUser)
+        } else if lower == "hklm" || lower.contains("localmachine") {
+            Some(Self::LocalMachine)
+        } else {
+            None
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum RegistryValue {

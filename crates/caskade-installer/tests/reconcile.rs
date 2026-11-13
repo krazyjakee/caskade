@@ -16,9 +16,7 @@ use caskade_installer::{
         Sha256Digest, UninstallRequest, Uninstaller,
     },
     reconcile::{ReconcileError, ReconcileRequest, ReconcileStatus, Reconciler, ScanLimits},
-    relocate::{
-        RegistryStore, RegistryWrite, RelocateError, Relocator, RunningCheck, ShortcutEditor,
-    },
+    relocate::{RegistryStore, RelocateError, Relocator, RunningCheck, ShortcutEditor},
     runtime::alias::AliasStore,
     scan::{self, ScanInput},
     testing::{FakeAction, FakeDiskSpace, FakeRuntime, FakeScript, RecordingSink},
@@ -28,11 +26,11 @@ use sha2::{Digest, Sha256};
 type Key = (String, String, String);
 #[derive(Default)]
 struct Registry {
-    values: Mutex<BTreeMap<Key, RegistryWrite>>,
+    values: Mutex<BTreeMap<Key, scan::RegistryValue>>,
     fail_once: AtomicBool,
 }
 impl RegistryStore for Registry {
-    fn read(&self, hive: &str, key: &str, name: &str) -> io::Result<Option<RegistryWrite>> {
+    fn read(&self, hive: &str, key: &str, name: &str) -> io::Result<Option<scan::RegistryValue>> {
         Ok(self
             .values
             .lock()
@@ -40,7 +38,7 @@ impl RegistryStore for Registry {
             .get(&(hive.into(), key.into(), name.into()))
             .cloned())
     }
-    fn apply(&self, writes: &[RegistryWrite]) -> io::Result<()> {
+    fn apply(&self, writes: &[scan::RegistryValue]) -> io::Result<()> {
         for write in writes {
             self.values.lock().unwrap().insert(
                 (write.hive.clone(), write.key.clone(), write.name.clone()),
@@ -385,7 +383,7 @@ async fn failed_registry_repair_restores_files_manifest_and_the_original_danglin
     let store = AliasStore::new(home.path().join("aliases"));
     store.link("rollback-alias", &old).unwrap();
     let registry = Arc::new(Registry::default());
-    let value = RegistryWrite {
+    let value = scan::RegistryValue {
         hive: "HKCU".into(),
         key: "Software\\CaskadeReconcile".into(),
         name: "Path".into(),

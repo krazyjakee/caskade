@@ -2,7 +2,7 @@ use std::{collections::BTreeSet, path::Path};
 
 use crate::{ArtifactNode, Question, host::HostCaps};
 
-use super::{Candidate, HandlerId, PlanSet, Policy, PresetArgs, ranking};
+use super::{Candidate, HandlerId, PlanSet, Policy, ranking};
 
 #[derive(Debug, thiserror::Error)]
 pub enum PlanError {
@@ -21,8 +21,6 @@ pub enum PlanError {
     Handler { handler: HandlerId, message: String },
     #[error("artifact identifier {id:?} is duplicated")]
     DuplicateArtifact { id: crate::ArtifactId },
-    #[error("candidate override failed: {message}")]
-    Override { message: String },
 }
 
 /// All environmental input is explicit; handlers must not detect the real host.
@@ -71,39 +69,16 @@ pub trait Handler: Send + Sync {
     ) -> Result<Proposal, PlanError>;
 }
 
-/// Pure, artifact-scoped recipe adjustments. Transformed candidates still pass
-/// handler/confidence validation and the caller's original policy/host filters.
-pub trait CandidateTransform: Send + Sync {
-    fn preset_args(
-        &self,
-        _artifact: &ArtifactNode,
-        base: &PresetArgs,
-    ) -> Result<PresetArgs, PlanError> {
-        Ok(base.clone())
-    }
-    fn transform(
-        &self,
-        artifact: &ArtifactNode,
-        candidate: Candidate,
-    ) -> Result<Option<Candidate>, PlanError>;
-}
-
 /// Registry and host-aware planner. No format handlers are registered implicitly;
 /// callers register the handlers enabled by their build and plugin configuration.
 #[derive(Default)]
 pub struct PlanEngine {
     handlers: Vec<(HandlerId, Box<dyn Handler>)>,
-    transform: Option<Box<dyn CandidateTransform>>,
 }
 
 impl PlanEngine {
     pub fn new() -> Self {
         Self::default()
-    }
-
-    pub fn with_transform(mut self, transform: Box<dyn CandidateTransform>) -> Self {
-        self.transform = Some(transform);
-        self
     }
 
     pub fn register(&mut self, handler: Box<dyn Handler>) -> Result<(), PlanError> {
@@ -144,31 +119,14 @@ impl PlanEngine {
         let mut candidates = vec![];
         let mut questions = vec![];
         for artifact in nodes {
-            let mut handler_policy = context.policy.clone();
-            if let Some(transform) = &self.transform {
-                handler_policy.preset_args =
-                    transform.preset_args(artifact, &context.policy.preset_args)?;
-            }
-            let handler_context = PlanContext {
-                policy: &handler_policy,
-                ..*context
-            };
             for (id, handler) in &self.handlers {
                 if !handler.claims(artifact) {
                     continue;
                 }
-                let proposal = handler.propose(artifact, &handler_context)?;
+                let proposal = handler.propose(artifact, context)?;
                 let needs_choice_before_proposing = proposal.candidates.is_empty();
                 let start = candidates.len();
                 for candidate in proposal.candidates {
-                    let candidate = if let Some(transform) = &self.transform {
-                        let Some(candidate) = transform.transform(artifact, candidate)? else {
-                            continue;
-                        };
-                        candidate
-                    } else {
-                        candidate
-                    };
                     validate_confidence(candidate.confidence)?;
                     if candidate.handler != *id {
                         return Err(PlanError::HandlerMismatch {

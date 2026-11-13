@@ -23,6 +23,7 @@ use caskade_installer::{
     runtime::{NativeRuntime, ProcessCommand, Runtime, alias::AliasStore},
     scan::{self, ScanInput},
     testing::{FakeDiskSpace, RecordingSink},
+    types::RegistryHive,
 };
 use sha2::{Digest, Sha256};
 use std::{
@@ -32,6 +33,81 @@ use std::{
     sync::Arc,
     time::Duration,
 };
+
+/// Read every value under each recorded `(hive, key)` and its subkeys, in
+/// both registry views for HKLM. A value of HKLM's 32-bit view below
+/// `Software` is reported at its `Software\WOW6432Node\…` path, where the
+/// 64-bit view (and a move rewriting it) finds it. Unknown hives and missing
+/// keys are skipped. At most `max_values` values are read.
+fn read_keys(keys: &[(String, String)], max_values: usize) -> Vec<scan::RegistryValue> {
+    use winreg::{
+        RegKey,
+        enums::{
+            HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_READ, KEY_WOW64_32KEY, KEY_WOW64_64KEY,
+        },
+    };
+    fn walk(
+        key: &RegKey,
+        hive: &str,
+        path: &str,
+        view: u32,
+        values: &mut Vec<scan::RegistryValue>,
+        max_values: usize,
+    ) {
+        for (name, value) in key.enum_values().flatten() {
+            if values.len() >= max_values {
+                return;
+            }
+            values.push(scan::RegistryValue {
+                hive: hive.into(),
+                key: path.into(),
+                name,
+                value_type: format!("{:?}", value.vtype),
+                data: value.bytes.into_owned(),
+            });
+        }
+        for child in key.enum_keys().flatten() {
+            if values.len() >= max_values {
+                return;
+            }
+            if let Ok(opened) = key.open_subkey_with_flags(&child, KEY_READ | view) {
+                let path = format!("{path}\\{child}");
+                walk(&opened, hive, &path, view, values, max_values);
+            }
+        }
+    }
+    let mut values = vec![];
+    for (hive, key) in keys {
+        let (root, name, views): (_, _, &[u32]) = match RegistryHive::parse(hive) {
+            Some(RegistryHive::CurrentUser) => (HKEY_CURRENT_USER, "HKCU", &[0]),
+            Some(RegistryHive::LocalMachine) => (
+                HKEY_LOCAL_MACHINE,
+                "HKLM",
+                &[KEY_WOW64_64KEY, KEY_WOW64_32KEY],
+            ),
+            _ => continue,
+        };
+        for view in views {
+            let physical = if *view == KEY_WOW64_32KEY {
+                caskade_installer::relocate::wow64_32bit_key(key)
+            } else {
+                None
+            };
+            let (path, view) = match physical {
+                Some(physical) => (physical, KEY_WOW64_64KEY),
+                None => (key.clone(), *view),
+            };
+            let Ok(opened) = RegKey::predef(root).open_subkey_with_flags(&path, KEY_READ | view)
+            else {
+                continue;
+            };
+            walk(&opened, name, &path, view, &mut values, max_values);
+        }
+    }
+    values.sort_by(|a, b| (&a.hive, &a.key, &a.name).cmp(&(&b.hive, &b.key, &b.name)));
+    values.dedup();
+    values
+}
 
 const CUSTOM_KEY: &str = r"Software\CaskadeFixture\FixtureGame";
 // Each known key is checked absent before arming this guard. Failures must not
@@ -226,7 +302,7 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
             let alias_home = tempfile::tempdir().unwrap();
             let aliases = AliasStore::new(alias_home.path().join("moving aliases"));
             assert!(
-                scan::registry::read_keys(&[("HKLM".into(), CUSTOM_KEY.into())], 128).is_empty(),
+                read_keys(&[("HKLM".into(), CUSTOM_KEY.into())], 128).is_empty(),
                 "fixture key must be absent before installation"
             );
             let source = fixture_root.join(id).join(if id == "msi-plus-cab" {
@@ -250,7 +326,7 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
             let uninstall_path =
                 format!("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{uninstall_key}");
             assert!(
-                scan::registry::read_keys(
+                read_keys(
                     &[
                         ("HKCU".into(), uninstall_path.clone()),
                         ("HKLM".into(), uninstall_path)
@@ -261,8 +337,8 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
                 "fixture Uninstall registration must be absent before installation"
             );
             let mut planner = PlanEngine::new();
-            planner.register(Box::new(InnoHandler::new())).unwrap();
-            planner.register(Box::new(MsiHandler::new())).unwrap();
+            planner.register(Box::new(InnoHandler)).unwrap();
+            planner.register(Box::new(MsiHandler)).unwrap();
             // detect() leaves the filesystem unmeasured (not writable), which
             // rules out every candidate that writes the game folder.
             let mut host = HostCaps::detect();
@@ -357,7 +433,7 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
                     keys.push((hive.into(), location.path.as_str().replace('/', "\\")));
                 }
             }
-            let values = scan::registry::read_keys(&keys, 4096);
+            let values = read_keys(&keys, 4096);
             let scan = scan::scan_references(&ScanInput {
                 game_dir: &report.dir,
                 real_path: &report.dir.to_string_lossy(),
@@ -478,26 +554,25 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
             assert!(!report.dir.exists());
             // Shown if the self-check below fails: where the game is now and
             // what its registry says.
-            let install_path: Vec<String> =
-                scan::registry::read_keys(&[("HKLM".into(), CUSTOM_KEY.into())], 16)
-                    .iter()
-                    .map(|value| {
-                        let units: Vec<u16> = value
-                            .data
-                            .as_chunks::<2>()
-                            .0
-                            .iter()
-                            .map(|pair| u16::from_le_bytes(*pair))
-                            .collect();
-                        format!(
-                            "{}\\{}\\{} = {:?}",
-                            value.hive,
-                            value.key,
-                            value.name,
-                            String::from_utf16_lossy(&units).trim_end_matches('\0')
-                        )
-                    })
-                    .collect();
+            let install_path: Vec<String> = read_keys(&[("HKLM".into(), CUSTOM_KEY.into())], 16)
+                .iter()
+                .map(|value| {
+                    let units: Vec<u16> = value
+                        .data
+                        .as_chunks::<2>()
+                        .0
+                        .iter()
+                        .map(|pair| u16::from_le_bytes(*pair))
+                        .collect();
+                    format!(
+                        "{}\\{}\\{} = {:?}",
+                        value.hive,
+                        value.key,
+                        value.name,
+                        String::from_utf16_lossy(&units).trim_end_matches('\0')
+                    )
+                })
+                .collect();
             eprintln!(
                 "{id} (alias: {aliased}): {:?}, rewrote {} files and {} values; now {}; \
                  registry references {registry_references:?}; now {install_path:?}",
@@ -519,7 +594,7 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
                     "the real-path GOG config must be rewritten"
                 );
             }
-            let current_values = scan::registry::read_keys(&keys, 4096);
+            let current_values = read_keys(&keys, 4096);
             let remaining = scan::scan_references(&ScanInput {
                 game_dir: &moved.game_dir,
                 real_path: &report.dir.to_string_lossy(),
@@ -583,7 +658,7 @@ async fn c_to_d_minis_self_check_and_use_the_safe_uninstall_route_with_and_witho
             assert!(removed.is_clean(), "{removed:?}");
             assert!(!moved.game_dir.exists());
             assert!(
-                scan::registry::read_keys(&keys, 4096).is_empty(),
+                read_keys(&keys, 4096).is_empty(),
                 "uninstall left fixture registry state"
             );
             // Checked before the guard below could clear it: the uninstall

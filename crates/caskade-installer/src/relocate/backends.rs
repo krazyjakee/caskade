@@ -1,15 +1,16 @@
 //! Concrete [`RegistryStore`] / [`ShortcutEditor`] backends for moves.
-use super::{RegistryStore, RegistryWrite, ShortcutEditor};
+use super::{RegistryStore, ShortcutEditor};
 use crate::{
     RegistryEntry, RegistryHive, RegistryValue,
     runtime::{ProcessCommand, Runtime, proton::GAME_DIR, registry},
+    scan,
 };
 use std::{
     collections::BTreeMap,
     fs, io,
     path::{Path, PathBuf},
-    sync::Arc,
-    time::Duration,
+    sync::{Arc, Mutex, PoisonError},
+    time::{Duration, SystemTime},
 };
 
 fn utf16_text(bytes: &[u8]) -> String {
@@ -23,20 +24,12 @@ fn utf16_text(bytes: &[u8]) -> String {
 }
 
 fn hive(name: &str) -> io::Result<RegistryHive> {
-    let lower = name.to_ascii_lowercase().replace('_', "");
-    if lower == "hkcu" || lower.contains("currentuser") {
-        Ok(RegistryHive::CurrentUser)
-    } else if lower == "hklm" || lower.contains("localmachine") {
-        Ok(RegistryHive::LocalMachine)
-    } else {
-        Err(io::Error::other(format!(
-            "unsupported registry hive {name}"
-        )))
-    }
+    RegistryHive::parse(name)
+        .ok_or_else(|| io::Error::other(format!("unsupported registry hive {name}")))
 }
 
 /// Raw value bytes (as read) to a typed entry for a `.reg` import.
-pub fn typed_entry(write: &RegistryWrite) -> io::Result<RegistryEntry> {
+fn typed_entry(write: &scan::RegistryValue) -> io::Result<RegistryEntry> {
     let text = || utf16_text(&write.data).trim_end_matches('\0').to_owned();
     let value = match write.value_type.as_str() {
         "REG_SZ" => RegistryValue::String(text()),
@@ -77,37 +70,83 @@ fn run(runtime: &dyn Runtime, command: &ProcessCommand, what: &str) -> io::Resul
 /// `system.reg`/`user.reg`; a batch is one `regedit /S` import run through
 /// the prefix runtime (game directory = `G:\Game`).
 pub struct PrefixRegistry {
-    pub runtime: Arc<dyn Runtime>,
-    pub prefix: PathBuf,
-    pub game_dir: PathBuf,
+    runtime: Arc<dyn Runtime>,
+    prefix: PathBuf,
+    game_dir: PathBuf,
+    /// Each hive file's values, parsed once until the file changes on disk
+    /// or `apply` writes: a move reads one value per reference.
+    hives: Mutex<BTreeMap<&'static str, ParsedHive>>,
+}
+
+struct ParsedHive {
+    modified: SystemTime,
+    len: u64,
+    values: Vec<scan::RegistryValue>,
+}
+
+impl PrefixRegistry {
+    pub fn new(runtime: Arc<dyn Runtime>, prefix: PathBuf, game_dir: PathBuf) -> Self {
+        Self {
+            runtime,
+            prefix,
+            game_dir,
+            hives: Mutex::default(),
+        }
+    }
 }
 
 impl RegistryStore for PrefixRegistry {
-    fn read(&self, hive_name: &str, key: &str, name: &str) -> io::Result<Option<RegistryWrite>> {
+    fn read(
+        &self,
+        hive_name: &str,
+        key: &str,
+        name: &str,
+    ) -> io::Result<Option<scan::RegistryValue>> {
         let file = match hive(hive_name)? {
             RegistryHive::LocalMachine => "system.reg",
             _ => "user.reg",
         };
-        let text = match fs::read_to_string(self.prefix.join(file)) {
-            Ok(text) => text,
-            Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(None),
+        let path = self.prefix.join(file);
+        let not_found = |error: &io::Error| error.kind() == io::ErrorKind::NotFound;
+        let metadata = match fs::metadata(&path) {
+            Ok(metadata) => metadata,
+            Err(error) if not_found(&error) => return Ok(None),
             Err(error) => return Err(error),
         };
-        Ok(registry::parse_prefix_reg(&text, hive_name)?
-            .into_iter()
+        let (modified, len) = (metadata.modified()?, metadata.len());
+        let mut hives = self.hives.lock().unwrap_or_else(PoisonError::into_inner);
+        if !hives
+            .get(file)
+            .is_some_and(|parsed| parsed.modified == modified && parsed.len == len)
+        {
+            let text = match fs::read_to_string(&path) {
+                Ok(text) => text,
+                Err(error) if not_found(&error) => return Ok(None),
+                Err(error) => return Err(error),
+            };
+            let values = registry::parse_prefix_reg(&text, hive_name)?;
+            hives.insert(
+                file,
+                ParsedHive {
+                    modified,
+                    len,
+                    values,
+                },
+            );
+        }
+        Ok(hives[file]
+            .values
+            .iter()
             .find(|value| {
                 value.key.eq_ignore_ascii_case(key) && value.name.eq_ignore_ascii_case(name)
             })
-            .map(|value| RegistryWrite {
+            .map(|value| scan::RegistryValue {
                 hive: hive_name.into(),
-                key: value.key,
-                name: value.name,
-                value_type: value.value_type,
-                data: value.data,
+                ..value.clone()
             }))
     }
 
-    fn apply(&self, writes: &[RegistryWrite]) -> io::Result<()> {
+    fn apply(&self, writes: &[scan::RegistryValue]) -> io::Result<()> {
         if writes.is_empty() {
             return Ok(());
         }
@@ -140,6 +179,10 @@ impl RegistryStore for PrefixRegistry {
             },
             "regedit",
         );
+        self.hives
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .clear();
         let removed = fs::remove_file(&path);
         result.and(removed)
     }
@@ -148,10 +191,10 @@ impl RegistryStore for PrefixRegistry {
 /// No registry (hosts or games without one): nothing to read or write.
 pub struct NoRegistry;
 impl RegistryStore for NoRegistry {
-    fn read(&self, _: &str, _: &str, _: &str) -> io::Result<Option<RegistryWrite>> {
+    fn read(&self, _: &str, _: &str, _: &str) -> io::Result<Option<scan::RegistryValue>> {
         Ok(None)
     }
-    fn apply(&self, writes: &[RegistryWrite]) -> io::Result<()> {
+    fn apply(&self, writes: &[scan::RegistryValue]) -> io::Result<()> {
         if writes.is_empty() {
             Ok(())
         } else {
@@ -222,7 +265,12 @@ impl WindowsRegistry {
 
 #[cfg(windows)]
 impl RegistryStore for WindowsRegistry {
-    fn read(&self, hive_name: &str, key: &str, name: &str) -> io::Result<Option<RegistryWrite>> {
+    fn read(
+        &self,
+        hive_name: &str,
+        key: &str,
+        name: &str,
+    ) -> io::Result<Option<scan::RegistryValue>> {
         use winreg::{
             RegKey,
             enums::{HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_READ, KEY_WOW64_64KEY},
@@ -238,7 +286,7 @@ impl RegistryStore for WindowsRegistry {
                 Err(error) => return Err(error),
             };
         match opened.get_raw_value(name) {
-            Ok(value) => Ok(Some(RegistryWrite {
+            Ok(value) => Ok(Some(scan::RegistryValue {
                 hive: hive_name.into(),
                 key: key.into(),
                 name: name.into(),
@@ -250,7 +298,7 @@ impl RegistryStore for WindowsRegistry {
         }
     }
 
-    fn apply(&self, writes: &[RegistryWrite]) -> io::Result<()> {
+    fn apply(&self, writes: &[scan::RegistryValue]) -> io::Result<()> {
         use winreg::{
             RegKey, RegValue,
             enums::{
@@ -362,7 +410,7 @@ mod tests {
     fn raw_values_become_typed_reg_entries() {
         let utf16 =
             |text: &str| -> Vec<u8> { text.encode_utf16().flat_map(u16::to_le_bytes).collect() };
-        let write = |value_type: &str, data: Vec<u8>| RegistryWrite {
+        let write = |value_type: &str, data: Vec<u8>| scan::RegistryValue {
             hive: "HKLM".into(),
             key: r"Software\Game".into(),
             name: "Path".into(),
@@ -401,11 +449,11 @@ mod tests {
             "WINE REGISTRY Version 2\n\n[Software\\\\Indie] 1\n\"InstallPath\"=\"G:\\\\Game\"\n",
         )
         .unwrap();
-        let store = PrefixRegistry {
-            runtime: Arc::new(crate::runtime::NativeRuntime::new()),
-            prefix: prefix.path().into(),
-            game_dir: prefix.path().into(),
-        };
+        let store = PrefixRegistry::new(
+            Arc::new(crate::runtime::NativeRuntime::new()),
+            prefix.path().into(),
+            prefix.path().into(),
+        );
         let value = store
             .read("HKLM", r"software\indie", "installpath")
             .unwrap()
@@ -431,11 +479,11 @@ mod tests {
             "WINE REGISTRY Version 2\n\n[Software\\\\Bad\\0Key] 1\n\"InstallPath\"=\"G:\\\\Game\"\n",
         )
         .unwrap();
-        let store = PrefixRegistry {
-            runtime: Arc::new(crate::runtime::NativeRuntime::new()),
-            prefix: prefix.path().into(),
-            game_dir: prefix.path().into(),
-        };
+        let store = PrefixRegistry::new(
+            Arc::new(crate::runtime::NativeRuntime::new()),
+            prefix.path().into(),
+            prefix.path().into(),
+        );
         let error = store
             .read("HKLM", r"Software\Bad", "InstallPath")
             .unwrap_err();

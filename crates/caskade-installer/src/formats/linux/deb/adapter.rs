@@ -18,11 +18,6 @@ use std::{
 
 #[derive(Default)]
 pub struct PackageProbe;
-impl PackageProbe {
-    pub fn new() -> Self {
-        Self
-    }
-}
 fn inspect(reader: &mut (impl std::io::Read + Seek), format: Format) -> super::Result<PackageInfo> {
     if format == Format::Deb {
         Ok(super::inspect(reader)?.info)
@@ -107,11 +102,6 @@ impl FormatProbe for PackageProbe {
 
 #[derive(Default)]
 pub struct DebHandler;
-impl DebHandler {
-    pub fn new() -> Self {
-        Self
-    }
-}
 impl Handler for DebHandler {
     fn id(&self) -> HandlerId {
         HandlerId("deb".into())
@@ -287,7 +277,6 @@ pub(crate) fn propose(
 #[derive(Default)]
 pub struct PackageExtractor {
     sources: BTreeMap<ArtifactId, PathBuf>,
-    artifacts: Mutex<BTreeMap<ArtifactId, Vec<ArtifactNode>>>,
     references: Mutex<BTreeMap<ArtifactId, Vec<super::GeneratedReference>>>,
 }
 impl PackageExtractor {
@@ -296,12 +285,6 @@ impl PackageExtractor {
             sources,
             ..Self::default()
         }
-    }
-    pub fn take_artifacts(&self, id: &ArtifactId) -> Option<Vec<ArtifactNode>> {
-        self.artifacts
-            .lock()
-            .expect("package artifacts poisoned")
-            .remove(id)
     }
     pub fn references(&self, artifact: &ArtifactId) -> Option<Vec<super::GeneratedReference>> {
         self.references
@@ -345,12 +328,12 @@ impl Extractor for PackageExtractor {
         let mut magic = [0; 4];
         file.seek(SeekFrom::Start(0))?;
         std::io::Read::read_exact(&mut file, &mut magic)?;
-        let (_, nodes) = if &magic == b"\xed\xab\xee\xdb" {
+        let extracted = if &magic == b"\xed\xab\xee\xdb" {
             super::super::rpm::extract(&mut file, &mut dir, &options, &mut &*context)
         } else {
             super::extract(&mut file, &mut dir, &options, &mut &*context)
-        }
-        .map_err(exec_error)?;
+        };
+        extracted.map_err(exec_error)?;
         desktop::check_absolute_payload_references(&dir, &mut &*context).map_err(exec_error)?;
         let references = desktop::rewrite_desktop_files(
             &mut dir,
@@ -358,10 +341,6 @@ impl Extractor for PackageExtractor {
             &mut &*context,
         )
         .map_err(exec_error)?;
-        self.artifacts
-            .lock()
-            .expect("package artifacts poisoned")
-            .insert(id.clone(), nodes);
         self.references
             .lock()
             .expect("package references poisoned")

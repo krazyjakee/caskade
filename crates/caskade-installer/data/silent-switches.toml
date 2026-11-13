@@ -54,7 +54,7 @@ no_launch_args = []
 dir_last = false
 silent_supported = true
 checked_versions = []
-notes = "WiX Burn/WixStdBA: InstallFolder is a bundle-authored variable and must be overridable (bal:Overridable=yes in WixStdBA, including WiX 3.14.1). Custom bootstrapper applications can differ. Language, shortcuts and launch actions require a bundle-specific recipe."
+notes = "WiX Burn/WixStdBA: InstallFolder is a bundle-authored variable and must be overridable (bal:Overridable=yes in WixStdBA, including WiX 3.14.1). Custom bootstrapper applications can differ. Language, shortcuts and launch actions are bundle-specific and not preset."
 sources = ["https://docs.firegiant.com/wix/schema/wxs/variable/", "https://docs.firegiant.com/wix/tools/burn/wixstdba/"]
 
 [families.install_shield]
@@ -68,7 +68,7 @@ no_launch_args = []
 dir_last = false
 silent_supported = false
 checked_versions = []
-notes = "InstallShield variants cannot share one silent command. Basic MSI needs /s and nested /v MSI arguments; InstallScript needs a recorded response file. Only enable a silent recipe after identifying the variant; unknown variants use the interactive wizard."
+notes = "InstallShield variants cannot share one silent command. Basic MSI needs /s and nested /v MSI arguments; InstallScript needs a recorded response file. Unidentified variants use the interactive wizard."
 sources = ["https://docs.revenera.com/installshield/helplibrary/IHelpSetup_EXECmdLine.htm"]
 
 [families.wise]
@@ -81,7 +81,7 @@ no_launch_args = []
 dir_last = false
 silent_supported = false
 checked_versions = []
-notes = "Wise versions and authored scripts differ. No verified generic preset; use an identified package recipe or the interactive wizard."
+notes = "Wise versions and authored scripts differ. No verified generic preset; use the interactive wizard."
 sources = []
 
 [families.setup_factory]
@@ -107,5 +107,5 @@ no_launch_args = []
 dir_last = false
 silent_supported = false
 checked_versions = []
-notes = "Unknown installer: no generic switches are safe. Use the interactive wizard or a package-specific recipe."
+notes = "Unknown installer: no generic switches are safe. Use the interactive wizard."
 sources = []

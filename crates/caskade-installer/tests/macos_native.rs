@@ -107,7 +107,7 @@ async fn managed(id: &str, launch: bool, quarantine: bool) {
     let mut planner = PlanEngine::new();
     let extractor: Arc<dyn Extractor> = match fixture.expected.format.as_str() {
         "dmg" => {
-            planner.register(Box::new(DmgHandler::new())).unwrap();
+            planner.register(Box::new(DmgHandler)).unwrap();
             assert!(!attached_images().contains(&source));
             Arc::new(DmgExtractor::new(
                 sources.clone(),
@@ -116,11 +116,11 @@ async fn managed(id: &str, launch: bool, quarantine: bool) {
             ))
         }
         "pkg" => {
-            planner.register(Box::new(PkgHandler::new())).unwrap();
+            planner.register(Box::new(PkgHandler)).unwrap();
             Arc::new(PkgExtractor::new(sources.clone()))
         }
         _ => {
-            planner.register(Box::new(AppHandler::new())).unwrap();
+            planner.register(Box::new(AppHandler)).unwrap();
             Arc::new(AppExtractor::new(sources.clone()))
         }
     };
@@ -307,7 +307,7 @@ async fn native_dmg_cancelled_copy_detaches_and_rolls_back() {
         .root;
     let sources = BTreeMap::from([(node.id.clone(), source.clone())]);
     let mut planner = PlanEngine::new();
-    planner.register(Box::new(DmgHandler::new())).unwrap();
+    planner.register(Box::new(DmgHandler)).unwrap();
     let plans = planner.plan(&[node], &host, &Policy::default()).unwrap();
     let token = CancellationToken::new();
     let result = Executor::new(
@@ -416,7 +416,7 @@ async fn native_system_and_product_packages_delegate_and_clean_their_fixture_rec
             .unwrap()
             .root;
         let mut planner = PlanEngine::new();
-        planner.register(Box::new(PkgHandler::new())).unwrap();
+        planner.register(Box::new(PkgHandler)).unwrap();
         let plans = planner
             .plan(std::slice::from_ref(&node), &host, &Policy::default())
             .unwrap();

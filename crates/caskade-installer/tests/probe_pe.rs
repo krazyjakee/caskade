@@ -262,7 +262,7 @@ fn regression_21_unaligned_optional_header_is_declined_without_panicking() {
 
     let root = tempfile::tempdir().unwrap();
     fs::write(root.path().join("Game.exe"), bytes).unwrap();
-    let host: HostCaps = toml::from_str(include_str!("hosts/windows.toml")).unwrap();
+    let host: HostCaps = caskade_installer::pipeline::input::host(Some("windows")).unwrap();
     let _ = discover(root.path(), &host, &DiscoveryHints::default());
 }
 

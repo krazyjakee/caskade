@@ -188,21 +188,21 @@ async fn deb_missing_dep_falls_back_to_apt_inside_disposable_debian() {
         String::from_utf8_lossy(&update.stderr)
     );
     let runtime = Arc::new(DockerRuntime::new(&container, fixtures));
-    let mut host: HostCaps = toml::from_str(include_str!("hosts/linux.toml")).unwrap();
+    let mut host: HostCaps = caskade_installer::pipeline::input::host(Some("linux")).unwrap();
     host.packages.root = true;
     host.packages.managers = BTreeMap::from([
         ("apt".into(), "/usr/bin/apt".into()),
         ("dpkg-query".into(), "/usr/bin/dpkg-query".into()),
     ]);
     let mut probe = ProbeEngine::default();
-    probe.register(Box::new(PackageProbe::new()));
+    probe.register(Box::new(PackageProbe));
     let node = probe.probe_path(&package).unwrap().root;
     let info: PackageInfo = serde_json::from_value(node.facts["linux.package"].clone()).unwrap();
     let root = TestRoot::new().unwrap();
     let dependencies = deb::check_dependencies(&*runtime, &host, &info, root.path()).unwrap();
     assert_eq!(dependencies.missing, ["hello"]);
     let mut planner = PlanEngine::new();
-    planner.register(Box::new(DebHandler::new())).unwrap();
+    planner.register(Box::new(DebHandler)).unwrap();
     let plans = planner
         .plan(std::slice::from_ref(&node), &host, &Policy::default())
         .unwrap();

@@ -27,5 +27,6 @@ pub use engine::FetchEngine;
 pub use local::{LocalSource, Near};
 pub use names::{disposition_name, safe_file_name};
 pub use resolver::{Direct, ResolverRegistry};
+pub(crate) use storage::DOWNLOADS;
 
 pub use resolvers::ResolverConfig;

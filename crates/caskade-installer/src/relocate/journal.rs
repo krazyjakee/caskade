@@ -168,7 +168,7 @@ impl UndoLog {
             durable: Some((dir, name, record)),
         }))
     }
-    pub fn committed_copy(&self) -> Option<(&Path, &Path)> {
+    fn committed_copy(&self) -> Option<(&Path, &Path)> {
         self.durable.as_ref().and_then(|(_, _, r)| {
             (r.committed && r.copied).then_some((r.source.as_path(), r.destination.as_path()))
         })

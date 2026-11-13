@@ -22,11 +22,7 @@ impl Reconciler {
         crate::manifest::RelocationVerdict,
         Vec<String>,
     )> {
-        use crate::{
-            Strategy,
-            manifest::RelocationVerdict,
-            scan::{RegistryValue, ScanInput},
-        };
+        use crate::{Strategy, manifest::RelocationVerdict, scan::ScanInput};
 
         let record = manifest.record();
         let allowed = self.writable_references(game, &record.relocation.references)?;
@@ -44,13 +40,7 @@ impl Reconciler {
             } = &reference.location
                 && let Some(value) = repair.registry.read(hive, key, name)?
             {
-                registry.push(RegistryValue {
-                    hive: value.hive,
-                    key: value.key,
-                    name: value.name,
-                    value_type: value.value_type,
-                    data: value.data,
-                });
+                registry.push(value);
             }
         }
         let alias = match (&self.aliases, &record.alias) {

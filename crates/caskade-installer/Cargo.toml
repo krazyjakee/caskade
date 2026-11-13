@@ -18,6 +18,8 @@ fetch = ["dep:reqwest", "dep:futures-util", "dep:httpdate", "dep:scraper", "dep:
 # large tree. caskade-core's `net` turns it on.
 torrent = ["fetch", "dep:librqbit", "dep:librqbit-core", "dep:librqbit-sha1-wrapper", "dep:reqwest013", "dep:rustls"]
 cli = ["dep:clap", "dep:tracing-subscriber"]
+# The `testing` fakes, for this crate's and dependents' tests.
+test-utils = []
 
 [dependencies]
 caskade-jobs = { path = "../caskade-jobs" }
@@ -31,7 +33,6 @@ schemars = { version = "1", features = ["url2"] }
 specta = { version = "=2.0.0-rc.26", features = ["derive", "url", "serde_json"] }
 url = { version = "2", features = ["serde"] }
 cap-std = "4"
-cap-fs-ext = "4"
 fs2 = "0.4"
 dunce = "1"
 chardetng = "0.1"
@@ -74,8 +75,6 @@ cfb = { version = "=0.14.0", optional = true }
 cab = { version = "=0.6.0", optional = true }
 nsis = { version = "=0.6.0", optional = true }
 toml = "0.8"
-# Embedded-schema validation only: no HTTP or file reference resolution.
-jsonschema = { version = "=0.60.1", default-features = false }
 notify = { version = "8", default-features = false, features = ["macos_kqueue"] }
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"], optional = true }
 futures-util = { version = "0.3", optional = true }
@@ -95,9 +94,8 @@ reqwest013 = { package = "reqwest", version = "0.13", default-features = false, 
 rustls = { version = "0.23", default-features = false, features = ["ring", "std"], optional = true }
 clap = { version = "4", features = ["derive"], optional = true }
 tracing-subscriber = { version = "0.3", features = ["env-filter"], optional = true }
-# Default running-game check for moves (`pipeline::relocate`, #61; the app
-# injects its own tracker), also used by the Windows native-run tests (#35).
-# 0.38 keeps MSRV 1.93.
+# Default running-game check for moves (`pipeline::relocate`, #61), also used
+# by the Windows native-run tests (#35).
 sysinfo = { version = "=0.38.4", default-features = false, features = ["system"] }
 
 [target.'cfg(unix)'.dependencies]
@@ -115,6 +113,7 @@ junction = "=2.1.0"
 criterion = { version = "=0.8.2", default-features = false, features = ["cargo_bench_support", "plotters"] }
 
 [dev-dependencies]
+caskade-installer = { path = ".", features = ["test-utils"] }
 insta = { version = "1", features = ["json"] }
 proptest = "1"
 wiremock = "0.6"

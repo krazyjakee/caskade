@@ -7,7 +7,6 @@ mod listing;
 mod process;
 
 use crate::{
-    ArtifactNode,
     formats::archive::{ArchiveError, ArchiveOptions, Entry, ExtractionControl, NoopControl},
     host::HostCaps,
     safety::{self, Limits, SafeDir},
@@ -200,7 +199,7 @@ impl SevenZip {
         scratch_parent: &Path,
         destination: &mut SafeDir,
         control: &mut dyn ExtractionControl,
-    ) -> Result<Vec<ArtifactNode>> {
+    ) -> Result<()> {
         let (source, _) = resolved(input)?;
         let entries = self.list(&source, control)?;
         let total = entries.iter().try_fold(0_u64, |sum, entry| {
@@ -246,23 +245,7 @@ impl SevenZip {
             &self.options,
             self.limits,
             control,
-        )?;
-        // Re-probing only reads completed confined output; no utility is run.
-        let mut engine = crate::probe::ProbeEngine::default();
-        engine.register(Box::new(super::ArchiveProbe));
-        let mut artifacts = Vec::new();
-        for path in destination.extracted_files() {
-            control.checkpoint(0)?;
-            let name = path.to_str().ok_or(safety::SafetyError::InvalidEncoding)?;
-            let mut file = destination.open_read(name)?;
-            let mut node = engine
-                .probe_reader(&mut file, path)
-                .map_err(|e| SevenZipError::Listing(e.to_string()))?
-                .root;
-            node.id = crate::ArtifactId(format!("extracted:{}", artifacts.len()));
-            artifacts.push(node);
-        }
-        Ok(artifacts)
+        )
     }
 }
 pub(super) fn resolved(input: &Path) -> Result<(PathBuf, u64)> {
