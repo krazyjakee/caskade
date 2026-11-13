@@ -499,8 +499,7 @@ tree, query client and components.
   bindings (`pnpm --filter @caskade/sdk core-types`).
 - [`packages/ui`](../../packages/ui) (`@caskade/ui`): the shell's form
   primitives (`Button`, `Switch`, `Select`, `TextField`, `Slider`,
-  `SettingsSection`, …), `GameArt`, `GameCard`, `Hero`, `Shelf`,
-  `StatusBadge` and the anatomy catalogue
+  `SettingsSection`, …), `GameArt`, `StatusBadge` and the anatomy catalogue
   ([`docs/theming/anatomy.md`](../theming/anatomy.md)). They come from the
   app at runtime, so they follow the active theme.
 - [`packages/vite-plugin`](../../packages/vite-plugin)

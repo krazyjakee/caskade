@@ -14,31 +14,6 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#. Hours played, abbreviated
-#: packages/ui/src/GameCard.tsx apps/native/src/ui/game_card.rs
-msgid "{playtimeHours}h"
-msgstr "{playtimeHours} h"
-
-#. Hours played
-#: packages/ui/src/Hero.tsx apps/native/src/ui/hero.rs
-msgid "{playtimeHours}h played"
-msgstr "{playtimeHours} h spelat"
-
-#. A game's size on disk, in gigabytes
-#. A game's size on disk, in gigabytes
-#: packages/ui/src/GameCard.tsx packages/ui/src/Hero.tsx
-#: apps/native/src/ui/game_card.rs apps/native/src/ui/hero.rs
-msgid "{sizeGb} GB"
-msgstr "{sizeGb} GB"
-
-#. How many stores sell a game
-#. js-lingui:icu=%7Bstores%2C+plural%2C+one+%7B%23+store%7D+other+%7B%23+stores%7D%7D&pluralize_on=stores
-#: packages/ui/src/GameCard.tsx apps/native/src/ui/game_card.rs
-msgid "# store"
-msgid_plural "# stores"
-msgstr[0] "# butik"
-msgstr[1] "# butiker"
-
 #: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
 msgid "Alien"
 msgstr "Utomjording"
@@ -58,8 +33,8 @@ msgstr "Kan köpas"
 
 #. The picker of an account's picture
 #: packages/ui/src/Avatar.tsx apps/native/src/onboarding/account.rs
-#: apps/native/src/settings/accounts.rs apps/native/src/settings/search.rs
-#: apps/native/src/ui/avatar.rs
+#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/search/search_index.rs apps/native/src/ui/avatar.rs
 msgid "Avatar"
 msgstr "Avatar"
 
@@ -123,10 +98,6 @@ msgstr "Dölj detaljer"
 msgid "Installed"
 msgstr "Installerat"
 
-#: packages/ui/src/Hero.tsx apps/native/src/ui/hero.rs
-msgid "Last played {lastPlayed}"
-msgstr "Senast spelat {lastPlayed}"
-
 #: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
 msgid "Mech helmet"
 msgstr "Mechhjälm"
@@ -135,27 +106,9 @@ msgstr "Mechhjälm"
 msgid "Moon"
 msgstr "Måne"
 
-#. A button opening more actions
-#. The button that opens more actions
-#: packages/ui/src/Hero.tsx apps/native/src/collections/page.rs
-#: apps/native/src/ui/hero.rs
-msgid "More"
-msgstr "Mer"
-
-#: packages/ui/src/Hero.tsx apps/native/src/ui/hero.rs
-msgid "More launch options"
-msgstr "Fler startalternativ"
-
 #: packages/ui/src/StatusBadge.tsx apps/native/src/ui/status_badge.rs
 msgid "Not Installed"
 msgstr "Inte installerat"
-
-#. A store game the user already owns
-#. A game of a shared collection a store account owns
-#: packages/ui/src/GameCard.tsx apps/native/src/flows/shares_common.rs
-#: apps/native/src/ui/game_card.rs
-msgid "Owned"
-msgstr "Ägs"
 
 #: packages/ui/src/avatars.ts apps/native/src/ui/avatar.rs
 msgid "Portal"
@@ -207,10 +160,34 @@ msgstr "Stjärna"
 msgid "Starfighter"
 msgstr "Rymdjaktplan"
 
-#: packages/ui/src/Shelf.tsx apps/native/src/ui/shelf.rs
-msgid "View All"
-msgstr "Visa alla"
+#~ msgid "{playtimeHours}h"
+#~ msgstr "{playtimeHours} h"
 
-#: packages/ui/src/Hero.tsx apps/native/src/ui/hero.rs
-msgid "View Details"
-msgstr "Visa detaljer"
+#~ msgid "{playtimeHours}h played"
+#~ msgstr "{playtimeHours} h spelat"
+
+#~ msgid "{sizeGb} GB"
+#~ msgstr "{sizeGb} GB"
+
+#~ msgid "# store"
+#~ msgid_plural "# stores"
+#~ msgstr[0] "# butik"
+#~ msgstr[1] "# butiker"
+
+#~ msgid "Last played {lastPlayed}"
+#~ msgstr "Senast spelat {lastPlayed}"
+
+#~ msgid "More"
+#~ msgstr "Mer"
+
+#~ msgid "More launch options"
+#~ msgstr "Fler startalternativ"
+
+#~ msgid "Owned"
+#~ msgstr "Ägs"
+
+#~ msgid "View All"
+#~ msgstr "Visa alla"
+
+#~ msgid "View Details"
+#~ msgstr "Visa detaljer"

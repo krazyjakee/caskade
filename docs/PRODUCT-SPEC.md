@@ -117,7 +117,7 @@ Game pages show fan decompilations, recompilations and source ports of that game
 
 ### 4.10 Achievements
 
-Read-only achievement progress for Steam, GOG, Epic and RetroAchievements (emulated games, linked by a verified ROM hash or by hand, hardcore and softcore apart). The game page lists them with rarity, hides spoilers, and announces new unlocks after a session. Each store account's achievements stay its own.
+Read-only achievement progress for Steam, GOG, Epic and RetroAchievements (emulated games, linked by a verified ROM hash, hardcore and softcore apart). The game page lists them with rarity, hides spoilers, and announces new unlocks after a session. Each store account's achievements stay its own.
 
 ### 4.11 Devices and sync
 

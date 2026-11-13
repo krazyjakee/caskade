@@ -410,7 +410,7 @@ State on the root:
 
 ## `game-card`
 
-A game tile in a grid. Rendered by GameCard (apps/native/src/ui/game_card.rs); in the webview, GameCard; the library's LibraryCard and the Web tab's tiles (app).
+A game tile in a grid. Rendered by GameCard (apps/native/src/ui/game_card.rs); in the webview, LibraryCard, CatalogCard and the Web tab's tiles (app).
 
 Root: `[data-cs="game-card"]`
 
@@ -448,7 +448,7 @@ Contains: [`game-art`](#game-art), [`status-badge`](#status-badge)
 
 ## `hero`
 
-The large featured-game banner. Rendered by Hero (apps/native/src/ui/hero.rs); the home and game pages' hero sections (app); in the webview, Hero; the home and game pages' hero sections (app).
+The large featured-game banner. Rendered by Hero (apps/native/src/ui/hero.rs); the home and game pages' hero sections (app); in the webview, the home and game pages' hero sections (app).
 
 Root: `[data-cs="hero"]`
 
@@ -477,7 +477,7 @@ Contains: [`game-art`](#game-art), [`status-badge`](#status-badge)
 
 ## `shelf`
 
-A titled row of cards. Rendered by Shelf (apps/native/src/ui/shelf.rs); in the webview, Shelf.
+A titled row of cards. Rendered by Shelf (apps/native/src/ui/shelf.rs); in the webview, nothing: only the native UI has shelves.
 
 Root: `[data-cs="shelf"]`
 
@@ -1387,7 +1387,7 @@ Contains: [`button`](#button)
 
 ## `store-links`
 
-Links to the stores that sell a game. Rendered by WhereToBuy (apps/native/src/store/game.rs); in the webview, StoreLinks (app).
+Links to the stores that sell a game. Rendered by WhereToBuy (apps/native/src/store/game.rs); in the webview, WhereToBuy (app).
 
 Root: `[data-cs="store-links"]`
 

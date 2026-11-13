@@ -1590,18 +1590,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cap-fs-ext"
-version = "4.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56ff379b70af8e08307a8f65e7040c7301cb4a572538ade16b4984f0da77847f"
-dependencies = [
- "cap-primitives",
- "cap-std",
- "io-lifetimes 3.0.1",
- "windows-sys 0.61.2",
-]
-
-[[package]]
 name = "cap-primitives"
 version = "4.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1673,6 +1661,7 @@ dependencies = [
  "caskade-core",
  "caskade-discovery",
  "caskade-installer",
+ "caskade-jobs",
  "flate2",
  "md-5 0.10.6",
  "reqwest 0.12.28",
@@ -1693,7 +1682,9 @@ dependencies = [
 name = "caskade-addons"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
  "caskade-core",
+ "caskade-jobs",
  "image",
  "minisign",
  "minisign-verify",
@@ -1729,6 +1720,7 @@ dependencies = [
  "caskade-share",
  "caskade-sources",
  "caskade-streaming",
+ "caskade-sync",
  "caskade-system-stats",
  "flate2",
  "minisign",
@@ -1743,6 +1735,8 @@ dependencies = [
  "tempfile",
  "tokio",
  "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
  "url",
  "windows-registry",
  "wiremock",
@@ -1865,7 +1859,6 @@ dependencies = [
  "gtk",
  "libappindicator-sys",
  "minisign",
- "qrcode",
  "serde",
  "serde_json",
  "sha2 0.10.9",
@@ -1884,12 +1877,9 @@ dependencies = [
  "time",
  "tokio",
  "tracing",
- "tracing-appender",
- "tracing-subscriber",
  "url",
  "webkit2gtk",
  "wiremock",
- "wry",
  "zip",
 ]
 
@@ -1977,8 +1967,8 @@ dependencies = [
  "backhand",
  "bzip2",
  "cab",
- "cap-fs-ext",
  "cap-std",
+ "caskade-installer",
  "caskade-jobs",
  "cfb 0.14.0",
  "chardetng 0.1.17",
@@ -2001,7 +1991,6 @@ dependencies = [
  "inno",
  "innospect",
  "insta",
- "jsonschema",
  "junction",
  "librqbit",
  "librqbit-core",
@@ -2097,6 +2086,7 @@ dependencies = [
  "embed-resource",
  "gtk",
  "image",
+ "indexmap 2.14.2",
  "libappindicator-sys",
  "parley",
  "percent-encoding",
@@ -2107,7 +2097,6 @@ dependencies = [
  "tempfile",
  "tokio",
  "tracing",
- "tracing-subscriber",
  "tray-icon",
  "unicode-normalization",
  "url",
@@ -2200,7 +2189,6 @@ dependencies = [
  "caskade-discovery",
  "caskade-installer",
  "caskade-sync",
- "fs2",
  "serde",
  "serde_json",
  "specta",
@@ -2246,7 +2234,6 @@ dependencies = [
  "caskade-sync",
  "hickory-proto",
  "image",
- "keyring",
  "netdev 0.46.3",
  "rcgen",
  "reqwest 0.12.28",
