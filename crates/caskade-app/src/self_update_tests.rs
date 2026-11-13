@@ -137,7 +137,7 @@ fn another_keys_or_another_versions_signature_is_refused() {
 
 #[test]
 fn the_shipped_key_is_readable() {
-    let key = public_key().expect("the updater key in tauri.conf.json");
+    let key = public_key().expect("the updater key in caskade-app/updater.pub");
     assert!(minisign_verify::PublicKey::decode(&base64_text(&key).unwrap()).is_ok());
 }
 

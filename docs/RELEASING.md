@@ -79,7 +79,10 @@ secrets.
 
    The workflow stops before building when either secret is missing, when the
    password is wrong, or when the key isn't the pair of
-   `plugins.updater.pubkey` in `apps/desktop/src-tauri/tauri.conf.json`.
+   `crates/caskade-app/updater.pub`. The native updater embeds this file; the
+   legacy config's `plugins.updater.pubkey` must keep the same value. CI and
+   release preparation check that both match. Keep the existing trust key
+   when moving metadata; installed copies rely on it.
 
 4. Back up `~/.tauri/caskade-updater.key` and `caskade-updater.password`
    somewhere offline, such as a password manager. Installed copies only accept
@@ -91,12 +94,14 @@ secrets.
 
 1. Set the new version in each place the workflow checks:
    - `apps/desktop/src-tauri/tauri.conf.json` (`version`)
-   - `apps/desktop/src-tauri/Cargo.toml` (`[package] version`), then run
-     `cargo metadata --format-version 1 > /dev/null` to update its entry in
-     `Cargo.lock` (the release build uses `--locked`)
+   - `apps/native/Cargo.toml` and `apps/desktop/src-tauri/Cargo.toml`
+     (`[package] version`), then run
+     `flock /tmp/caskade-heavy.lock cargo metadata --format-version 1 > /dev/null`
+     to update both entries in `Cargo.lock` (the release build uses `--locked`)
    - `apps/desktop/package.json` (`version`)
 
-   Commit them to `master`.
+   Run `python3 scripts/check-release-metadata.py <version>` to check all
+   six version entries and the updater keys, then commit them to `master`.
 
 2. Push `master`, then tag it:
 

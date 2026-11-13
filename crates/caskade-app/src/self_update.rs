@@ -24,15 +24,9 @@ const FEED_LIMIT: u64 = 1024 * 1024;
 const BUNDLE_LIMIT: u64 = 2 * 1024 * 1024 * 1024;
 const CHECK_TIMEOUT: Duration = Duration::from_secs(30);
 
-/// The key Caskade's releases are signed with: the Tauri app's updater key.
+/// The key Caskade's releases are signed with, shared with release tooling.
 pub fn public_key() -> Option<String> {
-    let config: serde_json::Value = serde_json::from_str(include_str!(
-        "../../../apps/desktop/src-tauri/tauri.conf.json"
-    ))
-    .ok()?;
-    config["plugins"]["updater"]["pubkey"]
-        .as_str()
-        .map(str::to_owned)
+    Some(include_str!("../updater.pub").trim().to_owned())
 }
 
 /// How this copy of Caskade was installed.

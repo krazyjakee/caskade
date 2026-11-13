@@ -66,34 +66,8 @@ jobs:
       - name: Tag matches the app's version
         id: version
         run: |
-          python3 - <<'PY'
-          import json, os, sys, tomllib
-
-          tag = os.environ["TAG"]
-          version = tag[1:]
-          app = "apps/desktop"
-          found = {
-              f"{app}/src-tauri/tauri.conf.json": json.load(open(f"{app}/src-tauri/tauri.conf.json"))["version"],
-              f"{app}/src-tauri/Cargo.toml": tomllib.load(open(f"{app}/src-tauri/Cargo.toml", "rb"))["package"]["version"],
-              "Cargo.lock (caskade-desktop)": next(
-                  p["version"]
-                  for p in tomllib.load(open("Cargo.lock", "rb"))["package"]
-                  if p["name"] == "caskade-desktop"
-              ),
-          }
-          package = json.load(open(f"{app}/package.json"))
-          if "version" in package:
-              found[f"{app}/package.json"] = package["version"]
-          wrong = {path: v for path, v in found.items() if v != version}
-          for path, v in wrong.items():
-              print(f"::error file={path.split(' ')[0]},title=Version mismatch::{path} says {v}, the tag {tag} says {version}")
-          if wrong:
-              print("Bump every version listed above (docs/RELEASING.md, Cutting a release), then tag again.")
-              sys.exit(1)
-          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
-              out.write(f"version={version}\n")
-          print(f"{tag}: version {version} everywhere")
-          PY
+          python3 scripts/check-release-metadata.py "${TAG#v}"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       # Signs a scratch file with the secret key, then checks that the
       # signature's key id is the committed public key's. A wrong password or
@@ -115,17 +89,17 @@ jobs:
             exit 1
           fi
           python3 - "$probe.sig" <<'PY'
-          import base64, json, sys
+          import base64, sys
 
           def key_id(wrapped):
               # Tauri stores minisign keys and signatures base64-encoded; the
               # second line holds the algorithm (2 bytes) then the key id (8).
               return base64.b64decode(base64.b64decode(wrapped).decode().splitlines()[1])[2:10]
 
-          conf = "apps/desktop/src-tauri/tauri.conf.json"
-          pubkey = json.load(open(conf)).get("plugins", {}).get("updater", {}).get("pubkey")
+          conf = "crates/caskade-app/updater.pub"
+          pubkey = open(conf).read().strip()
           if not pubkey:
-              print(f"::error file={conf},title=No updater public key::plugins.updater.pubkey is missing in {conf}.")
+              print(f"::error file={conf},title=No updater public key::The updater public key is missing in {conf}.")
               sys.exit(1)
           signed, committed = key_id(open(sys.argv[1]).read()), key_id(pubkey)
           if signed != committed:
@@ -337,7 +311,7 @@ jobs:
               print("::error title=No latest.json::The draft has no latest.json: see the sign job's log.")
               sys.exit(1)
           manifest = json.loads(download("latest.json"))
-          pubkey = key_id(json.load(open("apps/desktop/src-tauri/tauri.conf.json"))["plugins"]["updater"]["pubkey"])
+          pubkey = key_id(open("crates/caskade-app/updater.pub").read().strip())
           prefix = f"https://github.com/{repo}/releases/download/{tag}/"
           expected = {
               "linux-x86_64": ".AppImage",
@@ -362,7 +336,7 @@ jobs:
               if f"{name}.sig" not in assets or download(f"{name}.sig").decode().strip() != signature.strip():
                   errors.append(f"{platform}: the signature isn't {name}.sig's")
               elif key_id(signature) != pubkey:
-                  errors.append(f"{platform}: signed with another key than tauri.conf.json's")
+                  errors.append(f"{platform}: signed with another key than caskade-app/updater.pub's")
               rows.append(f"| `{platform}` | `{name}` |")
           mac = [platforms[p]["url"] for p in ("darwin-aarch64", "darwin-x86_64") if p in platforms]
           if len(mac) == 2 and mac[0] == mac[1]:
