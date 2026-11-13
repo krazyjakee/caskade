@@ -66,3 +66,7 @@ pub async fn game_achievement_icon(
         }
     }
 }
+
+#[cfg(test)]
+#[path = "achievement_icons_tests.rs"]
+mod tests;

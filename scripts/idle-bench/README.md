@@ -35,21 +35,20 @@ database schema must match), in release:
 ```sh
 P=(--profile bench-release --config 'profile.bench-release.inherits="release"')
 T=$(cargo metadata --format-version 1 --no-deps | python3 -c 'import json, sys; print(json.load(sys.stdin)["target_directory"])')
-# the webview app: build the UI first, then the binary that embeds it
-(cd apps/desktop && pnpm vite build)
-flock /tmp/caskade-heavy.lock cargo build "${P[@]}" -p caskade-desktop --bin caskade --features tauri/custom-protocol
+flock /tmp/caskade-heavy.lock cargo build "${P[@]}" -p caskade-native
 flock /tmp/caskade-heavy.lock cargo build "${P[@]}" -p caskade-core --example seed_library
-mkdir -p ~/idle-bench/app && cp "$T/bench-release/caskade" ~/idle-bench/app/
-cp apps/desktop/src-tauri/binaries/7zz-x86_64-unknown-linux-gnu ~/idle-bench/app/7zz
+mkdir -p ~/idle-bench/app && cp "$T/bench-release/caskade-native" ~/idle-bench/app/caskade
+python3 scripts/7zz-sidecar.py --dev && cp apps/native/binaries/7zz-x86_64-unknown-linux-gnu ~/idle-bench/app/7zz
 
 scripts/idle-bench/run.sh --app ~/idle-bench/app/caskade \
   --seed "$T/bench-release/examples/seed_library" \
-  --out ~/idle-bench/webview-$(git rev-parse --short HEAD) --label "webview UI, $(git rev-parse --short HEAD)"
+  --out ~/idle-bench/native-$(git rev-parse --short HEAD) --label "native UI, $(git rev-parse --short HEAD)"
 ```
 
-For the native UI, pass its binary as `--app` and its process names as
-`--exe` (a regex matched against each executable's name; the default,
-`caskade|WebKit\w*Process`, covers the webview app).
+`--exe` is a regex matched against each process's executable name; the
+default, `caskade|WebKit\w*Process`, also counts a web game's or video's
+webview processes. Results from before #143 measured the retired webview
+app the same way.
 
 A run takes about 40 minutes (seeding, 5 minutes of warm-up, 30 of
 measuring). `--warmup`, `--duration`, `--interval`, `--games` and `--size`

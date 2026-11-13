@@ -1,42 +1,49 @@
 #!/usr/bin/env python3
-"""Check app versions and the transition shell's copy of the updater trust key.
+"""Check the app's version, its bundles' identity and the updater trust key.
 
-Pass the release version (without v) to check a tag; otherwise use native's
-version. Reads only committed metadata and never accesses signing secrets.
+The version is caskade-native's (apps/native/Cargo.toml and Cargo.lock);
+apps/native/Tauri.toml, the bundle config, takes it from there. Pass the
+release version (without v) to check a tag. Installed copies rely on the
+bundle identity and the trust key staying as they are. Reads only committed
+metadata and never accesses signing secrets.
 """
 import argparse
-import json
 from pathlib import Path
 import sys
 import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_KEY = "crates/caskade-app/updater.pub"
+MANIFEST = "apps/native/Cargo.toml"
+BUNDLE_CONFIG = "apps/native/Tauri.toml"
+# What installs, updates and uninstalls of earlier releases find Caskade by:
+# the install folder, uninstall key, deb package, app bundle, shortcuts and
+# the caskade:// handler.
+IDENTITY = {"productName": "Caskade", "identifier": "dev.caskade.app", "mainBinaryName": "caskade"}
+SCHEME = "caskade"
 
 
 def check(root, version=None):
-    config_path = "apps/desktop/src-tauri/tauri.conf.json"
-    config = json.loads((root / config_path).read_text())
-    found = {config_path: config["version"]}
-    crates = {
-        "caskade-native": "apps/native/Cargo.toml",
-        "caskade-desktop": "apps/desktop/src-tauri/Cargo.toml",
-    }
-    for path in crates.values():
-        found[path] = tomllib.loads((root / path).read_text())["package"]["version"]
-    package_path = "apps/desktop/package.json"
-    package = json.loads((root / package_path).read_text())
-    if "version" in package:
-        found[package_path] = package["version"]
+    found = {MANIFEST: tomllib.loads((root / MANIFEST).read_text())["package"]["version"]}
     locked = tomllib.loads((root / "Cargo.lock").read_text())["package"]
-    for name in crates:
-        found[f"Cargo.lock ({name})"] = next(p["version"] for p in locked if p["name"] == name)
-    expected = version or found[crates["caskade-native"]]
+    found["Cargo.lock (caskade-native)"] = next(p["version"] for p in locked if p["name"] == "caskade-native")
+    config = tomllib.loads((root / BUNDLE_CONFIG).read_text())
+    if "version" in config:
+        found[BUNDLE_CONFIG] = config["version"]
+    expected = version or found[MANIFEST]
     errors = [f"{path} says {value}, expected {expected}"
               for path, value in found.items() if value != expected]
+    errors += [f"{BUNDLE_CONFIG}: {field} must stay {value!r}; installed copies are found by it"
+               for field, value in IDENTITY.items() if config.get(field) != value]
+    plugins = config.get("plugins", {})
+    if SCHEME not in plugins.get("deep-link", {}).get("desktop", {}).get("schemes", []):
+        errors.append(f"{BUNDLE_CONFIG}: plugins.deep-link.desktop.schemes must keep {SCHEME!r}")
     key = (root / PUBLIC_KEY).read_text().strip()
-    if not key or config.get("plugins", {}).get("updater", {}).get("pubkey") != key:
-        errors.append(f"{config_path}: plugins.updater.pubkey must match {PUBLIC_KEY}")
+    pubkey = plugins.get("updater", {}).get("pubkey", "")
+    if not key:
+        errors.append(f"{PUBLIC_KEY} is empty")
+    elif not pubkey or (root / BUNDLE_CONFIG).parent.joinpath(pubkey).resolve() != (root / PUBLIC_KEY).resolve():
+        errors.append(f"{BUNDLE_CONFIG}: plugins.updater.pubkey must be the path of {PUBLIC_KEY}")
     return expected, errors
 
 
@@ -54,7 +61,7 @@ def main():
             print(error, file=sys.stderr)
         print("See docs/RELEASING.md before tagging.", file=sys.stderr)
         return 1
-    print(f"Version {version} everywhere; the native and legacy updater trust keys match.")
+    print(f"Version {version} in caskade-native's manifest and lockfile; the bundle identity and updater trust key are unchanged.")
     return 0
 
 

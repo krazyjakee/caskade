@@ -6,11 +6,11 @@ The catalogue lists Caskade plugins and themes only. It doesn't take Playnite ex
 
 ## The tools
 
-`caskade-catalogue` (`apps/desktop/src-tauri/src/bin/catalogue.rs`) builds packages and checks catalogues with the code the app installs with:
+`caskade-catalogue` (`crates/caskade-catalogue`) builds packages and checks catalogues with the code the app installs with:
 
 ```sh
-cargo run -p caskade-desktop --features dev-tools --bin caskade-catalogue -- build <source.json> --out <dir> [--previous <published catalogue.json>]
-cargo run -p caskade-desktop --features dev-tools --bin caskade-catalogue -- check <dir>/catalogue.json | <address> [--key <public key or .pub file> | --release-key]
+cargo run -p caskade-catalogue -- build <source.json> --out <dir> [--previous <published catalogue.json>]
+cargo run -p caskade-catalogue -- check <dir>/catalogue.json | <address> [--key <public key or .pub file> | --release-key]
 ```
 
 `just starter-catalogue [<dir>]` does both for the starter collection. It builds the example plugins first (`plugins/examples/build.mjs`).
@@ -124,10 +124,10 @@ Every step after building is the maintainer's. Nothing in the repository uploads
 2. Check the folder with `check <dir>/catalogue.json`.
 3. Try it in a clean profile from a local server:
    - Serve the folder: `python3 -m http.server -d <dir> 8765`.
-   - Start the app with `CASKADE_CATALOGUE_URL=http://127.0.0.1:8765/catalogue.json` and `CASKADE_CATALOGUE_PUBKEY` set to a test key's public half. Sign `catalogue.json` with that key first, using `pnpm tauri signer sign -f <test key> catalogue.json`.
+   - Start the app with `CASKADE_CATALOGUE_URL=http://127.0.0.1:8765/catalogue.json` and `CASKADE_CATALOGUE_PUBKEY` set to a test key's public half. Sign `catalogue.json` with that key first, using `apps/native/node_modules/.bin/tauri signer sign -f <test key> catalogue.json`.
    - Install it from Settings → Plugins.
    - Or run the ignored test `starter_collection_installs_in_a_clean_profile` with `CASKADE_STARTER_DIR=<dir>`.
-4. Sign `catalogue.json` with the release key: `pnpm tauri signer sign -f ~/.tauri/caskade-updater.key catalogue.json`.
+4. Sign `catalogue.json` with the release key: `apps/native/node_modules/.bin/tauri signer sign -f ~/.tauri/caskade-updater.key catalogue.json`.
 5. Upload every file in the folder, `catalogue.json.sig` included, as assets of the `catalogue` release on `krazyjakee/caskade` (the [origin](catalogue.md#origin-and-trust)): `gh release upload catalogue <dir>/* --clobber`.
 6. Check the published copy: `check https://github.com/krazyjakee/caskade/releases/download/catalogue/catalogue.json --release-key`.
 

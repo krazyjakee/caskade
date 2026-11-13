@@ -131,3 +131,7 @@ pub async fn game_collections(
         .await
         .map_err(report)
 }
+
+#[cfg(test)]
+#[path = "collections_tests.rs"]
+mod tests;

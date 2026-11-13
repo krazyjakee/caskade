@@ -1,0 +1,3 @@
+# macOS: the app and its dmg (Tauri.toml has the rest).
+[bundle]
+targets = ["app", "dmg"]

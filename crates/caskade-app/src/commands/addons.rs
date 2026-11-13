@@ -165,3 +165,7 @@ pub async fn addons_media(
         }
     }
 }
+
+#[cfg(test)]
+#[path = "addons_tests.rs"]
+mod tests;

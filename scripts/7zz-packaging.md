@@ -37,20 +37,39 @@ RAR tests are explicitly gated so CI cannot silently pass by skipping a missing
 binary: #22 must download the pin, set `CASKADE_7ZZ`, and run the ignored tests on
 Linux, Windows and macOS. Windows tests also require Python for fake utilities.
 
-## Tauri externalBin wiring at I5
+## In the app bundles
 
-Copy each target's program to `binaries/7zz-<target-triple>[.exe]` in the Tauri
-package and configure `bundle.externalBin = ["binaries/7zz"]` there. The native
-triples are `x86_64-unknown-linux-gnu`, `aarch64-unknown-linux-gnu`,
+`scripts/7zz-sidecar.py` stages the verified program for a target as ignored
+`apps/native/binaries/7zz-<target-triple>[.exe]`, with the upstream
+License.txt as `7zip-License.txt` and, for Windows, the matching `7z.dll`.
+`apps/native/Tauri.toml` packages it (`bundle.externalBin = ["binaries/7zz"]`)
+next to the `caskade` executable: `/usr/bin/7zz` from the deb, `7zz.exe` with
+`7z.dll` beside it in the Windows install folder, and
+`Caskade.app/Contents/MacOS/7zz`. Every bundle carries the license under
+`licenses/`. The DLL is a resource, never in externalBin or launched.
+`scripts/stage-bundle.py` runs the script for its target, so `just build-app`
+and release CI stage it with the app; `--dev` (`just dev`) puts it beside the
+host's debug native executable instead.
+
+```sh
+python3 scripts/7zz-sidecar.py
+# For a Linux Windows-cross check:
+python3 scripts/7zz-sidecar.py --target x86_64-pc-windows-gnu
+```
+
+The triples are `x86_64-unknown-linux-gnu`, `aarch64-unknown-linux-gnu`,
 `x86_64-apple-darwin`, `aarch64-apple-darwin`, `x86_64-pc-windows-msvc` and
-`aarch64-pc-windows-msvc` (the x64 Windows payload also serves GNU test builds).
-The macOS package is universal. Bundle **7z.dll adjacent to the renamed Windows
-program** using target-specific packaging, plus the upstream License.txt for
-every target. Do not add the DLL to externalBin or launch it. Keep installer
-library code independent of Tauri. App signing/notarization is performed by the
-app packaging workflow, without changing the pinned executable contents before
-verification; a signing pipeline that changes bytes must explicitly update its
-verified artifact manifest.
+`aarch64-pc-windows-msvc` (the x64 Windows payload also serves GNU test
+builds). The macOS payload is universal; each Windows bundle gets only its own
+architecture's DLL. The app finds the program beside its executable
+(`caskade_app::commands::install::sidecar`), and `InstallService::with_sidecar`
+verifies the program and Windows DLL hashes with the installer's pinned
+loader. Keep installer library code independent of the packaging. App
+signing/notarization runs in the packaging workflow without changing the
+pinned executable's bytes before verification; a signing pipeline that changes
+them must explicitly update its verified artifact manifest. Windows
+MSVC/ARM64 and macOS signing/notarization remain native verification items on
+#22.
 
 ## Execution and fallback
 

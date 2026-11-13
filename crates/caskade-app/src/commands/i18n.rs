@@ -61,3 +61,7 @@ pub async fn announce(events: Events, mut changes: watch::Receiver<String>) {
         events.send(Event::LocaleChanged(LocaleChanged { locale }));
     }
 }
+
+#[cfg(test)]
+#[path = "i18n_tests.rs"]
+mod tests;

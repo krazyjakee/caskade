@@ -1,0 +1,30 @@
+[package]
+name = "caskade-catalogue"
+version = "0.1.0"
+description = "The add-on catalogue's maintainer tool (#184): builds and checks catalogues with the checks an install makes"
+edition.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "caskade-catalogue"
+path = "src/main.rs"
+
+[dependencies]
+caskade-core = { path = "../caskade-core" }
+caskade-addons = { path = "../caskade-addons" }
+# The release key `check --release-key` verifies against.
+caskade-app = { path = "../caskade-app" }
+caskade-plugin-host = { path = "../caskade-plugin-host" }
+serde_json = "1"
+tokio = { version = "1", features = ["rt", "rt-multi-thread"] }
+
+# The smoke test (tests/smoke.rs): a local catalogue server, a throwaway
+# signing key and a clean profile.
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+wiremock = "0.6"
+minisign = "=0.10.0"
+tempfile = "=3.27.0"
+
+[lints]
+workspace = true

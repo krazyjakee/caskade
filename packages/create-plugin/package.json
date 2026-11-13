@@ -1,7 +1,7 @@
 {
   "name": "create-caskade-plugin",
   "version": "0.1.0",
-  "description": "Scaffolds a Caskade plugin: a React UI half, a Rust backend half, or both.",
+  "description": "Scaffolds a Caskade plugin: a Rust backend, optionally drawing a view with Caskade's components.",
   "private": true,
   "type": "module",
   "bin": {

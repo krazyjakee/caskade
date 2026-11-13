@@ -1,9 +1,0 @@
-/*
- * The app's stylesheet as is: the cascade layer order, Tailwind in our
- * layers, the token contract in cs.tokens and @caskade/ui's utilities. The
- * toolbar's theme goes into cs.theme on top (src/themes).
- */
-@import "../../desktop/src/styles/index.css";
-
-/* The playground's own frames (galleries, the anatomy panel, token tables). */
-@source "./";

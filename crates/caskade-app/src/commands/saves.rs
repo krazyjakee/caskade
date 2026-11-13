@@ -199,3 +199,7 @@ pub fn forward_changes(events: crate::events::Events, versions: &SaveVersions) {
         }
     });
 }
+
+#[cfg(test)]
+#[path = "saves_tests.rs"]
+mod tests;

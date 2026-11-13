@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run the desktop app with hot reload from any working directory.
+# Build and run the app from any working directory.
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 
-exec pnpm tauri dev "$@"
+exec just dev "$@"

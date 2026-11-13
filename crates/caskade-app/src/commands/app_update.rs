@@ -401,3 +401,7 @@ async fn automatic(settings: &SettingsService) -> bool {
     };
     check && crate::onboarding::completed(settings).await
 }
+
+#[cfg(test)]
+#[path = "app_update_tests.rs"]
+mod tests;

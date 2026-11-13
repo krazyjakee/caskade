@@ -253,3 +253,7 @@ pub async fn theme_load_unpacked(
     }
     load_dev(events, themes, Path::new(folder)).map_err(CommandError::from)
 }
+
+#[cfg(test)]
+#[path = "themes_tests.rs"]
+mod tests;

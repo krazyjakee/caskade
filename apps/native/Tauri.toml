@@ -1,0 +1,47 @@
+# Caskade's bundles: deb and AppImage here, NSIS in Tauri.windows.toml, the
+# macOS app and dmg in Tauri.macos.toml. Only the Tauri CLI's bundler reads
+# these files (`tauri bundle`, docs/RELEASING.md): the app has no Tauri
+# runtime. The version is apps/native/Cargo.toml's.
+#
+# Installed copies depend on the name, identifier and executable below:
+# the NSIS install folder and uninstall key, the deb package, the macOS
+# bundle, shortcuts, the caskade:// handler and the data and keychain
+# entries all follow them. scripts/check-release-metadata.py keeps them.
+productName = "Caskade"
+identifier = "dev.caskade.app"
+# caskade-native, staged under this name by scripts/stage-bundle.py: the
+# executable earlier releases started.
+mainBinaryName = "caskade"
+
+[bundle]
+active = true
+targets = ["deb", "appimage"]
+# The package and installer description (otherwise the crate's).
+shortDescription = "Game library and launcher"
+icon = ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.png"]
+# Pinned 7-Zip beside the executable, staged by scripts/7zz-sidecar.py.
+externalBin = ["binaries/7zz"]
+# Release CI turns this on to get macOS's .app.tar.gz; signing is the
+# release workflow's sign job's (docs/RELEASING.md).
+createUpdaterArtifacts = false
+
+[bundle.resources]
+"binaries/7zip-License.txt" = "licenses/7zip-License.txt"
+
+# The tray loads AppIndicator at run time, so nothing finds it by linking:
+# the deb depends on it and the AppImage carries it (the bundler adds
+# WebKitGTK and GTK, for game and video windows, itself).
+[bundle.linux.deb]
+depends = ["libayatana-appindicator3-1"]
+
+[bundle.linux.appimage.files]
+"/usr/lib/libayatana-appindicator3.so.1" = "/usr/lib/x86_64-linux-gnu/libayatana-appindicator3.so.1"
+
+# Registered by the installers: NSIS, the .desktop file and Info.plist.
+[plugins.deep-link.desktop]
+schemes = ["caskade"]
+
+# The bundler wants an updater key to make updater bundles; a path, so the
+# key stays in one place.
+[plugins.updater]
+pubkey = "../../crates/caskade-app/updater.pub"

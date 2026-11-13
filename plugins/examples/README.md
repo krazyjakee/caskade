@@ -2,7 +2,7 @@
 
 These are the dogfood plugins. CI builds and tests them.
 
-Every example targets plugin API 0.2 (#109): its backend draws its UI with Caskade's components, so it works in the webview and the native app, and in console mode.
+Every example targets plugin API 0.2 (#109): its backend draws its UI with Caskade's components, so it works in the app's desktop and console modes.
 
 | Plugin                            | Shows                                                                                                                                                       |
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -24,4 +24,4 @@ To try one, load the folder in place with `caskade dev plugins/examples/<name>` 
 
 Tests:
 - `crates/caskade-plugin-host/tests/examples.rs`: each plugin installs from its folder with exactly its declared permissions. GameMode wraps a fixture launch in a fake `gamemoderun`; HowLongToBeat queries a mock server, caches the result and draws its tab; Playtime stats draws the most played games, the table and the last session; Caskade Pack's game action answers in Swedish; Crashy's UI fails alone.
-- `apps/native/src/plugins/tests.rs` and `apps/desktop/src/plugins/examples.test.tsx`: drawn views, tabs, game actions, Home sections and placeholders in the native app and the webview.
+- `apps/native/src/plugins/tests.rs`: drawn views, tabs, game actions, Home sections and placeholders in the app.

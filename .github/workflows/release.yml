@@ -4,8 +4,9 @@ name: release
 # release. The build legs run with a read-only token and never see the
 # updater signing key: build scripts, proc-macros and npm packages run there.
 # Only the `sign` job holds the key, and it runs nothing but the pinned Tauri
-# CLI's `signer sign` on the legs' artifacts. Publishing the draft by hand is
-# what ships it: the in-app updater
+# CLI's `signer sign` on the legs' artifacts (the CLI is a build tool here:
+# it bundles and signs; the app has no Tauri runtime). Publishing the draft
+# by hand is what ships it: the in-app updater
 # reads releases/latest/download/latest.json, and releases/latest skips
 # drafts. See docs/RELEASING.md.
 on:
@@ -71,7 +72,8 @@ jobs:
 
       # Signs a scratch file with the secret key, then checks that the
       # signature's key id is the committed public key's. A wrong password or
-      # a key from another pair fails here instead of after four builds.
+      # a key from another pair fails here instead of after four builds. The
+      # Tauri CLI's version is the one pnpm-lock.yaml pins for apps/native.
       - name: Signing key works and matches the committed public key
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -161,9 +163,10 @@ jobs:
       ref: refs/tags/${{ inputs.tag || github.ref_name }}
       version: ${{ needs.prepare.outputs.version }}
 
-  # The only job with the signing key. It runs no project code: it signs the
-  # legs' updater bundles with the Tauri CLI version pinned in pnpm-lock.yaml,
-  # writes latest.json and uploads everything to the draft in one go.
+  # The only job with the signing key. It runs no project code and installs
+  # no project dependencies: it signs the legs' updater bundles with the
+  # Tauri CLI version pinned in pnpm-lock.yaml, writes latest.json and
+  # uploads everything to the draft in one go.
   sign:
     needs: [prepare, build]
     runs-on: ubuntu-latest
@@ -182,8 +185,9 @@ jobs:
           path: ${{ runner.temp }}/release
           merge-multiple: true
 
-      # --app-version binds each signature to the version, as `tauri build`
-      # does: the app's updater config has requireSignedVersion on.
+      # --app-version binds each signature to the version (a trusted
+      # comment): the app's updater refuses a signature for another version
+      # (crates/caskade-app/src/self_update.rs, verify).
       - name: Sign the updater bundles
         working-directory: ${{ runner.temp }}/release
         env:
@@ -204,8 +208,8 @@ jobs:
             echo "Signed $file"
           done
 
-      # The same entries tauri-action wrote: the plain platform key, which the
-      # updater falls back to, and one per bundle type. Windows prefers NSIS.
+      # The plain platform key, which the updater falls back to, and one per
+      # bundle type (self_update.rs, Bundle::platforms). Windows prefers NSIS.
       - name: Write latest.json
         working-directory: ${{ runner.temp }}/release
         env:
@@ -267,7 +271,8 @@ jobs:
 
   # Reads the draft back as installed copies will: latest.json lists every
   # platform, and each entry points at a file on the release whose .sig it
-  # carries, signed with the committed key. Check it before anyone publishes.
+  # carries, signed with the committed key for this version. Check it before
+  # anyone publishes.
   verify:
     needs: [prepare, sign]
     runs-on: ubuntu-latest
@@ -301,6 +306,15 @@ jobs:
 
           def key_id(wrapped):
               return base64.b64decode(base64.b64decode(wrapped).decode().splitlines()[1])[2:10]
+
+          def signed_version(wrapped):
+              # minisign's trusted comment; `signer sign --app-version` adds
+              # version:<v>, which the updater compares with latest.json's.
+              for line in base64.b64decode(wrapped).decode().splitlines():
+                  if line.startswith("trusted comment: "):
+                      fields = line.removeprefix("trusted comment: ").split("\t")
+                      return next((f.removeprefix("version:") for f in fields if f.startswith("version:")), None)
+              return None
 
           assets = dict(
               reversed(line.split("\t", 1))
@@ -337,6 +351,8 @@ jobs:
                   errors.append(f"{platform}: the signature isn't {name}.sig's")
               elif key_id(signature) != pubkey:
                   errors.append(f"{platform}: signed with another key than caskade-app/updater.pub's")
+              elif signed_version(signature) != version:
+                  errors.append(f"{platform}: the signature is for version {signed_version(signature)}, not {version}")
               rows.append(f"| `{platform}` | `{name}` |")
           mac = [platforms[p]["url"] for p in ("darwin-aarch64", "darwin-x86_64") if p in platforms]
           if len(mac) == 2 and mac[0] == mac[1]:

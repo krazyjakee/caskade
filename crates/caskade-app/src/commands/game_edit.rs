@@ -193,3 +193,7 @@ pub fn forward_refresh(events: crate::events::Events, metadata: &Metadata) {
         }
     });
 }
+
+#[cfg(test)]
+#[path = "game_edit_tests.rs"]
+mod tests;

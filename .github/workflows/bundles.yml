@@ -2,7 +2,8 @@ name: bundles
 # Builds the release's bundles from any commit (Actions → bundles → Run
 # workflow), as workflow artifacts only: no tag, no draft release, no
 # updater signatures and no secrets. For checking installers before a
-# release, e.g. the native app inside them (#110). See docs/RELEASING.md.
+# release, e.g. after changing apps/native/Tauri.toml (#110, #143). See
+# docs/RELEASING.md.
 on:
   workflow_dispatch:
 permissions:

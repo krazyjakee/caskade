@@ -27,15 +27,16 @@ Swedish. The generated `dist/` directory is ignored by Git.
   alongside language names, marks the current language, and supports Escape
   and clicking outside without runtime JavaScript.
 - `site.css` uses the app's generated `--cs-*` tokens. The build copies those
-  tokens and the existing Caskade logo. The website's `data-cs="website"` root
-  and parts are in `packages/ui/src/anatomy.ts`; regenerate the catalogue with
-  `pnpm --filter @caskade/ui docs` after changing its anatomy.
+  tokens and the Caskade logo (`apps/native/icons/caskade.svg`). The website's `data-cs="website"` root
+  and parts are in the anatomy catalogue (`WEBSITE` in
+  `apps/native/src/anatomy.rs`); after changing them, regenerate the contract
+  `check.py` reads with `CASKADE_WRITE_ANATOMY=1 cargo test -p caskade-native anatomy`.
 - `assets/` bundles the Latin variable Inter and Oxanium fonts and their OFL
-  licences, from the same Fontsource families the desktop app uses. Keep the
+  licences, the same families the app bundles (`apps/native/assets/fonts`). Keep the
   licences when replacing font files.
 - `desktop-en.jpg`, `desktop-sv.jpg`, `console-en.jpg` and `console-sv.jpg` are
-  captures of the actual app's Home view in its browser preview, using a sample
-  library. The page crops the images with CSS and links to the complete captures.
+  captures of the app's Home view (taken from the retired webview app's
+  browser preview before #143), using a sample library. The page crops the images with CSS and links to the complete captures.
   The sample artwork comes from Steam's public artwork CDN; game artwork belongs
   to its respective owners. No personal library, account or device data is used.
 - Download buttons link directly to the published AppImage, Debian package,
@@ -63,26 +64,18 @@ If moving to a custom domain, update the canonical and alternate URL base in
 
 ## Refreshing screenshots
 
-Install the desktop workspace's dependencies and a Playwright-compatible
-Chromium, then start a local fixture preview:
+The captures came from the retired webview app's fixture preview, through a
+Playwright script removed with it (#143). Until a native capture script
+exists, take new ones from the native app on a private desktop with fixtures:
 
 ```sh
-VITE_CASKADE_FIXTURES=1 pnpm --filter @caskade/desktop dev --host 127.0.0.1 --port 1430 --strictPort
+cargo build -p caskade-native
+scripts/private-desktop.sh --size 1600x900 -- env CASKADE_FIXTURES=1 \
+  "$(cargo metadata --format-version 1 --no-deps | python3 -c 'import json,sys;print(json.load(sys.stdin)["target_directory"])')/debug/caskade-native"
 ```
 
-In another terminal, run the manual capture under Xvfb on Linux:
-
-```sh
-xvfb-run -a node apps/website/capture.mjs http://127.0.0.1:1430
-```
-
-Set `CHROME_PATH` if Chromium is installed outside Playwright's default location.
-The capture downloads public cover artwork, intercepts the fixture bootstrap in
-an isolated browser context, and renders the actual application components in
-both modes and languages. It does not edit the app's source or open a native
-profile. Only visible images are awaited; off-screen shelves load lazily. This
-is a manual asset-authoring step, separate from offline builds and CI checks.
-Review all four images, then rebuild the website and commit the captures.
+Use a fabricated sample library only: no personal library, account or device
+data. Review all four images, then rebuild the website and commit them.
 
 ## Deployment
 

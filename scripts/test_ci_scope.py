@@ -28,16 +28,16 @@ class ScopeTests(unittest.TestCase):
                 ci.main()
             values = dict(line.split("=", 1) for line in output.read_text().splitlines())
             self.assertEqual(set(values), set(ci.FIELDS))
-            self.assertEqual(values["e2e"], "true")
+            self.assertEqual(values["native"], "true")
             self.assertTrue(all(value in ("true", "false") for value in values.values()))
 
     def test_prose_skips_heavy_jobs(self):
         self.assertFalse(any(ci.scope(["README.md", "docs/PRODUCT-SPEC.md"]).values()))
 
-    def test_frontend_change_does_not_select_native_rust_suites(self):
-        scope = ci.scope(["apps/desktop/src/views/LibraryView.tsx"])
+    def test_js_tooling_change_does_not_select_native_rust_suites(self):
+        scope = ci.scope(["packages/create-plugin/generate.mjs"])
         self.assertTrue(scope["app"] and scope["frontend"] and scope["catalogs"])
-        self.assertFalse(scope["rust"] or scope["installer"] or scope["discovery"] or scope["e2e"])
+        self.assertFalse(scope["rust"] or scope["installer"] or scope["discovery"])
         self.assertFalse(scope["native"])
 
     def test_native_ui_jobs_follow_what_caskade_native_builds_on(self):
@@ -51,10 +51,8 @@ class ScopeTests(unittest.TestCase):
                 self.assertTrue(scope["native"] and scope["rust"])
         # Patched Blitz is a build input of everything it's vendored for.
         self.assertTrue(all(ci.scope(["vendor/blitz/crates/blitz-dom/src/lib.rs"]).values()))
-        # The Tauri app is beside it, not under it.
-        for path in ["apps/desktop/src-tauri/src/lib.rs", "apps/desktop/src/App.tsx"]:
-            with self.subTest(path=path):
-                self.assertFalse(ci.scope([path])["native"])
+        # JavaScript tooling is beside it, not under it.
+        self.assertFalse(ci.scope(["packages/create-plugin/index.mjs"])["native"])
 
     def test_installer_change_reaches_discovery_transitively(self):
         scope = ci.scope(["crates/caskade-installer/src/lib.rs"])
@@ -70,7 +68,7 @@ class ScopeTests(unittest.TestCase):
         self.assertFalse(scope["installer"] or scope["discovery"])
 
     def test_embedded_contracts_and_catalogs_need_rust_checks(self):
-        for path in ["packages/ui/anatomy.json", "packages/tokens/tokens/sets/base.json",
+        for path in ["crates/caskade-theme/anatomy.json", "packages/tokens/tokens/sets/base.json",
                      "locales/fr/core.po", "docs/legal/privacy.md", "wit/caskade-plugin.wit",
                      "docs/TECH-SPEC.md"]:
             with self.subTest(path=path):
@@ -109,7 +107,7 @@ class ScopeTests(unittest.TestCase):
                     patch.object(ci, "changed_paths", return_value=["crates/caskade-discovery/src/lib.rs"]):
                 scope = ci.select(event_name, {"pull_request": {"labels": []}})
                 self.assertTrue(scope["discovery"] and scope["rust"] and scope["app"])
-                self.assertFalse(scope["installer"] or scope["e2e"])
+                self.assertFalse(scope["installer"])
             with self.subTest(event_name=event_name, paths="prose"), \
                     patch.object(ci, "changed_paths", return_value=["docs/README.md"]):
                 self.assertFalse(any(ci.select(event_name, {"pull_request": {}}).values()))
@@ -123,7 +121,7 @@ class ScopeTests(unittest.TestCase):
     def test_label_allows_e2e_for_an_otherwise_unaffected_pr(self):
         with patch.object(ci, "changed_paths", return_value=["docs/README.md"]):
             scope = ci.select("pull_request", {"pull_request": {"labels": [{"name": "run-e2e"}]}})
-            self.assertTrue(scope["app"] and scope["rust"] and scope["e2e"] and scope["native"])
+            self.assertTrue(scope["app"] and scope["rust"] and scope["native"])
             self.assertFalse(scope["installer"] or scope["discovery"])
 
     def test_dependency_graph_includes_target_build_dev_and_workspace_dependencies(self):

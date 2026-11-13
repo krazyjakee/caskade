@@ -416,3 +416,7 @@ pub fn setup(
     }
     crate::runtime::spawn(async move { host.start().await });
 }
+
+#[cfg(test)]
+#[path = "streaming_tests.rs"]
+mod tests;

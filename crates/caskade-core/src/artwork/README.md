@@ -38,8 +38,6 @@ files are rejected. Capability-relative opens prevent symlink escapes even
 when files change between checks. No ambient path reaches the webview.
 
 `artwork::serve(&cache, uri)` runs reads off-thread and returns a framework-free
-HTTP result. `src-tauri/src/asset.rs::register` wires it to the async protocol,
-allows GET only, and adds MIME, immutable-cache and nosniff headers. Errors have
-empty bodies and expose no filesystem paths. Core protocol tests cover encoded
-routes and symlinks; adapter tests exercise the exact response helper used by
-the registered scheme.
+HTTP result. The native app (`apps/native/src/library/art.rs`) reads covers
+through it. Errors have empty bodies and expose no filesystem paths. Core
+protocol tests cover encoded routes and symlinks.

@@ -7,15 +7,15 @@
 //! - The page's renderer exited, or hung for [`HANG_GRACE`]: reload the
 //!   page. The core still has everything, so the UI comes back where it was.
 //! - The WebView2 browser process exited: the webview is dead and can't be
-//!   rebuilt in place, so the main window restarts Caskade.
-//! - Reloads that keep failing ([`RELOADS`] within [`RELOAD_WINDOW`]) turn
-//!   into a restart. Restarts are counted across processes, in a file
-//!   ([`Restarts`]): past [`RESTARTS`] within [`RESTART_WINDOW`] a native
-//!   dialog asks to restart or quit instead of looping.
+//!   rebuilt in place, so the window closes.
+//! - Reloads that keep failing ([`RELOADS`] within [`RELOAD_WINDOW`]) close
+//!   it too.
 //!
-//! The game and video windows (`web_player`, `video_player`) follow the
-//! same [`Policy`], reloading or closing themselves; a shell's main window
-//! uses it and [`Restarts`] too.
+//! The game and video windows (`web_player`, `video_player`) follow this
+//! [`Policy`]. [`Restarts`] counts Caskade's own restarts across processes,
+//! in a file: the native app restarts after a crash, and past [`RESTARTS`]
+//! within [`RESTART_WINDOW`] a native dialog asks to restart or quit
+//! instead of looping.
 //!
 //! WebView2 reports failures on Windows; WebKitGTK reports its web process
 //! exiting or going unresponsive on Linux. A main-window failure on the GPU

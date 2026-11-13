@@ -1,0 +1,11 @@
+# Windows: the NSIS installer (Tauri.toml has the rest). Installs per user
+# under %LOCALAPPDATA%\Caskade, as every release has.
+[bundle]
+targets = ["nsis"]
+
+# 7-Zip's console program needs its DLL beside it.
+[bundle.resources]
+"binaries/7z.dll" = "7z.dll"
+
+[bundle.windows.nsis]
+installerHooks = "packaging/windows/hooks.nsh"

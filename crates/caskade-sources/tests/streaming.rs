@@ -749,7 +749,7 @@ impl Drop for RealCaskade {
 /// library on disk. The game gets a session on the host, Sunshine's
 /// description of the client shows it came through that path, and ending
 /// the stream stops it, keeping its playtime on the host and none on the
-/// client. Needs a built `caskade` (`cargo build -p caskade-desktop`, or
+/// client. Needs a built `caskade-native` (`cargo build -p caskade-native`, or
 /// `CASKADE_LIVE_PROGRAM`). Its folders are the test's, so it can't reach
 /// the user's own Caskade. Run under Xvfb
 /// (`xvfb-run -a -s "-screen 0 1280x720x24"`).
@@ -815,13 +815,17 @@ async fn live_linux_published_game_plays_and_stops_with_the_stream() {
     let program = std::env::var_os("CASKADE_LIVE_PROGRAM").map_or_else(
         || {
             let test = std::env::current_exe().unwrap();
-            test.parent().unwrap().parent().unwrap().join("caskade")
+            test.parent()
+                .unwrap()
+                .parent()
+                .unwrap()
+                .join("caskade-native")
         },
         PathBuf::from,
     );
     assert!(
         program.is_file(),
-        "no {}: run `cargo build -p caskade-desktop`",
+        "no {}: run `cargo build -p caskade-native`",
         program.display()
     );
 

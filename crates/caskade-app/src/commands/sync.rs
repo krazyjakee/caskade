@@ -228,3 +228,7 @@ pub fn hold_pair_link(
     }
     true
 }
+
+#[cfg(test)]
+#[path = "sync_tests.rs"]
+mod tests;

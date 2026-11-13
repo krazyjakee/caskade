@@ -1,8 +1,7 @@
 //! The UI plugins draw (#109). From plugin API 0.2 a plugin's UI
 //! contributions are trees of Caskade's own components, which its backend
 //! returns as JSON from the `ui` export (`render`, `act`). Caskade draws
-//! them with its components: RSX in the native app, `@caskade/ui` in the
-//! webview until the cutover. The theme, focus, pad input, console mode and
+//! them with its own RSX components. The theme, focus, pad input, console mode and
 //! screen readers come with them, and plugin code runs only in its sandbox.
 //!
 //! A tree is one [`Node`] or a list of them, e.g.

@@ -75,3 +75,7 @@ pub async fn account_verify_admin_pin(
 ) -> Result<PinCheck, CommandError> {
     accounts.verify_admin_pin(pin).await.map_err(report)
 }
+
+#[cfg(test)]
+#[path = "accounts_tests.rs"]
+mod tests;

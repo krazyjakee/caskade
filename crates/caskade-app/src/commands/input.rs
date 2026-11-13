@@ -70,3 +70,7 @@ impl Summoner {
 pub fn input_devices(state: &InputService) -> Vec<PadInfo> {
     state.devices()
 }
+
+#[cfg(test)]
+#[path = "input_tests.rs"]
+mod tests;

@@ -81,3 +81,7 @@ pub fn setup(events: Events, presence: &Presence, devices: Devices, store: Libra
         }
     });
 }
+
+#[cfg(test)]
+#[path = "presence_tests.rs"]
+mod tests;

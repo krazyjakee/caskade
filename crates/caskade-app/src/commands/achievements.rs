@@ -37,3 +37,7 @@ pub async fn game_achievements_cancel(
     crate::permissions::enforce("game_achievements_cancel", serde_json::Value::default)?;
     Ok(achievements.cancel_refresh(&game_id))
 }
+
+#[cfg(test)]
+#[path = "achievements_tests.rs"]
+mod tests;

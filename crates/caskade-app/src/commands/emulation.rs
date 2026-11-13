@@ -155,3 +155,7 @@ pub async fn emulation_game_set(
         .await
         .map_err(report)
 }
+
+#[cfg(test)]
+#[path = "emulation_tests.rs"]
+mod tests;

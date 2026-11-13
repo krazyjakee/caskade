@@ -47,3 +47,7 @@ pub async fn manual_game_add(
     });
     Ok(id)
 }
+
+#[cfg(test)]
+#[path = "manual_games_tests.rs"]
+mod tests;

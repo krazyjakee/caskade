@@ -143,3 +143,8 @@ async fn release_of(
         )))),
     }
 }
+
+// The fixture tools are shell scripts.
+#[cfg(all(test, target_os = "linux"))]
+#[path = "actions_tests.rs"]
+mod tests;

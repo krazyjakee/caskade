@@ -1,7 +1,7 @@
 // Builds an example plugin's halves into its dist/ (#133):
 //   node plugins/examples/build.mjs <example folder> [more…]
-// The UI half uses the app's Vite and @caskade/vite-plugin (no install in
-// the example); the backend builds for wasm32-wasip2 with cargo.
+// The backend builds for wasm32-wasip2 with cargo and draws the plugin's
+// UI (plugin API 0.2); 0.1's JavaScript UI halves are no longer built.
 import { execFileSync } from "node:child_process";
 import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -12,10 +12,7 @@ if (folders.length === 0) throw new Error("usage: build.mjs <example folder>…"
 
 for (const folder of folders.map((name) => resolve(here, name))) {
   const manifest = JSON.parse(readFileSync(join(folder, "plugin.json"), "utf8"));
-  if (manifest.ui)
-    execFileSync("node", [join(here, "../../apps/desktop/scripts/build-plugin-ui.mjs"), folder], {
-      stdio: "inherit",
-    });
+  if (manifest.ui) throw new Error(`${folder}: 0.1 JavaScript UI halves are no longer built`);
   if (manifest.backend) {
     const crate = join(folder, "backend/Cargo.toml");
     const output = execFileSync(

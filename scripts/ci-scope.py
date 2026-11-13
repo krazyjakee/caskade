@@ -15,7 +15,7 @@ import tomllib
 ROOT = Path(__file__).resolve().parents[1]
 # GitHub cancels superseded PR runs itself (`concurrency` in each workflow).
 PR_EVENTS = ("pull_request", "pull_request_target")
-FIELDS = ("app", "frontend", "rust", "catalogs", "e2e", "native", "cross", "installer", "discovery")
+FIELDS = ("app", "frontend", "rust", "catalogs", "native", "cross", "installer", "discovery")
 
 
 def package_graph(root):
@@ -89,13 +89,13 @@ def scope(paths, root=ROOT):
             # text comes from the bundled catalogs.
             if path.startswith(("themes/", "locales/")):
                 result["native"] = True
-        elif path.startswith("packages/") or path.startswith("apps/desktop/") or path in (
+        elif path.startswith("packages/") or path in (
             "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "biome.json", "biome.jsonc",
             "docs/theming/anatomy.md", "docs/theming/tokens.md",
         ):
             result["frontend"] = result["catalogs"] = True
             # The theme compiler embeds these generated contracts.
-            if path.startswith("packages/tokens/") or path == "packages/ui/anatomy.json":
+            if path.startswith("packages/tokens/"):
                 result["rust"] = result["native"] = True
         elif path in ("README.md", "AGENTS.md", "CLAUDE.md", "SECURITY.md") or (
             path.startswith("docs/") and path.endswith(".md")
@@ -133,7 +133,7 @@ def select(event_name, event, root=ROOT):
             result = dict.fromkeys(FIELDS, True)
         labels = {label.get("name") for label in pr.get("labels") or []}
         if "run-e2e" in labels:
-            result["app"] = result["frontend"] = result["rust"] = result["catalogs"] = result["e2e"] = True
+            result["app"] = result["frontend"] = result["rust"] = result["catalogs"] = True
             result["native"] = True
     return result
 

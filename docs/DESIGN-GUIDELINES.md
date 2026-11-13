@@ -44,7 +44,7 @@ Style only through the `--cs-*` tokens, through their Tailwind utilities (`bg-su
 - Durations come from `--cs-motion-*` tokens. Looping animations set `animation-play-state: var(--cs-motion-ambient)`.
 - Loops that run for as long as background work or the app does move in steps: the busy spinner (`animate-worker`) turns in `steps(8)`, the backdrop pans in steps. The native UI draws a frame for each step, so a continuous loop costs a share of a core for as long as it runs (#82). Loops that run together step on one clock, so their steps land on the same frame: the backdrop's grid and drift both change 1.2 times a second (#148). `steps(n)` counts each keyframe interval, not the whole animation.
 - Reduced motion (the system setting or Appearance) zeroes durations and pauses loops through token sets, so every new animation must use the tokens to inherit that.
-- When the webview paints on the CPU (`data-paint="cpu"`), ambient loops pause by default. Never make anything depend on an animation running.
+- When the window paints on the CPU (`data-paint="cpu"`), ambient loops pause by default. Never make anything depend on an animation running.
 - Lists enter with `animate-enter`, staggered by `--i`. Motion explains a change (something arrived, moved or opened); it never decorates a static screen.
 
 ## 5. Input and focus
@@ -54,15 +54,15 @@ Style only through the `--cs-*` tokens, through their Tailwind utilities (`bg-su
 - **Spatial navigation** stays within the current area while it has a target that way, prefers the row or column focus is already in, and treats a settings row as one stop.
 - Each view gives a pad its first stop (`data-focus-default`). A dialog moves focus to its default control, and back to where it was when it closes. In the native UI a dialog or popover closes on B through its own `back` binding.
 - **Text entry** on a pad goes through the on-screen keyboard. Typing anywhere outside a field starts a search.
-- **Files and folders**: every control that opens a picker is also a drop zone, and pickers go through `usePathPicker`, which shows the in-app folder browser in console mode.
+- **Files and folders**: every control that opens a picker is also a drop zone, and pickers go through `use_path_picker`, which shows the in-app folder browser in console mode.
 - **Menus**: every item that has a context menu opens it from a right click, the context-menu key, Shift+F10, a pad's Start or an actions button. A game has one menu, the same everywhere.
 - Mouse-only gestures (hover, drag) always have another way in.
 
 ## 6. Components and anatomy
 
-- Build from `apps/native/src/ui` in native and `@caskade/ui` in legacy: form controls, `SettingsSection`/`SettingRow`, menus, `ErrorNotice` (React Aria Components in legacy). Add a shared component when two places need it.
-- Style interaction state with React Aria's data attributes (`data-hovered`, `data-selected`, `data-focus-visible`), not `:hover` or `:checked`.
-- Give every component a `data-cs` root and `data-part`s, and domain state as `data-status` (and similar). Add them to the anatomy catalogue (`packages/ui/src/anatomy.ts`): they are public API for themes. A native (RSX) component declares the same entry in `apps/native/src/anatomy.rs`, word for word apart from the component it names; while the legacy UI is retained, a test holds the two catalogues together. Class names are not, and CSS never selects on classes.
+- Build from `apps/native/src/ui`: form controls, `SettingsSection`/`SettingRow`, menus, `ErrorNotice`. Add a shared component when two places need it.
+- Style interaction state with the components' data attributes (`data-hovered`, `data-selected`, `data-focus-visible`), not `:hover` or `:checked`.
+- Give every component a `data-cs` root and `data-part`s, and domain state as `data-status` (and similar). Declare its anatomy entry beside the component and list it in the catalogue (`apps/native/src/anatomy.rs`), which generates `docs/theming/anatomy.md` and the theme contract: they are public API for themes. Class names are not, and CSS never selects on classes.
 - A control inside a `SettingRow` is labelled by its row. A second control in the same row needs its own `aria-label`.
 
 ## 7. Writing
@@ -106,7 +106,7 @@ A button or menu item ends with an ellipsis when it asks something before it act
 
 ### 7.4 Translation
 
-Every visible string goes through the translation layer (Lingui in the webview, `tr!` in Rust). Name placeholders by what fills them (`{title}`, not `{0}`). Add a translator comment when the English alone is ambiguous, and a context only when the same English means different things. Leave room: translations run longer than English.
+Every visible string goes through the translation layer (`t!` in the UI, `tr!` in the core). Name placeholders by what fills them (`{title}`, not `{0}`). Add a translator comment when the English alone is ambiguous, and a context only when the same English means different things. Leave room: translations run longer than English.
 
 ## 8. Accessibility
 
@@ -119,6 +119,6 @@ Every visible string goes through the translation layer (Lingui in the webview, 
 ## 9. Speed is design
 
 - The grid never decodes full-size art: thumbnails come from the cache.
-- Prefer flat fills to blur. WebKitGTK on Linux is the slowest webview Caskade runs on; design for it.
+- Prefer flat fills to blur: the native UI draws no backdrop blur, and the CPU renderer is the slowest path Caskade runs on; design for it.
 - Show cached content immediately and refresh it quietly. A view never waits on the network to show what Caskade already knows.
 - Long work becomes a job in Activity with progress and cancel, never a frozen screen.

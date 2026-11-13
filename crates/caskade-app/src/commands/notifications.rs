@@ -109,3 +109,7 @@ pub async fn notifications_mark_all_read(
         .map(|changed| u32::try_from(changed).unwrap_or(u32::MAX))
         .map_err(|error| error.to_string())
 }
+
+#[cfg(test)]
+#[path = "notifications_tests.rs"]
+mod tests;

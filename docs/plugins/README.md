@@ -183,35 +183,6 @@ empty or fuzzy shows its English.
   Plugins, the plugin's settings page (`settings_sections`) and
   `plugins_ui` get them translated; the manifest itself, ids and the
   stored values stay as written.
-- **UI half.** `ctx.i18n` and, inside contributions, `useTranslation()`
-  have `t(message, values?, { context? })` and
-  `plural(count, one, other, values?)`; `<Trans>` takes plain text as its
-  child, or `message` with React elements in `values`:
-
-  ```tsx
-  import { definePlugin, Trans, useTranslation } from "@caskade/sdk";
-
-  function Panel() {
-    const { t, plural } = useTranslation();
-    return (
-      <section aria-label={t("Game packs")}>
-        <Trans message="Drop a pack on {library}" values={{ library: <b>{t("the library")}</b> }} />
-        {plural(count, "One pack", "{n} packs")}
-      </section>
-    );
-  }
-
-  export default definePlugin({
-    activate(ctx) {
-      ctx.slots.register("game.actions", { id: "repack", title: ctx.i18n.t("Repack"), run });
-    },
-  });
-  ```
-
-  The app fetches the catalog (`plugin_messages`) before `activate`. When
-  the language changes (`LocaleChanged`, the `locale.changed` plugin
-  event), it activates every plugin again with the new catalog, so titles
-  registered in `activate` and rendered text both follow.
 - **Backend.** From 0.2, `host.message` and `host.plural` look text up in
   the plugin's catalog in the language in use (Rust SDK: `i18n::t`,
   `i18n::tc` with a context, `i18n::tf` with `{name}` values and
@@ -456,11 +427,11 @@ same terms as the built-in views (#152).
 
 ### Migrating from 0.1
 
-0.1 plugins are deprecated. They still load: their backends link to the
-0.1 world, and their JavaScript UI halves run in the webview app until the
-native app replaces it (BLITZ-33). The native app doesn't run JavaScript,
-so it draws no 0.1 UI, and Settings → Plugins says the plugin's UI needs an
-update. To move a plugin to 0.2:
+0.1 plugins are deprecated. Their backends still load: they link to the
+0.1 world. Their JavaScript UI halves no longer run: the webview app that
+ran them was removed (BLITZ-33, #143), and the app doesn't run JavaScript.
+Settings → Plugins says such a plugin's UI needs an update. To move a
+plugin to 0.2:
 
 1. Set `"api": "^0.2"` and remove `ui` from `plugin.json`. Keep the
    `slots` and `views` entries; their titles now come only from the
@@ -475,71 +446,10 @@ update. To move a plugin to 0.2:
 4. Move the UI half's texts to `i18n::t` (the catalog stays the same) and
    delete `src/`, the Vite config and the `@caskade/sdk` dependency.
 
-## UI half (0.1, deprecated)
+## UI half (0.1, removed)
 
-This is how 0.1 plugins drew their UI. It still works in the webview app
-until BLITZ-33; new plugins use [UI (0.2)](#ui-02). `@caskade/sdk` stays at
-0.1.1 as this deprecated layer; the scaffolder no longer writes UI halves.
-
-A UI half is one ES module whose default export is `definePlugin(...)`.
-Inside Caskade, `react`, `react-dom`, `react/jsx-runtime`, `@caskade/sdk`
-and `@caskade/ui` resolve through the app's import map to the app's own
-instances. So a plugin bundles none of them, and it shares the app's React
-tree, query client and components.
-
-- [`packages/sdk`](../../packages/sdk) (`@caskade/sdk`, versioned with the
-  WIT package): `definePlugin`, the `PluginContext`
-  (`slots.register`, `events.on`, `backend.call`, `settings`, `notify`,
-  `i18n`), the hooks `usePlugin`, `useGame`, `useBackendQuery`,
-  `useSettings` and `useTranslation`, `<Trans>` (see
-  [Translations](#translations-219)),
-  and for console mode `useMode`, `useInputAction`, `useFocusable` and
-  `FocusSection` (see [Console mode](#console-mode)).
-  The event payload types (`PluginEvents`) are generated from the core's
-  bindings (`pnpm --filter @caskade/sdk core-types`).
-- [`packages/ui`](../../packages/ui) (`@caskade/ui`): the shell's form
-  primitives (`Button`, `Switch`, `Select`, `TextField`, `Slider`,
-  `SettingsSection`, …), `GameArt`, `StatusBadge` and the anatomy catalogue
-  ([`docs/theming/anatomy.md`](../theming/anatomy.md)). They come from the
-  app at runtime, so they follow the active theme.
-- [`packages/vite-plugin`](../../packages/vite-plugin)
-  (`@caskade/vite-plugin`) builds `src/index.tsx` into `dist/ui.js` (and
-  `dist/ui.css`, in the `cs.plugins` cascade layer) with the shared modules
-  left external:
-
-```ts
-// vite.config.ts
-import { caskadePlugin } from "@caskade/vite-plugin";
-import { defineConfig } from "vite";
-
-export default defineConfig({ plugins: [caskadePlugin()] });
-```
-
-```tsx
-// src/index.tsx
-import { definePlugin, useBackendQuery } from "@caskade/sdk";
-import { SettingsSection } from "@caskade/ui";
-
-function Hours({ gameId }: { gameId: string }) {
-  const hours = useBackendQuery<{ main: number }>("hours", { gameId });
-  return <SettingsSection title="How long to beat">{hours.data?.main ?? "…"} h</SettingsSection>;
-}
-
-export default definePlugin({
-  activate(ctx) {
-    ctx.slots.register("game.details.tabs", { id: "hltb", title: "How long", component: Hours });
-  },
-});
-```
-
-`plugin.json` then points `ui` at `dist/ui.js`; the app loads `dist/ui.css`
-from beside it when it exists.
-
-### Console mode (0.1)
-
-0.1 UI halves joined console mode through the SDK: `useMode`,
-`useInputAction(action, handler, { label, owner })`, `useFocusable` and
-`FocusSection`, with the actions `confirm`, `back`, `details`, `search`,
-`tab.prev`/`tab.next`, `page.prev`/`page.next`, `menu`, `view`, `guide` and
-the four `nav.*` directions. 0.2 trees get all of it from Caskade's own
-components.
+0.1 plugins could ship `dist/ui.js`, a React module built with
+`@caskade/sdk` and `@caskade/vite-plugin` that ran in the webview app. The
+webview app, the SDK and the Vite preset were removed with it (#143), so
+Caskade ignores a 0.1 UI half; the plugin's backend still loads. Move the
+UI to [UI (0.2)](#ui-02) as [Migrating from 0.1](#migrating-from-01) says.

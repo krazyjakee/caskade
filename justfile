@@ -10,18 +10,10 @@ install:
 dev *args:
     just native {{args}}
 
-# Run the legacy Tauri/React app with hot reload
-legacy *args:
-    pnpm tauri dev -- -- --legacy {{args}}
-
-# Run only the UI in a browser with hot reload (http://localhost:1420)
-web:
-    pnpm web
-
 # Run the native app (#87): the main window rendered by Blitz, without Tauri
 native *args:
     flock /tmp/caskade-heavy.lock cargo build -p caskade-native
-    flock /tmp/caskade-heavy.lock python3 scripts/tauri-sidecar.py --dev
+    flock /tmp/caskade-heavy.lock python3 scripts/7zz-sidecar.py --dev
     "$(flock /tmp/caskade-heavy.lock cargo metadata --format-version 1 --no-deps | python3 -c 'import json,sys;print(json.load(sys.stdin)["target_directory"])')/debug/caskade-native" {{args}}
 
 # Test the native UI as CI does (docs/native-testing.md): its headless component and view tests, then its screenshots (vello_cpu) against the committed images and Chromium's
@@ -38,7 +30,7 @@ native-shots:
     CASKADE_WRITE_SHOTS=1 flock /tmp/caskade-heavy.lock cargo test -p caskade-native --features shots --test shots
 
 # The native app's stylesheet (#90): Tailwind 4 over apps/native/src, after
-# changing its classes or the webview's styles; CI fails while it's stale
+# changing its classes or apps/native/styles; CI fails while it's stale
 native-css:
     node apps/native/scripts/build-css.mjs
 
@@ -46,17 +38,13 @@ native-css:
 build:
     flock /tmp/caskade-heavy.lock cargo build -p caskade-native
 
-# Production build of the legacy browser UI (no app bundle)
-build-web:
-    pnpm build
-
-# Debug build of the desktop app with Linux bundles (deb, AppImage)
+# Debug build of the app with Linux bundles (deb, AppImage)
 build-app:
     flock /tmp/caskade-heavy.lock cargo build -p caskade-native
-    flock /tmp/caskade-heavy.lock python3 scripts/native-sidecar.py --profile debug
-    flock /tmp/caskade-heavy.lock pnpm tauri build --debug --config native-app.conf.json
+    flock /tmp/caskade-heavy.lock python3 scripts/stage-bundle.py --profile debug
+    flock /tmp/caskade-heavy.lock pnpm --dir apps/native tauri bundle --debug --no-sign --no-binary-patching
 
-# Build desktop binaries and write Cargo's HTML timing report (no cache cleaning)
+# Build the app's binaries and write Cargo's HTML timing report (no cache cleaning)
 build-timings *args:
     flock /tmp/caskade-heavy.lock cargo build -p caskade-native --bins --timings {{args}}
 
@@ -67,26 +55,20 @@ plugin-new *args:
 # Build the starter add-on catalogue into <out> and check it (docs/plugins/publishing.md): just starter-catalogue [target/catalogue]
 starter-catalogue out="target/catalogue":
     flock /tmp/caskade-heavy.lock node plugins/examples/build.mjs playtime-stats howlongtobeat gamemode
-    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-desktop --features dev-tools --bin caskade-catalogue -- build scripts/addons/starter.json --out {{out}}
-    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-desktop --features dev-tools --bin caskade-catalogue -- check {{out}}/catalogue.json
+    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-catalogue -- build scripts/addons/starter.json --out {{out}}
+    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-catalogue -- check {{out}}/catalogue.json
 
-# Regenerate the TypeScript bindings (apps/desktop/src/api/bindings.ts)
-bindings:
-    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-desktop --features dev-tools --bin export-bindings
+# Extract translatable text into locales/<domain>.pot (core, app, ui) and merge it into each locales/<lang>/<domain>.po; `just i18n --add de` starts a language
+i18n *args:
+    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-i18n --features extract --bin caskade-i18n -- extract {{args}}
 
-# Extract translatable text into locales/<domain>.pot, merged into each locales/<lang>/<domain>.po: the Rust side's tr! calls (core), then the webview's (ui, app; needs GNU gettext)
-i18n:
-    flock /tmp/caskade-heavy.lock cargo run -q -p caskade-i18n --features extract --bin caskade-i18n -- extract
-    pnpm i18n:extract
-
-# Check the translations as CI does: templates current, every PO file passes msgfmt --check, translations keep their placeholders and tags; prints each language's completion (needs GNU gettext)
+# Check the translations as CI does: templates and catalogs current, every PO file passes msgfmt --check, translations keep their placeholders and tags; prints each language's completion (needs GNU gettext)
 i18n-check:
     flock /tmp/caskade-heavy.lock cargo run -q -p caskade-i18n --features extract --bin caskade-i18n -- extract --check
-    pnpm i18n:check
 
-# Run the app tests: core and Tauri adapter (Rust), then the frontend (Vitest)
+# Run the app tests: the core, the application layer and the native UI (Rust), then the JavaScript tooling's
 test-app *args:
-    flock /tmp/caskade-heavy.lock cargo test -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-app -p caskade-ui-data -p caskade-ui-input -p caskade-ui-i18n -p caskade-ui-theme -p caskade-player -p caskade-desktop -p caskade-native {{args}}
+    flock /tmp/caskade-heavy.lock cargo test -p caskade-core -p caskade-achievements -p caskade-addons -p caskade-backup -p caskade-share -p caskade-streaming -p caskade-system-stats -p caskade-app -p caskade-ui-data -p caskade-ui-input -p caskade-ui-i18n -p caskade-ui-theme -p caskade-player -p caskade-native -p caskade-catalogue {{args}}
     pnpm test
 
 # Type-check every package

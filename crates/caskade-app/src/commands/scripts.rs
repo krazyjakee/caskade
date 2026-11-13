@@ -125,3 +125,7 @@ fn mismatch() -> CommandError {
         "the script belongs to another scope"
     )))
 }
+
+#[cfg(test)]
+#[path = "scripts_tests.rs"]
+mod tests;

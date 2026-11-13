@@ -247,3 +247,7 @@ pub fn owned_install_cancel(accounts: &StoreAccounts, entry_id: &str) {
     }
     accounts.cancel_install(entry_id);
 }
+
+#[cfg(test)]
+#[path = "store_accounts_tests.rs"]
+mod tests;

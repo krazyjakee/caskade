@@ -1,11 +1,13 @@
 name: build bundles
-# The release's build legs (#110): Caskade for Linux (deb, AppImage), Windows
-# (NSIS) and macOS on Apple silicon and Intel (app, dmg, updater tarball),
-# with the native app inside, uploaded as workflow artifacts named
-# `bundles-<target>`. Called by `release` (from a tag, then signed and
-# published as a draft) and by `bundles` (any commit, artifacts only).
-# Read-only, and no signing secrets reach it: build scripts, proc-macros and
-# npm packages run here.
+# The release's build legs (#110, #143): Caskade for Linux (deb, AppImage),
+# Windows (NSIS) and macOS on Apple silicon and Intel (app, dmg, updater
+# tarball), uploaded as workflow artifacts named `bundles-<target>`. Each
+# carries caskade-native as its `caskade` executable, with the pinned 7-Zip
+# beside it, packaged by the Tauri CLI's bundler (`tauri bundle`, a build
+# tool only: apps/native/Tauri.toml). Called by `release` (from a tag, then
+# signed and published as a draft) and by `bundles` (any commit, artifacts
+# only). Read-only, and no signing secrets reach it: build scripts,
+# proc-macros and npm packages run here.
 on:
   workflow_call:
     inputs:
@@ -51,9 +53,10 @@ jobs:
           ref: ${{ inputs.ref }}
           persist-credentials: false
 
-      # WebKitGTK 4.1 and GTK for Tauri, librsvg for the AppImage's GTK
-      # plugin, AppIndicator for the tray icon (the CLI finds it through
-      # pkg-config), libudev for gilrs, D-Bus for the keyring.
+      # WebKitGTK 4.1 and GTK for the game and video windows (wry), librsvg
+      # for the AppImage's GTK plugin, AppIndicator for the tray icon (the
+      # AppImage carries it), libudev for gilrs, ALSA for sound, D-Bus for
+      # the keyring.
       - name: Linux build dependencies
         if: runner.os == 'Linux'
         run: |
@@ -83,6 +86,7 @@ jobs:
           key: ${{ matrix.target }}
           cache-on-failure: true
 
+      # The Tauri CLI, the bundler, at the version pnpm-lock.yaml pins.
       # pnpm's version comes from `packageManager` in package.json.
       - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
@@ -94,34 +98,34 @@ jobs:
       - name: Install JS dependencies
         run: pnpm install --frozen-lockfile
 
-      # The committed config leaves createUpdaterArtifacts off, so local and
-      # CI builds need no key. A file rather than inline JSON, so no
-      # shell on any runner has to keep the quotes. With it on, the bundler
-      # also makes macOS's updater bundle (Caskade.app.tar.gz); --no-sign
-      # below leaves the signatures to the sign job.
-      - name: Turn on updater artifacts
-        shell: bash
-        run: echo '{"bundle":{"createUpdaterArtifacts":true}}' > apps/desktop/updater-artifacts.conf.json
-
-      # The native UI is the default. The caskade entry point starts the
-      # caskade-native beside it; --legacy runs the retained Tauri UI.
-      # The same installers and signed updates carry both executables.
-      - name: Build the native app
+      # Then caskade-native is staged as the bundles' `caskade` executable,
+      # and the SHA-pinned 7-Zip for the target beside it.
+      - name: Build the app
         shell: bash
         env:
           TARGET: ${{ matrix.target }}
         run: |
-          # The MSVC runtime linked in, as the Tauri CLI links it into
-          # caskade.exe: a fresh Windows has no VCRUNTIME140.dll.
+          # The MSVC runtime linked in: a fresh Windows has no
+          # VCRUNTIME140.dll.
           case "$TARGET" in *-windows-msvc) export RUSTFLAGS="${RUSTFLAGS:-} -C target-feature=+crt-static" ;; esac
           cargo build --release --locked -p caskade-native --target "$TARGET"
-          python scripts/native-sidecar.py --target "$TARGET" --profile release
+          python scripts/stage-bundle.py --target "$TARGET" --profile release
 
-      # Builds through beforeBuildCommand (the 7-Zip sidecar for the target,
-      # then the UI). No key here: --no-sign skips the updater signatures.
-      - name: Build
-        working-directory: apps/desktop
-        run: pnpm tauri build --target ${{ matrix.target }} --config updater-artifacts.conf.json --config native-app.conf.json --no-sign -- --locked
+      # The committed config leaves createUpdaterArtifacts off, so local
+      # builds need no key. A file rather than inline JSON, so no shell on
+      # any runner has to keep the quotes. With it on, the bundler also makes
+      # macOS's updater bundle (Caskade.app.tar.gz). No key here: --no-sign
+      # leaves the signatures to the sign job, and the executable stays as
+      # built (--no-binary-patching: the app tells its bundle by where it
+      # runs, crates/caskade-app/src/self_update.rs).
+      - name: Bundle
+        shell: bash
+        working-directory: apps/native
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          echo '{"bundle":{"createUpdaterArtifacts":true}}' > "$RUNNER_TEMP/updater-artifacts.json"
+          pnpm tauri bundle --target "$TARGET" --config "$RUNNER_TEMP/updater-artifacts.json" --no-sign --no-binary-patching
 
       # The files the release carries, under their release names. Tauri calls
       # macOS's updater bundle Caskade.app.tar.gz on both architectures, so it

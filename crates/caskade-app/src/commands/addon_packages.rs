@@ -608,3 +608,7 @@ pub async fn addons_uninstall(
     records.save(store).await.map_err(report)?;
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "addon_packages_tests.rs"]
+mod tests;

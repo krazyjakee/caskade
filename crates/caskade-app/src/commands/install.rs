@@ -201,3 +201,7 @@ pub fn services(
     });
     Ok((source, service))
 }
+
+#[cfg(test)]
+#[path = "install_tests.rs"]
+mod tests;

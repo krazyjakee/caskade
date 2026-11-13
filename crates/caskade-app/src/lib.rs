@@ -1,7 +1,7 @@
 //! Caskade's application layer: what an app shell does besides drawing
-//! windows. The Tauri app (`apps/desktop/src-tauri`) and the native app
-//! both run it, so its state, permissions, events and recovery behave the
-//! same in each. Nothing here depends on Tauri or any other UI toolkit.
+//! windows. The native app (`apps/native`) runs it; nothing here depends on
+//! a UI toolkit, so its state, permissions, events and recovery are tested
+//! without a window.
 
 pub mod background;
 pub mod commands;

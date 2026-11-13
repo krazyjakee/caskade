@@ -137,3 +137,7 @@ pub async fn rom_exclusions_set(
         .await
         .map_err(report)
 }
+
+#[cfg(test)]
+#[path = "rom_scanners_tests.rs"]
+mod tests;

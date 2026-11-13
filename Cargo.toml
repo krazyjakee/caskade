@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/*", "apps/desktop/src-tauri", "apps/native", "xtask"]
+members = ["crates/*", "apps/native", "xtask"]
 default-members = ["apps/native"]
 # Vendored upstream crates keep their own lints and tests (see their PATCHES.md).
 exclude = ["vendor"]

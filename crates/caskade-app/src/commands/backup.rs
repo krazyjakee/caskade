@@ -190,3 +190,7 @@ pub fn setup(events: Events, backups: &Backups) {
         move || backups.watch()
     });
 }
+
+#[cfg(test)]
+#[path = "backup_tests.rs"]
+mod tests;

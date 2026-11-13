@@ -82,3 +82,7 @@ pub async fn starts_in_console(startup: &Startup, settings: &SettingsService) ->
     let preferences: ConsoleSettings = settings.read_or_default(SETTINGS).await;
     startup.console(&preferences)
 }
+
+#[cfg(test)]
+#[path = "console_tests.rs"]
+mod tests;

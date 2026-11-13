@@ -22,7 +22,7 @@ Why it exists is in the [mission](MISSION.md). How it is built is in the [tech s
 
 ## 3. Surfaces
 
-The native Dioxus/Blitz app is the default for development and installed launches. The legacy Tauri/React UI remains available temporarily through `just legacy` or `caskade --legacy`. Both use the same library and application services; quit one before starting the other on the same profile. Plugins with API 0.1 JavaScript UI need the legacy app; native renders API 0.2 component trees.
+Caskade's window is a native Dioxus/Blitz app; the earlier Tauri/React webview app was retired (#143), and installs that had it update to the native app with their library, settings and sign-ins as they were. Plugins draw their UI with API 0.2 component trees; an API 0.1 plugin's JavaScript UI no longer runs, though its backend still loads. Web games and videos still open in webview windows of their own.
 
 Caskade has two modes over the same views:
 
@@ -177,7 +177,7 @@ Settings → Backup (admins): back up now, daily or weekly automatic backups wit
 - **Tray icon** with Show and Quit. Closing the window hides it to the tray by default. A second start shows the running window.
 - **Startup** (Settings → General): Launch on system startup starts Caskade when you log in, Start minimized keeps that start in the tray with no window, and Open to picks the first view: Home (the default), Library, Collections or the view open when Caskade last quit. Console mode keeps its own start.
 - **Settings → Statistics**: CPU, GPU, memory, network and storage use, sampled only while you watch.
-- **Self-healing**: lost webviews reload and the app restarts itself with a cap, interrupted installs and updates finish or roll back at start, and failures say what happened and what to do.
+- **Self-healing**: a lost web game or video webview reloads, the app restarts itself after a crash (with a cap), interrupted installs and updates finish or roll back at start, and failures say what happened and what to do.
 - **First-run setup**: language, where games and ROMs live, the first account, or setting up from another device.
 - **About**: version, terms, privacy policy and third-party licences.
 

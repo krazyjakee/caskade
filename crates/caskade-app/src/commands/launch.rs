@@ -88,3 +88,7 @@ pub async fn game_age_approve(
 pub async fn running_games(service: &LaunchService) -> Result<Vec<LaunchTicket>, CommandError> {
     service.running_sessions().await.map_err(report)
 }
+
+#[cfg(all(test, target_os = "linux"))]
+#[path = "launch_tests.rs"]
+mod tests;

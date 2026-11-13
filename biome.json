@@ -14,18 +14,12 @@
       "!crates",
       "!xtask",
       "!scripts",
-      "!apps/desktop/src-tauri/gen",
-      "!apps/desktop/src-tauri/icons",
-      "!**/storybook-static",
-      "!apps/desktop/src/api/bindings.ts",
-      "!packages/sdk/src/core.ts",
       "!packages/tokens/tokens.css",
       "!packages/tokens/manifest.json",
-      "!packages/ui/anatomy.json",
-      "!packages/ui/anatomy-entries.json",
+      "!apps/native/icons",
+      "!apps/native/assets/avatars",
       "!apps/native/assets/app.css",
-      "!apps/native/src/shots/shots.css",
-      "!locales/native.json"
+      "!apps/native/src/shots/shots.css"
     ]
   },
   "formatter": {

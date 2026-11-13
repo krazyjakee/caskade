@@ -97,3 +97,7 @@ pub async fn storage_move_and_remove(
         .await
         .map_err(report)
 }
+
+#[cfg(test)]
+#[path = "storage_tests.rs"]
+mod tests;

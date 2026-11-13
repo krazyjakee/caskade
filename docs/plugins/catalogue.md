@@ -188,7 +188,7 @@ In console mode the list and the details are pad-driven: A on a row opens its de
 The maintainer's steps; nothing in the repo does these on its own. [publishing.md](publishing.md) has the details: the tools, the source file, API compatibility, permissions, updates, deprecation and reporting.
 
 1. Build and check the catalogue and its packages: `just starter-catalogue <dir>`, or `caskade-catalogue build` and `check`.
-2. Sign `catalogue.json` with the release key: `pnpm tauri signer sign -f ~/.tauri/caskade-updater.key catalogue.json`.
+2. Sign `catalogue.json` with the release key: `apps/native/node_modules/.bin/tauri signer sign -f ~/.tauri/caskade-updater.key catalogue.json`.
 3. Upload every file in the folder, `catalogue.json.sig` included, as assets of the `catalogue` release on `krazyjakee/caskade`.
 4. Check the published copy: `caskade-catalogue check <origin> --release-key`.
 
@@ -208,4 +208,4 @@ Not offered:
 - **`crashy`:** the test plugin.
 - **`caskade-pack`:** the example, whose network host is a placeholder.
 
-`commands/addon_smoke_tests.rs` builds a plugin and a theme with the same tooling, signs the catalogue and serves it from a local server. It then installs both into a clean profile, checks that they start or compile, updates them, and checks a broken release: the tooling flags it and the install rolls back. `starter_collection_installs_in_a_clean_profile` (ignored; set `CASKADE_STARTER_DIR`) installs every starter package the same way.
+`crates/caskade-catalogue/tests/smoke.rs` builds a plugin and a theme with the same tooling, signs the catalogue and serves it from a local server. It then installs both into a clean profile, checks that they start or compile, updates them, and checks a broken release: the tooling flags it and the install rolls back. `starter_collection_installs_in_a_clean_profile` (ignored; set `CASKADE_STARTER_DIR`) installs every starter package the same way.
