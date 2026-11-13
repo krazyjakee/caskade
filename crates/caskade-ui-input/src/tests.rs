@@ -23,6 +23,8 @@ type KeyHandler = Rc<dyn Fn(&mut Fake, &str) -> bool>;
 struct Fake {
     tree: TestTree,
     focus: Option<usize>,
+    /// Controls whose layout is visible before the toolkit can focus them.
+    pending_focus: HashSet<usize>,
     values: HashMap<usize, String>,
     checked: HashSet<usize>,
     backs: usize,
@@ -80,7 +82,9 @@ impl Ui for Fake {
         self.focus
     }
     fn focus(&mut self, node: usize, _instant: bool) {
-        self.focus = Some(node);
+        if !self.pending_focus.contains(&node) {
+            self.focus = Some(node);
+        }
     }
     fn blur(&mut self) {
         self.focus = None;
@@ -1250,6 +1254,55 @@ fn a_views_focus_waits_for_its_data_after_a_navigation() {
     app.ui.tree.button(main, "200 0 140 80", "Play");
     app.settle();
     assert_eq!(app.focused(), "Play");
+}
+
+#[test]
+fn a_navigation_retries_when_the_toolkit_cannot_focus_the_new_control_yet() {
+    let mut ui = Fake::default();
+    let sidebar = ui.tree.section(0, "sidebar");
+    let settings = ui.tree.button(sidebar, "0 0 100 40", "Settings");
+    let main = ui.tree.section(0, "main");
+    let play = ui.tree.button(main, "200 0 140 40", "Play");
+    ui.tree.set(play, "data-focus-default", "");
+    ui.location = Some("game".into());
+    let mut app = App::new(ui, true);
+    app.focus(settings);
+    app.ui.tree.remove(play);
+    let general = app.ui.tree.button(main, "200 0 140 40", "General");
+    app.ui.tree.set(general, "data-focus-default", "");
+    // Blitz can expose a box before marking a new node as in-document;
+    // its focus call then leaves focus on the sidebar.
+    app.ui.pending_focus.insert(general);
+    app.ui.location = Some("settings".into());
+    app.settle();
+    assert_eq!(app.focused(), "Settings");
+    app.ui.pending_focus.remove(&general);
+    app.settle();
+    assert_eq!(app.focused(), "General");
+}
+
+#[test]
+fn a_views_default_retries_when_the_toolkit_cannot_focus_it_yet() {
+    for after_frame_limit in [false, true] {
+        let mut ui = Fake::default();
+        let main = ui.tree.section(0, "main");
+        ui.tree.button(main, "0 300 140 40", "View all");
+        ui.location = Some("home".into());
+        let mut app = App::new(ui, true);
+        if after_frame_limit {
+            for _ in 0..10 {
+                app.settle();
+            }
+        }
+        let resume = app.ui.tree.button(main, "0 0 200 60", "Resume");
+        app.ui.tree.set(resume, "data-focus-default", "");
+        app.ui.pending_focus.insert(resume);
+        app.settle();
+        assert_eq!(app.focused(), "View all");
+        app.ui.pending_focus.remove(&resume);
+        app.settle();
+        assert_eq!(app.focused(), "Resume");
+    }
 }
 
 #[test]

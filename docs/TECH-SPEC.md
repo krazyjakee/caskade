@@ -241,7 +241,7 @@ Sessions survive restarts: recovery state records running processes by `ProcessI
 
 - `caskade-input` normalises pads to actions (`nav.*`, `confirm`, `back`, `tab.*`, `guide`, …), emitted to the webview only while a Caskade window has focus, except `guide`. On Windows a thread reads XInput's guide button.
 - The webview's spatial focus engine (`input/spatial.ts`) moves focus within `data-focus-section` areas; views declare a default stop and bind buttons with `useInputAction`.
-- The native UI runs the same rules (`caskade-ui-input`) over Blitz's layout boxes; views bind buttons with `use_input_action` (see *The native UI's input* above).
+- The native UI runs the same rules (`caskade-ui-input`) over Blitz's layout boxes; views bind buttons with `use_input_action` (see *The native UI's input* above). View focus placement retries until the toolkit accepts focus: a newly rendered control can have a layout box before Blitz marks it as attached to the document.
 - `main_window::raise` handles window managers that ignore plain focus requests (Muffin, Mutter) on Linux.
 
 ### App services

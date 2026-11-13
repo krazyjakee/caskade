@@ -485,7 +485,9 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
                 match self.spatial.view_default(ui) {
                     Some(preferred) if Some(preferred) != current => {
                         self.focus(ui, preferred, false);
-                        self.entered = Some(preferred);
+                        if ui.focused() == Some(preferred) {
+                            self.entered = Some(preferred);
+                        }
                         restore.stable = 0;
                     }
                     // On the view's default: done once it has stayed there
@@ -525,8 +527,15 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
                 _ => self.spatial.entry(ui),
             },
         };
-        if let Some(target) = target {
+        // A toolkit may expose a control's box before it can take focus
+        // (Blitz waits until the node is in-document). Keep trying until
+        // focus actually lands, rather than treating the old focus as a
+        // subsequent move by the user.
+        let target = target.filter(|&target| {
             self.focus(ui, target, false);
+            ui.focused() == Some(target)
+        });
+        if let Some(target) = target {
             self.entered = restore.saved.is_none().then_some(target);
             // Until it has stayed on the view's default: the default may
             // still come, or the view it went into may still be the old one.
@@ -564,6 +573,9 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
         if let Some(preferred) = self.spatial.view_default(ui) {
             if Some(preferred) != current {
                 self.focus(ui, preferred, false);
+                if ui.focused() != Some(preferred) {
+                    return;
+                }
                 self.entered = Some(preferred);
             }
             self.awaiting = false;
