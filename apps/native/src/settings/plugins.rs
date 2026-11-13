@@ -710,7 +710,7 @@ fn PluginSettingsPages() -> Element {
                 if !pages.iter().any(|page| page.plugin == plugin.id)
                     && plugin.settings_error.is_none()
                 {
-                    super::SchemaSettings {
+                    super::schema::SchemaSettings {
                         namespace: format!("plugins.{}", plugin.id),
                         title: plugin.name.clone(),
                         icon: Some(crate::ui::icons::PUZZLE),

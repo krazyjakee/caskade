@@ -10,7 +10,7 @@ use std::sync::Arc;
 
 pub use caskade_addons::package::{AddonRecord, AddonRecords, RejectedRelease, UpdatePreference};
 pub use caskade_addons::{
-    AddonKind, AppMode, CatalogueItem, CatalogueService, CatalogueStatus, ItemState,
+    AddonKind, AddonOs, AppMode, CatalogueItem, CatalogueService, CatalogueStatus, ItemState,
 };
 use caskade_app::commands::addon_offers::{self, DeviceAddon};
 use caskade_app::commands::addon_packages::{

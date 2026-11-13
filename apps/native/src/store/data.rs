@@ -55,11 +55,6 @@ fn services() -> Result<&'static caskade_app::start::Services, ErrorReport> {
     })
 }
 
-/// A command's text error as a report.
-fn report(error: String) -> ErrorReport {
-    ErrorReport::from(error)
-}
-
 impl StoreData {
     /// The running app's.
     pub fn of_app() -> Self {
@@ -71,7 +66,7 @@ impl StoreData {
                     change(async move {
                         igdb::igdb_catalog_search(&services.igdb, &search)
                             .await
-                            .map_err(report)
+                            .map_err(ErrorReport::from)
                     })
                     .await
                 })
@@ -82,7 +77,7 @@ impl StoreData {
                     change(async move {
                         igdb::igdb_catalog_recent(&services.igdb, &releases)
                             .await
-                            .map_err(report)
+                            .map_err(ErrorReport::from)
                     })
                     .await
                 })
@@ -93,7 +88,7 @@ impl StoreData {
                     change(async move {
                         igdb::igdb_catalog_upcoming(&services.igdb, &releases)
                             .await
-                            .map_err(report)
+                            .map_err(ErrorReport::from)
                     })
                     .await
                 })
@@ -104,7 +99,7 @@ impl StoreData {
                     change(async move {
                         igdb::igdb_catalog_filters(&services.igdb)
                             .await
-                            .map_err(report)
+                            .map_err(ErrorReport::from)
                     })
                     .await
                 })
@@ -115,7 +110,7 @@ impl StoreData {
                     change(async move {
                         igdb::igdb_catalog_games(&services.igdb, &ids)
                             .await
-                            .map_err(report)
+                            .map_err(ErrorReport::from)
                     })
                     .await
                 })
@@ -128,7 +123,7 @@ impl StoreData {
                     change(async move {
                         igdb::igdb_owned(&services.store, &ids)
                             .await
-                            .map_err(report)
+                            .map_err(ErrorReport::from)
                     })
                     .await
                 })

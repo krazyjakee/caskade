@@ -3,9 +3,11 @@
 //! choosing a suggestion opens its game. Ctrl K (⌘ K) focuses it from
 //! anywhere, and the library's search shows in it.
 
+use crate::data::sleep;
 use crate::data::use_library_search;
 use crate::input::{Bind, use_input, use_input_action};
 use crate::router::{Route, href::Href, use_router};
+use crate::ui::fold;
 use crate::ui::{Anchor, GameArt, GameStatus, Popover, StatusBadge, Svg, icons, use_active_option};
 use caskade_core::model::GameSummary;
 use caskade_ui_i18n::{t, tn, tp};
@@ -13,19 +15,9 @@ use caskade_ui_input::{Action, InputSource};
 use dioxus_native::NodeHandle;
 use dioxus_native::prelude::*;
 use std::time::Duration;
-use unicode_normalization::UnicodeNormalization;
 
 /// How long typing pauses before the suggestions are fetched.
 const SUGGEST_DELAY: Duration = Duration::from_millis(150);
-
-/// `text` with accents and case aside, as the search matches
-/// (`foldSearch`).
-pub fn fold(text: &str) -> String {
-    text.nfd()
-        .filter(|c| !unicode_normalization::char::is_combining_mark(*c))
-        .flat_map(char::to_lowercase)
-        .collect()
-}
 
 /// Where `query` first occurs in `text`, case and accents aside, as byte
 /// offsets into `text` (`findFolded`).
@@ -60,11 +52,6 @@ fn Highlight(text: String, query: String) -> Element {
         },
         None => rsx! { "{text}" },
     }
-}
-
-/// Waits on the app's runtime: Dioxus's executor has no timers.
-async fn sleep(time: Duration) {
-    let _ = caskade_app::runtime::spawn(async move { tokio::time::sleep(time).await }).await;
 }
 
 #[component]

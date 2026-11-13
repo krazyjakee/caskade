@@ -104,7 +104,7 @@ fn row_switch(window: &Window, label: &str) -> blitz_dom::NodeId {
 
 #[test]
 fn this_device_is_renamed_and_its_connections_switch() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore("core.sync", saved("core.sync"));
     let (devices, accounts, _dir) = desk();

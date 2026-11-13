@@ -16,7 +16,8 @@ use std::collections::BTreeSet;
 /// Where a root comes from, as `anatomy.ts`'s `source`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Source {
-    /// The component library (`@caskade/ui`, the RSX components of #93).
+    /// The component library (`@caskade/ui`, the RSX components of #93);
+    /// `native` in `anatomy.ts` for one only the native UI still renders.
     Ui,
     /// The app shell and its views.
     App,
@@ -229,28 +230,30 @@ pub fn from_json(text: &str) -> Result<Vec<Entry>, String> {
         Box::leak(list.into_boxed_slice())
     }
     let list: Value = serde_json::from_str(text).map_err(|error| error.to_string())?;
-    Ok(list
-        .as_array()
+    list.as_array()
         .ok_or("not a list of entries")?
         .iter()
-        .map(|entry| Entry {
-            name: leak(entry["name"].as_str().unwrap_or("")),
-            rendered: leak(entry["rendered"].as_str().unwrap_or("")),
-            source: match entry["source"].as_str() {
-                Some("app") => Source::App,
-                Some("website") => Source::Website,
-                _ => Source::Ui,
-            },
-            description: leak(entry["description"].as_str().unwrap_or("")),
-            parts: pairs(&entry["parts"], |what| leak(what.as_str().unwrap_or(""))),
-            states: pairs(&entry["states"], strings),
-            interaction: strings(&entry["interaction"]),
-            app_only: strings(&entry["appOnly"]),
-            contains: strings(&entry["contains"]),
-            slots: strings(&entry["slots"]),
-            container: entry["container"].as_bool().unwrap_or(false),
+        .map(|entry| {
+            Ok(Entry {
+                name: leak(entry["name"].as_str().unwrap_or("")),
+                rendered: leak(entry["rendered"].as_str().unwrap_or("")),
+                source: match entry["source"].as_str() {
+                    Some("ui" | "native") => Source::Ui,
+                    Some("app") => Source::App,
+                    Some("website") => Source::Website,
+                    other => return Err(format!("unknown source {other:?}")),
+                },
+                description: leak(entry["description"].as_str().unwrap_or("")),
+                parts: pairs(&entry["parts"], |what| leak(what.as_str().unwrap_or(""))),
+                states: pairs(&entry["states"], strings),
+                interaction: strings(&entry["interaction"]),
+                app_only: strings(&entry["appOnly"]),
+                contains: strings(&entry["contains"]),
+                slots: strings(&entry["slots"]),
+                container: entry["container"].as_bool().unwrap_or(false),
+            })
         })
-        .collect())
+        .collect()
 }
 
 /// The catalogue the docs list: the webview's (`webview`, in its order),

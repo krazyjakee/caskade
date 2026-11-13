@@ -138,7 +138,7 @@ fn library() -> Window {
 
 #[test]
 fn a_click_on_a_card_opens_its_quick_look_beside_the_library() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = library();
     let card = window.get("data-index", "0");
@@ -197,7 +197,7 @@ fn a_click_on_a_card_opens_its_quick_look_beside_the_library() {
 
 #[test]
 fn a_right_click_opens_a_games_menu_whose_actions_work() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = library();
     let card = window.get("data-index", "0");
@@ -244,7 +244,7 @@ fn a_right_click_opens_a_games_menu_whose_actions_work() {
 
 #[test]
 fn add_to_collection_makes_a_collection_with_the_game_in_it() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = library();
     let card = window.get("data-index", "0");
@@ -279,7 +279,7 @@ fn add_to_collection_makes_a_collection_with_the_game_in_it() {
 
 #[test]
 fn a_pad_opens_the_focused_games_menu_and_quick_look() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = library();
     let card = window.get("data-index", "0");
@@ -300,7 +300,7 @@ fn a_pad_opens_the_focused_games_menu_and_quick_look() {
 
 #[test]
 fn a_double_click_plays_and_says_why_it_didnt_start() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = library();
     let card = window.get("data-index", "0");

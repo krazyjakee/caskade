@@ -104,11 +104,6 @@ impl History {
         self.visited();
     }
 
-    #[allow(dead_code, reason = "the game page's Back (#100) asks")]
-    pub fn can_go_back(&self) -> bool {
-        self.at > 0
-    }
-
     /// The visit Back goes to, if any.
     pub fn previous(&self) -> Option<&Entry> {
         self.at.checked_sub(1).map(|at| &self.entries[at])
@@ -292,11 +287,6 @@ impl Router {
     pub fn stay(&self) {
         let mut held = self.held;
         held.set(None);
-    }
-
-    #[allow(dead_code, reason = "the game page's Back (#100) asks")]
-    pub fn can_go_back(&self) -> bool {
-        self.history.read().can_go_back()
     }
 
     /// Game `id`'s page, going back to the page shown now.

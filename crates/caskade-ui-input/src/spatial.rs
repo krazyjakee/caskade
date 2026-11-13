@@ -121,11 +121,6 @@ pub fn has_overlay<T: FocusTree + ?Sized>(tree: &T) -> bool {
     scope(tree) != tree.root()
 }
 
-/// The overlay `node` is in, if any.
-pub fn overlay_of<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> Option<T::Node> {
-    closest(tree, node, |at| is_overlay(tree, at))
-}
-
 /// Whether focus can stop on `node`.
 pub fn is_focusable<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> bool {
     if !contains(tree, tree.root(), node) || !takes_focus(tree, node) {

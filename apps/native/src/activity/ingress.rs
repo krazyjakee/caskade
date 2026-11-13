@@ -19,10 +19,6 @@ use crate::flows::storage::{InstallRootPicker, use_storage};
 use crate::router::{Route, use_router};
 use crate::ui::{Button, ButtonVariant, Dialog, use_toasts};
 
-fn report(message: String) -> caskade_ui_data::ErrorReport {
-    caskade_ui_data::ErrorReport::new(caskade_ui_data::ErrorCode::Other, message)
-}
-
 fn is_collection(request: &InstallRequest) -> bool {
     request
         .share
@@ -65,9 +61,13 @@ pub fn InstallIngress() -> Element {
                         continue;
                     };
                     let handle = handle.clone();
-                    let asked =
-                        change(async move { handle.request_install(value).await.map_err(report) })
-                            .await;
+                    let asked = change(async move {
+                        handle
+                            .request_install(value)
+                            .await
+                            .map_err(caskade_ui_data::ErrorReport::from)
+                    })
+                    .await;
                     match asked {
                         Ok(_) => requests.restart(),
                         Err(error) => {
@@ -101,11 +101,13 @@ pub fn InstallIngress() -> Element {
                     for path in paths {
                         let handle = handle.clone();
                         let path = path.display().to_string();
-                        let asked =
-                            change(
-                                async move { handle.request_dropped(path).await.map_err(report) },
-                            )
-                            .await;
+                        let asked = change(async move {
+                            handle
+                                .request_dropped(path)
+                                .await
+                                .map_err(caskade_ui_data::ErrorReport::from)
+                        })
+                        .await;
                         match asked {
                             Ok(_) => requests.restart(),
                             Err(error) => {
@@ -146,7 +148,7 @@ pub fn InstallIngress() -> Element {
                             .await
                             .map(|job| Some(job.id))
                     };
-                    followed.map_err(report)
+                    followed.map_err(caskade_ui_data::ErrorReport::from)
                 })
                 .await;
                 busy.set(false);

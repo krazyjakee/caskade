@@ -3,7 +3,8 @@
 //! reach, a new Caskade, and the version. The spinner turns in eight steps
 //! a turn (`animate-worker`), which keeps it under 2% of a core (#82).
 
-use crate::data::status::{is_running, use_app_update, use_background, use_devices, use_jobs};
+use crate::activity::labels::is_running;
+use crate::data::status::{use_app_update, use_background, use_devices};
 use crate::router::RouteLink;
 use crate::ui::{Svg, icons};
 use caskade_app::commands::app_update::AppUpdatePhase;
@@ -86,7 +87,7 @@ pub fn activity_label(
 #[component]
 pub fn StatusBar() -> Element {
     let background = use_background();
-    let jobs = use_jobs();
+    let jobs = crate::data::use_jobs_query();
     let background = background.read();
     let (status, unavailable, checking) = match &*background {
         Some(Ok(status)) => (status.clone(), false, false),
@@ -104,7 +105,7 @@ pub fn StatusBar() -> Element {
     let jobs = jobs
         .read()
         .as_ref()
-        .and_then(|jobs| jobs.as_ref().ok().cloned().flatten())
+        .and_then(|jobs| jobs.as_ref().ok().cloned())
         .unwrap_or_default();
     // `CASKADE_NATIVE_SMOKE_MOTION=spinner` turns it to measure its cost.
     let busy = crate::smoke::spinning()

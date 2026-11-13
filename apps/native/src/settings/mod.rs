@@ -4,13 +4,12 @@
 //! Settings), LB/RB move between sections, and a section the signed-in
 //! account may not change isn't listed.
 //!
-//! The framework the panels build on: [`SchemaSettings`] renders a section
-//! from the core's JSON Schema; [`DraftField`] and [`DraftSlider`] save
-//! once the user is done; [`ResetDefaults`] says what a reset changes
-//! first; [`SettingsStatus`] shows a section's load and writes; and
-//! [`UnsavedChangesGuard`] asks before edits a Save button holds are lost.
-//! The panels themselves come with #104 and #105; until then most show
-//! what they will hold.
+//! The framework the panels build on: [`schema::SchemaSettings`] renders a
+//! section from the core's JSON Schema; [`drafts::DraftField`] and
+//! [`drafts::DraftSlider`] save once the user is done;
+//! [`reset::ResetDefaults`] says what a reset changes first;
+//! [`state::SettingsStatus`] shows a section's load and writes; and
+//! [`unsaved::UnsavedChangesGuard`] asks before edits a Save button holds are lost.
 
 mod about;
 mod accounts;
@@ -41,24 +40,13 @@ mod tests;
 mod torrent;
 pub(crate) mod unsaved;
 
-#[allow(unused_imports)]
-pub use drafts::{DraftField, DraftSlider};
-pub(crate) use emulation::romm_server_id;
+pub(crate) use devices::use_device_sync;
+pub(crate) use emulation::{romm_server_id, use_romm};
 pub(crate) use general::language_options;
 pub(crate) use launchers::source_name;
-#[allow(unused_imports)]
-pub use reset::{ResetDefaults, ResetField, ResetPart};
-#[allow(unused_imports)]
-pub use schema::SchemaSettings;
-#[allow(unused_imports)]
-pub use state::{
-    SectionState, SettingsFeedback, SettingsLoading, SettingsStatus, use_settings_section,
-};
-#[allow(unused_imports)]
-pub use unsaved::{
-    Leaving, UnsavedChangesGuard, UnsavedForm, after_unsaved_changes, holds_close,
-    use_unsaved_changes,
-};
+pub(crate) use state::{SettingsFeedback, use_settings_section};
+use unsaved::UnsavedChangesGuard;
+pub(crate) use unsaved::holds_close;
 
 use caskade_ui_data::{Editable, Key};
 use caskade_ui_i18n::{t, tp};

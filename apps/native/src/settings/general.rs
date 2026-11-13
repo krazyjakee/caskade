@@ -14,6 +14,7 @@ use serde_json::Value;
 
 use super::reset::{ResetDefaults, ResetField, ResetPart};
 use super::schema::SchemaSettings;
+use super::state::flag;
 use super::state::{
     SectionState, SettingsFeedback, SettingsLoading, SettingsStatus, use_settings_section,
 };
@@ -38,10 +39,6 @@ fn text(value: &Value, key: &str) -> String {
         .and_then(Value::as_str)
         .unwrap_or_default()
         .to_owned()
-}
-
-fn flag(value: &Value, key: &str) -> bool {
-    value.get(key).and_then(Value::as_bool).unwrap_or(false)
 }
 
 fn select(options: &[(&str, String)]) -> Vec<SelectOption> {
@@ -437,7 +434,7 @@ fn describe(status: &AppUpdateStatus) -> String {
             None => t!("Caskade is up to date."),
             Some(ms) => t!(
                 "Caskade is up to date. Checked {time}.",
-                time = format::date_time(crate::library::local_date_time(ms))
+                time = crate::library::date_time(ms)
             ),
         },
         AppUpdatePhase::Available => t!("Version {version} is available.", version = version),

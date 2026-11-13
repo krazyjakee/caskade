@@ -34,7 +34,7 @@ mod root;
 #[cfg(test)]
 pub(crate) mod tests;
 
-#[allow(unused_imports)]
+pub(crate) use doc::find_attr;
 pub use root::{Bind, Input, InputRoot, use_focus_location, use_input, use_input_action};
 
 use caskade_app::commands::input::{Summoner, sink};

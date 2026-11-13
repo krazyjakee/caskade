@@ -150,11 +150,6 @@ impl Jobs {
         }
     }
 
-    /// Whether this app has a job queue (installs).
-    pub fn has_queue(&self) -> bool {
-        self.queue.is_some()
-    }
-
     fn queue(&self) -> Result<&Arc<dyn JobQueue>> {
         self.queue.as_ref().ok_or_else(no_queue)
     }
@@ -279,14 +274,10 @@ impl FakeQueue {
         }
     }
 
-    fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
-        mutex.lock().unwrap_or_else(|e| e.into_inner())
-    }
-
     /// Puts `job` in the queue, or replaces it, and announces it.
     pub fn put(&self, mut job: JobSnapshot) {
         {
-            let mut jobs = Self::lock(&self.jobs);
+            let mut jobs = caskade_core::lock(&self.jobs);
             match jobs.iter_mut().find(|known| known.id == job.id) {
                 Some(known) => {
                     job.revision = job.revision.max(known.revision + 1);
@@ -300,27 +291,27 @@ impl FakeQueue {
 
     /// Empties the queue and what it was asked.
     pub fn clear(&self) {
-        Self::lock(&self.jobs).clear();
-        Self::lock(&self.calls).clear();
+        caskade_core::lock(&self.jobs).clear();
+        caskade_core::lock(&self.calls).clear();
     }
 
     pub fn calls(&self) -> Vec<String> {
-        Self::lock(&self.calls).clone()
+        caskade_core::lock(&self.calls).clone()
     }
 
     fn called(&self, call: String) {
-        Self::lock(&self.calls).push(call);
+        caskade_core::lock(&self.calls).push(call);
     }
 
     fn with(&self, id: &str, change: impl FnOnce(&mut JobSnapshot)) -> Result<JobSnapshot> {
-        let mut job = Self::lock(&self.jobs)
+        let mut job = caskade_core::lock(&self.jobs)
             .iter()
             .find(|job| job.id == id)
             .cloned()
             .ok_or_else(|| caskade_core::tr!("This job is no longer in Activity."))?;
         change(&mut job);
         self.put(job.clone());
-        Ok(Self::lock(&self.jobs)
+        Ok(caskade_core::lock(&self.jobs)
             .iter()
             .find(|known| known.id == id)
             .cloned()
@@ -331,7 +322,7 @@ impl FakeQueue {
 #[async_trait]
 impl JobQueue for FakeQueue {
     fn list(&self) -> Vec<JobSnapshot> {
-        Self::lock(&self.jobs).clone()
+        caskade_core::lock(&self.jobs).clone()
     }
     fn cancel(&self, id: &str) -> Result<JobSnapshot> {
         self.called(format!("cancel {id}"));
@@ -347,7 +338,7 @@ impl JobQueue for FakeQueue {
     }
     fn remove(&self, id: &str) -> Result<()> {
         self.called(format!("remove {id}"));
-        Self::lock(&self.jobs).retain(|job| job.id != id);
+        caskade_core::lock(&self.jobs).retain(|job| job.id != id);
         Ok(())
     }
     async fn retry(&self, id: &str, candidate: Option<u32>) -> Result<JobSnapshot> {
@@ -406,7 +397,7 @@ impl FakeRefresh {
 
     /// Sets the status and announces it; `None` as if none ran.
     pub fn set(&self, status: Option<RefreshStatus>) {
-        *FakeQueue::lock(&self.status) = status.clone();
+        *caskade_core::lock(&self.status) = status.clone();
         if let Some(status) = status {
             self.events
                 .send(Event::GamesRefreshChanged(GamesRefreshChanged(status)));
@@ -414,30 +405,30 @@ impl FakeRefresh {
     }
 
     pub fn calls(&self) -> Vec<String> {
-        FakeQueue::lock(&self.calls).clone()
+        caskade_core::lock(&self.calls).clone()
     }
 
     pub fn clear(&self) {
-        FakeQueue::lock(&self.calls).clear();
-        *FakeQueue::lock(&self.status) = None;
+        caskade_core::lock(&self.calls).clear();
+        *caskade_core::lock(&self.status) = None;
     }
 }
 
 #[async_trait]
 impl DetailsRefresh for FakeRefresh {
     fn status(&self) -> Option<RefreshStatus> {
-        FakeQueue::lock(&self.status).clone()
+        caskade_core::lock(&self.status).clone()
     }
     async fn start(&self, game_ids: Vec<String>, mode: RefreshMode) -> Result<()> {
         let mode = serde_json::to_value(mode)
             .ok()
             .and_then(|value| value.as_str().map(str::to_owned))
             .unwrap_or_default();
-        FakeQueue::lock(&self.calls).push(format!("start {} {mode}", game_ids.join(",")));
+        caskade_core::lock(&self.calls).push(format!("start {} {mode}", game_ids.join(",")));
         Ok(())
     }
     fn cancel(&self) -> bool {
-        FakeQueue::lock(&self.calls).push("cancel".to_owned());
+        caskade_core::lock(&self.calls).push("cancel".to_owned());
         true
     }
 }

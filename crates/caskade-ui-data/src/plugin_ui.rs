@@ -226,10 +226,6 @@ pub struct FakePluginUi {
     events: Events,
 }
 
-fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
-    mutex.lock().unwrap_or_else(|e| e.into_inner())
-}
-
 impl FakePluginUi {
     pub fn new(events: Events) -> Self {
         Self {
@@ -248,7 +244,7 @@ impl FakePluginUi {
             .first()
             .map(|plugin| plugin.id.clone())
             .unwrap_or_default();
-        *lock(&self.plugins) = plugins;
+        *caskade_core::lock(&self.plugins) = plugins;
         self.events
             .send(Event::PluginsChanged(PluginsChanged { plugin }));
     }
@@ -256,7 +252,7 @@ impl FakePluginUi {
     /// What contribution `id` of `slot` draws when its state is `state`
     /// (`*` for any); an `Err` is the plugin failing.
     pub fn draw(&self, plugin: &str, slot: &str, id: &str, state: &str, tree: Drawing) {
-        lock(&self.trees).insert(
+        caskade_core::lock(&self.trees).insert(
             (
                 (plugin.to_owned(), slot.to_owned(), id.to_owned()),
                 state.to_owned(),
@@ -267,29 +263,25 @@ impl FakePluginUi {
 
     /// What `act` answers for `action`.
     pub fn answer(&self, action: &str, outcome: std::result::Result<Outcome, String>) {
-        lock(&self.outcomes).insert(action.to_owned(), outcome);
+        caskade_core::lock(&self.outcomes).insert(action.to_owned(), outcome);
     }
 
     pub fn calls(&self) -> Vec<String> {
-        lock(&self.calls).clone()
+        caskade_core::lock(&self.calls).clone()
     }
 
     pub fn clear(&self) {
-        lock(&self.plugins).clear();
-        lock(&self.trees).clear();
-        lock(&self.outcomes).clear();
-        lock(&self.calls).clear();
+        caskade_core::lock(&self.plugins).clear();
+        caskade_core::lock(&self.trees).clear();
+        caskade_core::lock(&self.outcomes).clear();
+        caskade_core::lock(&self.calls).clear();
     }
-}
-
-fn failed(message: String) -> ErrorReport {
-    ErrorReport::new(ErrorCode::Other, message)
 }
 
 #[async_trait]
 impl PluginUiSource for FakePluginUi {
     async fn drawn(&self) -> Vec<DrawnPlugin> {
-        lock(&self.plugins).clone()
+        caskade_core::lock(&self.plugins).clone()
     }
     async fn render(
         &self,
@@ -298,18 +290,18 @@ impl PluginUiSource for FakePluginUi {
         id: &str,
         context: Context,
     ) -> Result<Vec<Node>> {
-        lock(&self.calls).push(format!(
+        caskade_core::lock(&self.calls).push(format!(
             "render {plugin} {slot} {id} {}",
             context.game_id.as_deref().unwrap_or("-")
         ));
         let key = (plugin.to_owned(), slot.to_owned(), id.to_owned());
-        let trees = lock(&self.trees);
+        let trees = caskade_core::lock(&self.trees);
         trees
             .get(&(key.clone(), context.state.to_string()))
             .or_else(|| trees.get(&(key, "*".to_owned())))
             .cloned()
             .unwrap_or_else(|| Err(format!("plugin {plugin} draws no {slot} {id}")))
-            .map_err(failed)
+            .map_err(ErrorReport::from)
     }
     async fn act(
         &self,
@@ -320,12 +312,12 @@ impl PluginUiSource for FakePluginUi {
         value: Value,
         _context: Context,
     ) -> Result<Outcome> {
-        lock(&self.calls).push(format!("act {plugin} {slot} {id} {action} {value}"));
-        lock(&self.outcomes)
+        caskade_core::lock(&self.calls).push(format!("act {plugin} {slot} {id} {action} {value}"));
+        caskade_core::lock(&self.outcomes)
             .get(action)
             .cloned()
             .unwrap_or(Ok(Outcome::default()))
-            .map_err(failed)
+            .map_err(ErrorReport::from)
     }
 }
 

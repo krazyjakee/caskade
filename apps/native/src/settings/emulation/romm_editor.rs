@@ -371,13 +371,6 @@ pub fn ServerEditor(
     let found = report();
     let failure = error();
     let platforms = rows(&current, found.as_ref());
-    let platform_name = |id: &str| {
-        snapshot
-            .platforms
-            .iter()
-            .find(|view| view.platform.id == id)
-            .map_or_else(|| id.to_owned(), |view| view.platform.name.clone())
-    };
     let unchanged = !is_new && current == initial && secret.read().is_empty();
     let roms_on_server: u32 = found.as_ref().map_or(0, |found| {
         found
@@ -590,7 +583,7 @@ pub fn ServerEditor(
                                 Some(suggested) => t!(
                                     note = "The Caskade platform matched to a RomM platform",
                                     "Automatic ({platform})",
-                                    platform = platform_name(suggested)
+                                    platform = snapshot.platform_name(suggested)
                                 ),
                                 None => t!(
                                     note = "No Caskade platform matches a RomM platform",

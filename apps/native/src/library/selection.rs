@@ -5,6 +5,7 @@
 //! on them.
 
 use dioxus_native::prelude::*;
+use indexmap::IndexSet;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -15,7 +16,9 @@ type GameAt = Rc<RefCell<Box<dyn Fn(usize) -> Option<String>>>>;
 /// range starts.
 #[derive(Clone, Copy, PartialEq)]
 pub struct GameSelection {
-    chosen: Signal<Vec<String>>,
+    /// In the order they were chosen; a set, as "Select all" adds a whole
+    /// library at once (#111).
+    chosen: Signal<IndexSet<String>>,
     on: Signal<bool>,
     anchor: Signal<Option<usize>>,
     /// The grid's lookup, refreshed as it renders.
@@ -31,7 +34,7 @@ impl GameSelection {
 
     /// The chosen games, in the order they were chosen.
     pub fn ids(&self) -> Vec<String> {
-        self.chosen.read().clone()
+        self.chosen.read().iter().cloned().collect()
     }
 
     pub fn count(&self) -> usize {
@@ -40,8 +43,7 @@ impl GameSelection {
 
     /// Whether `id` is chosen; `None` when choosing is off.
     pub fn state(&self, id: &str) -> Option<bool> {
-        self.active()
-            .then(|| self.chosen.read().iter().any(|chosen| chosen == id))
+        self.active().then(|| self.chosen.read().contains(id))
     }
 
     pub fn start(&mut self) {
@@ -65,11 +67,8 @@ impl GameSelection {
     pub fn toggle(&mut self, id: &str, index: Option<usize>) {
         {
             let mut chosen = self.chosen.write();
-            match chosen.iter().position(|chosen| chosen == id) {
-                Some(at) => {
-                    chosen.remove(at);
-                }
-                None => chosen.push(id.to_owned()),
+            if !chosen.shift_remove(id) {
+                chosen.insert(id.to_owned());
             }
         }
         if index.is_some() {
@@ -95,14 +94,7 @@ impl GameSelection {
 
     /// Chooses `ids` too.
     pub fn add(&mut self, ids: impl IntoIterator<Item = String>) {
-        {
-            let mut chosen = self.chosen.write();
-            for id in ids {
-                if !chosen.contains(&id) {
-                    chosen.push(id);
-                }
-            }
-        }
+        self.chosen.write().extend(ids);
         self.on.set(true);
     }
 
@@ -134,7 +126,7 @@ impl GameSelection {
 /// A new selection for a view, offered to its grid and bar.
 pub fn use_selection_provider() -> GameSelection {
     use_context_provider(|| GameSelection {
-        chosen: Signal::new(Vec::new()),
+        chosen: Signal::new(IndexSet::new()),
         on: Signal::new(false),
         anchor: Signal::new(None),
         game_at: Signal::new(Rc::new(RefCell::new(Box::new(|_| None)))),

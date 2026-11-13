@@ -37,6 +37,16 @@ pub(crate) mod page_tests;
 use crate::ui::{Link, Svg, icons};
 use dioxus_native::prelude::*;
 
+/// An operating system's name, for people.
+fn system_name(system: &str) -> String {
+    match system {
+        "windows" => "Windows".to_owned(),
+        "mac" | "macos" => "macOS".to_owned(),
+        "linux" => "Linux".to_owned(),
+        other => other.to_owned(),
+    }
+}
+
 /// A link out of the app, opened in the browser.
 #[component]
 pub fn ExternalLink(

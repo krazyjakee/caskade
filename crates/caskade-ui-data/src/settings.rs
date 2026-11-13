@@ -10,6 +10,7 @@ use caskade_core::{
     error::ErrorReport,
     settings::{SettingsSection, SettingsService, SettingsSnapshot},
 };
+use caskade_plugin_host::PluginHost;
 use serde_json::Value;
 
 type Result<T> = std::result::Result<T, ErrorReport>;
@@ -19,6 +20,8 @@ type Result<T> = std::result::Result<T, ErrorReport>;
 pub struct Settings {
     settings: SettingsService,
     accounts: AccountService,
+    /// For plugins' settings titles in their own catalogs' words.
+    plugins: Option<PluginHost>,
 }
 
 /// Which sections the signed-in account may change (#205).
@@ -42,12 +45,19 @@ impl Editable {
 
 impl Settings {
     pub fn new(settings: SettingsService, accounts: AccountService) -> Self {
-        Self { settings, accounts }
+        Self {
+            settings,
+            accounts,
+            plugins: None,
+        }
     }
 
     /// The settings in a running app.
     pub fn of(services: &caskade_app::start::Services) -> Self {
-        Self::new(services.settings.clone(), services.accounts.clone())
+        Self {
+            plugins: services.plugins.clone(),
+            ..Self::new(services.settings.clone(), services.accounts.clone())
+        }
     }
 
     /// Whether Caskade starts in console mode (#107): by how it was started
@@ -69,10 +79,10 @@ impl Settings {
         crate::accounts::Accounts::new(self.accounts.clone())
     }
 
-    /// Every section, with its schema and defaults. A plugin's titles stay
-    /// in its own words until the native UI hosts plugins (#108).
+    /// Every section, with its schema and defaults. A plugin's comes with
+    /// its titles and descriptions from the plugin's own catalog (#219).
     pub fn sections(&self) -> Result<Vec<SettingsSection>> {
-        settings::settings_sections(&self.settings, |_, _| {})
+        settings::settings_sections(&self.settings, self.plugins.as_ref())
     }
 
     /// A section's value and revision.

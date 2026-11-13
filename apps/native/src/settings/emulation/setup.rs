@@ -14,7 +14,7 @@ use caskade_ui_data::emulation::{
 use caskade_ui_i18n::{format, t, tn, tp};
 use dioxus_native::prelude::*;
 
-use crate::data::change;
+use crate::data::{change, run};
 use crate::ui::icons::{
     CLOUD_DOWNLOAD, DOWNLOAD, MONITOR_SMARTPHONE, REFRESH_CW, ROTATE_CCW, TRIANGLE_ALERT, X,
 };
@@ -77,29 +77,6 @@ fn status_name(status: SetupStatus) -> &'static str {
 /// The newest install of an emulator, or for a platform.
 fn latest_job(jobs: &[SetupJob], matches: impl Fn(&SetupJob) -> bool) -> Option<SetupJob> {
     jobs.iter().filter(|job| matches(job)).last().cloned()
-}
-
-/// Runs `work` on the app's runtime with `pending` set; `failure` hears
-/// why it didn't work, `settled` what it gave (`None` when it failed).
-fn run<T: Send + 'static>(
-    mut pending: Signal<bool>,
-    mut failure: Signal<Option<ErrorReport>>,
-    work: impl Future<Output = Result<T, ErrorReport>> + Send + 'static,
-    settled: impl FnOnce(Option<T>) + 'static,
-) {
-    pending.set(true);
-    failure.set(None);
-    spawn(async move {
-        let result = change(work).await;
-        pending.set(false);
-        match result {
-            Ok(value) => settled(Some(value)),
-            Err(report) => {
-                failure.set(Some(report));
-                settled(None);
-            }
-        }
-    });
 }
 
 /// What an install starts from.
@@ -528,8 +505,8 @@ pub fn ManagedEmulatorInfo(emulator_id: String) -> Element {
         row.definition_id == item.definition_id
     });
     let running = job.as_ref().is_some_and(setup_running);
-    let checked = (managed.checked_at_ms != 0)
-        .then(|| format::date_time(crate::library::local_date_time(managed.checked_at_ms)));
+    let checked =
+        (managed.checked_at_ms != 0).then(|| crate::library::date_time(managed.checked_at_ms));
     let title = match &item.installed_label {
         Some(label) => format!("{} · {label}", t!("Installed by Caskade")),
         None => t!("Installed by Caskade"),

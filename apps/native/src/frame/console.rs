@@ -72,17 +72,30 @@ pub fn ConsoleShell(view_key: String) -> Element {
     // The cards' "Playing on …" marks, read once.
     crate::game::provide_playing_marks();
     // The pointer hides when it rests (2.5 s after it last moved).
+    // A move only re-renders when the pointer was hidden, and one waiter
+    // follows the last move (#111).
     let mut idle = use_signal(|| true);
-    let mut moves = use_signal(|| 0u64);
+    let mut last_move = use_signal(std::time::Instant::now);
+    let mut waiting = use_signal(|| false);
     let moved = move |_| {
-        idle.set(false);
-        let mine = *moves.peek() + 1;
-        moves.set(mine);
+        last_move.set(std::time::Instant::now());
+        if *idle.peek() {
+            idle.set(false);
+        }
+        if *waiting.peek() {
+            return;
+        }
+        waiting.set(true);
         spawn(async move {
-            let _ = caskade_app::runtime::spawn(tokio::time::sleep(CURSOR_IDLE)).await;
-            if *moves.peek() == mine {
-                idle.set(true);
+            loop {
+                let rest = CURSOR_IDLE.saturating_sub(last_move.peek().elapsed());
+                if rest.is_zero() {
+                    break;
+                }
+                crate::data::sleep(rest).await;
             }
+            waiting.set(false);
+            idle.set(true);
         });
     };
     rsx! {

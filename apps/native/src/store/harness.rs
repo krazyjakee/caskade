@@ -34,7 +34,7 @@ pub(crate) struct StoreScript {
 static STORE: Mutex<Option<StoreScript>> = Mutex::new(None);
 
 pub(crate) fn store<T>(f: impl FnOnce(&mut StoreScript) -> T) -> T {
-    let mut script = STORE.lock().unwrap_or_else(|e| e.into_inner());
+    let mut script = caskade_core::lock(&STORE);
     f(script.get_or_insert_with(StoreScript::default))
 }
 
@@ -42,13 +42,13 @@ pub(crate) struct StoreScripted;
 
 /// Scripts the catalogue until the guard drops.
 pub(crate) fn store_script(script: StoreScript) -> StoreScripted {
-    *STORE.lock().unwrap_or_else(|e| e.into_inner()) = Some(script);
+    *caskade_core::lock(&STORE) = Some(script);
     StoreScripted
 }
 
 impl Drop for StoreScripted {
     fn drop(&mut self) {
-        *STORE.lock().unwrap_or_else(|e| e.into_inner()) = None;
+        *caskade_core::lock(&STORE) = None;
     }
 }
 

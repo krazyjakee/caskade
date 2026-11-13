@@ -149,26 +149,16 @@ fn use_clock_setting() -> Clock {
     }
 }
 
-fn now_ms() -> i64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|elapsed| elapsed.as_millis() as i64)
-        .unwrap_or_default()
-}
-
 /// The time, ticking on the minute.
 #[component]
 fn ClockText() -> Element {
     let clock = use_clock_setting();
-    let mut now = use_signal(now_ms);
+    let mut now = use_signal(caskade_core::now_ms);
     use_future(move || async move {
         loop {
-            let wait = 60_000 - (now_ms().rem_euclid(60_000)) as u64;
-            let _ = caskade_app::runtime::spawn(tokio::time::sleep(
-                std::time::Duration::from_millis(wait),
-            ))
-            .await;
-            now.set(now_ms());
+            let wait = 60_000 - (caskade_core::now_ms().rem_euclid(60_000)) as u64;
+            crate::data::sleep(std::time::Duration::from_millis(wait)).await;
+            now.set(caskade_core::now_ms());
         }
     });
     let text = format::time(crate::library::local_date_time(now()), clock, false);

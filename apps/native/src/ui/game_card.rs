@@ -159,10 +159,13 @@ impl CardGame {
 /// A game's platform under its title, unless it's a PC game, as the
 /// webview's `platformLine`.
 pub fn platform_line(platforms: &[String]) -> Option<String> {
-    match platforms {
+    let shown: Vec<&String> = platforms
+        .iter()
+        .filter(|name| !crate::library::platforms::is_pc(name))
+        .collect();
+    match shown.as_slice() {
         [] => None,
-        [only] if only == "PC" || only == "Windows" => None,
-        [first] => Some(first.clone()),
+        [first] => Some((*first).clone()),
         [first, rest @ ..] => Some(format!("{first} +{}", rest.len())),
     }
 }
@@ -220,8 +223,7 @@ pub fn GameCard(
         .unwrap_or_else(|| "\u{2014}".to_owned());
     let last_played = game
         .last_played_ms
-        .map(crate::library::local_date_time)
-        .map(caskade_ui_i18n::format::date_time)
+        .map(crate::library::date_time)
         .unwrap_or_else(|| caskade_ui_i18n::format::last_played(None));
     rsx! {
         div {

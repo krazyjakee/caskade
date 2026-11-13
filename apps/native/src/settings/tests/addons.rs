@@ -14,10 +14,7 @@ const SAMPLE: &str =
 
 fn seed() {
     let service = source().addons.service().expect("the fixtures' catalogue");
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_millis() as i64;
+    let now = caskade_core::now_ms();
     caskade_app::runtime::block_on(service.accept(SAMPLE.as_bytes(), None, now)).unwrap();
 }
 
@@ -66,7 +63,7 @@ fn permission_words_read_as_the_reviews() {
 /// words and kind.
 #[test]
 fn lists_searches_and_filters_the_catalogue() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = catalogue();
     let status = window.get("data-part", "status");
@@ -113,7 +110,7 @@ fn lists_searches_and_filters_the_catalogue() {
 /// download says to try again later and is offered again.
 #[test]
 fn details_install_and_a_failed_download_says_so() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = catalogue();
     let details = window.get("aria-label", "Details of Playtime stats");
@@ -163,7 +160,7 @@ fn details_install_and_a_failed_download_says_so() {
 /// catalogue keeps the last one and says why.
 #[test]
 fn the_update_preference_saves_and_a_failed_check_keeps_the_last() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let addons = source().addons.clone();
     let before = caskade_app::runtime::block_on(addons.records())

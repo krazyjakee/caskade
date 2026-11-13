@@ -2,7 +2,7 @@
 //! `components/ShelfRow.tsx`): a focus section, so focus comes back to the
 //! card it left, scrolling sideways when there are more cards than fit.
 
-use blitz_dom::{LocalName, NodeId};
+use blitz_dom::NodeId;
 use caskade_ui_input::Action;
 use dioxus_native::NodeHandle;
 use dioxus_native::prelude::*;
@@ -82,18 +82,7 @@ pub fn ShelfRow(
             .unwrap_or(1);
         let target = cards[page_target(at, cards.len(), visible, by)];
         // The card's own focus stop.
-        let mut stop = None;
-        let mut queue = vec![target];
-        while let Some(node) = queue.pop() {
-            let Some(element) = doc.get_node(node) else {
-                continue;
-            };
-            if element.attr(LocalName::from("data-cs")) == Some("game-card") {
-                stop = Some(node);
-                break;
-            }
-            queue.extend(element.children.iter().rev().copied());
-        }
+        let stop = crate::input::find_attr(&doc, target, "data-cs", "game-card");
         drop(doc);
         if let Some(stop) = stop {
             input.focus(stop);
@@ -156,10 +145,7 @@ pub fn ShelfRow(
                     items.set(event.data().downcast::<NodeHandle>().cloned());
                     // Measured a frame later, once laid out.
                     spawn(async move {
-                        let _ = caskade_app::runtime::spawn(async {
-                            tokio::time::sleep(std::time::Duration::from_millis(16)).await;
-                        })
-                        .await;
+                        crate::data::sleep(std::time::Duration::from_millis(16)).await;
                         laid_out += 1;
                     });
                 },

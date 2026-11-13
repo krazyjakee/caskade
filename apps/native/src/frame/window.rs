@@ -24,13 +24,10 @@ const DRAG_THRESHOLD: f64 = 4.0;
 /// Two presses this close make a double click.
 const DOUBLE_CLICK: Duration = Duration::from_millis(500);
 
-pub(super) fn window() -> Option<&'static std::sync::Arc<dyn Window>> {
-    crate::shell::main_window()
-}
-
 /// Whether the window is maximized, kept up to date as it resizes.
 pub(super) fn use_maximized() -> bool {
-    let mut maximized = use_signal(|| window().is_some_and(|window| window.is_maximized()));
+    let mut maximized =
+        use_signal(|| crate::shell::main_window().is_some_and(|window| window.is_maximized()));
     // Without a window (headless tests) there are no window events; that
     // stays so for the document's life, so the hook is always or never
     // called.
@@ -42,7 +39,7 @@ pub(super) fn use_maximized() -> bool {
             event,
             dioxus_native::winit::event::WindowEvent::SurfaceResized(_)
         ) {
-            let now = window().is_some_and(|window| window.is_maximized());
+            let now = crate::shell::main_window().is_some_and(|window| window.is_maximized());
             if *maximized.peek() != now {
                 maximized.set(now);
             }
@@ -52,7 +49,7 @@ pub(super) fn use_maximized() -> bool {
 }
 
 pub(super) fn toggle_maximized() {
-    if let Some(window) = window() {
+    if let Some(window) = crate::shell::main_window() {
         window.set_maximized(!window.is_maximized());
     }
 }
@@ -81,7 +78,7 @@ pub fn WindowControls() -> Element {
                 "aria-label": tp!("window", "Minimize"),
                 class: "{neutral}",
                 onclick: move |_| {
-                    if let Some(window) = window() {
+                    if let Some(window) = crate::shell::main_window() {
                         window.set_minimized(true);
                     }
                 },
@@ -257,7 +254,7 @@ impl Drag {
         }
         self.pressed.set(None);
         self.last_press.set(None);
-        if let Some(window) = window() {
+        if let Some(window) = crate::shell::main_window() {
             let _ = window.drag_window();
         }
     }
@@ -326,7 +323,7 @@ pub fn ResizeEdges() -> Element {
                 style: "position: fixed; z-index: 60; {place} cursor: {cursor};",
                 onmousedown: move |event: MouseEvent| {
                     event.stop_propagation();
-                    if let Some(window) = window() {
+                    if let Some(window) = crate::shell::main_window() {
                         let _ = window.drag_resize_window(direction);
                     }
                 },

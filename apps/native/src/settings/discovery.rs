@@ -19,6 +19,7 @@ use serde_json::{Map, Value};
 
 use super::launchers::source_name;
 use super::reset::{ResetDefaults, ResetField, ResetPart};
+use super::state::flag;
 use super::state::{SettingsFeedback, SettingsLoading, use_settings_section};
 use crate::data::{change, try_use_discovery, use_discovery_query, use_library, use_query};
 use crate::flows::paths::{PathRequest, PickKind, use_path_picker};
@@ -93,10 +94,6 @@ fn phase(name: &str) -> String {
         "failed" => tp!("discovery phase", "Failed"),
         other => other.to_owned(),
     }
-}
-
-fn flag(value: &Value, key: &str) -> bool {
-    value.get(key).and_then(Value::as_bool).unwrap_or(false)
 }
 
 /// What a discovery action does, for the one runner.

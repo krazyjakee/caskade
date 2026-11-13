@@ -18,16 +18,12 @@ use dioxus_native::prelude::*;
 
 use super::{Continue, StepHeading};
 use crate::data::change;
+use crate::settings::use_device_sync;
 use crate::ui::icons::{CIRCLE_CHECK, GAMEPAD_2, HARD_DRIVE, LAPTOP, LINK_2, MONITOR, TV};
 use crate::ui::{Button, ButtonVariant, Checkbox, FailureNotice, NoticeVariant, Svg, TextField};
 
 /// What a pairing link looks like, as the field's hint.
 const LINK_PLACEHOLDER: &str = "caskade://pair?…";
-
-/// The app's devices: a test's, else the running app's.
-fn use_device_sync() -> Option<DeviceSync> {
-    try_use_context::<DeviceSync>().or_else(|| crate::shell::services().map(DeviceSync::of))
-}
 
 /// The devices' status, read again on every change to them; `None` until
 /// it's read (or when it can't be), as the webview's query data.

@@ -40,20 +40,20 @@ pub(crate) struct EditScript {
 static EDIT: Mutex<Option<EditScript>> = Mutex::new(None);
 
 fn edit<T>(f: impl FnOnce(&mut EditScript) -> T) -> T {
-    let mut script = EDIT.lock().unwrap_or_else(|e| e.into_inner());
+    let mut script = caskade_core::lock(&EDIT);
     f(script.get_or_insert_with(EditScript::default))
 }
 
 pub(crate) struct EditScripted;
 
 pub(crate) fn edit_script(script: EditScript) -> EditScripted {
-    *EDIT.lock().unwrap_or_else(|e| e.into_inner()) = Some(script);
+    *caskade_core::lock(&EDIT) = Some(script);
     EditScripted
 }
 
 impl Drop for EditScripted {
     fn drop(&mut self) {
-        *EDIT.lock().unwrap_or_else(|e| e.into_inner()) = None;
+        *caskade_core::lock(&EDIT) = None;
     }
 }
 
@@ -220,7 +220,7 @@ fn button(window: &Window, label: &str) -> blitz_dom::NodeId {
 
 #[test]
 fn edit_details_saves_the_changed_fields_as_one_patch_and_closes() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = edit_script(EditScript {
         state: Some(state()),
@@ -269,7 +269,7 @@ fn edit_details_saves_the_changed_fields_as_one_patch_and_closes() {
 
 #[test]
 fn a_field_saved_elsewhere_meanwhile_is_a_conflict_to_settle() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = edit_script(EditScript {
         state: Some(state()),
@@ -322,7 +322,7 @@ fn a_field_saved_elsewhere_meanwhile_is_a_conflict_to_settle() {
 
 #[test]
 fn closing_with_unsaved_changes_asks_first() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = edit_script(EditScript {
         state: Some(state()),
@@ -386,7 +386,7 @@ fn closing_with_unsaved_changes_asks_first() {
 
 #[test]
 fn the_games_menu_offers_edit_which_opens_the_editor() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = edit_script(EditScript {
         state: Some(state()),
@@ -420,7 +420,7 @@ fn art(kind: ArtworkKind, id: &str, source: &str) -> Artwork {
 
 #[test]
 fn artwork_shows_each_kinds_choice_and_changes_it_at_once() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let cover = art(ArtworkKind::Cover, "cover-1", "igdb");
     let other = art(ArtworkKind::Cover, "cover-2", "steam");
@@ -504,7 +504,7 @@ fn release() -> ReleaseActions {
 
 #[test]
 fn actions_add_a_play_action_that_saves_on_its_own() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = edit_script(EditScript {
         state: Some(state()),
@@ -548,7 +548,7 @@ fn actions_add_a_play_action_that_saves_on_its_own() {
 
 #[test]
 fn saves_change_a_releases_locations_from_their_revision() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let folder = LocationSpec {
         kind: LocationKind::Folder,

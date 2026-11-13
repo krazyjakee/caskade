@@ -48,7 +48,7 @@ fn button(window: &Window, label: &str) -> Option<blitz_dom::NodeId> {
 
 #[test]
 fn browse_lists_the_past_years_most_rated_beside_the_shelves_a_page_at_a_time() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = store_script(StoreScript {
         search: Some(IgdbCatalogPage {
@@ -87,7 +87,7 @@ fn browse_lists_the_past_years_most_rated_beside_the_shelves_a_page_at_a_time() 
 
 #[test]
 fn search_waits_for_typing_to_stop_and_keeps_the_text_in_the_route() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = store_script(StoreScript {
         search: Some(page(games(1..3))),
@@ -121,7 +121,7 @@ fn search_waits_for_typing_to_stop_and_keeps_the_text_in_the_route() {
 
 #[test]
 fn the_lists_say_when_nothing_matches_the_server_is_away_or_results_are_saved() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let script = store_script(StoreScript {
         search: Some(page(Vec::new())),
@@ -158,7 +158,7 @@ fn the_lists_say_when_nothing_matches_the_server_is_away_or_results_are_saved() 
 
 #[test]
 fn the_librarys_games_are_marked_installed_or_in_the_library() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = store_script(StoreScript {
         search: Some(page(games(1..4))),
@@ -203,7 +203,7 @@ fn the_librarys_games_are_marked_installed_or_in_the_library() {
 
 #[test]
 fn upcoming_shows_dates_as_precisely_as_known_and_tbd_apart() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let release = |game: u64, release: IgdbReleaseDate| IgdbListedRelease { game, release };
     let _script = store_script(StoreScript {
@@ -258,7 +258,7 @@ fn upcoming_shows_dates_as_precisely_as_known_and_tbd_apart() {
 
 #[test]
 fn lb_and_rb_switch_the_stores_tabs() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = store_script(StoreScript {
         search: Some(page(games(1..3))),

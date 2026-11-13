@@ -1,14 +1,14 @@
 //! Activity's frame and its notification feed (`views/activity/
 //! ActivityView.tsx`, `NotificationFeed.tsx`, #96): the header, the Jobs
-//! and Notifications tabs, and the feed. The jobs panel is #101's; until
-//! then its tab says it isn't built yet.
+//! and Notifications tabs, and the feed; the jobs panel is `crate::activity`.
 //!
 //! Showing the feed marks nothing read: an item is read once it's opened,
 //! or marked read.
 
+use crate::activity::labels::is_active;
 use crate::data::status::{
-    NOTIFICATION_PAGE, ReadChange, change_read, is_active, use_notification_members,
-    use_notifications, use_unread_notifications,
+    NOTIFICATION_PAGE, ReadChange, change_read, use_notification_members, use_notifications,
+    use_unread_notifications,
 };
 use crate::library::local_date_time;
 use crate::router::{ActivityTab, Route, RouteLink, href::Href, use_router};

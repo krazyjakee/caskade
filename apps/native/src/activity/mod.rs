@@ -8,7 +8,7 @@
 mod anatomy;
 mod card;
 mod ingress;
-mod labels;
+pub(crate) mod labels;
 mod question;
 mod refresh;
 #[cfg(test)]

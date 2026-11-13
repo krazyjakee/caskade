@@ -9,7 +9,7 @@
 //! which a test replaces.
 
 use crate::data::change;
-use crate::data::status::{use_devices, use_jobs};
+use crate::data::status::use_devices;
 use crate::ui::{Button, ButtonVariant, Dialog, RadioGroup, RadioOption};
 use caskade_app::commands::launch::LaunchOutcome;
 use caskade_app::commands::presence::PlayingElsewhere;
@@ -206,7 +206,7 @@ pub fn UpdateOffer(
     let mut busy = use_signal(|| false);
     let mut error = use_signal(|| None::<String>);
     let mut job = use_signal(|| None::<String>);
-    let jobs = use_jobs();
+    let jobs = crate::data::use_jobs_query();
     let latest = update.latest.clone().unwrap_or_default();
     let latest_version = version_label(&latest);
     let body = match &update.installed {
@@ -226,7 +226,7 @@ pub fn UpdateOffer(
     let job_status = job().and_then(|id| {
         jobs.read()
             .as_ref()
-            .and_then(|jobs| jobs.as_ref().ok().cloned().flatten())
+            .and_then(|jobs| jobs.as_ref().ok().cloned())
             .and_then(|jobs| jobs.into_iter().find(|each| each.id == id))
     });
     let mut played = use_signal(|| false);
@@ -364,7 +364,7 @@ pub fn PlayingElsewhereDialog(
                     li { key: "{each.device_id}:{each.started_at_ms}",
                         {
                             let name = if each.device_name.is_empty() { another_device() } else { each.device_name.clone() };
-                            let since = format::date_time(crate::library::local_date_time(each.started_at_ms));
+                            let since = crate::library::date_time(each.started_at_ms);
                             t!("On {name} since {since}", name = name, since = since)
                         }
                     }
@@ -444,7 +444,7 @@ pub fn SaveConflictDialog(
         .map(|version| RadioOption {
             description: Some(format!(
                 "{} · {}",
-                format::date_time(crate::library::local_date_time(version.created_at_ms)),
+                crate::library::date_time(version.created_at_ms),
                 format::size(Some(version.size_bytes))
             )),
             disabled: busy,

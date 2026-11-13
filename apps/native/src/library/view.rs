@@ -65,7 +65,14 @@ pub fn library_href(library: &LibraryRoute, change: impl FnOnce(&mut LibraryRout
 fn use_title_letters(query: ReadSignal<ListGames>) -> Query<Vec<TitleLetter>> {
     use_query(DataKey::Summary, move |library| {
         let query = query();
-        async move { library.letters(&query).await }
+        // Only a sort by title shows the letters (#111).
+        async move {
+            if query.sort == GameSort::Title {
+                library.letters(&query).await
+            } else {
+                Ok(Vec::new())
+            }
+        }
     })
 }
 

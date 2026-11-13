@@ -9,7 +9,7 @@
 use caskade_core::devices::{Pairing as Pair, PairingLinkTarget, PairingState};
 use caskade_core::error::ErrorReport;
 use caskade_ui_data::pairing::Pairing;
-use caskade_ui_i18n::{format, t};
+use caskade_ui_i18n::t;
 use dioxus_native::prelude::*;
 
 use crate::data::change;
@@ -250,7 +250,7 @@ fn OpenedLinkDialog(
         .get(..8)
         .unwrap_or(&target.device_id)
         .to_owned();
-    let until = format::date_time(crate::library::local_date_time(target.expires_at_ms));
+    let until = crate::library::date_time(target.expires_at_ms);
     let close = {
         let pairing = pairing.clone();
         move |_| {

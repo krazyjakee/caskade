@@ -158,7 +158,7 @@ pub(crate) mod fake {
     static FAKE: Mutex<Option<Fake>> = Mutex::new(None);
 
     fn fake() -> std::sync::MutexGuard<'static, Option<Fake>> {
-        FAKE.lock().unwrap_or_else(|e| e.into_inner())
+        caskade_core::lock(&FAKE)
     }
 
     pub(crate) struct Faked;

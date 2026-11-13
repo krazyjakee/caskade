@@ -29,14 +29,6 @@ mod tests;
 pub use caskade_input::{Action, GlyphFamily};
 pub use tree::{FocusTree, Rect};
 
-/// The four directions, as actions.
-pub fn is_direction(action: Action) -> bool {
-    matches!(
-        action,
-        Action::NavUp | Action::NavDown | Action::NavLeft | Action::NavRight
-    )
-}
-
 /// What sent an action.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InputSource {

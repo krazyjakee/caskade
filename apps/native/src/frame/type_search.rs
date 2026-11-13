@@ -240,7 +240,7 @@ fn Overlay(typing: Signal<Option<Typing>>) -> Element {
                                 // typed, as a browser's value does.
                                 let handle = handle.clone();
                                 spawn(async move {
-                                    let _ = caskade_app::runtime::spawn(tokio::time::sleep(std::time::Duration::from_millis(20))).await;
+                                    crate::data::sleep(std::time::Duration::from_millis(20)).await;
                                     let typed = typing.peek().as_ref().map(|state| state.text.clone()).unwrap_or_default();
                                     let value = blitz_dom::QualName::new(None, blitz_dom::ns!(), blitz_dom::LocalName::from("value"));
                                     let mut doc = handle.doc_mut();

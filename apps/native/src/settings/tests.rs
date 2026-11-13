@@ -146,10 +146,10 @@ fn a_standard_account_finds_only_the_sections_it_opens() {
 // ── The view ──
 
 fn open(href: &'static str) -> Window {
-    *START.lock().unwrap_or_else(|e| e.into_inner()) = href;
+    *caskade_core::lock(&START) = href;
     let mut window = Window::open();
     // Other tests' windows open on Home.
-    *START.lock().unwrap_or_else(|e| e.into_inner()) = "/";
+    *caskade_core::lock(&START) = "/";
     window.settle_until("Settings", |window| {
         window.find("data-cs", "settings-nav").is_some()
     });
@@ -175,7 +175,7 @@ fn tab(window: &Window, label: &str) -> blitz_dom::NodeId {
 
 #[test]
 fn lists_every_section_in_groups_each_tab_tied_to_its_panel() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let window = open("/settings?tab=appearance");
     let nav = window.get("data-cs", "settings-nav");
@@ -216,7 +216,7 @@ fn lists_every_section_in_groups_each_tab_tied_to_its_panel() {
 
 #[test]
 fn opens_a_section_in_place_by_click_arrows_and_a_pads_bumpers() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = open("/settings?tab=general");
     // A click opens it in place: Back leaves Settings.
@@ -256,7 +256,7 @@ fn opens_a_section_in_place_by_click_arrows_and_a_pads_bumpers() {
 /// field, titled as the schema titles it.
 #[test]
 fn schema_sections_render_every_field_of_the_cores_schemas() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let settings = crate::frame::tests::source().settings.clone();
     let sections = settings.sections().unwrap();
@@ -325,7 +325,7 @@ fn label_of(window: &Window, row: blitz_dom::NodeId) -> String {
 
 #[test]
 fn search_opens_the_first_result_and_highlights_its_row() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = open("/settings?tab=general");
     let field = window
@@ -375,7 +375,7 @@ fn search_opens_the_first_result_and_highlights_its_row() {
 /// goes back first and resets it.
 #[test]
 fn a_schema_switch_saves_and_reset_puts_it_back() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let settings = crate::frame::tests::source().settings.clone();
     let before = caskade_app::runtime::block_on(settings.get("core.updates"))
@@ -438,7 +438,7 @@ fn a_schema_switch_saves_and_reset_puts_it_back() {
 /// goes to Settings' search (#56).
 #[test]
 fn typing_and_a_pads_search_go_to_settings_search() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = open("/settings?tab=general");
     window.focus(tab(&window, "General"));
@@ -616,9 +616,7 @@ mod guard {
 
     #[test]
     fn leaving_a_section_with_unsaved_edits_asks_and_does_what_the_answer_says() {
-        let _one = crate::input::tests::ONE_WINDOW
-            .lock()
-            .unwrap_or_else(|e| e.into_inner());
+        let _one = caskade_core::lock(&crate::input::tests::ONE_WINDOW);
         let _runtime = caskade_app::runtime::handle().enter();
         let mut window = Window::open();
         let router = window.router();

@@ -6,6 +6,7 @@
 //! (`PlayingElsewhere.tsx`'s `PlayingElsewhereLine`).
 
 use super::data::{use_answer, use_page_data};
+use super::system_name;
 use crate::flows::devices::peer_note;
 use crate::ui::{Button, ButtonSize, ButtonVariant, icons};
 use caskade_core::devices::DeviceLink;
@@ -14,15 +15,6 @@ use caskade_core::sync::copies::PeerCopy;
 use caskade_ui_data::Key as DataKey;
 use caskade_ui_i18n::{format, t, tp};
 use dioxus_native::prelude::*;
-
-fn system_name(system: &str) -> String {
-    match system {
-        "windows" => "Windows".to_owned(),
-        "mac" => "macOS".to_owned(),
-        "linux" => "Linux".to_owned(),
-        other => other.to_owned(),
-    }
-}
 
 /// What to say about an owned release, beside its store.
 fn describe(state: &OwnedInstallState) -> Option<String> {
@@ -120,7 +112,7 @@ pub fn OwnedReleases(game_id: String, primary: bool) -> Element {
                     }
                     if let Some(at) = release.refreshed_at_ms {
                         span { class: "text-xs text-fg-subtle",
-                            {t!("Library refreshed {refreshed}.", refreshed = format::date_time(crate::library::local_date_time(at)))}
+                            {t!("Library refreshed {refreshed}.", refreshed = crate::library::date_time(at))}
                         }
                     }
                     if let Some(note) = describe(&release.state) {
@@ -400,7 +392,7 @@ pub fn PlaytimeSources(game_id: String) -> Element {
                 "{provider}: {total}, read {read}",
                 provider = provider_name(&source.provider),
                 total = total,
-                read = format::date_time(crate::library::local_date_time(source.observed_at_ms))
+                read = crate::library::date_time(source.observed_at_ms)
             )
         })
         .collect::<Vec<_>>()

@@ -78,11 +78,6 @@ fn shell_of(id: &str) -> Option<Shell> {
     .find(|shell| shell_id(*shell) == id)
 }
 
-/// The shells this OS has, first the one a new script uses.
-fn shells() -> &'static [Shell] {
-    Shell::available()
-}
-
 /// Written as they are; never a translatable placeholder.
 const PLACEHOLDERS: &str = "{InstallDir}, {GameTitle}";
 
@@ -95,7 +90,7 @@ fn blank(scope: ScriptScope, name: String) -> LifecycleScript {
         enabled: true,
         phase: ScriptPhase::BeforeLaunch,
         command: ScriptCommand::Shell {
-            shell: shells()[0],
+            shell: Shell::available()[0],
             script: String::new(),
         },
         cwd: None,
@@ -519,7 +514,7 @@ fn ScriptForm(
                     move |kind: String| {
                         set(Box::new(move |script| {
                             script.command = if kind == "shell" {
-                                ScriptCommand::Shell { shell: shells()[0], script: String::new() }
+                                ScriptCommand::Shell { shell: Shell::available()[0], script: String::new() }
                             } else {
                                 ScriptCommand::Direct { program: Default::default(), args: Vec::new() }
                             };
@@ -529,7 +524,7 @@ fn ScriptForm(
             }
             match script.command.clone() {
                 ScriptCommand::Shell { shell, script: text } => {
-                    let mut options: Vec<Shell> = shells().to_vec();
+                    let mut options: Vec<Shell> = Shell::available().to_vec();
                     if !options.contains(&shell) {
                         options.insert(0, shell);
                     }

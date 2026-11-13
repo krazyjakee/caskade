@@ -4,22 +4,13 @@
 //! Windows and macOS dialogs). Every call blocks until the user answers;
 //! call it off the window's thread once the event loop runs.
 
-// The pickers and the install picker are for the views (installs #99,
-// Settings → Storage #104); startup's dialogs use the rest now.
-#![allow(dead_code)]
 use std::path::PathBuf;
 
-/// What the dialog is about: how it looks.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Kind {
-    Info,
-    Error,
-}
-
-/// Asks `text` with `buttons` (the first is the default); the index of the
-/// one pressed, `None` when the dialog was closed or can't show.
-pub fn ask(title: &str, text: &str, kind: Kind, buttons: &[String]) -> Option<usize> {
-    platform::ask(title, text, kind, buttons)
+/// Asks `text` with `buttons` (the first is the default), shown as an
+/// error; the index of the one pressed, `None` when the dialog was closed
+/// or can't show.
+pub fn ask(title: &str, text: &str, buttons: &[String]) -> Option<usize> {
+    platform::ask(title, text, buttons)
 }
 
 /// Picks one file, of `filter` (a name and its extensions) when given.
@@ -82,20 +73,17 @@ pub fn install_picker() -> caskade_app::commands::install_picker::InstallPicker 
 
 #[cfg(target_os = "linux")]
 mod platform {
-    use super::{Kind, Pick};
+    use super::Pick;
     use gtk::prelude::*;
     use std::path::PathBuf;
 
-    pub fn ask(title: &str, text: &str, kind: Kind, buttons: &[String]) -> Option<usize> {
+    pub fn ask(title: &str, text: &str, buttons: &[String]) -> Option<usize> {
         let (title, text, buttons) = (title.to_owned(), text.to_owned(), buttons.to_vec());
         crate::tray::on_gtk(move || {
             let dialog = gtk::MessageDialog::new(
                 None::<&gtk::Window>,
                 gtk::DialogFlags::MODAL,
-                match kind {
-                    Kind::Info => gtk::MessageType::Info,
-                    Kind::Error => gtk::MessageType::Error,
-                },
+                gtk::MessageType::Error,
                 gtk::ButtonsType::None,
                 &text,
             );
@@ -155,10 +143,10 @@ mod platform {
 
 #[cfg(not(target_os = "linux"))]
 mod platform {
-    use super::{Kind, Pick};
+    use super::Pick;
     use std::path::PathBuf;
 
-    pub fn ask(title: &str, text: &str, kind: Kind, buttons: &[String]) -> Option<usize> {
+    pub fn ask(title: &str, text: &str, buttons: &[String]) -> Option<usize> {
         let buttons_rfd = match buttons {
             [only] => rfd::MessageButtons::OkCustom(only.clone()),
             [first, second] => rfd::MessageButtons::OkCancelCustom(first.clone(), second.clone()),
@@ -170,10 +158,7 @@ mod platform {
         let answer = rfd::MessageDialog::new()
             .set_title(title)
             .set_description(text)
-            .set_level(match kind {
-                Kind::Info => rfd::MessageLevel::Info,
-                Kind::Error => rfd::MessageLevel::Error,
-            })
+            .set_level(rfd::MessageLevel::Error)
             .set_buttons(buttons_rfd)
             .show();
         match answer {

@@ -655,23 +655,7 @@ pub fn use_answer<T: 'static>(
     key: caskade_ui_data::Key,
     load: impl FnMut() -> Answer<T> + 'static,
 ) -> crate::data::Query<T> {
-    let mut resource = use_resource(load);
-    let events = use_context::<crate::data::DataSource>().events.clone();
-    use_hook(move || {
-        let mut events = events.subscribe();
-        spawn(async move {
-            use tokio::sync::broadcast::error::RecvError;
-            loop {
-                match events.recv().await {
-                    Ok(event) if caskade_ui_data::Changed::from_event(&event).affects(&key) => {
-                        resource.restart()
-                    }
-                    Ok(_) => {}
-                    Err(RecvError::Lagged(_)) => resource.restart(),
-                    Err(RecvError::Closed) => break,
-                }
-            }
-        });
-    });
+    let resource = use_resource(load);
+    crate::data::reload_on(&use_context::<crate::data::DataSource>(), key, resource);
     resource
 }

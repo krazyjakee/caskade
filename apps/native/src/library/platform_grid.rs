@@ -64,7 +64,9 @@ fn PlatformCard(platform: PlatformSummary, index: usize, to: String) -> Element 
     let games = tn!("# game", "# games", platform.games as usize);
     let playtime =
         (platform.playtime_ms > 0).then(|| format::duration(platform.playtime_ms / 1000));
-    let last_played = platform.last_played_at_ms.map(relative_day);
+    let last_played = platform
+        .last_played_at_ms
+        .map(|ms| super::relative_day(ms, true));
     let label = t!(
         note = "A platform's card: its name and how many games it has",
         "{title}, {games}",
@@ -127,18 +129,4 @@ fn PlatformCard(platform: PlatformSummary, index: usize, to: String) -> Element 
             }
         }
     }
-}
-
-/// "Today", "Yesterday", "3 days ago", or the day, for a time in ms.
-fn relative_day(ms: i64) -> String {
-    use chrono::TimeZone;
-    let at = super::local_date_time(ms);
-    let day = chrono::Local
-        .timestamp_millis_opt(ms)
-        .single()
-        .map(|time| time.date_naive());
-    let days = day
-        .map(|day| (chrono::Local::now().date_naive() - day).num_days().max(0) as u64)
-        .unwrap_or(u64::MAX);
-    format::relative_day(at, days, true)
 }

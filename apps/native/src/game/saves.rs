@@ -218,7 +218,7 @@ pub fn SavesPanel(
                             class: "flex flex-wrap items-center justify-between gap-3 rounded-panel border border-border bg-surface-raised p-3",
                             div { class: "min-w-0",
                                 p { class: "text-sm font-medium",
-                                    {format::date_time(crate::library::local_date_time(each.version.created_at_ms))}
+                                    {crate::library::date_time(each.version.created_at_ms)}
                                     if each.current {
                                         span { class: "ml-2 rounded-full border border-accent px-2 py-0.5 text-xs font-normal text-accent-alt",
                                             {tp!("save version", "In use")}

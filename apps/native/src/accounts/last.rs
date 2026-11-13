@@ -22,30 +22,20 @@ fn file() -> Option<PathBuf> {
 /// The account that signed in last here.
 pub fn last_account() -> Option<String> {
     match file() {
-        Some(file) => std::fs::read_to_string(file)
-            .ok()
-            .and_then(|text| serde_json::from_str::<Saved>(&text).ok())
-            .and_then(|saved| saved.last_account),
-        None => LAST.lock().unwrap_or_else(|e| e.into_inner()).clone(),
+        Some(file) => crate::state_file::load::<Saved>(&file).and_then(|saved| saved.last_account),
+        None => caskade_core::lock(&LAST).clone(),
     }
 }
 
 /// Remembers `id` as the account that signed in last here.
 pub fn remember(id: &str) {
     match file() {
-        Some(file) => {
-            let saved = Saved {
+        Some(file) => crate::state_file::save(
+            &file,
+            &Saved {
                 last_account: Some(id.to_owned()),
-            };
-            let Ok(text) = serde_json::to_string(&saved) else {
-                return;
-            };
-            // Written beside, then moved over: never half a file.
-            let partial = file.with_extension("json.partial");
-            if std::fs::write(&partial, text).is_ok() && std::fs::rename(&partial, &file).is_err() {
-                let _ = std::fs::remove_file(&partial);
-            }
-        }
-        None => *LAST.lock().unwrap_or_else(|e| e.into_inner()) = Some(id.to_owned()),
+            },
+        ),
+        None => *caskade_core::lock(&LAST) = Some(id.to_owned()),
     }
 }

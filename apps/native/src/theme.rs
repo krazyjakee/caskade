@@ -201,7 +201,7 @@ pub fn show(look: Look) {
 
 /// Asks the main thread to apply `look`.
 fn restyle(look: Look) {
-    *PENDING.lock().unwrap_or_else(|e| e.into_inner()) = Some(look);
+    *caskade_core::lock(&PENDING) = Some(look);
     crate::launch::ask(crate::launch::Request::Restyle);
 }
 
@@ -242,20 +242,20 @@ pub fn follow(services: &'static caskade_app::start::Services) {
 /// The OS switched between light and dark: themes with both follow it.
 pub fn prefers_light(light: bool) {
     {
-        let mut current = PREFERS_LIGHT.lock().unwrap_or_else(|e| e.into_inner());
+        let mut current = caskade_core::lock(&PREFERS_LIGHT);
         if *current == light {
             return;
         }
         *current = light;
     }
-    if let Some(look) = LAST.lock().unwrap_or_else(|e| e.into_inner()).clone() {
+    if let Some(look) = caskade_core::lock(&LAST).clone() {
         restyle(look);
     }
 }
 
 /// Applies the look waiting for the main thread, if any; whether it did.
 pub fn apply_pending(doc: &mut BaseDocument) -> bool {
-    let Some(look) = PENDING.lock().unwrap_or_else(|e| e.into_inner()).take() else {
+    let Some(look) = caskade_core::lock(&PENDING).take() else {
         return false;
     };
     apply(doc, &look);
@@ -359,7 +359,7 @@ pub fn apply(doc: &mut BaseDocument, look: &Look) {
     let root = doc.root_element().id;
     let context = appearance::Context {
         modes: look.modes.clone(),
-        prefers_light: *PREFERS_LIGHT.lock().unwrap_or_else(|e| e.into_inner()),
+        prefers_light: *caskade_core::lock(&PREFERS_LIGHT),
     };
     // `@media (prefers-reduced-motion)`, for "system" motion and themes.
     doc.viewport_mut().prefers_reduced_motion = look.prefers_reduced_motion;
@@ -401,7 +401,7 @@ pub fn apply(doc: &mut BaseDocument, look: &Look) {
         }
         doc.mutate().set_attribute(root, qual("style"), &style);
     }
-    *LAST.lock().unwrap_or_else(|e| e.into_inner()) = Some(look.clone());
+    *caskade_core::lock(&LAST) = Some(look.clone());
 }
 
 /// The fonts the tokens name, bundled as the webview bundles them

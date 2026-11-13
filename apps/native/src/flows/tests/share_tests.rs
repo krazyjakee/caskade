@@ -3,13 +3,9 @@
 //! Share with someone… and stops it; Friend looks at a link, sees what it
 //! shares, and receives the game, which arrives as an install.
 
-use super::receive_share::ReceiveShareDialog;
-use super::share_game::{ShareGameDialog, ShareTarget};
-use crate::input::InputRoot;
-use crate::input::tests::ONE_WINDOW as ONE;
-use blitz_dom::{DocumentConfig, NodeId};
-use blitz_traits::events::{BlitzKeyEvent, KeyState, UiEvent};
-use blitz_traits::shell::{ColorScheme, Viewport};
+use super::*;
+use crate::flows::receive_share::ReceiveShareDialog;
+use crate::flows::share_game::{ShareGameDialog, ShareTarget};
 use caskade_core::accounts::AccountService;
 use caskade_core::bus::Bus;
 use caskade_core::db::LibraryStore;
@@ -24,9 +20,7 @@ use caskade_core::transfer::Transfers;
 use caskade_installer::manifest::RootManifest;
 use caskade_installer::pipeline::input;
 use caskade_ui_data::shares::{ShareExpiry, ShareState, Shares};
-use dioxus_native::DioxusDocument;
-use dioxus_native::prelude::keyboard_types::{Code, Key, Location, Modifiers, NamedKey};
-use dioxus_native::prelude::*;
+use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -171,24 +165,17 @@ static SHOWN: Mutex<Option<Shown>> = Mutex::new(None);
 static HEARD: Mutex<Vec<String>> = Mutex::new(Vec::new());
 
 fn heard(what: impl Into<String>) {
-    HEARD
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .push(what.into());
+    caskade_core::lock(&HEARD).push(what.into());
 }
 
 fn heard_all() -> Vec<String> {
-    HEARD.lock().unwrap_or_else(|e| e.into_inner()).clone()
+    caskade_core::lock(&HEARD).clone()
 }
 
 fn app() -> Element {
-    let shown = SHOWN
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .clone()
-        .unwrap();
+    let shown = caskade_core::lock(&SHOWN).clone().unwrap();
     rsx! {
-        style { {include_str!("../../assets/app.css")} }
+        style { {include_str!("../../../assets/app.css")} }
         InputRoot {
             div { id: "share-ready",
                 match shown {
@@ -200,7 +187,7 @@ fn app() -> Element {
                         }
                     },
                     Shown::Pair { pairing } => rsx! {
-                        super::pairing::PairingHost { pairing }
+                        crate::flows::pairing::PairingHost { pairing }
                     },
                     Shown::Receive { shares } => rsx! {
                         ReceiveShareDialog {
@@ -215,123 +202,19 @@ fn app() -> Element {
     }
 }
 
-struct Window {
-    doc: DioxusDocument,
-}
-
-impl Window {
-    fn open(shown: Shown) -> Self {
-        *SHOWN.lock().unwrap_or_else(|e| e.into_inner()) = Some(shown);
-        HEARD.lock().unwrap_or_else(|e| e.into_inner()).clear();
-        let mut doc = DioxusDocument::new(
-            VirtualDom::new(app),
-            DocumentConfig {
-                viewport: Some(Viewport::new(1280, 800, 1.0, ColorScheme::Dark)),
-                ..Default::default()
-            },
-        );
-        doc.initial_build();
-        let mut window = Self { doc };
-        window.until("the host", 20, |w| w.find("#share-ready").is_some());
-        window
-    }
-
-    fn settle(&mut self) {
-        for _ in 0..12 {
-            blitz_dom::Document::poll(&mut self.doc, None);
-            self.doc.inner.borrow_mut().resolve(0.0);
-            std::thread::sleep(Duration::from_millis(3));
-        }
-    }
-
-    fn until(&mut self, what: &str, seconds: u64, done: impl Fn(&Self) -> bool) {
-        let until = Instant::now() + Duration::from_secs(seconds);
-        while Instant::now() < until {
-            self.settle();
-            if done(self) {
-                self.settle();
-                return;
-            }
-        }
-        panic!("never saw {what}");
-    }
-
-    fn find(&self, selector: &str) -> Option<NodeId> {
-        self.doc
-            .inner
-            .borrow()
-            .query_selector(selector)
-            .ok()
-            .flatten()
-    }
-
-    fn text(&self, selector: &str) -> String {
-        let Some(node) = self.find(selector) else {
-            return String::new();
-        };
-        let doc = self.doc.inner.borrow();
-        doc.get_node(node)
-            .map(|node| node.text_content())
-            .unwrap_or_default()
-    }
-
-    fn focus(&mut self, selector: &str) {
-        let node = self
-            .find(selector)
-            .unwrap_or_else(|| panic!("no {selector}"));
-        self.doc.inner.borrow_mut().set_focus_to(node);
-        self.settle();
-    }
-
-    fn key_event(&mut self, key: Key, state: KeyState) {
-        let text = match &key {
-            Key::Character(text) if state == KeyState::Pressed => Some(text.clone().into()),
-            _ => None,
-        };
-        let event = BlitzKeyEvent {
-            key,
-            code: Code::Unidentified,
-            modifiers: Modifiers::empty(),
-            location: Location::Standard,
-            is_auto_repeating: false,
-            is_composing: false,
-            state,
-            text,
-        };
-        let event = match state {
-            KeyState::Pressed => UiEvent::KeyDown(event),
-            KeyState::Released => UiEvent::KeyUp(event),
-        };
-        blitz_dom::Document::handle_ui_event(&mut self.doc, event);
-    }
-
-    fn key(&mut self, key: Key) {
-        self.key_event(key.clone(), KeyState::Pressed);
-        self.settle();
-        self.key_event(key, KeyState::Released);
-        self.settle();
-    }
-
-    fn type_text(&mut self, text: &str) {
-        for character in text.chars() {
-            self.key_event(Key::Character(character.to_string()), KeyState::Pressed);
-            self.key_event(Key::Character(character.to_string()), KeyState::Released);
-        }
-        self.settle();
-    }
-
-    fn press(&mut self, selector: &str) {
-        self.focus(selector);
-        self.key(Key::Named(NamedKey::Enter));
-    }
+/// `shown` in a window, once its host is there.
+fn open(shown: Shown) -> Window {
+    *caskade_core::lock(&SHOWN) = Some(shown);
+    caskade_core::lock(&HEARD).clear();
+    Window::open_root(app, "the host", "#share-ready")
 }
 
 #[test]
 fn a_link_is_made_to_a_game_and_stopping_it_ends_the_share() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let desk = core("Desk");
     let entry_id = add_celeste(&desk);
-    let mut window = Window::open(Shown::Share {
+    let mut window = open(Shown::Share {
         shares: desk.handle(),
         entry_id,
     });
@@ -342,7 +225,7 @@ fn a_link_is_made_to_a_game_and_stopping_it_ends_the_share() {
             .starts_with("Caskade makes a link. Whoever opens it")
     );
     window.press("#share-make");
-    window.until("the link", 30, |w| {
+    window.until_for("the link", 30, |w| {
         w.text("[data-part=link]")
             .starts_with("caskade://receive?t=")
     });
@@ -351,7 +234,7 @@ fn a_link_is_made_to_a_game_and_stopping_it_ends_the_share() {
         send.starts_with("Send this link to whoever you're sharing Celeste"),
         "{send}"
     );
-    window.until("the share ready", 30, |w| {
+    window.until_for("the share ready", 30, |w| {
         w.text("[data-part=state]")
             .starts_with("The link works until ")
     });
@@ -360,7 +243,7 @@ fn a_link_is_made_to_a_game_and_stopping_it_ends_the_share() {
         "Nobody has opened the link yet."
     );
     window.press("#share-stop");
-    window.until("the dialog closed", 20, |_| heard_all() == ["closed"]);
+    window.until("the dialog closed", |_| heard_all() == ["closed"]);
     let shares = desk.shares.clone();
     let list = caskade_app::runtime::block_on(async move { shares.list().await }).unwrap();
     assert_eq!(list.len(), 1);
@@ -369,7 +252,7 @@ fn a_link_is_made_to_a_game_and_stopping_it_ends_the_share() {
 
 #[test]
 fn a_link_is_looked_at_and_the_game_received_from_it() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let desk = core("Desk");
     let friend = core("Friend's PC");
     let entry_id = add_celeste(&desk);
@@ -392,7 +275,7 @@ fn a_link_is_looked_at_and_the_game_received_from_it() {
         }
         shares.link(&share.id).await.unwrap()
     });
-    let mut window = Window::open(Shown::Receive {
+    let mut window = open(Shown::Receive {
         shares: friend.handle(),
     });
     assert_eq!(window.text("[role=dialog] h2"), "Receive a shared game");
@@ -400,7 +283,7 @@ fn a_link_is_looked_at_and_the_game_received_from_it() {
     window.type_text(&link);
     // Enter in the field looks, as the webview's form submits.
     window.key(Key::Named(NamedKey::Enter));
-    window.until("what it shares", 30, |w| {
+    window.until_for("what it shares", 30, |w| {
         w.find("[data-cs=share-info]").is_some()
     });
     assert_eq!(
@@ -415,7 +298,7 @@ fn a_link_is_looked_at_and_the_game_received_from_it() {
         "{rows}"
     );
     window.press("#share-receive");
-    window.until("the job", 30, |_| {
+    window.until_for("the job", 30, |_| {
         heard_all().iter().any(|what| what.starts_with("job "))
     });
     assert!(heard_all().contains(&"closed".to_owned()));
@@ -447,7 +330,7 @@ fn a_pairing_by_code_is_shown_confirmed_and_finished() {
         eprintln!("skipped: CASKADE_TEST_NO_MULTICAST");
         return;
     }
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let service = format!("cskn{:08x}", std::process::id() ^ 0x3c3c);
     let lan = || Reach {
         lan: Some(service.clone()),
@@ -476,7 +359,7 @@ fn a_pairing_by_code_is_shown_confirmed_and_finished() {
             tokio::time::sleep(Duration::from_millis(50)).await;
         }
     });
-    let mut window = Window::open(Shown::Pair {
+    let mut window = open(Shown::Pair {
         pairing: caskade_ui_data::pairing::Pairing::new(
             tv.devices.clone(),
             tv.accounts.clone(),
@@ -492,9 +375,7 @@ fn a_pairing_by_code_is_shown_confirmed_and_finished() {
     let pairing =
         caskade_app::runtime::block_on(async move { desk_devices.pair_nearby(&asked).await })
             .unwrap();
-    window.until("the request", 20, |w| {
-        w.find("[data-cs=pair-device]").is_some()
-    });
+    window.until("the request", |w| w.find("[data-cs=pair-device]").is_some());
     assert_eq!(
         window.text("[data-cs=pair-device] h2"),
         "Desk wants to pair"
@@ -502,14 +383,14 @@ fn a_pairing_by_code_is_shown_confirmed_and_finished() {
     let code = format!("{} {}", &pairing.code[..3], &pairing.code[3..]);
     assert_eq!(window.text("[data-part=code]"), code);
     window.press("#pair-confirm");
-    window.until("the TV's confirmation", 20, |w| {
+    window.until("the TV's confirmation", |w| {
         w.text("[data-cs=pair-device] [role=status]")
             .starts_with("Waiting for Desk to confirm")
     });
     let desk_devices = desk.devices.clone();
     caskade_app::runtime::block_on(async move { desk_devices.confirm_pairing(&tv_id).await })
         .unwrap();
-    window.until("paired", 20, |w| {
+    window.until("paired", |w| {
         w.text("[data-cs=pair-device] h2") == "Paired with Desk"
     });
     assert!(
@@ -520,7 +401,7 @@ fn a_pairing_by_code_is_shown_confirmed_and_finished() {
         window.text("[data-cs=pair-device]")
     );
     window.press("#pair-close");
-    window.until("the dialog gone", 20, |w| {
+    window.until("the dialog gone", |w| {
         w.find("[data-cs=pair-device]").is_none()
     });
     let tv_devices = tv.devices.clone();

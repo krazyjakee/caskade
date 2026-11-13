@@ -396,9 +396,7 @@ mod tests {
     /// the screenshots show it under every built-in theme.
     #[test]
     fn the_gallery_shows_every_catalogued_component() {
-        let _one = crate::input::tests::ONE_WINDOW
-            .lock()
-            .unwrap_or_else(|e| e.into_inner());
+        let _one = caskade_core::lock(&crate::input::tests::ONE_WINDOW);
         let mut shown = BTreeSet::new();
         for (_, root) in super::SCREENS {
             shown.extend(roots(*root));

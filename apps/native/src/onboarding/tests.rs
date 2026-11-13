@@ -21,11 +21,7 @@ static STORAGE: Mutex<Option<Storage>> = Mutex::new(None);
 static LIBRARY: Mutex<Option<DataSource>> = Mutex::new(None);
 
 fn source() -> DataSource {
-    LIBRARY
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .clone()
-        .expect("a library")
+    caskade_core::lock(&LIBRARY).clone().expect("a library")
 }
 
 fn storage(dir: &std::path::Path) -> Storage {
@@ -64,9 +60,9 @@ fn app() -> Element {
     crate::data::use_data_source(source);
     use_context_provider(crate::library::view_tests::fake_drop_install);
     use_context_provider(crate::game::launch_tests::fake_steps);
-    use_context_provider(crate::game::page_tests::fake_data);
+    use_context_provider(crate::game::page_tests::page_data_tests::fake_data);
     use_context_provider(crate::game::editor::tests::fake_edit_data);
-    if let Some(storage) = STORAGE.lock().unwrap_or_else(|e| e.into_inner()).clone() {
+    if let Some(storage) = caskade_core::lock(&STORAGE).clone() {
         use_context_provider(move || storage);
     }
     rsx! {
@@ -79,7 +75,7 @@ fn app() -> Element {
 
 /// The frame on the welcome.
 fn open(storage: Option<Storage>) -> Window {
-    *STORAGE.lock().unwrap_or_else(|e| e.into_inner()) = storage;
+    *caskade_core::lock(&STORAGE) = storage;
     let mut doc = DioxusDocument::new(
         VirtualDom::new(app),
         DocumentConfig {
@@ -114,8 +110,7 @@ fn set(namespace: &str, key: &str, value: Value) {
 struct FirstRun;
 
 fn first_run() -> FirstRun {
-    *LIBRARY.lock().unwrap_or_else(|e| e.into_inner()) =
-        Some(block(DataSource::fixtures(3)).unwrap());
+    *caskade_core::lock(&LIBRARY) = Some(block(DataSource::fixtures(3)).unwrap());
     set("core.onboarding", "completed", json!(false));
     set("core.onboarding", "sounds", json!(false));
     FirstRun
@@ -123,7 +118,7 @@ fn first_run() -> FirstRun {
 
 impl Drop for FirstRun {
     fn drop(&mut self) {
-        *LIBRARY.lock().unwrap_or_else(|e| e.into_inner()) = None;
+        *caskade_core::lock(&LIBRARY) = None;
     }
 }
 
@@ -145,7 +140,7 @@ fn press(window: &mut Window, id: &str) {
 
 #[test]
 fn skip_setup_keeps_the_defaults_and_opens_the_library() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _run = first_run();
     let mut window = open(None);
     // Nothing of the app shows behind it.
@@ -159,7 +154,7 @@ fn skip_setup_keeps_the_defaults_and_opens_the_library() {
 
 #[test]
 fn a_first_run_goes_through_the_questions_and_the_work_to_the_library() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _run = first_run();
     let dir = tempfile::tempdir().unwrap();
     let mut window = open(Some(storage(dir.path())));
@@ -216,7 +211,7 @@ fn a_first_run_goes_through_the_questions_and_the_work_to_the_library() {
 #[test]
 fn the_choices_and_the_admins_account_are_saved() {
     use dioxus_native::prelude::keyboard_types::{Key, Modifiers, NamedKey};
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _run = first_run();
     let accounts = source().settings.accounts();
     let admin = block(accounts.list()).unwrap().active_id.unwrap();
@@ -273,7 +268,7 @@ fn the_choices_and_the_admins_account_are_saved() {
 
 #[test]
 fn choosing_console_mode_switches_the_window_at_once() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _run = first_run();
     let dir = tempfile::tempdir().unwrap();
     let mut window = open(Some(storage(dir.path())));

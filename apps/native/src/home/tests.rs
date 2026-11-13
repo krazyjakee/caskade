@@ -32,7 +32,7 @@ fn titles(window: &Window, id: &str) -> Vec<String> {
 
 #[test]
 fn the_game_played_last_is_the_hero_and_leaves_recently_played() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = home();
     let said = window.view_text();
@@ -74,7 +74,7 @@ fn the_game_played_last_is_the_hero_and_leaves_recently_played() {
 
 #[test]
 fn the_new_games_shelves_show_the_last_added_and_the_released_games() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = home();
     window.settle_until("Recently Released", |window| {
@@ -171,7 +171,7 @@ fn another_device_is_named_when_paired_and_nothing_for_this_one() {
 #[test]
 fn lt_and_rt_page_focus_along_a_shelf() {
     use caskade_ui_input::Action;
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = home();
     let shelf = window.get("data-focus-section", "shelf-added");

@@ -11,13 +11,11 @@ use std::sync::Mutex;
 pub static DONE: Mutex<Vec<String>> = Mutex::new(Vec::new());
 
 pub fn did(what: impl Into<String>) {
-    DONE.lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .push(what.into());
+    caskade_core::lock(&DONE).push(what.into());
 }
 
 pub fn take_done() -> Vec<String> {
-    std::mem::take(&mut *DONE.lock().unwrap_or_else(|e| e.into_inner()))
+    std::mem::take(&mut *caskade_core::lock(&DONE))
 }
 
 #[component]

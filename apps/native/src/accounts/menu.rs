@@ -5,14 +5,13 @@
 //! a game Caskade launched is running: the session belongs to the account
 //! that started it.
 
-use caskade_ui_data::Key as DataKey;
 use caskade_ui_data::accounts::AccountRole;
 use caskade_ui_i18n::{t, tp};
 use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use dioxus_native::prelude::*;
 
 use super::{use_account_list, use_accounts};
-use crate::data::{change, use_query};
+use crate::data::change;
 use crate::router::{Route, use_router};
 use crate::settings::unsaved::{Leaving, after_unsaved_changes};
 use crate::ui::icons::{USER_ROUND, USERS};
@@ -20,26 +19,16 @@ use crate::ui::interact::{Keys, use_interaction};
 use crate::ui::popover::use_trigger;
 use crate::ui::{Avatar, AvatarSize, Menu, MenuEntry, MenuItem};
 
-/// How many games Caskade launched are running now.
-fn use_running_count() -> usize {
-    let sessions = use_query(DataKey::Sessions(None), |library| async move {
-        library.sessions(None, 50).await
-    });
-    match &*sessions.read() {
-        Some(Ok(sessions)) => sessions
-            .iter()
-            .filter(|session| session.ended_at_ms.is_none())
-            .count(),
-        _ => 0,
-    }
-}
-
 #[component]
 pub fn AccountMenu() -> Element {
     let list = use_account_list();
     let accounts = use_accounts();
     let router = use_router();
-    let running = use_running_count();
+    let running = crate::data::use_running_count();
+    let running = match &*running.read() {
+        Some(Ok(count)) => *count,
+        _ => 0,
+    };
     let trigger = use_trigger();
     let interaction = use_interaction();
     let mut open = use_signal(|| None::<crate::ui::Anchor>);

@@ -131,7 +131,7 @@ fn press(window: &mut Window, node: blitz_dom::NodeId, key: Key) {
 
 #[test]
 fn every_field_reads_what_its_section_saved() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     set("core.general", "launchOnLogin", json!(true));
@@ -185,7 +185,7 @@ fn every_field_reads_what_its_section_saved() {
 /// Start minimized needs Launch on system startup, and says so (#55).
 #[test]
 fn changes_save_by_keyboard_and_pad() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     set("core.general", "launchOnLogin", json!(false));
@@ -280,7 +280,7 @@ fn changes_save_by_keyboard_and_pad() {
 /// keeps it (#44), and says what goes back first.
 #[test]
 fn the_reset_puts_back_every_preference_on_the_page() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     let console = saved("core.console")["start"].clone();
@@ -361,7 +361,7 @@ fn says(window: &Window, text: &str) -> bool {
 
 #[test]
 fn checks_installs_with_progress_and_offers_the_restart() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _fake = fake::start(idle());
     let mut window = general("/settings?tab=general");
@@ -410,7 +410,7 @@ fn checks_installs_with_progress_and_offers_the_restart() {
 
 #[test]
 fn offers_the_release_again_after_a_failed_download() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _fake = fake::start(AppUpdateStatus {
         phase: AppUpdatePhase::Failed,
@@ -435,7 +435,7 @@ fn offers_the_release_again_after_a_failed_download() {
 /// checks; one that can turns them off.
 #[test]
 fn says_why_a_copy_cant_update_itself_and_turns_the_checks_off() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     {
@@ -470,7 +470,7 @@ fn says_why_a_copy_cant_update_itself_and_turns_the_checks_off() {
 /// Links to Caskade updates land on them, not on the top of General (#68).
 #[test]
 fn a_link_to_caskades_updates_scrolls_to_them() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let top = |window: &Window| {
         let anchor = window.get("data-anchor", "updates");
@@ -499,7 +499,7 @@ fn a_link_to_caskades_updates_scrolls_to_them() {
 /// description).
 #[test]
 fn every_control_is_named_by_its_row() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let window = general("/settings?tab=general");
     let panel = window.get("data-settings", "general");

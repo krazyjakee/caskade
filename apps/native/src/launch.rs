@@ -66,7 +66,7 @@ static REQUESTS: OnceLock<(mpsc::Sender<Request>, Mutex<Option<EventLoopProxy>>)
 fn requests() -> &'static (mpsc::Sender<Request>, Mutex<Option<EventLoopProxy>>) {
     REQUESTS.get_or_init(|| {
         let (sender, receiver) = mpsc::channel();
-        *RECEIVER.lock().unwrap_or_else(|e| e.into_inner()) = Some(receiver);
+        *caskade_core::lock(&RECEIVER) = Some(receiver);
         (sender, Mutex::new(None))
     })
 }
@@ -78,7 +78,7 @@ static RECEIVER: Mutex<Option<mpsc::Receiver<Request>>> = Mutex::new(None);
 pub fn ask(request: Request) {
     let (sender, proxy) = requests();
     let _ = sender.send(request);
-    if let Some(proxy) = proxy.lock().unwrap_or_else(|e| e.into_inner()).as_ref() {
+    if let Some(proxy) = caskade_core::lock(proxy).as_ref() {
         proxy.wake_up();
     }
 }
@@ -93,9 +93,7 @@ pub fn run(
 ) {
     let receiver = {
         requests();
-        RECEIVER
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
+        caskade_core::lock(&RECEIVER)
             .take()
             .expect("the window runs once")
     };

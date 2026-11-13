@@ -103,7 +103,7 @@ fn within(window: &Window, root: blitz_dom::NodeId, name: &str, value: &str) -> 
 /// turns its sources off and the reset turns them back on.
 #[test]
 fn lists_the_found_launchers_and_switches_them() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore("core.launchers", saved("core.launchers"));
     let mut window = open("/settings?tab=launchers");
@@ -224,7 +224,7 @@ fn installer() -> Window {
 /// Linux: one switch makes Caskade their default app, or gives them back.
 #[test]
 fn torrent_links_open_with_caskade_and_go_back() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _fake = fake::start(links(Support::Direct, true, false), None);
     let mut window = installer();
@@ -250,7 +250,7 @@ fn torrent_links_open_with_caskade_and_go_back() {
 /// A change that fails says why.
 #[test]
 fn windows_offers_caskade_and_opens_default_apps() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     {
         let _fake = fake::start(links(Support::Chooser, true, false), None);
@@ -291,7 +291,7 @@ fn windows_offers_caskade_and_opens_default_apps() {
 
 #[test]
 fn says_when_this_system_cant_send_them() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _fake = fake::start(links(Support::Unsupported, false, false), None);
     let window = installer();

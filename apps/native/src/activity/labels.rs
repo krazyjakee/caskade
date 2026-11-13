@@ -85,11 +85,15 @@ pub fn status_name(status: JobStatus) -> &'static str {
     }
 }
 
+/// Whether `job` is under way: downloading or installing (the webview's
+/// `running`).
 pub fn is_running(job: &JobSnapshot) -> bool {
     matches!(job.status, JobStatus::Downloading | JobStatus::Installing)
 }
 
-/// Running, queued, paused or waiting for the user: it can be cancelled.
+/// Running, queued, paused or waiting for the user: it can be cancelled,
+/// and it counts on the Activity button (`api/install.ts`'s
+/// `isActiveJob`).
 pub fn is_active(job: &JobSnapshot) -> bool {
     is_running(job)
         || matches!(

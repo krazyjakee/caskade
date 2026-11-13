@@ -4,8 +4,8 @@
 //! refreshing), and every achievement with its state, progress, unlock
 //! time, hardcore unlock, rarity and points where the service gives them.
 //! Hidden achievements stay concealed until unlocked or revealed. Icons
-//! are drawn (a trophy, a lock, a concealed mark); the services' own
-//! pictures aren't fetched natively yet.
+//! are the services' own pictures, or drawn (a trophy, a lock, a concealed
+//! mark) where there is none.
 
 use super::data::{AchievementIcon, use_answer, use_page_data};
 use crate::input::use_input;
@@ -234,10 +234,7 @@ fn SetView(game_id: String, set: AchievementSet) -> Element {
     if let Some(at) = sync.fetched_at_ms {
         account.push_str(&format!(
             " · {}",
-            t!(
-                "updated {when}",
-                when = format::date_time(crate::library::local_date_time(at))
-            )
+            t!("updated {when}", when = crate::library::date_time(at))
         ));
     }
     rsx! {
@@ -248,7 +245,7 @@ fn SetView(game_id: String, set: AchievementSet) -> Element {
                     None => t!("The last refresh failed: {reason}", reason = error.summary),
                     Some(at) => t!(
                         "Showing achievements from {when}. The last refresh failed: {reason}",
-                        when = format::date_time(crate::library::local_date_time(at)),
+                        when = crate::library::date_time(at),
                         reason = error.summary
                     ),
                 }
@@ -256,7 +253,7 @@ fn SetView(game_id: String, set: AchievementSet) -> Element {
         }
         if let Some(at) = sync.retry_at_ms {
             p { "data-part": "wait", class: "text-sm text-fg-muted",
-                {t!("{provider} asked Caskade to wait; refreshing works again after {when}.", provider = provider.clone(), when = format::date_time(crate::library::local_date_time(at)))}
+                {t!("{provider} asked Caskade to wait; refreshing works again after {when}.", provider = provider.clone(), when = crate::library::date_time(at))}
             }
         }
         match sync.status {
@@ -473,7 +470,7 @@ fn Row(
     } else {
         None
     };
-    let when = |ms: i64| format::date_time(crate::library::local_date_time(ms));
+    let when = crate::library::date_time;
     let unlocked_line = if state.unlocked {
         match state.unlocked_at_ms.filter(|_| capabilities.unlock_times) {
             Some(at) => t!("Unlocked {when}", when = when(at)),

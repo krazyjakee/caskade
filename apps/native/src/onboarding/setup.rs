@@ -2,6 +2,7 @@
 //! `onboarding/SetupStep.tsx`: each task's progress, the library's count
 //! climbing and covers arriving behind it. Then the way in.
 
+use crate::data::sleep;
 use std::cell::Cell;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
@@ -9,7 +10,7 @@ use std::time::{Duration, Instant};
 use caskade_core::model::{GameFilter, GameSort, ListGames};
 use caskade_ui_data::Key as DataKey;
 use caskade_ui_data::emulation::Emulation;
-use caskade_ui_data::romm::Romm;
+
 use caskade_ui_i18n::{format, t, tn};
 use dioxus_native::prelude::*;
 
@@ -32,11 +33,6 @@ const COUNT_FRAME: Duration = Duration::from_millis(33);
 const QUIET: u64 = 30;
 
 const OPEN: &str = "inline-flex h-12 items-center justify-center rounded-control bg-linear-to-r from-accent to-accent-strong px-10 font-display text-base font-semibold tracking-widest text-accent-fg uppercase transition-[filter,box-shadow,scale] duration-(--cs-motion-duration-fast) data-focus-visible:focus-ring data-hovered:shadow-[0_0_28px_-4px] data-hovered:shadow-glow data-hovered:brightness-115 data-pressed:scale-[0.97]";
-
-async fn sleep(time: Duration) {
-    // Timers need the app runtime's reactor; Dioxus's executor has none.
-    let _ = caskade_app::runtime::spawn(async move { tokio::time::sleep(time).await }).await;
-}
 
 fn icon(state: TaskState) -> Icon {
     match state {
@@ -162,7 +158,7 @@ pub fn SetupStep(choices: Choices, sounds: Sounds, on_done: EventHandler<()>) ->
     let discovery = crate::data::try_use_discovery();
     let emulation =
         try_use_context::<Emulation>().or_else(|| crate::shell::services().map(Emulation::of));
-    let romm = try_use_context::<Romm>().or_else(|| crate::shell::services().and_then(Romm::of));
+    let romm = crate::settings::use_romm();
     let tasks = use_signal(|| planned_tasks(&choices));
     let mut finished = use_signal(|| false);
     let mut error = use_signal(|| None::<String>);

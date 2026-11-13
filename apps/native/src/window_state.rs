@@ -25,24 +25,13 @@ impl WindowState {
     /// The saved state in `file`; `None` without one, or when it can't be
     /// used.
     pub fn load(file: &Path) -> Option<Self> {
-        let text = std::fs::read_to_string(file).ok()?;
-        let state: Self = serde_json::from_str(&text)
-            .inspect_err(|error| tracing::warn!(%error, "the window state isn't readable"))
-            .ok()?;
+        let state: Self = crate::state_file::load(file)?;
         (state.width >= MIN_WIDTH && state.height >= MIN_HEIGHT).then_some(state)
     }
 
     /// Writes the state to `file`, replacing it whole.
     pub fn save(&self, file: &Path) {
-        let Ok(text) = serde_json::to_string(self) else {
-            return;
-        };
-        let partial = file.with_extension("json.partial");
-        if let Err(error) =
-            std::fs::write(&partial, text).and_then(|()| std::fs::rename(&partial, file))
-        {
-            tracing::warn!(%error, "the window state wasn't saved");
-        }
+        crate::state_file::save(file, self);
     }
 
     /// The state after the window moved or resized: a maximised window

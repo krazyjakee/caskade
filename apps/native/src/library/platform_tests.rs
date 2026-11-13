@@ -6,7 +6,7 @@ use crate::router::Route;
 
 #[test]
 fn emulated_games_show_by_platform_and_a_platform_opens_its_games() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open();
     window.go("/library?filter=emulated&sort=title&layout=grid");

@@ -238,7 +238,7 @@ fn sign_in_label(server: &RommServerConfig) -> String {
 
 fn last_sync(status: Option<&ServerStatus>) -> String {
     match status.and_then(|status| status.last_sync_ms) {
-        Some(ms) => format::date_time(crate::library::local_date_time(ms)),
+        Some(ms) => crate::library::date_time(ms),
         None => t!(
             note = "A RomM server's last sync: none yet",
             "Not this session"

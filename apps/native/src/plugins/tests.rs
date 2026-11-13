@@ -75,9 +75,9 @@ fn chart(view: &str) -> Vec<Node> {
 }
 
 fn open(href: &'static str) -> Window {
-    *START.lock().unwrap_or_else(|e| e.into_inner()) = href;
+    *caskade_core::lock(&START) = href;
     let window = Window::open();
-    *START.lock().unwrap_or_else(|e| e.into_inner()) = "/";
+    *caskade_core::lock(&START) = "/";
     window
 }
 
@@ -88,7 +88,7 @@ fn press(window: &mut Window, node: blitz_dom::NodeId) {
 
 #[test]
 fn a_view_draws_tells_the_plugin_and_keeps_its_state() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     fake().set_plugins(vec![plugin(
@@ -177,7 +177,7 @@ fn a_view_draws_tells_the_plugin_and_keeps_its_state() {
 
 #[test]
 fn a_contribution_that_fails_shows_its_plugins_placeholder() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     fake().set_plugins(vec![
@@ -230,7 +230,7 @@ fn a_contribution_that_fails_shows_its_plugins_placeholder() {
 
 #[test]
 fn drawn_stats_read_as_a_list_of_values() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     fake().set_plugins(vec![plugin(
@@ -265,7 +265,7 @@ const HLTB: &str = "dev.caskade.howlongtobeat";
 
 #[test]
 fn the_game_page_shows_plugins_actions_tabs_and_panels_for_its_game() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     fake().set_plugins(vec![
@@ -349,7 +349,7 @@ fn the_game_page_shows_plugins_actions_tabs_and_panels_for_its_game() {
 
 #[test]
 fn a_games_menu_runs_plugins_actions_and_says_when_one_fails() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     fake().set_plugins(vec![plugin(
@@ -396,7 +396,7 @@ fn a_games_menu_runs_plugins_actions_and_says_when_one_fails() {
 
 #[test]
 fn library_cards_show_plugins_badges() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     fake().set_plugins(vec![plugin(
@@ -426,7 +426,7 @@ fn library_cards_show_plugins_badges() {
 
 #[test]
 fn home_ends_with_plugins_sections() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     fake().set_plugins(vec![plugin(

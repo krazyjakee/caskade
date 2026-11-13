@@ -6,7 +6,6 @@
 
 use super::data::{UpdateChange, use_page_data};
 use super::launch::version_label;
-use crate::data::status::use_jobs;
 use crate::ui::{Button, ButtonSize, ButtonVariant, Switch, icons};
 use caskade_core::install::{JobPhase, JobStatus};
 use caskade_core::updates::GameUpdate;
@@ -16,11 +15,11 @@ use dioxus_native::prelude::*;
 /// The update job's progress, then how it ended.
 #[component]
 pub fn UpdateProgress(job_id: String) -> Element {
-    let jobs = use_jobs();
+    let jobs = crate::data::use_jobs_query();
     let job = jobs
         .read()
         .as_ref()
-        .and_then(|jobs| jobs.as_ref().ok().cloned().flatten())
+        .and_then(|jobs| jobs.as_ref().ok().cloned())
         .and_then(|jobs| jobs.into_iter().find(|each| each.id == job_id));
     let Some(job) = job else {
         return rsx! {};

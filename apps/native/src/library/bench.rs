@@ -12,6 +12,7 @@
 
 use super::grid::VirtualLibrary;
 use super::window::Layout;
+use crate::data::sleep;
 use crate::input::use_input;
 use blitz_dom::{LocalName, NodeId, ScrollBehavior};
 use caskade_core::model::{GameFilter, GameSort, ListGames};
@@ -40,15 +41,7 @@ pub fn screen() -> Option<Element> {
 }
 
 fn layout() -> Layout {
-    match std::env::var("CASKADE_LIBRARY_BENCH_LAYOUT").as_deref() {
-        Ok("list") => Layout::List,
-        _ => Layout::Grid,
-    }
-}
-
-/// Waits on the app's runtime: Dioxus's executor has no timers.
-async fn sleep(time: Duration) {
-    let _ = caskade_app::runtime::spawn(async move { tokio::time::sleep(time).await }).await;
+    std::env::var("CASKADE_LIBRARY_BENCH_LAYOUT").map_or(Layout::Grid, |name| Layout::parse(&name))
 }
 
 /// What the benchmark measured.
@@ -91,8 +84,14 @@ fn Bench() -> Element {
                 sleep(Duration::from_millis(100)).await;
                 let found = root.peek().clone().and_then(|handle| {
                     let doc = handle.doc();
-                    let scroller = find(&doc, handle.node_id(), "data-cs", "virtual-library")?;
-                    find(&doc, scroller, "data-index", "0").map(|_| (handle.clone(), scroller))
+                    let scroller = crate::input::find_attr(
+                        &doc,
+                        handle.node_id(),
+                        "data-cs",
+                        "virtual-library",
+                    )?;
+                    crate::input::find_attr(&doc, scroller, "data-index", "0")
+                        .map(|_| (handle.clone(), scroller))
                 });
                 if let Some(found) = found {
                     break found;
@@ -137,18 +136,6 @@ fn Bench() -> Element {
     }
 }
 
-fn find(doc: &blitz_dom::BaseDocument, from: NodeId, name: &str, value: &str) -> Option<NodeId> {
-    let mut stack = vec![from];
-    while let Some(at) = stack.pop() {
-        let node = doc.get_node(at)?;
-        if node.attr(LocalName::from(name)) == Some(value) {
-            return Some(at);
-        }
-        stack.extend(node.children.iter().copied());
-    }
-    None
-}
-
 /// The games mounted under `scroller`.
 fn count(doc: &blitz_dom::BaseDocument, scroller: NodeId) -> usize {
     let mut count = 0;
@@ -182,7 +169,7 @@ fn write_report(measured: &Measured, layout: Layout, elapsed: Duration) {
             .unwrap_or(0.0)
     };
     let report = serde_json::json!({
-        "layout": if layout == Layout::List { "list" } else { "grid" },
+        "layout": layout.name(),
         "steps": STEPS,
         "frames": measured.redraws.len(),
         "frameMsP50": percentile(0.5),

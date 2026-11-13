@@ -98,7 +98,7 @@ fn type_into(window: &mut Window, id: &str, text: &str) {
 
 #[test]
 fn a_script_is_added_ordered_duplicated_and_deleted() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let (store, accounts) = library();
     let mut window = open(Scripts::new(store.clone(), accounts));
     assert!(
@@ -163,7 +163,7 @@ fn a_script_is_added_ordered_duplicated_and_deleted() {
 
 #[test]
 fn a_test_runs_the_script_once_and_shows_its_output() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let (store, accounts) = library();
     let mut window = open(Scripts::new(store, accounts));
     press(&mut window, "scripts-add");
@@ -194,7 +194,7 @@ fn a_test_runs_the_script_once_and_shows_its_output() {
 #[test]
 fn an_account_that_isnt_an_admin_cant_change_global_scripts() {
     use caskade_core::accounts::{AccountAccess, AccountRole, NewAccount, Permissions};
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let (store, accounts) = library();
     let kid = accounts.clone();
     caskade_app::runtime::block_on(async move {

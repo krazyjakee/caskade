@@ -21,7 +21,8 @@ use caskade_core::emulation::{
     RomScanner, Tracking,
 };
 use caskade_core::paths::AppPaths;
-use caskade_core::romm::{MemorySecrets, RommService};
+use caskade_core::romm::RommService;
+use caskade_core::secrets::MemorySecrets;
 use caskade_ui_data::emulation::Emulation;
 use caskade_ui_data::romm::Romm;
 use dioxus_native::DioxusDocument;
@@ -227,7 +228,7 @@ fn add_emulator(library: &Library, platform: &str, extension: &str) -> (String, 
 
 #[test]
 fn an_emulator_added_by_hand_is_listed_and_removed_after_asking() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let library = library(false);
     let mut window = open(&library, None, "emulation-add");
     assert!(body(&window).contains("No emulators yet."));
@@ -282,7 +283,7 @@ fn an_emulator_added_by_hand_is_listed_and_removed_after_asking() {
 
 #[test]
 fn a_custom_profile_previews_its_command_and_saves() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let library = library(false);
     let (emulator, _) = add_emulator(&library, "nintendo_nes", "nes");
     let mut window = open(&library, None, "profile-add-custom");
@@ -317,7 +318,7 @@ fn a_custom_profile_previews_its_command_and_saves() {
 
 #[test]
 fn a_platforms_default_emulator_saves() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let library = library(false);
     let (emulator, profile) = add_emulator(&library, "nintendo_nes", "nes");
     let mut window = open(&library, Some("platforms"), "platform-default-nintendo_nes");
@@ -344,7 +345,7 @@ fn a_platforms_default_emulator_saves() {
 
 #[test]
 fn a_rom_scan_is_reviewed_and_imported() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let library = library(false);
     let (emulator, profile) = add_emulator(&library, "nintendo_nes", "nes");
     let roms = library.dir.path().join("roms");
@@ -383,7 +384,7 @@ fn a_rom_scan_is_reviewed_and_imported() {
 
 #[test]
 fn a_romm_server_is_added_with_its_password_in_the_keychain_only() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let library = library(true);
     let mut window = open(&library, Some("romm"), "romm-add");
     press_id(&mut window, "romm-add");
@@ -415,7 +416,7 @@ fn a_romm_server_is_added_with_its_password_in_the_keychain_only() {
         .unwrap();
     // The password is in the keychain (sealed), and nowhere in the
     // settings or on screen.
-    use caskade_core::romm::SecretStore;
+    use caskade_core::secrets::SecretStore;
     assert!(
         caskade_app::runtime::block_on(library.secrets.get(&server.id))
             .unwrap()
@@ -427,7 +428,7 @@ fn a_romm_server_is_added_with_its_password_in_the_keychain_only() {
 
 #[test]
 fn without_romm_the_section_says_why() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let library = library(false);
     let window = open(&library, Some("romm"), "emulation-add");
     let mut window = window;

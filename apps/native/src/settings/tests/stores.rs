@@ -101,7 +101,7 @@ fn press(window: &mut Window, node: blitz_dom::NodeId) {
 
 #[test]
 fn connects_disconnects_and_removes_an_account() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = stores();
     let section = window.get("data-provider", "fakestore");
@@ -214,7 +214,7 @@ fn connects_disconnects_and_removes_an_account() {
 
 #[test]
 fn the_refresh_preferences_save() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let settings = source().settings.clone();
     let before = caskade_app::runtime::block_on(settings.get("core.storeAccounts"))

@@ -19,7 +19,7 @@ use std::sync::Mutex;
 static HEARD: Mutex<Vec<String>> = Mutex::new(Vec::new());
 
 fn heard(what: String) {
-    HEARD.lock().unwrap_or_else(|e| e.into_inner()).push(what);
+    caskade_core::lock(&HEARD).push(what);
 }
 
 #[component]

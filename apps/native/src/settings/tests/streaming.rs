@@ -321,7 +321,7 @@ fn text_of(window: &Window, name: &str, value: &str) -> String {
 
 #[test]
 fn hosting_turns_on_and_a_waiting_device_pairs_with_its_code() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let fake = Fake::new();
     let mut window = open(&fake);
     window.settle_until("hosting off", |window| {
@@ -389,7 +389,7 @@ fn hosting_turns_on_and_a_waiting_device_pairs_with_its_code() {
 
 #[test]
 fn streaming_set_up_before_asks_for_its_sign_in() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let fake = Fake::new();
     *fake.on_outcome.lock().unwrap() = HostOutcome::ExistingFound;
     let mut window = open(&fake);
@@ -418,7 +418,7 @@ fn streaming_set_up_before_asks_for_its_sign_in() {
 
 #[test]
 fn a_device_to_stream_from_pairs_through_the_dialogs_code() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let fake = Fake::new();
     fake.hosts.lock().unwrap().extend([
         StreamHost {
@@ -507,7 +507,7 @@ fn a_device_to_stream_from_pairs_through_the_dialogs_code() {
 
 #[test]
 fn the_stream_quality_saves_and_programs_update() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let before = caskade_app::runtime::block_on(source().settings.get("core.streaming"))
         .unwrap()

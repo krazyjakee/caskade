@@ -15,7 +15,7 @@ use std::cell::RefCell;
 use std::sync::LazyLock;
 
 use caskade_app::tray::{Tray, quit_label, show_label};
-use caskade_core::settings::{GeneralSettings, SettingsService};
+use caskade_core::settings::SettingsService;
 use tray_icon::menu::{Menu, MenuEvent, MenuItem, PredefinedMenuItem};
 use tray_icon::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
 
@@ -213,24 +213,9 @@ pub fn relabel() {
 /// Follows `core.general`'s close setting, and the core's language for the
 /// menu.
 pub fn follow(settings: SettingsService) {
-    caskade_app::runtime::spawn(async move {
-        let general = |settings: SettingsService| async move {
-            settings
-                .read_or_default::<GeneralSettings>("core.general")
-                .await
-        };
-        state().follow(&general(settings.clone()).await);
-        let mut changes = settings.subscribe();
-        use tokio::sync::broadcast::error::RecvError;
-        loop {
-            match changes.recv().await {
-                Ok(changed) if changed.namespace == "core.general" => {}
-                Ok(_) | Err(RecvError::Lagged(_)) => continue,
-                Err(RecvError::Closed) => break,
-            }
-            state().follow(&general(settings.clone()).await);
-        }
-    });
+    caskade_app::runtime::spawn(caskade_app::tray::follow_settings(settings, |general| {
+        state().follow(general)
+    }));
     caskade_app::runtime::spawn(async move {
         let mut changes = caskade_core::i18n::subscribe();
         while changes.changed().await.is_ok() {
@@ -264,7 +249,7 @@ mod linux {
         if cfg!(test) {
             return false;
         }
-        let mut gtk = GTK.lock().unwrap_or_else(|e| e.into_inner());
+        let mut gtk = caskade_core::lock(&GTK);
         if let Some(running) = *gtk {
             return running;
         }

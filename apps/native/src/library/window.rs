@@ -31,6 +31,23 @@ pub enum Layout {
 }
 
 impl Layout {
+    /// Its name in links and saved state.
+    pub fn name(self) -> &'static str {
+        match self {
+            Self::Grid => "grid",
+            Self::List => "list",
+        }
+    }
+
+    /// The layout `name` names; anything else is the grid.
+    pub fn parse(name: &str) -> Self {
+        if name == "list" {
+            Self::List
+        } else {
+            Self::Grid
+        }
+    }
+
     pub fn row_height(self) -> f64 {
         match self {
             Self::Grid => GRID_ROW,

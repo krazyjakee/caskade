@@ -5,6 +5,7 @@
 //! core's own first scan doesn't run a second one; the rest may finish
 //! after the user opens the library.
 
+use crate::data::sleep;
 use std::collections::BTreeSet;
 use std::time::Duration;
 
@@ -166,11 +167,6 @@ pub trait Report {
 
 /// Between looks at work that's running.
 const POLL: Duration = Duration::from_millis(400);
-
-async fn sleep(time: Duration) {
-    // Timers need the app runtime's reactor; Dioxus's executor has none.
-    let _ = caskade_app::runtime::spawn(async move { tokio::time::sleep(time).await }).await;
-}
 
 /// A section's saved value with `patch`'s fields over it.
 async fn update_section(

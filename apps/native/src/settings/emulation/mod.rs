@@ -67,6 +67,24 @@ pub struct Snapshot {
     pub platforms: Vec<PlatformView>,
 }
 
+impl Snapshot {
+    /// Platform `id`'s name, or the id for one it doesn't know.
+    pub fn platform_name(&self, id: &str) -> String {
+        self.platform(id)
+            .map_or_else(|| id.to_owned(), |view| view.platform.name.clone())
+    }
+
+    /// Platform `id`'s short name, or the id for one it doesn't know.
+    pub fn platform_short(&self, id: &str) -> String {
+        self.platform(id)
+            .map_or_else(|| id.to_owned(), |view| view.platform.short.clone())
+    }
+
+    fn platform(&self, id: &str) -> Option<&PlatformView> {
+        self.platforms.iter().find(|view| view.platform.id == id)
+    }
+}
+
 /// What's running, as its events say: the last detection, every scan
 /// (newest first) and every install.
 #[derive(Clone, Copy, PartialEq)]

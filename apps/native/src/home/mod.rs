@@ -9,10 +9,6 @@ mod shelf_row;
 mod tests;
 
 pub use anatomy::ANATOMY;
-#[allow(
-    unused_imports,
-    reason = "the store and collections views (#102) use it"
-)]
 pub(crate) use shelf_row::ShelfRow;
 
 use caskade_core::model::{GameFilter, GamePage, GameSort, GameSummary, ListGames, PlayedOn};
@@ -127,18 +123,6 @@ fn use_games(filter: GameFilter, sort: GameSort, limit: u32) -> Query<GamePage> 
     })
 }
 
-/// How many games are running now.
-fn use_running_count() -> Query<usize> {
-    use_query(DataKey::Sessions(None), |library| async move {
-        library.sessions(None, 200).await.map(|sessions| {
-            sessions
-                .iter()
-                .filter(|session| session.ended_at_ms.is_none())
-                .count()
-        })
-    })
-}
-
 /// The library opened on a filter and, given one, a sort; the rest as
 /// the user left them (the webview's links).
 fn library_href(filter: &str, sort: Option<&str>) -> String {
@@ -148,21 +132,10 @@ fn library_href(filter: &str, sort: Option<&str>) -> String {
     }
 }
 
-fn sort_name(sort: GameSort) -> &'static str {
-    match sort {
-        GameSort::Added => "added",
-        GameSort::Released => "released",
-        GameSort::Recent => "recent",
-        GameSort::Playtime => "playtime",
-        GameSort::Popular => "popular",
-        GameSort::Title => "title",
-    }
-}
-
 #[component]
 pub fn HomeView() -> Element {
     let router = use_router();
-    let running = use_running_count();
+    let running = crate::data::use_running_count();
     // The hero and the shelf's 12.
     let recent = use_games(GameFilter::Recent, GameSort::Recent, SHELF_SIZE + 1);
     let stats = use_library_stats();
@@ -410,7 +383,7 @@ fn NewGamesShelf(
     if !failed && games.is_empty() {
         return rsx! {};
     }
-    let href = library_href("all", Some(sort_name(sort)));
+    let href = library_href("all", Some(crate::router::route::sort_name(sort)));
     rsx! {
         ShelfRow {
             id,

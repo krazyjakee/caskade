@@ -213,12 +213,6 @@ pub fn rich(context: Option<&str>, id: &str, args: &[(&str, &dyn Value)]) -> Vec
     caskade_i18n::rich::parse(&text(context, id, args))
 }
 
-/// Whether `id` (in `context`) has a translation in the language in use,
-/// in the `app` or `ui` domain.
-pub fn is_translated(context: Option<&str>, id: &str) -> bool {
-    APP.find(context, id).is_some() || UI.find(context, id).is_some()
-}
-
 /// A message: `t!("Quick menu")`, `t!("Stop {title}", title = name)`;
 /// `note = "…"` first is a comment for translators.
 #[macro_export]

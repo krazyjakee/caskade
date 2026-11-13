@@ -46,68 +46,39 @@ mod toast;
 mod tooltip;
 
 pub use age_lock::AgeLockLabel;
-#[allow(unused_imports)]
-pub use avatar::{
-    Avatar, AvatarInfo, AvatarPicker, AvatarSize, DEFAULT_AVATAR, avatar_info, avatars, initials,
-};
-#[allow(unused_imports)]
+pub use avatar::{Avatar, AvatarPicker, AvatarSize, DEFAULT_AVATAR, avatars};
 pub use button::{Button, ButtonSize, ButtonVariant};
-#[allow(unused_imports)]
 pub use checkbox::Checkbox;
-#[allow(unused_imports)]
-pub use combobox::{ActiveOption, Combobox, use_active_option};
-#[allow(unused_imports)]
+pub use combobox::use_active_option;
 pub use dialog::{ConfirmDialog, Dialog};
-#[allow(unused_imports)]
 pub use error_notice::{ErrorNotice, NoticeVariant};
-#[allow(unused_imports)]
 pub use failure::FailureNotice;
-#[allow(unused_imports)]
-pub use game_art::{GameArt, art_background};
-#[allow(unused_imports)]
-pub use game_card::{CardGame, CardVariant, GameCard, platform_line};
-#[allow(unused_imports)]
+pub use game_art::GameArt;
+pub use game_card::{CardGame, GameCard, platform_line};
 pub use game_row::{GameRow, TABLE_COLUMNS};
-#[allow(unused_imports)]
-pub use hero::{Hero, HeroGame};
-#[allow(unused_imports)]
+pub use hero::Hero;
 pub use icons::{Icon, Svg};
-#[allow(unused_imports)]
-pub use interact::Forced;
-#[allow(unused_imports)]
 pub use link::Link;
-#[allow(unused_imports)]
 pub use menu::{Menu, MenuButton, MenuEntry, MenuItem};
-#[allow(unused_imports)]
 pub use popover::{Anchor, Popover};
-#[allow(unused_imports)]
 pub use progress::Progress;
-#[allow(unused_imports)]
 pub use radio::{RadioGroup, RadioOption};
-#[allow(unused_imports)]
 pub use segmented::{Segment, SegmentedControl};
-#[allow(unused_imports)]
-pub(crate) use select::List as SelectList;
-#[allow(unused_imports)]
 pub use select::{Select, SelectOption};
-#[allow(unused_imports)]
 pub use settings::{DotTone, Found, Pill, PillTone, SettingRow, SettingsSection, StatusDot, fold};
-#[allow(unused_imports)]
 pub use shelf::Shelf;
-#[allow(unused_imports)]
 pub use slider::Slider;
-#[allow(unused_imports)]
 pub use status_badge::{GameStatus, StatusBadge};
-#[allow(unused_imports)]
 pub use switch::{Switch, SwitchSize};
-#[allow(unused_imports)]
 pub use tabs::{Tab, Tabs};
-#[allow(unused_imports)]
 pub use text_field::{SearchField, TextField};
-#[allow(unused_imports)]
 pub use toast::{ToastRegion, Toasts, use_toasts};
-#[allow(unused_imports)]
-pub use tooltip::Tooltip;
+// Only the gallery shows these.
+#[cfg_attr(not(any(debug_assertions, feature = "gallery")), allow(unused_imports))]
+pub(crate) use {
+    avatar::AvatarInfo, combobox::Combobox, game_card::CardVariant, hero::HeroGame,
+    interact::Forced, select::List as SelectList, tooltip::Tooltip,
+};
 
 use caskade_ui_theme::anatomy::Entry;
 

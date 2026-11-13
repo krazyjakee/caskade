@@ -115,7 +115,7 @@ fn press(window: &mut Window, id: &str) {
 
 #[test]
 fn back_up_now_writes_a_checked_backup_and_says_so() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let library = library();
     let mut window = open(&library);
     // Every part listed, the library always in.
@@ -149,7 +149,7 @@ fn back_up_now_writes_a_checked_backup_and_says_so() {
 
 #[test]
 fn a_folder_that_isnt_there_blocks_the_backup_with_why() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let library = library();
     let gone = library
         .folder

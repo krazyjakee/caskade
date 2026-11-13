@@ -39,19 +39,14 @@ impl Memory {
     pub fn load(file: Option<PathBuf>) -> Self {
         let saved: Saved = file
             .as_deref()
-            .and_then(|file| std::fs::read_to_string(file).ok())
-            .and_then(|text| serde_json::from_str(&text).ok())
+            .and_then(crate::state_file::load)
             .unwrap_or_default();
         let library = saved
             .library
             .map(|library| LibraryPrefs {
                 filter: library.filter,
                 sort: library.sort,
-                layout: if library.layout == "list" {
-                    Layout::List
-                } else {
-                    Layout::Grid
-                },
+                layout: Layout::parse(&library.layout),
             })
             .unwrap_or_default();
         Self {
@@ -125,22 +120,11 @@ impl Memory {
             library: Some(SavedLibrary {
                 filter: library.filter,
                 sort: library.sort,
-                layout: match library.layout {
-                    Layout::Grid => "grid".into(),
-                    Layout::List => "list".into(),
-                },
+                layout: library.layout.name().into(),
             }),
             last_view: self.last_view.clone(),
         };
-        let Ok(text) = serde_json::to_string(&saved) else {
-            return;
-        };
-        let partial = file.with_extension("json.partial");
-        if let Err(error) =
-            std::fs::write(&partial, text).and_then(|()| std::fs::rename(&partial, file))
-        {
-            tracing::warn!(%error, "the views to come back to weren't saved");
-        }
+        crate::state_file::save(file, &saved);
     }
 }
 

@@ -1,188 +1,9 @@
-//! A game's page (#100) in the frame over the fixture library, headless,
-//! per kind of game, as `GameView.test.tsx` has them: an installed game,
-//! one that isn't, and an emulated one; the way back; and what isn't there.
+//! The page's own data, scripted (`PageData`): updates, launch actions,
+//! separating, IGDB, saves, achievements, copies and ports.
 
-use super::launch_tests::{Script, launches, script, started};
-use crate::frame::tests::{ONE, Window};
-use crate::router::Route;
+use super::*;
 
-/// `href`'s page, once its title shows.
-fn open(href: &str) -> Window {
-    let mut window = Window::open();
-    window.go(href);
-    window.settle_until("the game's page", |window| {
-        window.find("data-view", "game").is_some()
-            || window
-                .find_all("role", "status")
-                .into_iter()
-                .any(|node| window.text(node).contains("Game not found"))
-            || window.find("data-part", "back").is_some()
-    });
-    window.settle_until("its title", |window| {
-        window.find("data-part", "title").is_some() || window.find("data-part", "back").is_some()
-    });
-    window
-}
-
-fn text(window: &Window, part: &str) -> String {
-    window
-        .find_all("data-part", part)
-        .into_iter()
-        .map(|node| window.text(node))
-        .collect::<Vec<_>>()
-        .join(" | ")
-}
-
-fn play_button(window: &Window) -> blitz_dom::NodeId {
-    let hero = window.get("data-cs", "hero");
-    window.find_in(hero, "data-part", "play").expect("Play")
-}
-
-#[test]
-fn an_installed_game_shows_what_it_is_and_its_release() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
-    let _runtime = caskade_app::runtime::handle().enter();
-    // Fixture Game 0002: installed, Adventure, PC, released 2024.
-    let window = open("/games/fixture-1");
-    assert_eq!(
-        window
-            .attr(window.get("data-view", "game"), "data-status")
-            .as_deref(),
-        Some("installed")
-    );
-    assert_eq!(text(&window, "title"), "Fixture Game 0002");
-    let meta = text(&window, "meta");
-    assert!(meta.contains("Adventure · PC · 1.0 GB · 2024"), "{meta}");
-    assert!(text(&window, "description").contains("Original development fixture."));
-    assert!(text(&window, "tags").contains("Fixture"));
-    // Its one release, from the fixture launcher, with nothing to launch:
-    // Play stays, disabled.
-    let entry = text(&window, "entry");
-    assert!(entry.contains("Installed"), "{entry}");
-    assert_eq!(
-        window
-            .attr(play_button(&window), "data-disabled")
-            .as_deref(),
-        Some("true")
-    );
-    // One release: no picker, no Default badge.
-    assert!(window.find("data-part", "release").is_none());
-    assert!(window.find("data-part", "default").is_none());
-    assert!(text(&window, "sessions").is_empty());
-}
-
-#[test]
-fn a_game_that_isnt_installed_says_its_release_is_partly_there() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
-    let _runtime = caskade_app::runtime::handle().enter();
-    // Fixture Game 0001: not installed.
-    let window = open("/games/fixture-0");
-    assert_eq!(
-        window
-            .attr(window.get("data-view", "game"), "data-status")
-            .as_deref(),
-        Some("not-installed")
-    );
-    let entry = text(&window, "entry");
-    assert!(entry.contains("Partly installed"), "{entry}");
-    assert_eq!(
-        window
-            .attr(play_button(&window), "data-disabled")
-            .as_deref(),
-        Some("true")
-    );
-}
-
-#[test]
-fn an_emulated_game_plays_through_play() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
-    let _runtime = caskade_app::runtime::handle().enter();
-    let mut window = open("/games/fixture-emulated-0-0");
-    assert_eq!(
-        window
-            .attr(window.get("data-view", "game"), "data-status")
-            .as_deref(),
-        Some("emulated")
-    );
-    let _script = script(Script {
-        outcomes: [started("fixture-emulated-0-0")].into(),
-        ..Script::default()
-    });
-    let play = play_button(&window);
-    assert_eq!(window.attr(play, "data-disabled"), None);
-    window.click(play);
-    window.settle_until("the launch", |_| launches() == 1);
-}
-
-#[test]
-fn back_goes_where_the_game_was_opened_from() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
-    let _runtime = caskade_app::runtime::handle().enter();
-    // Opened from a link to it: back to the Library, in its place.
-    let mut window = open("/games/fixture-1");
-    let back = window.get("data-part", "back");
-    assert!(
-        window.text(back).contains("Back to Library"),
-        "{}",
-        window.text(back)
-    );
-    window.click(back);
-    window.settle_until("the Library", |window| {
-        matches!(window.route(), Route::Library(_))
-    });
-    // Opened from another game's page: named after that game, and a step
-    // back in history to it.
-    window.go("/games/fixture-1");
-    window.settle_until("the first game", |window| {
-        window.find("data-part", "title").is_some()
-    });
-    window.go("/games/fixture-2?from=%2Fgames%2Ffixture-1");
-    window.settle_until("the second game", |window| {
-        window
-            .find("data-part", "title")
-            .is_some_and(|title| window.text(title) == "Fixture Game 0003")
-    });
-    window.settle_until("the other game's name", |window| {
-        window
-            .find("data-part", "back")
-            .is_some_and(|back| window.text(back).contains("Back to Fixture Game 0002"))
-    });
-    let back = window.get("data-part", "back");
-    window.click(back);
-    window.settle_until(
-        "the first game again",
-        |window| matches!(window.route(), Route::Game { ref id, .. } if id == "fixture-1"),
-    );
-}
-
-#[test]
-fn a_game_that_isnt_there_says_so() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
-    let _runtime = caskade_app::runtime::handle().enter();
-    let mut window = Window::open();
-    window.go("/games/no-such-game");
-    window.settle_until("not found", |window| {
-        window
-            .find("role", "status")
-            .is_none_or(|status| !window.text(status).contains("Loading"))
-            && window.find("data-part", "back").is_some()
-    });
-    assert!(window.find("data-view", "game").is_none());
-}
-
-#[test]
-fn a_right_click_on_the_hero_opens_the_games_menu() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
-    let _runtime = caskade_app::runtime::handle().enter();
-    let mut window = open("/games/fixture-1");
-    let hero = window.get("data-cs", "hero");
-    window.right_click(hero);
-    window.settle_until("the menu", |window| window.find("role", "menu").is_some());
-}
-
-// The page's own data, scripted: updates, launch actions, separating.
-
-use super::data::{PageData, UpdateChange};
+use crate::game::data::{PageData, UpdateChange};
 use caskade_core::launch::ReleaseActions;
 use caskade_core::model::{
     ActionKind, ActionTracking, EntryActionSettings, GameAction, LaunchSpec,
@@ -208,7 +29,7 @@ pub(crate) struct PageScript {
     pub(crate) save_chosen: Vec<(String, String)>,
     pub(crate) revealed: Vec<(String, u32)>,
     pub(crate) igdb: Option<caskade_core::metadata::GameIgdb>,
-    pub(crate) igdb_changes: Vec<super::data::IgdbChange>,
+    pub(crate) igdb_changes: Vec<crate::game::data::IgdbChange>,
     pub(crate) igdb_results: Vec<caskade_core::igdb::IgdbGame>,
     pub(crate) searches: Vec<String>,
     pub(crate) ratings: Vec<caskade_core::igdb::IgdbAgeRating>,
@@ -232,24 +53,24 @@ pub(crate) struct PageScript {
 static PAGE: Mutex<Option<PageScript>> = Mutex::new(None);
 
 pub(crate) fn page<T>(f: impl FnOnce(&mut PageScript) -> T) -> T {
-    let mut script = PAGE.lock().unwrap_or_else(|e| e.into_inner());
+    let mut script = caskade_core::lock(&PAGE);
     f(script.get_or_insert_with(PageScript::default))
 }
 
 pub(crate) struct PageScripted;
 
 pub(crate) fn page_script(script: PageScript) -> PageScripted {
-    *PAGE.lock().unwrap_or_else(|e| e.into_inner()) = Some(script);
+    *caskade_core::lock(&PAGE) = Some(script);
     PageScripted
 }
 
 impl Drop for PageScripted {
     fn drop(&mut self) {
-        *PAGE.lock().unwrap_or_else(|e| e.into_inner()) = None;
+        *caskade_core::lock(&PAGE) = None;
     }
 }
 
-fn answer<T: 'static>(value: T) -> super::launch::Answer<T> {
+fn answer<T: 'static>(value: T) -> crate::game::launch::Answer<T> {
     Box::pin(async move { Ok(value) })
 }
 
@@ -444,7 +265,7 @@ fn action(id: &str, entry_id: &str, name: &str, kind: ActionKind) -> GameAction 
 
 #[test]
 fn a_followed_install_offers_its_newer_release_and_skips_it() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = page_script(PageScript {
         updates: vec![update("entry-1", "fixture-1")],
@@ -486,7 +307,7 @@ fn a_followed_install_offers_its_newer_release_and_skips_it() {
 
 #[test]
 fn a_release_with_several_launch_actions_picks_the_one_play_starts_and_lists_its_tools() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = page_script(PageScript {
         actions: vec![ReleaseActions {
@@ -554,7 +375,7 @@ fn a_release_with_several_launch_actions_picks_the_one_play_starts_and_lists_its
 
 #[test]
 fn an_emulated_release_shows_its_emulator_and_picks_another() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = page_script(PageScript::default());
     let mut window = open("/games/fixture-emulated-0-0");
@@ -599,7 +420,7 @@ fn an_emulated_release_shows_its_emulator_and_picks_another() {
 
 #[test]
 fn an_emulated_release_that_needs_setup_says_how_and_play_waits() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut emulation = ready_emulation("fixture-emulated-entry-0-0");
     emulation.readiness = caskade_core::emulation::Readiness::NoEmulator;
@@ -624,7 +445,7 @@ fn an_emulated_release_that_needs_setup_says_how_and_play_waits() {
 
 #[test]
 fn an_owned_release_installs_through_its_store() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     use caskade_core::store_accounts::{OwnedInstallState, OwnedRelease};
     let _script = page_script(PageScript {
@@ -665,7 +486,7 @@ fn an_owned_release_installs_through_its_store() {
 
 #[test]
 fn a_stores_own_download_says_to_pause_it_in_the_launcher() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     use caskade_core::store_accounts::{OwnedInstallState, OwnedRelease};
     let _script = page_script(PageScript {
@@ -707,7 +528,7 @@ fn a_stores_own_download_says_to_pause_it_in_the_launcher() {
 
 #[test]
 fn a_copy_on_another_device_copies_here_or_plays_there() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     use caskade_core::db::CopyLocation;
     use caskade_core::devices::{DeviceKind, DeviceLink, DeviceOs};
@@ -755,7 +576,7 @@ fn a_copy_on_another_device_copies_here_or_plays_there() {
 
 #[test]
 fn play_time_reported_by_stores_says_where_it_comes_from() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     use caskade_core::db::{PlaytimeBreakdown, ReportedPlaytime};
     let _script = page_script(PageScript {
@@ -809,7 +630,7 @@ fn matched(game_id: &str) -> caskade_core::metadata::GameIgdb {
 
 #[test]
 fn a_matched_game_shows_igdbs_facts_and_changes_its_match() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = page_script(PageScript {
         igdb: Some(matched("fixture-1")),
@@ -842,7 +663,7 @@ fn a_matched_game_shows_igdbs_facts_and_changes_its_match() {
     });
     assert_eq!(
         page(|script| script.igdb_changes[0].clone()),
-        super::data::IgdbChange::Set(None)
+        crate::game::data::IgdbChange::Set(None)
     );
     // Change IGDB game: searches the title, then uses a result.
     let change = window.get("data-part", "igdb-change");
@@ -862,13 +683,13 @@ fn a_matched_game_shows_igdbs_facts_and_changes_its_match() {
     });
     assert_eq!(
         page(|script| script.igdb_changes[1].clone()),
-        super::data::IgdbChange::Set(Some("77".to_owned()))
+        crate::game::data::IgdbChange::Set(Some("77".to_owned()))
     );
 }
 
 #[test]
 fn igdbs_videos_play_in_the_video_window_and_the_age_rating_shows() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = page_script(PageScript {
         igdb: Some(matched("fixture-1")),
@@ -910,11 +731,11 @@ fn igdbs_videos_play_in_the_video_window_and_the_age_rating_shows() {
 
 #[test]
 fn the_saves_panel_restores_shows_where_they_are_and_settles_a_conflict() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     use caskade_core::saves::versions::{SaveHistory, VersionState};
-    let ours = super::launch_tests::version("ours", true);
-    let theirs = super::launch_tests::version("theirs", false);
+    let ours = crate::game::launch_tests::version("ours", true);
+    let theirs = crate::game::launch_tests::version("theirs", false);
     let _script = page_script(PageScript {
         saves: Some(SaveHistory {
             account_id: String::new(),
@@ -1020,7 +841,7 @@ fn achievement(
 
 #[test]
 fn achievements_show_the_counts_and_hidden_ones_stay_concealed_until_revealed() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     use caskade_achievements::achievements::{
         AchievementCapabilities, AchievementSet, SetAccount, SetStatus, SetSync,
@@ -1097,7 +918,7 @@ fn achievements_show_the_counts_and_hidden_ones_stay_concealed_until_revealed() 
 
 #[test]
 fn achievements_show_their_services_pictures_and_hidden_ones_stay_drawn() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     use caskade_achievements::achievements::{
         AchievementCapabilities, AchievementSet, SetAccount, SetStatus, SetSync,
@@ -1156,7 +977,7 @@ fn achievements_show_their_services_pictures_and_hidden_ones_stay_drawn() {
 
 #[test]
 fn with_online_lookups_off_the_igdb_panel_says_so_and_turns_them_on() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let settings = &crate::frame::tests::source().settings;
     let before = caskade_app::runtime::block_on(settings.get("core.metadata"))
@@ -1200,7 +1021,7 @@ fn with_online_lookups_off_the_igdb_panel_says_so_and_turns_them_on() {
 
 #[test]
 fn a_fan_port_shows_what_it_needs_and_installs_after_asking() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     use caskade_core::ports::{
         GamePorts, Port, PortFileHow, PortHere, PortMatch, PortNeeds, PortsStatus,

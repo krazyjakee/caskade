@@ -5,6 +5,7 @@
 //! gate and admin approval (#106) share it. The PIN lives only in this
 //! component until it goes to the core.
 
+use crate::data::sleep;
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
@@ -53,11 +54,6 @@ pub fn valid_pin(pin: &str) -> bool {
 fn wait(ms: i64) -> String {
     let seconds = (ms.max(0) + 999) / 1000;
     format!("{}:{:02}", seconds / 60, seconds % 60)
-}
-
-async fn sleep(time: Duration) {
-    // Timers need the app runtime's reactor; Dioxus's executor has none.
-    let _ = caskade_app::runtime::spawn(async move { tokio::time::sleep(time).await }).await;
 }
 
 #[derive(Clone, Copy, PartialEq)]

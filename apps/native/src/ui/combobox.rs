@@ -174,10 +174,10 @@ pub fn Combobox(
     let mut text = use_signal(|| chosen_label.clone());
     let mut open = use_signal(|| None::<Anchor>);
     let mut field = use_signal(|| None::<NodeHandle>);
-    let query = text().to_lowercase();
+    let query = super::fold(&text());
     let matches: Vec<SelectOption> = options
         .iter()
-        .filter(|option| !option.disabled && option.label.to_lowercase().contains(&query))
+        .filter(|option| !option.disabled && super::fold(&option.label).contains(&query))
         .cloned()
         .collect();
     let show = move || {

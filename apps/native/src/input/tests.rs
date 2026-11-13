@@ -23,11 +23,11 @@ pub(crate) static ONE_WINDOW: Mutex<()> = Mutex::new(());
 static DONE: Mutex<Vec<String>> = Mutex::new(Vec::new());
 
 fn done() -> std::sync::MutexGuard<'static, Vec<String>> {
-    DONE.lock().unwrap_or_else(|e| e.into_inner())
+    caskade_core::lock(&DONE)
 }
 
 fn calls() -> std::sync::MutexGuard<'static, Vec<String>> {
-    GUIDE_CALLS.lock().unwrap_or_else(|e| e.into_inner())
+    caskade_core::lock(&GUIDE_CALLS)
 }
 
 fn did(what: impl Into<String>) {
@@ -308,7 +308,7 @@ enum Driver {
 
 #[test]
 fn a_pad_and_a_keyboard_each_work_the_grid_the_sidebar_and_a_dialog() {
-    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE_WINDOW);
     let _runtime = caskade_app::runtime::handle().enter();
     for driver in [Driver::Pad, Driver::Keyboard] {
         done().clear();
@@ -348,7 +348,7 @@ fn a_pad_and_a_keyboard_each_work_the_grid_the_sidebar_and_a_dialog() {
 
 #[test]
 fn a_click_focuses_the_control_without_a_ring_and_a_pad_types_in_a_field() {
-    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE_WINDOW);
     let _runtime = caskade_app::runtime::handle().enter();
     done().clear();
     let mut window = Window::open();
@@ -396,7 +396,7 @@ impl super::guide::GuideApi for FakeGuide {
         &self,
     ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Vec<super::guide::RunningGame>>>> {
         calls().push("running".into());
-        let running = RUNNING.lock().unwrap_or_else(|e| e.into_inner()).clone();
+        let running = caskade_core::lock(&RUNNING).clone();
         Box::pin(async move { running })
     }
 
@@ -445,7 +445,7 @@ impl Window {
 }
 
 fn guide_window(running: bool) -> Window {
-    *RUNNING.lock().unwrap_or_else(|e| e.into_inner()) = if running {
+    *caskade_core::lock(&RUNNING) = if running {
         vec![super::guide::RunningGame {
             session_id: "s1".into(),
             game_id: "g1".into(),
@@ -462,7 +462,7 @@ fn guide_window(running: bool) -> Window {
 
 #[test]
 fn guide_opens_the_quick_menu_over_a_running_game_and_return_goes_back_to_it() {
-    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE_WINDOW);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = guide_window(true);
     window.pad(Action::Guide);
@@ -476,7 +476,7 @@ fn guide_opens_the_quick_menu_over_a_running_game_and_return_goes_back_to_it() {
 
 #[test]
 fn stopping_asks_first_by_pad_then_stops_the_session() {
-    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE_WINDOW);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = guide_window(true);
     window.pad(Action::Guide);
@@ -493,7 +493,7 @@ fn stopping_asks_first_by_pad_then_stops_the_session() {
 
 #[test]
 fn the_menu_opens_the_games_details_and_back_or_guide_again_closes_it() {
-    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE_WINDOW);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = guide_window(true);
     window.pad(Action::Guide);
@@ -511,7 +511,7 @@ fn the_menu_opens_the_games_details_and_back_or_guide_again_closes_it() {
 
 #[test]
 fn guide_shows_no_menu_when_nothing_is_running() {
-    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE_WINDOW);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = guide_window(false);
     window.pad(Action::Guide);
@@ -529,10 +529,10 @@ fn translated_app() -> Element {
 
 #[test]
 fn switching_language_updates_the_open_guide_menu_without_a_restart() {
-    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE_WINDOW);
     let _runtime = caskade_app::runtime::handle().enter();
     caskade_core::i18n::set_locale("en");
-    *RUNNING.lock().unwrap_or_else(|e| e.into_inner()) = vec![super::guide::RunningGame {
+    *caskade_core::lock(&RUNNING) = vec![super::guide::RunningGame {
         session_id: "s1".into(),
         game_id: "g1".into(),
         title: "Celeste".into(),
@@ -587,7 +587,7 @@ fn Growing() -> Element {
 
 #[test]
 fn a_pad_move_waits_for_the_layout_of_what_just_changed() {
-    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE_WINDOW);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open_with(growing_app);
     // The first press focuses the view; left goes to the sidebar's Home.
@@ -619,7 +619,7 @@ fn a_pad_move_waits_for_the_layout_of_what_just_changed() {
 #[test]
 fn focus_handed_back_to_a_control_that_went_does_nothing() {
     use caskade_ui_input::dispatch::Ui;
-    let _one = ONE_WINDOW.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE_WINDOW);
     let _runtime = caskade_app::runtime::handle().enter();
     let window = Window::open();
     let card = window.find("Card 5");

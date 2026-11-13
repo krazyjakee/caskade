@@ -96,8 +96,7 @@ pub fn GameRow(
     };
     let last_played = game
         .last_played_ms
-        .map(crate::library::local_date_time)
-        .map(caskade_ui_i18n::format::date_time)
+        .map(crate::library::date_time)
         .unwrap_or_else(|| caskade_ui_i18n::format::last_played(None));
     let playtime = caskade_ui_i18n::format::playtime(game.playtime_ms / 1000);
     let size = caskade_ui_i18n::format::size(game.size_bytes);

@@ -36,7 +36,7 @@ fn to_console(window: &mut Window) {
 
 #[test]
 fn view_switches_to_console_mode_and_back() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _desktop = Desktop;
     let mut window = open();
@@ -71,7 +71,7 @@ fn view_switches_to_console_mode_and_back() {
 
 #[test]
 fn the_hint_bar_shows_what_each_button_does_in_the_controllers_glyphs() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _desktop = Desktop;
     let mut window = open();
@@ -125,7 +125,7 @@ fn session(id: &str) -> GameSession {
 
 #[test]
 fn the_curtain_comes_down_over_a_running_game_and_lifts() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _desktop = Desktop;
     let mut window = open();
@@ -172,7 +172,7 @@ fn the_curtain_comes_down_over_a_running_game_and_lifts() {
 fn a_card_shows_the_device_its_game_is_running_on() {
     use crate::game::launch_tests::{Script, script};
     use caskade_app::commands::presence::PlayingElsewhere;
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _desktop = Desktop;
     let mut window = open();

@@ -113,7 +113,7 @@ fn says(window: &Window, text: &str) -> bool {
 /// them; the chosen one is checked, and arrows pick the next.
 #[test]
 fn lists_every_theme_and_arrows_pick_the_next() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     let mut window = appearance();
@@ -174,7 +174,7 @@ fn lists_every_theme_and_arrows_pick_the_next() {
 /// can't be used says why and can't be picked.
 #[test]
 fn a_rescan_finds_a_new_theme_and_a_broken_one_says_why() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     let folder = caskade_ui_data::fixtures::themes_folder().join("broken");
@@ -219,7 +219,7 @@ fn a_rescan_finds_a_new_theme_and_a_broken_one_says_why() {
 /// and save by keyboard and pad.
 #[test]
 fn the_look_cards_and_motion_read_and_save() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     set("density", json!("comfortable"));
@@ -294,7 +294,7 @@ fn the_look_cards_and_motion_read_and_save() {
 /// see on the theme; Theme accent goes back to the theme's.
 #[test]
 fn accents_save_kept_readable_and_go_back_to_the_themes() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     set("accent", Value::Null);
@@ -340,7 +340,7 @@ fn accents_save_kept_readable_and_go_back_to_the_themes() {
 /// being lost.
 #[test]
 fn custom_css_saves_refuses_and_switches_off() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     set("customCss", json!(""));
@@ -415,7 +415,7 @@ fn custom_css_saves_refuses_and_switches_off() {
 /// One reset puts the whole section back, custom CSS included (#44).
 #[test]
 fn the_reset_puts_the_page_back() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     set("density", json!("compact"));
@@ -443,7 +443,7 @@ fn the_reset_puts_the_page_back() {
 /// More themes opens the catalogue: Settings → Plugins.
 #[test]
 fn more_themes_opens_the_catalogue() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = appearance();
     let link = window.get("data-part", "more-themes");
@@ -459,7 +459,7 @@ fn more_themes_opens_the_catalogue() {
 /// A screen reader hears each control by its row's label.
 #[test]
 fn every_control_is_named() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let window = appearance();
     let panel = window.get("data-settings", "appearance");

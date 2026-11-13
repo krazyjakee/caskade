@@ -121,22 +121,22 @@ impl FakeInbox {
     /// Queues `request`, as a deep link or another device would, and
     /// announces it.
     pub fn offer(&self, request: InstallRequest) {
-        FakeQueue::lock(&self.pending).push(request.clone());
+        caskade_core::lock(&self.pending).push(request.clone());
         self.events
             .send(Event::InstallRequested(InstallRequested(request)));
     }
 
     pub fn calls(&self) -> Vec<String> {
-        FakeQueue::lock(&self.calls).clone()
+        caskade_core::lock(&self.calls).clone()
     }
 
     pub fn clear(&self) {
-        FakeQueue::lock(&self.pending).clear();
-        FakeQueue::lock(&self.calls).clear();
+        caskade_core::lock(&self.pending).clear();
+        caskade_core::lock(&self.calls).clear();
     }
 
     fn called(&self, call: String) {
-        FakeQueue::lock(&self.calls).push(call);
+        caskade_core::lock(&self.calls).push(call);
     }
 
     fn queue(&self, kind: InputKind, value: String) -> InstallRequest {
@@ -148,7 +148,7 @@ impl FakeInbox {
     /// A new request, not yet offered.
     fn queue_quietly(&self, kind: InputKind, value: String) -> InstallRequest {
         let id = {
-            let mut next = FakeQueue::lock(&self.next);
+            let mut next = caskade_core::lock(&self.next);
             *next += 1;
             format!("request-{next}")
         };
@@ -163,7 +163,7 @@ impl FakeInbox {
     }
 
     fn take(&self, id: &str) -> Result<InstallRequest> {
-        let mut pending = FakeQueue::lock(&self.pending);
+        let mut pending = caskade_core::lock(&self.pending);
         let at = pending
             .iter()
             .position(|request| request.request_id == id)
@@ -175,7 +175,7 @@ impl FakeInbox {
 #[async_trait]
 impl InstallInbox for FakeInbox {
     fn pending(&self) -> Vec<InstallRequest> {
-        FakeQueue::lock(&self.pending).clone()
+        caskade_core::lock(&self.pending).clone()
     }
     async fn request(&self, value: String) -> Result<InstallRequest> {
         self.called(format!("request {value}"));

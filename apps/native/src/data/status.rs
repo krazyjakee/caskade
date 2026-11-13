@@ -1,19 +1,17 @@
-//! What the shell's status bar and Activity button read (#96): jobs, unread
+//! What the shell's status bar and Activity button read (#96): unread
 //! notifications, paired devices, the app's update and its background
 //! tasks. They come from the app's services, loaded again when their app
 //! event says they changed; fixtures mode has no services, so they read as
-//! nothing running, nothing unread, no devices and no update.
+//! nothing unread, no devices and no update.
 
 use super::{DataSource, Query};
 use caskade_achievements::notifications::{MemberPage, NotificationPage};
 use caskade_app::background::AppStatus;
 use caskade_app::commands::app_update::AppUpdateStatus;
 use caskade_core::devices::DevicesStatus;
-use caskade_core::install::JobSnapshot;
-use caskade_ui_data::{Changed, ErrorReport, Key as DataKey};
+use caskade_ui_data::{ErrorReport, Key as DataKey};
 use dioxus_native::prelude::*;
 use std::future::Future;
-use tokio::sync::broadcast;
 
 type Services = &'static caskade_app::start::Services;
 
@@ -26,7 +24,7 @@ where
     Fut: Future<Output = Result<T, ErrorReport>> + Send + 'static,
 {
     let source = use_context::<DataSource>();
-    let mut resource = use_resource(move || {
+    let resource = use_resource(move || {
         let work = crate::shell::services().map(&mut load);
         async move {
             match work {
@@ -35,35 +33,12 @@ where
             }
         }
     });
-    use_hook(move || {
-        let mut events = source.events.subscribe();
-        spawn(async move {
-            loop {
-                match events.recv().await {
-                    Ok(event) if Changed::from_event(&event).affects(&key) => resource.restart(),
-                    Ok(_) => {}
-                    Err(broadcast::error::RecvError::Lagged(_)) => resource.restart(),
-                    Err(broadcast::error::RecvError::Closed) => break,
-                }
-            }
-        });
-    });
+    super::reload_on(&source, key, resource);
     resource
 }
 
 fn report(error: impl std::fmt::Display) -> ErrorReport {
     ErrorReport::from_error(&caskade_core::Error::Invalid(error.to_string()))
-}
-
-/// Every job: installs, downloads, moves.
-pub fn use_jobs() -> Query<Option<Vec<JobSnapshot>>> {
-    use_status(DataKey::Jobs, |services| async move {
-        Ok(services
-            .install
-            .as_ref()
-            .map(caskade_app::commands::install::jobs_list)
-            .unwrap_or_default())
-    })
 }
 
 /// How many notifications are unread.
@@ -98,20 +73,6 @@ pub fn use_background() -> Query<Option<AppStatus>> {
             env!("CARGO_PKG_VERSION").to_owned(),
         ))
     })
-}
-
-/// Whether `job` is under way: downloading or installing (the webview's
-/// `running`).
-pub fn is_running(job: &JobSnapshot) -> bool {
-    use caskade_core::install::JobStatus;
-    matches!(job.status, JobStatus::Downloading | JobStatus::Installing)
-}
-
-/// Whether `job` still runs or waits: it counts on the Activity button
-/// (`api/install.ts`'s `isActiveJob`).
-pub fn is_active(job: &JobSnapshot) -> bool {
-    use caskade_core::install::JobStatus;
-    is_running(job) || matches!(job.status, JobStatus::Queued | JobStatus::NeedsUser)
 }
 
 /// A page of the notification feed, newest change first; only unread items

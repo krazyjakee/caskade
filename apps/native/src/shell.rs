@@ -53,20 +53,27 @@ pub fn services() -> Option<&'static Services> {
     SERVICES.get()
 }
 
+/// The services once they've started, which is beside the window, about a
+/// second in (never in fixtures mode or a test).
+pub async fn services_ready() -> &'static Services {
+    let mut started = STARTED.subscribe();
+    loop {
+        if let Some(services) = services() {
+            return services;
+        }
+        if started.changed().await.is_err() {
+            std::future::pending::<()>().await;
+        }
+    }
+}
+
 static SERVICES: OnceLock<Services> = OnceLock::new();
+/// Sent once [`SERVICES`] is set.
+static STARTED: std::sync::LazyLock<tokio::sync::watch::Sender<()>> =
+    std::sync::LazyLock::new(|| tokio::sync::watch::Sender::new(()));
 
 /// The main window's place on screen, while it's shown.
 static PLACEMENT: Mutex<Option<WindowPlacement>> = Mutex::new(None);
-
-/// The key Caskade's releases are signed with, which the add-on catalogue
-/// is checked against too: the Tauri app's updater key.
-fn release_key() -> Option<String> {
-    let config: serde_json::Value =
-        serde_json::from_str(include_str!("../../desktop/src-tauri/tauri.conf.json")).ok()?;
-    config["plugins"]["updater"]["pubkey"]
-        .as_str()
-        .map(str::to_owned)
-}
 
 /// Starts every other service on `core`, off the main thread so the window
 /// shows at once. `ready` runs with them once they're up.
@@ -81,11 +88,10 @@ pub fn start(core: Core, ready: impl FnOnce(&'static Services) + Send + 'static)
         .spawn(move || {
             let shell = Shell {
                 events: sink(),
-                placement: Arc::new(|| *PLACEMENT.lock().unwrap_or_else(|e| e.into_inner())),
+                placement: Arc::new(|| *caskade_core::lock(&PLACEMENT)),
                 // Nothing yet tells a started program which startup it
                 // belongs to (an X11 startup notification): BLITZ-9 (#88).
                 activation: Arc::new(Vec::new),
-                release_key: release_key(),
             };
             let services = caskade_app::start::start(core, shell);
             if let (Some(guard), Some(install)) =
@@ -96,6 +102,7 @@ pub fn start(core: Core, ready: impl FnOnce(&'static Services) + Send + 'static)
             if SERVICES.set(services).is_err() {
                 return;
             }
+            STARTED.send_replace(());
             if let Some(services) = SERVICES.get() {
                 tracing::info!("services started");
                 ready(services);
@@ -134,7 +141,6 @@ impl GameWindow for NativeWindow {
         match way {
             Making::Minimize => self.0.set_minimized(true),
             Making::Hide => self.0.set_visible(false),
-            // Console mode isn't in the native app yet (BLITZ-13, #92).
             Making::Stay | Making::Fade => {}
         }
         Ok(())
@@ -180,7 +186,7 @@ impl Keeper {
         let size = window.surface_size();
         let minimized = window.is_minimized().unwrap_or(false);
         let shown = window.is_visible().unwrap_or(true) && !minimized;
-        *PLACEMENT.lock().unwrap_or_else(|e| e.into_inner()) = shown.then_some(WindowPlacement {
+        *caskade_core::lock(&PLACEMENT) = shown.then_some(WindowPlacement {
             x: position.x,
             y: position.y,
             width: size.width,
@@ -189,7 +195,7 @@ impl Keeper {
         if minimized || size.width == 0 || size.height == 0 {
             return;
         }
-        let mut state = self.state.lock().unwrap_or_else(|e| e.into_inner());
+        let mut state = caskade_core::lock(&self.state);
         let next = WindowState::followed(
             state.0,
             (position.x, position.y),
@@ -207,9 +213,18 @@ impl Keeper {
 
     /// Writes the last state, at exit.
     pub fn save(&self) {
-        if let Some(state) = self.state.lock().unwrap_or_else(|e| e.into_inner()).0 {
+        if let Some(state) = caskade_core::lock(&self.state).0 {
             state.save(&self.file);
         }
+    }
+}
+
+/// The main window is shown (not hidden to the tray or minimized); tests
+/// have none and count as shown.
+pub fn main_window_shown() -> bool {
+    match main_window() {
+        Some(window) => window.is_visible() != Some(false) && window.is_minimized() != Some(true),
+        None => true,
     }
 }
 

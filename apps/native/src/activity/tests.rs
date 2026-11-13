@@ -70,9 +70,9 @@ fn job(id: &str, value: serde_json::Value) -> JobSnapshot {
 }
 
 fn activity() -> Window {
-    *START.lock().unwrap_or_else(|e| e.into_inner()) = "/activity?tab=jobs";
+    *caskade_core::lock(&START) = "/activity?tab=jobs";
     let mut window = Window::open();
-    *START.lock().unwrap_or_else(|e| e.into_inner()) = "/";
+    *caskade_core::lock(&START) = "/";
     window.settle_until("Activity", |window| {
         window.find("data-view", "activity").is_some()
     });
@@ -114,7 +114,7 @@ fn press(window: &mut Window, node: blitz_dom::NodeId) {
 
 #[test]
 fn an_install_shows_live_progress_and_cancels() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     let (queue, _) = fakes();
@@ -201,7 +201,7 @@ fn menu_item(window: &Window, text: &str) -> Option<blitz_dom::NodeId> {
 
 #[test]
 fn a_download_pauses_and_resumes_by_mouse_keyboard_pad_and_menu() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     let (queue, _) = fakes();
@@ -298,7 +298,7 @@ fn a_download_pauses_and_resumes_by_mouse_keyboard_pad_and_menu() {
 
 #[test]
 fn a_job_waiting_for_an_answer_opens_its_question_and_continues() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     let (queue, _) = fakes();
@@ -345,7 +345,7 @@ fn a_job_waiting_for_an_answer_opens_its_question_and_continues() {
 
 #[test]
 fn a_failed_install_says_why_and_recovers() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     let (queue, _) = fakes();
@@ -429,7 +429,7 @@ fn refresh(running: bool, cancelled: bool, failed: &[&str], remaining: &[&str]) 
 
 #[test]
 fn the_details_refresh_cancels_retries_and_continues() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     let (_, refresh_fake) = fakes();
@@ -506,7 +506,7 @@ fn paste(window: &mut Window) {
 
 #[test]
 fn a_link_pasted_outside_a_field_asks_to_install_it() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     let _clipboard = NoClipboard;
@@ -545,7 +545,7 @@ fn a_link_pasted_outside_a_field_asks_to_install_it() {
 
 #[test]
 fn a_deep_link_waits_until_confirmed_and_its_job_shows() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     let mut window = activity();
@@ -586,7 +586,7 @@ fn a_deep_link_waits_until_confirmed_and_its_job_shows() {
 
 #[test]
 fn closing_a_copy_from_another_device_dismisses_it() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     let mut window = activity();
@@ -619,7 +619,7 @@ fn closing_a_copy_from_another_device_dismisses_it() {
 
 #[test]
 fn a_file_dropped_outside_the_library_asks_first() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     let mut window = activity();
@@ -651,7 +651,7 @@ fn a_file_dropped_outside_the_library_asks_first() {
 
 #[test]
 fn a_shared_collection_is_added_without_a_job() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _clean = Clean;
     let mut window = activity();

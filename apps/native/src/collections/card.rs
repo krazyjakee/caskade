@@ -74,23 +74,6 @@ pub fn CollectionMosaic(covers: Vec<String>, #[props(default)] class: String) ->
     }
 }
 
-/// "Today", "3 days ago", or the day, for a time in ms; `standalone`
-/// false keeps the language's case for inside a sentence.
-fn relative_day(ms: i64, standalone: bool) -> String {
-    use chrono::TimeZone;
-    let at = crate::library::local_date_time(ms);
-    let days = chrono::Local
-        .timestamp_millis_opt(ms)
-        .single()
-        .map(|time| {
-            (chrono::Local::now().date_naive() - time.date_naive())
-                .num_days()
-                .max(0) as u64
-        })
-        .unwrap_or(u64::MAX);
-    format::relative_day(at, days, standalone)
-}
-
 /// "Updated today", "Updated 3 days ago"; a smart collection follows the
 /// library, so it is "Live". Empty when a manual one has no date.
 pub fn collection_updated(collection: &CollectionSummary) -> String {
@@ -107,7 +90,7 @@ pub fn collection_updated(collection: &CollectionSummary) -> String {
     t!(
         note = "{when} is a day: “today”, “3 days ago”",
         "Updated {when}",
-        when = relative_day(collection.updated_at_ms, false)
+        when = crate::library::relative_day(collection.updated_at_ms, false)
     )
 }
 

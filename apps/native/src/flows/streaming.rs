@@ -11,6 +11,7 @@
 //!   stop it and stream this one, or leave it be. The launch flow (#100)
 //!   opens it on a busy host.
 
+use crate::data::sleep;
 use std::time::Duration;
 
 use caskade_core::error::ErrorReport;
@@ -35,11 +36,6 @@ pub fn use_stream_pairing() -> Option<StreamPairing> {
         .or_else(|| crate::shell::services().and_then(StreamPairing::of))
 }
 
-async fn sleep(time: Duration) {
-    // Timers need the app runtime's reactor; Dioxus's executor has none.
-    let _ = caskade_app::runtime::spawn(async move { tokio::time::sleep(time).await }).await;
-}
-
 /// The prompt for the first request not dismissed, over any view.
 #[component]
 pub fn StreamPairingHost(pairing: StreamPairing) -> Element {
@@ -50,9 +46,16 @@ pub fn StreamPairingHost(pairing: StreamPairing) -> Element {
         use_hook(move || {
             spawn(async move {
                 loop {
-                    let read = pairing.clone();
-                    let admin = change(async move { Ok(read.is_admin().await) }).await;
-                    if matches!(admin, Ok(true)) && pairing.hosting() {
+                    // Hosting first: it's in memory, and an app that isn't
+                    // hosting reads no accounts (#111).
+                    let admin = pairing.hosting() && {
+                        let read = pairing.clone();
+                        matches!(
+                            change(async move { Ok(read.is_admin().await) }).await,
+                            Ok(true)
+                        )
+                    };
+                    if admin {
                         let read = pairing.clone();
                         // A failed read keeps what's shown until the next.
                         if let Ok(list) = change(async move { read.requests().await }).await {

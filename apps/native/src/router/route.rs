@@ -62,7 +62,7 @@ pub fn filter_name(filter: GameFilter) -> &'static str {
     }
 }
 
-fn sort_name(sort: GameSort) -> &'static str {
+pub(crate) fn sort_name(sort: GameSort) -> &'static str {
     match sort {
         GameSort::Title => "title",
         GameSort::Recent => "recent",
@@ -70,13 +70,6 @@ fn sort_name(sort: GameSort) -> &'static str {
         GameSort::Added => "added",
         GameSort::Released => "released",
         GameSort::Popular => "popular",
-    }
-}
-
-fn layout_name(layout: Layout) -> &'static str {
-    match layout {
-        Layout::Grid => "grid",
-        Layout::List => "list",
     }
 }
 
@@ -210,7 +203,7 @@ fn library(href: &Href, remembered: &Remembered) -> LibraryRoute {
         sort: pick(&SORTS, sort_name, href.get_text("sort")).unwrap_or(saved.sort),
         layout: pick(
             &[Layout::Grid, Layout::List],
-            layout_name,
+            Layout::name,
             href.get_text("layout"),
         )
         .unwrap_or(saved.layout),
@@ -330,7 +323,7 @@ impl Route {
             Self::Library(library) => Href::new("/library")
                 .text("filter", Some(filter_name(library.filter)))
                 .text("sort", Some(sort_name(library.sort)))
-                .text("layout", Some(layout_name(library.layout)))
+                .text("layout", Some(library.layout.name()))
                 .text("q", library.q.as_deref())
                 .text("platform", library.platform.as_deref())
                 .with("opening", library.opening.then_some(Value::Bool(true))),

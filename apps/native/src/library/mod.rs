@@ -1,9 +1,5 @@
 //! The library's virtual grid and list (#94): see [`grid`] and [`window`].
 
-// The Library view (#99) mounts it; until then the tests and the scroll
-// benchmark do.
-#![allow(dead_code)]
-
 mod anatomy;
 mod art;
 pub mod bench;
@@ -85,6 +81,28 @@ pub(crate) use selection_bar::{AllIds, AllIdsProp, SelectionBar};
 pub use view::{DropInstall, LibraryView};
 pub use window::Layout;
 pub(crate) use window::{GRID_GAP, GRID_ROW, MIN_CARD};
+
+/// A Unix time in milliseconds, as the webview's `formatDateTime` writes
+/// it.
+pub fn date_time(ms: i64) -> String {
+    caskade_ui_i18n::format::date_time(local_date_time(ms))
+}
+
+/// "Today", "Yesterday", "3 days ago", or the day, for a time in ms;
+/// `standalone` false keeps the language's case for inside a sentence.
+pub fn relative_day(ms: i64, standalone: bool) -> String {
+    use chrono::TimeZone;
+    let days = chrono::Local
+        .timestamp_millis_opt(ms)
+        .single()
+        .map(|time| {
+            (chrono::Local::now().date_naive() - time.date_naive())
+                .num_days()
+                .max(0) as u64
+        })
+        .unwrap_or(u64::MAX);
+    caskade_ui_i18n::format::relative_day(local_date_time(ms), days, standalone)
+}
 
 /// A Unix time in milliseconds on the user's clock.
 pub fn local_date_time(ms: i64) -> caskade_ui_i18n::intl::DateTime {

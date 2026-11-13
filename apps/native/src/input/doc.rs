@@ -15,6 +15,23 @@ use caskade_ui_input::{FocusTree, Rect};
 /// select `[data-focus-visible]` instead.
 pub const RING: &str = "data-focus-visible";
 
+/// The first element at or under `from`, in document order, whose
+/// attribute `name` is `value`.
+pub fn find_attr(doc: &BaseDocument, from: NodeId, name: &str, value: &str) -> Option<NodeId> {
+    let name = LocalName::from(name);
+    let mut stack = vec![from];
+    while let Some(at) = stack.pop() {
+        let Some(node) = doc.get_node(at) else {
+            continue;
+        };
+        if node.attr(name.clone()) == Some(value) {
+            return Some(at);
+        }
+        stack.extend(node.children.iter().rev().copied());
+    }
+    None
+}
+
 /// Whether no control has focus: nothing, the input root, or an element
 /// around it (Blitz starts with focus on the document's own).
 pub fn idle(doc: &BaseDocument, holder: NodeId) -> bool {

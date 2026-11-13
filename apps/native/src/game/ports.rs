@@ -6,22 +6,13 @@
 //! while the catalogue is off, missing, or has none for the game.
 
 use super::data::{use_answer, use_page_data};
-use crate::data::status::use_jobs;
+use super::system_name;
 use crate::ui::{Button, ButtonSize, ButtonVariant, Dialog, Svg, icons};
 use caskade_core::install::JobStatus;
 use caskade_core::ports::{Port, PortFileHow, PortHere, PortMatch, PortNeeds};
 use caskade_ui_data::Key as DataKey;
 use caskade_ui_i18n::{t, tp};
 use dioxus_native::prelude::*;
-
-fn system_name(system: &str) -> String {
-    match system {
-        "windows" => "Windows".to_owned(),
-        "mac" | "macos" => "macOS".to_owned(),
-        "linux" => "Linux".to_owned(),
-        other => other.to_owned(),
-    }
-}
 
 /// What a port wants from the user, and how it gets it.
 #[component]
@@ -56,11 +47,11 @@ fn Need(need: PortNeeds) -> Element {
 /// A port install as it runs.
 #[component]
 fn PortProgress(job_id: String) -> Element {
-    let jobs = use_jobs();
+    let jobs = crate::data::use_jobs_query();
     let job = jobs
         .read()
         .as_ref()
-        .and_then(|jobs| jobs.as_ref().ok().cloned().flatten())
+        .and_then(|jobs| jobs.as_ref().ok().cloned())
         .and_then(|jobs| jobs.into_iter().find(|each| each.id == job_id));
     let Some(job) = job else {
         return rsx! { p { role: "status", class: "text-fg-muted", {t!("Starting the install…")} } };

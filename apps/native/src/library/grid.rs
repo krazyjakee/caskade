@@ -18,7 +18,7 @@ use crate::data::{DataSource, change};
 use crate::input::{Bind, use_input, use_input_action};
 use crate::router::{LibraryRoute, RouteLink};
 use crate::ui::{CardGame, GameCard, GameRow};
-use blitz_dom::{BaseDocument, NodeId, ScrollBehavior};
+use blitz_dom::ScrollBehavior;
 use caskade_core::model::{GameSort, GameSummary, ListGames, TitleLetter};
 use caskade_ui_data::{Changed, Key as DataKey};
 use caskade_ui_i18n::{t, tp};
@@ -249,7 +249,7 @@ pub fn VirtualLibrary(
     let mounted = pending_focus.borrow().and_then(|index| {
         let handle = scroller.peek().clone()?;
         let doc = handle.doc();
-        card_node(&doc, handle.node_id(), index)
+        crate::input::find_attr(&doc, handle.node_id(), "data-index", &index.to_string())
     });
     if let Some(node) = mounted {
         pending_focus.borrow_mut().take();
@@ -261,10 +261,7 @@ pub fn VirtualLibrary(
         pending_tries.set(tries);
         if tries <= 30 {
             spawn(async move {
-                let _ = caskade_app::runtime::spawn(async {
-                    tokio::time::sleep(std::time::Duration::from_millis(16)).await;
-                })
-                .await;
+                crate::data::sleep(std::time::Duration::from_millis(16)).await;
                 moved += 1;
             });
         } else {
@@ -395,10 +392,7 @@ pub fn VirtualLibrary(
                         // Measured once laid out: a frame later.
                         spawn(async move {
                             for _ in 0..30 {
-                                let _ = caskade_app::runtime::spawn(async {
-                                    tokio::time::sleep(std::time::Duration::from_millis(16)).await;
-                                })
-                                .await;
+                                crate::data::sleep(std::time::Duration::from_millis(16)).await;
                                 moved += 1;
                                 let measured = scroller
                                     .peek()
@@ -534,22 +528,6 @@ fn scroll_to(handle: &NodeHandle, top: f64, input: &crate::input::Input) {
         .doc_mut()
         .scroll_to(handle.node_id(), 0.0, top, ScrollBehavior::Instant);
     input.scrolled_by_code();
-}
-
-/// The focus stop of game `index` under the scroller, once mounted.
-fn card_node(doc: &BaseDocument, scroller: NodeId, index: usize) -> Option<NodeId> {
-    let wanted = index.to_string();
-    let mut found = None;
-    let mut stack = vec![scroller];
-    while let Some(at) = stack.pop() {
-        let node = doc.get_node(at)?;
-        if node.attr(blitz_dom::LocalName::from("data-index")) == Some(wanted.as_str()) {
-            found = Some(at);
-            break;
-        }
-        stack.extend(node.children.iter().copied());
-    }
-    found
 }
 
 /// The list's columns (`LibraryRow.tsx`'s `listColumns`): title, status,

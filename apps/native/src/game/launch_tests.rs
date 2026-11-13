@@ -37,7 +37,7 @@ pub(crate) struct Script {
 static SCRIPT: Mutex<Option<Script>> = Mutex::new(None);
 
 fn with<T>(f: impl FnOnce(&mut Script) -> T) -> T {
-    let mut script = SCRIPT.lock().unwrap_or_else(|e| e.into_inner());
+    let mut script = caskade_core::lock(&SCRIPT);
     f(script.get_or_insert_with(Script::default))
 }
 
@@ -45,13 +45,13 @@ fn with<T>(f: impl FnOnce(&mut Script) -> T) -> T {
 pub(crate) struct Scripted;
 
 pub(crate) fn script(script: Script) -> Scripted {
-    *SCRIPT.lock().unwrap_or_else(|e| e.into_inner()) = Some(script);
+    *caskade_core::lock(&SCRIPT) = Some(script);
     Scripted
 }
 
 impl Drop for Scripted {
     fn drop(&mut self) {
-        *SCRIPT.lock().unwrap_or_else(|e| e.into_inner()) = None;
+        *caskade_core::lock(&SCRIPT) = None;
     }
 }
 
@@ -177,7 +177,7 @@ fn press(window: &mut Window, dialog: &str, part: &str) {
 
 #[test]
 fn a_newer_release_is_offered_before_play_and_play_now_starts_it() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let (mut window, game) = library();
     let _script = script(Script {
@@ -215,7 +215,7 @@ fn a_newer_release_is_offered_before_play_and_play_now_starts_it() {
 
 #[test]
 fn skipping_a_release_stops_its_offer_and_plays() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let (mut window, game) = library();
     let _script = script(Script {
@@ -247,7 +247,7 @@ fn skipping_a_release_stops_its_offer_and_plays() {
 
 #[test]
 fn a_game_running_on_another_device_warns_and_plays_anyway() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let (mut window, game) = library();
     let _script = script(Script {
@@ -278,7 +278,7 @@ fn a_game_running_on_another_device_warns_and_plays_anyway() {
 
 #[test]
 fn when_both_devices_played_play_asks_which_save_and_plays_with_it() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let (mut window, game) = library();
     let _script = script(Script {
@@ -310,7 +310,7 @@ fn when_both_devices_played_play_asks_which_save_and_plays_with_it() {
 
 #[test]
 fn a_save_on_its_way_is_waited_for_then_the_game_starts() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let (mut window, game) = library();
     let _script = script(Script {
@@ -349,7 +349,7 @@ fn a_save_on_its_way_is_waited_for_then_the_game_starts() {
 
 #[test]
 fn skip_plays_with_the_save_here_while_another_is_on_its_way() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let (mut window, game) = library();
     let _script = script(Script {
@@ -378,7 +378,7 @@ fn skip_plays_with_the_save_here_while_another_is_on_its_way() {
 
 #[test]
 fn a_busy_streaming_device_is_asked_to_stop_and_the_game_launches_again() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let (mut window, game) = library();
     let _script = script(Script {

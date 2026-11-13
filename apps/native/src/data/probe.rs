@@ -49,10 +49,7 @@ pub fn Probe() -> Element {
             // A moment later, so the two writes show as two updates (library
             // events within 200 ms arrive as one).
             // Made on the runtime: a timer needs its reactor.
-            let _ = caskade_app::runtime::spawn(async {
-                tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-            })
-            .await;
+            crate::data::sleep(std::time::Duration::from_secs(1)).await;
             // Then a change through the data layer, as a view's toggle.
             if let Err(error) = change(async move { library.set_favorite(&id, true).await }).await {
                 tracing::warn!(%error, "data probe: the favourite didn't change");

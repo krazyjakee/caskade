@@ -4,7 +4,7 @@
 
 use blitz_dom::NodeId;
 use caskade_core::error::ErrorReport;
-use caskade_ui_data::romm::{ConnectionReport, Romm, RommAuth};
+use caskade_ui_data::romm::{ConnectionReport, RommAuth};
 use caskade_ui_data::storage::Storage;
 use caskade_ui_i18n::{format, t, tp};
 use dioxus_native::NodeHandle;
@@ -290,7 +290,7 @@ pub fn SourcesStep(
     on_next: EventHandler<()>,
 ) -> Element {
     let picker = use_path_picker();
-    let romm = try_use_context::<Romm>().or_else(|| crate::shell::services().and_then(Romm::of));
+    let romm = crate::settings::use_romm();
     let mut retro = use_signal(|| choices.rom_folder.is_some());
     let mut folder = use_signal(|| choices.rom_folder.clone());
     let mut use_romm = use_signal(|| choices.romm.is_some());

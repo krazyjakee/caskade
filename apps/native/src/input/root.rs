@@ -35,7 +35,6 @@ pub enum Job {
     /// After a render: an overlay to enter, a view's focus to place.
     Frame,
     /// The view changed to a history entry.
-    #[allow(dead_code, reason = "the views (#96 onwards) send it")]
     Navigated(String),
     /// A click landed on `hit`: focus goes to the control there (Blitz
     /// clears it on a click anywhere but a field), and in console mode a tap
@@ -45,7 +44,6 @@ pub enum Job {
         touch: bool,
     },
     /// Focus goes to `node` (shown as keyboard focus): a view put it there.
-    #[allow(dead_code, reason = "the library (#94, mounted by #99) sends it")]
     Focus(NodeId),
 }
 
@@ -149,28 +147,24 @@ impl Input {
         let _ = self.inner.jobs.send(Job::Action(action, source, glyphs));
     }
 
-    #[allow(dead_code, reason = "the views (#96 onwards) call it")]
     /// The view changed to history entry `key`: focus goes back where it
     /// was there, or to the view's entry.
     pub fn navigated(&self, key: impl Into<String>) {
         let _ = self.inner.jobs.send(Job::Navigated(key.into()));
     }
 
-    #[allow(dead_code, reason = "the views (#96 onwards) call it")]
     /// What `back` does with no overlay and no binding: the previous view.
     pub fn on_back(&self, back: impl Fn() + 'static) {
         *self.inner.back.borrow_mut() = Some(Rc::new(back));
     }
 
     /// What opening a game's details does: the router's way there.
-    #[allow(dead_code, reason = "the views (#96 onwards) call it")]
     pub fn on_details(&self, details: impl Fn(String) + 'static) {
         *self.inner.details.borrow_mut() = Some(Rc::new(details));
     }
 
     /// What typing outside a field, a menu or a dialog does: the shell's
     /// search opens with the character typed (empty for `/`).
-    #[allow(dead_code, reason = "the shell's search (#96 onwards) calls it")]
     pub fn on_type(&self, start: impl Fn(String) + 'static) {
         *self.inner.typing.borrow_mut() = Some(Rc::new(start));
     }
@@ -282,21 +276,18 @@ impl Input {
         self.inner.dispatcher.borrow().active()
     }
 
-    #[allow(dead_code, reason = "the views (#96 onwards) call it")]
     /// The labels of the pad used last, for hints.
     pub fn glyphs(&self) -> GlyphFamily {
         self.changed.read();
         self.inner.dispatcher.borrow().glyphs()
     }
 
-    #[allow(dead_code, reason = "the views (#96 onwards) call it")]
     /// What sent the last action.
     pub fn source(&self) -> Option<InputSource> {
         self.changed.read();
         self.inner.dispatcher.borrow().source()
     }
 
-    #[allow(dead_code, reason = "the views (#96 onwards) call it")]
     /// What each action would do now, for the hint bar.
     pub fn hints(&self) -> Vec<ActiveBinding> {
         self.changed.read();
@@ -309,7 +300,6 @@ impl Input {
         .unwrap_or_default()
     }
 
-    #[allow(dead_code, reason = "the library (#94, mounted by #99) calls it")]
     /// A view scrolled a box itself: what follows scrolling hears of it, as
     /// Blitz sends no scroll event for a scroll made from code.
     pub fn scrolled_by_code(&self) {
@@ -317,7 +307,6 @@ impl Input {
         scrolled += 1;
     }
 
-    #[allow(dead_code, reason = "the library (#94, mounted by #99) calls it")]
     /// Puts focus on `node`, as keys or a pad would: remembered in its
     /// sections, with the ring, scrolled into view.
     pub fn focus(&self, node: NodeId) {
@@ -604,11 +593,7 @@ impl Input {
         spawn(async move {
             let mut frame = 0;
             loop {
-                // Made on the app's runtime: a timer needs its reactor.
-                let _ = caskade_app::runtime::spawn(async {
-                    tokio::time::sleep(FRAME).await;
-                })
-                .await;
+                crate::data::sleep(FRAME).await;
                 input.run_frame();
                 frame += 1;
                 let (pending, waiting) = {
@@ -722,7 +707,6 @@ pub fn use_input_action(action: Action, bind: Bind, run: impl FnMut() -> bool + 
     use_drop(move || bindings.borrow_mut().remove(id));
 }
 
-#[allow(dead_code, reason = "the views (#96 onwards) call it")]
 /// Puts focus back where it was when the view at `key` comes back, or on
 /// the view's entry when it's new: a view calls this with its location.
 pub fn use_focus_location(key: String) {
@@ -763,7 +747,7 @@ pub fn InputRoot(
                 if action {
                     let mut waited = Duration::ZERO;
                     while waited < STALE_WAIT && worker.stale() {
-                        let _ = caskade_app::runtime::spawn(tokio::time::sleep(FRAME)).await;
+                        crate::data::sleep(FRAME).await;
                         waited += FRAME;
                     }
                 }

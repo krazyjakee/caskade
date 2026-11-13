@@ -47,8 +47,7 @@ pub fn Tooltip(
                 generation += 1;
                 let mine = *generation.peek();
                 spawn(async move {
-                    // On the app's runtime: a timer needs its reactor.
-                    let _ = caskade_app::runtime::spawn(async { tokio::time::sleep(DELAY).await }).await;
+                    crate::data::sleep(DELAY).await;
                     if *generation.peek() == mine {
                         show_now();
                     }

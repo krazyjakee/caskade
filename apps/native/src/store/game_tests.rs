@@ -8,7 +8,7 @@
 
 use super::{screenshots, similar_ids, website_label};
 use crate::frame::tests::{ONE, Window};
-use crate::game::page_tests::{PageScript, page_script};
+use crate::game::page_tests::page_data_tests::{PageScript, page_script};
 use crate::router::Route;
 use crate::store::harness::{StoreScript, catalog_game, page, store, store_script};
 use blitz_dom::NodeId;
@@ -210,7 +210,7 @@ fn back_text(window: &Window) -> String {
 
 #[test]
 fn a_catalog_game_opens_from_the_results_and_back_returns_to_them() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = store_script(StoreScript {
         search: Some(page(vec![lantern()])),
@@ -333,14 +333,15 @@ fn a_catalog_game_opens_from_the_results_and_back_returns_to_them() {
 
 #[test]
 fn igdbs_videos_play_in_the_video_window_and_its_screenshots_fill_the_gallery() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = store_script(StoreScript {
         games: catalogue(),
         ..StoreScript::default()
     });
     let _page = page_script(PageScript::default());
-    let played = || crate::game::page_tests::page(|script| script.videos_played.clone());
+    let played =
+        || crate::game::page_tests::page_data_tests::page(|script| script.videos_played.clone());
     let mut window = store_game("/store/games/1001", "Lantern Tide");
 
     let videos = window.get("data-cs", "videos");
@@ -398,7 +399,7 @@ fn igdbs_videos_play_in_the_video_window_and_its_screenshots_fill_the_gallery() 
 
 #[test]
 fn a_game_says_so_without_videos_stores_or_the_game_itself() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = store_script(StoreScript {
         games: catalogue(),

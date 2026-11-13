@@ -266,7 +266,7 @@ fn BrowseTab(store: StoreRoute) -> Element {
                     typed += 1;
                     let mine = *typed.peek();
                     spawn(async move {
-                        let _ = caskade_app::runtime::spawn(tokio::time::sleep(DEBOUNCE)).await;
+                        crate::data::sleep(DEBOUNCE).await;
                         if *typed.peek() == mine {
                             submit.call(value);
                         }

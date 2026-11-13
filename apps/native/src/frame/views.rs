@@ -1,7 +1,4 @@
-//! What each page shows. The views come with their issues (#97–#108):
-//! until then a page shows its name and "Not built yet.", as the webview's
-//! `PlaceholderView`, except the library, whose grid (#94) shows the
-//! route's filter, sort and search.
+//! What each page shows, by route.
 
 use crate::router::{LibraryRoute, Route, use_router};
 use caskade_core::model::GameFilter;
@@ -56,8 +53,7 @@ pub fn Outlet() -> Element {
     }
 }
 
-/// A page that isn't built yet: its name, as the webview's
-/// `PlaceholderView`.
+/// A page's name over "Not built yet.": what a page not found shows.
 pub fn placeholder(title: String) -> Element {
     rsx! {
         div { class: "grid h-full flex-1 place-items-center",

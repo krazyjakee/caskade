@@ -1,7 +1,5 @@
-//! Each section's panel: General and Appearance (#104, `general.rs`,
-//! `appearance.rs`); Installer's schema
-//! (`core.installer`), as the webview's `InstallerSettings`. The others
-//! come with #104 and #105.
+//! Each section's panel; Installer's is its schema (`core.installer`), as
+//! the webview's `InstallerSettings`.
 
 use caskade_ui_i18n::t;
 use dioxus_native::prelude::*;
@@ -72,20 +70,6 @@ pub fn panel(tab: &'static str, sub: Option<String>) -> Element {
         "emulators" => rsx! {
             super::emulation::EmulationSettings { section: sub }
         },
-        _ => rsx! {
-            Pending {}
-        },
-    }
-}
-
-/// What isn't built yet in a panel (#104, #105).
-#[component]
-fn Pending() -> Element {
-    rsx! {
-        div {
-            "data-pending": "true",
-            class: "rounded-panel border border-dashed border-border p-5",
-            p { class: "text-sm text-fg-muted", {t!("Not built yet.")} }
-        }
+        _ => rsx! {},
     }
 }

@@ -116,7 +116,14 @@ pub fn use_web_games(query: ReadSignal<ListGames>) -> Query<Vec<GameSummary>> {
             limit: MOSAIC_LIMIT,
             ..query()
         };
-        async move { data.page(&query).await.map(|page| page.items) }
+        // Only the Web tab shows the mosaic (#111).
+        async move {
+            if query.filter == caskade_core::model::GameFilter::Web {
+                data.page(&query).await.map(|page| page.items)
+            } else {
+                Ok(Vec::new())
+            }
+        }
     })
 }
 

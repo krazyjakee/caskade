@@ -2,10 +2,6 @@
 //! webview's `components/{manualGame,pathBrowser,shares,sync,storage}`:
 //! each with the same steps and wording, over the native data layer.
 
-// Until the library's toolbar mounts `AddGame` (#99) and the path
-// browser picks folders (#108).
-#![allow(dead_code)]
-
 pub mod add_game;
 mod anatomy;
 pub mod devices;
@@ -77,7 +73,5 @@ pub fn Hosts() -> Element {
     }
 }
 
-#[cfg(test)]
-mod share_tests;
 #[cfg(test)]
 mod tests;

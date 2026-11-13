@@ -3,7 +3,8 @@
 //! controls. Dragging anywhere but a control moves the window, and a double
 //! click maximizes it (`window.rs`).
 
-use crate::data::status::{is_active, use_jobs, use_unread_notifications};
+use crate::activity::labels::is_active;
+use crate::data::status::use_unread_notifications;
 use crate::router::RouteLink;
 use crate::ui::{Anchor, Menu, MenuEntry, MenuItem, Svg, icons};
 use caskade_core::install::JobStatus;
@@ -91,7 +92,7 @@ pub fn Topbar() -> Element {
                         menu.set(None);
                         match id.as_str() {
                             "minimize" => {
-                                if let Some(window) = super::window::window() {
+                                if let Some(window) = crate::shell::main_window() {
                                     window.set_minimized(true);
                                 }
                             }
@@ -110,12 +111,12 @@ pub fn Topbar() -> Element {
 /// answer, else the notifications while some are unread.
 #[component]
 pub fn ActivityLink() -> Element {
-    let jobs = use_jobs();
+    let jobs = crate::data::use_jobs_query();
     let unread = use_unread_notifications();
     let jobs = jobs
         .read()
         .as_ref()
-        .and_then(|jobs| jobs.as_ref().ok().cloned().flatten())
+        .and_then(|jobs| jobs.as_ref().ok().cloned())
         .unwrap_or_default();
     let unread = unread
         .read()

@@ -5,11 +5,9 @@
 //!
 //! - `preview`: the same library with genres for subtitles, which the
 //!   built-in themes' previews are rendered from (#125).
-//! - `library`: the BLITZ-0 prototype's library (`apps/native-proto`): the
-//!   shell's sidebar, top bar with search, status bar, the backdrop and a
-//!   grid of game cards with placeholder art, as the webview's. Until the
-//!   views come (#96) it's also the shell: the app's own root is a
-//!   placeholder in the system's sans-serif, which differs per machine.
+//! - `library`: the shell's sidebar, top bar with search, status bar, the
+//!   backdrop and a grid of game cards with placeholder art, as the
+//!   webview's.
 //!
 //! Every text is in the bundled fonts, so a render doesn't depend on the
 //! machine's.

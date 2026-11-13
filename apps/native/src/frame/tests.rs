@@ -47,7 +47,7 @@ fn app() -> Element {
     // Play asks scripted steps, not the app's services.
     use_context_provider(crate::game::launch_tests::fake_steps);
     // The game page's data, scripted.
-    use_context_provider(crate::game::page_tests::fake_data);
+    use_context_provider(crate::game::page_tests::page_data_tests::fake_data);
     // The game editor's data, scripted.
     use_context_provider(crate::game::editor::tests::fake_edit_data);
     // The Store's catalogue, scripted.
@@ -56,7 +56,7 @@ fn app() -> Element {
         // The app's stylesheet: the frame lays out as in the app.
         style { {include_str!("../../assets/app.css")} }
         InputRoot {
-            super::Frame { start: *START.lock().unwrap_or_else(|e| e.into_inner()) }
+            super::Frame { start: *caskade_core::lock(&START) }
         }
     }
 }
@@ -381,7 +381,7 @@ fn pointer(x: f32, y: f32, down: bool) -> blitz_traits::events::BlitzPointerEven
 
 #[test]
 fn every_page_of_the_webview_opens() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open();
     for (href, shows) in [
@@ -410,7 +410,7 @@ fn every_page_of_the_webview_opens() {
 
 #[test]
 fn the_sidebar_navigates_by_mouse_with_the_librarys_filters_and_counts() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open();
     let store = window.nav_link("Store");
@@ -466,7 +466,7 @@ fn the_sidebar_navigates_by_mouse_with_the_librarys_filters_and_counts() {
 
 #[test]
 fn the_sidebar_navigates_by_keyboard_and_pad() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open();
     // Enter on a focused link.
@@ -504,7 +504,7 @@ fn the_sidebar_navigates_by_keyboard_and_pad() {
 
 #[test]
 fn the_search_suggests_games_and_opens_the_library_on_the_text() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open();
     // Ctrl K focuses it from anywhere.
@@ -559,7 +559,7 @@ fn the_search_suggests_games_and_opens_the_library_on_the_text() {
 
 #[test]
 fn typing_outside_a_field_opens_the_search_overlay() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open();
     let root = window.get("data-cs", "app-shell");
@@ -595,7 +595,7 @@ fn typing_outside_a_field_opens_the_search_overlay() {
 
 #[test]
 fn the_status_bar_says_whats_running_and_the_version() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let window = Window::open();
     let bar = window.get("data-cs", "status-bar");
@@ -612,7 +612,7 @@ fn the_status_bar_says_whats_running_and_the_version() {
 
 #[test]
 fn a_press_moves_the_window_only_from_the_title_bars_own_surface() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let window = Window::open();
     let doc = window.doc.inner.borrow();
@@ -717,7 +717,7 @@ fn search_matches_ignore_case_and_accents() {
 
 #[test]
 fn a_right_click_on_the_title_bar_offers_the_windows_menu() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open();
     // On a control, no: the bell keeps its click.

@@ -108,7 +108,7 @@ fn sources_have_names_and_unknown_ones_show_as_they_are() {
 
 #[test]
 fn the_preferences_read_and_save_and_off_stops_scans() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     set("enabled", json!(true));
@@ -195,7 +195,7 @@ fn the_preferences_read_and_save_and_off_stops_scans() {
 /// off is kept per OS.
 #[test]
 fn a_system_check_turns_off_for_this_os() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     set("enabled", json!(true));
@@ -230,7 +230,7 @@ fn a_system_check_turns_off_for_this_os() {
 /// Folders for deep scans: added by typing, listed, removed by name.
 #[test]
 fn folders_are_added_and_removed() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     set("enabled", json!(true));
@@ -268,7 +268,7 @@ fn folders_are_added_and_removed() {
 /// Ignored results list their title and source, and come back.
 #[test]
 fn an_ignored_result_is_allowed_again() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _restore = Restore::new();
     set(
@@ -311,7 +311,7 @@ fn an_ignored_result_is_allowed_again() {
 /// A hidden game is listed and shown again.
 #[test]
 fn a_hidden_game_is_shown_again() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let library = source().library.clone();
     let game = caskade_app::runtime::block_on(library.page(&Default::default()))
@@ -379,7 +379,7 @@ fn review_app() -> Element {
                 review,
                 busy: false,
                 on_decide: |decision: (Vec<String>, bool)| {
-                    DECIDED.lock().unwrap_or_else(|e| e.into_inner()).push(decision)
+                    caskade_core::lock(&DECIDED).push(decision)
                 },
             }
         }
@@ -387,14 +387,14 @@ fn review_app() -> Element {
 }
 
 fn decided() -> Vec<(Vec<String>, bool)> {
-    DECIDED.lock().unwrap_or_else(|e| e.into_inner()).clone()
+    caskade_core::lock(&DECIDED).clone()
 }
 
 #[test]
 fn the_review_list_accepts_several_and_ignores_one_by_a_right_click() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
-    DECIDED.lock().unwrap_or_else(|e| e.into_inner()).clear();
+    caskade_core::lock(&DECIDED).clear();
     let mut doc = DioxusDocument::new(
         VirtualDom::new(review_app),
         blitz_dom::DocumentConfig {

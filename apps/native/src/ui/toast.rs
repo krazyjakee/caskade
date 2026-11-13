@@ -52,9 +52,7 @@ impl Toasts {
         });
         if !stays {
             spawn(async move {
-                // On the app's runtime: a timer needs its reactor.
-                let _ =
-                    caskade_app::runtime::spawn(async { tokio::time::sleep(SHOWN).await }).await;
+                crate::data::sleep(SHOWN).await;
                 self.dismiss(id);
             });
         }

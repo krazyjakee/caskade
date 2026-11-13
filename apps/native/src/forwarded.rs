@@ -27,12 +27,7 @@ fn act(intents: Vec<Intent>) {
         return;
     }
     caskade_app::runtime::spawn(async move {
-        let services = loop {
-            if let Some(services) = crate::shell::services() {
-                break services;
-            }
-            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-        };
+        let services = crate::shell::services_ready().await;
         for intent in intents {
             let raise = match intent {
                 Intent::Links(links) => {

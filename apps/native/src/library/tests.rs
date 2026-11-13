@@ -46,7 +46,7 @@ use crate::input::tests::ONE_WINDOW as ONE;
 
 fn app() -> Element {
     use_data_source(|| SOURCE.get().expect("the fixture library").clone());
-    let layout = *LAYOUT.lock().unwrap_or_else(|e| e.into_inner());
+    let layout = *caskade_core::lock(&LAYOUT);
     let query = ListGames {
         filter: GameFilter::All,
         sort: GameSort::Title,
@@ -72,7 +72,7 @@ impl Window {
         let source = SOURCE
             .get_or_init(|| caskade_app::runtime::block_on(DataSource::fixtures(GAMES)).unwrap());
         let _ = source;
-        *LAYOUT.lock().unwrap_or_else(|e| e.into_inner()) = layout;
+        *caskade_core::lock(&LAYOUT) = layout;
         let mut doc = DioxusDocument::new(
             VirtualDom::new(app),
             DocumentConfig {
@@ -241,7 +241,7 @@ fn scroll_through(window: &mut Window, layout: Layout) -> usize {
 
 #[test]
 fn scrolling_ten_thousand_games_keeps_the_mounted_cards_bounded() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open(Layout::Grid);
     let games = total();
@@ -277,7 +277,7 @@ fn scrolling_ten_thousand_games_keeps_the_mounted_cards_bounded() {
 
 #[test]
 fn scrolling_the_list_keeps_its_rows_bounded() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open(Layout::List);
     let most = scroll_through(&mut window, Layout::List);
@@ -313,7 +313,7 @@ impl Window {
 #[test]
 fn a_pad_pages_through_the_grid_and_focus_follows() {
     use caskade_ui_input::Action;
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = Window::open(Layout::Grid);
     // A pad starts on the first game.

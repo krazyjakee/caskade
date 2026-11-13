@@ -12,7 +12,7 @@ use caskade_core::store_accounts::{
 };
 use caskade_ui_data::ErrorReport;
 use caskade_ui_data::stores::{Stores, StoresSnapshot};
-use caskade_ui_i18n::{format, t, tn, tp};
+use caskade_ui_i18n::{t, tn, tp};
 use dioxus_native::prelude::*;
 use serde_json::Value;
 
@@ -50,34 +50,20 @@ fn field_kind(secret: bool) -> &'static str {
     if secret { "password" } else { "text" }
 }
 
-fn when(ms: i64) -> String {
-    format::date_time(crate::library::local_date_time(ms))
-}
-
 /// Runs a store action on the app's runtime, then reads the accounts again.
 fn act<F, Fut>(
     stores: Option<Stores>,
     mut snapshot: Resource<Result<StoresSnapshot, ErrorReport>>,
-    mut pending: Signal<bool>,
-    mut failed: Signal<Option<ErrorReport>>,
+    pending: Signal<bool>,
+    failed: Signal<Option<ErrorReport>>,
     work: F,
 ) where
     F: FnOnce(Stores) -> Fut + 'static,
     Fut: std::future::Future<Output = Result<(), ErrorReport>> + Send + 'static,
 {
-    let Some(stores) = stores else {
-        return;
-    };
-    pending.set(true);
-    failed.set(None);
-    spawn(async move {
-        let outcome = change(work(stores)).await;
-        pending.set(false);
-        if let Err(error) = outcome {
-            failed.set(Some(error));
-        }
-        snapshot.restart();
-    });
+    if let Some(stores) = stores {
+        crate::data::run(pending, failed, work(stores), move |_| snapshot.restart());
+    }
 }
 
 #[component]
@@ -277,11 +263,7 @@ fn SignIn(
         if kind == AuthKind::Device {
             spawn(async move {
                 loop {
-                    caskade_app::runtime::spawn(tokio::time::sleep(
-                        std::time::Duration::from_secs(5),
-                    ))
-                    .await
-                    .ok();
+                    crate::data::sleep(std::time::Duration::from_secs(5)).await;
                     complete(AuthInput::Poll);
                 }
             });
@@ -424,7 +406,7 @@ fn SignIn(
             p { class: "text-xs text-fg-muted",
                 {t!(
                     "The sign-in expires {0}. Caskade keeps it in your system's keychain, never in its settings or backups.",
-                    0 = when(flow.expires_at_ms)
+                    0 = crate::library::date_time(flow.expires_at_ms)
                 )}
             }
         }
@@ -458,13 +440,16 @@ fn AccountRow(
     let description = match account.sync.last_ok_ms {
         None => t!("Not refreshed yet."),
         Some(at) if provider.as_ref().is_some_and(|provider| !provider.library) => {
-            t!("Achievements last refreshed {0}.", 0 = when(at))
+            t!(
+                "Achievements last refreshed {0}.",
+                0 = crate::library::date_time(at)
+            )
         }
         Some(at) => t!(
             "{owned, plural, one {# game owned} other {# games owned}}, {installed} installed. Last refreshed {0}.",
             owned = summary.owned,
             installed = summary.installed,
-            0 = when(at)
+            0 = crate::library::date_time(at)
         ),
     };
     let id = account.id.clone();
@@ -845,8 +830,7 @@ fn AchievementSettings() -> Element {
     let Some(settings) = section.value() else {
         return rsx! {};
     };
-    let flag = |key: &str| settings.get(key).and_then(Value::as_bool).unwrap_or(false);
-    let enabled = flag("enabled");
+    let enabled = super::state::flag(&settings, "enabled");
     rsx! {
         SettingsSection {
             icon: Some(TROPHY),
@@ -859,7 +843,7 @@ fn AchievementSettings() -> Element {
                 label: t!("Refresh in the background"),
                 description: t!("After a game exits, and now and then for games played lately."),
                 Switch {
-                    checked: flag("background"),
+                    checked: super::state::flag(&settings, "background"),
                     disabled: !enabled,
                     on_change: move |on: bool| section.set_field("background", Value::Bool(on)),
                 }
@@ -868,7 +852,7 @@ fn AchievementSettings() -> Element {
                 label: t!("Notify new unlocks"),
                 description: t!("A notification for achievements unlocked since the last refresh. The first refresh of a game brings its history in without notifications."),
                 Switch {
-                    checked: flag("notifyUnlocks"),
+                    checked: super::state::flag(&settings, "notifyUnlocks"),
                     disabled: !enabled,
                     on_change: move |on: bool| section.set_field("notifyUnlocks", Value::Bool(on)),
                 }

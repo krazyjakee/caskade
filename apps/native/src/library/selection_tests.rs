@@ -61,7 +61,7 @@ fn start(window: &mut Window) {
 
 #[test]
 fn games_are_chosen_by_click_and_range_and_all_of_them() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = open();
     assert!(window.find("data-cs", "selection-bar").is_none());
@@ -142,7 +142,7 @@ fn games_are_chosen_by_click_and_range_and_all_of_them() {
 
 #[test]
 fn chosen_games_take_one_edit_after_a_preview() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = open();
     start(&mut window);

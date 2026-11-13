@@ -73,22 +73,7 @@ pub fn use_language() {
         // resolves to English and so doesn't announce.
         spawn(async {
             use tokio::sync::broadcast::error::RecvError;
-            // The services start after the window (and never in fixtures
-            // mode or a test: then it gives up).
-            let mut waited = 0;
-            let services = loop {
-                if let Some(services) = crate::shell::services() {
-                    break services;
-                }
-                waited += 1;
-                if waited > 1200 {
-                    return;
-                }
-                let _ = caskade_app::runtime::spawn(async {
-                    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
-                })
-                .await;
-            };
+            let services = crate::shell::services_ready().await;
             let mut settings = services.settings.subscribe();
             show(&requested().await);
             loop {
@@ -106,10 +91,6 @@ pub fn use_language() {
 
 /// Rich text's tree, with each numbered tag built by its function: the
 /// element around its translated words.
-#[allow(
-    dead_code,
-    reason = "trans! calls it, and the views (#96 onwards) use trans!"
-)]
 pub fn rich(
     nodes: &[caskade_ui_i18n::Node],
     build: &[(usize, &dyn Fn(Element) -> Element)],

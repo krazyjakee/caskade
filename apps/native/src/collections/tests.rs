@@ -122,7 +122,7 @@ fn game_titles(window: &Window) -> Vec<String> {
 
 #[test]
 fn lists_collections_pinned_first_and_opens_one_with_its_games() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut made = Made::default();
     let weekend = made.manual("Weekend Picks", &["fixture-1", "fixture-2", "fixture-3"]);
@@ -208,7 +208,7 @@ fn lists_collections_pinned_first_and_opens_one_with_its_games() {
 
 #[test]
 fn makes_a_manual_collection_and_adds_games_to_it() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut made = Made::default();
     let mut window = Window::open();
@@ -289,7 +289,7 @@ fn makes_a_manual_collection_and_adds_games_to_it() {
 
 #[test]
 fn a_smart_collections_page_shows_its_rules_and_games() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut made = Made::default();
     let query = ListGames {
@@ -327,7 +327,7 @@ fn a_smart_collections_page_shows_its_rules_and_games() {
 
 #[test]
 fn pins_a_collection_from_its_cards_menu() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut made = Made::default();
     let id = made.manual("Pin Me", &["fixture-1"]);
@@ -355,7 +355,7 @@ fn pins_a_collection_from_its_cards_menu() {
 
 #[test]
 fn deletes_a_collection_from_its_menu() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut made = Made::default();
     let id = made.manual("Doomed Picks", &["fixture-1"]);
@@ -398,7 +398,7 @@ fn deletes_a_collection_from_its_menu() {
 #[test]
 fn plays_a_random_installed_game_from_the_collection() {
     use crate::game::launch_tests::{Script, launches, script};
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _script = script(Script::default());
     let mut made = Made::default();

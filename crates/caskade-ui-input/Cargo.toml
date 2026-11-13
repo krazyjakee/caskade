@@ -6,10 +6,6 @@ edition.workspace = true
 rust-version.workspace = true
 publish = false
 
-[features]
-# The hand-built tree tests use, for other crates' tests.
-test-tree = []
-
 [dependencies]
 # The actions pads send (`Action`); no pad backend.
 caskade-input = { path = "../caskade-input", default-features = false }

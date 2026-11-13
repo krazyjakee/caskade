@@ -96,7 +96,7 @@ fn enter_pin(window: &mut Window, pin: &str) {
 
 #[test]
 fn switch_account_signs_out_to_the_picker_and_a_locked_account_asks_for_its_pin() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let home = household(None);
     let mut window = Window::open();
     // The top bar's avatar: who is signed in, and Switch account.
@@ -169,7 +169,7 @@ fn switch_account_signs_out_to_the_picker_and_a_locked_account_asks_for_its_pin(
 
 #[test]
 fn an_age_limit_asks_for_an_admins_pin_before_play_then_plays() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let home = household(Some(12));
     // The library's first game by title, which has a release Play starts.
@@ -228,7 +228,7 @@ fn an_age_limit_asks_for_an_admins_pin_before_play_then_plays() {
 #[test]
 fn the_picker_in_console_mode_has_larger_tiles_and_the_hint_bar() {
     use caskade_ui_input::Action;
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let home = household(None);
     let mut window = Window::open();

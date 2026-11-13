@@ -11,20 +11,20 @@
 #[cfg(test)]
 mod a11y_snapshot;
 mod accounts;
-// The anatomy catalogue (#90); the components (#93) add to it.
 // Activity's jobs (#101).
 mod activity;
+// The anatomy catalogue (#90); the components (#93) add to it.
 mod anatomy;
-// Console mode, for a TV and a pad (#107).
-mod console;
-// The data hooks (#89); the views (#96 onwards) use them.
 // Collections and a collection's page (#102).
 mod collections;
+// Console mode, for a TV and a pad (#107).
+mod console;
+// The data hooks (#89).
 mod data;
 mod dialogs;
-mod flows;
 // Files dragged onto the window: the library installs them (#99).
 mod drops;
+mod flows;
 mod forwarded;
 // The frame around the views: sidebar, top bar, status bar (#96).
 mod frame;
@@ -39,17 +39,18 @@ mod i18n;
 mod input;
 mod launch;
 mod library;
+mod onboarding;
+mod paste;
 // Plugins' drawn UI (#109).
 mod plugins;
 // Navigation between the pages (#96), in place of the webview's router.
-mod onboarding;
-mod paste;
 mod router;
 mod settings;
 mod shell;
 #[cfg(feature = "shots")]
 mod shots;
 mod smoke;
+mod state_file;
 mod store;
 mod theme;
 mod tray;
@@ -89,24 +90,10 @@ fn main() {
     // video's window, not the app. Their WebKitGTK first gets the renderer
     // the Tauri app picks for its own (it may restart the process); Blitz's
     // main window doesn't use WebKit.
-    if caskade_player::web_player::Options::from_args(std::env::args_os()).is_some()
-        || caskade_player::video_player::Options::from_args(std::env::args_os()).is_some()
-    {
+    if let Some(window) = caskade_player::Window::from_args(std::env::args_os()) {
         caskade_player::webkit::prefer_gpu();
-    }
-    if let Some(options) = caskade_player::web_player::Options::from_args(std::env::args_os()) {
         logging();
-        exit_window(
-            caskade_player::web_player::run(options),
-            "the game window couldn't open",
-        );
-    }
-    if let Some(options) = caskade_player::video_player::Options::from_args(std::env::args_os()) {
-        logging();
-        exit_window(
-            caskade_player::video_player::run(options),
-            "the video window couldn't open",
-        );
+        window.run();
     }
     logging();
     caskade_app::background::log_panics();
@@ -126,24 +113,7 @@ fn main() {
         eprintln!("this build has no gallery: build with --features gallery");
         std::process::exit(2);
     }
-    tracing::info!(
-        version = env!("CARGO_PKG_VERSION"),
-        "Caskade (native) starting"
-    );
-    let paths = caskade_core::AppPaths::standard()
-        .unwrap_or_else(|error| startup_failed("Caskade couldn't find its data folders", &error));
-    if let Err(error) = paths.create() {
-        startup_failed("Caskade couldn't create its data folders", &error);
-    }
-    // `--restore <backup>` (#192): staged now, applied as the library opens.
-    if let Some(archive) = caskade_app::recovery::restore_arg(
-        &std::env::args().collect::<Vec<_>>(),
-        &std::env::current_dir().unwrap_or_default(),
-    ) && let Err(error) =
-        caskade_app::runtime::block_on(caskade_app::recovery::stage(&paths, &archive))
-    {
-        startup_failed("Caskade couldn't restore the backup", &error);
-    }
+    let paths = caskade_app::recovery::prepare_paths();
     // One Caskade per user: a second start hands its arguments (links,
     // `--console`, a torrent file) to the running one and ends.
     let instance = match caskade_app::runtime::block_on(caskade_app::single_instance::claim(
@@ -198,12 +168,7 @@ fn main() {
     shell::start(core, |services| {
         theme::follow(services);
         caskade_app::launch_cli::server::listen(
-            caskade_app::launch_cli::server::Services {
-                accounts: services.accounts.clone(),
-                store: services.store.clone(),
-                launches: services.launch.clone(),
-                saves: Some(services.save_versions.clone()),
-            },
+            caskade_app::launch_cli::server::Services::of(services),
             caskade_app::launch_cli::Endpoint::for_paths(&services.paths),
         );
         smoke::after_start(services);
@@ -342,8 +307,7 @@ fn attributes(restored: Option<window_state::WindowState>) -> dioxus_native::Win
 }
 
 /// The main window's root: it follows the window (its state, game focus,
-/// a quit asked for) and holds the views, which come with the UI work
-/// (#96 onwards).
+/// a quit asked for) and holds the views.
 fn app() -> Element {
     // The UI's language, before any text (#91).
     i18n::use_language();
@@ -403,12 +367,7 @@ fn window_ready(window: Arc<dyn dioxus_native::winit::window::Window>) {
     }
     smoke::window_ready(window.clone());
     caskade_app::runtime::spawn(async move {
-        let services = loop {
-            if let Some(services) = shell::services() {
-                break services;
-            }
-            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-        };
+        let services = shell::services_ready().await;
         // Pads: their actions reach the input root while the window has
         // focus (#92).
         input::start_pads(services, window.clone());
@@ -422,72 +381,44 @@ fn window_ready(window: Arc<dyn dioxus_native::winit::window::Window>) {
     });
 }
 
+/// Logs to stderr and the daily files, as the Tauri app does.
 fn logging() {
-    let _ = tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
-        )
-        .try_init();
+    caskade_app::logging::init("Caskade (native)", env!("CARGO_PKG_VERSION"));
 }
 
-/// Ends a window process (`--web-game`, `--video`) with its window's code.
-fn exit_window(outcome: Result<i32, String>, failed: &str) -> ! {
-    match outcome {
-        Ok(code) => std::process::exit(code),
-        Err(error) => {
-            tracing::error!(%error, "{failed}");
-            std::process::exit(1)
-        }
-    }
-}
-
-/// The library store couldn't open: a dialog says why and offers to restore
-/// a backup (#192), or, when a newer Caskade wrote the library, to update;
-/// otherwise Caskade quits.
+/// The library store couldn't open: the app layer's dialogs say why and
+/// offer a way back (`caskade_app::recovery::library_failed`).
 fn library_failed(error: &caskade_core::Error, paths: &caskade_core::AppPaths) -> ! {
-    tracing::error!(%error, "library unavailable");
-    eprintln!("Caskade couldn't open its library: {error}");
-    let report = caskade_core::error::ErrorReport::from(error);
-    if report
-        .hints
-        .contains(&caskade_core::error::RecoveryHint::UpdateCaskade)
-    {
-        // A backup is older than the library: restoring one would lose what
-        // the newer Caskade added.
-        updater::update_for_library(report.summary);
+    caskade_app::recovery::library_failed(error, paths, &StartupDialogs);
+    std::process::exit(1)
+}
+
+/// The library error dialog's dialogs, which block, before the window opens.
+struct StartupDialogs;
+
+impl caskade_app::recovery::StartupDialogs for StartupDialogs {
+    fn ask(&self, text: &str, buttons: &[String]) -> Option<usize> {
+        dialogs::ask("Caskade", text, buttons)
     }
-    let text = caskade_core::tr!(
-        "Caskade couldn't open its library.\n\n{error}\n\nYou can restore it from a backup, or start Caskade with --restore <backup file>.",
-        error = error
-    );
-    let restore = caskade_core::tr!("Restore from backup…");
-    if dialogs::ask(
-        "Caskade",
-        &text,
-        dialogs::Kind::Error,
-        &[restore, caskade_core::tr!("Quit")],
-    ) != Some(0)
-    {
-        std::process::exit(1);
+
+    fn pick_file(&self, title: &str, filter: (&str, &[&str])) -> Option<std::path::PathBuf> {
+        dialogs::pick_file(title, Some(filter))
     }
-    let Some(archive) = dialogs::pick_file(
-        &caskade_core::tr!("Choose a Caskade backup"),
-        Some((&caskade_core::tr!("Caskade backups"), &["zip"])),
-    ) else {
-        std::process::exit(1);
-    };
-    match caskade_app::runtime::block_on(caskade_app::recovery::stage(paths, &archive)) {
-        Ok(()) => restart(),
-        Err(error) => {
-            dialogs::ask(
-                "Caskade",
-                &caskade_core::tr!("This backup can't be restored.\n\n{error}", error = error),
-                dialogs::Kind::Error,
-                &[caskade_core::tr!("Quit")],
-            );
-            std::process::exit(1)
-        }
+
+    fn cant_update(&self) -> Option<caskade_core::i18n::Message> {
+        updater::unavailable()
+    }
+
+    fn update(&self) -> Result<Option<String>, String> {
+        caskade_app::runtime::block_on(updater::install_now())
+    }
+
+    fn restart(&self) {
+        restart()
+    }
+
+    fn quit(&self) {
+        std::process::exit(1)
     }
 }
 
@@ -505,13 +436,6 @@ fn restart() -> ! {
             std::process::exit(1)
         }
     }
-}
-
-/// Ends the process before the window opens.
-fn startup_failed(what: &str, error: &dyn std::fmt::Display) -> ! {
-    tracing::error!(%error, "{what}");
-    eprintln!("{what}: {error}");
-    std::process::exit(1)
 }
 
 #[cfg(test)]

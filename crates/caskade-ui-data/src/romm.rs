@@ -70,10 +70,6 @@ impl Romm {
         commands::romm_sync(&self.romm, id).await
     }
 
-    pub async fn cache(&self) -> Result<CacheStatus> {
-        commands::romm_cache_status(&self.romm).await
-    }
-
     /// Removes every download except kept games.
     pub async fn clear_cache(&self) -> Result<CacheStatus> {
         commands::romm_cache_clear(&self.romm).await

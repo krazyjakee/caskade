@@ -131,7 +131,7 @@ pub struct Found(pub Signal<Option<String>>);
 /// How long a found preference stays highlighted.
 pub const HIGHLIGHT: Duration = Duration::from_secs(4);
 
-/// Lower case without accents, so "Écran" finds "ecran".
+/// Lower case without accents, so "Écran" finds "ecran" (`foldSearch`).
 pub fn fold(text: &str) -> String {
     text.nfd()
         .filter(|c| !unicode_normalization::char::is_combining_mark(*c))
@@ -165,9 +165,7 @@ fn use_found(label: &str, node: Signal<Option<NodeHandle>>) -> bool {
         let control = super::popover::start_in(&handle.doc(), handle.node_id());
         input.focus(control.unwrap_or(handle.node_id()));
         spawn(async move {
-            caskade_app::runtime::spawn(tokio::time::sleep(HIGHLIGHT))
-                .await
-                .ok();
+            crate::data::sleep(HIGHLIGHT).await;
             lit.set(false);
         });
     });

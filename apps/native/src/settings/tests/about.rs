@@ -29,7 +29,7 @@ fn link(window: &Window, text: &str) -> blitz_dom::NodeId {
 
 #[test]
 fn about_shows_the_build_credits_and_opens_legal_in_place() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let mut window = open("/settings?tab=about");
     window.settle_until("About", |window| window.find("data-cs", "about").is_some());
     let version = window.text(window.get("data-part", "version"));
@@ -81,7 +81,7 @@ fn about_shows_the_build_credits_and_opens_legal_in_place() {
 
 #[test]
 fn the_packages_open_by_licence() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let mut window = open("/settings?tab=about&section=packages");
     window.settle_until("the packages", |window| {
         !window.find_all("data-part", "license-group").is_empty()

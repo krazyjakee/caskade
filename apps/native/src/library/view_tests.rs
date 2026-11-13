@@ -31,7 +31,7 @@ fn open(href: &str) -> Window {
 
 #[test]
 fn the_sort_menu_and_the_lists_headers_sort_the_library() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = open("/library?filter=all&sort=recent&layout=grid");
     // The menu, by keyboard: Recently played is first, Title next.
@@ -92,7 +92,7 @@ fn the_sort_menu_and_the_lists_headers_sort_the_library() {
 
 #[test]
 fn lb_and_rb_step_through_the_filters_and_wrap() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = open("/library?filter=recent");
     window.pad(Action::TabNext);
@@ -107,7 +107,7 @@ fn lb_and_rb_step_through_the_filters_and_wrap() {
 
 #[test]
 fn a_search_shows_as_a_chip_that_clears_it() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = open("/library?filter=all&q=fixture");
     let chip = window.get("data-part", "clear-search");
@@ -119,7 +119,7 @@ fn a_search_shows_as_a_chip_that_clears_it() {
 
 #[test]
 fn a_long_library_sorted_by_title_has_the_alphabet_bar() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = open("/library?filter=all&sort=title");
     window.settle_until("the alphabet bar", |window| {
@@ -134,7 +134,7 @@ fn a_long_library_sorted_by_title_has_the_alphabet_bar() {
 
 #[test]
 fn an_empty_filter_says_so_and_offers_every_game() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut window = open("/library?filter=all&q=nothing-is-called-this");
     let empty = window.get("data-part", "empty");
@@ -185,7 +185,7 @@ pub(crate) fn fake_drop_install() -> super::DropInstall {
             if path.ends_with(".bad") {
                 return Err(format!("can't add {path}"));
             }
-            DROPPED.lock().unwrap_or_else(|e| e.into_inner()).push(path);
+            caskade_core::lock(&DROPPED).push(path);
             Ok(())
         })
     }))
@@ -195,9 +195,9 @@ pub(crate) fn fake_drop_install() -> super::DropInstall {
 fn files_dropped_on_the_library_ask_to_install_and_say_why_not() {
     use crate::drops::{DropEvent, drops};
     use std::path::PathBuf;
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
-    DROPPED.lock().unwrap_or_else(|e| e.into_inner()).clear();
+    caskade_core::lock(&DROPPED).clear();
     let mut window = open("/library?filter=all&sort=title&layout=grid");
     // Dragged over: the hint.
     let _ = drops().send(DropEvent::Over);
@@ -224,10 +224,7 @@ fn files_dropped_on_the_library_ask_to_install_and_say_why_not() {
         window.find("data-part", "drop-error").is_some()
     });
     assert!(window.find("data-part", "drop-hint").is_none());
-    assert_eq!(
-        *DROPPED.lock().unwrap_or_else(|e| e.into_inner()),
-        ["/games/Setup.exe"]
-    );
+    assert_eq!(*caskade_core::lock(&DROPPED), ["/games/Setup.exe"]);
     let error = window.get("data-part", "drop-error");
     assert_eq!(window.attr(error, "role").as_deref(), Some("alert"));
     assert!(window.text(error).contains("can't add /games/broken.bad"));

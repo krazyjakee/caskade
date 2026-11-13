@@ -8,11 +8,6 @@ use caskade_ui_data::shares::{
 use caskade_ui_i18n::{format, t};
 use dioxus_native::prelude::*;
 
-/// A moment as the webview's `formatDateTime` writes it.
-fn date_time(ms: i64) -> String {
-    format::date_time(crate::library::local_date_time(ms))
-}
-
 /// Who opened a share's link, and how far each has got.
 #[component]
 pub fn ShareRecipients(share: ShareRecord) -> Element {
@@ -92,7 +87,7 @@ fn Recipient(recipient: ShareRecipient, size: Option<u64>) -> Element {
 /// or stopped.
 #[component]
 pub fn ShareStateLine(share: ShareRecord) -> Element {
-    let until = share.expires_at_ms.map(date_time);
+    let until = share.expires_at_ms.map(crate::library::date_time);
     let (status, text) = match &share.state {
         ShareState::Preparing { done, total } => (
             "preparing",
@@ -141,7 +136,7 @@ pub fn ShareStateLine(share: ShareRecord) -> Element {
 #[component]
 pub fn ShareInfoDetails(info: ShareInfo) -> Element {
     let sharer = info.sharer.clone();
-    let until = info.expires_at_ms.map(date_time);
+    let until = info.expires_at_ms.map(crate::library::date_time);
     let collection = matches!(info.contents, ShareContents::Collection { .. });
     let mut rows: Vec<(String, String)> =
         vec![(t!(note = "Who shared something", "From"), sharer.clone())];

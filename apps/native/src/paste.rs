@@ -72,13 +72,13 @@ pub fn follow(event: &WindowEvent) -> bool {
     true
 }
 
-/// Puts `text` on the clipboard, for the Copy buttons. Unit tests copy to
-/// [`tests::copied`] instead: the system clipboard is the display's, which
-/// is the developer's desktop when the tests run there (#122).
+/// Puts `text` on the clipboard, for the Copy buttons. Unit tests copy
+/// nothing: the system clipboard is the display's, which is the
+/// developer's desktop when the tests run there (#122).
 pub fn copy_text(text: String) -> Result<(), String> {
     #[cfg(test)]
     {
-        *tests::COPIED.lock().unwrap_or_else(|e| e.into_inner()) = Some(text);
+        drop(text);
         Ok(())
     }
     #[cfg(not(test))]
@@ -135,21 +135,13 @@ pub mod tests {
     use super::*;
 
     static CLIPBOARD: Mutex<Option<String>> = Mutex::new(None);
-    /// What the Copy buttons last copied.
-    pub(super) static COPIED: Mutex<Option<String>> = Mutex::new(None);
-
-    #[allow(dead_code, reason = "for tests that check a Copy button")]
-    pub fn copied() -> Option<String> {
-        COPIED.lock().unwrap_or_else(|e| e.into_inner()).clone()
-    }
-
     /// What a paste reads in tests; `None` reads nothing.
     pub fn set_clipboard(text: Option<&str>) {
-        *CLIPBOARD.lock().unwrap_or_else(|e| e.into_inner()) = text.map(str::to_owned);
+        *caskade_core::lock(&CLIPBOARD) = text.map(str::to_owned);
     }
 
     pub(super) fn clipboard() -> Option<String> {
-        CLIPBOARD.lock().unwrap_or_else(|e| e.into_inner()).clone()
+        caskade_core::lock(&CLIPBOARD).clone()
     }
 
     #[test]

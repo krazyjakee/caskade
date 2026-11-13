@@ -124,7 +124,7 @@ fn list(accounts: &Accounts) -> caskade_ui_data::accounts::AccountList {
 
 #[test]
 fn an_admin_adds_changes_and_deletes_accounts() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let (source, accounts) = library();
     let mut window = open(&source, Panel::Accounts, "account-add");
     let me = window.text(window.get("data-part", "name"));
@@ -212,7 +212,7 @@ fn an_admin_adds_changes_and_deletes_accounts() {
 
 #[test]
 fn age_limits_are_labelled_with_the_rating_board() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let (source, accounts) = library();
     caskade_app::runtime::block_on(async {
         let admin = accounts.list().await.unwrap().active_id.unwrap();
@@ -245,7 +245,7 @@ fn age_limits_are_labelled_with_the_rating_board() {
 
 #[test]
 fn my_profile_saves_its_name_and_sets_its_pin() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let (source, accounts) = library();
     let mut window = open(&source, Panel::Profile, "profile-name");
     assert!(body(&window).contains("an admin."));

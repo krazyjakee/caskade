@@ -136,7 +136,7 @@ fn hooks_and_permissions_read_as_words() {
 /// uninstalls after Uninstall asks.
 #[test]
 fn a_plugin_is_reviewed_allowed_turned_off_and_uninstalled() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _gone = Gone(vec![write_plugin("reader", reader())]);
     let mut window = plugins("Library Reader");
@@ -231,7 +231,7 @@ fn a_plugin_is_reviewed_allowed_turned_off_and_uninstalled() {
 /// can't be turned on.
 #[test]
 fn an_invalid_plugin_says_why() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let mut manifest = reader();
     manifest["id"] = json!("NotReverseDns");
@@ -263,7 +263,7 @@ fn an_invalid_plugin_says_why() {
 
 #[test]
 fn a_0_1_plugins_ui_says_it_needs_an_update_and_a_drawn_page_shows() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     // A 0.1 plugin with a JavaScript UI half (#109): it doesn't run here.
     let mut old = reader();

@@ -52,8 +52,7 @@ required-features = ["shots"]
 
 [dependencies]
 # The BLITZ-0 baseline (#113, Pins): Blitz 9f9c8e3 with Dioxus 0.8.0-alpha.3,
-# anyrender 812644a and Stylo 2dca345, as apps/native-proto pins them. They
-# move together, and the BLITZ-0 measurements are rerun on every bump.
+# anyrender 812644a and Stylo 2dca345. They move together.
 # Without `net` (blitz-net): its reqwest builds rustls on aws-lc, which the
 # workspace keeps out (`web_player/proxy.rs`'s lockfile test), and the app's
 # images come from the artwork cache, not the network.
@@ -98,10 +97,11 @@ anyrender_vello_cpu = { git = "https://github.com/DioxusLabs/anyrender", branch 
 # The tray icon and its menu (`tray.rs`), as the Tauri app builds them.
 tray-icon = { version = "0.25", default-features = false, features = ["libappindicator"] }
 image = { version = "=0.25.10", default-features = false, features = ["png"] }
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # The bundled fonts under the tokens' family names, and theme asset URLs
 # (`theme.rs`), at the versions Blitz uses.
 parley = "0.12"
+# The library's chosen games, in the order chosen (`library/selection.rs`).
+indexmap = "2"
 # The search's accent-blind matching, as the webview's `foldSearch` (#96).
 unicode-normalization = "0.1"
 url = "2"

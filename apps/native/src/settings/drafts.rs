@@ -71,7 +71,7 @@ pub fn DraftField(
                         let mine = *typed.peek();
                         let save = input_save.clone();
                         spawn(async move {
-                            caskade_app::runtime::spawn(tokio::time::sleep(PAUSE)).await.ok();
+                            crate::data::sleep(PAUSE).await;
                             // Only if nothing was typed since.
                             if *typed.peek() == mine {
                                 save(next);

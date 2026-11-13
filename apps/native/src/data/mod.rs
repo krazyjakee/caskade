@@ -139,17 +139,8 @@ async fn resolve() -> Option<DataSource> {
             .inspect_err(|error| tracing::error!(%error, "the fixture library didn't open"))
             .ok();
     }
-    // The services start beside the window, about a second in.
-    caskade_app::runtime::spawn(async {
-        loop {
-            if let Some(source) = DataSource::app() {
-                return source;
-            }
-            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
-        }
-    })
-    .await
-    .ok()
+    crate::shell::services_ready().await;
+    DataSource::app()
 }
 
 /// Gives `children` the data source once it's ready. Until then they render
@@ -177,6 +168,12 @@ fn Provided(source: DataSource, children: Element) -> Element {
     }
 }
 
+/// Waits `time` on the app's runtime: Dioxus's executor has no timers
+/// (no reactor), so the timer is made there too.
+pub async fn sleep(time: std::time::Duration) {
+    let _ = caskade_app::runtime::spawn(async move { tokio::time::sleep(time).await }).await;
+}
+
 mod probe;
 // The shell's status bar and Activity button (#96).
 pub mod status;
@@ -196,6 +193,29 @@ where
     caskade_app::runtime::spawn(work)
         .await
         .unwrap_or_else(|error| Err(ErrorReport::from_error(&error)))
+}
+
+/// Runs `work` on the app's runtime with `pending` set; `failure` hears
+/// why it didn't work, `settled` what it gave (`None` when it failed).
+pub fn run<T: Send + 'static>(
+    mut pending: Signal<bool>,
+    mut failure: Signal<Option<ErrorReport>>,
+    work: impl Future<Output = Result<T, ErrorReport>> + Send + 'static,
+    settled: impl FnOnce(Option<T>) + 'static,
+) {
+    pending.set(true);
+    failure.set(None);
+    spawn(async move {
+        let result = change(work).await;
+        pending.set(false);
+        match result {
+            Ok(value) => settled(Some(value)),
+            Err(report) => {
+                failure.set(Some(report));
+                settled(None);
+            }
+        }
+    });
 }
 
 /// What a query gives a view: its data, or the core's report of what went
@@ -414,7 +434,7 @@ pub fn use_settings() -> Settings {
 
 /// Loads `resource` again whenever an app event makes `key` stale, or when
 /// events were missed.
-fn reload_on<T: 'static>(source: &DataSource, key: DataKey, mut resource: Query<T>) {
+pub(crate) fn reload_on<T: 'static>(source: &DataSource, key: DataKey, mut resource: Query<T>) {
     let events = source.events.clone();
     use_hook(move || {
         let mut events = events.subscribe();
@@ -431,6 +451,18 @@ fn reload_on<T: 'static>(source: &DataSource, key: DataKey, mut resource: Query<
     });
 }
 
+/// How many games Caskade launched are running now.
+pub fn use_running_count() -> Query<usize> {
+    use_query(DataKey::Sessions(None), |library| async move {
+        library.sessions(None, 200).await.map(|sessions| {
+            sessions
+                .iter()
+                .filter(|session| session.ended_at_ms.is_none())
+                .count()
+        })
+    })
+}
+
 /// A page of the library for `query`; at most 100 summaries.
 pub fn use_library_page(query: ReadSignal<ListGames>) -> Query<GamePage> {
     use_query(DataKey::Games, move |library| {
@@ -440,8 +472,6 @@ pub fn use_library_page(query: ReadSignal<ListGames>) -> Query<GamePage> {
 }
 
 /// The top bar's search: the best few matches for `text`.
-// The views (#96 onwards) use it.
-#[allow(dead_code)]
 pub fn use_library_search(text: ReadSignal<String>) -> Query<GamePage> {
     use_query(DataKey::Games, move |library| {
         let text = text();
@@ -450,8 +480,6 @@ pub fn use_library_search(text: ReadSignal<String>) -> Query<GamePage> {
 }
 
 /// A game with its releases; `None` when it's gone.
-// The views (#96 onwards) use it.
-#[allow(dead_code)]
 pub fn use_game(id: String) -> Query<Option<GameDetails>> {
     use_query(DataKey::Game(id.clone()), move |library| {
         let id = id.clone();
@@ -460,8 +488,6 @@ pub fn use_game(id: String) -> Query<Option<GameDetails>> {
 }
 
 /// The library's totals.
-// The views (#96 onwards) use it.
-#[allow(dead_code)]
 pub fn use_library_stats() -> Query<LibraryStats> {
     use_query(
         DataKey::Summary,

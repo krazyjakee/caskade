@@ -22,10 +22,6 @@ fn services() -> Result<Services, ErrorReport> {
     crate::shell::services().ok_or_else(unavailable)
 }
 
-fn failed(error: String) -> ErrorReport {
-    ErrorReport::from(error)
-}
-
 /// Starts entry `entry_id`, with `choice` when a launch asked for one: the
 /// launch may ask (an emulator's choices, an age limit, a busy host).
 pub async fn launch(
@@ -46,7 +42,7 @@ pub async fn stop(session_id: String) -> Result<(), ErrorReport> {
         caskade_app::commands::guide::guide_stop_game(session_id, &services.launch)
             .await
             .map(drop)
-            .map_err(failed)
+            .map_err(ErrorReport::from)
     })
     .await
 }
@@ -66,7 +62,7 @@ pub async fn copy_path(entry_id: String) -> Result<(), ErrorReport> {
     crate::data::change(async move {
         let path =
             caskade_app::commands::library::game_entry_path(&services.store, &entry_id).await?;
-        crate::paste::copy_text(path).map_err(failed)
+        crate::paste::copy_text(path).map_err(ErrorReport::from)
     })
     .await
 }
@@ -78,7 +74,7 @@ pub async fn uninstall(entry_id: String) -> Result<JobSnapshot, ErrorReport> {
     crate::data::change(async move {
         caskade_app::commands::install::uninstall_game(install, &services.launch, entry_id)
             .await
-            .map_err(failed)
+            .map_err(ErrorReport::from)
     })
     .await
 }

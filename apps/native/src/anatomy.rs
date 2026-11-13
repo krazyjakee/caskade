@@ -94,11 +94,6 @@ mod tests {
             "virtual-library",
             "#93: the webview's VirtualLibrary isn't catalogued either",
         ),
-        // The virtual grid's (#94) minimal cards and rows; the full ones,
-        // with the webview's parts, are #93's components.
-        ("game-card", "#93: the full GameCard"),
-        ("game-art", "#93: the full GameCard's art"),
-        ("game-row", "#93: the full LibraryRow"),
         ("alphabet-bar", "#99: the Library view's AlphabetBar"),
         (
             "collection-picker",

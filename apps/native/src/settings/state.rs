@@ -265,3 +265,8 @@ pub fn SettingsStatus(
         }
     }
 }
+
+/// Whether `key` of a section's `value` is on; off when unset.
+pub fn flag(value: &Value, key: &str) -> bool {
+    value.get(key).and_then(Value::as_bool).unwrap_or(false)
+}

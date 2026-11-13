@@ -21,9 +21,7 @@ static STORAGE: Mutex<Option<Storage>> = Mutex::new(None);
 
 fn app() -> Element {
     use_data_source(|| source().clone());
-    let storage = STORAGE
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
+    let storage = caskade_core::lock(&STORAGE)
         .clone()
         .expect("the test's storage");
     use_context_provider(|| storage);
@@ -80,7 +78,7 @@ fn locations() -> Locations {
         );
         let storage =
             Storage::new(service.clone(), None, settings).with_locations(source, accounts);
-        *STORAGE.lock().unwrap_or_else(|e| e.into_inner()) = Some(storage);
+        *caskade_core::lock(&STORAGE) = Some(storage);
         Locations {
             temp,
             service,
@@ -161,7 +159,7 @@ fn clear_and_type(window: &mut Window, node: blitz_dom::NodeId, text: &str) {
 
 #[test]
 fn lists_the_locations_selects_one_and_saves_its_label_and_template() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let locations = locations();
     let mut window = open();
@@ -211,7 +209,7 @@ fn lists_the_locations_selects_one_and_saves_its_label_and_template() {
 
 #[test]
 fn adds_a_folder_and_makes_another_location_the_default() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let locations = locations();
     let mut window = open();
@@ -256,7 +254,7 @@ fn adds_a_folder_and_makes_another_location_the_default() {
 /// removing keeps its files.
 #[test]
 fn a_right_click_removes_a_location_keeping_its_files() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let locations = locations();
     let mut window = open();
@@ -301,7 +299,7 @@ fn a_right_click_removes_a_location_keeping_its_files() {
 
 #[test]
 fn always_use_the_default_saves() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
     let _locations = locations();
     let settings = source().settings.clone();

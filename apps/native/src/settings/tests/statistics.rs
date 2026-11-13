@@ -92,7 +92,7 @@ fn app() -> Element {
 
 #[test]
 fn statistics_go_live_and_say_what_was_read() {
-    let _one = ONE.lock().unwrap_or_else(|e| e.into_inner());
+    let _one = caskade_core::lock(&ONE);
     let reads = Arc::new(AtomicU64::new(0));
     let stats = {
         let reads = reads.clone();

@@ -1,7 +1,7 @@
 //! What the input rules read of the UI: a tree of elements with tags,
 //! attributes and layout boxes, in document order. The native app reads
 //! Blitz's document through [`FocusTree`]; tests build trees by hand
-//! ([`test_tree`]).
+//! (`test_tree`).
 
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -109,7 +109,7 @@ pub fn depth<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> usize {
 
 /// A tree built by hand, for tests: elements with attributes and a box from
 /// `data-rect="x y w h"`, as the webview's tests give jsdom boxes.
-#[cfg(any(test, feature = "test-tree"))]
+#[cfg(test)]
 pub mod test_tree {
     use super::*;
 
@@ -180,12 +180,6 @@ pub mod test_tree {
             let attrs = &mut self.elements[node].attrs;
             attrs.retain(|(existing, _)| existing != name);
             attrs.push((name.into(), value.into()));
-        }
-
-        pub fn unset(&mut self, node: usize, name: &str) {
-            self.elements[node]
-                .attrs
-                .retain(|(existing, _)| existing != name);
         }
 
         /// Takes `node` out of the tree.
