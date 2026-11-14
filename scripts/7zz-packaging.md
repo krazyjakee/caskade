@@ -67,7 +67,10 @@ verifies the program and Windows DLL hashes with the installer's pinned
 loader. Keep installer library code independent of the packaging. App
 signing/notarization runs in the packaging workflow without changing the
 pinned executable's bytes before verification; a signing pipeline that changes
-them must explicitly update its verified artifact manifest. Windows
+them must explicitly update its verified artifact manifest. The AppImage's
+bundler (linuxdeploy) does: it gives `usr/bin/7zz` a RUNPATH, so the Linux
+x86_64 program has a second pinned hash, the AppImage's, and the release's
+Linux build leg runs `scripts/check-bundled-7zz.py` on the deb and AppImage. Windows
 MSVC/ARM64 and macOS signing/notarization remain native verification items on
 #22.
 

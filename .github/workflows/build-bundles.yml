@@ -160,6 +160,13 @@ jobs:
             exit 1
           fi
 
+      # The AppImage's bundler rewrites the programs it packs: check that the
+      # 7-Zip each Linux bundle carries is still one the app accepts.
+      - name: Check the bundled 7-Zip
+        if: contains(matrix.target, '-linux-')
+        shell: bash
+        run: python3 scripts/check-bundled-7zz.py "$RUNNER_TEMP"/bundles/*.deb "$RUNNER_TEMP"/bundles/*.AppImage
+
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: bundles-${{ matrix.target }}

@@ -112,7 +112,11 @@ impl SevenZip {
         let dll = match checksum.as_str() {
             "d32657a7a0e4cdc0a8aa57cafe474746944d76e861e753e9c902b9c9356fa886"
             | "17925963fe96bd0b441d1a139dbd2780b8894de0446fe2650ccdc65372167415"
-            | "8e495531e1b2b8cb169ca583493922d4ab386007756418c15b95f07f642c35fb" => None,
+            | "8e495531e1b2b8cb169ca583493922d4ab386007756418c15b95f07f642c35fb"
+            // Linux x86_64's, as the AppImage carries it: its bundler (linuxdeploy)
+            // gives every program in usr/bin a RUNPATH of $ORIGIN/../lib, always
+            // the same bytes (scripts/check-bundled-7zz.py checks each release).
+            | "ef39b1cbc317824cd47a05ed59ec5f6d82044b69054058499bbafdef8c316e8f" => None,
             "94205cfc054dd3bbeb978905bc619a65b3f04e9e73bb2717841110b6f46d962e" => {
                 Some("78bf6b668d75801e3aa180b4ccb16e6d8395fba80dec8a065055bb6f8dfabb82")
             }
