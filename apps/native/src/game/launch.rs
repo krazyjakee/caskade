@@ -548,11 +548,7 @@ pub fn save_note(result: &BeforePlay, device_name: impl Fn(&SaveVersion) -> Stri
         )),
         _ => {}
     }
-    if !result.checked {
-        lines.push(t!(
-            "Not every paired device could be reached, so one of them may have a newer save."
-        ));
-    }
+    // A paired device out of reach isn't news: other devices are often off.
     lines.extend(result.warnings.iter().cloned());
     lines
 }

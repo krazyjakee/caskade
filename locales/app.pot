@@ -6398,10 +6398,6 @@ msgstr ""
 msgid "Not enough free space"
 msgstr ""
 
-#: apps/native/src/game/launch.rs
-msgid "Not every paired device could be reached, so one of them may have a newer save."
-msgstr ""
-
 #: apps/native/src/game/achievements.rs
 msgid "Not fetched yet. Refresh achievements to see them."
 msgstr ""

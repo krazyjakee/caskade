@@ -6432,10 +6432,6 @@ msgstr "Inte kompatibel"
 msgid "Not enough free space"
 msgstr "Inte tillräckligt med ledigt utrymme"
 
-#: apps/native/src/game/launch.rs
-msgid "Not every paired device could be reached, so one of them may have a newer save."
-msgstr "Alla parkopplade enheter kunde inte nås, så någon av dem kan ha en nyare sparfil."
-
 #: apps/native/src/game/achievements.rs
 msgid "Not fetched yet. Refresh achievements to see them."
 msgstr "Inte hämtade än. Uppdatera prestationerna för att se dem."
@@ -13123,6 +13119,9 @@ msgstr "Installerad {installedVersion}"
 #: apps/native/src/collections/rules.rs
 msgid "“{text}”"
 msgstr "”{text}”"
+
+#~ msgid "Not every paired device could be reached, so one of them may have a newer save."
+#~ msgstr "Alla parkopplade enheter kunde inte nås, så någon av dem kan ha en nyare sparfil."
 
 #~ msgid "{0} · {1}"
 #~ msgstr "{0} · {1}"
