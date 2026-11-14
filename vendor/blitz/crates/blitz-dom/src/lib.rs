@@ -47,6 +47,7 @@ mod events;
 mod font_metrics;
 mod form;
 mod html;
+mod image_cache;
 /// Loading of `<iframe>` elements into sub-documents.
 mod iframe;
 /// Integration of taffy and the DOM.

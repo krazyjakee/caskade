@@ -1,0 +1,191 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Sat, 14 Nov 2026 21:43:15 +0000
+Subject: [PATCH] Drop decoded images no element shows beyond a budget
+
+The document cached every image it ever decoded, by URL, for its lifetime:
+scrolling a long list of images kept every one in memory, and the
+renderers' own caches (which hold weak handles to free the images the
+embedder drops) never saw them go. Images an element still shows stay;
+of the rest, the most recently used are kept up to 16 MiB.
+---
+ packages/blitz-dom/src/document.rs    |   8 +-
+ packages/blitz-dom/src/image_cache.rs | 123 ++++++++++++++++++++++++++
+ packages/blitz-dom/src/lib.rs         |   1 +
+ 3 files changed, 130 insertions(+), 2 deletions(-)
+ create mode 100644 packages/blitz-dom/src/image_cache.rs
+
+diff --git a/packages/blitz-dom/src/document.rs b/packages/blitz-dom/src/document.rs
+index 2322cdc76..aac0760ff 100644
+--- a/packages/blitz-dom/src/document.rs
++++ b/packages/blitz-dom/src/document.rs
+@@ -418,7 +418,7 @@ pub struct BaseDocument {
+ 
+     /// Cache of loaded images, keyed by URL. Allows reusing images across multiple
+     /// elements without re-fetching from the network.
+-    pub(crate) image_cache: HashMap<String, ImageData>,
++    pub(crate) image_cache: crate::image_cache::ImageCache,
+ 
+     /// Tracks in-flight image requests. When an image is being fetched, additional
+     /// requests for the same URL are queued here instead of starting new fetches.
+@@ -584,7 +584,7 @@ impl BaseDocument {
+             has_changes: false,
+             ime_cursor_area: None,
+             deferred_construction_nodes: Vec::new(),
+-            image_cache: HashMap::new(),
++            image_cache: Default::default(),
+             pending_images: HashMap::new(),
+             pending_style_image_nodes: Vec::new(),
+             pending_critical_resources: HashSet::new(),
+@@ -1558,6 +1558,10 @@ impl BaseDocument {
+                 }
+             }
+         }
++
++        // Now the elements hold it, drop images none shows beyond the cache's budget.
++        drop(image);
++        self.image_cache.trim();
+     }
+ 
+     /// Snapshot the node's pre-mutation state (element state and attributes) ahead of
+diff --git a/packages/blitz-dom/src/image_cache.rs b/packages/blitz-dom/src/image_cache.rs
+new file mode 100644
+index 000000000..6cd7b06fd
+--- /dev/null
++++ b/packages/blitz-dom/src/image_cache.rs
+@@ -0,0 +1,123 @@
++//! Decoded images by URL, shared by every element that shows the same one.
++
++use std::collections::HashMap;
++
++use crate::node::ImageData;
++
++/// How many bytes of decoded raster images no element uses any more the
++/// cache keeps, so an image shown again soon (a list scrolled back, a page
++/// revisited) needn't be fetched and decoded again.
++const UNUSED_BUDGET: usize = 16 * 1024 * 1024;
++
++struct Entry {
++    image: ImageData,
++    last_used: u64,
++}
++
++/// Decoded images by URL. Images an element still shows stay; of the rest,
++/// the most recently used are kept up to [`UNUSED_BUDGET`] and the others
++/// are dropped, so a long scroll through images doesn't keep every one it
++/// ever showed.
++#[derive(Default)]
++pub(crate) struct ImageCache {
++    entries: HashMap<String, Entry>,
++    clock: u64,
++}
++
++impl ImageCache {
++    pub(crate) fn get(&mut self, url: &str) -> Option<&ImageData> {
++        self.clock += 1;
++        let entry = self.entries.get_mut(url)?;
++        entry.last_used = self.clock;
++        Some(&entry.image)
++    }
++
++    pub(crate) fn insert(&mut self, url: String, image: ImageData) {
++        self.clock += 1;
++        let last_used = self.clock;
++        self.entries.insert(url, Entry { image, last_used });
++    }
++
++    /// Drops the least recently used images no element uses beyond the
++    /// budget. Call it after handing a newly loaded image to its elements.
++    pub(crate) fn trim(&mut self) {
++        self.trim_to(UNUSED_BUDGET);
++    }
++
++    fn trim_to(&mut self, budget: usize) {
++        let mut unused: Vec<(u64, usize, &String)> = self
++            .entries
++            .iter()
++            .filter_map(|(url, entry)| {
++                unused_bytes(&entry.image).map(|bytes| (entry.last_used, bytes, url))
++            })
++            .collect();
++        if unused.iter().map(|&(_, bytes, _)| bytes).sum::<usize>() <= budget {
++            return;
++        }
++        unused.sort_unstable_by(|a, b| b.0.cmp(&a.0));
++        let mut kept = 0;
++        let drop: Vec<String> = unused
++            .into_iter()
++            .filter(|&(_, bytes, _)| {
++                kept += bytes;
++                kept > budget
++            })
++            .map(|(_, _, url)| url.clone())
++            .collect();
++        for url in drop {
++            self.entries.remove(&url);
++        }
++    }
++
++    #[cfg(test)]
++    fn contains(&self, url: &str) -> bool {
++        self.entries.contains_key(url)
++    }
++}
++
++/// A raster image's size when only the cache holds it.
++fn unused_bytes(image: &ImageData) -> Option<usize> {
++    match image {
++        ImageData::Raster(raster) if raster.data.strong_count() == 1 => Some(raster.data.len()),
++        _ => None,
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use crate::node::RasterImageData;
++    use std::sync::Arc;
++
++    fn image(bytes: usize) -> ImageData {
++        ImageData::Raster(RasterImageData::new(1, 1, Arc::new(vec![0; bytes])))
++    }
++
++    #[test]
++    fn keeps_the_most_recently_used_unused_images_within_the_budget() {
++        let mut cache = ImageCache::default();
++        cache.insert("a".into(), image(10));
++        cache.insert("b".into(), image(10));
++        cache.insert("c".into(), image(10));
++        cache.get("a");
++        cache.trim_to(20);
++        assert!(cache.contains("a"));
++        assert!(!cache.contains("b"));
++        assert!(cache.contains("c"));
++    }
++
++    #[test]
++    fn never_drops_an_image_an_element_shows() {
++        let mut cache = ImageCache::default();
++        cache.insert("shown".into(), image(10));
++        let shown = cache.get("shown").cloned();
++        cache.insert("other".into(), image(10));
++        cache.trim_to(0);
++        assert!(cache.contains("shown"));
++        assert!(!cache.contains("other"));
++        drop(shown);
++        cache.trim_to(0);
++        assert!(!cache.contains("shown"));
++    }
++}
+diff --git a/packages/blitz-dom/src/lib.rs b/packages/blitz-dom/src/lib.rs
+index 02cdb6d7e..5dfb65422 100644
+--- a/packages/blitz-dom/src/lib.rs
++++ b/packages/blitz-dom/src/lib.rs
+@@ -47,6 +47,7 @@ mod events;
+ mod font_metrics;
+ mod form;
+ mod html;
++mod image_cache;
+ /// Loading of `<iframe>` elements into sub-documents.
+ mod iframe;
+ /// Integration of taffy and the DOM.

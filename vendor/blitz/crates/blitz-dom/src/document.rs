@@ -418,7 +418,7 @@ pub struct BaseDocument {
 
     /// Cache of loaded images, keyed by URL. Allows reusing images across multiple
     /// elements without re-fetching from the network.
-    pub(crate) image_cache: HashMap<String, ImageData>,
+    pub(crate) image_cache: crate::image_cache::ImageCache,
 
     /// Tracks in-flight image requests. When an image is being fetched, additional
     /// requests for the same URL are queued here instead of starting new fetches.
@@ -584,7 +584,7 @@ impl BaseDocument {
             has_changes: false,
             ime_cursor_area: None,
             deferred_construction_nodes: Vec::new(),
-            image_cache: HashMap::new(),
+            image_cache: Default::default(),
             pending_images: HashMap::new(),
             pending_style_image_nodes: Vec::new(),
             pending_critical_resources: HashSet::new(),
@@ -1558,6 +1558,10 @@ impl BaseDocument {
                 }
             }
         }
+
+        // Now the elements hold it, drop images none shows beyond the cache's budget.
+        drop(image);
+        self.image_cache.trim();
     }
 
     /// Snapshot the node's pre-mutation state (element state and attributes) ahead of
