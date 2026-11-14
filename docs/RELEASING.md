@@ -171,8 +171,9 @@ again.
 `latest.json` also has a `linux-x86_64-deb` entry, because the `sign` job signs
 the deb too. Copies installed from the deb update from it (see below). Each
 signature is bound to the version (`signer sign --app-version`), and the
-updater refuses one for another version
-(`crates/caskade-app/src/self_update.rs`).
+updater refuses one for another version or one that names no version
+(`crates/caskade-app/src/self_update.rs`, #151): every release since 0.1.1
+was signed with its version.
 
 ## What updates itself
 

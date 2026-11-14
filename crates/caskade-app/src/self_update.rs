@@ -251,16 +251,16 @@ pub fn verify(
     key.verify(bytes, &signature, false)
         .map_err(|error| refused(error.to_string()))?;
     // Only now is the trusted comment trusted: the global signature covers
-    // it. A signature for another version is a replayed old release.
+    // it. A signature for another version, or for none (every release since
+    // 0.1.1 names its own, #151), may be a replayed old release.
     let signed = signature
         .trusted_comment()
         .split('\t')
         .find_map(|field| field.strip_prefix("version:"));
     match signed {
-        Some(signed) if signed.trim_start_matches('v') != version.trim_start_matches('v') => {
-            Err(refused(format!("it's for version {signed}")))
-        }
-        _ => Ok(()),
+        Some(signed) if signed.trim_start_matches('v') == version.trim_start_matches('v') => Ok(()),
+        Some(signed) => Err(refused(format!("it's for version {signed}"))),
+        None => Err(refused(caskade_core::tr!("it names no version"))),
     }
 }
 

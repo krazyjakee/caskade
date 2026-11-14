@@ -5547,6 +5547,10 @@ msgid "The update's signature doesn't match: {why}"
 msgstr ""
 
 #: crates/caskade-app/src/self_update.rs
+msgid "it names no version"
+msgstr ""
+
+#: crates/caskade-app/src/self_update.rs
 msgid "This copy isn't an AppImage."
 msgstr ""
 

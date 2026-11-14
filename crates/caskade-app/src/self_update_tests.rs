@@ -1,6 +1,6 @@
 //! The release feed and its signatures, served here (no network): a newer
 //! release is found for this bundle, its download verifies, and a bundle
-//! signed by another key, or for another version, is refused.
+//! signed by another key, for another version or for none, is refused.
 use super::*;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
@@ -23,16 +23,16 @@ impl Signer {
 
     /// `bytes`' signature as `tauri signer sign` writes it, for `version`.
     fn sign(&self, bytes: &[u8], version: &str) -> String {
-        let signature = minisign::sign(
-            Some(&self.key.pk),
-            &self.key.sk,
+        self.sign_with_comment(
             bytes,
-            Some(&format!(
-                "timestamp:1\tfile:caskade.AppImage\tversion:{version}"
-            )),
-            None,
+            &format!("timestamp:1\tfile:caskade.AppImage\tversion:{version}"),
         )
-        .unwrap();
+    }
+
+    /// `bytes`' signature with `comment` as its trusted comment.
+    fn sign_with_comment(&self, bytes: &[u8], comment: &str) -> String {
+        let signature =
+            minisign::sign(Some(&self.key.pk), &self.key.sk, bytes, Some(comment), None).unwrap();
         base64::engine::general_purpose::STANDARD.encode(signature.to_string())
     }
 }
@@ -123,6 +123,20 @@ fn another_keys_or_another_versions_signature_is_refused() {
         let replayed = signer.sign(BUNDLE, "0.1.0");
         let error = verify(BUNDLE, &replayed, &signer.public_key(), "0.2.0").unwrap_err();
         assert!(error.contains("0.1.0"), "{error}");
+        // A genuine signature that names no version could be any release's.
+        let unversioned = signer.sign_with_comment(BUNDLE, "timestamp:1\tfile:caskade.AppImage");
+        let error = verify(BUNDLE, &unversioned, &signer.public_key(), "0.2.0").unwrap_err();
+        assert!(error.contains("no version"), "{error}");
+        // A `v` before either version is the same version.
+        assert!(
+            verify(
+                BUNDLE,
+                &signer.sign(BUNDLE, "v0.2.0"),
+                &signer.public_key(),
+                "0.2.0"
+            )
+            .is_ok()
+        );
         // And the bytes must be the signed ones.
         let error = verify(
             b"other bytes",
