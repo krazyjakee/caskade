@@ -186,6 +186,7 @@ impl BaseDocument {
         event: GeneratedTextInputEvent,
         mut dispatch_event: F,
     ) {
+        let font_ctx = self.font_ctx.clone();
         let node = &mut self.nodes[node_id];
         let element_data = node
             .element_data_mut()
@@ -196,8 +197,9 @@ impl BaseDocument {
 
         match event {
             GeneratedTextInputEvent::Input => {
-                // The value without an IME's preedit, which isn't text yet.
-                let value = input_data.editor.text().to_string();
+                // A password's edit is masked, and its value kept.
+                input_data.unmask_edit(&mut font_ctx.lock().unwrap(), &mut self.layout_ctx);
+                let value = input_data.value();
                 // The value is in the accessibility tree.
                 self.has_changes = true;
                 dispatch_event(DomEvent::new(

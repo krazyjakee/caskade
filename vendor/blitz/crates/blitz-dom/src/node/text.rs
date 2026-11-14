@@ -102,6 +102,16 @@ pub struct TextInputData {
     /// The `placeholder` attribute's text in the `::placeholder` style, shown while the input
     /// is empty and nothing is being composed in it.
     pub placeholder: Option<TextInputPlaceholder>,
+    /// A password field's value. Its editor holds one [`PASSWORD_MASK`] per character of it,
+    /// so the value is never laid out, drawn or selected. `None` for any other field.
+    pub secret: Option<String>,
+}
+
+/// What a password field shows for each character of its value.
+pub const PASSWORD_MASK: char = '\u{2022}';
+
+fn mask(text: &str) -> String {
+    std::iter::repeat_n(PASSWORD_MASK, text.chars().count()).collect()
 }
 
 /// A text input's placeholder, laid out like the input's own text but in its `::placeholder`
@@ -145,14 +155,45 @@ impl TextInputData {
             scroll_offset: 0.0,
             content_box_subpixel_offset: taffy::Point::ZERO,
             placeholder: None,
+            secret: None,
         }
+    }
+
+    /// The field's value: a password's own text, not the mask its editor holds, and without
+    /// an IME's preedit, which isn't text yet.
+    pub fn value(&self) -> String {
+        match &self.secret {
+            Some(secret) => secret.clone(),
+            None => self.editor.text().to_string(),
+        }
+    }
+
+    /// Makes this a password field, masking its value, or a plain one, showing it.
+    pub fn set_password(
+        &mut self,
+        font_ctx: &mut FontContext,
+        layout_ctx: &mut LayoutContext<TextBrush>,
+        password: bool,
+    ) {
+        if password == self.secret.is_some() {
+            return;
+        }
+        let value = self.value();
+        if password {
+            self.secret = Some(value.clone());
+        } else {
+            self.secret = None;
+        }
+        self.show(font_ctx, layout_ctx, &value);
     }
 
     /// Whether the placeholder shows: the input is empty and no composition (an IME's
     /// preedit) is in progress.
     pub fn shows_placeholder(&self) -> bool {
         // The raw text includes a preedit; an IME may compose before it has any text.
-        self.placeholder.is_some() && self.editor.raw_text().is_empty() && !self.editor.is_composing()
+        self.placeholder.is_some()
+            && self.editor.raw_text().is_empty()
+            && !self.editor.is_composing()
     }
 
     pub fn set_text(
@@ -163,15 +204,76 @@ impl TextInputData {
     ) {
         // The same value again (a controlled field re-rendering) changes
         // nothing: the caret, the selection and a composition stay.
-        if self.editor.text() != text {
-            // A new value replaces a composition in progress, and the caret
-            // goes to its end, as a browser puts it.
-            self.editor.driver(font_ctx, layout_ctx).clear_compose();
-            self.editor.set_text(text);
-            let mut driver = self.editor.driver(font_ctx, layout_ctx);
-            driver.refresh_layout();
-            driver.move_to_text_end();
+        match &mut self.secret {
+            Some(secret) if secret == text => return,
+            Some(secret) => text.clone_into(secret),
+            None if self.editor.text() == text => return,
+            None => {}
         }
+        self.show(font_ctx, layout_ctx, text);
+    }
+
+    /// Puts `value` in the editor (masked in a password field). A new value replaces a
+    /// composition in progress, and the caret goes to its end, as a browser puts it.
+    fn show(
+        &mut self,
+        font_ctx: &mut FontContext,
+        layout_ctx: &mut LayoutContext<TextBrush>,
+        value: &str,
+    ) {
+        self.editor.driver(font_ctx, layout_ctx).clear_compose();
+        if self.secret.is_some() {
+            self.editor.set_text(&mask(value));
+        } else {
+            self.editor.set_text(value);
+        }
+        let mut driver = self.editor.driver(font_ctx, layout_ctx);
+        driver.refresh_layout();
+        driver.move_to_text_end();
+    }
+
+    /// After an edit of a password field, works out what it did to the value from the text
+    /// it left in the editor, and masks what it typed. An edit replaces a range with new text
+    /// and leaves the caret after it, so the unmasked characters before the caret are the new
+    /// text, and the masks either side of them are what's left of the value. (Typed mask
+    /// characters at the start of the new text count as the value's own.)
+    pub(crate) fn unmask_edit(
+        &mut self,
+        font_ctx: &mut FontContext,
+        layout_ctx: &mut LayoutContext<TextBrush>,
+    ) {
+        let Some(secret) = &mut self.secret else {
+            return;
+        };
+        // A preedit is masked once it's committed.
+        if self.editor.is_composing() {
+            return;
+        }
+        let text = self.editor.raw_text();
+        let caret_byte = self.editor.raw_selection().focus().index().min(text.len());
+        let before_caret = &text[..caret_byte];
+        let caret = before_caret.chars().count();
+        let start = before_caret
+            .chars()
+            .position(|c| c != PASSWORD_MASK)
+            .unwrap_or(caret);
+        let typed: String = before_caret.chars().skip(start).collect();
+        let kept = text.chars().count() - (caret - start);
+        let old = secret.chars().count();
+        let end = (start + old.saturating_sub(kept)).min(old);
+        let start = start.min(old);
+        let mut value: String = secret.chars().take(start).collect();
+        value.push_str(&typed);
+        value.extend(secret.chars().skip(end));
+        *secret = value;
+        if text.chars().all(|c| c == PASSWORD_MASK) {
+            return;
+        }
+        let masked = mask(secret);
+        self.editor.set_text(&masked);
+        let mut driver = self.editor.driver(font_ctx, layout_ctx);
+        driver.refresh_layout();
+        driver.move_to_byte(caret.min(masked.chars().count()) * PASSWORD_MASK.len_utf8());
     }
 
     /// Recompute [`Self::scroll_offset`] so that the caret stays visible within the input's
@@ -1074,6 +1176,100 @@ mod tests {
         assert!(!input.editor.is_composing());
         assert_eq!(input.editor.text(), "hello");
         assert_eq!(input.editor.raw_selection().focus().index(), 5);
+    }
+
+    #[test]
+    fn a_password_shows_only_masks() {
+        let mut input = TextInputData::new(false);
+        let mut font_ctx = FontContext::new();
+        let mut layout_ctx = LayoutContext::new();
+        input.set_text(&mut font_ctx, &mut layout_ctx, "12");
+        input.set_password(&mut font_ctx, &mut layout_ctx, true);
+        assert_eq!(input.editor.raw_text(), "\u{2022}\u{2022}");
+        input.set_text(&mut font_ctx, &mut layout_ctx, "1234");
+        assert_eq!(input.editor.raw_text(), mask("1234"));
+        assert_eq!(input.value(), "1234");
+        // A plain field again shows the value.
+        input.set_password(&mut font_ctx, &mut layout_ctx, false);
+        assert_eq!(input.editor.raw_text(), "1234");
+        assert_eq!(input.value(), "1234");
+    }
+
+    #[test]
+    fn edits_to_a_password_reach_its_value() {
+        let mut input = TextInputData::new(false);
+        let mut font_ctx = FontContext::new();
+        let mut layout_ctx = LayoutContext::new();
+        input.set_password(&mut font_ctx, &mut layout_ctx, true);
+        input.set_text(&mut font_ctx, &mut layout_ctx, "1234");
+        let width = PASSWORD_MASK.len_utf8();
+        let mut edit =
+            |input: &mut TextInputData,
+             f: &dyn Fn(&mut parley::PlainEditorDriver<'_, TextBrush>)| {
+                f(&mut input.editor.driver(&mut font_ctx, &mut layout_ctx));
+                input.unmask_edit(&mut font_ctx, &mut layout_ctx);
+                assert_eq!(input.editor.raw_text(), mask(&input.value()));
+                input.editor.raw_selection().focus().index() / width
+            };
+        // Typed at the end.
+        assert_eq!(edit(&mut input, &|d| d.insert_or_replace_selection("5")), 5);
+        assert_eq!(input.value(), "12345");
+        // Backspace after the 2.
+        assert_eq!(
+            edit(&mut input, &|d| {
+                d.move_to_byte(2 * width);
+                d.backdelete();
+            }),
+            1
+        );
+        assert_eq!(input.value(), "1345");
+        // Delete before the 3.
+        assert_eq!(edit(&mut input, &|d| d.delete()), 1);
+        assert_eq!(input.value(), "145");
+        // Typed over a selection.
+        assert_eq!(
+            edit(&mut input, &|d| {
+                d.select_byte_range(0, 2 * width);
+                d.insert_or_replace_selection("xyz");
+            }),
+            3
+        );
+        assert_eq!(input.value(), "xyz5");
+        // Typed in the middle.
+        assert_eq!(
+            edit(&mut input, &|d| {
+                d.move_to_byte(width);
+                d.insert_or_replace_selection("é");
+            }),
+            2
+        );
+        assert_eq!(input.value(), "xéyz5");
+        // Moving changes nothing.
+        assert_eq!(edit(&mut input, &|d| d.move_to_text_start()), 0);
+        assert_eq!(input.value(), "xéyz5");
+    }
+
+    #[test]
+    fn a_committed_composition_in_a_password_is_masked() {
+        let mut input = TextInputData::new(false);
+        let mut font_ctx = FontContext::new();
+        let mut layout_ctx = LayoutContext::new();
+        input.set_password(&mut font_ctx, &mut layout_ctx, true);
+        input.apply_ime_event(
+            &mut font_ctx,
+            &mut layout_ctx,
+            BlitzImeEvent::Preedit("x".into(), None),
+        );
+        input.unmask_edit(&mut font_ctx, &mut layout_ctx);
+        assert_eq!(input.value(), "");
+        input.apply_ime_event(
+            &mut font_ctx,
+            &mut layout_ctx,
+            BlitzImeEvent::Commit("ab".into()),
+        );
+        input.unmask_edit(&mut font_ctx, &mut layout_ctx);
+        assert_eq!(input.value(), "ab");
+        assert_eq!(input.editor.raw_text(), mask("ab"));
     }
 
     #[test]

@@ -890,7 +890,10 @@ fn placeholder_style(
     doc: &BaseDocument,
     input_element_id: NodeId,
     is_multiline: bool,
-) -> Option<(String, style::servo_arc::Arc<style::properties::ComputedValues>)> {
+) -> Option<(
+    String,
+    style::servo_arc::Arc<style::properties::ComputedValues>,
+)> {
     use style::selector_parser::PseudoElement;
     use style::stylist::RuleInclusion;
 
@@ -945,6 +948,7 @@ fn create_text_editor(doc: &mut BaseDocument, input_element_id: NodeId, is_multi
     let is_focussed = node.is_focussed();
     let node_id = node.id;
     let element = &mut node.data.downcast_element_mut().unwrap();
+    let password = element.text_field_flags().password;
     if !matches!(element.special_data, SpecialElementData::TextInput(_)) {
         let mut text_input_data = TextInputData::new(is_multiline);
         let editor = &mut text_input_data.editor;
@@ -964,6 +968,7 @@ fn create_text_editor(doc: &mut BaseDocument, input_element_id: NodeId, is_multi
 
     let scale = doc.viewport.scale_f64() as f32;
     let mut font_ctx = doc.font_ctx.lock().unwrap();
+    text_input_data.set_password(&mut font_ctx, &mut doc.layout_ctx, password);
 
     text_input_data.placeholder = placeholder.map(|(text, style)| {
         let mut editor = Box::new(parley::PlainEditor::new(16.0));

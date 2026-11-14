@@ -91,6 +91,15 @@ fn enter_pin(window: &mut Window, pin: &str) {
     let field = window.get("data-part", "field");
     window.focus(field);
     window.type_text(pin);
+    // The field shows a mask per digit, never the PIN.
+    let shown = window
+        .doc
+        .inner
+        .borrow()
+        .get_node(field)
+        .and_then(|node| node.element_data()?.text_input_data())
+        .map(|input| input.editor.raw_text().to_owned());
+    assert_eq!(shown, Some("\u{2022}".repeat(pin.len())));
     window.key(Key::Named(NamedKey::Enter));
 }
 
