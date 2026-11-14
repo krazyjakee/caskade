@@ -337,3 +337,45 @@ fn a_pad_pages_through_the_grid_and_focus_follows() {
     window.pad(Action::PagePrev);
     window.settle_until(|window| window.focused_index() == Some(page));
 }
+
+impl Window {
+    /// The loading placeholders mounted.
+    fn placeholders(&self) -> usize {
+        let doc = self.doc.inner.borrow();
+        self.nodes_with("data-part")
+            .into_iter()
+            .filter(|&id| {
+                doc.get_node(id)
+                    .and_then(|node| node.attr(LocalName::from("data-part")))
+                    == Some("placeholder")
+            })
+            .count()
+    }
+}
+
+/// A metadata match or scan writes games over and over: each change loads
+/// the shown pages again, but the games already shown stay until then
+/// rather than blanking to placeholders.
+#[test]
+fn a_library_change_keeps_the_shown_games_while_they_load_again() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = Window::open(Layout::Grid);
+    window.settle_until(|window| !window.indexes().is_empty() && window.placeholders() == 0);
+    let shown = window.indexes();
+    let events = SOURCE.get().expect("the fixture library").events.clone();
+    for _ in 0..5 {
+        let _ = events.send(caskade_app::events::Event::LibraryChanged(
+            caskade_app::events::LibraryChanged {
+                change: caskade_app::events::LibraryChange::Updated,
+                game_id: None,
+            },
+        ));
+        let until = Instant::now() + Duration::from_millis(100);
+        while Instant::now() < until {
+            window.settle(Duration::from_millis(4));
+            assert_eq!(window.placeholders(), 0, "the shown games blanked");
+            assert_eq!(window.indexes(), shown);
+        }
+    }
+}

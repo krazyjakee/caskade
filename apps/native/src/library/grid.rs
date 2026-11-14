@@ -33,16 +33,33 @@ use tokio::sync::broadcast;
 /// The games loaded so far, by page.
 #[derive(Default)]
 struct Pages {
-    pages: HashMap<usize, Rc<Vec<GameSummary>>>,
+    pages: HashMap<usize, Page>,
     pending: HashSet<usize>,
     /// Bumped when the query changes, so a late page of the old one is
     /// dropped.
     generation: u64,
+    /// Bumped when the games changed: a page loaded before is stale and
+    /// loads again, but stays shown until then, so the grid doesn't blank
+    /// while a scan or metadata match writes games over and over.
+    epoch: u64,
     query: Option<ListGames>,
     /// The collection whose games these are (#102).
     collection: Option<String>,
     /// The view's `reload` they were loaded at.
     reload: u64,
+}
+
+/// A page of games, and the [`Pages::epoch`] it was asked for at.
+struct Page {
+    games: Rc<Vec<GameSummary>>,
+    epoch: u64,
+}
+
+impl Pages {
+    /// The games changed: the loaded pages load again, shown meanwhile.
+    fn stale(&mut self) {
+        self.epoch += 1;
+    }
 }
 
 /// What a view hears from the grid.
@@ -88,7 +105,7 @@ pub fn VirtualLibrary(
                 selection.set_game_at(move |index| {
                     let state = pages.borrow();
                     let page = state.pages.get(&(index / PAGE))?;
-                    page.get(index % PAGE).map(|game| game.id.clone())
+                    page.games.get(index % PAGE).map(|game| game.id.clone())
                 });
             }
         });
@@ -120,11 +137,7 @@ pub fn VirtualLibrary(
                         Err(broadcast::error::RecvError::Closed) => break,
                     };
                     if stale {
-                        let mut state = pages.borrow_mut();
-                        state.pages.clear();
-                        state.generation += 1;
-                        state.pending.clear();
-                        drop(state);
+                        pages.borrow_mut().stale();
                         loaded += 1;
                     }
                 }
@@ -177,9 +190,7 @@ pub fn VirtualLibrary(
     if pages.borrow().reload != reload {
         let mut state = pages.borrow_mut();
         state.reload = reload;
-        state.pages.clear();
-        state.pending.clear();
-        state.generation += 1;
+        state.stale();
     }
 
     let frame = Frame {
@@ -244,11 +255,16 @@ pub fn VirtualLibrary(
             .pages
             .retain(|&page, _| frame.keeps(page, focus) || wanted.contains(&page));
         for page in wanted {
-            if state.pages.contains_key(&page) || state.pending.contains(&page) {
+            let fresh = state
+                .pages
+                .get(&page)
+                .is_some_and(|loaded| loaded.epoch == state.epoch);
+            if fresh || state.pending.contains(&page) {
                 continue;
             }
             state.pending.insert(page);
             let generation = state.generation;
+            let epoch = state.epoch;
             let pages = pages.clone();
             let library = source.library.clone();
             let page_query = ListGames {
@@ -276,7 +292,8 @@ pub fn VirtualLibrary(
                 state.pending.remove(&page);
                 match result {
                     Ok(got) => {
-                        state.pages.insert(page, Rc::new(got.items));
+                        let games = Rc::new(got.items);
+                        state.pages.insert(page, Page { games, epoch });
                         drop(state);
                         let count = usize::try_from(got.total).unwrap_or(usize::MAX);
                         if *total.peek() != Some(count) {
@@ -398,7 +415,7 @@ pub fn VirtualLibrary(
     let state = pages.borrow();
     let game_at = |index: usize| -> Option<GameSummary> {
         let page = state.pages.get(&(index / PAGE))?;
-        page.get(index % PAGE).cloned()
+        page.games.get(index % PAGE).cloned()
     };
     let columns = frame.columns();
     let row_height = layout.row_height();
