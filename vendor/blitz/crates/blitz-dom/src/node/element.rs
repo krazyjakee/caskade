@@ -139,6 +139,10 @@ pub struct ElementData {
 #[derive(Debug, Clone)]
 pub struct LayoutData {
     pub cache: Cache,
+    /// The cached `RunMode::PerformLayout` result is stale: since it was stored, a sizing run
+    /// (`RunMode::ComputeSize`) broke the lines of this node or of an inline root below it at
+    /// another width, and paint draws lines as last broken. Cleared when layout runs again.
+    pub final_layout_stale: bool,
     pub unrounded_layout: Layout,
     pub final_layout: Layout,
     pub scroll_offset: crate::Point<f64>,
@@ -155,6 +159,7 @@ impl LayoutData {
     pub const fn new() -> Self {
         Self {
             cache: Cache::new(),
+            final_layout_stale: false,
             unrounded_layout: Layout::new(),
             final_layout: Layout::new(),
             scroll_offset: crate::Point::ZERO,

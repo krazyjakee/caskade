@@ -191,6 +191,19 @@ impl LayoutPassState<'_> {
         }
     }
 
+    /// Mark the cached `PerformLayout` results of `node_id` and its layout ancestors stale,
+    /// so the next layout pass lays them out again rather than reusing them.
+    fn mark_final_layout_stale(&mut self, node_id: NodeId) {
+        let mut current = Some(node_id);
+        while let Some(id) = current {
+            let node = &mut self.nodes[id];
+            current = node.layout_parent.get().or(node.parent);
+            if let Some(layout_data) = node.try_layout_data_mut() {
+                layout_data.final_layout_stale = true;
+            }
+        }
+    }
+
     pub(crate) fn compute_inline_layout(
         &mut self,
         node_id: NodeId,
@@ -1374,6 +1387,12 @@ impl LayoutPassState<'_> {
             .downcast_element_mut()
             .unwrap()
             .inline_layout_data = Some(inline_layout);
+
+        // A sizing run broke the lines at the width it measured: this node's cached layout,
+        // and its ancestors', no longer match what paint would draw.
+        if inputs.run_mode != RunMode::PerformLayout {
+            self.mark_final_layout_stale(node_id);
+        }
 
         let oof_position_inset = taffy::Rect {
             left: border.left,

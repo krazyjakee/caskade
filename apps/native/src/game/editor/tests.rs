@@ -546,6 +546,57 @@ fn actions_add_a_play_action_that_saves_on_its_own() {
     assert_eq!(saved.entry_id, "entry-1");
 }
 
+/// Each element of `root`'s subtree whose text is drawn taller than its box,
+/// with the text: lines broken narrower than the box spill onto what follows.
+fn text_taller_than_its_box(window: &Window, root: blitz_dom::NodeId) -> Vec<String> {
+    let doc = window.doc.inner.borrow();
+    let mut spilled = Vec::new();
+    let mut stack = vec![root];
+    while let Some(id) = stack.pop() {
+        let node = doc.get_node(id).expect("a node");
+        stack.extend(node.children.iter().copied());
+        let Some(text) = node
+            .element_data()
+            .and_then(|element| element.inline_layout_data.as_ref())
+        else {
+            continue;
+        };
+        if text.layout.height() > node.final_layout().size.height + 1.0 {
+            spilled.push(text.text.clone());
+        }
+    }
+    spilled
+}
+
+/// A keystroke re-measures the form; its notes and labels keep their lines
+/// at the form's width, not the narrowest a measurement tried.
+#[test]
+fn actions_text_wraps_at_the_forms_width_after_an_edit() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _script = edit_script(EditScript {
+        state: Some(state()),
+        releases: vec![release()],
+        ..EditScript::default()
+    });
+    let mut window = open_editor();
+    tab(&mut window, "Actions");
+    window.settle_until("the locked launch", |window| {
+        window.find("data-part", "locked").is_some()
+    });
+    let form = window.get("data-part", "form");
+    let name = window
+        .find_in(form, "data-part", "input")
+        .expect("the name field");
+    window.focus(name);
+    window.type_text("!");
+    window.settle();
+    assert_eq!(
+        text_taller_than_its_box(&window, form),
+        Vec::<String>::new()
+    );
+}
+
 #[test]
 fn saves_change_a_releases_locations_from_their_revision() {
     let _one = caskade_core::lock(&ONE);

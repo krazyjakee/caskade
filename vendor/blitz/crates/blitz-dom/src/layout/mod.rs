@@ -748,10 +748,11 @@ impl taffy::CacheTree for LayoutPassState<'_> {
         node_id: NodeId,
         inputs: &taffy::LayoutInput,
     ) -> Option<taffy::LayoutOutput> {
-        self.node_from_id_mut(node_id)
-            .try_layout_data_mut()?
-            .cache
-            .get(inputs)
+        let layout_data = self.node_from_id_mut(node_id).try_layout_data_mut()?;
+        if inputs.run_mode == RunMode::PerformLayout && layout_data.final_layout_stale {
+            return None;
+        }
+        layout_data.cache.get(inputs)
     }
 
     #[inline]
@@ -761,9 +762,11 @@ impl taffy::CacheTree for LayoutPassState<'_> {
         inputs: &taffy::LayoutInput,
         layout_output: taffy::LayoutOutput,
     ) {
-        self.node_from_id_mut(node_id)
-            .cache_mut()
-            .store(inputs, layout_output);
+        let layout_data = self.node_from_id_mut(node_id).layout_data_mut();
+        if inputs.run_mode == RunMode::PerformLayout {
+            layout_data.final_layout_stale = false;
+        }
+        layout_data.cache.store(inputs, layout_output);
     }
 
     #[inline]
