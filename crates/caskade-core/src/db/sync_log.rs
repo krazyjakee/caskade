@@ -198,6 +198,31 @@ impl LibraryStore {
             .collect())
     }
 
+    /// Each field's winner with its value as `serde_json`'s text (object
+    /// keys sorted, so equal values have equal text), parsing one row at a
+    /// time: the sync engine keeps every winner, and parsed values of a real
+    /// library's fields took ~37 MB (#111).
+    pub async fn sync_field_texts(&self) -> Result<Vec<(FieldKey, Option<String>, Stamp)>> {
+        let rows = sqlx::query_as::<_, (String, String, String, Option<String>, String, i64, i64)>(
+            "SELECT entity,key,field,value_json,origin,wall,counter FROM sync_fields",
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(rows
+            .into_iter()
+            .filter_map(|(entity, key, field, value, origin, wall, counter)| {
+                let value = value
+                    .and_then(|text| serde_json::from_str::<Value>(&text).ok())
+                    .map(|value| value.to_string());
+                let stamp = Stamp {
+                    clock: Hlc::new(wall, counter),
+                    origin,
+                };
+                Some(((Entity::parse(&entity)?, key, field), value, stamp))
+            })
+            .collect())
+    }
+
     /// Records changes this device made, already the winners here, in one
     /// transaction with the fields and the version vector.
     pub async fn sync_record_local(&self, changes: &[Change]) -> Result<()> {

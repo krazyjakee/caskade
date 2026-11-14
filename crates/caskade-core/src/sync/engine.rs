@@ -28,7 +28,7 @@ use tokio::sync::Mutex;
 use super::change::{Change, EXISTS, Entity, join_key, key_parts};
 use super::clock::{Clock, Hlc, Stamp};
 use super::policy::{Category, SyncSettings};
-use crate::db::{Applied, FieldKey, FieldState, LibraryStore, Seen};
+use crate::db::{Applied, FieldKey, LibraryStore, Seen};
 use crate::settings::SettingsService;
 use crate::{Result, now_ms};
 
@@ -115,9 +115,50 @@ pub struct SyncEngine {
 struct State {
     loaded: bool,
     clock: Clock,
-    fields: HashMap<FieldKey, FieldState>,
+    fields: HashMap<FieldKey, Winner>,
+    /// Each origin once, shared by its fields.
+    origins: HashSet<Arc<str>>,
     /// The categories last seen turned on, to notice one turned back on.
     on: Option<BTreeSet<Category>>,
+}
+
+/// A field's winner as the engine keeps it between captures: its value as
+/// JSON text and its origin shared with the device's other fields. Parsed
+/// values of a real library's ~29,000 fields held ~37 MB (#111).
+struct Winner {
+    /// `serde_json`'s text of the value: it writes object keys sorted, so
+    /// equal values have equal text.
+    value: Option<Box<str>>,
+    clock: Hlc,
+    origin: Arc<str>,
+}
+
+impl State {
+    /// Records `key`'s winner.
+    fn set(&mut self, key: FieldKey, value: Option<&Value>, stamp: &Stamp) {
+        self.set_text(key, value.map(Value::to_string), stamp);
+    }
+
+    /// Records `key`'s winner, its value already as `serde_json`'s text.
+    fn set_text(&mut self, key: FieldKey, value: Option<String>, stamp: &Stamp) {
+        let origin = match self.origins.get(stamp.origin.as_str()) {
+            Some(origin) => origin.clone(),
+            None => {
+                let origin: Arc<str> = stamp.origin.as_str().into();
+                self.origins.insert(origin.clone());
+                origin
+            }
+        };
+        let value = value.map(String::into_boxed_str);
+        self.fields.insert(
+            key,
+            Winner {
+                value,
+                clock: stamp.clock,
+                origin,
+            },
+        );
+    }
 }
 
 /// What a change maps to here.
@@ -257,7 +298,10 @@ impl SyncEngine {
         if state.loaded {
             return Ok(());
         }
-        state.fields = self.store.sync_fields().await?;
+        state.fields.clear();
+        for (key, value, stamp) in self.store.sync_field_texts().await? {
+            state.set_text(key, value, &stamp);
+        }
         let last = self
             .store
             .sync_seen()
@@ -302,8 +346,8 @@ impl SyncEngine {
             let current = state
                 .fields
                 .get(&(*entity, key.clone(), field.clone()))
-                .and_then(|state| state.value.as_ref());
-            if current != Some(value) {
+                .and_then(|winner| winner.value.as_deref());
+            if current.is_none_or(|current| !is_text_of(current, value)) {
                 changes.push(self.draft(*entity, key, field, Some(value.clone())));
             }
         }
@@ -326,8 +370,9 @@ impl SyncEngine {
                 && field == EXISTS
                 && current
                     .value
-                    .as_ref()
-                    .is_some_and(crate::db::is_stand_in_marker)
+                    .as_deref()
+                    .and_then(|text| serde_json::from_str::<Value>(text).ok())
+                    .is_some_and(|value| crate::db::is_stand_in_marker(&value))
             {
                 continue;
             }
@@ -372,12 +417,10 @@ impl SyncEngine {
         }
         self.store.sync_record_local(&changes).await?;
         for change in &changes {
-            state.fields.insert(
+            state.set(
                 (change.entity, change.key.clone(), change.field.clone()),
-                FieldState {
-                    value: change.value.clone(),
-                    stamp: change.stamp(),
-                },
+                change.value.as_ref(),
+                &change.stamp(),
             );
         }
         Ok(changes.len())
@@ -477,12 +520,10 @@ impl SyncEngine {
                         if super::settings::apply(settings, &self.store, change, value.clone())
                             .await?
                         {
-                            state.fields.insert(
+                            state.set(
                                 (change.entity, target, change.field.clone()),
-                                FieldState {
-                                    value,
-                                    stamp: change.stamp(),
-                                },
+                                value.as_ref(),
+                                &change.stamp(),
                             );
                             applied += 1;
                         }
@@ -515,12 +556,10 @@ impl SyncEngine {
                             Applied::Wait => {}
                             Applied::Superseded => progress = true,
                             Applied::Written => {
-                                state.fields.insert(
+                                state.set(
                                     (change.entity, target, change.field.clone()),
-                                    FieldState {
-                                        value,
-                                        stamp: change.stamp(),
-                                    },
+                                    value.as_ref(),
+                                    &change.stamp(),
                                 );
                                 applied += 1;
                                 progress = true;
@@ -529,12 +568,10 @@ impl SyncEngine {
                     }
                     Mapped::To(target, value) if change.entity == Entity::RommServer => {
                         if self.apply_romm(change, &target, value.clone()).await? {
-                            state.fields.insert(
+                            state.set(
                                 (change.entity, target, change.field.clone()),
-                                FieldState {
-                                    value,
-                                    stamp: change.stamp(),
-                                },
+                                value.as_ref(),
+                                &change.stamp(),
                             );
                             applied += 1;
                         }
@@ -553,12 +590,10 @@ impl SyncEngine {
                                     self.arrived
                                         .store(true, std::sync::atomic::Ordering::Relaxed);
                                 }
-                                state.fields.insert(
+                                state.set(
                                     (change.entity, target, change.field.clone()),
-                                    FieldState {
-                                        value,
-                                        stamp: change.stamp(),
-                                    },
+                                    value.as_ref(),
+                                    &change.stamp(),
                                 );
                                 applied += 1;
                                 progress = true;
@@ -894,8 +929,34 @@ impl SyncEngine {
         state
             .fields
             .get(&(entity, key.to_owned(), field.to_owned()))
-            .map(|state| state.stamp.clone())
+            .map(|winner| Stamp {
+                clock: winner.clock,
+                origin: winner.origin.to_string(),
+            })
     }
+}
+
+/// Whether `text` is `serde_json`'s text of `value`, without writing it out:
+/// capture compares every synced field each time.
+fn is_text_of(text: &str, value: &Value) -> bool {
+    /// Takes the text as it's written, matching it against the rest.
+    struct Matches<'a>(&'a [u8]);
+    impl std::io::Write for Matches<'_> {
+        fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+            match self.0.strip_prefix(bytes) {
+                Some(rest) => {
+                    self.0 = rest;
+                    Ok(bytes.len())
+                }
+                None => Err(std::io::ErrorKind::InvalidData.into()),
+            }
+        }
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+    let mut rest = Matches(text.as_bytes());
+    serde_json::to_writer(&mut rest, value).is_ok() && rest.0.is_empty()
 }
 
 /// A server's platform mappings from another device, each keeping this
@@ -920,4 +981,21 @@ fn merge_platforms(local: Option<&Value>, incoming: &Value) -> Value {
         })
         .collect();
     Value::Array(merged)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn a_value_matches_only_its_own_text() {
+        let value = json!({"b": [1, 2.5, null], "a": "x\"y"});
+        assert!(is_text_of(&value.to_string(), &value));
+        assert!(is_text_of(r#"{"a":"x\"y","b":[1,2.5,null]}"#, &value));
+        assert!(!is_text_of(r#"{"a":"x\"y","b":[1,2.5]}"#, &value));
+        assert!(!is_text_of(r#"{"a":"x\"y","b":[1,2.5,null]} "#, &value));
+        assert!(!is_text_of("", &value));
+        assert!(!is_text_of("1", &json!(1.0)));
+    }
 }
