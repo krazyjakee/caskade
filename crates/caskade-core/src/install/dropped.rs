@@ -261,7 +261,7 @@ fn read_shortcut(env: &HostEnv, path: &Path) -> Result<(String, Target)> {
         )),
         LaunchTarget::Flatpak { app_id, .. } => Err(Error::Invalid(crate::tr!(
             "{title} is the Flatpak app {app_id}. Caskade finds Flatpak games with \
-             library discovery (Settings → Library Discovery).",
+             library discovery (Settings → Discovery).",
             title = title,
             app_id = app_id
         ))),

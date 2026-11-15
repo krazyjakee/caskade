@@ -742,6 +742,9 @@
   .max-h-48 {
     max-height: calc(calc(0.25rem * var(--cs-density-scale)) * 48);
   }
+  .max-h-64 {
+    max-height: calc(calc(0.25rem * var(--cs-density-scale)) * 64);
+  }
   .max-h-\[28rem\] {
     max-height: 28rem;
   }

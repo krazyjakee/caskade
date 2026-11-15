@@ -926,3 +926,28 @@ async fn a_damaged_cache_is_started_again() {
     assert!(dir.path().join("games.sqlite.damaged").exists());
     assert_eq!(igdb.cached().await.unwrap(), 1);
 }
+
+#[tokio::test]
+async fn cache_creates_nested_folders_and_recovers_after_a_location_is_fixed() {
+    let dir = tempfile::tempdir().unwrap();
+    let blocker = dir.path().join("cache");
+    std::fs::write(&blocker, b"not a directory").unwrap();
+    let cache = blocker.join("Application Support/IGDB cache");
+    let igdb = Igdb::with_base_url(&cache, unreachable());
+    let error = igdb.store().await.err().expect("blocked directory");
+    let report = crate::error::ErrorReport::from_error(&error);
+    assert!(report.summary.contains("local IGDB cache"), "{report:?}");
+    assert!(
+        report
+            .summary
+            .contains(&cache.join("games.sqlite").display().to_string())
+    );
+    assert!(report.detail.is_some());
+    assert!(!report.summary.contains("server"));
+    std::fs::remove_file(blocker).unwrap();
+    let store = igdb.store().await.unwrap();
+    store.put(&[], &[42]).await.unwrap();
+    assert!(store.get(&[42]).await.unwrap().contains_key(&42));
+    assert!(cache.join("games.sqlite").is_file());
+    assert!(!cache.join("games.sqlite.damaged").exists());
+}

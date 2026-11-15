@@ -301,6 +301,15 @@ impl<S: Shell> Loop<S> {
 }
 
 impl<S: Shell> ApplicationHandler for Loop<S> {
+    // AppKit sends editing commands (Backspace, Option-Backspace, caret
+    // movement…) through this callback rather than ordinary key events.
+    #[cfg(target_os = "macos")]
+    fn macos_handler(
+        &mut self,
+    ) -> Option<&mut dyn dioxus_native::winit::platform::macos::ApplicationHandlerExtMacOS> {
+        self.inner.macos_handler()
+    }
+
     fn new_events(&mut self, event_loop: &dyn ActiveEventLoop, cause: StartCause) {
         self.inner.new_events(event_loop, cause);
     }

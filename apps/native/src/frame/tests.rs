@@ -745,3 +745,34 @@ fn a_right_click_on_the_title_bar_offers_the_windows_menu() {
         assert!(menu.is_none());
     }
 }
+
+#[test]
+fn repeated_navigation_does_not_retain_detached_page_trees() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = Window::open();
+    let routes = [
+        "/library",
+        "/collections",
+        "/settings?tab=general",
+        "/settings?tab=appearance",
+        "/settings?tab=library-discovery",
+        "/",
+    ];
+    let mut baseline = 0;
+    for tour in 0..4 {
+        for route in routes {
+            window.go(route);
+        }
+        let retained = window.doc.inner.borrow().tree().len();
+        println!("navigation tour {tour}: {retained} retained DOM nodes");
+        if tour == 0 {
+            baseline = retained;
+        } else {
+            assert!(
+                retained <= baseline + 64,
+                "tour {tour}: {retained} retained DOM nodes, first tour {baseline}"
+            );
+        }
+    }
+}

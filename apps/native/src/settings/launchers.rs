@@ -1,7 +1,7 @@
 //! Settings → Launchers (#104), as the webview's `LaunchersSettings` and
 //! `launchers.ts`: the launchers discovery looks for on this device,
 //! whether it found each, and a switch for scanning it (#48). The one
-//! place `core.launchers` changes; Library Discovery links here.
+//! place `core.launchers` changes; Discovery links here.
 
 use caskade_app::discovery::DiscoverySnapshot;
 use caskade_ui_data::discovery::LauncherStatus;
@@ -346,7 +346,7 @@ fn LauncherRow(detected: DetectedLauncher, on: bool, on_change: EventHandler<boo
     }
 }
 
-/// Scans, folders and the system's checks are Library Discovery's (#46); it
+/// Scans, folders and the system's checks are Discovery's (#46); it
 /// links back here.
 #[component]
 fn DiscoveryLink() -> Element {
@@ -357,7 +357,7 @@ fn DiscoveryLink() -> Element {
     .href();
     rsx! {
         p { class: "mt-1 text-sm text-fg-muted",
-            {crate::trans!("How and when games are scanned: <0>Library Discovery</0>";
+            {crate::trans!("How and when games are scanned: <0>Discovery</0>";
                 0 => |inner| rsx! {
                     RouteLink { to: href.clone(), current: false, class: "text-accent-alt", {inner} }
                 })}

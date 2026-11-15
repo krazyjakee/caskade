@@ -1,4 +1,4 @@
-//! Settings → Library Discovery (#104), as the webview's
+//! Settings → Discovery (#104), as the webview's
 //! `LibraryDiscoverySettings`, `ReviewList` and `HiddenGames`: turning
 //! discovery on, Scan now and its progress; results waiting for a decision
 //! (accept or ignore, several at once or one by a right click); when scans
@@ -268,7 +268,7 @@ pub fn LibraryDiscoverySettings() -> Element {
                 }
                 // Names what goes back and asks first (#44, #49).
                 ResetDefaults {
-                    group: tp!("settings tab", "Library Discovery"),
+                    group: tp!("settings tab", "Discovery"),
                     label: t!("Reset discovery settings"),
                     parts: reset_parts,
                     keeps: t!("Launchers, play history import and settings on other pages stay as they are."),
@@ -277,7 +277,7 @@ pub fn LibraryDiscoverySettings() -> Element {
             }
             SettingsSection {
                 icon: Some(SCAN_SEARCH),
-                title: t!("Automatic Library Discovery"),
+                title: t!("Automatic discovery"),
                 description: t!("Finds the games your launchers and your system already know about. It reads their records and never starts a launcher."),
                 SettingRow {
                     label: t!("Enable library discovery"),
@@ -323,7 +323,7 @@ pub fn LibraryDiscoverySettings() -> Element {
             if !enabled {
                 // Why everything below is dimmed (#55).
                 p { role: "note", class: "text-sm text-fg-muted",
-                    {t!("Library discovery is off, so the settings below don't apply until it's on.")}
+                    {t!("Discovery is off, so the settings below don't apply until it's on.")}
                 }
             }
             div {

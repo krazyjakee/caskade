@@ -90,7 +90,7 @@ pub fn StoreAccountsSettings() -> Element {
             if current.providers.is_empty() {
                 SettingsSection { icon: Some(STORE), title: t!("Store accounts"),
                     p { class: "text-sm text-fg-muted",
-                        {t!("No store can be connected in this version of Caskade yet. Games your launchers have installed are still found by Library Discovery.")}
+                        {t!("No store can be connected in this version of Caskade yet. Games your launchers have installed are still found by Discovery.")}
                     }
                 }
             }

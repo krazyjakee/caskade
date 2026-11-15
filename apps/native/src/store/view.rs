@@ -530,8 +530,8 @@ fn Notices(state: Pages, current: bool, on_retry: EventHandler<()>) -> Element {
             div { role: "alert", class: "flex flex-wrap items-center gap-3 text-sm text-fg-muted",
                 span {
                     match &state.failed {
-                        Some(error) if !error.is_empty() => t!("Could not reach the game catalog: {error}", error = error.clone()),
-                        _ => t!("Could not reach the game catalog."),
+                        Some(error) if !error.is_empty() => t!("Could not load the game catalogue: {error}", error = error.clone()),
+                        _ => t!("Could not load the game catalogue."),
                     }
                 }
                 Button { size: ButtonSize::Sm, on_press: move |_| on_retry.call(()), {t!("Try again")} }
@@ -646,9 +646,10 @@ fn ReleaseShelf(shelf: Shelf, store: StoreRoute) -> Element {
                 Link {
                     href: href.clone(),
                     "data-part": "view-all",
-                    class: "text-sm text-accent-alt",
+                    class: "inline-flex items-center gap-1 text-sm text-accent-alt",
                     on_press: move |_| router.navigate(&href),
-                    {t!("View all →")}
+                    {t!("View all")}
+                            crate::ui::Svg { icon: crate::ui::icons::ARROW_RIGHT, class: "size-4" }
                 }
             },
             notice: rsx! {

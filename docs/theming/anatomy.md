@@ -46,8 +46,8 @@ variant of the component, such as the library's card.
 - [`game-row`](#game-row): A game in the library's compact table (the list layout).
 - [`settings-nav`](#settings-nav): Settings' sections: a vertical tab list beside the open section's panel, in desktop and console modes, grouped under headings, with the settings search above it. It stays in view while the panel scrolls, and scrolls on its own when the sections don't fit.
 - [`schema-settings`](#schema-settings): A settings section drawn from its JSON Schema (#59, #128): Settings → General's Game updates, Settings → Installer and a plugin's settings in Settings → Plugins. Its reset button in the heading, then a row per field with a select, switch, slider or text field, as the field's type has it.
-- [`discovery-settings`](#discovery-settings): Settings → Library Discovery (#104): turning discovery on, Scan now and its progress; the results waiting for a decision; when scans run; the system's own records; deep scans and their folders; what each source last reported; hidden games shown again; and ignored results allowed again.
-- [`discovery-review`](#discovery-review): Review possible games, in Settings → Library Discovery: the results that need a decision, with Select all, Accept selected and Ignore selected. Accept adds a result to the library; Ignore keeps future scans from bringing it back.
+- [`discovery-settings`](#discovery-settings): Settings → Discovery (#104): turning discovery on, Scan now and its progress; the results waiting for a decision; when scans run; the system's own records; deep scans and their folders; what each source last reported; hidden games shown again; and ignored results allowed again.
+- [`discovery-review`](#discovery-review): Review possible games, in Settings → Discovery: the results that need a decision, with Select all, Accept selected and Ignore selected. Accept adds a result to the library; Ignore keeps future scans from bringing it back.
 - [`storage-settings`](#storage-settings): Settings → Storage (#104): where Caskade installs games. Each location as a card with its status, space and games; adding one; the selected one's label and folder template, made the default, or removed, keeping its files or moving its games to another location first (one job in Activity, #64); and Always use the default location.
 - [`plugin-review`](#plugin-review): A plugin's name, version, id and description, what it asks to do and what it adds, before it's allowed or installed (Settings → Plugins, and an add-on's details), with Cancel and Allow or Install and allow; or an installed plugin's details, with Close. An invalid plugin lists its problems instead.
 - [`streaming-settings`](#streaming-settings): Settings → Streaming (#265): letting other devices stream games from this one (admins), with Repair, the devices waiting to pair and the ones paired; the devices this one can stream from, pairing with them and adding one by its address; the stream quality; and the streaming programs' updates. Other accounts see a note on what only an admin can do.
@@ -645,7 +645,7 @@ Contains: [`error-notice`](#error-notice), [`settings-section`](#settings-sectio
 
 ## `discovery-settings`
 
-Settings → Library Discovery (#104): turning discovery on, Scan now and its progress; the results waiting for a decision; when scans run; the system's own records; deep scans and their folders; what each source last reported; hidden games shown again; and ignored results allowed again. Rendered by LibraryDiscoverySettings (apps/native/src/settings/discovery.rs).
+Settings → Discovery (#104): turning discovery on, Scan now and its progress; the results waiting for a decision; when scans run; the system's own records; deep scans and their folders; what each source last reported; hidden games shown again; and ignored results allowed again. Rendered by LibraryDiscoverySettings (apps/native/src/settings/discovery.rs).
 
 Root: `[data-cs="discovery-settings"]`
 
@@ -662,7 +662,7 @@ Contains: [`error-notice`](#error-notice), [`button`](#button), [`settings-secti
 
 ## `discovery-review`
 
-Review possible games, in Settings → Library Discovery: the results that need a decision, with Select all, Accept selected and Ignore selected. Accept adds a result to the library; Ignore keeps future scans from bringing it back. Rendered by ReviewList (apps/native/src/settings/discovery.rs).
+Review possible games, in Settings → Discovery: the results that need a decision, with Select all, Accept selected and Ignore selected. Accept adds a result to the library; Ignore keeps future scans from bringing it back. Rendered by ReviewList (apps/native/src/settings/discovery.rs).
 
 Root: `[data-cs="discovery-review"]`
 
@@ -838,7 +838,7 @@ Root: `[data-cs="onboarding"]`
 | `language` | `[data-cs="onboarding"] [data-part="language"]` | A language, or System; `data-selected` marks the choice. |
 | `next` | `[data-cs="onboarding"] [data-part="next"]` | Continue, Set up, or Open my library. |
 | `progress` | `[data-cs="onboarding"] [data-part="progress"]` | The step dots; each has `data-status` `active`, `done` or `next`. |
-| `setup` | `[data-cs="onboarding"] [data-part="setup"]` | The work being done; `data-status` is `running` or `done`. |
+| `setup` | `[data-cs="onboarding"] [data-part="setup"]` | The work being done; `data-status` is `running`, `done` or `failed`. |
 | `covers` | `[data-cs="onboarding"] [data-part="covers"]` | Covers of the games found so far, behind the list. |
 | `count` | `[data-cs="onboarding"] [data-part="count"]` | How many games the library has. |
 | `tasks` | `[data-cs="onboarding"] [data-part="tasks"]` | The list of tasks. |
@@ -848,7 +848,7 @@ State on the root:
 
 - `data-step`: `welcome`, `language`, `folder`, `sources`, `mode`, `account`, `setup`
 
-Contains: [`backdrop`](#backdrop), [`window-controls`](#window-controls), [`button`](#button), [`switch`](#switch), [`checkbox`](#checkbox), [`text-field`](#text-field), [`game-art`](#game-art), [`avatar-picker`](#avatar-picker)
+Contains: [`backdrop`](#backdrop), [`window-controls`](#window-controls), [`button`](#button), [`switch`](#switch), [`checkbox`](#checkbox), [`text-field`](#text-field), [`game-art`](#game-art), [`avatar-picker`](#avatar-picker), [`error-notice`](#error-notice)
 
 ## `addon-catalogue`
 

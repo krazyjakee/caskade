@@ -1,5 +1,5 @@
 //! Settings panels' themeable roots (#103, #104, #105): the panels drawn
-//! from a JSON Schema, Library Discovery, Storage, a plugin's review and
+//! from a JSON Schema, Discovery, Storage, a plugin's review and
 //! Streaming. The settings window itself is `settings::ANATOMY`.
 
 use caskade_ui_theme::anatomy::{Entry, Source};
@@ -78,7 +78,7 @@ pub const DISCOVERY_SETTINGS: Entry = Entry {
         "discovery-settings",
         "LibraryDiscoverySettings (apps/native/src/settings/discovery.rs)",
         Source::App,
-        "Settings → Library Discovery (#104): turning discovery on, Scan now and its progress; the results waiting for a decision; when scans run; the system's own records; deep scans and their folders; what each source last reported; hidden games shown again; and ignored results allowed again.",
+        "Settings → Discovery (#104): turning discovery on, Scan now and its progress; the results waiting for a decision; when scans run; the system's own records; deep scans and their folders; what each source last reported; hidden games shown again; and ignored results allowed again.",
     )
 };
 
@@ -92,7 +92,7 @@ pub const DISCOVERY_REVIEW: Entry = Entry {
         "discovery-review",
         "ReviewList (apps/native/src/settings/discovery.rs)",
         Source::App,
-        "Review possible games, in Settings → Library Discovery: the results that need a decision, with Select all, Accept selected and Ignore selected. Accept adds a result to the library; Ignore keeps future scans from bringing it back.",
+        "Review possible games, in Settings → Discovery: the results that need a decision, with Select all, Accept selected and Ignore selected. Accept adds a result to the library; Ignore keeps future scans from bringing it back.",
     )
 };
 

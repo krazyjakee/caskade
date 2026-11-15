@@ -167,7 +167,7 @@ fn lists_the_found_launchers_and_switches_them() {
     window.settle_until("steam back", |_| {
         saved("core.launchers")["enabled"].get("steam") != Some(&json!(false))
     });
-    // Look again detects again; the link goes to Library Discovery.
+    // Look again detects again; the link goes to Discovery.
     let again = window
         .find_all("data-cs", "button")
         .into_iter()
@@ -182,7 +182,7 @@ fn lists_the_found_launchers_and_switches_them() {
         .find_all("href", "/settings?tab=library-discovery")
         .into_iter()
         .next()
-        .expect("the link to Library Discovery");
+        .expect("the link to Discovery");
     window.focus(link);
     window.key(Key::Named(NamedKey::Enter));
     window.settle_until("library discovery", |window| {

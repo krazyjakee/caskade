@@ -194,12 +194,13 @@ pub fn HomeView() -> Element {
                         Link {
                             href: recent_href.clone(),
                             "data-part": "view-all",
-                            class: "text-sm text-accent-alt",
+                            class: "inline-flex items-center gap-1 text-sm text-accent-alt",
                             on_press: {
                                 let href = recent_href.clone();
                                 move |_| router.navigate(&href)
                             },
-                            {t!("View all →")}
+                            {t!("View all")}
+                            crate::ui::Svg { icon: crate::ui::icons::ARROW_RIGHT, class: "size-4" }
                         }
                     },
                     notice: rsx! {
@@ -214,12 +215,13 @@ pub fn HomeView() -> Element {
                                 p { {t!("No sessions yet. Pick something from your library.")} }
                                 Link {
                                     href: all_href.clone(),
-                                    class: "mt-3 inline-block text-accent-alt",
+                                    class: "mt-3 inline-flex items-center gap-1 text-accent-alt",
                                     on_press: {
                                         let href = all_href.clone();
                                         move |_| router.navigate(&href)
                                     },
-                                    {t!("Browse library →")}
+                                    {t!("Browse library")}
+                                    crate::ui::Svg { icon: crate::ui::icons::ARROW_RIGHT, class: "size-4" }
                                 }
                             }
                         }
@@ -393,9 +395,10 @@ fn NewGamesShelf(
                 Link {
                     href: href.clone(),
                     "data-part": "view-all",
-                    class: "text-sm text-accent-alt",
+                    class: "inline-flex items-center gap-1 text-sm text-accent-alt",
                     on_press: move |_| router.navigate(&href),
-                    {t!("View all →")}
+                    {t!("View all")}
+                            crate::ui::Svg { icon: crate::ui::icons::ARROW_RIGHT, class: "size-4" }
                 }
             },
             notice: rsx! {

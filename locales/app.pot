@@ -51,6 +51,12 @@ msgid_plural "# devices in reach"
 msgstr[0] ""
 msgstr[1] ""
 
+#: apps/native/src/onboarding/setup.rs
+msgid "# discovery warning"
+msgid_plural "# discovery warnings"
+msgstr[0] ""
+msgstr[1] ""
+
 #: apps/native/src/settings/emulation/detection.rs
 msgid "# emulator installation found"
 msgid_plural "# emulator installations found"
@@ -1322,11 +1328,6 @@ msgstr ""
 msgid "Automatic ({platform})"
 msgstr ""
 
-#: apps/native/src/settings/discovery.rs
-#: apps/native/src/settings/search/search_index.rs
-msgid "Automatic Library Discovery"
-msgstr ""
-
 #: apps/native/src/settings/backup.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Automatic backups"
@@ -1339,6 +1340,11 @@ msgstr ""
 
 #: apps/native/src/activity/refresh.rs
 msgid "Automatic details refreshed"
+msgstr ""
+
+#: apps/native/src/settings/discovery.rs
+#: apps/native/src/settings/search/search_index.rs
+msgid "Automatic discovery"
 msgstr ""
 
 #: apps/native/src/settings/general.rs
@@ -1541,7 +1547,7 @@ msgid "Browse for {label}"
 msgstr ""
 
 #: apps/native/src/home/mod.rs
-msgid "Browse library →"
+msgid "Browse library"
 msgstr ""
 
 #: apps/native/src/flows/fields.rs
@@ -2615,6 +2621,18 @@ msgstr ""
 msgid "Could not load similar games."
 msgstr ""
 
+#: apps/native/src/store/view.rs
+msgid "Could not load the game catalogue."
+msgstr ""
+
+#: apps/native/src/store/view.rs
+msgid "Could not load the game catalogue: {error}"
+msgstr ""
+
+#: apps/native/src/store/game.rs
+msgid "Could not load the game catalogue: {reason}"
+msgstr ""
+
 #: apps/native/src/collections/page.rs
 msgid "Could not load the games."
 msgstr ""
@@ -2641,18 +2659,6 @@ msgstr ""
 
 #: apps/native/src/home/mod.rs
 msgid "Could not load your recent activity."
-msgstr ""
-
-#: apps/native/src/store/view.rs
-msgid "Could not reach the game catalog."
-msgstr ""
-
-#: apps/native/src/store/view.rs
-msgid "Could not reach the game catalog: {error}"
-msgstr ""
-
-#: apps/native/src/store/game.rs
-msgid "Could not reach the game catalog: {reason}"
 msgstr ""
 
 #: apps/native/src/settings/emulation/setup.rs
@@ -3075,8 +3081,19 @@ msgstr ""
 msgid "Disconnect…"
 msgstr ""
 
+#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/discovery.rs
+#: apps/native/src/settings/mod.rs
+msgctxt "settings tab"
+msgid "Discovery"
+msgstr ""
+
 #: apps/native/src/onboarding/setup.rs
 msgid "Discovery has finished. Review any warnings below, or open your library."
+msgstr ""
+
+#: apps/native/src/settings/discovery.rs
+msgid "Discovery is off, so the settings below don't apply until it's on."
 msgstr ""
 
 #. The heading over a game's disc images
@@ -3706,6 +3723,10 @@ msgstr ""
 msgid "Finishing"
 msgstr ""
 
+#: apps/native/src/onboarding/run.rs
+msgid "Finishing setup"
+msgstr ""
+
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "First-run setup"
@@ -4308,7 +4329,7 @@ msgid "How Caskade looks. Themes restyle every view through design tokens."
 msgstr ""
 
 #: apps/native/src/settings/launchers.rs
-msgid "How and when games are scanned: <0>Library Discovery</0>"
+msgid "How and when games are scanned: <0>Discovery</0>"
 msgstr ""
 
 #: apps/native/src/onboarding/questions.rs
@@ -5243,19 +5264,8 @@ msgctxt "settings group"
 msgid "Library"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
-#: apps/native/src/settings/discovery.rs
-#: apps/native/src/settings/mod.rs
-msgctxt "settings tab"
-msgid "Library Discovery"
-msgstr ""
-
 #: apps/native/src/settings/backup.rs
 msgid "Library and settings"
-msgstr ""
-
-#: apps/native/src/settings/discovery.rs
-msgid "Library discovery is off, so the settings below don't apply until it's on."
 msgstr ""
 
 #: apps/native/src/frame/sidebar.rs
@@ -6280,7 +6290,7 @@ msgid "No settings match “{query}”."
 msgstr ""
 
 #: apps/native/src/settings/stores.rs
-msgid "No store can be connected in this version of Caskade yet. Games your launchers have installed are still found by Library Discovery."
+msgid "No store can be connected in this version of Caskade yet. Games your launchers have installed are still found by Discovery."
 msgstr ""
 
 #: apps/native/src/activity/card.rs
@@ -8715,8 +8725,20 @@ msgstr ""
 msgid "Saving another emulator here removes the old one's built-in profiles. Your own profiles are kept."
 msgstr ""
 
+#: apps/native/src/onboarding/run.rs
+msgid "Saving artwork and game info choices"
+msgstr ""
+
+#: apps/native/src/onboarding/run.rs
+msgid "Saving discovery choices"
+msgstr ""
+
 #: apps/native/src/onboarding/setup.rs
 msgid "Saving is taking longer than expected. Continue with your current settings, or wait. You can run setup again from Settings → General."
+msgstr ""
+
+#: apps/native/src/onboarding/run.rs
+msgid "Saving setup choices"
 msgstr ""
 
 #: apps/native/src/onboarding/setup.rs
@@ -8824,7 +8846,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: apps/native/src/game_menu/menu.rs
-msgid "Scans won't bring it back. Show it again in Settings → Library Discovery."
+msgid "Scans won't bring it back. Show it again in Settings → Discovery."
 msgstr ""
 
 #: apps/native/src/settings/addons/addon_details.rs
@@ -9153,7 +9175,15 @@ msgid "Setup"
 msgstr ""
 
 #: apps/native/src/onboarding/setup.rs
+msgid "Setup could not save your choices"
+msgstr ""
+
+#: apps/native/src/onboarding/setup.rs
 msgid "Setup needs attention"
+msgstr ""
+
+#: apps/native/src/onboarding/run.rs
+msgid "Setup paused. Try again to continue."
 msgstr ""
 
 #: apps/native/src/onboarding/setup.rs
@@ -11033,7 +11063,7 @@ msgstr ""
 
 #: apps/native/src/home/mod.rs
 #: apps/native/src/store/view.rs
-msgid "View all →"
+msgid "View all"
 msgstr ""
 
 #: apps/native/src/game_menu/quick_look.rs
@@ -12180,7 +12210,7 @@ msgstr ""
 msgid "scan, find games"
 msgstr ""
 
-#. Search words for Settings → Library Discovery, separated by commas
+#. Search words for Settings → Discovery, separated by commas
 #: apps/native/src/settings/search/search_index.rs
 msgid "scan, scanning, discovery, find games, detect games, import, launchers, folders, watch folders, hidden games, ignored games, play history, deep scan"
 msgstr ""
@@ -12731,6 +12761,10 @@ msgstr ""
 
 #: apps/native/src/game/media.rs
 msgid "{number} of {count}"
+msgstr ""
+
+#: apps/native/src/onboarding/run.rs
+msgid "{operation}: {reason}"
 msgstr ""
 
 #: apps/native/src/settings/devices/paired.rs

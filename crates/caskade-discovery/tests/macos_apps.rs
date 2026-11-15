@@ -295,7 +295,25 @@ fn app_and_executable_symlinks_do_not_escape_the_fixture_or_bundle() {
         b"still insidefixture but outsidebundle",
     );
     std::os::unix::fs::symlink(t.path().join("root/outside-executable"), &exe).unwrap();
-    assert!(scan(t.path()).is_empty());
+    app(
+        t.path(),
+        "Applications/Healthy.app",
+        "Healthy",
+        "org.fixture.healthy",
+        Some("public.app-category.games"),
+        false,
+    );
+    let ctx = ScanCtx::default();
+    let games = MacosApps
+        .scan(&HostEnv::fixture(t.path()).unwrap(), &ctx)
+        .unwrap();
+    assert_eq!(games.len(), 1);
+    assert_eq!(games[0].title, "Healthy");
+    assert!(
+        ctx.take_warnings()
+            .iter()
+            .any(|w| w.contains("bundle executable escapes bundle"))
+    );
 }
 
 #[test]
@@ -324,4 +342,65 @@ fn bundle_entry_budget_is_shared_across_all_application_roots() {
     assert_eq!(games.len(), 1);
     assert_eq!(games[0].title, "A");
     assert!(ctx.take_warnings().iter().any(|w| w.contains("budget")));
+}
+
+#[test]
+fn padded_shortcuts_missing_plists_and_classifier_limits_keep_healthy_games() {
+    let t = scenario();
+    app(
+        t.path(),
+        "Applications/Healthy.app",
+        "Healthy",
+        "com.valvesoftware.steam.app.620",
+        None,
+        false,
+    );
+    let info = t
+        .path()
+        .join("root/Applications/Healthy.app/Contents/Info.plist");
+    let mut bytes = fs::read(&info).unwrap();
+    bytes.extend(b"\0\0");
+    fs::write(info, bytes).unwrap();
+    fs::create_dir_all(t.path().join("root/Applications/Missing.app/Contents")).unwrap();
+    app(
+        t.path(),
+        "Applications/Large.app",
+        "Large",
+        "org.fixture.large",
+        None,
+        false,
+    );
+    for i in 0..20 {
+        write(
+            t.path(),
+            &format!("root/Applications/Large.app/Contents/Resources/file{i}"),
+            b"fixture",
+        );
+    }
+    let config = Config {
+        classifier: ClassifierConfig {
+            max_entries: 8,
+            ..ClassifierConfig::default()
+        },
+        ..Config::default()
+    };
+    let ctx = ScanCtx::with_config(Cancel::new(), Arc::new(config));
+    let games = MacosApps
+        .scan(&HostEnv::fixture(t.path()).unwrap(), &ctx)
+        .unwrap();
+    assert_eq!(games.len(), 1);
+    assert_eq!(games[0].title, "Healthy");
+    let warnings = ctx.take_warnings();
+    assert!(
+        warnings
+            .iter()
+            .any(|w| w.contains("Missing.app/Contents/Info.plist")),
+        "{warnings:?}"
+    );
+    assert!(
+        warnings
+            .iter()
+            .any(|w| w.contains("Large.app") && w.contains("budget")),
+        "{warnings:?}"
+    );
 }

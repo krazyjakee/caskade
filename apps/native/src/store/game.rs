@@ -118,7 +118,7 @@ pub fn StoreGameView(igdb_id: String, from: Option<String>) -> Element {
                         p { role: "status", {t!("Loading game…")} }
                     },
                     Lookup::Failed(reason) => rsx! {
-                        p { role: "alert", {t!("Could not reach the game catalog: {reason}", reason = reason)} }
+                        p { role: "alert", {t!("Could not load the game catalogue: {reason}", reason = reason)} }
                     },
                     Lookup::NotFound => rsx! {
                         p { role: "alert", {t!("IGDB has no game {igdbId}.", igdbId = igdb_id.clone())} }

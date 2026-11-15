@@ -268,7 +268,7 @@ pub fn items(target: &Target, facts: &Facts) -> Vec<MenuEntry> {
     if !scoped && facts.game.is_some() && scanned {
         second.push(MenuEntry::Item(MenuItem {
             description: Some(facts.hide_failure.clone().unwrap_or_else(|| {
-                t!("Scans won't bring it back. Show it again in Settings → Library Discovery.")
+                t!("Scans won't bring it back. Show it again in Settings → Discovery.")
             })),
             ..item("hide", t!("Hide from library"), icons::EYE_OFF)
         }));

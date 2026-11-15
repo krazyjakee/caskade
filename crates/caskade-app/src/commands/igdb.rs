@@ -41,7 +41,7 @@ fn parse(ids: &[String]) -> Result<Vec<u64>, String> {
 pub async fn igdb_games(igdb: &Igdb, ids: &[String]) -> Result<IgdbLookup, String> {
     igdb.games(&parse(ids)?)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// Fetches `ids` again, replacing the cached answers older than ten
@@ -49,7 +49,7 @@ pub async fn igdb_games(igdb: &Igdb, ids: &[String]) -> Result<IgdbLookup, Strin
 pub async fn igdb_refresh(igdb: &Igdb, ids: &[String]) -> Result<IgdbLookup, String> {
     igdb.refresh(&parse(ids)?)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// IGDB's best matches for the title `query`, best first, at most
@@ -57,7 +57,7 @@ pub async fn igdb_refresh(igdb: &Igdb, ids: &[String]) -> Result<IgdbLookup, Str
 pub async fn igdb_search(igdb: &Igdb, query: &str, limit: u32) -> Result<Vec<IgdbGame>, String> {
     igdb.search(query, limit as usize)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// A library game's IGDB match and its IGDB game; `None` before matching
@@ -66,7 +66,7 @@ pub async fn game_igdb(metadata: &Metadata, game_id: &str) -> Result<Option<Game
     metadata
         .game(game_id)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// Matches a library game to an IGDB game by hand, or to none with
@@ -85,7 +85,7 @@ pub async fn game_igdb_set(
     metadata
         .set(game_id, igdb_id)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// Forgets a library game's match and matches it automatically again.
@@ -98,7 +98,7 @@ pub async fn game_igdb_rematch(
     metadata
         .rematch(game_id)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// Fetches a library game's IGDB game again and fills the game in from it.
@@ -111,7 +111,7 @@ pub async fn game_igdb_refresh(
     metadata
         .refresh(game_id)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// Moves an entry out of its game into a game of its own, which IGDB
@@ -123,7 +123,7 @@ pub async fn game_separate_entry(metadata: &Metadata, entry_id: &str) -> Result<
     metadata
         .separate(entry_id)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// A page of the IGDB catalog: games matching a search, or the most-rated
@@ -135,7 +135,7 @@ pub async fn igdb_catalog_search(
 ) -> Result<IgdbCatalogPage, String> {
     igdb.catalog_search(search)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// A page of the last 90 days' releases, newest first.
@@ -145,7 +145,7 @@ pub async fn igdb_catalog_recent(
 ) -> Result<IgdbCatalogPage, String> {
     igdb.catalog_recent(releases)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// A page of releases to come, soonest first; with `tbd`, undated ones.
@@ -155,14 +155,14 @@ pub async fn igdb_catalog_upcoming(
 ) -> Result<IgdbCatalogPage, String> {
     igdb.catalog_upcoming(releases)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// The platforms and genres the catalog can be narrowed by.
 pub async fn igdb_catalog_filters(igdb: &Igdb) -> Result<IgdbCatalogFilters, String> {
     igdb.catalog_filters()
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// Games for the Store's pages: cached answers younger than a day, the
@@ -170,7 +170,7 @@ pub async fn igdb_catalog_filters(igdb: &Igdb) -> Result<IgdbCatalogFilters, Str
 pub async fn igdb_catalog_games(igdb: &Igdb, ids: &[String]) -> Result<IgdbLookup, String> {
     igdb.catalog_games(&parse(ids)?)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// The library games matched to IGDB games `ids`: what the Store shows as
@@ -179,7 +179,7 @@ pub async fn igdb_owned(store: &LibraryStore, ids: &[String]) -> Result<Vec<Igdb
     store
         .igdb_owned(&parse(ids)?)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }
 
 /// A library game's age ratings and the minimum age they come to; `None`
@@ -191,5 +191,5 @@ pub async fn game_age_ratings(
     store
         .game_age_ratings(game_id)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(|error| caskade_core::error::ErrorReport::from_error(&error).summary)
 }

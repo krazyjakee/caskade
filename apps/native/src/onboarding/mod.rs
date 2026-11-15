@@ -63,7 +63,7 @@ pub const ONBOARDING: Entry = Entry {
         ),
         (
             "setup",
-            "The work being done; `data-status` is `running` or `done`.",
+            "The work being done; `data-status` is `running`, `done` or `failed`.",
         ),
         (
             "covers",
@@ -91,6 +91,7 @@ pub const ONBOARDING: Entry = Entry {
         "text-field",
         "game-art",
         "avatar-picker",
+        "error-notice",
     ],
     ..Entry::new(
         "onboarding",

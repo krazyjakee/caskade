@@ -108,6 +108,7 @@ pub struct Task {
     pub label: String,
     pub state: TaskState,
     pub detail: String,
+    pub warnings: Vec<String>,
 }
 
 /// The tasks `choices` run, in order, labelled in the language chosen at
@@ -118,6 +119,7 @@ pub fn planned_tasks(choices: &Choices) -> Vec<Task> {
         label,
         state: TaskState::Waiting,
         detail: String::new(),
+        warnings: Vec::new(),
     };
     let mut tasks = Vec::new();
     if choices.pc_games {
@@ -176,9 +178,10 @@ async fn update_section(
 ) -> Result<(), ErrorReport> {
     let settings = settings.clone();
     let namespace = namespace.to_owned();
+    let section = namespace.clone();
     change(async move {
         settings
-            .update(&namespace, move |mut value| {
+            .update(&section, move |mut value| {
                 if let (Some(value), Some(patch)) = (value.as_object_mut(), patch.as_object()) {
                     for (key, field) in patch {
                         value.insert(key.clone(), field.clone());
@@ -190,6 +193,20 @@ async fn update_section(
             .map(|_| ())
     })
     .await
+    .map_err(|mut error| {
+        let operation = match namespace.as_str() {
+            "core.discovery" => t!("Saving discovery choices"),
+            "core.metadata" => t!("Saving artwork and game info choices"),
+            "core.onboarding" => t!("Finishing setup"),
+            _ => t!("Saving setup choices"),
+        };
+        error.summary = t!(
+            "{operation}: {reason}",
+            operation = operation,
+            reason = error.summary
+        );
+        error
+    })
 }
 
 /// Saves the choices that are settings. Setup counts as done after this:
@@ -203,12 +220,16 @@ pub async fn save_choices(settings: &Settings, choices: &Choices) -> Result<(), 
     .await?;
     // The play history section belongs to discovery's sources; without it
     // there's nothing to keep.
-    let _ = update_section(
+    if let Err(error) = update_section(
         settings,
         "discovery.import",
         json!({ "seedPlaytime": choices.play_time }),
     )
-    .await;
+    .await
+        && error.code != caskade_core::error::ErrorCode::Unavailable
+    {
+        return Err(error);
+    }
     update_section(
         settings,
         "core.metadata",
@@ -229,16 +250,43 @@ struct Tasks<'a> {
 
 impl Tasks<'_> {
     fn set(&self, id: TaskId, state: TaskState, detail: impl Into<String>) {
-        let detail = detail.into();
+        self.set_with_warnings(id, state, detail.into(), Vec::new());
+    }
+
+    fn pause(&self) {
+        let ids: Vec<_> = self
+            .list
+            .borrow()
+            .iter()
+            .filter(|task| matches!(task.state, TaskState::Waiting | TaskState::Running))
+            .map(|task| task.id)
+            .collect();
+        for id in ids {
+            self.set(
+                id,
+                TaskState::Skipped,
+                t!("Setup paused. Try again to continue."),
+            );
+        }
+    }
+
+    fn set_with_warnings(
+        &self,
+        id: TaskId,
+        state: TaskState,
+        detail: String,
+        warnings: Vec<String>,
+    ) {
         let mut list = self.list.borrow_mut();
         let Some(task) = list.iter_mut().find(|task| task.id == id) else {
             return;
         };
-        if task.state == state && task.detail == detail {
+        if task.state == state && task.detail == detail && task.warnings == warnings {
             return;
         }
         task.state = state;
         task.detail = detail;
+        task.warnings = warnings;
         let shown = list.clone();
         drop(list);
         self.report.update(shown);
@@ -257,7 +305,10 @@ pub async fn run_setup(
         report,
     };
     report.update(tasks.list.borrow().clone());
-    save_choices(&parts.settings, choices).await?;
+    if let Err(error) = save_choices(&parts.settings, choices).await {
+        tasks.pause();
+        return Err(error);
+    }
     // The scan starts before setup counts as done, so the core's own first
     // scan doesn't run a second one.
     let scan_started = match (&parts.discovery, choices.pc_games) {
@@ -268,7 +319,24 @@ pub async fn run_setup(
                 t!("Scanning installed launchers and game folders…"),
             );
             let discovery = discovery.clone();
-            Some(change(async move { discovery.scan().await }).await)
+            // A retry after the completion marker could not be saved may
+            // find the first attempt's scan still running. Follow that scan.
+            match change(async move {
+                let snapshot = discovery.status().await?;
+                if matches!(snapshot.phase.as_str(), "scanning" | "importing") {
+                    Ok(snapshot)
+                } else {
+                    discovery.scan().await
+                }
+            })
+            .await
+            {
+                Ok(_) => Some(()),
+                Err(error) => {
+                    tasks.set(TaskId::Games, TaskState::Failed, error.summary);
+                    None
+                }
+            }
         }
         (None, true) => {
             tasks.set(
@@ -280,7 +348,10 @@ pub async fn run_setup(
         }
         _ => None,
     };
-    mark_completed(&parts.settings).await?;
+    if let Err(error) = mark_completed(&parts.settings).await {
+        tasks.pause();
+        return Err(error);
+    }
     report.ready();
     if choices.online {
         tasks.set(
@@ -413,9 +484,12 @@ async fn games(discovery: &Discovery, tasks: &Tasks<'_>, report: &dyn Report) {
                 t!("Scan cancelled. Retry in Settings → Library."),
             );
         } else if !problems.is_empty() {
-            let mut parts = vec![game_count(snapshot.imported)];
-            parts.extend(problems);
-            tasks.set(TaskId::Games, TaskState::Warning, parts.join(" · "));
+            tasks.set_with_warnings(
+                TaskId::Games,
+                TaskState::Warning,
+                game_count(snapshot.imported),
+                problems,
+            );
         } else if snapshot.found == 0 {
             tasks.set(TaskId::Games, TaskState::Warning, t!("None found"));
         } else if snapshot.imported == 0 {

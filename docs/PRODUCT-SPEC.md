@@ -39,7 +39,7 @@ Views:
 | **Store** | A catalog of games from IGDB: search with filters, new and upcoming releases, popular sorts, and pages for games you don't own, linking to stores. It creates no library entries. |
 | **Collections** | Manual lists and smart collections (a saved filter, platform, search and sort), pinned or not, each with a page that can play a random game. |
 | **Activity** | Jobs (downloads, installs, updates, copies, questions waiting for an answer) and the notification feed, opened from the topbar's bell. |
-| **Settings** | General, Appearance, Plugins · Library Discovery, Launchers, Store accounts, Storage, Installer · Emulation, Scripts · Devices, Streaming · Profile, Accounts · Backup, Statistics, About. Searchable. |
+| **Settings** | General, Appearance, Plugins · Discovery, Launchers, Store accounts, Storage, Installer · Emulation, Scripts · Devices, Streaming · Profile, Accounts · Backup, Statistics, About. Searchable. |
 
 Choosing a game opens its quick look: a side panel in desktop mode, the page itself in console mode. Double-clicking a game in the library plays it, as its menu's Play does; its card and quick look say Starting… at once, until the game runs. Every game card, hero, search result and release row opens the same game menu: Play or Stop, Play with…, tools, open the page, favourite, Add to collection…, Edit…, Share with someone…, open or copy its folder, move, uninstall, hide, and plugins' actions.
 
@@ -48,7 +48,7 @@ Choosing a game opens its quick look: a side panel in desktop mode, the page its
 ### 4.1 Finding games
 
 - **Launchers and stores on the device**: Steam, Heroic, Legendary, Lutris, Epic, GOG, EA, Ubisoft, Battle.net, Xbox, itch, Amazon, Riot, Rockstar, Bottles, Faugus, Minigalaxy, Flatpak and Snap.
-- **The OS**: Start Menu shortcuts, uninstall entries, Windows Game Explorer, `.desktop` files, macOS app bundles and Wine prefixes, with a classifier that keeps out things that aren't games.
+- **The OS**: Start Menu shortcuts, uninstall entries, Windows Game Explorer, `.desktop` files, macOS app bundles and Wine prefixes, with a classifier that keeps out things that aren't games. Setup summarises discovery warnings with details available on demand, and keeps the affected location and recovery guidance when choices cannot be saved.
 - **Merging**: one game found by several sources becomes one game with several releases. Games that are the same game (the same IGDB id, or the same title released within five years) merge into one game with a release and a Play button per platform. Separate keeps a release apart for good.
 - **Watching**: folders and launchers are rescanned when they change. Each launcher can be switched off in Settings → Launchers.
 - **Adding by hand**: Add a game on this computer… takes a program, a shortcut (with its arguments, folder and environment) or a URI. Add by title… adds a record with no files. Likely duplicates ask whether to join or keep apart.

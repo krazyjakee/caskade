@@ -87,7 +87,7 @@ pub(super) fn forbidden(permission: Permission) -> Error {
 fn label(section: &str) -> String {
     match section {
         "general" => crate::trp!("settings section", "General"),
-        "library-discovery" => crate::trp!("settings section", "Library Discovery"),
+        "library-discovery" => crate::trp!("settings section", "Discovery"),
         "launchers" => crate::trp!("settings section", "Launchers"),
         "emulators" => crate::trp!("settings section", "Emulation"),
         "appearance" => crate::trp!("settings section", "Appearance"),

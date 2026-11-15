@@ -72,7 +72,7 @@ msgstr ""
 
 #: crates/caskade-core/src/accounts/permission.rs
 msgctxt "settings section"
-msgid "Library Discovery"
+msgid "Discovery"
 msgstr ""
 
 #: crates/caskade-core/src/accounts/permission.rs
@@ -190,6 +190,10 @@ msgstr ""
 #: crates/caskade-core/src/bus/intercept.rs
 #: crates/caskade-core/src/bus/mod.rs
 msgid "Updating plugins"
+msgstr ""
+
+#: crates/caskade-core/src/cache_db.rs
+msgid "Could not open the local {cache} cache"
 msgstr ""
 
 #: crates/caskade-core/src/db/accounts.rs
@@ -1096,11 +1100,19 @@ msgid "The game is running, or another move or uninstall of it is under way."
 msgstr ""
 
 #: crates/caskade-core/src/error.rs
+msgid "{action} at “{path}”. {reason}"
+msgstr ""
+
+#: crates/caskade-core/src/error.rs
 msgid "The library database was written by a newer version of Caskade."
 msgstr ""
 
 #: crates/caskade-core/src/error.rs
 msgid "cannot determine the application directories"
+msgstr ""
+
+#: crates/caskade-core/src/error.rs
+msgid "The database could not be opened. Check that its folder exists and is writable, with space for temporary journal files."
 msgstr ""
 
 #: crates/caskade-core/src/error.rs
@@ -1433,7 +1445,7 @@ msgid "{title} runs Wine without a game"
 msgstr ""
 
 #: crates/caskade-core/src/install/dropped.rs
-msgid "{title} is the Flatpak app {app_id}. Caskade finds Flatpak games with library discovery (Settings → Library Discovery)."
+msgid "{title} is the Flatpak app {app_id}. Caskade finds Flatpak games with library discovery (Settings → Discovery)."
 msgstr ""
 
 #: crates/caskade-core/src/install/dropped.rs
@@ -5259,6 +5271,18 @@ msgstr ""
 
 #: crates/caskade-app/src/commands/scripts.rs
 msgid "the script belongs to another scope"
+msgstr ""
+
+#: crates/caskade-app/src/commands/settings.rs
+msgid "Could not read settings"
+msgstr ""
+
+#: crates/caskade-app/src/commands/settings.rs
+msgid "Could not save settings"
+msgstr ""
+
+#: crates/caskade-app/src/commands/settings.rs
+msgid "{operation} at “{path}”. {reason}"
 msgstr ""
 
 #: crates/caskade-app/src/commands/shares.rs

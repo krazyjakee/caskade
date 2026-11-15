@@ -163,7 +163,7 @@ fn bundle(env: &HostEnv, dir: &Path, ctx: &ScanCtx) -> Result<Option<DetectedGam
             &ctx.config().classifier,
         )
         .map_err(|e| SourceError::Other {
-            message: e.to_string(),
+            message: format!("{}: {e}", dir.display()),
         })?;
         let Some(confidence) = result.confidence() else {
             return Ok(None);
@@ -171,7 +171,7 @@ fn bundle(env: &HostEnv, dir: &Path, ctx: &ScanCtx) -> Result<Option<DetectedGam
         game.confidence = confidence;
         game.evidence.extend(result.evidence);
         for warning in result.warnings {
-            ctx.warn(warning);
+            ctx.warn(format!("{}: {warning}", dir.display()));
         }
     }
     if !is_file(env, &executable) {

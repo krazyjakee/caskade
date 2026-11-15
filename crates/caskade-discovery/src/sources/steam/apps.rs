@@ -2,7 +2,7 @@
 //! `data/steam-tools.toml`, then well-known tool names.
 
 use super::{
-    super::{is_file, join, read},
+    super::{is_file, join},
     vdf,
 };
 use crate::{
@@ -41,10 +41,13 @@ pub(super) fn app_info(
         max_input_bytes: APPINFO_LIMIT,
         ..Limits::default()
     };
-    let parsed = read(env, &file, APPINFO_LIMIT as u64)
+    let parsed = env
+        .resolve_path(&file)
+        .and_then(std::fs::File::open)
         .map_err(|error| error.to_string())
-        .and_then(|bytes| {
-            binary_vdf::parse_appinfo_selected(&bytes, &limits, wanted)
+        .and_then(|file| {
+            let mut reader = std::io::BufReader::new(file);
+            binary_vdf::read_appinfo_selected(&mut reader, &limits, wanted, 16 << 20)
                 .map_err(|error| error.to_string())
         });
     match parsed {

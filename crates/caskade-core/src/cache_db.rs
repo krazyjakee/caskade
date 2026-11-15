@@ -28,14 +28,21 @@ where
     F: Fn(PathBuf) -> Fut,
     Fut: Future<Output = Result<T>>,
 {
-    match open(path.clone()).await {
+    let opened = match open(path.clone()).await {
         Err(error) if ErrorReport::from_error(&error).code == ErrorCode::Corrupt => {
             tracing::warn!(cache = what, path = %path.display(), %error, "cache is damaged; starting it again");
-            set_aside(&path)?;
-            open(path).await
+            match set_aside(&path) {
+                Ok(()) => open(path.clone()).await,
+                Err(error) => Err(error.into()),
+            }
         }
         opened => opened,
-    }
+    };
+    opened.map_err(|source| crate::Error::AtPath {
+        action: crate::tr!("Could not open the local {cache} cache", cache = what),
+        path,
+        source: Box::new(source),
+    })
 }
 
 /// A pool on the cache at `path` (created with its folder), at schema
@@ -144,7 +151,10 @@ mod tests {
         })
         .await
         .unwrap_err();
-        assert!(matches!(error, Error::Io(_)));
+        assert_eq!(
+            ErrorReport::from_error(&error).code,
+            ErrorCode::AccessDenied
+        );
         assert_eq!(calls.load(std::sync::atomic::Ordering::SeqCst), 1);
     }
 }

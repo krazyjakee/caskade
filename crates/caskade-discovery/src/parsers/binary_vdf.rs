@@ -253,3 +253,113 @@ fn parse_appinfo_inner(
         apps,
     })
 }
+
+/// Reads selected records without buffering the rest of Steam's cache (#156).
+/// Validates every record span and the complete file length before seeking.
+/// The compacted input (selected records plus v29's key table) is bounded by
+/// `working_bytes`; the existing decoder enforces string, node and depth limits.
+pub fn read_appinfo_selected(
+    reader: &mut (impl std::io::Read + std::io::Seek),
+    limits: &Limits,
+    wanted: &std::collections::BTreeSet<u32>,
+    working_bytes: usize,
+) -> Result<AppInfo> {
+    use std::io::SeekFrom;
+    let length = reader.seek(SeekFrom::End(0))?;
+    limits.check(
+        usize::try_from(length).unwrap_or(usize::MAX),
+        limits.max_input_bytes,
+        "input bytes",
+    )?;
+    reader.seek(SeekFrom::Start(0))?;
+    let mut header = [0; 8];
+    reader.read_exact(&mut header)?;
+    let magic = u32::from_le_bytes(header[..4].try_into().unwrap());
+    if !matches!(magic, 0x0756_4428 | 0x0756_4429) {
+        return Err(ParseError::Unsupported(format!("appinfo magic {magic:#x}")));
+    }
+    let mut selected = header.to_vec();
+    let table_offset = if magic as u8 == 0x29 {
+        let mut offset = [0; 8];
+        reader.read_exact(&mut offset)?;
+        selected.extend(offset);
+        u64::from_le_bytes(offset)
+    } else {
+        length
+    };
+    let mut position = selected.len() as u64;
+    if table_offset < position || table_offset > length {
+        return Err(ParseError::Invalid("string table offset".into()));
+    }
+    loop {
+        if table_offset.saturating_sub(position) < 4 {
+            return Err(ParseError::Invalid("appinfo terminator offset".into()));
+        }
+        let mut id = [0; 4];
+        reader.read_exact(&mut id)?;
+        position += 4;
+        let app_id = u32::from_le_bytes(id);
+        if app_id == 0 {
+            if position != table_offset {
+                return Err(ParseError::Invalid("appinfo terminator offset".into()));
+            }
+            selected.extend(id);
+            break;
+        }
+        if table_offset.saturating_sub(position) < 4 {
+            return Err(ParseError::Invalid("appinfo entry header".into()));
+        }
+        let mut size_bytes = [0; 4];
+        reader.read_exact(&mut size_bytes)?;
+        position += 4;
+        let size = u32::from_le_bytes(size_bytes) as usize;
+        if size < 61 || size as u64 > table_offset.saturating_sub(position) {
+            return Err(ParseError::Invalid("appinfo entry span".into()));
+        }
+        if wanted.contains(&app_id) {
+            // Include the eventual terminator in the allocation budget.
+            let required = selected
+                .len()
+                .checked_add(8)
+                .and_then(|n| n.checked_add(size))
+                .and_then(|n| n.checked_add(4))
+                .ok_or(ParseError::Limit {
+                    budget: "appinfo working bytes",
+                    maximum: working_bytes,
+                })?;
+            limits.check(required, working_bytes, "appinfo working bytes")?;
+            if selected.capacity() < required {
+                let capacity = selected
+                    .capacity()
+                    .saturating_mul(2)
+                    .max(required)
+                    .min(working_bytes);
+                selected.reserve_exact(capacity - selected.len());
+            }
+            selected.extend(id);
+            selected.extend(size_bytes);
+            let start = selected.len();
+            selected.resize(start + size, 0);
+            reader.read_exact(&mut selected[start..])?;
+        } else {
+            reader.seek(SeekFrom::Start(position + size as u64))?;
+        }
+        position += size as u64;
+    }
+    if magic as u8 == 0x29 {
+        let table_size = usize::try_from(length - table_offset)
+            .map_err(|_| ParseError::Invalid("string table size".into()))?;
+        limits.check(
+            selected.len().saturating_add(table_size),
+            working_bytes,
+            "appinfo working bytes",
+        )?;
+        let start = selected.len();
+        selected[8..16].copy_from_slice(&(start as u64).to_le_bytes());
+        selected.reserve_exact(table_size);
+        selected.resize(start + table_size, 0);
+        reader.read_exact(&mut selected[start..])?;
+    }
+    limits.check(selected.len(), working_bytes, "appinfo working bytes")?;
+    parse_appinfo_selected(&selected, limits, wanted)
+}

@@ -395,7 +395,7 @@ fn permission_sections() -> [(&'static str, String, String); 8] {
         ),
         (
             "library-discovery",
-            tp!("settings tab", "Library Discovery"),
+            tp!("settings tab", "Discovery"),
             t!("What scans look for, their folders and ignored results."),
         ),
         (

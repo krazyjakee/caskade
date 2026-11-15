@@ -343,3 +343,35 @@ async fn an_unreachable_server_reads_in_the_language_shown_also_once_stored() {
             .starts_with("kan inte nå 127.0.0.1")
     );
 }
+
+#[test]
+fn storage_context_keeps_the_path_cause_classification_and_recovery() {
+    let error = Error::AtPath {
+        action: "Could not open the local IGDB cache".into(),
+        path: "/fixture/cache/igdb/games.sqlite".into(),
+        source: Box::new(Error::Io(io::Error::from(io::ErrorKind::PermissionDenied))),
+    };
+    let report = ErrorReport::from_error(&error);
+    assert_eq!(report.code, ErrorCode::AccessDenied);
+    assert!(report.summary.contains("/fixture/cache/igdb/games.sqlite"));
+    assert!(report.summary.contains("local IGDB cache"));
+    assert!(report.hints.contains(&RecoveryHint::CheckPermissions));
+    assert!(report.detail.unwrap().contains("denied"));
+}
+
+#[tokio::test]
+async fn sqlite_cantopen_does_not_claim_a_privacy_or_permission_denial() {
+    use sqlx::Connection;
+    let dir = tempfile::tempdir().unwrap();
+    let error = sqlx::SqliteConnection::connect_with(
+        &sqlx::sqlite::SqliteConnectOptions::new()
+            .filename(dir.path().join("absent/games.sqlite"))
+            .create_if_missing(true),
+    )
+    .await
+    .unwrap_err();
+    let report = ErrorReport::from_error(&error);
+    assert_eq!(report.code, ErrorCode::Database);
+    assert!(report.summary.contains("folder exists and is writable"));
+    assert!(!report.summary.contains("refused"));
+}

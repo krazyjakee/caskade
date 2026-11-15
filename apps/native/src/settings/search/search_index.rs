@@ -23,7 +23,7 @@ pub fn section_words(tab: &str) -> String {
             "app, language, region, startup, start, close, tray, minimize, quit, time format, cache, first-run setup, console mode, desktop mode, app updates, Caskade updates, self-update, new version, game updates, update games, GitHub releases"
         ),
         "library-discovery" => t!(
-            note = "Search words for Settings → Library Discovery, separated by commas",
+            note = "Search words for Settings → Discovery, separated by commas",
             "scan, scanning, discovery, find games, detect games, import, launchers, folders, watch folders, hidden games, ignored games, play history, deep scan"
         ),
         "launchers" => t!(
@@ -190,7 +190,7 @@ pub const INDEX: [Entry; 125] = [
     Entry {
         tab: "library-discovery",
         section: None,
-        label: || t!("Automatic Library Discovery"),
+        label: || t!("Automatic discovery"),
         words: None,
     },
     Entry {

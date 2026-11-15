@@ -301,3 +301,89 @@ fn choosing_console_mode_switches_the_window_at_once() {
         window.find("data-mode", "desktop").is_some()
     });
 }
+
+#[test]
+fn a_readonly_settings_database_pauses_setup_and_retry_finishes() {
+    use super::run::{Choices, Report, SetupParts, Task, TaskState, run_setup};
+    use super::sound::Cue;
+    use caskade_core::{
+        AppPaths, accounts::AccountService, bus::Bus, db::LibraryStore, settings::SettingsService,
+    };
+    use std::cell::{Cell, RefCell};
+    struct Progress {
+        tasks: RefCell<Vec<Task>>,
+        ready: Cell<bool>,
+    }
+    impl Report for Progress {
+        fn update(&self, tasks: Vec<Task>) {
+            *self.tasks.borrow_mut() = tasks;
+        }
+        fn cue(&self, _: Cue) {}
+        fn ready(&self) {
+            self.ready.set(true);
+        }
+    }
+    let _one = caskade_core::lock(&ONE);
+    let dir = tempfile::tempdir().unwrap();
+    block(async {
+        let paths = AppPaths::under(dir.path());
+        let store = LibraryStore::open(&paths.database()).await.unwrap();
+        let settings = SettingsService::new(store.clone());
+        settings.register_core(&paths).unwrap();
+        let accounts = AccountService::open(store.clone(), Bus::default())
+            .await
+            .unwrap();
+        let parts = SetupParts {
+            settings: caskade_ui_data::Settings::new(settings.clone(), accounts),
+            discovery: None,
+            emulation: None,
+            romm: None,
+        };
+        // Hold three connections so every setup read/write uses the fourth,
+        // with SQLite itself refusing writes. This works even as root.
+        let _a = store.pool.acquire().await.unwrap();
+        let _b = store.pool.acquire().await.unwrap();
+        let _c = store.pool.acquire().await.unwrap();
+        sqlx::query("PRAGMA query_only = ON")
+            .execute(&store.pool)
+            .await
+            .unwrap();
+        let progress = Progress {
+            tasks: RefCell::new(Vec::new()),
+            ready: Cell::new(false),
+        };
+        let choices = Choices::default();
+        let failure = run_setup(&parts, &choices, &progress).await.unwrap_err();
+        assert!(failure.summary.contains("Saving discovery choices"));
+        assert!(
+            failure
+                .summary
+                .contains(&paths.database().display().to_string())
+        );
+        assert!(failure.detail.is_some());
+        assert!(!progress.ready.get());
+        assert!(
+            progress
+                .tasks
+                .borrow()
+                .iter()
+                .all(|task| task.state == TaskState::Skipped)
+        );
+        // The test restores access on the same pool, then retries the same choices.
+        sqlx::query("PRAGMA query_only = OFF")
+            .execute(&store.pool)
+            .await
+            .unwrap();
+        let tasks = run_setup(&parts, &choices, &progress).await.unwrap();
+        assert!(progress.ready.get());
+        assert!(
+            tasks
+                .iter()
+                .all(|task| !matches!(task.state, TaskState::Waiting | TaskState::Running))
+        );
+        assert_eq!(
+            settings.get("core.onboarding").await.unwrap().value["completed"],
+            json!(true)
+        );
+    });
+}

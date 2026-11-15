@@ -55,6 +55,7 @@ struct Setup {
     temp: tempfile::TempDir,
     machine: MachineFixture,
     store: LibraryStore,
+    #[cfg(target_os = "linux")]
     service: EmulationService,
     launches: EmulatorLaunches,
 }
@@ -85,6 +86,7 @@ impl Setup {
             temp,
             machine,
             store,
+            #[cfg(target_os = "linux")]
             service,
             launches,
         }

@@ -160,6 +160,10 @@ msgstr ""
 msgid "Hide details"
 msgstr ""
 
+#: apps/native/src/ui/failure.rs
+msgid "If macOS is protecting this location, open System Settings, choose Privacy & Security, then Files and Folders, and allow Caskade to access it. For locations that require Full Disk Access, add Caskade there instead. Quit and reopen Caskade if macOS asks, then try again. Privacy access does not fix a read-only drive or folder ownership."
+msgstr ""
+
 #. A game of a shared collection, on this device
 #: apps/native/src/flows/shares_common.rs
 #: apps/native/src/game/ports.rs

@@ -4,9 +4,21 @@ use std::io::Cursor;
 /// Uses the plist crate's public value so downstream metadata keeps native types.
 pub fn parse(bytes: &[u8], limits: &Limits) -> Result<::plist::Value> {
     limits.input(bytes)?;
+    // Some Steam app shortcuts pad XML plists with NUL bytes (#155).
+    // Keep the original input budget and binary trailer intact; embedded NULs
+    // and any other trailing content still go through the strict parser.
+    let bytes = if bytes.starts_with(b"bplist00") {
+        bytes
+    } else {
+        let end = bytes.iter().rposition(|b| *b != 0).map_or(0, |i| i + 1);
+        &bytes[..end]
+    };
     if bytes.starts_with(b"bplist00") {
         super::plist_binary::validate(bytes, limits)?;
     } else {
+        if bytes.contains(&0) {
+            return Err(ParseError::Invalid("NUL inside XML plist".into()));
+        }
         let mut reader = quick_xml::Reader::from_reader(bytes);
         let mut depth: usize = 0;
         let mut nodes: usize = 0;

@@ -138,7 +138,7 @@ fn the_lists_say_when_nothing_matches_the_server_is_away_or_results_are_saved() 
     window.settle_until("the server is away", |window| {
         window
             .view_text()
-            .contains("Could not reach the game catalog")
+            .contains("Could not load the game catalogue")
     });
     assert!(button(&window, "Try again").is_some());
     store(|script| {

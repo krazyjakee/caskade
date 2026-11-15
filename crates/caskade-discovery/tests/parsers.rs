@@ -369,3 +369,159 @@ fn product_cached_install_state_roundtrips_and_obeys_depth_budgets() {
         ));
     }
 }
+
+#[test]
+fn xml_plist_accepts_only_trailing_nul_padding_and_keeps_original_budget() {
+    let original = sample("Info.plist");
+    let expected = parsers::plist::parse(&original, &LIMITS).unwrap();
+    let padded = [original.as_slice(), b"\0\0"].concat();
+    assert_eq!(parsers::plist::parse(&padded, &LIMITS).unwrap(), expected);
+    let limits = Limits {
+        max_input_bytes: original.len(),
+        ..LIMITS
+    };
+    assert!(matches!(
+        parsers::plist::parse(&padded, &limits),
+        Err(ParseError::Limit { .. })
+    ));
+    let embedded = b"<?xml version=\"1.0\"?><plist version=\"1.0\"><string>a\0b</string></plist>";
+    assert!(parsers::plist::parse(embedded, &LIMITS).is_err());
+    let junk = [original.as_slice(), b"\0junk"].concat();
+    assert!(parsers::plist::parse(&junk, &LIMITS).is_err());
+    let mut binary = Vec::new();
+    expected.to_writer_binary(&mut binary).unwrap();
+    assert_eq!(parsers::plist::parse(&binary, &LIMITS).unwrap(), expected);
+    binary.extend(b"\0\0");
+    assert!(parsers::plist::parse(&binary, &LIMITS).is_err());
+}
+
+#[test]
+fn streamed_appinfo_matches_both_versions_and_rejects_truncation_and_limits() {
+    use std::{collections::BTreeSet, io::Cursor};
+    let wanted = BTreeSet::from([620, 1493710]);
+    for name in ["appinfo-v28.vdf", "appinfo-v29.vdf"] {
+        let bytes = sample(name);
+        let expected =
+            parsers::binary_vdf::parse_appinfo_selected(&bytes, &LIMITS, &wanted).unwrap();
+        let streamed = parsers::binary_vdf::read_appinfo_selected(
+            &mut Cursor::new(&bytes),
+            &LIMITS,
+            &wanted,
+            LIMITS.max_input_bytes,
+        )
+        .unwrap();
+        assert_eq!(streamed, expected);
+        for n in 0..bytes.len() {
+            assert!(
+                parsers::binary_vdf::read_appinfo_selected(
+                    &mut Cursor::new(&bytes[..n]),
+                    &LIMITS,
+                    &wanted,
+                    LIMITS.max_input_bytes
+                )
+                .is_err(),
+                "{name} prefix {n}"
+            );
+        }
+        assert!(matches!(
+            parsers::binary_vdf::read_appinfo_selected(
+                &mut Cursor::new(&bytes),
+                &LIMITS,
+                &wanted,
+                32
+            ),
+            Err(ParseError::Limit { .. })
+        ));
+        let limits = Limits {
+            max_input_bytes: bytes.len() - 1,
+            ..LIMITS
+        };
+        assert!(matches!(
+            parsers::binary_vdf::read_appinfo_selected(
+                &mut Cursor::new(&bytes),
+                &limits,
+                &wanted,
+                LIMITS.max_input_bytes
+            ),
+            Err(ParseError::Limit { .. })
+        ));
+    }
+}
+
+// A sparse, authored cache with a 192 MiB unwanted record. The reader below
+// counts bytes actually read, so buffering the whole cache fails this test
+// without relying on allocator/OS-specific RSS or running the desktop app.
+fn large_appinfo() -> std::fs::File {
+    use std::io::{Seek, SeekFrom, Write};
+    let mut file = tempfile::tempfile().unwrap();
+    file.write_all(&0x0756_4428u32.to_le_bytes()).unwrap();
+    file.write_all(&1u32.to_le_bytes()).unwrap();
+    file.write_all(&999u32.to_le_bytes()).unwrap();
+    let span = 192u32 << 20;
+    file.write_all(&span.to_le_bytes()).unwrap();
+    file.seek(SeekFrom::Current(i64::from(span))).unwrap();
+    file.write_all(&0u32.to_le_bytes()).unwrap();
+    file.rewind().unwrap();
+    file
+}
+
+#[test]
+fn streamed_appinfo_does_not_read_unwanted_large_records() {
+    use std::{
+        collections::BTreeSet,
+        io::{Read, Seek, SeekFrom},
+    };
+    struct Counted {
+        file: std::fs::File,
+        read: usize,
+    }
+    impl Read for Counted {
+        fn read(&mut self, buffer: &mut [u8]) -> std::io::Result<usize> {
+            let n = self.file.read(buffer)?;
+            self.read += n;
+            Ok(n)
+        }
+    }
+    impl Seek for Counted {
+        fn seek(&mut self, to: SeekFrom) -> std::io::Result<u64> {
+            self.file.seek(to)
+        }
+    }
+    let mut reader = Counted {
+        file: large_appinfo(),
+        read: 0,
+    };
+    let limits = Limits {
+        max_input_bytes: 256 << 20,
+        ..LIMITS
+    };
+    let parsed = parsers::binary_vdf::read_appinfo_selected(
+        &mut reader,
+        &limits,
+        &BTreeSet::from([620]),
+        16 << 20,
+    )
+    .unwrap();
+    assert!(parsed.apps.is_empty());
+    assert_eq!(reader.read, 20, "unwanted cache contents were read");
+}
+
+#[test]
+#[ignore = "isolated before/after RSS probe; run with /usr/bin/time -l and --exact"]
+fn appinfo_memory_probe() {
+    use std::{collections::BTreeSet, io::Read};
+    let mut file = large_appinfo();
+    let wanted = BTreeSet::from([620]);
+    let limits = Limits {
+        max_input_bytes: 256 << 20,
+        ..LIMITS
+    };
+    let parsed = if std::env::var_os("CASKADE_APPINFO_BUFFERED_BASELINE").is_some() {
+        let mut bytes = Vec::new();
+        file.read_to_end(&mut bytes).unwrap();
+        parsers::binary_vdf::parse_appinfo_selected(&bytes, &limits, &wanted).unwrap()
+    } else {
+        parsers::binary_vdf::read_appinfo_selected(&mut file, &limits, &wanted, 16 << 20).unwrap()
+    };
+    assert!(parsed.apps.is_empty());
+}

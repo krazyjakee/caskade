@@ -73,8 +73,8 @@ msgstr "Allmänt"
 
 #: crates/caskade-core/src/accounts/permission.rs
 msgctxt "settings section"
-msgid "Library Discovery"
-msgstr "Biblioteksidentifiering"
+msgid "Discovery"
+msgstr "Upptäckt"
 
 #: crates/caskade-core/src/accounts/permission.rs
 msgctxt "settings section"
@@ -192,6 +192,10 @@ msgstr "Filsystem"
 #: crates/caskade-core/src/bus/mod.rs
 msgid "Updating plugins"
 msgstr "Uppdaterar tillägg"
+
+#: crates/caskade-core/src/cache_db.rs
+msgid "Could not open the local {cache} cache"
+msgstr ""
 
 #: crates/caskade-core/src/db/accounts.rs
 msgid "the last admin can't be removed or made standard"
@@ -1098,12 +1102,20 @@ msgid "The game is running, or another move or uninstall of it is under way."
 msgstr "Spelet körs, eller så pågår redan en annan flytt eller avinstallation av det."
 
 #: crates/caskade-core/src/error.rs
+msgid "{action} at “{path}”. {reason}"
+msgstr ""
+
+#: crates/caskade-core/src/error.rs
 msgid "The library database was written by a newer version of Caskade."
 msgstr "Biblioteksdatabasen skrevs av en nyare version av Caskade."
 
 #: crates/caskade-core/src/error.rs
 msgid "cannot determine the application directories"
 msgstr "kan inte avgöra programmets kataloger"
+
+#: crates/caskade-core/src/error.rs
+msgid "The database could not be opened. Check that its folder exists and is writable, with space for temporary journal files."
+msgstr ""
 
 #: crates/caskade-core/src/error.rs
 msgid "That can't be done as asked."
@@ -1435,8 +1447,8 @@ msgid "{title} runs Wine without a game"
 msgstr "{title} kör Wine utan något spel"
 
 #: crates/caskade-core/src/install/dropped.rs
-msgid "{title} is the Flatpak app {app_id}. Caskade finds Flatpak games with library discovery (Settings → Library Discovery)."
-msgstr "{title} är Flatpak-appen {app_id}. Caskade hittar Flatpak-spel med biblioteksidentifiering (Inställningar → Biblioteksidentifiering)."
+msgid "{title} is the Flatpak app {app_id}. Caskade finds Flatpak games with library discovery (Settings → Discovery)."
+msgstr ""
 
 #: crates/caskade-core/src/install/dropped.rs
 msgid "{path} doesn't exist any more"
@@ -5263,6 +5275,18 @@ msgstr "Den sparplatsen finns inte på den här enheten."
 msgid "the script belongs to another scope"
 msgstr "skriptet hör till en annan omfattning"
 
+#: crates/caskade-app/src/commands/settings.rs
+msgid "Could not read settings"
+msgstr ""
+
+#: crates/caskade-app/src/commands/settings.rs
+msgid "Could not save settings"
+msgstr ""
+
+#: crates/caskade-app/src/commands/settings.rs
+msgid "{operation} at “{path}”. {reason}"
+msgstr ""
+
 #: crates/caskade-app/src/commands/shares.rs
 msgid "the link is too long for a QR code"
 msgstr "länken är för lång för en QR-kod"
@@ -5711,6 +5735,13 @@ msgstr "Den här kopian av Caskade kan inte uppdatera sig själv: ladda ner den 
 #: apps/native/src/updater.rs
 msgid "Couldn't install the update: {error}"
 msgstr "Det gick inte att installera uppdateringen: {error}"
+
+#~ msgctxt "settings section"
+#~ msgid "Library Discovery"
+#~ msgstr "Biblioteksidentifiering"
+
+#~ msgid "{title} is the Flatpak app {app_id}. Caskade finds Flatpak games with library discovery (Settings → Library Discovery)."
+#~ msgstr "{title} är Flatpak-appen {app_id}. Caskade hittar Flatpak-spel med biblioteksidentifiering (Inställningar → Biblioteksidentifiering)."
 
 #~ msgid "Caskade was installed as a system package: update it with your package manager."
 #~ msgstr "Caskade installerades som ett systempaket: uppdatera det med din pakethanterare."

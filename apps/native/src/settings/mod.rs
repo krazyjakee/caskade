@@ -156,7 +156,7 @@ pub const SECTIONS: [Section; 17] = [
     },
     Section {
         id: "library-discovery",
-        label: || tp!("settings tab", "Library Discovery"),
+        label: || tp!("settings tab", "Discovery"),
         icon: SCAN_SEARCH,
         group: "library",
     },

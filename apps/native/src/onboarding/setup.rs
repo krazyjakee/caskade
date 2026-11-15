@@ -7,6 +7,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
 
+use caskade_core::error::ErrorReport;
 use caskade_core::model::{GameFilter, GameSort, ListGames};
 use caskade_ui_data::Key as DataKey;
 use caskade_ui_data::emulation::Emulation;
@@ -18,7 +19,7 @@ use super::run::{Choices, Report, SetupParts, TaskId, TaskState, planned_tasks, 
 use super::sound::{Cue, Sounds};
 use crate::data::{use_library_stats, use_query};
 use crate::ui::icons::{CIRCLE_ALERT, CIRCLE_CHECK, CIRCLE_DASHED, CIRCLE_X, LOADER_CIRCLE};
-use crate::ui::{Button, GameArt, Icon, Svg};
+use crate::ui::{Button, ErrorNotice, FailureNotice, GameArt, Icon, Svg};
 use dioxus_native::prelude::dioxus_core::{Task, spawn_forever};
 
 /// How often the elapsed and quiet times move on.
@@ -161,7 +162,7 @@ pub fn SetupStep(choices: Choices, sounds: Sounds, on_done: EventHandler<()>) ->
     let romm = crate::settings::use_romm();
     let tasks = use_signal(|| planned_tasks(&choices));
     let mut finished = use_signal(|| false);
-    let mut error = use_signal(|| None::<String>);
+    let mut error = use_signal(|| None::<ErrorReport>);
     let ready = use_signal(|| false);
     let mut attempt = use_signal(|| 0u32);
     let mut elapsed = use_signal(|| 0u64);
@@ -199,6 +200,8 @@ pub fn SetupStep(choices: Choices, sounds: Sounds, on_done: EventHandler<()>) ->
             };
             live.attempt.set(attempt);
             live.changed.set(Instant::now());
+            elapsed.set(0);
+            quiet.set(0);
             // Only when they change: setting a signal runs its readers again.
             if error.peek().is_some() {
                 error.set(None);
@@ -226,7 +229,10 @@ pub fn SetupStep(choices: Choices, sounds: Sounds, on_done: EventHandler<()>) ->
                         sounds.play(Cue::Done);
                         finished.set(true);
                     }
-                    Err(report) => error.set(Some(report.summary)),
+                    Err(report) => {
+                        error.set(Some(report));
+                        finished.set(true);
+                    }
                 }
             });
         });
@@ -234,6 +240,7 @@ pub fn SetupStep(choices: Choices, sounds: Sounds, on_done: EventHandler<()>) ->
     {
         let live = live.clone();
         use_effect(move || {
+            let current_attempt = attempt();
             if finished() {
                 return;
             }
@@ -242,7 +249,7 @@ pub fn SetupStep(choices: Choices, sounds: Sounds, on_done: EventHandler<()>) ->
             spawn(async move {
                 loop {
                     sleep(TICK).await;
-                    if *finished.peek() {
+                    if *finished.peek() || live.attempt.get() != current_attempt {
                         break;
                     }
                     elapsed.set(began.elapsed().as_secs());
@@ -284,21 +291,26 @@ pub fn SetupStep(choices: Choices, sounds: Sounds, on_done: EventHandler<()>) ->
     };
     // Reads the count and the covers again while the work runs; library
     // events read them again too where the core sends them.
-    use_effect(move || {
-        if finished() {
-            return;
-        }
-        spawn(async move {
-            loop {
-                sleep(REFRESH).await;
-                if *finished.peek() {
-                    break;
-                }
-                stats.restart();
-                games.restart();
+    {
+        let live = live.clone();
+        use_effect(move || {
+            let current_attempt = attempt();
+            if finished() {
+                return;
             }
+            let live = live.clone();
+            spawn(async move {
+                loop {
+                    sleep(REFRESH).await;
+                    if *finished.peek() || live.attempt.get() != current_attempt {
+                        break;
+                    }
+                    stats.restart();
+                    games.restart();
+                }
+            });
         });
-    });
+    }
 
     let is_finished = finished();
     let is_ready = ready();
@@ -356,7 +368,7 @@ pub fn SetupStep(choices: Choices, sounds: Sounds, on_done: EventHandler<()>) ->
     rsx! {
         section {
             "data-part": "setup",
-            "data-status": if is_finished { "done" } else { "running" },
+            "data-status": if failure.is_some() { "failed" } else if is_finished { "done" } else { "running" },
             class: "relative",
             div {
                 "data-part": "covers",
@@ -402,10 +414,22 @@ pub fn SetupStep(choices: Choices, sounds: Sounds, on_done: EventHandler<()>) ->
                         "data-task": name,
                         "data-status": task.state.name(),
                         style: "--i: {i + 4}",
-                        class: "relative flex animate-rise items-center gap-3 overflow-hidden rounded-panel border border-border bg-surface-raised px-4 py-3",
-                        Svg { icon: icon(task.state), class: format!("size-5 shrink-0 {}", tone(task.state)) }
-                        span { class: "font-medium", "{task.label}" }
-                        span { class: "ml-auto min-w-0 text-right text-sm break-words text-fg-muted", "{task.detail}" }
+                        class: "relative flex animate-rise flex-col gap-3 overflow-hidden rounded-panel border border-border bg-surface-raised px-4 py-3",
+                        div { class: "flex items-center gap-3",
+                            Svg { icon: icon(task.state), class: format!("size-5 shrink-0 {}", tone(task.state)) }
+                            span { class: "font-medium", "{task.label}" }
+                            span { class: "ml-auto min-w-0 text-right text-sm break-words text-fg-muted", "{task.detail}" }
+                        }
+                        if !task.warnings.is_empty() {
+                            div { class: "max-h-64 overflow-y-auto",
+                                ErrorNotice {
+                                    summary: tn!("# discovery warning", "# discovery warnings", task.warnings.len()),
+                                    detail: Some(task.warnings.join("\n\n")),
+                                    warning: true,
+                                    variant: crate::ui::NoticeVariant::Inline,
+                                }
+                            }
+                        }
                         if task.state == TaskState::Running {
                             span {
                                 "aria-hidden": "true",
@@ -416,8 +440,12 @@ pub fn SetupStep(choices: Choices, sounds: Sounds, on_done: EventHandler<()>) ->
                 }
             }
 
-            if let Some(message) = failure.clone() {
-                p { role: "alert", class: "mt-4 text-center text-sm text-danger", "{message}" }
+            if let Some(report) = failure.clone() {
+                FailureNotice {
+                    error: report,
+                    title: t!("Setup could not save your choices"),
+                    class: "mt-4",
+                }
             }
             if !is_ready && (failure.is_some() || slow) {
                 Button {

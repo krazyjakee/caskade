@@ -97,7 +97,7 @@ fn the_new_games_shelves_show_the_last_added_and_the_released_games() {
     }
     let shelf = window.get("data-focus-section", "shelf-released");
     let view_all = window.find_in(shelf, "data-part", "view-all").unwrap();
-    assert_eq!(window.text(view_all), "View all →");
+    assert_eq!(window.text(view_all), "View all");
     window.click(view_all);
     assert!(
         window

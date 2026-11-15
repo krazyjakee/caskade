@@ -123,6 +123,17 @@ impl SettingsService {
             })
             .collect())
     }
+    /// The database holding these settings (none for in-memory fixtures).
+    pub fn database_path(&self) -> Option<std::path::PathBuf> {
+        let path = self
+            .store
+            .pool
+            .connect_options()
+            .get_filename()
+            .to_path_buf();
+        (path != std::path::Path::new(":memory:")).then_some(path)
+    }
+
     pub fn subscribe(&self) -> broadcast::Receiver<SettingsChanged> {
         self.changes.subscribe()
     }

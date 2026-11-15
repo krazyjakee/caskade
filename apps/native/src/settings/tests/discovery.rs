@@ -1,4 +1,4 @@
-//! Settings → Library Discovery (#104), ported from the webview's
+//! Settings → Discovery (#104), ported from the webview's
 //! `discovery` tests: the preferences read and save (on, schedule,
 //! watching, play history, the system's checks, deep scans and their
 //! folders), off dims them and stops Scan now, the status says the phase,
@@ -58,7 +58,7 @@ fn set(key: &str, value: Value) {
 
 fn discovery() -> Window {
     let mut window = open("/settings?tab=library-discovery");
-    window.settle_until("Library Discovery", |window| {
+    window.settle_until("Discovery", |window| {
         window.find("data-settings", "library-discovery").is_some()
             && window
                 .find_all("role", "status")
@@ -175,9 +175,9 @@ fn the_preferences_read_and_save_and_off_stops_scans() {
     window.settle_until("off", |window| {
         saved("core.discovery")["enabled"] == json!(false)
             && window.find("role", "note").is_some_and(|note| {
-                window.text(note).contains(
-                    "Library discovery is off, so the settings below don't apply until it's on.",
-                )
+                window
+                    .text(note)
+                    .contains("Discovery is off, so the settings below don't apply until it's on.")
             })
     });
     let options = window.get("data-part", "discovery-options");

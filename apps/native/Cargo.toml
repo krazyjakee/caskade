@@ -132,6 +132,8 @@ windows-registry = "0.6"
 caskade-streaming = { path = "../../crates/caskade-streaming" }
 
 [dev-dependencies]
+# Setup retry tests use SQLite's connection-level read-only switch.
+sqlx = { version = "0.9", default-features = false, features = ["sqlite", "runtime-tokio"] }
 # The accessibility test reads Blitz's AccessKit tree (#83).
 accesskit = "0.25"
 tempfile = "=3.27.0"
@@ -147,3 +149,10 @@ caskade-emulation-fixtures = { path = "../../crates/caskade-emulation-fixtures" 
 
 [lints]
 workspace = true
+
+# An opt-in offscreen Metal allocation probe (#156); it creates no window.
+[target.'cfg(target_os = "macos")'.dev-dependencies]
+objc2 = "0.6"
+pollster = "0.4"
+vello_gpu = "0.3"
+wgpu = { version = "30", default-features = false, features = ["metal"] }

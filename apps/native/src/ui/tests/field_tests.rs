@@ -176,3 +176,21 @@ fn a_combobox_opens_on_its_first_option_and_answers_a_pad() {
     assert!(!window.exists("listbox"));
     assert_eq!(window.focused(), Some(field));
 }
+
+#[test]
+fn appkit_editing_commands_delete_from_a_search_field() {
+    let _one = one_window();
+    let mut window = Window::open(fields);
+    let field = window.id("search");
+    window.focus_node(field);
+    for command in ["moveToEndOfLine:", "deleteBackward:"] {
+        blitz_dom::Document::handle_ui_event(
+            &mut window.doc,
+            UiEvent::AppleStandardKeybinding(command.into()),
+        );
+        window.settle();
+    }
+    assert_eq!(take_done(), ["search \"pine\""]);
+    assert_eq!(window.attr("search", "value").as_deref(), Some("pine"));
+    assert_eq!(window.focused_id().as_deref(), Some("search"));
+}

@@ -14,6 +14,14 @@ pub enum Error {
     Migration(#[from] sqlx::migrate::MigrateError),
     #[error(transparent)]
     Json(#[from] serde_json::Error),
+    /// A local storage operation, retaining the underlying classification.
+    #[error("{action} at “{path}”: {source}")]
+    AtPath {
+        action: String,
+        path: std::path::PathBuf,
+        #[source]
+        source: Box<Error>,
+    },
     /// No home directory, so the per-OS app directories are unknown.
     #[error("cannot determine the application directories")]
     NoAppDirs,
@@ -506,6 +514,23 @@ fn classify(error: &(dyn std::error::Error + 'static)) -> Option<Found> {
 fn core_error(error: &Error) -> Option<Found> {
     use ErrorCode::*;
     match error {
+        Error::AtPath {
+            action,
+            path,
+            source,
+        } => {
+            let report = ErrorReport::from_error(source.as_ref());
+            Some(Found {
+                code: report.code,
+                summary: Summary::Text(crate::tr!(
+                    "{action} at “{path}”. {reason}",
+                    action = action,
+                    path = path.display(),
+                    reason = report.summary
+                )),
+                hints: Some(report.hints),
+            })
+        }
         Error::Io(io) => io_error(io),
         Error::Db(error) => sql_error(error),
         Error::Migration(sqlx::migrate::MigrateError::VersionMissing(_)) => newer(crate::tr!(
@@ -582,12 +607,20 @@ fn sql_error(error: &sqlx::Error) -> Option<Found> {
                 .code()
                 .and_then(|code| code.parse::<i32>().ok())
                 .map(|code| code & 0xff);
+            if code == Some(14) {
+                return found(
+                    Database,
+                    Summary::Text(crate::tr!(
+                        "The database could not be opened. Check that its folder exists and is writable, with space for temporary journal files."
+                    )),
+                );
+            }
             found(
                 match code {
                     Some(5 | 6) => Busy,
                     Some(11 | 26) => Corrupt,
                     Some(13) => DiskFull,
-                    Some(8 | 14) => AccessDenied,
+                    Some(8) => AccessDenied,
                     _ => Database,
                 },
                 Summary::Plain,
