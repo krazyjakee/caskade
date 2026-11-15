@@ -153,7 +153,7 @@ Play a game installed on another device in the house, streamed over the local ne
 
 ### 4.14 People
 
-- **Local accounts**: admin or standard, permissions, an age limit, an optional 4–8 digit PIN (a household lock, not data protection), and a switcher. A library from before accounts starts with one admin and no PIN.
+- **Local accounts**: admin or standard, permissions, an age limit, an optional 4–8 digit PIN (a household lock, not data protection), and a switcher. Choosing an account with a PIN automatically focuses the PIN field so typing can start immediately. A library from before accounts starts with one admin and no PIN.
 - Collections and some preferences belong to each account. Settings that change the device are admins'.
 
 ### 4.15 Activity and notifications

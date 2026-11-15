@@ -90,6 +90,12 @@ fn tile(window: &Window, name: &str) -> blitz_dom::NodeId {
 fn enter_pin(window: &mut Window, pin: &str) {
     let field = window.get("data-part", "field");
     window.focus(field);
+    type_pin(window, pin);
+}
+
+fn type_pin(window: &mut Window, pin: &str) {
+    let field = window.get("data-part", "field");
+    assert_eq!(window.focused(), Some(field), "the PIN field has focus");
     window.type_text(pin);
     // The field shows a mask per digit, never the PIN.
     let shown = window
@@ -152,7 +158,7 @@ fn switch_account_signs_out_to_the_picker_and_a_locked_account_asks_for_its_pin(
             .as_deref(),
         Some("pin")
     );
-    enter_pin(&mut window, "0000");
+    type_pin(&mut window, "0000");
     window.settle_until("refused", |window| {
         body(window).contains("That PIN isn't right.")
     });

@@ -18,7 +18,7 @@ use dioxus_native::NodeHandle;
 use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use dioxus_native::prelude::*;
 
-use crate::input::{Bind, use_input_action};
+use crate::input::{Bind, use_input, use_input_action};
 use crate::ui::icons::{CHECK, DELETE};
 use crate::ui::{Button, Svg};
 
@@ -80,7 +80,11 @@ pub fn PinPad(
     /// Off where a dialog's heading already says it; it still names the field.
     #[props(default = true)]
     show_title: bool,
+    /// Focus the field as it opens, so a keyboard can type immediately.
+    #[props(default)]
+    autofocus: bool,
 ) -> Element {
+    let input = use_input();
     let mut pin = use_signal(String::new);
     let mut status = use_signal(|| Status::Ready);
     let mut message = use_signal(|| None::<String>);
@@ -265,6 +269,12 @@ pub fn PinPad(
             }
             input {
                 "data-part": "field",
+                "data-focus-default": autofocus.then_some("true"),
+                onmounted: move |event| {
+                    if autofocus && let Some(handle) = event.data().downcast::<NodeHandle>() {
+                        input.focus(handle.node_id());
+                    }
+                },
                 r#type: "password",
                 inputmode: "numeric",
                 autocomplete: "off",
@@ -309,7 +319,7 @@ pub fn PinPad(
                     Button {
                         key: "{digit}",
                         "data-part": "key",
-                        "data-focus-default": (digit == '1').then_some("true"),
+                        "data-focus-default": (!autofocus && digit == '1').then_some("true"),
                         class: KEY,
                         on_press: move |_| type_digit(digit),
                         "{digit}"

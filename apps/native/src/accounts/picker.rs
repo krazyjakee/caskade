@@ -133,6 +133,7 @@ pub fn AccountPicker(list: AccountList, on_signed_in: EventHandler<Account>) -> 
                         }
                         Avatar { part: "avatar", avatar: Some(account.avatar.clone()), name: account.name.clone(), size }
                         PinPad {
+                            autofocus: true,
                             title: t!("Enter {name}'s PIN", name = account.name.clone()),
                             locked_until_ms: account.locked_until_ms,
                             check: {
