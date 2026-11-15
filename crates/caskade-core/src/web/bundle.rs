@@ -130,6 +130,15 @@ impl Bundle {
         lock(&self.manifest).start = key(start);
     }
 
+    /// The response was framed as an HTML Blob even if its server called it
+    /// plain text. Preserve how the browser used it when playing it directly.
+    /// Only in memory until [`Bundle::save`].
+    pub fn mark_html(&self, url: &Url) {
+        if let Some(item) = lock(&self.manifest).items.get_mut(&key(url)) {
+            item.content_type = Some("text/html; charset=utf-8".to_owned());
+        }
+    }
+
     /// Drops every URL `keep` refuses, with its file, and returns how many
     /// went. The manifest changes in memory until [`Bundle::save`].
     pub fn retain(&self, keep: impl Fn(&str) -> bool) -> io::Result<usize> {

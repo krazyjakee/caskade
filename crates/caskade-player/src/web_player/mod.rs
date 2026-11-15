@@ -438,19 +438,27 @@ pub fn run(options: Options) -> Result<i32, String> {
                     (Step::Capturing, bar::Action::Primary) => {
                         // Only the game, where the page showed one: a
                         // Flash movie, or a frame from another site. A
-                        // site's own frame keeps its page: all of it is the
-                        // game's origin anyway, and some play only inside
-                        // it (totaljerkface.com's).
+                        // site's own frame keeps its page: some play only
+                        // inside it (totaljerkface.com's). A fetched HTML
+                        // Blob uses its original response, on either origin.
                         if let Some(game) = &found
                             && (caskade_core::web::is_swf(&game.url)
+                                || game.from_blob
                                 || !same_origin(&game.url, &page))
                             && session.bundle.get(&game.url).is_some()
+                            && (!game.from_blob || session.bundle.has(&game.url))
                         {
+                            if game.from_blob {
+                                session.bundle.mark_html(&game.url);
+                            }
                             session.bundle.set_start(&game.url);
                             if game.size.is_some() {
                                 session.bundle.set_size(game.size);
                             }
-                            match session.bundle.retain(session.needed_by(&game.url)) {
+                            match session.bundle.retain(
+                                session
+                                    .needed_by(&game.url, game.from_blob.then_some(page.as_str())),
+                            ) {
                                 Ok(dropped) => tracing::info!(
                                     host = game.url.host_str(),
                                     dropped,

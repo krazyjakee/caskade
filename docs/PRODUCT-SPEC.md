@@ -106,6 +106,7 @@ Choosing a game opens its quick look: a side panel in desktop mode, the page its
 - Web games get artwork from their page and the usual metadata matching. Without store ids or another match, a single exact title match on IGDB supplies details and artwork even when the page offers no pictures. Ambiguous titles stay unmatched; tiles without artwork always show their title.
 - Web games play in Caskade's own game window, so playtime counts, console mode is fullscreen and the guide button works.
 - **Play offline** (Linux): a guided capture saves the game and its files into a storage location, without the site around it, its ads or its trackers, and checks that it plays with no network.
+- Pages that fetch the player as HTML and put it in a temporary Blob iframe are saved with the original player as their start page, including Unity wrappers.
 
 ### 4.8 Fan ports
 

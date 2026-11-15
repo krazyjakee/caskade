@@ -105,16 +105,23 @@ impl Session {
     /// Whether the game at `start`, found in the page it was captured in,
     /// needs a URL the bundle kept: the game's own, or one something it
     /// loaded asked for, by origin, as far as it goes. What this capture
-    /// didn't see asked for stays.
+    /// didn't see asked for stays. Blob documents inherit the wrapper's
+    /// origin, so their requests cannot be distinguished from its own:
+    /// keep their captured assets conservatively, dropping only the wrapper.
     #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
-    pub fn needed_by(&self, start: &Url) -> impl Fn(&str) -> bool + use<> {
+    pub fn needed_by(&self, start: &Url, blob_page: Option<&str>) -> impl Fn(&str) -> bool + use<> {
         let referers = self
             .referers
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner())
             .clone();
         let needed = needed_by(start, &referers);
-        move |url| needed.contains(url) || referers.get(url).is_none_or(Option::is_none)
+        let start = start.to_string();
+        let blob_page = blob_page.map(str::to_owned);
+        move |url| match &blob_page {
+            Some(page) => url != page || url == start,
+            None => needed.contains(url) || referers.get(url).is_none_or(Option::is_none),
+        }
     }
 
     fn unkept(&self) -> std::sync::MutexGuard<'_, BTreeSet<String>> {
@@ -529,6 +536,38 @@ fn status(status: StatusCode) -> Response<Body> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_blob_game_keeps_assets_with_its_wrappers_referrer_but_drops_the_wrapper() {
+        let dir = tempfile::tempdir().unwrap();
+        let page = Url::parse("https://portal.example/game/").unwrap();
+        let game = Url::parse("https://cdn.example/unity/index.html").unwrap();
+        let data = Url::parse("https://cdn.example/unity/Build/game.data").unwrap();
+        let session = Session::new(Bundle::create(dir.path(), &page).unwrap(), Mode::Capture);
+        for url in [&page, &game, &data] {
+            session.bundle.put(url, 200, None, b"kept").unwrap();
+            session
+                .referers
+                .lock()
+                .unwrap()
+                .insert(url.to_string(), Some(page.clone()));
+        }
+        session.bundle.mark_html(&game);
+        session.bundle.set_start(&game);
+        session
+            .bundle
+            .retain(session.needed_by(&game, Some(page.as_str())))
+            .unwrap();
+        session.bundle.save().unwrap();
+        let reopened = Bundle::open(dir.path()).unwrap();
+        assert_eq!(reopened.start(), game.as_str());
+        assert_eq!(
+            reopened.get(&game).unwrap().content_type.as_deref(),
+            Some("text/html; charset=utf-8")
+        );
+        assert!(!reopened.has(&page));
+        assert!(reopened.has(&game) && reopened.has(&data));
+    }
 
     #[test]
     fn the_game_found_keeps_what_it_loaded_and_not_its_portal() {

@@ -14,72 +14,9 @@ use url::Url;
 /// `__caskadeFind` with its biggest visible elements a game could be
 /// (frames, Flash movies, canvases and videos, at least
 /// [`GameSize::MIN_WIDTH`] × [`GameSize::MIN_HEIGHT`]); a frame's address is that
-/// of the deepest frame inside it that fills it.
-pub const FRAMES_SCRIPT: &str = r#"(() => {
-  if (window === window.top) {
-    const shown = new WeakMap();
-    addEventListener("message", (event) => {
-      const frame = event.data && event.data.__caskadeFrame;
-      if (frame && typeof frame.href === "string" && event.source) shown.set(event.source, frame);
-    });
-    const filling = (win, width, height, depth) => {
-      let best = null;
-      const own = shown.get(win);
-      if (own && own.width * own.height >= 0.8 * width * height) best = { href: own.href, depth };
-      let count = 0;
-      try {
-        count = depth < 4 ? win.length : 0;
-      } catch {}
-      for (let i = 0; i < count; i++) {
-        let inner = null;
-        try {
-          inner = win[i];
-        } catch {}
-        const found = inner && filling(inner, width, height, depth + 1);
-        if (found && (!best || found.depth > best.depth)) best = found;
-      }
-      return best;
-    };
-    const kinds = "iframe, embed, object, ruffle-embed, ruffle-object, canvas, video";
-    Object.defineProperty(window, "__caskadeFind", {
-      value: () => {
-        const found = [];
-        for (const element of document.querySelectorAll(kinds)) {
-          const box = element.getBoundingClientRect();
-          if (box.width < 320 || box.height < 240) continue;
-          const style = getComputedStyle(element);
-          if (style.visibility === "hidden" || Number(style.opacity) === 0) continue;
-          const kind = element.localName;
-          let src = null;
-          if (kind === "iframe") {
-            const inner = element.contentWindow && filling(element.contentWindow, box.width, box.height, 0);
-            src = inner ? inner.href : element.src;
-          } else if (kind.endsWith("embed")) src = element.getAttribute("src");
-          else if (kind.endsWith("object")) src = element.getAttribute("data");
-          try {
-            src = src ? new URL(src, document.baseURI).href : null;
-          } catch {
-            src = null;
-          }
-          found.push({ kind, src, width: Math.round(box.width), height: Math.round(box.height) });
-        }
-        return found.sort((a, b) => b.width * b.height - a.width * a.height).slice(0, 8);
-      },
-    });
-  } else {
-    const tell = () => {
-      try {
-        window.top.postMessage(
-          { __caskadeFrame: { href: location.href, width: innerWidth, height: innerHeight } },
-          "*",
-        );
-      } catch {}
-    };
-    tell();
-    addEventListener("load", tell);
-    addEventListener("resize", tell);
-  }
-})();"#;
+/// of the deepest frame inside it that fills it. HTML Blob frames are traced
+/// back to the HTTP response the page read to create them.
+pub const FRAMES_SCRIPT: &str = include_str!("find.js");
 
 /// Asks the page what it shows; answered as JSON.
 pub const FIND: &str = "window.__caskadeFind ? window.__caskadeFind() : []";
@@ -91,6 +28,9 @@ pub struct Found {
     pub url: Url,
     /// How big the page showed it.
     pub size: Option<GameSize>,
+    /// The page framed a Blob of an HTTP response: use the response itself,
+    /// including when it came from the page's own origin.
+    pub from_blob: bool,
 }
 
 #[derive(Deserialize)]
@@ -99,6 +39,8 @@ struct Shown {
     src: Option<String>,
     width: f64,
     height: f64,
+    #[serde(default, rename = "fromBlob")]
+    from_blob: bool,
 }
 
 /// The game in `answer`, `FIND`'s: the biggest frame or Flash movie that
@@ -130,6 +72,7 @@ pub fn choose(answer: &str) -> Option<Found> {
         return Some(Found {
             size: GameSize::new(side(element.width), side(element.height)),
             url,
+            from_blob: element.from_blob,
         });
     }
     None
@@ -138,6 +81,33 @@ pub fn choose(answer: &str) -> Option<Found> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn blob_frame_tracking_runs_in_the_pages_javascript() {
+        let result = std::process::Command::new("node")
+            .arg(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/src/web_player/find.test.mjs"
+            ))
+            .output()
+            .expect("Node.js runs the capture script's regression checks");
+        assert!(
+            result.status.success(),
+            "{}\n{}",
+            String::from_utf8_lossy(&result.stdout),
+            String::from_utf8_lossy(&result.stderr)
+        );
+    }
+
+    #[test]
+    fn a_resolved_blob_uses_its_original_http_document() {
+        let answer = r#"[{"kind":"iframe","src":"https://cdn.example/unity/index.html","fromBlob":true,"width":960,"height":540}]"#;
+        let found = choose(answer).unwrap();
+        assert!(found.from_blob);
+        assert_eq!(found.url.as_str(), "https://cdn.example/unity/index.html");
+        let unresolved = r#"[{"kind":"iframe","src":"blob:https://portal.example/temporary","width":960,"height":540}]"#;
+        assert_eq!(choose(unresolved), None);
+    }
 
     #[test]
     fn the_biggest_frame_that_isnt_an_ad_or_a_video_is_the_game() {
@@ -154,6 +124,7 @@ mod tests {
             Some(Found {
                 url: Url::parse("https://g1.gdn.poki.com/v2/index.html?country=GB").unwrap(),
                 size: GameSize::new(836, 470),
+                from_blob: false,
             })
         );
     }
