@@ -43,19 +43,18 @@ fn repeated_offscreen_metal_frames_keep_memory_bounded() {
         memory_budget_thresholds: wgpu::MemoryBudgetThresholds::default(),
         display: None,
     });
-    let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-        power_preference: wgpu::PowerPreference::HighPerformance,
-        ..Default::default()
-    }))
+    // Exercise the same adapter policy as the app. WGPU_POWER_PREF=high
+    // reproduces AMD driver growth on the affected dual-GPU Mac (#156).
+    let handle = pollster::block_on(wgpu_context::DeviceHandle::new_from_compatible_surface(
+        instance,
+        None,
+        Some(wgpu::Features::CLEAR_TEXTURE | wgpu::Features::PIPELINE_CACHE),
+        None,
+    ))
     .unwrap();
-    println!("adapter: {:?}", adapter.get_info());
-    let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
-        required_features: adapter.features()
-            & (wgpu::Features::CLEAR_TEXTURE | wgpu::Features::PIPELINE_CACHE),
-        memory_hints: wgpu::MemoryHints::MemoryUsage,
-        ..Default::default()
-    }))
-    .unwrap();
+    println!("adapter: {:?}", handle.adapter.get_info());
+    let device = &handle.device;
+    let queue = &handle.queue;
     let size = RenderSize {
         width: 512,
         height: 512,
@@ -76,9 +75,9 @@ fn repeated_offscreen_metal_frames_keep_memory_bounded() {
         view_formats: &[],
     });
     let view = texture.create_view(&Default::default());
-    let depth = Renderer::create_depth_texture_view(&device, &size);
+    let depth = Renderer::create_depth_texture_view(device, &size);
     let (mut renderer, mut resources) = Renderer::new_with(
-        &device,
+        device,
         &RenderTargetConfig {
             format,
             width: 512,
@@ -90,17 +89,21 @@ fn repeated_offscreen_metal_frames_keep_memory_bounded() {
     let mut baseline = 0.0;
     // Match the long-lived outer pool around winit's AppKit run loop.
     objc2::rc::autoreleasepool(|_| {
-        for frame in 0..512 {
+        for frame in 0..4096 {
             scene.reset();
             scene.set_paint(peniko::Color::from_rgb8(40, 50, 60));
             for i in 0..32 {
                 let offset = f64::from((frame + i) % 200);
+                // Layer composition exercises multiple Metal render passes;
+                // solid rectangles alone did not reproduce the growth.
+                scene.push_opacity_layer(0.9);
                 scene.fill_rect(&peniko::kurbo::Rect::new(
                     offset,
                     f64::from(i * 10),
                     offset + 100.0,
                     f64::from(i * 10 + 8),
                 ));
+                scene.pop_layer();
             }
             {
                 let mut encoder = device.create_command_encoder(&Default::default());
@@ -108,8 +111,8 @@ fn repeated_offscreen_metal_frames_keep_memory_bounded() {
                     .render(
                         &scene,
                         &mut resources,
-                        &device,
-                        &queue,
+                        device,
+                        queue,
                         &mut encoder,
                         &size,
                         &view,
@@ -121,13 +124,13 @@ fn repeated_offscreen_metal_frames_keep_memory_bounded() {
                 queue.submit([encoder.finish()]);
                 device.poll(wgpu::PollType::wait_indefinitely()).unwrap();
             }
-            if matches!(frame, 31 | 127 | 511) {
+            if matches!(frame, 31 | 127 | 1023 | 4095) {
                 let footprint = footprint_mib();
                 println!("frame {}: {footprint:.1} MiB", frame + 1);
                 if frame == 127 {
                     baseline = footprint;
                 }
-                if frame == 511 {
+                if frame == 4095 {
                     assert!(
                         footprint <= baseline + 16.0,
                         "Metal allocations grew by {:.1} MiB after warm-up",

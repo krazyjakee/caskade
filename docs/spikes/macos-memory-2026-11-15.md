@@ -72,6 +72,50 @@ drained after each frame also measured 6.1 MiB, so that workaround was not
 adopted. This small workload does not reproduce the app's growth and does
 not rule out more complex renderer resources or driver caches.
 
+## Layered Metal reproduction and adapter mitigation
+
+A richer offscreen fixture paints a Blitz/Dioxus document through the app's
+Vello Hybrid scene painter: text in the bundled Inter font, linear gradients,
+rounded clipped cards, shadows and opacity layers. It reproduces the growth
+without navigation or a window. A simpler scene of 32 translucent rectangles
+also reproduces it; plain solid rectangles did not. The document is reused,
+scene storage is reset each frame, and every submission is followed by a
+blocking device poll.
+
+| Workload / adapter | Frame 32 | Frame 128 | Frame 512 | Frame 2048 |
+| --- | --- | --- | --- | --- |
+| Translucent rectangles / AMD Radeon Pro 560 | 6.9 MiB | 7.7 MiB | 11.5 MiB | 26.9 MiB |
+| Same / Intel HD Graphics 630 | 38.1 MiB | 38.4 MiB | 38.5 MiB | 38.6 MiB |
+| Rich document / AMD, pool drained per frame | 10.0 MiB | 11.4 MiB | 17.2 MiB | 40.4 MiB |
+| Rich document / Intel | 51.6 MiB | 51.8 MiB | 50.3 MiB | 47.6 MiB |
+
+All figures are `vmmap` physical footprint from development test processes on
+the hardware above, without stack logging. The richer fixture had the same
+AMD footprint at frame 512 with and without a per-frame autorelease pool.
+Disabling wgpu debug/validation flags did not stop the translucent-rectangle
+growth (19.3 MiB from frames 128 to 2048).
+
+A separate logged rich-document run captured `malloc_history -allBySize`.
+The growing live allocation groups include 736 allocations each in
+`amdMtlBronzeResourceMgrAlloc` / `amdMtlBronzeAllocThreadGroupLengthMgr`,
+called from `BronzeMtlCmdBuffer renderCommandEncoderWithDescriptor:` through
+wgpu-hal's Metal render-pass creation. This independently reproduces driver
+resource retention consistent with the earlier app graph; it does not prove
+that every allocation in the installed app has that cause.
+
+The macOS renderer now defaults to the low-power adapter, retaining explicit
+`WGPU_ADAPTER_NAME` and `WGPU_POWER_PREF` overrides. This selects Intel on the
+reported dual-GPU Mac and avoids the reproduced AMD path. Other platforms keep
+their existing selection policy. This is an adapter mitigation, not a driver
+repair or a solution proven on AMD-only Macs. The ignored Metal regression
+probe now uses the app's `DeviceHandle` selection and 4,096 frames with opacity
+layers; `WGPU_POWER_PREF=high` selects the affected AMD path for comparison.
+The final Cargo-built probe selected Intel through that production policy:
+45.5 MiB at frames 32 and 128, then 46.1 MiB at frames 1,024 and 4,096,
+passing its 16 MiB post-warm-up growth limit. It creates no desktop resources.
+The same binary with `WGPU_POWER_PREF=high` selected AMD and failed that check:
+15.1 MiB at frame 128 and 54.9 MiB at frame 4,096 (39.8 MiB growth).
+
 ## Acceptance procedure and budget
 
 Use a release build with its commit recorded, a separate empty profile,
@@ -98,8 +142,11 @@ with malloc stack logging.
 
 ## Next allocation-stack capture
 
-The app-wide growth is still unresolved. After saving any edits, the user
-can quit Caskade and launch the installed bundle from Terminal with:
+A whole-app run of the patched build is still required to validate the budget.
+The original installed 0.2.0 bundle does not contain the adapter mitigation.
+If the patched app still grows, after saving any edits the user can quit it
+and launch that patched binary from Terminal with allocation logging. For a
+patched bundle installed at the usual path:
 
 ```sh
 MallocStackLogging=1 /Applications/Caskade.app/Contents/MacOS/caskade

@@ -2032,6 +2032,7 @@ dependencies = [
  "url",
  "vello_gpu",
  "wgpu 30.0.1",
+ "wgpu_context",
  "windows-registry",
 ]
 

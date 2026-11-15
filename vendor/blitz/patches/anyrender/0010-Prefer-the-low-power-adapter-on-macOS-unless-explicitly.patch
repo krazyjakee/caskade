@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Sun, 15 Nov 2026 11:52:27 +0000
+Subject: [PATCH] Prefer the low-power adapter on macOS unless explicitly
+ overridden
+
+---
+ crates/wgpu_context/src/lib.rs | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/crates/wgpu_context/src/lib.rs b/crates/wgpu_context/src/lib.rs
+index 9b31736..a71b077 100644
+--- a/crates/wgpu_context/src/lib.rs
++++ b/crates/wgpu_context/src/lib.rs
+@@ -38,6 +38,26 @@ impl DeviceHandle {
+         extra_features: Option<Features>,
+         override_limits: Option<Limits>,
+     ) -> Result<Self, WgpuContextError> {
++        // A launcher does not need the discrete GPU. In particular, layered
++        // rendering grows AMD Metal driver allocations on older dual-GPU Macs
++        // (#156). Prefer the integrated adapter, while keeping explicit wgpu
++        // adapter and power-preference overrides available for diagnosis.
++        #[cfg(target_os = "macos")]
++        let adapter =
++            match wgpu::util::initialize_adapter_from_env(&instance, compatible_surface).await {
++                Ok(adapter) => adapter,
++                Err(_) => {
++                    instance
++                        .request_adapter(&wgpu::RequestAdapterOptions {
++                            power_preference: wgpu::PowerPreference::from_env()
++                                .unwrap_or(wgpu::PowerPreference::LowPower),
++                            compatible_surface,
++                            ..Default::default()
++                        })
++                        .await?
++                }
++            };
++        #[cfg(not(target_os = "macos"))]
+         let adapter =
+             wgpu::util::initialize_adapter_from_env_or_default(&instance, compatible_surface)
+                 .await?;
