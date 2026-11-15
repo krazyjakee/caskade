@@ -4,7 +4,8 @@
 //! from it. An id comes from, in order: the game's RomM ROM (RomM's own
 //! match), a name match in the Hasheous dumps of the game's platforms, and
 //! the metadata server's match for the game's store ids (Steam, GOG, Epic,
-//! …). The user can set one by hand, or say the game has none.
+//! …). Web games without store ids also try an unambiguous exact title
+//! in IGDB. The user can set one by hand, or say the game has none.
 //!
 //! Applying a match fills the description, genres, tags, release date,
 //! aliases and age ratings (with the minimum age they come to,
@@ -63,7 +64,8 @@ use std::{
 };
 use tokio::sync::Mutex;
 
-/// Games matched per round: one `/match` and one `/games` request each.
+/// Games matched per round: batched store ids and games, plus title
+/// searches for web games without store ids.
 const CHUNK: usize = 50;
 /// When games without a match are tried again, if the dumps stay the same.
 const RETRY_NONE: Duration = Duration::from_secs(7 * 24 * 60 * 60);
@@ -78,6 +80,8 @@ pub enum MatchSource {
     Hasheous,
     /// The metadata server matched a store id.
     Store,
+    /// IGDB has exactly one game with the web game's title.
+    Title,
     /// Another device's match for a game that came from it, sent with the
     /// game (#75): used when nothing here finds one.
     Device,
@@ -93,6 +97,7 @@ impl MatchSource {
             Self::Romm => "romm",
             Self::Hasheous => "hasheous",
             Self::Store => "store",
+            Self::Title => "title",
             Self::Device => "device",
             Self::Manual => "manual",
             Self::None => "none",
@@ -104,6 +109,7 @@ impl MatchSource {
             "romm" => Self::Romm,
             "hasheous" => Self::Hasheous,
             "store" => Self::Store,
+            "title" => Self::Title,
             "device" => Self::Device,
             "manual" => Self::Manual,
             "none" => Self::None,
@@ -447,8 +453,13 @@ impl Metadata {
                 continue;
             }
             ids.extend(store.synced_store_ids(game_id).await?);
+            let web_title = entries.iter().any(|entry| {
+                entry.source_id.as_str() == "web"
+                    || matches!(entry.launch, Some(crate::model::LaunchSpec::Web { .. }))
+            }) && find::store_ids(&ids, &HashMap::new()).is_empty();
             if matches!(local, find::Local::Unsure)
                 && find::store_ids(&ids, &HashMap::new()).is_empty()
+                && !web_title
             {
                 // Nothing else to ask, and the dumps couldn't answer: left
                 // for the next run instead of recorded as none (#160).
@@ -474,8 +485,44 @@ impl Metadata {
                     }
                     _ => {
                         if find::store_ids(&ids, &HashMap::new()).is_empty() {
-                            // Nothing to ask the server about (a ROM RomM
-                            // left without an id), so none, offline too.
+                            if web_title {
+                                // Search only web titles, and never guess from
+                                // the server's first or closest result.
+                                if report.unreachable {
+                                    report.deferred += 1;
+                                    report.unanswered.push(game_id.clone());
+                                    continue;
+                                }
+                                match self.find_web_title(&game.title).await {
+                                    Ok(Some(id)) => {
+                                        rows.extend(
+                                            self.matched(
+                                                game_id,
+                                                Some(id),
+                                                MatchSource::Title,
+                                                dumps,
+                                            )
+                                            .await?,
+                                        );
+                                        report.matched += 1;
+                                        continue;
+                                    }
+                                    Ok(None) => {}
+                                    Err(error) => {
+                                        tracing::warn!(%error, "IGDB web title matching deferred");
+                                        report.unreachable = true;
+                                        report.deferred += 1;
+                                        report.unanswered.push(game_id.clone());
+                                        continue;
+                                    }
+                                }
+                            }
+                            if matches!(local, find::Local::Unsure) {
+                                report.deferred += 1;
+                                report.unanswered.push(game_id.clone());
+                                continue;
+                            }
+                            // No usable match from any source.
                             report.none += 1;
                             rows.extend(
                                 self.matched(game_id, None, MatchSource::None, dumps)

@@ -19,6 +19,7 @@ fn source_name(source: MatchSource) -> String {
         MatchSource::Romm => t!("Matched by your RomM server"),
         MatchSource::Hasheous => t!("Matched by name (Hasheous)"),
         MatchSource::Store => t!("Matched by store id"),
+        MatchSource::Title => t!("Matched by title (IGDB)"),
         MatchSource::Device => t!("Matched on another device"),
         MatchSource::Manual => t!(note = "How the game's IGDB match was made", "Chosen by you"),
         MatchSource::None => t!("No match found"),

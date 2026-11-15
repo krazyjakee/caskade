@@ -21,6 +21,7 @@ mod ratings;
 mod refresh;
 mod releases;
 mod runs;
+mod web;
 
 fn png() -> Vec<u8> {
     let image = DynamicImage::ImageRgba8(RgbaImage::from_pixel(8, 8, Rgba([1, 2, 3, 255])));

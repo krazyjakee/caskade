@@ -103,6 +103,7 @@ Choosing a game opens its quick look: a side panel in desktop mode, the page its
 ### 4.7 Web games
 
 - The Library's **Web** tab holds games that run in a web page, shown as a mosaic. **Add web game** takes a page address and nothing else.
+- Web games get artwork from their page and the usual metadata matching. Without store ids or another match, a single exact title match on IGDB supplies details and artwork even when the page offers no pictures. Ambiguous titles stay unmatched; tiles without artwork always show their title.
 - Web games play in Caskade's own game window, so playtime counts, console mode is fullscreen and the guide button works.
 - **Play offline** (Linux): a guided capture saves the game and its files into a storage location, without the site around it, its ads or its trackers, and checks that it plays with no network.
 

@@ -1,5 +1,6 @@
 //! Where a game's IGDB id comes from: its RomM ROM, the Hasheous dumps of
-//! its platforms, or (asked in one batch per chunk) its store ids.
+//! its platforms, (asked in one batch per chunk) its store ids, or an
+//! unambiguous exact web title from IGDB.
 
 use super::{MatchSource, Metadata};
 use crate::{
@@ -11,7 +12,7 @@ use crate::{
 use caskade_discovery::ExternalId;
 use std::collections::{BTreeSet, HashMap};
 
-/// Hasheous results looked at per title.
+/// Hasheous or IGDB results looked at per title.
 const SEARCH_LIMIT: u32 = 20;
 
 /// What the game's RomM ROM and the Hasheous dumps say about its IGDB id.
@@ -24,6 +25,30 @@ pub(super) enum Local {
 }
 
 impl Metadata {
+    /// A web game's exact title in IGDB, only when it identifies one id.
+    /// A full result page might hide another exact match, so abstain.
+    pub(super) async fn find_web_title(&self, title: &str) -> Result<Option<u64>> {
+        let title = titles(title).pop().unwrap_or_default();
+        let found = self
+            .inner
+            .igdb
+            .search(&title, SEARCH_LIMIT as usize)
+            .await?;
+        if found.len() >= SEARCH_LIMIT as usize {
+            return Ok(None);
+        }
+        let ids: BTreeSet<u64> = found
+            .iter()
+            .filter(|game| {
+                titles(&game.title)
+                    .last()
+                    .is_some_and(|name| name.eq_ignore_ascii_case(&title))
+            })
+            .map(|game| game.id)
+            .collect();
+        Ok((ids.len() == 1).then(|| *ids.first().unwrap()))
+    }
+
     /// An id from the game's RomM ROM or the Hasheous dumps.
     pub(super) async fn find_local(&self, game: &Game, entries: &[GameEntry]) -> Result<Local> {
         let mut hashes = Vec::new();

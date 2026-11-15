@@ -1,8 +1,10 @@
 //! Refreshing chosen games' metadata and artwork (#176), through the same
-//! matching (RomM ids, Hasheous names, store ids), IGDB cache and applies
-//! as the background runs, so the cache's freshness, the server's cooldown
+//! matching (RomM ids, Hasheous names, store ids and exact web titles),
+//! IGDB cache and applies as the background runs, so the cache's freshness,
+//! the server's cooldown
 //! and `Retry-After`, the user's fields and artwork choices, and "not on
-//! IGDB" all hold. Requests go in batches, never a request per game.
+//! IGDB" all hold. Store-id requests go in batches; unmatched web games
+//! without store ids can also search by exact title.
 //!
 //! Two modes: [`RefreshMode::Missing`] fills in what the games lack from
 //! what the cache has (matching the unmatched), and

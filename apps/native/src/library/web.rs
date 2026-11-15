@@ -159,6 +159,11 @@ fn WebTile(game: GameSummary, size: TileSize, index: usize) -> Element {
     let mut wrapper = use_signal(|| None::<dioxus_native::NodeHandle>);
     let starting = menus.is_some_and(|menus| menus.starting(&game.id));
     let cover = super::art_url_card(game.cover.as_ref());
+    let title_visibility = if cover.is_some() {
+        "opacity-0"
+    } else {
+        "opacity-100"
+    };
     let open_menu = {
         let target = target.clone();
         use_callback(move |anchor: Option<crate::ui::Anchor>| {
@@ -220,7 +225,7 @@ fn WebTile(game: GameSummary, size: TileSize, index: usize) -> Element {
                 }
                 p {
                     "data-part": "title",
-                    class: "absolute inset-x-0 bottom-0 truncate bg-linear-to-t from-surface-base/90 to-transparent px-2.5 pt-6 pb-2 text-sm font-semibold opacity-0 transition-opacity duration-(--cs-motion-duration-fast) group-hover:opacity-100 group-data-focus-visible:opacity-100",
+                    class: "absolute inset-x-0 bottom-0 truncate bg-linear-to-t from-surface-base/90 to-transparent px-2.5 pt-6 pb-2 text-sm font-semibold {title_visibility} transition-opacity duration-(--cs-motion-duration-fast) group-hover:opacity-100 group-data-focus-visible:opacity-100",
                     "{game.title}"
                 }
                 if starting {

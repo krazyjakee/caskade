@@ -5707,6 +5707,10 @@ msgstr "Matchat via namn (Hasheous)"
 msgid "Matched by store id"
 msgstr "Matchat via butiks-id"
 
+#: apps/native/src/game/igdb.rs
+msgid "Matched by title (IGDB)"
+msgstr ""
+
 #: apps/native/src/game/ports.rs
 msgid "Matched by title: check it's this game"
 msgstr "Matchad på titel: kontrollera att det är det här spelet"

@@ -2248,6 +2248,9 @@
   .opacity-60 {
     opacity: 60%;
   }
+  .opacity-100 {
+    opacity: 100%;
+  }
   .shadow-\[0_0_6px\] {
     --tw-shadow: 0 0 6px var(--tw-shadow-color, currentcolor);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
