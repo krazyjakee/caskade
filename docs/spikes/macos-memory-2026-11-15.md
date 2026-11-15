@@ -157,15 +157,15 @@ spatial-focus issue before Store. This is a renderer comparison, not the
 final navigation acceptance run.
 
 The integrated GPU avoids the reproduced AMD retention but still has too
-large a resource baseline here. Automatic rendering now uses vello_cpu for
-Intel macOS builds; explicit `CASKADE_RENDERER=gpu` retains the GPU path, and
-other build targets keep their existing default. CPU rendering already
+large a resource baseline for the experimental 200 MiB target here. Commit
+642904f4 temporarily made Intel macOS builds use vello_cpu automatically.
+That policy was subsequently removed at the user’s request (decision below). CPU rendering already
 pauses ambient loops through `data-paint="cpu"`. The existing e2e driver now
 supports `focus-href` (focus the app link, then use normal controller confirm)
 and `wait-paint`, so exact navigation and the selected renderer can be checked
 without depending on spatial geometry or OS input permissions.
 
-## Final automatic-CPU navigation run
+## Automatic-CPU experiment (subsequently reverted)
 
 The rebuilt development executable was launched at 18:48:55 UTC (PID 37970)
 with both `CASKADE_RENDERER` and `MallocStackLogging` unset. Its SHA-256 was
@@ -209,11 +209,31 @@ run's 310.4 MiB.
 Home after tour ten was 135.8 MiB, 3.6 MiB below tour two. The largest Home
 sample after warming was 142.0 MiB; the highest increase over tour two was
 2.6 MiB. Transient navigation raised the process peak to 211.9 MiB. The
-settled-Home and post-warm-up drift targets are met by this tested development
-build and profile. An isolated empty-profile release run, Apple Silicon and
+original settled-Home and post-warm-up comparison targets were met by this
+experimental CPU configuration and profile. An isolated empty-profile release run, Apple Silicon and
 other Intel Mac models remain unmeasured; these results do not claim them.
 
-## Acceptance procedure and budget
+## Renderer decision after the measurements
+
+The user prefers higher RAM use over CPU rendering. Automatic GPU rendering
+is restored on Intel macOS, and `CASKADE_RENDERER=cpu` remains an explicit
+opt-in alongside the existing fallback when no usable GPU is available.
+The macOS low-power GPU preference and the setup, SVG-icon and AppKit editing
+fixes remain. The CPU measurements above are comparison data, not the shipped
+default's acceptance result or a basis for silently choosing CPU again.
+
+The restored default was rebuilt and checked with `CASKADE_RENDERER` unset:
+the Home smoke script passed `wait-paint gpu`, reported `cpuRenderer=false`
+and no real keyboard or pointer events, and quit cleanly. Build and native
+Clippy for all targets passed. This verifies the selected renderer, not a new
+GPU memory-budget or ten-tour drift result.
+
+The 200 MiB figure below is retained as the original experimental comparison
+target. A larger GPU baseline is accepted; unbounded growth remains a separate
+bug to investigate. A GPU baseline budget needs to account for window size,
+scale and driver resources. The post-warm-up drift check remains useful.
+
+## Acceptance procedure and comparison targets
 
 Use a release build with its commit recorded, a separate empty profile,
 fixed window size and renderer, no online catalogue artwork, and record
@@ -228,9 +248,10 @@ with discovery and online lookups off. Warm each screen once, then repeat
 identical tours at least ten times. Record each screen, task state and library
 count, including before/after granting access in System Settings.
 
-The macOS empty-library target is at most 200 MiB physical footprint after
-five settled minutes on Home (main process, no web-game/video subprocess),
-and at most 16 MiB further growth between the second and tenth identical
+The original comparison target was at most 200 MiB physical footprint after
+five settled minutes on Home (main process, no web-game/video subprocess).
+That figure does not select the renderer. The provisional drift target is
+at most 16 MiB further growth between the second and tenth identical
 navigation tours. Keep startup and transient navigation peaks separate from
 settled Home. The real-window sections above record the user-authorized run
 and allocation-stack capture, including the passing numerical checks on the
@@ -240,8 +261,9 @@ rebuilt development executable was profiled separately.
 
 ## Next allocation-stack capture
 
-The tested development build meets the settled-Home and drift targets on this
-profile; an empty-profile release check is still outstanding. The original
+The CPU experiment met the comparison targets on this profile. GPU rendering
+is restored as the default; its whole-app drift and an empty-profile release
+check remain separate validation work. The original
 installed 0.2.0 bundle does not contain these fixes.
 If the patched app still grows, after saving any edits the user can quit it
 and launch that patched binary from Terminal with allocation logging. For a

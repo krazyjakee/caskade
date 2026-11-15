@@ -9,7 +9,7 @@ Why it exists is in the [mission](MISSION.md). How it is built is in the [tech s
 - **Released**: 0.1.x builds are published as GitHub releases (deb, AppImage, NSIS, MSI and a macOS app bundle), and installed copies update themselves from them.
 - **Linux** (X11, including Cinnamon, GNOME and gamescope): the reference platform. Every feature runs and is tested here, with live checks under Xvfb.
 - **Windows**: the app builds and passes lint. CI runs the launch channel and the administrator steps natively, and streaming, sync and launches have been tried in Windows VMs. Some real-hardware checks are still open (§5).
-- **macOS**: the native app has been built and run on an Intel Mac; Apple Silicon and remaining native integration checks still need hardware validation. Intel macOS builds draw on the CPU by default to avoid the measured Metal memory footprint. The standalone installer and discovery libraries are tested on macOS in CI.
+- **macOS**: the native app has been built and run on an Intel Mac; Apple Silicon and remaining native integration checks still need hardware validation. The standalone installer and discovery libraries are tested on macOS in CI.
 - **Languages**: English and Swedish. A translation ships as soon as its PO files are added.
 
 ## 2. Who it's for
