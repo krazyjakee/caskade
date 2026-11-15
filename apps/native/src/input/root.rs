@@ -476,6 +476,8 @@ impl Input {
             let within = spatial::scope(ui);
             super::e2e::Probe {
                 focused: name.unwrap_or_default(),
+                focused_href: focused.and_then(|node| ui.attr(node, "href").map(str::to_owned)),
+                cpu_renderer: ui.doc().root_element().attr("data-paint".into()) == Some("cpu"),
                 sections,
                 text: collapse(ui.text(ui.root())),
                 keyboard: 0,
@@ -843,8 +845,18 @@ pub fn InputRoot(
         if let Some(mut asks) = super::e2e::take_asks() {
             let answers = input.clone();
             spawn(async move {
-                while let Some(reply) = asks.recv().await {
-                    let _ = reply.send(answers.probe());
+                while let Some(ask) = asks.recv().await {
+                    if let Some(href) = ask.focus_href {
+                        let node = answers
+                            .read(|doc| {
+                                super::doc::find_attr(doc, doc.root_element().id, "href", &href)
+                            })
+                            .flatten();
+                        if let Some(node) = node {
+                            answers.focus(node);
+                        }
+                    }
+                    let _ = ask.reply.send(answers.probe());
                 }
             });
         }

@@ -103,7 +103,7 @@ wgpu-hal's Metal render-pass creation. This independently reproduces driver
 resource retention consistent with the earlier app graph; it does not prove
 that every allocation in the installed app has that cause.
 
-The macOS renderer now defaults to the low-power adapter, retaining explicit
+The macOS GPU-backed renderer defaults to the low-power adapter, retaining explicit
 `WGPU_ADAPTER_NAME` and `WGPU_POWER_PREF` overrides. This selects Intel on the
 reported dual-GPU Mac and avoids the reproduced AMD path. Other platforms keep
 their existing selection policy. This is an adapter mitigation, not a driver
@@ -115,6 +115,103 @@ The final Cargo-built probe selected Intel through that production policy:
 passing its 16 MiB post-warm-up growth limit. It creates no desktop resources.
 The same binary with `WGPU_POWER_PREF=high` selected AMD and failed that check:
 15.1 MiB at frame 128 and 54.9 MiB at frame 4,096 (39.8 MiB growth).
+
+## Real-window measurements and CPU selection
+
+The user subsequently explicitly authorized starting and stopping the app on
+this desktop for this investigation. This permission applies to this run;
+the repository's normal private-desktop rule is unchanged.
+
+The patched development executable (adapter mitigation from a8ac50e7) opened
+the existing one-game library on this Mac. The window was maximized at
+1,680 × 954 logical pixels, scale 2 (3,360 × 1,908 surface pixels), using the
+default Nexus theme, completed setup and the existing discovery settings.
+These measurements are not an empty-profile release-build acceptance result.
+
+A logged run (PID 34002, launched 18:15:30 UTC) confirmed Intel driver
+allocations. From the initial to the later idle allocation snapshot, AMD
+allocation groups stayed at 43 allocations / 23,188 bytes; Intel groups grew
+from 173,478,135 to 175,874,511 bytes. Those totals include anonymous VM;
+they are not interchangeable with physical footprint. Stack logging added
+64.4 MiB of “Performance tool data” by the later snapshot. The macOS app scan
+timed out in that instrumented run, so it is not a setup speed measurement.
+
+Without stack logging (PID 34784, launched 18:22:42 UTC), Home held 312.5 MiB
+physical footprint at 47 and 60 seconds and 310.4 MiB at 300 seconds, with a
+444.9 MiB startup peak. At 47 seconds, the malloc zone held 33.6 MiB of live
+allocations; IOAccelerator regions had 275.1 MiB resident, and IOSurface
+regions another 49.4 MiB. These categories do not add directly to footprint,
+but GPU/display resources dominate this baseline.
+
+A separate GPU navigation run (PID 35639) completed one full tour of Library,
+Collections, Store and all 17 Settings sections, returning Home at 494.2 MiB
+(518.4 MiB peak). A second tour stopped on a spatial-focus failure in the
+controller script. It is not a completed ten-tour result, and one warming
+tour does not establish continuing growth. The controller report recorded
+zero real keyboard or pointer events.
+
+With `CASKADE_RENDERER=cpu` on the same build and window (PID 36250), footprint
+was 93.6 MiB at 30.7 seconds and 94.5 MiB at 60 seconds after visiting Library
+and Collections; the peak was 160.5 MiB. That script stopped on the same
+spatial-focus issue before Store. This is a renderer comparison, not the
+final navigation acceptance run.
+
+The integrated GPU avoids the reproduced AMD retention but still has too
+large a resource baseline here. Automatic rendering now uses vello_cpu for
+Intel macOS builds; explicit `CASKADE_RENDERER=gpu` retains the GPU path, and
+other build targets keep their existing default. CPU rendering already
+pauses ambient loops through `data-paint="cpu"`. The existing e2e driver now
+supports `focus-href` (focus the app link, then use normal controller confirm)
+and `wait-paint`, so exact navigation and the selected renderer can be checked
+without depending on spatial geometry or OS input permissions.
+
+## Final automatic-CPU navigation run
+
+The rebuilt development executable was launched at 18:48:55 UTC (PID 37970)
+with both `CASKADE_RENDERER` and `MallocStackLogging` unset. Its SHA-256 was
+`27238dfe5e41f9ddaa437ef5bd34a155c4ddea6b87fe8aad9a561bae2ece8438`.
+The run used the same maximized Retina window, one-game profile, admin account
+and completed setup. Discovery and online lookups were enabled. The unbundled
+development executable reported a missing 7-Zip sidecar (also present in the
+comparison runs), and sync waited for `KeychainUnavailable`; this is not a
+validation of those integrations. Clippy ran during the initial settling
+period and finished before the five-minute snapshot and all navigation tours.
+
+The generated script first confirmed `data-paint="cpu"`, settled on Home for
+five minutes, then completed ten identical tours through Library, Collections,
+Store and all 17 Settings sections. It executed 517 steps, including 170
+Settings section switches, and returned a successful report with
+`cpuRenderer=true`, zero real keyboard events and zero real pointer events.
+The test instance quit cleanly; its window and navigation preferences were
+restored afterward. No installed app bundle was replaced.
+
+The startup samples below use seconds since process launch. Each tour sample
+was taken three seconds into its ten-second pause back on Home.
+
+| Sample | Elapsed seconds | Physical footprint | Process peak |
+| --- | --- | --- | --- |
+| start-30 | 30.1 | 93.2 MiB | 167.2 MiB |
+| start-60 | 60.1 | 92.9 MiB | 167.2 MiB |
+| start-300 | 300.1 | 117.4 MiB | 167.2 MiB |
+| tour-1 | 349.9 | 114.7 MiB | 190.8 MiB |
+| tour-2 | 384.3 | 139.4 MiB | 190.8 MiB |
+| tour-3 | 417.8 | 135.4 MiB | 190.8 MiB |
+| tour-4 | 451.4 | 115.0 MiB | 200.3 MiB |
+| tour-5 | 485.7 | 142.0 MiB | 211.9 MiB |
+| tour-6 | 519.6 | 129.8 MiB | 211.9 MiB |
+| tour-7 | 554.6 | 141.0 MiB | 211.9 MiB |
+| tour-8 | 588.2 | 141.1 MiB | 211.9 MiB |
+| tour-9 | 622.1 | 140.5 MiB | 211.9 MiB |
+| tour-10 | 655.5 | 135.8 MiB | 211.9 MiB |
+
+Home at 300 seconds after launch was 117.4 MiB, compared with the GPU
+run's 310.4 MiB.
+Home after tour ten was 135.8 MiB, 3.6 MiB below tour two. The largest Home
+sample after warming was 142.0 MiB; the highest increase over tour two was
+2.6 MiB. Transient navigation raised the process peak to 211.9 MiB. The
+settled-Home and post-warm-up drift targets are met by this tested development
+build and profile. An isolated empty-profile release run, Apple Silicon and
+other Intel Mac models remain unmeasured; these results do not claim them.
 
 ## Acceptance procedure and budget
 
@@ -134,16 +231,18 @@ count, including before/after granting access in System Settings.
 The macOS empty-library target is at most 200 MiB physical footprint after
 five settled minutes on Home (main process, no web-game/video subprocess),
 and at most 16 MiB further growth between the second and tenth identical
-navigation tours. These are acceptance targets, not a claim that the observed
-build meets them. Keep first-run peaks separate. A whole-app result and
-allocation-stack profile of navigation growth remain required before #156
-can be considered fully resolved; the existing process was not restarted
-with malloc stack logging.
+navigation tours. Keep startup and transient navigation peaks separate from
+settled Home. The real-window sections above record the user-authorized run
+and allocation-stack capture, including the passing numerical checks on the
+one-game development profile and the remaining release/empty-profile checks.
+The original installed process was not restarted with stack logging; the
+rebuilt development executable was profiled separately.
 
 ## Next allocation-stack capture
 
-A whole-app run of the patched build is still required to validate the budget.
-The original installed 0.2.0 bundle does not contain the adapter mitigation.
+The tested development build meets the settled-Home and drift targets on this
+profile; an empty-profile release check is still outstanding. The original
+installed 0.2.0 bundle does not contain these fixes.
 If the patched app still grows, after saving any edits the user can quit it
 and launch that patched binary from Terminal with allocation logging. For a
 patched bundle installed at the usual path:

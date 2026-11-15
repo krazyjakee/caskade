@@ -29,6 +29,16 @@ scroll benchmarks and a private-window resize reproduction, with a short
 repeatable probe. These are exploratory measurements, not the hour-long
 all-process resource acceptance run.
 
+For repeatable memory tours, `python3 apps/native/scripts/memory-tour.py`
+writes a controller script for `CASKADE_E2E_SCRIPT` (English UI, completed
+setup, desktop mode). It settles on Home, then visits Library, Collections,
+Store and all 17 Settings sections ten times. `--paint cpu` or `--paint gpu`
+checks the actual renderer through the document's `data-paint` attribute.
+`focus-href` focuses an app link by its exact href; the following `confirm`
+uses the usual controller activation. This measures navigation independently
+of spatial focus placement. The generator starts no app and sends no desktop
+input; the same private-desktop requirements apply when running its output.
+
 ## In CI
 
 `.github/workflows/ci.yml`, on master and on every pull request whose

@@ -18,7 +18,10 @@
 //! - `focus-is <text>`: the focused control reads `<text>` (nothing focused
 //!   reads as empty).
 //! - `focus-has <text>`: the focused control's text contains `<text>`.
+//! - `focus-href <href>`: focus an app link by its exact href, for repeatable
+//!   navigation measurements independent of spatial focus placement.
 //! - `wait-text <text>`: the window shows `<text>`.
+//! - `wait-paint cpu|gpu`: the window uses the requested renderer.
 //! - `wait-event <event>`: `game-started`, `game-exited` or
 //!   `settings-changed` happens, or the window is in console mode
 //!   (`console-on`) or out of it (`console-off`, #107).
@@ -64,6 +67,7 @@ pub struct Report {
     /// pad-only run.
     pub keyboard_events: u64,
     pub pointer_events: u64,
+    pub cpu_renderer: bool,
 }
 
 /// The window as the driver reads it.
@@ -71,6 +75,8 @@ pub struct Report {
 pub struct Probe {
     /// The focused control's accessible text; empty when none has focus.
     pub focused: String,
+    pub focused_href: Option<String>,
+    pub cpu_renderer: bool,
     /// The focus sections around the focused control, innermost first.
     pub sections: Vec<String>,
     /// The window's text.
@@ -89,12 +95,17 @@ pub struct Probe {
     pub grid: Option<crate::library::GridProbe>,
 }
 
-type Asks = async_mpsc::UnboundedReceiver<mpsc::Sender<Probe>>;
+pub struct Ask {
+    pub reply: mpsc::Sender<Probe>,
+    pub focus_href: Option<String>,
+}
+
+type Asks = async_mpsc::UnboundedReceiver<Ask>;
 
 /// The driver's questions to the window, which the input root answers on
 /// the UI thread; the receiving end until the root takes it.
 struct Questions {
-    ask: async_mpsc::UnboundedSender<mpsc::Sender<Probe>>,
+    ask: async_mpsc::UnboundedSender<Ask>,
     answer: Mutex<Option<Asks>>,
 }
 
@@ -153,10 +164,17 @@ impl Driver {
     /// a CPU renderer takes seconds under CI's Xvfb) answers late: the
     /// driver waits as long as a step may, not less.
     fn probe(&mut self) -> Result<Probe, String> {
+        self.query(None)
+    }
+
+    fn query(&mut self, focus_href: Option<&str>) -> Result<Probe, String> {
         let (reply, answer) = mpsc::channel();
         asks()
             .ask
-            .send(reply)
+            .send(Ask {
+                reply,
+                focus_href: focus_href.map(str::to_owned),
+            })
             .map_err(|_| "the window is gone".to_owned())?;
         let probe = answer
             .recv_timeout(WAIT)
@@ -268,9 +286,25 @@ impl Driver {
             "focus-has" => self.until(&format!("focus on {rest:?}"), |probe| {
                 probe.focused.contains(rest)
             }),
+            "focus-href" => {
+                self.query(Some(rest))?;
+                self.until(&format!("focus on link {rest:?}"), |probe| {
+                    probe.focused_href.as_deref() == Some(rest)
+                })
+            }
             "wait-text" => self.until(&format!("{rest:?} in the window"), |probe| {
                 probe.text.contains(rest)
             }),
+            "wait-paint" => {
+                let cpu = match rest {
+                    "cpu" => true,
+                    "gpu" => false,
+                    _ => return Err("wait-paint cpu|gpu".into()),
+                };
+                self.until(&format!("the {rest} renderer"), |probe| {
+                    probe.cpu_renderer == cpu
+                })
+            }
             "wait-event" => {
                 let wanted = match rest {
                     "game-started" => "game.started",
@@ -352,6 +386,7 @@ pub fn start(pads: InputService) {
         if driver.probe().is_ok() {
             report.keyboard_events = driver.last.keyboard;
             report.pointer_events = driver.last.pointer;
+            report.cpu_renderer = driver.last.cpu_renderer;
         }
         report.ok = outcome.is_ok();
         report.failure = outcome.err();

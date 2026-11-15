@@ -151,6 +151,8 @@ pub fn run(
 
 /// The window's renderer (#110): vello_hybrid on a GPU, vello_cpu (which
 /// repaints only damage) where there's none or only a software one.
+/// Intel macOS builds default to the CPU too: their Metal driver resources
+/// dominate the footprint of even a small library (#156).
 /// `CASKADE_RENDERER=cpu` draws on the CPU anyway; `CASKADE_RENDERER=gpu`
 /// draws through wgpu on a software adapter too (lavapipe), to test the GPU
 /// path, the backdrop's included (#149), without a GPU.
@@ -158,7 +160,11 @@ pub fn run(
 fn renderer() -> DioxusNativeWindowRenderer {
     let asked = std::env::var("CASKADE_RENDERER").unwrap_or_default();
     DioxusNativeWindowRenderer::with_options(dioxus_native::RendererOptions {
-        cpu_only: asked == "cpu",
+        cpu_only: match asked.as_str() {
+            "cpu" => true,
+            "gpu" => false,
+            _ => cfg!(all(target_os = "macos", target_arch = "x86_64")),
+        },
         allow_software_gpu: asked == "gpu",
         ..Default::default()
     })
