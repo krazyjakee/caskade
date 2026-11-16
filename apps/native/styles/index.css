@@ -180,7 +180,9 @@
     var(--tw-ring-offset-shadow), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow, 0 0 #0000);
 
   /* A frame: the chamfer's outline, less the same shape inset by the ring
-     width (a 45° cut moves in by width × (√2 − 1) along each side). */
+     width (a 45° cut moves in by width × (√2 − 1) along each side). The
+     inner shape runs the other way round, so it is a hole under the nonzero
+     rule too: Blitz ignores `evenodd` and filled the whole button (#158). */
   &::after {
     content: "";
     position: absolute;
@@ -197,13 +199,13 @@
       0 var(--cs-chamfer),
       var(--cs-chamfer) 0,
       calc(var(--cs-chamfer) + var(--cs-focus-ring-width) * 0.4142) var(--cs-focus-ring-width),
-      calc(100% - var(--cs-focus-ring-width)) var(--cs-focus-ring-width),
-      calc(100% - var(--cs-focus-ring-width))
-        calc(100% - var(--cs-chamfer) - var(--cs-focus-ring-width) * 0.4142),
+      var(--cs-focus-ring-width) calc(var(--cs-chamfer) + var(--cs-focus-ring-width) * 0.4142),
+      var(--cs-focus-ring-width) calc(100% - var(--cs-focus-ring-width)),
       calc(100% - var(--cs-chamfer) - var(--cs-focus-ring-width) * 0.4142)
         calc(100% - var(--cs-focus-ring-width)),
-      var(--cs-focus-ring-width) calc(100% - var(--cs-focus-ring-width)),
-      var(--cs-focus-ring-width) calc(var(--cs-chamfer) + var(--cs-focus-ring-width) * 0.4142),
+      calc(100% - var(--cs-focus-ring-width))
+        calc(100% - var(--cs-chamfer) - var(--cs-focus-ring-width) * 0.4142),
+      calc(100% - var(--cs-focus-ring-width)) var(--cs-focus-ring-width),
       calc(var(--cs-chamfer) + var(--cs-focus-ring-width) * 0.4142) var(--cs-focus-ring-width)
     );
   }

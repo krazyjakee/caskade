@@ -202,3 +202,28 @@ fn a_tooltip_shows_on_focus_and_describes_its_trigger() {
     window.settle();
     assert!(window.exists("tooltip"));
 }
+
+/// A popup stays inside the window (#157): from its trigger's left edge
+/// with room, else lined up with the trigger's right edge.
+#[test]
+fn popups_stay_inside_the_window() {
+    use super::super::popover::{MARGIN, place};
+    let anchor = |x: f64, width: f64| Anchor {
+        x,
+        y: 10.0,
+        width,
+        height: 32.0,
+        viewport_height: 800.0,
+        viewport_width: 1280.0,
+    };
+    let (style, side) = place(anchor(100.0, 40.0), false);
+    assert!(style.contains("left: 100px;"), "{style}");
+    assert_eq!(side, "bottom");
+    // The account avatar at the top bar's right end.
+    let (style, _) = place(anchor(1232.0, 32.0), false);
+    assert!(style.contains("right: 16px;"), "{style}");
+    assert!(!style.contains("left:"), "{style}");
+    // A right click at the very edge keeps the margin.
+    let (style, _) = place(anchor(1279.0, 0.0), false);
+    assert!(style.contains(&format!("right: {MARGIN}px;")), "{style}");
+}

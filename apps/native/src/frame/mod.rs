@@ -171,10 +171,14 @@ pub(crate) fn pointer_anchor(
     event: &MouseEvent,
 ) -> crate::ui::Anchor {
     let point = event.client_coordinates();
-    let viewport_height = within.map_or(0.0, |handle| {
+    let (viewport_width, viewport_height) = within.map_or((0.0, 0.0), |handle| {
         let doc = handle.doc();
         let viewport = doc.viewport();
-        f64::from(viewport.window_size.1) / viewport.scale_f64()
+        let scale = viewport.scale_f64();
+        (
+            f64::from(viewport.window_size.0) / scale,
+            f64::from(viewport.window_size.1) / scale,
+        )
     });
     crate::ui::Anchor {
         x: point.x,
@@ -182,5 +186,6 @@ pub(crate) fn pointer_anchor(
         width: 0.0,
         height: 0.0,
         viewport_height,
+        viewport_width,
     }
 }

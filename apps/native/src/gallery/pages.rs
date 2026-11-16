@@ -898,6 +898,7 @@ const ANCHOR: Anchor = Anchor {
     width: 208.0,
     height: 36.0,
     viewport_height: 800.0,
+    viewport_width: 1280.0,
 };
 
 pub fn OpenMenu() -> Element {

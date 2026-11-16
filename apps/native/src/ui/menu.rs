@@ -246,6 +246,8 @@ fn Item(
     on_choose: EventHandler<String>,
 ) -> Element {
     let interaction = use_interaction_where(first);
+    let input = use_input();
+    let mut me = use_signal(|| None::<NodeId>);
     let label_id = use_id("menu-item");
     let id = item.id.clone();
     let disabled = item.disabled;
@@ -264,13 +266,14 @@ fn Item(
             "data-part": "item",
             "data-tone": item.danger.then_some("danger"),
             "data-focused": interaction.focused(),
-            "data-hovered": interaction.hovered(),
+            "data-hovered": interaction.hovered().filter(|_| !disabled),
             "data-focus-visible": interaction.ring(),
             "data-disabled": flag(disabled),
             "data-focus-default": flag(first),
-            class: "flex cursor-default items-start gap-2.5 rounded-[6px] px-2.5 py-1.5 text-sm text-fg-muted outline-none console:data-focus-visible:focus-ring data-focused:bg-surface-hover data-focused:text-fg data-disabled:opacity-40 data-[tone=danger]:text-danger",
+            class: "flex cursor-default items-start gap-2.5 rounded-[6px] px-2.5 py-1.5 text-sm text-fg-muted outline-none console:data-focus-visible:focus-ring data-focused:bg-surface-hover data-focused:text-fg data-hovered:bg-surface-hover data-hovered:text-fg data-disabled:opacity-40 data-[tone=danger]:text-danger",
             onmounted: move |event| {
                 if let Some(node) = event.data().downcast::<NodeHandle>().map(NodeHandle::node_id) {
+                    me.set(Some(node));
                     let mut nodes = nodes;
                     nodes.write().retain(|(known, _)| *known != mount_id);
                     nodes.write().push((mount_id.clone(), node));
@@ -278,7 +281,14 @@ fn Item(
             },
             onfocus: move |_| interaction.focus(),
             onblur: move |_| interaction.blur(),
-            onmouseenter: move |_| interaction.enter(),
+            onmouseenter: move |_| {
+                interaction.enter();
+                // The item under the pointer is the one keys act on, as in
+                // react-aria's menus (#159).
+                if !disabled && let Some(node) = me() {
+                    input.focus(node);
+                }
+            },
             onmouseleave: move |_| interaction.leave(),
             onclick: move |_| choose(()),
             onkeydown: move |event| {

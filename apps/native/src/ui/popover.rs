@@ -1,5 +1,6 @@
 //! What every popup is built on (#93): a fixed box placed beside its
-//! trigger (below it, or above when below doesn't fit), with
+//! trigger (below it, or above when below doesn't fit; from its left edge,
+//! or its right edge when that would run off the window), with
 //! `data-placement` (which also makes it an overlay to the input layer:
 //! focus goes in when it opens and comes back to the trigger when it
 //! closes, as react-aria's focus scope does). It closes on Escape, a pad's
@@ -25,6 +26,8 @@ pub struct Anchor {
     pub height: f64,
     /// The window's height, to flip above when below doesn't fit.
     pub viewport_height: f64,
+    /// The window's width, to keep a popup inside it (#157).
+    pub viewport_width: f64,
 }
 
 impl Anchor {
@@ -33,12 +36,15 @@ impl Anchor {
     pub fn of(handle: &NodeHandle) -> Option<Self> {
         let doc = handle.doc();
         let rect = doc.get_client_bounding_rect(handle.node_id())?;
+        let (width, height) = doc.viewport().window_size;
+        let scale = doc.viewport().scale_f64();
         Some(Self {
             x: rect.x,
             y: rect.y,
             width: rect.width,
             height: rect.height,
-            viewport_height: f64::from(doc.viewport().window_size.1) / doc.viewport().scale_f64(),
+            viewport_height: f64::from(height) / scale,
+            viewport_width: f64::from(width) / scale,
         })
     }
 }
@@ -76,8 +82,15 @@ impl Trigger {
 pub const OFFSET: f64 = 6.0;
 /// How much room below the trigger a popup wants before it flips above.
 const ROOM: f64 = 240.0;
+/// How much room right of the trigger's left edge a popup wants before it
+/// lines up with the trigger's right edge instead: a menu's widest
+/// (`max-w-80`).
+const WIDE: f64 = 320.0;
+/// The least gap between a popup and the window's edge.
+pub const MARGIN: f64 = 8.0;
 
-/// A popup's place: `top`/`left` from the anchor, and which side it's on.
+/// A popup's place: `top` or `bottom`, and `left` or `right`, from the
+/// anchor, and which side of it it's on.
 pub fn place(anchor: Anchor, match_width: bool) -> (String, &'static str) {
     let below = anchor.y + anchor.height + OFFSET;
     let width = if match_width {
@@ -85,21 +98,24 @@ pub fn place(anchor: Anchor, match_width: bool) -> (String, &'static str) {
     } else {
         String::new()
     };
+    // Near the window's right edge (the account menu, a right click at the
+    // edge), the popup grows leftwards from the trigger's right edge.
+    let horizontal =
+        if anchor.viewport_width > 0.0 && anchor.x + WIDE > anchor.viewport_width - MARGIN {
+            let right = (anchor.viewport_width - anchor.x - anchor.width).max(MARGIN);
+            format!("right: {right}px;")
+        } else {
+            format!("left: {}px;", anchor.x.max(0.0))
+        };
     if below + ROOM > anchor.viewport_height && anchor.y > anchor.viewport_height / 2.0 {
         let bottom = anchor.viewport_height - anchor.y + OFFSET;
         (
-            format!(
-                "position: fixed; left: {}px; bottom: {bottom}px;{width}",
-                anchor.x
-            ),
+            format!("position: fixed; {horizontal} bottom: {bottom}px;{width}"),
             "top",
         )
     } else {
         (
-            format!(
-                "position: fixed; left: {}px; top: {below}px;{width}",
-                anchor.x
-            ),
+            format!("position: fixed; {horizontal} top: {below}px;{width}"),
             "bottom",
         )
     }

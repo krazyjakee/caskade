@@ -247,7 +247,7 @@ pub fn Combobox(
                             "data-part": "option",
                             "data-focused": (Some(index) == active_index).then_some("true"),
                             "data-selected": (Some(&option.value) == value.as_ref()).then_some("true"),
-                            class: "flex cursor-default items-center gap-2 rounded-[6px] px-2.5 py-1.5 text-sm text-fg-muted data-focused:bg-surface-hover data-focused:text-fg data-selected:text-fg",
+                            class: "flex cursor-default items-center gap-2 rounded-[6px] px-2.5 py-1.5 text-sm text-fg-muted hover:bg-surface-hover hover:text-fg data-focused:bg-surface-hover data-focused:text-fg data-selected:text-fg",
                             onclick: move |_| { active.on_choose.call(index); },
                             span { class: "grow truncate", "{option.label}" }
                             if Some(&option.value) == value.as_ref() {

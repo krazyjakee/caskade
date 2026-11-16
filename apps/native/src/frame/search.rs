@@ -288,7 +288,7 @@ pub fn SearchBox() -> Element {
                         role: "option",
                         "data-part": "see-all",
                         "data-focused": (active_index == Some(games.len())).then_some("true"),
-                        class: "mt-1 flex cursor-default items-center gap-2 rounded-[6px] px-2 py-2 text-sm text-fg-muted data-focused:bg-surface-hover data-focused:text-fg",
+                        class: "mt-1 flex cursor-default items-center gap-2 rounded-[6px] px-2 py-2 text-sm text-fg-muted hover:bg-surface-hover hover:text-fg data-focused:bg-surface-hover data-focused:text-fg",
                         onclick: move |_| {
                             let q = text.peek().clone();
                             search(q);
@@ -341,7 +341,7 @@ fn Suggestion(
             role: "option",
             "data-part": "suggestion",
             "data-focused": focused.then_some("true"),
-            class: "flex cursor-default items-center gap-3 rounded-[6px] px-2 py-1.5 data-focused:bg-surface-hover",
+            class: "flex cursor-default items-center gap-3 rounded-[6px] px-2 py-1.5 hover:bg-surface-hover data-focused:bg-surface-hover",
             onclick: move |_| on_choose.call(()),
             GameArt { image: cover, class: "size-9 shrink-0 rounded-[4px]" }
             span { class: "flex min-w-0 flex-1 flex-col",
