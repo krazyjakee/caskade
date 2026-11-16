@@ -243,7 +243,7 @@ focus-is Resume · View details
 # hero's game isn't in it), then into Recently Added, which has both games:
 # LT and RT page the shelf, and focus follows.
 press nav.down
-focus-is View all →
+focus-is View all
 seek nav.down Pocket Quest
 seek-section nav.down shelf-added
 press nav.down
