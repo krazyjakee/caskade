@@ -16,13 +16,22 @@ use super::Node;
 pub(crate) const FADE_DELAY: Duration = Duration::from_millis(500);
 pub(crate) const FADE_DURATION: Duration = Duration::from_millis(200);
 
+/// The opacity overlay scrollbars rest at between activity: dimmed, but
+/// visible, so a scroll container always shows where it is and how much is
+/// left (as with "always show scrollbars"), and its thumb can be grabbed
+/// without scrolling first.
+pub(crate) const RESTING_OPACITY: f32 = 0.6;
+
 /// Overlay scrollbar opacity as a function of time since the scroll
 /// container's last scrollbar activity: fully opaque through the fade
-/// delay, then fading linearly to hidden.
+/// delay, then fading linearly back to [`RESTING_OPACITY`].
 pub(crate) fn opacity_at(elapsed: Duration) -> f32 {
     match elapsed.checked_sub(FADE_DELAY) {
         None => 1.0,
-        Some(fading) => 1.0 - (fading.as_secs_f32() / FADE_DURATION.as_secs_f32()).min(1.0),
+        Some(fading) => {
+            let faded = (fading.as_secs_f32() / FADE_DURATION.as_secs_f32()).min(1.0);
+            1.0 - (1.0 - RESTING_OPACITY) * faded
+        }
     }
 }
 
@@ -227,12 +236,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn opacity_holds_through_the_fade_delay_then_fades_out() {
+    fn opacity_holds_through_the_fade_delay_then_fades_to_rest() {
         assert_eq!(opacity_at(Duration::ZERO), 1.0);
         assert_eq!(opacity_at(FADE_DELAY), 1.0);
         let mid_fade = opacity_at(FADE_DELAY + FADE_DURATION / 2);
-        assert!((mid_fade - 0.5).abs() < 0.01, "got {mid_fade}");
-        assert_eq!(opacity_at(FADE_DELAY + FADE_DURATION), 0.0);
-        assert_eq!(opacity_at(Duration::from_secs(3600)), 0.0);
+        let halfway = (1.0 + RESTING_OPACITY) / 2.0;
+        assert!((mid_fade - halfway).abs() < 0.01, "got {mid_fade}");
+        assert_eq!(opacity_at(FADE_DELAY + FADE_DURATION), RESTING_OPACITY);
+        assert_eq!(opacity_at(Duration::from_secs(3600)), RESTING_OPACITY);
     }
 }

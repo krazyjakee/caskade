@@ -469,6 +469,13 @@ impl<Rend: WindowRenderer> View<Rend> {
         let animation_time = self.current_animation_time();
         let is_visible = self.is_visible;
 
+        // Move a smooth scroll on through the document's event handler, so
+        // the page hears its `scroll` events (a virtual list renders what
+        // comes into view from them).
+        if self.doc.inner().is_scroll_animating() {
+            self.doc.handle_ui_event(UiEvent::ScrollAnimationFrame);
+        }
+
         let mut inner = self.doc.inner_mut();
         inner.resolve(animation_time);
         if let Some(hook) = &mut self.before_paint {

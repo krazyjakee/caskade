@@ -171,6 +171,13 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
     pub fn handle_ui_event(&mut self, event: UiEvent) {
         let event = match event {
             UiEvent::Accessibility(event) => return self.handle_accessibility_event(event),
+            UiEvent::ScrollAnimationFrame => {
+                self.doc
+                    .inner_mut()
+                    .resolve_scroll_animation_with(&mut |event| self.queue.push_back(event));
+                self.process_queue();
+                return;
+            }
             event => event,
         };
         let doc = self.doc.inner();
@@ -233,7 +240,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
             UiEvent::Ime(_) => focussed_node_id,
             UiEvent::Paste(_) => focussed_node_id,
             UiEvent::AppleStandardKeybinding(_) => focussed_node_id,
-            UiEvent::Accessibility(_) => None,
+            UiEvent::Accessibility(_) | UiEvent::ScrollAnimationFrame => None,
         };
         // Fall back to the root element. A document without a root element (e.g. an
         // empty iframe sub-document) has no event target, so there is nothing to do.
@@ -315,7 +322,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
                 self.run_default_action(&mut dom_event);
                 self.process_queue();
             }
-            UiEvent::Accessibility(_) => {}
+            UiEvent::Accessibility(_) | UiEvent::ScrollAnimationFrame => {}
         };
 
         // Update document input state (hover, focus, active, etc)

@@ -2036,9 +2036,9 @@ impl BaseDocument {
     }
 
     /// The current opacity of `node_id`'s overlay scrollbars. They show at
-    /// full opacity on scroll and fade out after a delay (Chromium's overlay
-    /// timings); the pointer resting on a thumb, or dragging it, holds them
-    /// visible.
+    /// full opacity on scroll and fade back to a dimmed resting opacity
+    /// after a delay (Chromium's overlay timings); the pointer resting on a
+    /// thumb, or dragging it, holds them at full opacity.
     pub fn scrollbar_opacity(&self, node_id: NodeId) -> f32 {
         let interacting = |scrollbar: &crate::node::ScrollbarRef| scrollbar.node_id == node_id;
         if self.hovered_scrollbar.as_ref().is_some_and(interacting)
@@ -2049,9 +2049,11 @@ impl BaseDocument {
         {
             return 1.0;
         }
-        self.scrollbar_activity.get(&node_id).map_or(0.0, |last| {
-            crate::node::scrollbar::opacity_at(last.elapsed())
-        })
+        self.scrollbar_activity
+            .get(&node_id)
+            .map_or(crate::node::scrollbar::RESTING_OPACITY, |last| {
+                crate::node::scrollbar::opacity_at(last.elapsed())
+            })
     }
 
     /// Show `node_id`'s overlay scrollbars at full opacity and restart their
@@ -2104,8 +2106,7 @@ impl BaseDocument {
         });
 
         let (hit, hovered_scrollbar) = self.hit_with_scrollbar(x, y);
-        // A faded-out thumb is not interactive: pointer moves never fade
-        // overlay scrollbars back in (only scrolling shows them).
+        // A hidden thumb is not interactive.
         let hovered_scrollbar =
             hovered_scrollbar.filter(|scrollbar| self.scrollbar_opacity(scrollbar.node_id) > 0.0);
         // Scrollbar-thumb hover is part of hover state: track it here so a

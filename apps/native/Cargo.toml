@@ -56,7 +56,7 @@ required-features = ["shots"]
 # Without `net` (blitz-net): its reqwest builds rustls on aws-lc, which the
 # workspace keeps out (`web_player/proxy.rs`'s lockfile test), and the app's
 # images come from the artwork cache, not the network.
-dioxus-native = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, features = ["prelude", "accessibility", "svg", "system-fonts", "woff"] }
+dioxus-native = { git = "https://github.com/DioxusLabs/blitz", rev = "9f9c8e321735890754b4a9970cb07765b8bf3c0c", default-features = false, features = ["prelude", "accessibility", "svg", "system-fonts", "woff", "scrollbars"] }
 caskade-app = { path = "../../crates/caskade-app" }
 caskade-core = { path = "../../crates/caskade-core" }
 # A job's install ways, questions and failures, for Activity (#101).

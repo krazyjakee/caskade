@@ -917,23 +917,34 @@ pub(crate) fn handle_click(
     }
 }
 
+/// How far one line of a wheel delta scrolls, in CSS pixels: Chromium's
+/// values (a notch is one line on Windows and Linux, so 100 px; macOS
+/// reports accelerated fractions of lines, 40 px each).
+#[cfg(target_os = "macos")]
+const LINE_SCROLL_PX: f64 = 40.0;
+#[cfg(not(target_os = "macos"))]
+const LINE_SCROLL_PX: f64 = 100.0;
+
 pub(crate) fn handle_wheel<F: FnMut(DomEvent)>(
     doc: &mut BaseDocument,
     _: NodeId,
     event: BlitzWheelEvent,
     mut dispatch_event: F,
 ) {
-    let (scroll_x, scroll_y) = match event.delta {
-        BlitzWheelDelta::Lines(x, y) => (x * 20.0, y * 20.0),
-        BlitzWheelDelta::Pixels(x, y) => (x, y),
+    // A wheel's notches (lines) step a practical distance and glide there;
+    // pixel deltas (a touchpad, a smooth-scrolling wheel) are already smooth
+    // and follow the fingers at once.
+    let has_changed = match event.delta {
+        BlitzWheelDelta::Lines(x, y) => doc.scroll_chain_smoothly(
+            doc.get_hover_node_id(),
+            x * LINE_SCROLL_PX,
+            y * LINE_SCROLL_PX,
+            &mut dispatch_event,
+        ),
+        BlitzWheelDelta::Pixels(x, y) => {
+            doc.scroll_chain_by(doc.get_hover_node_id(), x, y, &mut dispatch_event)
+        }
     };
-
-    let has_changed = doc.scroll_chain_by(
-        doc.get_hover_node_id(),
-        scroll_x,
-        scroll_y,
-        &mut dispatch_event,
-    );
     if has_changed {
         doc.shell_provider.request_redraw();
     }

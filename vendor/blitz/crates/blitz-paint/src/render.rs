@@ -891,10 +891,9 @@ fn convert_rect(rect: &parley::BoundingBox) -> kurbo::Rect {
 impl ElementCx<'_, '_> {
     /// Paint overlay scrollbar thumbs for scroll containers: `overflow:
     /// scroll`, or `auto` when the content overflows (never `hidden`/`clip`,
-    /// which scroll only programmatically). Thumbs appear on scroll and fade
-    /// out after a delay ([`BaseDocument::scrollbar_opacity`]); never-scrolled
-    /// containers paint nothing, keeping thumbs out of static reftest
-    /// screenshots.
+    /// which scroll only programmatically). Thumbs rest dimmed, show at full
+    /// opacity on scroll and fade back after a delay
+    /// ([`BaseDocument::scrollbar_opacity`]).
     ///
     /// Geometry comes from [`Node::scrollbar_thumb`], shared with the
     /// thumb-drag hit testing in blitz-dom.

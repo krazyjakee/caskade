@@ -580,7 +580,8 @@ fn Row(
     }
 }
 
-/// The game page moved (a wheel turned over it): rows waiting to come near
+/// The game page moved (a wheel turned over it, and again once its step
+/// has glided there): rows waiting to come near
 /// the screen look again. The input layer's own scrolls and a resized
 /// window say so too.
 #[derive(Clone, Copy)]

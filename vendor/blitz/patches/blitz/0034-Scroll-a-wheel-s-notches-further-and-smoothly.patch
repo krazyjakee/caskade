@@ -1,0 +1,348 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Mon, 16 Nov 2026 19:05:29 +0000
+Subject: [PATCH] Scroll a wheel's notches further, and smoothly
+
+A notch of a mouse wheel (a line delta) scrolled 20 px and jumped there.
+It now scrolls Chromium's distance (100 px a line; 40 px on macOS, whose
+line deltas are accelerated fractions) and glides there over 150 ms,
+easing out, unless the user prefers reduced motion. Notches arriving
+while it moves add to where it is heading. The first scroller along the
+chain that can move takes the step; text inputs and sub-documents
+scroll at once as before. Pixel deltas (touchpads) are unchanged.
+
+Animated scrolls (these, smooth scrollTo and flings) used to move
+without dispatching scroll events, so a virtual list never heard them.
+The shell now sends a UiEvent::ScrollAnimationFrame before resolving
+each frame while one runs; the event driver advances the animation
+with resolve_scroll_animation_with and dispatches its scroll events.
+---
+ packages/blitz-dom/src/events/driver.rs  |  11 +-
+ packages/blitz-dom/src/events/pointer.rs |  31 +++--
+ packages/blitz-dom/src/scrolling.rs      | 137 ++++++++++++++++++++++-
+ packages/blitz-shell/src/window.rs       |   7 ++
+ packages/blitz-traits/src/events.rs      |   5 +
+ 5 files changed, 174 insertions(+), 17 deletions(-)
+
+diff --git a/packages/blitz-dom/src/events/driver.rs b/packages/blitz-dom/src/events/driver.rs
+index f1b9035e6..04de53944 100644
+--- a/packages/blitz-dom/src/events/driver.rs
++++ b/packages/blitz-dom/src/events/driver.rs
+@@ -171,6 +171,13 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+     pub fn handle_ui_event(&mut self, event: UiEvent) {
+         let event = match event {
+             UiEvent::Accessibility(event) => return self.handle_accessibility_event(event),
++            UiEvent::ScrollAnimationFrame => {
++                self.doc
++                    .inner_mut()
++                    .resolve_scroll_animation_with(&mut |event| self.queue.push_back(event));
++                self.process_queue();
++                return;
++            }
+             event => event,
+         };
+         let doc = self.doc.inner();
+@@ -233,7 +240,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+             UiEvent::Ime(_) => focussed_node_id,
+             UiEvent::Paste(_) => focussed_node_id,
+             UiEvent::AppleStandardKeybinding(_) => focussed_node_id,
+-            UiEvent::Accessibility(_) => None,
++            UiEvent::Accessibility(_) | UiEvent::ScrollAnimationFrame => None,
+         };
+         // Fall back to the root element. A document without a root element (e.g. an
+         // empty iframe sub-document) has no event target, so there is nothing to do.
+@@ -315,7 +322,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+                 self.run_default_action(&mut dom_event);
+                 self.process_queue();
+             }
+-            UiEvent::Accessibility(_) => {}
++            UiEvent::Accessibility(_) | UiEvent::ScrollAnimationFrame => {}
+         };
+ 
+         // Update document input state (hover, focus, active, etc)
+diff --git a/packages/blitz-dom/src/events/pointer.rs b/packages/blitz-dom/src/events/pointer.rs
+index 58bfd2eb3..1532d7834 100644
+--- a/packages/blitz-dom/src/events/pointer.rs
++++ b/packages/blitz-dom/src/events/pointer.rs
+@@ -917,23 +917,34 @@ pub(crate) fn handle_click(
+     }
+ }
+ 
++/// How far one line of a wheel delta scrolls, in CSS pixels: Chromium's
++/// values (a notch is one line on Windows and Linux, so 100 px; macOS
++/// reports accelerated fractions of lines, 40 px each).
++#[cfg(target_os = "macos")]
++const LINE_SCROLL_PX: f64 = 40.0;
++#[cfg(not(target_os = "macos"))]
++const LINE_SCROLL_PX: f64 = 100.0;
++
+ pub(crate) fn handle_wheel<F: FnMut(DomEvent)>(
+     doc: &mut BaseDocument,
+     _: NodeId,
+     event: BlitzWheelEvent,
+     mut dispatch_event: F,
+ ) {
+-    let (scroll_x, scroll_y) = match event.delta {
+-        BlitzWheelDelta::Lines(x, y) => (x * 20.0, y * 20.0),
+-        BlitzWheelDelta::Pixels(x, y) => (x, y),
++    // A wheel's notches (lines) step a practical distance and glide there;
++    // pixel deltas (a touchpad, a smooth-scrolling wheel) are already smooth
++    // and follow the fingers at once.
++    let has_changed = match event.delta {
++        BlitzWheelDelta::Lines(x, y) => doc.scroll_chain_smoothly(
++            doc.get_hover_node_id(),
++            x * LINE_SCROLL_PX,
++            y * LINE_SCROLL_PX,
++            &mut dispatch_event,
++        ),
++        BlitzWheelDelta::Pixels(x, y) => {
++            doc.scroll_chain_by(doc.get_hover_node_id(), x, y, &mut dispatch_event)
++        }
+     };
+-
+-    let has_changed = doc.scroll_chain_by(
+-        doc.get_hover_node_id(),
+-        scroll_x,
+-        scroll_y,
+-        &mut dispatch_event,
+-    );
+     if has_changed {
+         doc.shell_provider.request_redraw();
+     }
+diff --git a/packages/blitz-dom/src/scrolling.rs b/packages/blitz-dom/src/scrolling.rs
+index de1ae74fc..19d7bfaf0 100644
+--- a/packages/blitz-dom/src/scrolling.rs
++++ b/packages/blitz-dom/src/scrolling.rs
+@@ -101,6 +101,18 @@ pub(crate) struct ScrollToState {
+     pub(crate) start_time: f64,
+     /// Total duration of the animation in milliseconds.
+     pub(crate) duration: f64,
++    /// How it moves over its duration.
++    pub(crate) easing: ScrollEasing,
++}
++
++/// The curve of a smooth scroll.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub(crate) enum ScrollEasing {
++    /// Accelerate, then decelerate: a programmatic scroll or a fragment jump.
++    InOut,
++    /// Start at full speed, then decelerate: a wheel step, which must answer
++    /// at once and may be followed by another before it ends.
++    Out,
+ }
+ 
+ #[derive(Debug, Clone, PartialEq)]
+@@ -123,6 +135,11 @@ fn ease_in_out_cubic(t: f64) -> f64 {
+     }
+ }
+ 
++/// Cubic ease-out: fastest at the start, settling at the end.
++fn ease_out_cubic(t: f64) -> f64 {
++    1.0 - (1.0 - t).powi(3)
++}
++
+ impl BaseDocument {
+     /// Apply a scroll to the document, returning whether anything moved.
+     ///
+@@ -447,6 +464,92 @@ impl BaseDocument {
+     /// Duration (in milliseconds) of an animated scroll.
+     const SMOOTH_SCROLL_DURATION_MS: f64 = 300.0;
+ 
++    /// Duration (in milliseconds) of a wheel step's animation.
++    const WHEEL_SCROLL_DURATION_MS: f64 = 150.0;
++
++    /// A user scroll by a whole step (a mouse wheel's notch) that animates
++    /// instead of jumping, unless the user prefers reduced motion: the
++    /// first scroller along the chain from `anchor_node_id` that can move
++    /// takes the delta and glides there. Steps arriving while it moves add
++    /// to where it is heading. Text inputs and sub-documents, which scroll
++    /// content of their own, scroll at once as before.
++    pub(crate) fn scroll_chain_smoothly(
++        &mut self,
++        anchor_node_id: Option<NodeId>,
++        scroll_x: f64,
++        scroll_y: f64,
++        dispatch_event: &mut dyn FnMut(DomEvent),
++    ) -> bool {
++        if self.viewport.prefers_reduced_motion {
++            return self.scroll_chain_by(anchor_node_id, scroll_x, scroll_y, dispatch_event);
++        }
++        let delta = Point {
++            x: -scroll_x,
++            y: -scroll_y,
++        };
++        let mut target = anchor_node_id.map_or(ScrollTarget::Viewport, ScrollTarget::Node);
++        loop {
++            target = self.canonical_scroll_target(target);
++            if let ScrollTarget::Node(node_id) = target {
++                let own_content = self.nodes.get(node_id).is_some_and(|node| {
++                    node.subdoc().is_some()
++                        || node
++                            .element_data()
++                            .is_some_and(|el| el.text_input_data().is_some())
++                });
++                if own_content {
++                    return self.scroll_chain_by(Some(node_id), scroll_x, scroll_y, dispatch_event);
++                }
++            }
++            let (current, min, max) = self.scroll_state(target, false);
++            let from = match &self.scroll_animation {
++                ScrollAnimationState::ScrollTo(state)
++                    if state.target == target && state.easing == ScrollEasing::Out =>
++                {
++                    state.end
++                }
++                _ => current,
++            };
++            // Only the axes the step moves, and never back against it (a box
++            // scrolled beyond its range by script stays where it is).
++            let step = |from: f64, by: f64, min: f64, max: f64| {
++                if by == 0.0 {
++                    from
++                } else {
++                    (from + by).clamp(min.min(from), max.max(from))
++                }
++            };
++            let end = Point {
++                x: step(from.x, delta.x, min.x, max.x),
++                y: step(from.y, delta.y, min.y, max.y),
++            };
++            if end != from {
++                self.animate_scroll(
++                    target,
++                    end,
++                    Self::WHEEL_SCROLL_DURATION_MS,
++                    ScrollEasing::Out,
++                );
++                if let ScrollTarget::Node(node_id) = target {
++                    self.show_scrollbars(node_id);
++                }
++                return true;
++            }
++            match self.next_scroller_in_chain(target) {
++                Some(next) => target = next,
++                None => return false,
++            }
++        }
++    }
++
++    /// Whether a smooth scroll or a fling is moving something: the embedder
++    /// then advances it each frame with
++    /// [`resolve_scroll_animation_with`](Self::resolve_scroll_animation_with),
++    /// so its `scroll` events reach the page.
++    pub fn is_scroll_animating(&self) -> bool {
++        self.scroll_animation != ScrollAnimationState::None
++    }
++
+     /// Returns the current, minimum and maximum scroll offsets for the given
+     /// scroll target. `include_hidden` controls whether
+     /// `overflow: hidden` axes count as scrollable (they do for programmatic scrolls,
+@@ -525,6 +628,21 @@ impl BaseDocument {
+     /// Start a smooth (animated) scroll towards the given absolute scroll offset. The
+     /// animation is advanced each frame in [`BaseDocument::resolve_scroll_animation`].
+     fn start_scroll_animation(&mut self, target: ScrollTarget, end: Point<f64>) {
++        self.animate_scroll(
++            target,
++            end,
++            Self::SMOOTH_SCROLL_DURATION_MS,
++            ScrollEasing::InOut,
++        );
++    }
++
++    fn animate_scroll(
++        &mut self,
++        target: ScrollTarget,
++        end: Point<f64>,
++        duration: f64,
++        easing: ScrollEasing,
++    ) {
+         let start = self.scroll_state(target, true).0;
+ 
+         let start_time = SystemTime::now()
+@@ -537,7 +655,8 @@ impl BaseDocument {
+             start,
+             end,
+             start_time,
+-            duration: Self::SMOOTH_SCROLL_DURATION_MS,
++            duration,
++            easing,
+         });
+ 
+         // Ensure the frame loop runs so the animation is driven to completion.
+@@ -737,6 +856,12 @@ impl BaseDocument {
+     }
+ 
+     pub fn resolve_scroll_animation(&mut self) {
++        self.resolve_scroll_animation_with(&mut |_| {});
++    }
++
++    /// Advance the running smooth scroll or fling to now, dispatching the
++    /// `scroll` events it causes.
++    pub fn resolve_scroll_animation_with(&mut self, dispatch_event: &mut dyn FnMut(DomEvent)) {
+         match &mut self.scroll_animation {
+             ScrollAnimationState::Fling(fling_state) => {
+                 let time_ms = SystemTime::now()
+@@ -757,7 +882,7 @@ impl BaseDocument {
+                 let dx = fling_state.x_velocity * time_diff_ms;
+                 let dy = fling_state.y_velocity * time_diff_ms;
+ 
+-                self.scroll_chain_by(Some(fling_state.target), dx, dy, &mut |_| {});
++                self.scroll_chain_by(Some(fling_state.target), dx, dy, dispatch_event);
+                 if fling_state.x_velocity.abs() < 0.1 && fling_state.y_velocity.abs() < 0.1 {
+                     self.scroll_animation = ScrollAnimationState::None;
+                 }
+@@ -775,15 +900,17 @@ impl BaseDocument {
+                 } else {
+                     ((time_ms - scroll_to.start_time) / scroll_to.duration).clamp(0.0, 1.0)
+                 };
+-                let eased = ease_in_out_cubic(progress);
++                let eased = match scroll_to.easing {
++                    ScrollEasing::InOut => ease_in_out_cubic(progress),
++                    ScrollEasing::Out => ease_out_cubic(progress),
++                };
+ 
+                 // Interpolate the target offset and move to it.
+                 let target = Point {
+                     x: scroll_to.start.x + (scroll_to.end.x - scroll_to.start.x) * eased,
+                     y: scroll_to.start.y + (scroll_to.end.y - scroll_to.start.y) * eased,
+                 };
+-                // TODO: dispatch `scroll` events for programmatic scrolls.
+-                self.write_scroll_offset(scroll_to.target, target, &mut |_| {});
++                self.write_scroll_offset(scroll_to.target, target, dispatch_event);
+ 
+                 if progress >= 1.0 {
+                     self.scroll_animation = ScrollAnimationState::None;
+diff --git a/packages/blitz-shell/src/window.rs b/packages/blitz-shell/src/window.rs
+index 27c707a27..10876d4c8 100644
+--- a/packages/blitz-shell/src/window.rs
++++ b/packages/blitz-shell/src/window.rs
+@@ -469,6 +469,13 @@ impl<Rend: WindowRenderer> View<Rend> {
+         let animation_time = self.current_animation_time();
+         let is_visible = self.is_visible;
+ 
++        // Move a smooth scroll on through the document's event handler, so
++        // the page hears its `scroll` events (a virtual list renders what
++        // comes into view from them).
++        if self.doc.inner().is_scroll_animating() {
++            self.doc.handle_ui_event(UiEvent::ScrollAnimationFrame);
++        }
++
+         let mut inner = self.doc.inner_mut();
+         inner.resolve(animation_time);
+         if let Some(hook) = &mut self.before_paint {
+diff --git a/packages/blitz-traits/src/events.rs b/packages/blitz-traits/src/events.rs
+index 223327946..3335c7ee9 100644
+--- a/packages/blitz-traits/src/events.rs
++++ b/packages/blitz-traits/src/events.rs
+@@ -74,6 +74,11 @@ pub enum UiEvent {
+     Paste(String),
+     /// An assistive technology (a screen reader, say) acting on an element.
+     Accessibility(BlitzAccessibilityEvent),
++    /// A frame of a running smooth scroll or fling (see
++    /// `BaseDocument::is_scroll_animating`): the embedder sends it before
++    /// resolving each frame, so the scroll moves on and its `scroll` events
++    /// reach the page.
++    ScrollAnimationFrame,
+ }
+ 
+ /// An action an assistive technology asks of an element: what a user does

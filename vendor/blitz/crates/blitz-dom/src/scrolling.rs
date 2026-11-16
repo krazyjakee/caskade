@@ -101,6 +101,18 @@ pub(crate) struct ScrollToState {
     pub(crate) start_time: f64,
     /// Total duration of the animation in milliseconds.
     pub(crate) duration: f64,
+    /// How it moves over its duration.
+    pub(crate) easing: ScrollEasing,
+}
+
+/// The curve of a smooth scroll.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum ScrollEasing {
+    /// Accelerate, then decelerate: a programmatic scroll or a fragment jump.
+    InOut,
+    /// Start at full speed, then decelerate: a wheel step, which must answer
+    /// at once and may be followed by another before it ends.
+    Out,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -121,6 +133,11 @@ fn ease_in_out_cubic(t: f64) -> f64 {
         let f = 2.0 * t - 2.0;
         1.0 + (f * f * f) / 2.0
     }
+}
+
+/// Cubic ease-out: fastest at the start, settling at the end.
+fn ease_out_cubic(t: f64) -> f64 {
+    1.0 - (1.0 - t).powi(3)
 }
 
 impl BaseDocument {
@@ -447,6 +464,92 @@ impl BaseDocument {
     /// Duration (in milliseconds) of an animated scroll.
     const SMOOTH_SCROLL_DURATION_MS: f64 = 300.0;
 
+    /// Duration (in milliseconds) of a wheel step's animation.
+    const WHEEL_SCROLL_DURATION_MS: f64 = 150.0;
+
+    /// A user scroll by a whole step (a mouse wheel's notch) that animates
+    /// instead of jumping, unless the user prefers reduced motion: the
+    /// first scroller along the chain from `anchor_node_id` that can move
+    /// takes the delta and glides there. Steps arriving while it moves add
+    /// to where it is heading. Text inputs and sub-documents, which scroll
+    /// content of their own, scroll at once as before.
+    pub(crate) fn scroll_chain_smoothly(
+        &mut self,
+        anchor_node_id: Option<NodeId>,
+        scroll_x: f64,
+        scroll_y: f64,
+        dispatch_event: &mut dyn FnMut(DomEvent),
+    ) -> bool {
+        if self.viewport.prefers_reduced_motion {
+            return self.scroll_chain_by(anchor_node_id, scroll_x, scroll_y, dispatch_event);
+        }
+        let delta = Point {
+            x: -scroll_x,
+            y: -scroll_y,
+        };
+        let mut target = anchor_node_id.map_or(ScrollTarget::Viewport, ScrollTarget::Node);
+        loop {
+            target = self.canonical_scroll_target(target);
+            if let ScrollTarget::Node(node_id) = target {
+                let own_content = self.nodes.get(node_id).is_some_and(|node| {
+                    node.subdoc().is_some()
+                        || node
+                            .element_data()
+                            .is_some_and(|el| el.text_input_data().is_some())
+                });
+                if own_content {
+                    return self.scroll_chain_by(Some(node_id), scroll_x, scroll_y, dispatch_event);
+                }
+            }
+            let (current, min, max) = self.scroll_state(target, false);
+            let from = match &self.scroll_animation {
+                ScrollAnimationState::ScrollTo(state)
+                    if state.target == target && state.easing == ScrollEasing::Out =>
+                {
+                    state.end
+                }
+                _ => current,
+            };
+            // Only the axes the step moves, and never back against it (a box
+            // scrolled beyond its range by script stays where it is).
+            let step = |from: f64, by: f64, min: f64, max: f64| {
+                if by == 0.0 {
+                    from
+                } else {
+                    (from + by).clamp(min.min(from), max.max(from))
+                }
+            };
+            let end = Point {
+                x: step(from.x, delta.x, min.x, max.x),
+                y: step(from.y, delta.y, min.y, max.y),
+            };
+            if end != from {
+                self.animate_scroll(
+                    target,
+                    end,
+                    Self::WHEEL_SCROLL_DURATION_MS,
+                    ScrollEasing::Out,
+                );
+                if let ScrollTarget::Node(node_id) = target {
+                    self.show_scrollbars(node_id);
+                }
+                return true;
+            }
+            match self.next_scroller_in_chain(target) {
+                Some(next) => target = next,
+                None => return false,
+            }
+        }
+    }
+
+    /// Whether a smooth scroll or a fling is moving something: the embedder
+    /// then advances it each frame with
+    /// [`resolve_scroll_animation_with`](Self::resolve_scroll_animation_with),
+    /// so its `scroll` events reach the page.
+    pub fn is_scroll_animating(&self) -> bool {
+        self.scroll_animation != ScrollAnimationState::None
+    }
+
     /// Returns the current, minimum and maximum scroll offsets for the given
     /// scroll target. `include_hidden` controls whether
     /// `overflow: hidden` axes count as scrollable (they do for programmatic scrolls,
@@ -525,6 +628,21 @@ impl BaseDocument {
     /// Start a smooth (animated) scroll towards the given absolute scroll offset. The
     /// animation is advanced each frame in [`BaseDocument::resolve_scroll_animation`].
     fn start_scroll_animation(&mut self, target: ScrollTarget, end: Point<f64>) {
+        self.animate_scroll(
+            target,
+            end,
+            Self::SMOOTH_SCROLL_DURATION_MS,
+            ScrollEasing::InOut,
+        );
+    }
+
+    fn animate_scroll(
+        &mut self,
+        target: ScrollTarget,
+        end: Point<f64>,
+        duration: f64,
+        easing: ScrollEasing,
+    ) {
         let start = self.scroll_state(target, true).0;
 
         let start_time = SystemTime::now()
@@ -537,7 +655,8 @@ impl BaseDocument {
             start,
             end,
             start_time,
-            duration: Self::SMOOTH_SCROLL_DURATION_MS,
+            duration,
+            easing,
         });
 
         // Ensure the frame loop runs so the animation is driven to completion.
@@ -737,6 +856,12 @@ impl BaseDocument {
     }
 
     pub fn resolve_scroll_animation(&mut self) {
+        self.resolve_scroll_animation_with(&mut |_| {});
+    }
+
+    /// Advance the running smooth scroll or fling to now, dispatching the
+    /// `scroll` events it causes.
+    pub fn resolve_scroll_animation_with(&mut self, dispatch_event: &mut dyn FnMut(DomEvent)) {
         match &mut self.scroll_animation {
             ScrollAnimationState::Fling(fling_state) => {
                 let time_ms = SystemTime::now()
@@ -757,7 +882,7 @@ impl BaseDocument {
                 let dx = fling_state.x_velocity * time_diff_ms;
                 let dy = fling_state.y_velocity * time_diff_ms;
 
-                self.scroll_chain_by(Some(fling_state.target), dx, dy, &mut |_| {});
+                self.scroll_chain_by(Some(fling_state.target), dx, dy, dispatch_event);
                 if fling_state.x_velocity.abs() < 0.1 && fling_state.y_velocity.abs() < 0.1 {
                     self.scroll_animation = ScrollAnimationState::None;
                 }
@@ -775,15 +900,17 @@ impl BaseDocument {
                 } else {
                     ((time_ms - scroll_to.start_time) / scroll_to.duration).clamp(0.0, 1.0)
                 };
-                let eased = ease_in_out_cubic(progress);
+                let eased = match scroll_to.easing {
+                    ScrollEasing::InOut => ease_in_out_cubic(progress),
+                    ScrollEasing::Out => ease_out_cubic(progress),
+                };
 
                 // Interpolate the target offset and move to it.
                 let target = Point {
                     x: scroll_to.start.x + (scroll_to.end.x - scroll_to.start.x) * eased,
                     y: scroll_to.start.y + (scroll_to.end.y - scroll_to.start.y) * eased,
                 };
-                // TODO: dispatch `scroll` events for programmatic scrolls.
-                self.write_scroll_offset(scroll_to.target, target, &mut |_| {});
+                self.write_scroll_offset(scroll_to.target, target, dispatch_event);
 
                 if progress >= 1.0 {
                     self.scroll_animation = ScrollAnimationState::None;

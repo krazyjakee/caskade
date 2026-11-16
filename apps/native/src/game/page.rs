@@ -343,7 +343,14 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
             "data-view": "game",
             "data-status": if running.is_some() { "running" } else { status.name() },
             class: "mt-4",
-            onwheel: move |_| moved += 1,
+            onwheel: move |_| {
+                moved += 1;
+                // A wheel's step glides (#160): look again once it's there.
+                spawn(async move {
+                    crate::data::sleep(std::time::Duration::from_millis(200)).await;
+                    moved += 1;
+                });
+            },
             GameBackLink { game_id: game.game.id.clone(), from: from.clone(), class: "text-sm text-fg-muted" }
             section {
                 "data-cs": "hero",

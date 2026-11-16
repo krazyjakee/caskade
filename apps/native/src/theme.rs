@@ -402,8 +402,14 @@ pub fn apply(doc: &mut BaseDocument, look: &Look) {
         modes: look.modes.clone(),
         prefers_light: *caskade_core::lock(&PREFERS_LIGHT),
     };
-    // `@media (prefers-reduced-motion)`, for "system" motion and themes.
-    doc.viewport_mut().prefers_reduced_motion = look.prefers_reduced_motion;
+    // `@media (prefers-reduced-motion)`, for "system" motion and themes,
+    // and whether a wheel's steps glide (#160): Appearance → Motion first,
+    // the OS's for "system".
+    doc.viewport_mut().prefers_reduced_motion = match look.prefs.motion.as_str() {
+        "reduced" => true,
+        "full" => false,
+        _ => look.prefers_reduced_motion,
+    };
     {
         let mut mutator = doc.mutate();
         for (name, value) in appearance::attributes(&look.prefs, &context) {

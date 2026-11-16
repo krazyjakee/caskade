@@ -74,6 +74,11 @@ pub enum UiEvent {
     Paste(String),
     /// An assistive technology (a screen reader, say) acting on an element.
     Accessibility(BlitzAccessibilityEvent),
+    /// A frame of a running smooth scroll or fling (see
+    /// `BaseDocument::is_scroll_animating`): the embedder sends it before
+    /// resolving each frame, so the scroll moves on and its `scroll` events
+    /// reach the page.
+    ScrollAnimationFrame,
 }
 
 /// An action an assistive technology asks of an element: what a user does

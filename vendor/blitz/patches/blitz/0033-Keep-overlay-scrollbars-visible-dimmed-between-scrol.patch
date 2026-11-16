@@ -1,0 +1,123 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: caskade <caskade@localhost>
+Date: Mon, 16 Nov 2026 19:04:24 +0000
+Subject: [PATCH] Keep overlay scrollbars visible, dimmed, between scrolls
+
+Overlay thumbs faded out completely 700 ms after a scroll, so a scroll
+container showed neither where it was nor how much was left until it
+was scrolled, and its thumb couldn't be grabbed first. They now fade
+back to a resting opacity (0.6) instead of to hidden, and containers
+that were never scrolled show their thumbs at that opacity too.
+---
+ packages/blitz-dom/src/document.rs       | 17 +++++++++--------
+ packages/blitz-dom/src/node/scrollbar.rs | 22 ++++++++++++++++------
+ packages/blitz-paint/src/render.rs       |  7 +++----
+ 3 files changed, 28 insertions(+), 18 deletions(-)
+
+diff --git a/packages/blitz-dom/src/document.rs b/packages/blitz-dom/src/document.rs
+index aac0760ff..9cef1af01 100644
+--- a/packages/blitz-dom/src/document.rs
++++ b/packages/blitz-dom/src/document.rs
+@@ -2036,9 +2036,9 @@ impl BaseDocument {
+     }
+ 
+     /// The current opacity of `node_id`'s overlay scrollbars. They show at
+-    /// full opacity on scroll and fade out after a delay (Chromium's overlay
+-    /// timings); the pointer resting on a thumb, or dragging it, holds them
+-    /// visible.
++    /// full opacity on scroll and fade back to a dimmed resting opacity
++    /// after a delay (Chromium's overlay timings); the pointer resting on a
++    /// thumb, or dragging it, holds them at full opacity.
+     pub fn scrollbar_opacity(&self, node_id: NodeId) -> f32 {
+         let interacting = |scrollbar: &crate::node::ScrollbarRef| scrollbar.node_id == node_id;
+         if self.hovered_scrollbar.as_ref().is_some_and(interacting)
+@@ -2049,9 +2049,11 @@ impl BaseDocument {
+         {
+             return 1.0;
+         }
+-        self.scrollbar_activity.get(&node_id).map_or(0.0, |last| {
+-            crate::node::scrollbar::opacity_at(last.elapsed())
+-        })
++        self.scrollbar_activity
++            .get(&node_id)
++            .map_or(crate::node::scrollbar::RESTING_OPACITY, |last| {
++                crate::node::scrollbar::opacity_at(last.elapsed())
++            })
+     }
+ 
+     /// Show `node_id`'s overlay scrollbars at full opacity and restart their
+@@ -2104,8 +2106,7 @@ impl BaseDocument {
+         });
+ 
+         let (hit, hovered_scrollbar) = self.hit_with_scrollbar(x, y);
+-        // A faded-out thumb is not interactive: pointer moves never fade
+-        // overlay scrollbars back in (only scrolling shows them).
++        // A hidden thumb is not interactive.
+         let hovered_scrollbar =
+             hovered_scrollbar.filter(|scrollbar| self.scrollbar_opacity(scrollbar.node_id) > 0.0);
+         // Scrollbar-thumb hover is part of hover state: track it here so a
+diff --git a/packages/blitz-dom/src/node/scrollbar.rs b/packages/blitz-dom/src/node/scrollbar.rs
+index 498026fa1..128e95fc6 100644
+--- a/packages/blitz-dom/src/node/scrollbar.rs
++++ b/packages/blitz-dom/src/node/scrollbar.rs
+@@ -16,13 +16,22 @@ use super::Node;
+ pub(crate) const FADE_DELAY: Duration = Duration::from_millis(500);
+ pub(crate) const FADE_DURATION: Duration = Duration::from_millis(200);
+ 
++/// The opacity overlay scrollbars rest at between activity: dimmed, but
++/// visible, so a scroll container always shows where it is and how much is
++/// left (as with "always show scrollbars"), and its thumb can be grabbed
++/// without scrolling first.
++pub(crate) const RESTING_OPACITY: f32 = 0.6;
++
+ /// Overlay scrollbar opacity as a function of time since the scroll
+ /// container's last scrollbar activity: fully opaque through the fade
+-/// delay, then fading linearly to hidden.
++/// delay, then fading linearly back to [`RESTING_OPACITY`].
+ pub(crate) fn opacity_at(elapsed: Duration) -> f32 {
+     match elapsed.checked_sub(FADE_DELAY) {
+         None => 1.0,
+-        Some(fading) => 1.0 - (fading.as_secs_f32() / FADE_DURATION.as_secs_f32()).min(1.0),
++        Some(fading) => {
++            let faded = (fading.as_secs_f32() / FADE_DURATION.as_secs_f32()).min(1.0);
++            1.0 - (1.0 - RESTING_OPACITY) * faded
++        }
+     }
+ }
+ 
+@@ -227,12 +236,13 @@ mod tests {
+     use super::*;
+ 
+     #[test]
+-    fn opacity_holds_through_the_fade_delay_then_fades_out() {
++    fn opacity_holds_through_the_fade_delay_then_fades_to_rest() {
+         assert_eq!(opacity_at(Duration::ZERO), 1.0);
+         assert_eq!(opacity_at(FADE_DELAY), 1.0);
+         let mid_fade = opacity_at(FADE_DELAY + FADE_DURATION / 2);
+-        assert!((mid_fade - 0.5).abs() < 0.01, "got {mid_fade}");
+-        assert_eq!(opacity_at(FADE_DELAY + FADE_DURATION), 0.0);
+-        assert_eq!(opacity_at(Duration::from_secs(3600)), 0.0);
++        let halfway = (1.0 + RESTING_OPACITY) / 2.0;
++        assert!((mid_fade - halfway).abs() < 0.01, "got {mid_fade}");
++        assert_eq!(opacity_at(FADE_DELAY + FADE_DURATION), RESTING_OPACITY);
++        assert_eq!(opacity_at(Duration::from_secs(3600)), RESTING_OPACITY);
+     }
+ }
+diff --git a/packages/blitz-paint/src/render.rs b/packages/blitz-paint/src/render.rs
+index 8c4a0292a..233e28d32 100644
+--- a/packages/blitz-paint/src/render.rs
++++ b/packages/blitz-paint/src/render.rs
+@@ -891,10 +891,9 @@ fn convert_rect(rect: &parley::BoundingBox) -> kurbo::Rect {
+ impl ElementCx<'_, '_> {
+     /// Paint overlay scrollbar thumbs for scroll containers: `overflow:
+     /// scroll`, or `auto` when the content overflows (never `hidden`/`clip`,
+-    /// which scroll only programmatically). Thumbs appear on scroll and fade
+-    /// out after a delay ([`BaseDocument::scrollbar_opacity`]); never-scrolled
+-    /// containers paint nothing, keeping thumbs out of static reftest
+-    /// screenshots.
++    /// which scroll only programmatically). Thumbs rest dimmed, show at full
++    /// opacity on scroll and fade back after a delay
++    /// ([`BaseDocument::scrollbar_opacity`]).
+     ///
+     /// Geometry comes from [`Node::scrollbar_thumb`], shared with the
+     /// thumb-drag hit testing in blitz-dom.
