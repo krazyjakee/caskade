@@ -46,12 +46,17 @@ pub fn host_facts(mode: AppMode) -> HostFacts {
 
 /// The catalogue client: `CASKADE_CATALOGUE_URL` and
 /// `CASKADE_CATALOGUE_PUBKEY` point a run at another catalogue (a local
-/// server while developing), else the curated origin checked against
-/// `release_key`, the key the shell's updater uses.
-pub fn service(dir: std::path::PathBuf, release_key: Option<String>) -> Option<CatalogueService> {
+/// server while developing), else `origin` (the curated one,
+/// `caskade_addons::DEFAULT_ORIGIN`, or nowhere on loopback only, #167)
+/// checked against `release_key`, the key the shell's updater uses.
+pub fn service(
+    dir: std::path::PathBuf,
+    origin: &str,
+    release_key: Option<String>,
+) -> Option<CatalogueService> {
     let origin = std::env::var("CASKADE_CATALOGUE_URL")
         .ok()
-        .unwrap_or_else(|| caskade_addons::DEFAULT_ORIGIN.to_owned());
+        .unwrap_or_else(|| origin.to_owned());
     let key = std::env::var("CASKADE_CATALOGUE_PUBKEY")
         .ok()
         .or(release_key);

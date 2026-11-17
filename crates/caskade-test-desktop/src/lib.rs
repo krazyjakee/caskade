@@ -75,11 +75,13 @@ impl PrivateDesktop {
     }
 
     /// The environment a program on this desktop gets: the display, the
-    /// bus, the runtime folder, `PATH`, and accessibility off (its bus would
-    /// be started on demand).
+    /// bus, the runtime folder, `PATH`, accessibility off (its bus would
+    /// be started on demand), and a debug build of Caskade on loopback only
+    /// (`CASKADE_NETWORK`, #167): tests never reach the internet.
     pub fn env(&self) -> Vec<(&'static str, String)> {
         vec![
             ("PATH", std::env::var("PATH").unwrap_or_default()),
+            ("CASKADE_NETWORK", "loopback".into()),
             ("DISPLAY", self.display.clone()),
             ("DBUS_SESSION_BUS_ADDRESS", self.bus.clone()),
             (

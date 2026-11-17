@@ -48,11 +48,15 @@ the token contracts; the `run-e2e` label too):
 
 - **rust-native** (Linux, two shards: Settings and the game page, then the
   rest): caskade-native's headless view and component tests (its binary's
-  unit tests) with the other app suites' binaries and examples.
+  unit tests) with the other app suites' binaries and examples, through
+  `cargo nextest` so each test is a process of its own and four run at once
+  (in one process they share the window lock and the app's event channel).
 - **rust** (Linux): the app suites' library, integration and doc tests.
 - **rust-checks** (Linux): Clippy, formatting, the stylesheet check
   (`build-css.mjs --check`), translations and the anatomy generator.
 - **native** (Linux): the window tests under Xvfb with Mesa's lavapipe,
+  traced by `scripts/loopback-only.sh` (nothing they start may address
+  beyond loopback: `PrivateDesktop` gives the app `CASKADE_NETWORK=loopback`),
   then the screenshots and the Chromium comparison.
 - **native-macos**: `cargo check -p caskade-native --all-targets`. Running
   it on a Mac is a #120 check.

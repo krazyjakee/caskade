@@ -208,6 +208,11 @@ pub fn start(core: Core, shell: Shell) -> Services {
         plugin_runners,
     } = core;
     let events = shell.events.clone();
+    // What the services may reach (#167), decided once for all of them.
+    let network = Network::of_this_run();
+    if network == Network::Loopback {
+        tracing::info!("loopback only: online lookups, update checks and mDNS stay off");
+    }
     let launch = launch.with_runner_resolver(Arc::new(
         caskade_core::install::InstallerRunnerResolver(settings.clone()),
     ));
@@ -344,11 +349,13 @@ pub fn start(core: Core, shell: Shell) -> Services {
             streaming_host = Some(host);
             // Devices to stream from (#262), through Caskade's own client.
             let client = caskade_streaming::StreamingClient::new(managed.clone());
-            match caskade_streaming::hosts::StreamHosts::new(
+            match caskade_streaming::hosts::StreamHosts::with(
                 store.clone(),
                 bus.clone(),
                 settings.clone(),
                 client.clone(),
+                network.mdns(),
+                caskade_streaming::hosts::HostTiming::default(),
             ) {
                 Ok(hosts) => {
                     // Play streams from them (#264).
@@ -392,7 +399,10 @@ pub fn start(core: Core, shell: Shell) -> Services {
     // Fan ports of games: Decomp Buddy's install plans, fetched daily.
     let ports = caskade_core::ports::Ports::new(paths.cache.join("ports"));
     // IGDB metadata from Caskade's metadata server, cached for good.
-    let igdb = caskade_core::igdb::Igdb::new(paths.cache.join("igdb"));
+    let igdb = caskade_core::igdb::Igdb::with_base_url(
+        paths.cache.join("igdb"),
+        network.server(caskade_core::igdb::BASE_URL),
+    );
     // Games IGDB has no icon for get their executable's.
     if let Some(artwork) = artwork.clone() {
         let icons = caskade_core::icons::ExeIcons::new(store.clone(), bus.clone(), artwork);
@@ -430,21 +440,23 @@ pub fn start(core: Core, shell: Shell) -> Services {
         artwork.clone(),
     );
     // These go online: they run once first-run setup is done, while
-    // `core.metadata.online` allows them.
-    crate::onboarding::supervise_online(settings.clone(), {
-        let (hasheous, metadata) = (hasheous.clone(), metadata.clone());
-        let (ludusavi, settings) = (ludusavi.clone(), settings.clone());
-        let ports = ports.clone();
-        let (bus, emulation, store) = (bus.clone(), emulation.clone(), store.clone());
-        move || {
-            vec![
-                hasheous.watch(&bus, emulation.clone(), store.clone()),
-                ludusavi.watch_settings(settings.clone()),
-                ports.watch_settings(settings.clone()),
-                metadata.watch(),
-            ]
-        }
-    });
+    // `core.metadata.online` allows them, and never on loopback only.
+    if network.online_lookups() {
+        crate::onboarding::supervise_online(settings.clone(), {
+            let (hasheous, metadata) = (hasheous.clone(), metadata.clone());
+            let (ludusavi, settings) = (ludusavi.clone(), settings.clone());
+            let ports = ports.clone();
+            let (bus, emulation, store) = (bus.clone(), emulation.clone(), store.clone());
+            move || {
+                vec![
+                    hasheous.watch(&bus, emulation.clone(), store.clone()),
+                    ludusavi.watch_settings(settings.clone()),
+                    ports.watch_settings(settings.clone()),
+                    metadata.watch(),
+                ]
+            }
+        });
+    }
     // Refreshing chosen games' details (#176): its status goes to Activity.
     crate::commands::game_edit::forward_refresh(events.clone(), &metadata);
     let updates = install.clone().map(|install| {
@@ -452,7 +464,13 @@ pub fn start(core: Core, shell: Shell) -> Services {
         install.set_emulation(emulation.clone());
         // Games installed from GitHub are followed for new releases,
         // checked in the background and before they're played.
-        let tracker = caskade_core::updates::Tracker::builtin(store.clone());
+        let tracker = match network {
+            Network::Open => caskade_core::updates::Tracker::builtin(store.clone()),
+            Network::Loopback => caskade_core::updates::Tracker::new(
+                store.clone(),
+                vec![Arc::new(caskade_core::updates::GitHub::new(network.web()))],
+            ),
+        };
         install.set_tracker(tracker.clone());
         let updates = caskade_core::updates::Updates::new(
             store.clone(),
@@ -540,6 +558,7 @@ pub fn start(core: Core, shell: Shell) -> Services {
     // The add-on catalogue (#181): read from its cache, fetched on demand.
     let catalogue = crate::commands::addons::service(
         paths.cache.join("addons"),
+        network.server(caskade_addons::DEFAULT_ORIGIN),
         crate::self_update::public_key(),
     );
     let addon_media = catalogue.as_ref().map(|catalogue| {
@@ -583,7 +602,7 @@ pub fn start(core: Core, shell: Shell) -> Services {
     // this thread: a locked keychain holds only sync), the endpoint and
     // pairing.
     let keys = Arc::new(caskade_core::devices::Keychain);
-    let devices = match sync_reach(fixtures_mode()) {
+    let devices = match network.sync_reach() {
         Some(reach) => {
             caskade_core::devices::Devices::with_reach(store.clone(), accounts.clone(), keys, reach)
         }
@@ -915,19 +934,76 @@ fn start_plugins(
     Ok((plugins, hooks))
 }
 
-/// Fixtures mode, as the native shell reads it: `CASKADE_FIXTURES=1` in a
-/// debug build.
-fn fixtures_mode() -> bool {
-    cfg!(debug_assertions) && std::env::var("CASKADE_FIXTURES").is_ok_and(|value| value == "1")
+/// What the services may reach (#135, #167), decided once in [`start`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Network {
+    /// The internet and the LAN, as the settings allow: every release build.
+    Open,
+    /// 127.0.0.1 only, for the window tests' runs: sync binds on loopback,
+    /// the online lookups (IGDB matching, Hasheous, Ludusavi, ports) don't
+    /// run, servers asked on demand (the metadata server, the add-on
+    /// catalogue, GitHub's releases) are [`NOWHERE`], so each request fails
+    /// as it does offline, and streaming hosts are looked for there rather
+    /// than by multicast.
+    Loopback,
 }
 
-/// Where the sync endpoint binds whatever the settings say: on 127.0.0.1
-/// only in fixtures mode (the window tests' runs), with no relays, address
-/// lookup, mDNS or router port mapping, so sync sends nothing beyond
-/// loopback (#135). Other services still reach the network in fixtures
-/// mode (#167). `None`: where the settings say.
-fn sync_reach(fixtures: bool) -> Option<caskade_core::devices::Reach> {
-    fixtures.then(caskade_core::devices::Reach::loopback)
+/// A loopback port nothing listens on: a request there is refused at once.
+const NOWHERE: &str = "http://127.0.0.1:1";
+
+impl Network {
+    /// This run's: loopback only in a debug build in fixtures mode
+    /// (`CASKADE_FIXTURES=1`, as the native shell reads it) or when told so
+    /// (`CASKADE_NETWORK=loopback`, which `caskade-test-desktop` gives every
+    /// program it starts).
+    fn of_this_run() -> Self {
+        Self::chosen(cfg!(debug_assertions), |name| std::env::var(name).ok())
+    }
+
+    /// The policy for a build (`debug`) and its environment (`var`).
+    fn chosen(debug: bool, var: impl Fn(&str) -> Option<String>) -> Self {
+        let loopback = var("CASKADE_FIXTURES").as_deref() == Some("1")
+            || var("CASKADE_NETWORK").as_deref() == Some("loopback");
+        if debug && loopback {
+            Self::Loopback
+        } else {
+            Self::Open
+        }
+    }
+
+    /// Where the sync endpoint binds whatever the settings say: on loopback
+    /// only, with no relays, address lookup, mDNS or router port mapping, so
+    /// sync sends nothing beyond it (#135). `None`: where the settings say.
+    fn sync_reach(self) -> Option<caskade_core::devices::Reach> {
+        (self == Self::Loopback).then(caskade_core::devices::Reach::loopback)
+    }
+
+    /// Whether the online lookups run (while `core.metadata.online` allows).
+    fn online_lookups(self) -> bool {
+        self == Self::Open
+    }
+
+    /// The server to ask in place of `real`.
+    fn server(self, real: &str) -> &str {
+        match self {
+            Self::Open => real,
+            Self::Loopback => NOWHERE,
+        }
+    }
+
+    /// GitHub's address, for game updates.
+    fn web(self) -> url::Url {
+        let web = format!("{}/", self.server("https://github.com"));
+        url::Url::parse(&web).expect("valid URL")
+    }
+
+    /// Where streaming hosts are asked for over mDNS.
+    fn mdns(self) -> std::net::SocketAddr {
+        match self {
+            Self::Open => caskade_streaming::mdns::MULTICAST,
+            Self::Loopback => std::net::SocketAddr::from(([127, 0, 0, 1], 1)),
+        }
+    }
 }
 
 #[cfg(test)]

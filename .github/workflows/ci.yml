@@ -276,9 +276,9 @@ jobs:
       matrix:
         include:
           - shard: settings and game pages
-            filter: "settings:: game::"
+            filter: "test(/^settings::|^game::/)"
           - shard: the rest
-            filter: "--skip settings:: --skip game::"
+            filter: "not test(/^settings::|^game::/)"
     name: rust-native (${{ matrix.shard }})
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -312,8 +312,15 @@ jobs:
         with:
           shared-key: app-linux
           save-if: false
+      - uses: taiki-e/install-action@682ce6c3c696a4cd5168a05f98e51aa02b877941 # v2.89.1
+        with:
+          tool: cargo-nextest@0.9.114
+      # A process per test (nextest): caskade-native's view tests share one
+      # window lock and the app's event channel within a process, so in one
+      # cargo test binary they ran one after another (13 min); as processes
+      # they run four at a time (#137).
       - name: Binaries' and examples' tests
-        run: cargo test $APP_SUITES --bins --examples -- ${{ matrix.filter }}
+        run: cargo nextest run $APP_SUITES --bins --examples --no-fail-fast -E '${{ matrix.filter }}'
 
   windows-cross:
     needs: changes
@@ -475,7 +482,7 @@ jobs:
             build-essential pkg-config file \
             libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev libxdo-dev libssl-dev \
             libayatana-appindicator3-dev libasound2-dev libudev-dev libdbus-1-dev \
-            xvfb xauth dbus x11-utils
+            xvfb xauth dbus x11-utils strace
           # winit (the native app's window) loads these at run time, and
           # Blitz's renderer needs a wgpu adapter: Mesa's lavapipe, without a GPU.
           sudo apt-get install -y --no-install-recommends libxkbcommon-x11-0 libxcursor1 libxi6 libxrandr2 mesa-vulkan-drivers
@@ -495,9 +502,13 @@ jobs:
       # go exactly where they ask. Then a scripted pad drives it through the
       # e2e harness (#92), and the GPU backdrop moves without the document
       # being painted (#149, on lavapipe). Each test starts its own Xvfb and
-      # session bus.
+      # session bus. Under strace, nothing they start may address beyond
+      # loopback (scripts/loopback-only.sh, #135, #167), so the build runs
+      # first and isn't traced.
+      - name: Build the window tests
+        run: cargo test -p caskade-native --locked --test smoke --test console_e2e --test backdrop --no-run
       - name: Native app smoke test and end to end
-        run: cargo test -p caskade-native --locked --test smoke --test console_e2e --test backdrop -- --ignored
+        run: scripts/loopback-only.sh -- cargo test -p caskade-native --locked --offline --test smoke --test console_e2e --test backdrop -- --ignored
       # Every theme on the reference screens, rendered with vello_cpu,
       # against the committed images (#90); cut titles and placeholders
       # against Chromium's rendering (#80).
