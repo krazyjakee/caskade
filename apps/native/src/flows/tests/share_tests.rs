@@ -408,3 +408,149 @@ fn a_pairing_by_code_is_shown_confirmed_and_finished() {
     let paired = caskade_app::runtime::block_on(async move { tv_devices.status().await.devices });
     assert!(paired.iter().any(|device| device.id == desk_id));
 }
+
+#[test]
+fn every_control_in_the_share_dialogs_has_a_name() {
+    let _one = caskade_core::lock(&ONE);
+    let desk = core("Desk");
+    let entry_id = add_celeste(&desk);
+    let mut window = open(Shown::Share {
+        shares: desk.handle(),
+        entry_id,
+    });
+    names_every_control(&window, "sharing, before the link");
+    window.press("#share-make");
+    window.until_for("the link", 30, |w| {
+        w.text("[data-part=link]")
+            .starts_with("caskade://receive?t=")
+    });
+    window.settle();
+    names_every_control(&window, "sharing, with the link");
+    let window = open(Shown::Receive {
+        shares: desk.handle(),
+    });
+    names_every_control(&window, "receiving");
+}
+
+/// The share dialogs with the language followed, as the app's root does.
+fn speaking_app() -> Element {
+    crate::i18n::use_language();
+    app()
+}
+
+/// A language switch while the receive dialog is open (#153): its words
+/// follow, in place, and the link typed so far stays.
+#[test]
+fn the_receive_dialog_follows_a_language_switch() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _english = English::start();
+    let friend = core("Friend's PC");
+    *caskade_core::lock(&SHOWN) = Some(Shown::Receive {
+        shares: friend.handle(),
+    });
+    caskade_core::lock(&HEARD).clear();
+    let mut window = Window::open_root(speaking_app, "the host", "#share-ready");
+    assert_eq!(window.text("[role=dialog] h2"), "Receive a shared game");
+    window.focus("#share-link-input");
+    window.type_text("caskade://receive");
+    speak(&mut window, "sv", |w| {
+        w.text("[role=dialog] h2") == "Ta emot ett delat spel"
+    });
+    assert_eq!(
+        window.attr("#share-link-input", "value").as_deref(),
+        Some("caskade://receive"),
+        "what was typed stays"
+    );
+    assert!(heard_all().is_empty(), "the dialog stayed open");
+    speak(&mut window, "en", |w| {
+        w.text("[role=dialog] h2") == "Receive a shared game"
+    });
+}
+
+/// The flows' window, driven by a pad alone (#153).
+impl crate::frame::pad_tests::Driven for Window {
+    fn document(&self) -> &DioxusDocument {
+        &self.doc
+    }
+
+    fn press(&mut self, action: caskade_ui_input::Action) {
+        self.pad(action);
+    }
+
+    fn put_focus(&mut self, node: NodeId) {
+        self.doc.inner.borrow_mut().set_focus_to(node);
+        self.settle();
+    }
+}
+
+/// Whether focus is on `selector`'s element.
+fn focus_on(window: &Window, selector: &str) -> bool {
+    window.find(selector).is_some()
+        && crate::frame::pad_tests::focused_node(window) == window.find(selector)
+}
+
+/// Share with someone… by keys alone and by a pad alone (#153): the
+/// dialog starts on Make link; by keys, Enter makes the link and Escape
+/// closes it; by pad, left to Cancel and back right, A makes the link and
+/// B closes it.
+#[test]
+fn sharing_goes_by_keys_alone_and_by_a_pad_alone() {
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let desk = core("Desk");
+    let entry_id = add_celeste(&desk);
+    let shown = Shown::Share {
+        shares: desk.handle(),
+        entry_id,
+    };
+    // Keys.
+    let mut window = open(shown.clone());
+    window.until("Make link focused", |w| focus_on(w, "#share-make"));
+    window.key(Key::Named(NamedKey::Enter));
+    window.until_for("the link", 30, |w| {
+        w.text("[data-part=link]")
+            .starts_with("caskade://receive?t=")
+    });
+    window.key(Key::Named(NamedKey::Escape));
+    window.until("the dialog closed", |_| heard_all() == ["closed"]);
+    drop(window);
+    // A pad.
+    let mut window = open(shown);
+    window.until("Make link focused", |w| focus_on(w, "#share-make"));
+    window.pad(Action::NavLeft);
+    assert!(
+        focus_on(&window, "#share-cancel"),
+        "left of Make link is Cancel"
+    );
+    window.pad(Action::NavRight);
+    assert!(focus_on(&window, "#share-make"));
+    window.pad(Action::Confirm);
+    window.until_for("the link", 30, |w| {
+        w.text("[data-part=link]")
+            .starts_with("caskade://receive?t=")
+    });
+    window.pad(Action::Back);
+    window.until("the dialog closed", |_| heard_all() == ["closed"]);
+}
+
+/// Receiving by keys alone and by a pad alone (#153): the dialog starts in
+/// the link's field; Escape closes it, and so does a pad's B.
+#[test]
+fn receiving_closes_by_escape_and_by_b() {
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let friend = core("Friend's PC");
+    let shown = Shown::Receive {
+        shares: friend.handle(),
+    };
+    let mut window = open(shown.clone());
+    window.until("the field focused", |w| focus_on(w, "#share-link-input"));
+    window.key(Key::Named(NamedKey::Escape));
+    window.until("closed by Escape", |_| heard_all() == ["closed"]);
+    drop(window);
+    let mut window = open(shown);
+    window.until("the field focused", |w| focus_on(w, "#share-link-input"));
+    window.pad(Action::Back);
+    window.until("closed by B", |_| heard_all() == ["closed"]);
+}

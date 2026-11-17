@@ -559,3 +559,43 @@ fn the_stream_quality_saves_and_programs_update() {
     )
     .unwrap();
 }
+
+/// A pad alone (#153), in the frame opened from Home: into the panel from
+/// its tab, along to Host games from this device, A turns hosting on, and
+/// B goes back.
+#[test]
+fn a_pad_alone_turns_hosting_on_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, reach, settings_by_pad};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let fake = Fake::new();
+    let backend = fake.clone();
+    let accounts = ACCOUNTS.get_or_init(admin_accounts).clone();
+    let (mut window, panel) = settings_by_pad(
+        source().clone(),
+        move || {
+            let (backend, accounts) = (backend.clone(), accounts.clone());
+            use_context_provider(move || Streaming::new(backend, accounts));
+        },
+        "streaming",
+        "hosting off",
+        |window| {
+            window
+                .find("data-part", "host-state")
+                .and_then(|node| window.attr(node, "data-status"))
+                .as_deref()
+                == Some("off")
+        },
+    );
+    reach(&mut window, panel, "the hosting switch", |window, node| {
+        window.attr(node, "id").as_deref() == Some("streaming-hosting")
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("ready", |window| {
+        text_of(window, "data-part", "host-state").trim()
+            == "Ready. Devices on this network can pair and play."
+    });
+    assert_eq!(fake.heard(), ["hosting true"]);
+    back_home(&mut window);
+}

@@ -8,6 +8,14 @@
 //! (`scripts/webkit-shots.py`). `tests/shots.rs` compares the PNGs with
 //! the committed ones.
 //!
+//! The screens: the gallery's pages and the reference screens
+//! (`shots/screens.rs`), and the real frame over the fixture library
+//! (`frame::shot`): the library (`shell`), Home, a game's page, the Store,
+//! Collections, Activity, Settings' first section, first-run setup and the
+//! game editor, in every theme; and in the default theme only, every other
+//! Settings section, console mode, reduced motion and effects, and (debug
+//! builds) the pseudo-locale (#153).
+//!
 //! `--shots <folder> --website-art <folder>` writes the website's captures
 //! instead (#150, [`website`]): `{desktop,console}-{en,sv}.jpg`, over a
 //! sample library whose covers are in the second folder
@@ -73,7 +81,7 @@ pub fn run(out: &Path, themes_folder: Option<&Path>) -> Result<(), String> {
             continue;
         }
         for &(screen, root) in screens::SCREENS.iter().chain(crate::gallery::SCREENS) {
-            render(out, &themes, &info.id, screen, root, None)?;
+            render(out, &themes, &info.id, screen, root, None, Shown::Plain)?;
         }
         // The app's own frame over the fixture library (#96), once its data
         // is there.
@@ -83,7 +91,8 @@ pub fn run(out: &Path, themes_folder: Option<&Path>) -> Result<(), String> {
             &info.id,
             "shell",
             crate::frame::shot::screen,
-            Some(crate::frame::shot::ready),
+            Some(&crate::frame::shot::ready),
+            Shown::Plain,
         )?;
         render(
             out,
@@ -91,7 +100,118 @@ pub fn run(out: &Path, themes_folder: Option<&Path>) -> Result<(), String> {
             &info.id,
             "home",
             crate::frame::shot::home,
-            Some(crate::frame::shot::home_ready),
+            Some(&crate::frame::shot::home_ready),
+            Shown::Plain,
+        )?;
+        // The views (#153): a game's page, the Store, Collections, Activity,
+        // Settings' first section, first-run setup and the game editor.
+        for &(screen, href, (name, value)) in crate::frame::shot::PAGES {
+            crate::frame::shot::open_page(href);
+            render(
+                out,
+                &themes,
+                &info.id,
+                screen,
+                crate::frame::shot::page,
+                Some(&|doc: &BaseDocument| crate::frame::shot::has(doc, name, value)),
+                Shown::Plain,
+            )?;
+        }
+        render(
+            out,
+            &themes,
+            &info.id,
+            "onboarding",
+            crate::frame::shot::onboarding,
+            Some(&crate::frame::shot::onboarding_ready),
+            Shown::Plain,
+        )?;
+        render(
+            out,
+            &themes,
+            &info.id,
+            "editor",
+            crate::frame::shot::editor,
+            Some(&crate::frame::shot::editor_ready),
+            Shown::Plain,
+        )?;
+        if info.id == DEFAULT_THEME {
+            default_only(out, &themes)?;
+        }
+    }
+    Ok(())
+}
+
+/// The theme the screens shown in one theme only are in.
+const DEFAULT_THEME: &str = "caskade.default";
+
+/// How a screen is shown, besides its theme.
+#[derive(Clone, Copy, PartialEq)]
+enum Shown {
+    Plain,
+    /// Appearance's reduced motion and reduced effects.
+    Reduced,
+    /// The pseudo-locale (`en-XA`, debug builds only).
+    Pseudo,
+}
+
+/// Settings sections no image of stays the same: they show this machine's
+/// free space (Storage) or times relative to now (Backup, Statistics).
+const UNSTEADY_SETTINGS: [&str; 3] = ["storage", "backup", "statistics"];
+
+/// The screens in the default theme only (#153): every Settings section
+/// past the first (but [`UNSTEADY_SETTINGS`]), console mode's Home, Home
+/// with reduced motion and effects, and Settings in the pseudo-locale
+/// (debug builds, which have it).
+fn default_only(out: &Path, themes: &ThemeService) -> Result<(), String> {
+    for tab in crate::router::SETTINGS_TABS
+        .iter()
+        .skip(1)
+        .filter(|tab| !UNSTEADY_SETTINGS.contains(*tab))
+    {
+        let href: &'static str = Box::leak(format!("/settings?tab={tab}").into_boxed_str());
+        crate::frame::shot::open_page(href);
+        let panel = format!("settings-tab-{tab}-panel");
+        render(
+            out,
+            themes,
+            DEFAULT_THEME,
+            &format!("settings-{tab}"),
+            crate::frame::shot::page,
+            Some(&|doc: &BaseDocument| crate::frame::shot::has(doc, "id", &panel)),
+            Shown::Plain,
+        )?;
+    }
+    render(
+        out,
+        themes,
+        DEFAULT_THEME,
+        "console",
+        crate::frame::shot::console_home,
+        Some(&crate::frame::shot::console_ready),
+        Shown::Plain,
+    )?;
+    render(
+        out,
+        themes,
+        DEFAULT_THEME,
+        "reduced",
+        crate::frame::shot::home,
+        Some(&crate::frame::shot::home_ready),
+        Shown::Reduced,
+    )?;
+    if caskade_ui_i18n::is_pseudo("en-XA") {
+        crate::frame::shot::open_page("/settings?tab=general");
+        render(
+            out,
+            themes,
+            DEFAULT_THEME,
+            "pseudo",
+            crate::frame::shot::page,
+            Some(&|doc: &BaseDocument| {
+                crate::frame::shot::has(doc, "id", "settings-tab-general-panel")
+            }),
+            Shown::Pseudo,
         )?;
     }
     Ok(())
@@ -146,9 +266,9 @@ fn write_website(out: &Path, themes: &ThemeService) -> Result<(), String> {
                 "caskade.default",
                 mode,
                 root,
-                Some(crate::frame::shot::website_ready),
-                width,
-                height,
+                Some(&crate::frame::shot::website_ready),
+                AppearanceSettings::default(),
+                (width, height),
             )?;
             let mut pixels = paint(&mut document.inner.borrow_mut(), width, height);
             pixels.truncate(width as usize * kept as usize * 4);
@@ -177,9 +297,25 @@ fn render(
     root: fn() -> dioxus_native::prelude::Element,
     // A screen whose data loads after its first render: rendered once this
     // says it's there.
-    ready: Option<fn(&BaseDocument) -> bool>,
+    ready: Option<&dyn Fn(&BaseDocument) -> bool>,
+    shown: Shown,
 ) -> Result<(), String> {
-    let (document, look) = settled(themes, theme, screen, root, ready, WIDTH, HEIGHT)?;
+    let prefs = match shown {
+        Shown::Reduced => AppearanceSettings {
+            motion: "reduced".to_owned(),
+            reduce_effects: true,
+            ..AppearanceSettings::default()
+        },
+        Shown::Plain | Shown::Pseudo => AppearanceSettings::default(),
+    };
+    if shown == Shown::Pseudo {
+        caskade_ui_i18n::set_language("en-XA");
+    }
+    let built = settled(themes, theme, screen, root, ready, prefs, (WIDTH, HEIGHT));
+    if shown == Shown::Pseudo {
+        caskade_ui_i18n::set_language("en");
+    }
+    let (document, look) = built?;
     let mut doc = document.inner.borrow_mut();
     let pixels = paint(&mut doc, WIDTH, HEIGHT);
     let name = format!("{screen}-{theme}");
@@ -199,30 +335,23 @@ fn render(
     Ok(())
 }
 
-/// `root` in `theme` at `width` × `height`, built and settled (with its
-/// data, given `ready`), and the look it has.
+/// `root` in `theme` with `prefs` at `width` × `height`, built and settled
+/// (with its data, given `ready`), and the look it has.
 fn settled(
     themes: &ThemeService,
     theme: &str,
     screen: &str,
     root: fn() -> dioxus_native::prelude::Element,
-    ready: Option<fn(&BaseDocument) -> bool>,
-    width: u32,
-    height: u32,
+    ready: Option<&dyn Fn(&BaseDocument) -> bool>,
+    prefs: AppearanceSettings,
+    (width, height): (u32, u32),
 ) -> Result<(dioxus_native::DioxusDocument, crate::theme::Look), String> {
     let active = themes.resolve(theme);
     let scheme = match caskade_ui_theme::appearance::color_scheme(&active.modes, false) {
         "light" => ColorScheme::Light,
         _ => ColorScheme::Dark,
     };
-    let look = crate::theme::look(
-        themes,
-        &active.id,
-        active.modes,
-        AppearanceSettings::default(),
-        false,
-        false,
-    );
+    let look = crate::theme::look(themes, &active.id, active.modes, prefs, false, false);
     let mut document = dioxus_native::DioxusDocument::new(
         VirtualDom::new(root),
         DocumentConfig {

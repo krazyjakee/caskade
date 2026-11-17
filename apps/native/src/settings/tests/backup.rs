@@ -199,3 +199,49 @@ fn a_folder_that_isnt_there_blocks_the_backup_with_why() {
             == json!("weekly")
     });
 }
+
+/// A pad alone (#153), in the frame opened from Home: into the panel from
+/// its tab, along to Back up now, A writes a checked backup, and B goes
+/// back.
+#[test]
+fn a_pad_alone_backs_up_now_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, reach, settings_by_pad};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let library = library();
+    let backups = library.backups.clone();
+    let (mut window, panel) = settings_by_pad(
+        library.source.clone(),
+        move || {
+            let backups = backups.clone();
+            use_context_provider(move || backups);
+        },
+        "backup",
+        "Back up now and its plan",
+        |window| {
+            window.find("id", "backup-now").is_some()
+                && window.find("role", "tabpanel").is_some_and(|panel| {
+                    window
+                        .text(panel)
+                        .contains("before compression. Never included:")
+                })
+        },
+    );
+    reach(&mut window, panel, "Back up now", |window, node| {
+        window.attr(node, "id").as_deref() == Some("backup-now")
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("backed up", |window| {
+        window
+            .find("data-part", "last")
+            .is_some_and(|node| window.text(node).starts_with("Backed up "))
+    });
+    let written = std::fs::read_dir(&library.folder)
+        .unwrap()
+        .filter_map(Result::ok)
+        .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "zip"))
+        .count();
+    assert_eq!(written, 1, "one backup in the folder");
+    back_home(&mut window);
+}

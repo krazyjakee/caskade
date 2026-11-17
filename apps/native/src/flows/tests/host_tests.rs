@@ -426,3 +426,146 @@ fn a_game_another_device_asks_for_is_answered_with_how_it_went() {
         "the other device hears why; nothing stays open here"
     );
 }
+
+/// A device asking to stream, with the code it shows.
+fn stream_request() -> StreamPairing {
+    let host = std::sync::Arc::new(FakeStreamHost::default());
+    host.requests.lock().unwrap().push(PairRequest {
+        id: "tv".into(),
+        name: "Living room TV".into(),
+        address: "192.0.2.7".into(),
+    });
+    StreamPairing::new(host, admin_accounts())
+}
+
+#[test]
+fn every_control_in_the_stream_pairing_and_stop_dialogs_has_a_name() {
+    let _one = caskade_core::lock(&ONE);
+    let mut window = open_host(HostShown::Stream(stream_request()));
+    window.until("the prompt", |w| {
+        w.find("[data-cs=stream-pair-prompt]").is_some()
+    });
+    window.settle();
+    names_every_control(&window, "a stream pairing request");
+    let mut window = open_host(HostShown::Stop { launching: false });
+    window.until("the question", |w| w.find("[data-cs=stop-host]").is_some());
+    window.settle();
+    names_every_control(&window, "stopping the other game");
+}
+
+/// The hosts with the language followed, as the app's root does.
+fn speaking_host_app() -> Element {
+    crate::i18n::use_language();
+    host_app()
+}
+
+/// A language switch while a pairing request is open (#153): its words
+/// follow, in place, and the code typed so far stays.
+#[test]
+fn a_stream_pairing_request_follows_a_language_switch() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _english = English::start();
+    source();
+    *caskade_core::lock(&HOST_SHOWN) = Some(HostShown::Stream(stream_request()));
+    caskade_core::lock(&HOST_HEARD).clear();
+    let mut window = Window::open_root(speaking_host_app, "the host", "#hosts-ready");
+    window.until("the prompt", |w| {
+        w.text("[data-cs=stream-pair-prompt] h2") == "Living room TV wants to play from this device"
+    });
+    window.focus("#pair-request-code");
+    window.type_text("12");
+    speak(&mut window, "sv", |w| {
+        w.text("[data-cs=stream-pair-prompt] h2")
+            == "Living room TV vill spela från den här enheten"
+    });
+    assert_eq!(
+        window.text("[data-cs=pair-request] [data-part=ask]"),
+        "Living room TV vill streama spel från den här enheten."
+    );
+    assert_eq!(
+        window.attr("#pair-request-code", "value").as_deref(),
+        Some("12"),
+        "what was typed stays"
+    );
+    speak(&mut window, "en", |w| {
+        w.text("[data-cs=stream-pair-prompt] h2") == "Living room TV wants to play from this device"
+    });
+}
+
+/// Two devices asking to stream, Living room TV then Deck.
+fn two_asking() -> std::sync::Arc<FakeStreamHost> {
+    let host = std::sync::Arc::new(FakeStreamHost::default());
+    for (id, name) in [("tv", "Living room TV"), ("deck", "Deck")] {
+        host.requests.lock().unwrap().push(PairRequest {
+            id: id.into(),
+            name: name.into(),
+            address: "192.0.2.7".into(),
+        });
+    }
+    host
+}
+
+fn prompt_for(window: &Window, device: &str) -> bool {
+    window.text("[data-cs=stream-pair-prompt] h2")
+        == format!("{device} wants to play from this device")
+}
+
+/// A stream pairing prompt by keys alone and by a pad alone (#153). Keys:
+/// the prompt starts in the code's field, the code typed and Enter pairs;
+/// Escape puts the next one off. A pad: B puts one off, and Decline,
+/// reached by a pad's moves, declines the next with A.
+#[test]
+fn a_stream_pairing_prompt_goes_by_keys_alone_and_by_a_pad_alone() {
+    use crate::frame::pad_tests::{focused_node, reach};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    // Keys.
+    let host = two_asking();
+    let pairing = StreamPairing::new(host.clone(), admin_accounts());
+    let mut window = open_host(HostShown::Stream(pairing));
+    window.until("the TV's prompt", |w| prompt_for(w, "Living room TV"));
+    window.until("the code's field focused", |w| {
+        w.find("#pair-request-code").is_some() && focused_node(w) == w.find("#pair-request-code")
+    });
+    window.type_text("4321");
+    window.key(Key::Named(NamedKey::Enter));
+    window.until("the Deck's prompt", |w| prompt_for(w, "Deck"));
+    assert_eq!(
+        *host.accepted.lock().unwrap(),
+        [(
+            "tv".to_owned(),
+            "4321".to_owned(),
+            "Living room TV".to_owned()
+        )]
+    );
+    window.until("the Deck's field focused", |w| {
+        w.find("#pair-request-code").is_some() && focused_node(w) == w.find("#pair-request-code")
+    });
+    window.key(Key::Named(NamedKey::Escape));
+    window.until("no prompt", |w| {
+        w.find("[data-cs=stream-pair-prompt]").is_none()
+    });
+    assert!(host.declined.lock().unwrap().is_empty(), "Escape isn't no");
+    drop(window);
+    // A pad.
+    let host = two_asking();
+    let pairing = StreamPairing::new(host.clone(), admin_accounts());
+    let mut window = open_host(HostShown::Stream(pairing));
+    window.until("the TV's prompt", |w| prompt_for(w, "Living room TV"));
+    window.pad(Action::Back);
+    window.until("the Deck's prompt", |w| prompt_for(w, "Deck"));
+    assert!(host.declined.lock().unwrap().is_empty(), "B isn't no");
+    let prompt = window
+        .find("[data-cs=stream-pair-prompt]")
+        .expect("the prompt");
+    reach(&mut window, prompt, "Decline", |w, node| {
+        crate::frame::pad_tests::attr_of(w, node, "id").as_deref() == Some("pair-request-decline")
+    });
+    window.pad(Action::Confirm);
+    window.until("no prompt", |w| {
+        w.find("[data-cs=stream-pair-prompt]").is_none()
+    });
+    assert_eq!(*host.declined.lock().unwrap(), ["deck"]);
+    assert!(host.accepted.lock().unwrap().is_empty());
+}

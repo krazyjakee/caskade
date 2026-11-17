@@ -105,3 +105,36 @@ fn the_packages_open_by_licence() {
         "the MIT licence's text follows"
     );
 }
+
+/// A pad alone (#153): into About from its tab, along to Licenses, A opens
+/// Legal in place, its way back returns to About, and B goes back to Home.
+#[test]
+fn a_pad_alone_opens_legal_comes_back_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, enter_panel, reach, settings_by_pad};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let (mut window, panel) = settings_by_pad(
+        crate::frame::tests::source().clone(),
+        || {},
+        "about",
+        "About",
+        |window| window.find("data-cs", "about").is_some(),
+    );
+    reach(&mut window, panel, "Licenses", |window, node| {
+        window.attr(node, "href").is_some() && window.text(node).trim() == "Licenses"
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("Legal", |window| window.find("data-cs", "legal").is_some());
+    assert_eq!(window.href(), "/settings?tab=about&section=licenses");
+    let panel = enter_panel(&mut window);
+    reach(&mut window, panel, "Legal's way back", |window, node| {
+        window.attr(node, "data-part").as_deref() == Some("back")
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("About again", |window| {
+        window.find("data-cs", "about").is_some()
+    });
+    assert_eq!(window.href(), "/settings?tab=about");
+    back_home(&mut window);
+}

@@ -339,3 +339,52 @@ fn a_0_1_plugins_ui_says_it_needs_an_update_and_a_drawn_page_shows() {
             })
     });
 }
+
+/// A pad alone (#153): into the panel from its tab, along to a plugin's
+/// Details…, A opens them, B closes them, and B goes back to Home.
+#[test]
+fn a_pad_alone_opens_a_plugins_details_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, reach, settings_by_pad};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut manifest = reader();
+    manifest["id"] = json!("dev.example.pad-reader");
+    manifest["name"] = json!("Pad Reader");
+    let _gone = Gone(vec![write_plugin("pad-reader", manifest)]);
+    // Listing reads the folders again, so the host knows it.
+    caskade_app::runtime::block_on(source().plugins.list()).unwrap();
+    let (mut window, panel) = settings_by_pad(
+        source().clone(),
+        || {},
+        "plugins",
+        "Pad Reader listed",
+        |window| {
+            window
+                .find_all("data-part", "plugin")
+                .iter()
+                .any(|&row| window.text(row).contains("Pad Reader"))
+        },
+    );
+    reach(
+        &mut window,
+        panel,
+        "Pad Reader's Details…",
+        |window, node| window.attr(node, "aria-label").as_deref() == Some("Pad Reader details"),
+    );
+    window.pad(Action::Confirm);
+    window.settle_until("the details", |window| {
+        window
+            .find("data-cs", "plugin-review")
+            .is_some_and(|dialog| window.text(dialog).contains("dev.example.pad-reader"))
+    });
+    window.pad(Action::Back);
+    window.settle_until("the details closed", |window| {
+        window.find("data-cs", "plugin-review").is_none()
+    });
+    assert!(
+        window.route() != crate::router::Route::Home,
+        "B closed the dialog, not the page"
+    );
+    back_home(&mut window);
+}

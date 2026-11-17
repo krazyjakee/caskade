@@ -133,10 +133,22 @@ fn every_theme_renders_the_reference_screens_as_before() {
         }
         return;
     }
-    assert_eq!(
-        rendered,
-        pngs(&golden()),
-        "screens or themes changed: CASKADE_WRITE_SHOTS=1 writes the images"
+    // A new screen fails here until its images are committed, and a screen
+    // that went fails until its images are removed.
+    let committed = pngs(&golden());
+    let missing: Vec<&String> = rendered
+        .iter()
+        .filter(|name| !committed.contains(*name))
+        .collect();
+    let gone: Vec<&String> = committed
+        .iter()
+        .filter(|name| !rendered.contains(*name))
+        .collect();
+    assert!(
+        missing.is_empty() && gone.is_empty(),
+        "screens or themes changed: CASKADE_WRITE_SHOTS=1 (just native-shots) writes the images\n\
+         rendered with no committed image: {missing:?}\n\
+         committed but no longer rendered: {gone:?}"
     );
     let mut problems = Vec::new();
     // The renders that differ, kept for a look (CI uploads them).

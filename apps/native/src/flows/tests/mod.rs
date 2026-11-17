@@ -250,3 +250,43 @@ fn a_fixture_title() -> String {
     .unwrap();
     page.items[0].title.clone()
 }
+
+/// English again when a test ends, whatever happened: the language is the
+/// process's.
+struct English;
+
+impl English {
+    fn start() -> Self {
+        caskade_core::i18n::set_locale("en");
+        caskade_ui_i18n::set_language("en");
+        Self
+    }
+}
+
+impl Drop for English {
+    fn drop(&mut self) {
+        caskade_core::i18n::set_locale("en");
+        caskade_ui_i18n::set_language("en");
+    }
+}
+
+/// The core switches to `language`, as a change of the Language setting
+/// makes it, and the window settles until `done`. The window's root follows
+/// the language as the app's does (`crate::i18n::use_language`).
+fn speak(window: &mut Window, language: &str, done: impl Fn(&Window) -> bool) {
+    caskade_core::i18n::set_locale(language);
+    window.until(language, done);
+}
+
+/// The open dialogs' controls without a name (#153), failing the test with
+/// them; `what` names what was open.
+fn names_every_control(window: &Window, what: &str) {
+    let (dialogs, unnamed) =
+        crate::frame::a11y_tests::unnamed_in_dialogs(&window.doc.inner.borrow());
+    assert!(dialogs > 0, "{what}: no dialog is open");
+    assert!(
+        unnamed.is_empty(),
+        "{what}: controls a screen reader can't name:\n{}",
+        unnamed.join("\n")
+    );
+}

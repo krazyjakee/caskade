@@ -269,3 +269,134 @@ fn the_picker_in_console_mode_has_larger_tiles_and_the_hint_bar() {
     assert_eq!(window.attr(avatar, "data-size").as_deref(), Some("xl"));
     let _ = block(source().settings.remember_console(false));
 }
+
+/// Who's playing by a pad alone (#153): a pad's moves reach the locked
+/// admin's tile and A asks for its PIN; B leaves the PIN pad for the
+/// accounts; on the pad's keys a digit typed, B deletes it, and the PIN
+/// typed with Start signs in.
+#[test]
+fn the_picker_and_a_pin_go_by_pad_alone() {
+    use crate::frame::pad_tests::reach;
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let home = household(None);
+    let mut window = Window::open();
+    block(accounts().sign_out()).unwrap();
+    window.settle_until("the picker", |window| {
+        window.find("data-cs", "account-picker").is_some()
+    });
+    let label = format!("{}, PIN locked", home.admin.name);
+    let choose_admin = |window: &mut Window| {
+        let picker = window.get("data-cs", "account-picker");
+        reach(&mut *window, picker, "the admin's tile", |window, node| {
+            window.attr(node, "aria-label").as_deref() == Some(label.as_str())
+        });
+        window.pad(Action::Confirm);
+        window.settle_until("the PIN pad", |window| {
+            window.find("data-cs", "pin-pad").is_some()
+        });
+    };
+    choose_admin(&mut window);
+    // B with nothing typed: back to the accounts.
+    window.pad(Action::Back);
+    window.settle_until("the accounts", |window| {
+        window
+            .find("data-cs", "account-picker")
+            .and_then(|picker| window.attr(picker, "data-step"))
+            .as_deref()
+            == Some("accounts")
+    });
+    assert_eq!(active(), None);
+    choose_admin(&mut window);
+    let typed = |window: &Window| {
+        window
+            .find("data-cs", "pin-pad")
+            .and_then(|pad| window.find_in(pad, "data-part", "field"))
+            .and_then(|field| window.attr(field, "value"))
+            .unwrap_or_default()
+    };
+    let key = |window: &mut Window, digit: char| {
+        let pad = window.get("data-cs", "pin-pad");
+        let digit = digit.to_string();
+        reach(
+            &mut *window,
+            pad,
+            &format!("the key {digit}"),
+            |window, node| {
+                window.attr(node, "data-part").as_deref() == Some("key")
+                    && window.text(node).trim() == digit
+            },
+        );
+        window.pad(Action::Confirm);
+    };
+    key(&mut window, '5');
+    window.settle_until("a digit", |window| typed(window) == "5");
+    window.pad(Action::Back);
+    window.settle_until("deleted", |window| typed(window).is_empty());
+    assert_eq!(
+        window
+            .attr(window.get("data-cs", "account-picker"), "data-step")
+            .as_deref(),
+        Some("pin"),
+        "B deleted a digit, and the pad stayed"
+    );
+    for digit in PIN.chars() {
+        key(&mut window, digit);
+    }
+    window.settle_until("the PIN typed", |window| typed(window) == PIN);
+    window.pad(Action::Menu);
+    window.settle_until("signed in", |window| {
+        window.find("data-cs", "account-picker").is_none()
+            && window.find("data-cs", "app-shell").is_some()
+    });
+    assert_eq!(active(), Some(home.admin.id.clone()));
+}
+
+/// Who's playing by keys alone (#153), with no pad: Tab reaches the locked
+/// admin's tile and Enter asks for its PIN with the field focused; a wrong
+/// PIN typed is refused; Escape goes back to the accounts; then the PIN
+/// typed and Enter signs in.
+#[test]
+fn the_picker_and_a_pin_go_by_keys_alone() {
+    use crate::frame::pad_tests::tab_to;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let home = household(None);
+    let mut window = Window::open();
+    block(accounts().sign_out()).unwrap();
+    window.settle_until("the picker", |window| {
+        window.find("data-cs", "account-picker").is_some()
+    });
+    let label = format!("{}, PIN locked", home.admin.name);
+    let choose_admin = |window: &mut Window| {
+        tab_to(&mut *window, "the admin's tile", |window, node| {
+            window.attr(node, "aria-label").as_deref() == Some(label.as_str())
+        });
+        window.key(Key::Named(NamedKey::Enter));
+        window.settle_until("the PIN pad", |window| {
+            window.find("data-cs", "pin-pad").is_some()
+        });
+    };
+    choose_admin(&mut window);
+    type_pin(&mut window, "0000");
+    window.settle_until("refused", |window| {
+        body(window).contains("That PIN isn't right.")
+    });
+    window.key(Key::Named(NamedKey::Escape));
+    window.settle_until("the accounts", |window| {
+        window
+            .find("data-cs", "account-picker")
+            .and_then(|picker| window.attr(picker, "data-step"))
+            .as_deref()
+            == Some("accounts")
+    });
+    assert_eq!(active(), None);
+    choose_admin(&mut window);
+    type_pin(&mut window, PIN);
+    window.settle_until("signed in", |window| {
+        window.find("data-cs", "account-picker").is_none()
+            && window.find("data-cs", "app-shell").is_some()
+    });
+    assert_eq!(active(), Some(home.admin.id.clone()));
+}

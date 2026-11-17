@@ -436,3 +436,42 @@ fn without_romm_the_section_says_why() {
         body(window).contains("RomM servers couldn't be loaded")
     });
 }
+
+/// A pad alone (#153), in the frame opened from Home: into the panel from
+/// its tab, A on Add emulator opens its form, Cancel closes it, and B goes
+/// back.
+#[test]
+fn a_pad_alone_opens_and_cancels_the_emulator_form_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, reach, settings_by_pad};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let library = library(false);
+    let emulation = library.emulation.clone();
+    let (mut window, panel) = settings_by_pad(
+        library.source.clone(),
+        move || {
+            let emulation = emulation.clone();
+            use_context_provider(move || emulation);
+        },
+        "emulators",
+        "Add emulator",
+        |window| window.find("id", "emulation-add").is_some(),
+    );
+    reach(&mut window, panel, "Add emulator", |window, node| {
+        window.attr(node, "id").as_deref() == Some("emulation-add")
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("the form", |window| {
+        window.find("id", "emulator-name").is_some()
+    });
+    reach(&mut window, panel, "the form's Cancel", |window, node| {
+        window.attr(node, "data-cs").as_deref() == Some("button")
+            && window.text(node).trim() == "Cancel"
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("the form closed", |window| {
+        window.find("id", "emulator-name").is_none()
+    });
+    back_home(&mut window);
+}

@@ -232,3 +232,41 @@ fn an_account_that_isnt_an_admin_cant_change_global_scripts() {
     .unwrap();
     assert!(saved.is_empty());
 }
+
+/// A pad alone (#153), in the frame opened from Home: into the panel from
+/// its tab, A on Add script opens a new script's form, Revert drops it,
+/// and B goes back.
+#[test]
+fn a_pad_alone_starts_a_script_reverts_it_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, reach, settings_by_pad};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let (store, accounts) = library();
+    let scripts = Scripts::new(store, accounts);
+    let (mut window, panel) = settings_by_pad(
+        source().clone(),
+        move || {
+            let scripts = scripts.clone();
+            use_context_provider(move || scripts);
+        },
+        "scripts",
+        "Add script",
+        |window| window.find("id", "scripts-add").is_some(),
+    );
+    reach(&mut window, panel, "Add script", |window, node| {
+        window.attr(node, "id").as_deref() == Some("scripts-add")
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("the form", |window| {
+        window.find("data-part", "form").is_some()
+    });
+    reach(&mut window, panel, "Revert", |window, node| {
+        window.attr(node, "id").as_deref() == Some("script-revert")
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("the form gone", |window| {
+        window.find("data-part", "form").is_none()
+    });
+    back_home(&mut window);
+}

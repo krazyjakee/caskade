@@ -19,9 +19,11 @@ mod views;
 pub mod window;
 
 #[cfg(test)]
-mod a11y_tests;
+pub(crate) mod a11y_tests;
 #[cfg(test)]
 mod language_tests;
+#[cfg(test)]
+pub(crate) mod pad_tests;
 #[cfg(test)]
 pub(crate) mod tests;
 

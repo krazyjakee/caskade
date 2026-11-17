@@ -275,6 +275,171 @@ mod tests {
         assert!(derive("orange", &dark()).is_err());
     }
 
+    /// WCAG AA for text: body and secondary text.
+    const AA_TEXT: f64 = 4.5;
+    /// WCAG AA for large text and non-text: the floor a pair on
+    /// [`BELOW_AA`] still has to keep.
+    const AA_LARGE: f64 = 3.0;
+
+    /// The text tokens, each over every surface it's drawn on.
+    const TEXT: [&str; 3] = [
+        "--cs-color-fg",
+        "--cs-color-fg-muted",
+        "--cs-color-fg-subtle",
+    ];
+    const SURFACES: [&str; 3] = [
+        "--cs-color-surface-base",
+        "--cs-color-surface-raised",
+        "--cs-color-surface-overlay",
+    ];
+
+    /// A built-in theme's text token known to miss 4.5:1, with its ratios
+    /// when it was found (#153). It still has to reach 3:1 on every
+    /// surface; whether to change the theme's colour or keep the token for
+    /// large text only is the maintainers' call, so the entry stays until
+    /// then. An entry that no longer misses fails, so the list can't go
+    /// stale.
+    const BELOW_AA: &[(&str, &str, &str)] = &[(
+        "caskade.default",
+        "--cs-color-fg-subtle",
+        "Nexus's hints and captions, #6a7194: 4.17:1 on surface-base, 3.93:1 on \
+         surface-raised, 3.61:1 on surface-overlay (Ember, from the catalogue, \
+         inherits them)",
+    )];
+
+    /// The declarations of the first `:root { … }` block in `css`.
+    fn root_tokens(css: &str) -> Vec<(String, String)> {
+        let Some(start) = css.find(":root {") else {
+            return Vec::new();
+        };
+        let block = &css[start + ":root {".len()..];
+        let block = &block[..block.find('}').unwrap_or(block.len())];
+        block
+            .split(';')
+            .filter_map(|declaration| {
+                let (name, value) = declaration.split_once(':')?;
+                let name = name.trim();
+                name.starts_with("--")
+                    .then(|| (name.to_owned(), value.trim().to_owned()))
+            })
+            .collect()
+    }
+
+    /// `name`'s value in `tokens` (the last one wins), with `var(--x)`
+    /// followed to what it names.
+    fn token(tokens: &[(String, String)], name: &str) -> String {
+        let mut value = tokens
+            .iter()
+            .rev()
+            .find(|(known, _)| known == name)
+            .map(|(_, value)| value.clone())
+            .unwrap_or_else(|| panic!("no {name}"));
+        for _ in 0..8 {
+            let Some(inner) = value
+                .strip_prefix("var(")
+                .and_then(|rest| rest.strip_suffix(')'))
+            else {
+                break;
+            };
+            let named = inner
+                .split(',')
+                .next()
+                .unwrap_or_default()
+                .trim()
+                .to_owned();
+            value = token(tokens, &named);
+        }
+        value
+    }
+
+    /// Every built-in theme's own text over its own surfaces (#153): the
+    /// contract's defaults (`packages/tokens/tokens.css`) under the
+    /// theme's compiled tokens, as the window cascades them. A raised or
+    /// translucent surface is composited over the base, as the accent check
+    /// does; text over the surface it's on. The accent's label over the
+    /// accent is text too.
+    #[test]
+    fn every_built_in_theme_keeps_its_text_readable_on_its_surfaces() {
+        let defaults = std::fs::read_to_string(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../../packages/tokens/tokens.css"),
+        )
+        .unwrap();
+        let defaults = root_tokens(&defaults);
+        assert!(!defaults.is_empty(), "tokens.css has no :root block");
+        // No folder of the user's: the built-in themes only.
+        let themes = caskade_core::themes::ThemeService::new(
+            std::env::temp_dir().join(format!("caskade-contrast-none-{}", std::process::id())),
+        );
+        let built_in: Vec<String> = themes
+            .list()
+            .into_iter()
+            .filter(|info| info.source == caskade_core::themes::ThemeSource::Builtin)
+            .map(|info| info.id)
+            .collect();
+        for id in [
+            "caskade.default",
+            "caskade.cobalt",
+            "caskade.emerald",
+            "caskade.engage",
+        ] {
+            assert!(built_in.iter().any(|known| known == id), "{built_in:?}");
+        }
+        let mut failures = Vec::new();
+        let mut allowed_and_missed = Vec::new();
+        for id in &built_in {
+            let css = themes.stylesheet(id).unwrap();
+            let mut tokens = defaults.clone();
+            tokens.extend(root_tokens(&css));
+            let colour = |name: &str, under: Rgb| {
+                let value = token(&tokens, name);
+                parse_surface(&value, under)
+                    .unwrap_or_else(|| panic!("{id}'s {name} isn't a colour: {value}"))
+            };
+            let base = colour("--cs-color-surface-base", [0.0; 3]);
+            let mut pairs = Vec::new();
+            for surface in SURFACES {
+                let under = colour(surface, base);
+                for text in TEXT {
+                    pairs.push((text, surface, contrast(colour(text, under), under)));
+                }
+            }
+            let accent = colour("--cs-color-accent", base);
+            pairs.push((
+                "--cs-color-accent-fg",
+                "--cs-color-accent",
+                contrast(colour("--cs-color-accent-fg", accent), accent),
+            ));
+            for (text, surface, ratio) in pairs {
+                let allowed = BELOW_AA
+                    .iter()
+                    .any(|(theme, token, _)| theme == id && *token == text);
+                let floor = if allowed { AA_LARGE } else { AA_TEXT };
+                if ratio < floor {
+                    failures.push(format!(
+                        "{id}: {text} on {surface} is {ratio:.2}:1, below {floor}:1"
+                    ));
+                }
+                if allowed && ratio < AA_TEXT {
+                    allowed_and_missed.push((id.clone(), text));
+                }
+            }
+        }
+        assert!(
+            failures.is_empty(),
+            "text a theme draws too faintly:\n{}",
+            failures.join("\n")
+        );
+        for (theme, token, why) in BELOW_AA {
+            assert!(
+                allowed_and_missed
+                    .iter()
+                    .any(|(id, text)| id == theme && text == token),
+                "{theme}'s {token} reaches 4.5:1 everywhere now; drop it from BELOW_AA ({why})"
+            );
+        }
+    }
+
     /// The webview's `deriveAccent` gives these for the same inputs (run in
     /// Node on 10 Nov 2026): both apps show the same accent.
     #[test]

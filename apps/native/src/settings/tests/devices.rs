@@ -168,3 +168,40 @@ fn this_device_is_renamed_and_its_connections_switch() {
             .is_some_and(|node| window.text(node).starts_with("caskade://pair"))
     });
 }
+
+/// A pad alone (#153), in the frame opened from Home: into the panel from
+/// its tab, along to What syncs, A opens its choices, and B goes back.
+#[test]
+fn a_pad_alone_opens_what_syncs_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, reach, settings_by_pad};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _restore = Restore("core.sync", saved("core.sync"));
+    let (devices, accounts, _dir) = desk();
+    let sync = DeviceSync::new(devices, None, None, accounts);
+    let (mut window, panel) = settings_by_pad(
+        source().clone(),
+        move || {
+            let sync = sync.clone();
+            use_context_provider(move || sync);
+        },
+        "devices",
+        "this device",
+        |window| {
+            window
+                .find("id", "device-name")
+                .and_then(|node| window.attr(node, "value"))
+                .as_deref()
+                == Some("Desk")
+        },
+    );
+    reach(&mut window, panel, "What syncs", |window, node| {
+        window.attr(node, "id").as_deref() == Some("sync-choose")
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("the choices", |window| {
+        window.find("data-category", "gameScripts").is_some()
+    });
+    back_home(&mut window);
+}

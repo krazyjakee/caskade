@@ -491,3 +491,271 @@ fn the_pseudo_locale_marks_the_frames_labels_and_keeps_them_laid_out() {
     let said = window.view_text();
     assert!(said.contains("Śēţţĩńĝś"), "{said}");
 }
+
+/// Empties the fixtures' job queue for the next test, whatever happened.
+struct NoJobs;
+
+impl Drop for NoJobs {
+    fn drop(&mut self) {
+        if let Some(fakes) = source().job_fakes.as_ref() {
+            fakes.queue.clear();
+        }
+    }
+}
+
+/// An install downloading, as the fixtures' queue reports it.
+fn downloading(id: &str) -> caskade_core::install::JobSnapshot {
+    serde_json::from_value(serde_json::json!({
+        "id": id,
+        "revision": 1,
+        "kind": "install",
+        "status": "downloading",
+        "title": "Celeste",
+        "input": "https://example.invalid/celeste.zip",
+        "rootId": null,
+        "phase": "download",
+        "progress": {"bytes": 2048, "totalBytes": 8192, "files": 0, "etaSecs": null, "message": "Downloading celeste.zip"},
+        "warnings": [],
+        "question": null,
+        "gameId": null,
+        "error": null,
+        "candidates": [],
+        "selectedCandidateIndex": null,
+        "targetDir": null,
+        "dependencies": [],
+        "verification": null,
+        "failure": null,
+        "createdAtMs": 1,
+        "updatedAtMs": 1
+    }))
+    .unwrap()
+}
+
+/// Activity (#153): a job's card and the page's header follow a switch in
+/// place, and so does the notification feed.
+#[test]
+fn activity_its_jobs_and_its_notifications_follow_a_switch() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _english = English::start();
+    let _no_jobs = NoJobs;
+    source()
+        .job_fakes
+        .as_ref()
+        .expect("the fixtures' fakes")
+        .queue
+        .put(downloading("j1"));
+    let mut window = open("/activity?tab=jobs");
+    window.settle_until("the job", |window| {
+        window.find("data-cs", "activity-job").is_some()
+    });
+    assert!(window.view_text().contains("Jobs and notifications"));
+    let cancel = window
+        .find_all("data-cs", "button")
+        .into_iter()
+        .find(|&button| label(&window, button) == "Cancel job")
+        .expect("Cancel job");
+    speak(&mut window, "sv", |window| {
+        label(window, cancel) == "Avbryt jobb"
+    });
+    let said = window.view_text();
+    assert!(said.contains("Jobb och aviseringar"), "{said}");
+    assert!(!said.contains("Jobs and notifications"), "{said}");
+    // The feed, opened in Swedish, then back in English in place.
+    window.go("/activity?tab=notifications");
+    window.settle_until("the feed in Swedish", |window| {
+        window.view_text().contains(
+            "Inga aviseringar än. Nya spel, misslyckade jobb och uppdateringar visas här.",
+        )
+    });
+    speak(&mut window, "en", |window| {
+        window
+            .view_text()
+            .contains("No notifications yet. New games, failed jobs and updates show here.")
+    });
+}
+
+/// The library's grid, with the id of the game on card `index`.
+fn library_card(window: &mut Window, index: &str) -> (NodeId, String) {
+    window.settle_until("the cards", |window| {
+        !window.find_all("data-index", index).is_empty()
+    });
+    let card = window.get("data-index", index);
+    let id = window
+        .attr(card, "data-focus-key")
+        .and_then(|key| key.strip_prefix("game-").map(str::to_owned))
+        .expect("the card's game");
+    (card, id)
+}
+
+/// What Play asks first, open over the library (#153): its words follow a
+/// switch and focus stays on the button it was on.
+#[test]
+fn a_question_play_asks_follows_a_switch_and_keeps_its_focus() {
+    use crate::game::launch_tests::{Script, script};
+    use caskade_core::updates::GameUpdate;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _english = English::start();
+    let mut window = open("/library?filter=all&sort=title&layout=grid");
+    let (card, game) = library_card(&mut window, "0");
+    let _script = script(Script {
+        update: Some(GameUpdate {
+            entry_id: "e".to_owned(),
+            game_id: game,
+            provider: "github".to_owned(),
+            project: "tide/water".to_owned(),
+            project_url: None,
+            installed: Some("1.1".to_owned()),
+            latest: Some("1.2".to_owned()),
+            latest_url: None,
+            available: true,
+            skipped: None,
+            prereleases: false,
+            checked_at_ms: 0,
+            error: None,
+        }),
+        ..Script::default()
+    });
+    window.double_click(card);
+    window.settle_until("the offer", |window| {
+        window.find("data-cs", "update-offer").is_some()
+    });
+    let offer = window.get("data-cs", "update-offer");
+    assert!(window.text(offer).contains("Update before playing?"));
+    let play_now = window
+        .find_in(offer, "data-part", "play-now")
+        .expect("Play now");
+    window.focus(play_now);
+    speak(&mut window, "sv", |window| {
+        window.text(offer).contains("Uppdatera innan du spelar?")
+    });
+    assert_eq!(label(&window, play_now), "Spela nu");
+    assert_eq!(window.focused(), Some(play_now), "focus stays on Play now");
+    speak(&mut window, "en", |window| {
+        window.text(offer).contains("Update before playing?")
+    });
+    window.key(dioxus_native::prelude::keyboard_types::Key::Named(
+        dioxus_native::prelude::keyboard_types::NamedKey::Escape,
+    ));
+    window.settle_until("the offer closed", |window| {
+        window.find("data-cs", "update-offer").is_none()
+    });
+}
+
+/// The game editor open over a game's page (#153): its title and tabs
+/// follow a switch in place.
+#[test]
+fn the_game_editor_follows_a_switch() {
+    use crate::game::editor::tests::{EditScript, edit_script};
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _english = English::start();
+    let mut game = caskade_core::model::Game::new("Fixture Game 0002");
+    game.id = "fixture-1".to_owned();
+    let _script = edit_script(EditScript {
+        state: Some(caskade_core::model::GameEditState {
+            automatic: game.clone(),
+            game,
+            manual: Vec::new(),
+        }),
+        ..EditScript::default()
+    });
+    let mut window = open("/games/fixture-1");
+    window.settle_until("Edit details", |window| {
+        window.find("data-part", "edit").is_some()
+    });
+    let edit = window.get("data-part", "edit");
+    window.click(edit);
+    window.settle_until("the editor", |window| {
+        window.find("data-cs", "game-editor").is_some()
+            && window.find("data-field", "title").is_some()
+    });
+    let editor = window.get("data-cs", "game-editor");
+    assert!(window.text(editor).contains("Edit Fixture Game 0002"));
+    let details = window
+        .find_all_in(editor, "role", "tab")
+        .into_iter()
+        .find(|&tab| label(&window, tab).starts_with("Details"))
+        .expect("the Details tab");
+    speak(&mut window, "sv", |window| {
+        window.text(editor).contains("Redigera Fixture Game 0002")
+    });
+    assert!(label(&window, details).starts_with("Detaljer"));
+    speak(&mut window, "en", |window| {
+        window.text(editor).contains("Edit Fixture Game 0002")
+    });
+}
+
+/// The toasts' messages shown now, in order.
+fn toasts(window: &Window) -> Vec<String> {
+    window
+        .find_all("data-part", "toast")
+        .into_iter()
+        .filter_map(|toast| window.find_in(toast, "data-part", "message"))
+        .map(|message| label(window, message))
+        .collect()
+}
+
+/// Toasts are words made when they're shown (#153), as in the webview: one
+/// already shown keeps its language through a switch, and the next one
+/// comes in the new language.
+#[test]
+fn a_toast_keeps_its_words_and_the_next_comes_in_the_new_language() {
+    use crate::game::launch_tests::{Script, script, started, version};
+    use caskade_core::saves::versions::{BeforePlay, SaveCheck};
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _english = English::start();
+    let restored = || BeforePlay {
+        check: SaveCheck::Restored {
+            version: version("theirs", false),
+        },
+        checked: true,
+        warnings: Vec::new(),
+    };
+    let mut window = open("/library?filter=all&sort=title&layout=grid");
+    let (first, game) = library_card(&mut window, "0");
+    let scripted = script(Script {
+        saves: [restored()].into(),
+        outcomes: [started(&game)].into(),
+        ..Script::default()
+    });
+    window.double_click(first);
+    window.settle_until("the English toast", |window| {
+        toasts(window)
+            .iter()
+            .any(|toast| toast.starts_with("Started with the save from"))
+    });
+    let library = nav_label(&window, "Library");
+    speak(&mut window, "sv", |window| {
+        label(window, library) == "Bibliotek"
+    });
+    // Shown before the switch: still in English.
+    let shown = toasts(&window);
+    assert!(
+        shown
+            .iter()
+            .any(|toast| toast.starts_with("Started with the save from")),
+        "{shown:?}"
+    );
+    assert!(
+        !shown
+            .iter()
+            .any(|toast| toast.starts_with("Startade med sparfilen från")),
+        "{shown:?}"
+    );
+    drop(scripted);
+    let (second, game) = library_card(&mut window, "1");
+    let _scripted = script(Script {
+        saves: [restored()].into(),
+        outcomes: [started(&game)].into(),
+        ..Script::default()
+    });
+    window.double_click(second);
+    window.settle_until("the Swedish toast", |window| {
+        toasts(window)
+            .iter()
+            .any(|toast| toast.starts_with("Startade med sparfilen från"))
+    });
+}

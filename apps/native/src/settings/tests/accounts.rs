@@ -299,3 +299,123 @@ fn my_profile_saves_its_name_and_sets_its_pin() {
         body(window).contains("Choose a new PIN for Robin")
     });
 }
+
+/// Types `pin` on the PIN pad's keys by pad alone: each digit's key
+/// reached by a pad's moves and pressed with A.
+fn pin_by_pad(window: &mut Window, pin: &str) {
+    use crate::frame::pad_tests::reach;
+    use caskade_ui_input::Action;
+    for digit in pin.chars() {
+        let pad = window.get("data-cs", "pin-pad");
+        let digit = digit.to_string();
+        reach(
+            &mut *window,
+            pad,
+            &format!("the key {digit}"),
+            |window, node| {
+                window.attr(node, "data-part").as_deref() == Some("key")
+                    && window.text(node).trim() == digit
+            },
+        );
+        window.pad(Action::Confirm);
+    }
+}
+
+/// A pad alone (#153), in the frame opened from Home: into My profile
+/// from its tab; Set PIN… opens the pad and B closes it; on the pad's keys
+/// a digit typed, B deletes it, and the new PIN typed twice with Start
+/// saves it; B goes back.
+#[test]
+fn a_pad_alone_sets_my_pin_on_the_pin_pad_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, reach, settings_by_pad};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let (source, accounts) = library();
+    let (mut window, panel) = settings_by_pad(
+        source,
+        || {},
+        "profile",
+        "My profile",
+        |window| window.find("id", "profile-name").is_some(),
+    );
+    let set_pin = |window: &Window, node: NodeId| {
+        window.attr(node, "data-cs").as_deref() == Some("button")
+            && window.text(node).trim() == "Set PIN…"
+    };
+    reach(&mut window, panel, "Set PIN…", set_pin);
+    window.pad(Action::Confirm);
+    window.settle_until("the pad", |window| {
+        window.find("data-cs", "pin-pad").is_some()
+    });
+    // B with nothing typed closes it.
+    window.pad(Action::Back);
+    window.settle_until("the pad closed", |window| {
+        window.find("data-cs", "pin-pad").is_none()
+    });
+    assert!(window.route() != crate::router::Route::Home);
+    reach(&mut window, panel, "Set PIN… again", set_pin);
+    window.pad(Action::Confirm);
+    window.settle_until("the pad again", |window| {
+        window.find("data-cs", "pin-pad").is_some()
+    });
+    let typed = |window: &Window| {
+        window
+            .find("data-cs", "pin-pad")
+            .and_then(|pad| window.find_in(pad, "data-part", "field"))
+            .and_then(|field| window.attr(field, "value"))
+            .unwrap_or_default()
+    };
+    // A digit, then B deletes it and the pad stays.
+    pin_by_pad(&mut window, "9");
+    window.settle_until("a digit", |window| typed(window) == "9");
+    window.pad(Action::Back);
+    window.settle_until("deleted", |window| typed(window).is_empty());
+    assert!(window.find("data-cs", "pin-pad").is_some());
+    pin_by_pad(&mut window, "1357");
+    window.settle_until("typed", |window| typed(window) == "1357");
+    window.pad(Action::Menu);
+    window.settle_until("again", |window| {
+        body(window).contains("Enter the new PIN again") && typed(window).is_empty()
+    });
+    pin_by_pad(&mut window, "1357");
+    window.pad(Action::Menu);
+    let check = accounts.clone();
+    window.settle_until("set", |window| {
+        window.find("data-cs", "pin-pad").is_none()
+            && list(&check).accounts.iter().all(|account| account.has_pin)
+    });
+    back_home(&mut window);
+}
+
+/// A pad alone (#153), in the frame opened from Home: into Accounts from
+/// its tab, A on Add account opens the editor, B closes it, and B goes
+/// back.
+#[test]
+fn a_pad_alone_opens_and_closes_the_account_editor_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, reach, settings_by_pad};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let (source, accounts) = library();
+    let (mut window, panel) = settings_by_pad(
+        source,
+        || {},
+        "accounts",
+        "Accounts",
+        |window| window.find("id", "account-add").is_some(),
+    );
+    reach(&mut window, panel, "Add account", |window, node| {
+        window.attr(node, "id").as_deref() == Some("account-add")
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("the editor", |window| {
+        window.find("data-cs", "account-editor").is_some()
+    });
+    window.pad(Action::Back);
+    window.settle_until("the editor closed", |window| {
+        window.find("data-cs", "account-editor").is_none()
+    });
+    assert_eq!(list(&accounts).accounts.len(), 1, "nothing was added");
+    back_home(&mut window);
+}

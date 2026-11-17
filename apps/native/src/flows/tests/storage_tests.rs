@@ -435,3 +435,221 @@ fn a_game_installed_from_a_link_goes_where_the_user_chose() {
     assert_eq!(job.status, JobStatus::Completed, "{job:?}");
     assert_eq!(job.root_id.as_deref(), Some(locations.archive.as_str()));
 }
+
+/// The picker with the language followed, as the app's root does.
+fn speaking_storage_app() -> Element {
+    crate::i18n::use_language();
+    storage_app()
+}
+
+#[test]
+fn every_control_in_the_install_picker_has_a_name() {
+    let _one = caskade_core::lock(&ONE);
+    let locations = locations(false);
+    let mut window = show(
+        &locations,
+        Shown::Picker {
+            needs: Needs::default(),
+            always_use_default: Some(false),
+        },
+    );
+    window.until("the locations", |w| w.find("#root-options").is_some());
+    window.settle();
+    names_every_control(&window, "the install picker");
+}
+
+#[cfg(target_os = "linux")]
+#[test]
+fn every_control_in_the_move_dialog_has_a_name() {
+    let _one = caskade_core::lock(&ONE);
+    let locations = locations(true);
+    let game_id = locations.game_id.clone().unwrap();
+    let mut window = show(
+        &locations,
+        Shown::Move {
+            game_id,
+            running: false,
+        },
+    );
+    window.press("#move-game");
+    window.until("the destination", |w| w.find("#move-destination").is_some());
+    window.settle();
+    names_every_control(&window, "the move dialog");
+}
+
+/// A language switch while the picker is open (#153): its words follow,
+/// in place.
+#[test]
+fn the_install_picker_follows_a_language_switch() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _english = English::start();
+    let locations = locations(false);
+    *caskade_core::lock(&SHOWN) = Some((
+        locations.storage.clone(),
+        Shown::Picker {
+            needs: Needs::default(),
+            always_use_default: Some(false),
+        },
+    ));
+    caskade_core::lock(&CHOSEN).clear();
+    let mut window = Window::open_root(speaking_storage_app, "the flow", "#storage-ready");
+    window.until("the locations", |w| {
+        w.text("[data-cs=install-root-picker] h2") == "Install location"
+    });
+    assert_eq!(window.text("#root-install").trim(), "Install here");
+    speak(&mut window, "sv", |w| {
+        w.text("[data-cs=install-root-picker] h2") == "Installationsplats"
+    });
+    assert_eq!(window.text("#root-install").trim(), "Installera här");
+    assert_eq!(window.text("#root-cancel").trim(), "Avbryt");
+    // Still the same choice: nothing was picked or cancelled.
+    assert!(chosen().is_empty());
+    speak(&mut window, "en", |w| {
+        w.text("[data-cs=install-root-picker] h2") == "Install location"
+    });
+}
+
+/// The install picker by a pad alone (#153): a pad enters on the default
+/// location; down to Fast SSD and A chooses it; Install here, reached by a
+/// pad's moves, installs there with A. Another picker's Cancel by pad.
+#[test]
+fn the_install_picker_goes_by_a_pad_alone() {
+    use crate::frame::pad_tests::{attr_of, reach};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let locations = locations(false);
+    let picker = Shown::Picker {
+        needs: Needs::default(),
+        always_use_default: Some(false),
+    };
+    let mut window = show(&locations, picker.clone());
+    window.until("the locations", |w| w.find("#root-options").is_some());
+    let root = window.find("[data-cs=install-root-picker]").unwrap();
+    let option = |w: &Window, node: NodeId, name: &str| {
+        attr_of(w, node, "role").as_deref() == Some("radio")
+            && w.doc
+                .inner
+                .borrow()
+                .get_node(node)
+                .is_some_and(|node| node.text_content().contains(name))
+    };
+    reach(&mut window, root, "Fast SSD", |w, node| {
+        option(w, node, "Fast SSD")
+    });
+    window.pad(Action::Confirm);
+    window.until("Fast SSD chosen", |w| {
+        w.doc
+            .inner
+            .borrow()
+            .query_selector_all("[role=radio][aria-checked=true]")
+            .map(|nodes| nodes.to_vec())
+            .unwrap_or_default()
+            .into_iter()
+            .any(|node| option(w, node, "Fast SSD"))
+    });
+    reach(&mut window, root, "Install here", |w, node| {
+        attr_of(w, node, "id").as_deref() == Some("root-install")
+    });
+    window.pad(Action::Confirm);
+    window.until("a choice", |_| !chosen().is_empty());
+    assert_eq!(chosen(), std::slice::from_ref(&locations.fast));
+    drop(window);
+    let mut window = show(&locations, picker);
+    window.until("the locations", |w| w.find("#root-options").is_some());
+    let root = window.find("[data-cs=install-root-picker]").unwrap();
+    reach(&mut window, root, "Cancel", |w, node| {
+        attr_of(w, node, "id").as_deref() == Some("root-cancel")
+    });
+    window.pad(Action::Confirm);
+    window.until("the cancel", |_| !chosen().is_empty());
+    assert_eq!(chosen(), ["cancelled"]);
+}
+
+/// Moving a game by keys alone and by a pad alone (#153). Keys: Tab to
+/// Move installed files… and Enter opens the dialog, Escape closes it;
+/// Enter again, Tab to Move game and Enter moves it. A pad: A opens the
+/// dialog, B closes it, A again, Move game reached by a pad's moves and A
+/// moves it back.
+#[cfg(target_os = "linux")]
+#[test]
+fn a_game_moves_by_keys_alone_and_by_a_pad_alone() {
+    use crate::frame::pad_tests::{attr_of, focused_node, reach};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let locations = locations(true);
+    let game_id = locations.game_id.clone().unwrap();
+    let on = |root: &str| {
+        roots(&locations.service)
+            .into_iter()
+            .find(|summary| summary.root.id == root)
+            .unwrap()
+            .games
+            .iter()
+            .any(|game| game.game_id == game_id)
+    };
+    assert!(on(&locations.fast) && !on(&locations.archive));
+    let shown = Shown::Move {
+        game_id: game_id.clone(),
+        running: false,
+    };
+    let focused_id = |w: &Window| focused_node(w).and_then(|node| attr_of(w, node, "id"));
+    let tab_to = |w: &mut Window, id: &str| {
+        for _ in 0..20 {
+            if focused_id(&*w).as_deref() == Some(id) {
+                return;
+            }
+            w.key(Key::Named(NamedKey::Tab));
+        }
+        panic!("Tab never reached #{id}; focus is on {:?}", focused_id(&*w));
+    };
+    // Keys.
+    let mut window = show(&locations, shown.clone());
+    tab_to(&mut window, "move-game");
+    window.key(Key::Named(NamedKey::Enter));
+    window.until("the dialog", |w| w.find("#move-destination").is_some());
+    window.key(Key::Named(NamedKey::Escape));
+    window.until("the dialog closed", |w| w.find("[role=dialog]").is_none());
+    tab_to(&mut window, "move-game");
+    window.key(Key::Named(NamedKey::Enter));
+    window.until("the dialog again", |w| {
+        w.find("#move-destination").is_some() && w.find("[data-part=reason]").is_none()
+    });
+    tab_to(&mut window, "move-confirm");
+    window.key(Key::Named(NamedKey::Enter));
+    window.until("the move to finish", |w| w.find("[role=dialog]").is_none());
+    assert!(
+        on(&locations.archive) && !on(&locations.fast),
+        "moved by keys"
+    );
+    drop(window);
+    // A pad, back to Fast SSD.
+    let mut window = show(&locations, shown);
+    let start = window.find("#storage-ready").unwrap();
+    reach(&mut window, start, "Move installed files…", |w, node| {
+        attr_of(w, node, "id").as_deref() == Some("move-game")
+    });
+    window.pad(Action::Confirm);
+    window.until("the dialog", |w| w.find("#move-destination").is_some());
+    window.pad(Action::Back);
+    window.until("the dialog closed", |w| w.find("[role=dialog]").is_none());
+    assert_eq!(
+        focused_id(&window).as_deref(),
+        Some("move-game"),
+        "focus came back"
+    );
+    window.pad(Action::Confirm);
+    window.until("the dialog again", |w| {
+        w.find("#move-destination").is_some() && w.find("[data-part=reason]").is_none()
+    });
+    let dialog = window.find("[role=dialog]").unwrap();
+    reach(&mut window, dialog, "Move game", |w, node| {
+        attr_of(w, node, "id").as_deref() == Some("move-confirm")
+    });
+    window.pad(Action::Confirm);
+    window.until("the move to finish", |w| w.find("[role=dialog]").is_none());
+    assert!(
+        on(&locations.fast) && !on(&locations.archive),
+        "moved back by pad"
+    );
+}

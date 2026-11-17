@@ -387,3 +387,129 @@ fn a_readonly_settings_database_pauses_setup_and_retry_finishes() {
         );
     });
 }
+
+/// Setup with the language followed, as the app's root does.
+fn speaking_app() -> Element {
+    crate::i18n::use_language();
+    app()
+}
+
+/// English again when a test ends, whatever happened: the language is the
+/// process's.
+struct English;
+
+impl Drop for English {
+    fn drop(&mut self) {
+        caskade_core::i18n::set_locale("en");
+        caskade_ui_i18n::set_language("en");
+    }
+}
+
+/// A language switch during setup (#153), as choosing a language makes
+/// it: the open question's words follow in place, and setup stays on it.
+#[test]
+fn setup_follows_a_language_switch_in_place() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _run = first_run();
+    caskade_core::i18n::set_locale("en");
+    caskade_ui_i18n::set_language("en");
+    let _english = English;
+    *caskade_core::lock(&STORAGE) = None;
+    let mut doc = DioxusDocument::new(
+        VirtualDom::new(speaking_app),
+        DocumentConfig {
+            viewport: Some(Viewport::new(1280, 800, 1.0, ColorScheme::Dark)),
+            ..Default::default()
+        },
+    );
+    doc.initial_build();
+    let mut window = Window { doc };
+    window.settle_until("setup", |window| step(window).as_deref() == Some("welcome"));
+    press(&mut window, "onboarding-start");
+    window.settle_until("the language", |window| {
+        step(window).as_deref() == Some("language")
+    });
+    let next = window.get("id", "onboarding-next");
+    let said = |window: &Window| window.text(window.get("data-cs", "onboarding"));
+    assert!(window.text(next).contains("Continue"));
+    assert!(said(&window).contains("Choose your language"));
+    caskade_core::i18n::set_locale("sv");
+    window.settle_until("setup in Swedish", |window| {
+        window.text(next).contains("Fortsätt")
+    });
+    assert!(said(&window).contains("Välj språk"), "{}", said(&window));
+    assert_eq!(
+        step(&window).as_deref(),
+        Some("language"),
+        "still on the same question"
+    );
+    caskade_core::i18n::set_locale("en");
+    window.settle_until("setup in English", |window| {
+        window.text(next).contains("Continue")
+    });
+}
+
+/// First-run setup by a pad alone (#153): A on Get started, each
+/// question's Continue reached by a pad's moves and pressed with A, B back
+/// a question, then the work and Open my library.
+#[test]
+fn a_pad_alone_goes_through_setup_and_back_a_question() {
+    use crate::frame::pad_tests::reach;
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _run = first_run();
+    let dir = tempfile::tempdir().unwrap();
+    let mut window = open(Some(storage(dir.path())));
+    // A pad presses `id`, reached from where it is in the setup.
+    fn press_by_pad(window: &mut Window, id: &str) {
+        window.settle_until(id, |window| {
+            window
+                .find("id", id)
+                .is_some_and(|node| window.attr(node, "aria-disabled").as_deref() != Some("true"))
+        });
+        let setup = window.get("data-cs", "onboarding");
+        reach(&mut *window, setup, id, |window, node| {
+            window.attr(node, "id").as_deref() == Some(id)
+        });
+        window.pad(Action::Confirm);
+    }
+    press_by_pad(&mut window, "onboarding-start");
+    window.settle_until("the language", |window| {
+        step(window).as_deref() == Some("language")
+    });
+    press_by_pad(&mut window, "onboarding-next");
+    window.settle_until("the folder", |window| {
+        step(window).as_deref() == Some("folder")
+    });
+    // B goes back a question.
+    window.pad(Action::Back);
+    window.settle_until("the language again", |window| {
+        step(window).as_deref() == Some("language")
+    });
+    for (from, to) in [
+        ("language", "folder"),
+        ("folder", "sources"),
+        ("sources", "mode"),
+        ("mode", "account"),
+        ("account", "setup"),
+    ] {
+        assert_eq!(step(&window).as_deref(), Some(from));
+        press_by_pad(&mut window, "onboarding-next");
+        window.settle_until(to, |window| step(window).as_deref() == Some(to));
+    }
+    window.settle_until("marked done", |_| {
+        saved("core.onboarding")["completed"] == json!(true)
+    });
+    window.settle_until("the work done", |window| {
+        window
+            .find("data-part", "setup")
+            .and_then(|setup| window.attr(setup, "data-status"))
+            .as_deref()
+            == Some("done")
+    });
+    press_by_pad(&mut window, "onboarding-open-library");
+    window.settle_until("the library", |window| {
+        window.find("data-cs", "app-shell").is_some() && window.href().starts_with("/library")
+    });
+}

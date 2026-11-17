@@ -329,3 +329,39 @@ fn always_use_the_default_saves() {
     caskade_app::runtime::block_on(settings.update("core.storage", move |_| restore)).unwrap();
     assert_ne!(before["alwaysUseDefault"], json!(null));
 }
+
+/// A pad alone (#153), in the frame opened from Home: into the panel from
+/// its tab, along to Fast SSD's card, A selects it, and B goes back.
+#[test]
+fn a_pad_alone_selects_a_location_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, reach, settings_by_pad};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _locations = locations();
+    let storage = caskade_core::lock(&STORAGE)
+        .clone()
+        .expect("the test's storage");
+    let (mut window, panel) = settings_by_pad(
+        source().clone(),
+        move || {
+            let storage = storage.clone();
+            use_context_provider(move || storage);
+        },
+        "storage",
+        "the locations",
+        |window| window.find_all("data-part", "root").len() == 2,
+    );
+    reach(&mut window, panel, "Fast SSD's card", |window, node| {
+        window.attr(node, "data-part").as_deref() == Some("root")
+            && window.text(node).contains("Fast SSD")
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("Fast SSD selected", |window| {
+        window
+            .attr(card(window, "Fast SSD"), "aria-pressed")
+            .as_deref()
+            == Some("true")
+    });
+    back_home(&mut window);
+}

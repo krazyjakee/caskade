@@ -172,3 +172,54 @@ fn statistics_go_live_and_say_what_was_read() {
         "sampling stopped with the panel"
     );
 }
+
+/// A pad alone (#153), in the frame opened from Home over the fake
+/// machine: into the panel from its tab, along its cards to the CPU's and
+/// the storage's, and B goes back.
+#[test]
+fn a_pad_alone_reaches_the_cards_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, reach, settings_by_pad};
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let reads = Arc::new(AtomicU64::new(0));
+    let stats = SystemStats::with_probe(
+        SamplerConfig {
+            interval: Duration::from_millis(200),
+            history: 30,
+            lease: Duration::from_secs(30),
+        },
+        move || {
+            Box::new(Fake {
+                reads: reads.clone(),
+            }) as Box<dyn Probe>
+        },
+    );
+    let (mut window, panel) = settings_by_pad(
+        source().clone(),
+        move || {
+            let stats = stats.clone();
+            use_context_provider(move || stats);
+        },
+        "statistics",
+        "live",
+        |window| {
+            window
+                .find("data-cs", "system-stats")
+                .and_then(|node| window.attr(node, "data-status"))
+                .as_deref()
+                == Some("live")
+        },
+    );
+    for metric in ["cpu", "storage"] {
+        reach(
+            &mut window,
+            panel,
+            &format!("the {metric} card"),
+            |window, node| {
+                window.attr(node, "data-part").as_deref() == Some("card")
+                    && window.attr(node, "data-metric").as_deref() == Some(metric)
+            },
+        );
+    }
+    back_home(&mut window);
+}

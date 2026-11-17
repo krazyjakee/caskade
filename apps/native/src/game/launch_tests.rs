@@ -412,3 +412,162 @@ fn a_busy_streaming_device_is_asked_to_stop_and_the_game_launches_again() {
     let second = with(|script| script.launches[1].1.clone());
     assert!(second.stop_host);
 }
+
+/// Whether `node` is the library's first card or inside it.
+fn on_first_card(window: &Window, node: blitz_dom::NodeId) -> bool {
+    window.find("data-index", "0").is_some_and(|card| {
+        let doc = window.doc.inner.borrow();
+        std::iter::successors(Some(node), |&id| doc.get_node(id).and_then(|n| n.parent))
+            .any(|id| id == card)
+    })
+}
+
+/// A pad plays the first card: a pad's moves reach it, X opens its quick
+/// look and X again plays.
+fn play_by_pad(window: &mut Window) {
+    use caskade_ui_input::Action;
+    let view = window.get("data-cs", "view");
+    crate::frame::pad_tests::reach(&mut *window, view, "the first card", on_first_card);
+    window.pad(Action::Details);
+    window.settle_until("the quick look", |window| {
+        window.find("data-cs", "quick-look").is_some()
+    });
+    window.pad(Action::Details);
+}
+
+/// A pad's moves reach `part` in the open `dialog`, and A presses it.
+fn press_by_pad(window: &mut Window, dialog: &str, part: &str) {
+    use caskade_ui_input::Action;
+    window.settle_until(dialog, |window| window.find("data-cs", dialog).is_some());
+    let root = window.get("data-cs", dialog);
+    crate::frame::pad_tests::reach(&mut *window, root, part, |window, node| {
+        window.attr(node, "data-part").as_deref() == Some(part)
+    });
+    window.pad(Action::Confirm);
+}
+
+/// B closes the open `dialog`, and nothing has started.
+fn close_by_b(window: &mut Window, dialog: &str) {
+    use caskade_ui_input::Action;
+    window.settle_until(dialog, |window| window.find("data-cs", dialog).is_some());
+    window.pad(Action::Back);
+    window.settle_until("closed", |window| window.find("data-cs", dialog).is_none());
+    assert_eq!(launches(), 0, "B on {dialog} starts nothing");
+}
+
+/// The play questions by a pad alone (#153): the update offer closes on
+/// B; asked again, Play now (reached by a pad's moves) goes on to the game
+/// running on another device, which closes on B too; asked a third time,
+/// Play now and then Play anyway play it.
+#[test]
+fn the_play_questions_go_by_a_pad_alone() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let (mut window, game) = library();
+    let _script = script(Script {
+        update: Some(GameUpdate {
+            entry_id: "e".to_owned(),
+            game_id: game.clone(),
+            provider: "github".to_owned(),
+            project: "tide/water".to_owned(),
+            project_url: None,
+            installed: Some("1.1".to_owned()),
+            latest: Some("1.2".to_owned()),
+            latest_url: None,
+            available: true,
+            skipped: None,
+            prereleases: false,
+            checked_at_ms: 0,
+            error: None,
+        }),
+        playing: vec![PlayingElsewhere {
+            device_id: "den".to_owned(),
+            device_name: "Den PC".to_owned(),
+            game_id: game.clone(),
+            title: "Tidewater".to_owned(),
+            account_id: String::new(),
+            started_at_ms: 1_700_000_000_000,
+        }],
+        outcomes: [started(&game)].into(),
+        ..Script::default()
+    });
+    play_by_pad(&mut window);
+    close_by_b(&mut window, "update-offer");
+    play_by_pad(&mut window);
+    press_by_pad(&mut window, "update-offer", "play-now");
+    close_by_b(&mut window, "playing-elsewhere");
+    play_by_pad(&mut window);
+    press_by_pad(&mut window, "update-offer", "play-now");
+    press_by_pad(&mut window, "playing-elsewhere", "play-anyway");
+    launched(&mut window, 1);
+}
+
+/// The game running on another device asked by keys alone (#153): Tab to
+/// the first card, Shift+F10 opens its menu and Enter on Play asks;
+/// Escape closes it with nothing started; asked again, Tab moves from
+/// Cancel to Play anyway and Enter plays.
+#[test]
+fn the_play_questions_go_by_keys_alone() {
+    use crate::frame::pad_tests::tab_to;
+    use dioxus_native::prelude::keyboard_types::{Key, Modifiers, NamedKey};
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let (mut window, game) = library();
+    let _script = script(Script {
+        playing: vec![PlayingElsewhere {
+            device_id: "den".to_owned(),
+            device_name: "Den PC".to_owned(),
+            game_id: game.clone(),
+            title: "Tidewater".to_owned(),
+            account_id: String::new(),
+            started_at_ms: 1_700_000_000_000,
+        }],
+        outcomes: [started(&game)].into(),
+        ..Script::default()
+    });
+    let ask = |window: &mut Window| {
+        if !window
+            .focused()
+            .is_some_and(|node| on_first_card(&*window, node))
+        {
+            tab_to(&mut *window, "the first card", on_first_card);
+        }
+        window.key_with(Key::Named(NamedKey::F10), Modifiers::SHIFT);
+        window.settle_until("the menu", |window| window.find("role", "menu").is_some());
+        for _ in 0..12 {
+            let on_play = window.focused().is_some_and(|node| {
+                window.attr(node, "role").as_deref() == Some("menuitem")
+                    && window.text(node).trim().starts_with("Play")
+            });
+            if on_play {
+                break;
+            }
+            window.key(Key::Named(NamedKey::ArrowDown));
+        }
+        window.key(Key::Named(NamedKey::Enter));
+        window.settle_until("the question", |window| {
+            window.find("data-cs", "playing-elsewhere").is_some()
+        });
+    };
+    ask(&mut window);
+    window.key(Key::Named(NamedKey::Escape));
+    window.settle_until("closed", |window| {
+        window.find("data-cs", "playing-elsewhere").is_none()
+    });
+    assert_eq!(launches(), 0, "Escape starts nothing");
+    ask(&mut window);
+    let focused_part = |window: &Window| {
+        window
+            .focused()
+            .and_then(|node| window.attr(node, "data-part"))
+    };
+    for _ in 0..3 {
+        if focused_part(&window).as_deref() == Some("play-anyway") {
+            break;
+        }
+        window.key(Key::Named(NamedKey::Tab));
+    }
+    assert_eq!(focused_part(&window).as_deref(), Some("play-anyway"));
+    window.key(Key::Named(NamedKey::Enter));
+    launched(&mut window, 1);
+}

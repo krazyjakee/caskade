@@ -250,3 +250,55 @@ fn the_refresh_preferences_save() {
     });
     assert_ne!(before["backgroundRefresh"], json!(null));
 }
+
+/// A pad alone (#153): into the panel from its tab, along to the refresh
+/// switch, A turns it over and it saves, and B goes back to Home.
+#[test]
+fn a_pad_alone_switches_the_refresh_and_goes_back() {
+    use crate::frame::pad_tests::{back_home, reach, settings_by_pad};
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let settings = source().settings.clone();
+    let before = caskade_app::runtime::block_on(settings.get("core.storeAccounts"))
+        .unwrap()
+        .value;
+    struct Restore(caskade_ui_data::Settings, Value);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            let value = self.1.clone();
+            let _ =
+                caskade_app::runtime::block_on(self.0.update("core.storeAccounts", move |_| value));
+        }
+    }
+    let _restore = Restore(settings.clone(), before.clone());
+    let stores = &source().stores;
+    if stores.service().providers().is_empty() {
+        stores.service().register_provider(Arc::new(Fakestore));
+    }
+    let refresh = |window: &Window| {
+        window
+            .find_all("data-cs", "setting-row")
+            .into_iter()
+            .find(|&row| label_of(window, row) == "Refresh in the background")
+    };
+    let (mut window, panel) = settings_by_pad(
+        source().clone(),
+        || {},
+        "stores",
+        "the refresh row",
+        |window| refresh(window).is_some(),
+    );
+    reach(&mut window, panel, "the refresh switch", |window, node| {
+        window.attr(node, "role").as_deref() == Some("switch")
+            && refresh(window).is_some_and(|row| is_inside(window, node, row))
+    });
+    window.pad(Action::Confirm);
+    window.settle_until("saved", |_| {
+        caskade_app::runtime::block_on(settings.get("core.storeAccounts"))
+            .unwrap()
+            .value["backgroundRefresh"]
+            != before["backgroundRefresh"]
+    });
+    back_home(&mut window);
+}

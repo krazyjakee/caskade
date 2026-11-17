@@ -4,6 +4,13 @@
 //! render, so a shot waits until the cards are there ([`ready`],
 //! [`home_ready`]).
 //!
+//! The views' screens (#153) are the same frame open on another page
+//! ([`PAGES`], [`page`]; Settings' sections too), first-run setup over a
+//! library of its own ([`onboarding`]), the game editor over scripted data
+//! ([`editor`]) and Home in console mode ([`console_home`]). Nothing reaches
+//! the app's services: the Store and a game's page show what fixtures mode
+//! has.
+//!
 //! The website's captures (#150) are Home over a sample library of their
 //! own ([`open_website`]): eight games with Steam's public cover art, which
 //! `scripts/website-art.sh` downloads beforehand.
@@ -209,4 +216,161 @@ pub fn website_ready(doc: &BaseDocument) -> bool {
         }
     });
     shelves_ready(doc, WEBSITE_GAMES.len()) && covers >= WEBSITE_GAMES.len() && !loading
+}
+
+/// The page the next [`page`] screen opens on.
+static PAGE: std::sync::Mutex<&'static str> = std::sync::Mutex::new("/");
+
+/// The views' screens in every theme (#153): the screen's name, the page
+/// it opens on, and an attribute and value there once the page has its
+/// data.
+pub const PAGES: &[(&str, &str, (&str, &str))] = &[
+    ("game", "/games/fixture-1", ("data-cs", "hero")),
+    ("store", "/store?tab=browse", ("data-view", "store")),
+    ("collections", "/collections", ("data-view", "collections")),
+    ("activity", "/activity?tab=jobs", ("data-view", "activity")),
+    (
+        "settings-general",
+        "/settings?tab=general",
+        ("id", "settings-tab-general-panel"),
+    ),
+];
+
+/// Opens the next [`page`] screen on `href`.
+pub fn open_page(href: &'static str) {
+    *caskade_core::lock(&PAGE) = href;
+}
+
+/// The frame over the fixture library, open on the page [`open_page`] set.
+pub fn page() -> Element {
+    framed(*caskade_core::lock(&PAGE), fixtures)
+}
+
+/// Whether an element of `doc` has attribute `name` set to `value`.
+pub fn has(doc: &BaseDocument, name: &str, value: &str) -> bool {
+    let mut found = false;
+    doc.visit(|_, node| {
+        found |= node.attr(LocalName::from(name)) == Some(value);
+    });
+    found
+}
+
+/// Home in console mode over the fixture library: the mode is set before
+/// the frame decides it.
+pub fn console_home() -> Element {
+    use_hook(|| crate::console::set_mode(crate::console::Mode::Console, false));
+    framed("/", fixtures)
+}
+
+/// Whether console mode's Home has its shelves.
+pub fn console_ready(doc: &BaseDocument) -> bool {
+    has(doc, "data-mode", "console") && shelves_ready(doc, 8)
+}
+
+/// A library of its own with setup still to do, its sounds off.
+static FIRST_RUN: OnceLock<DataSource> = OnceLock::new();
+
+fn first_run() -> DataSource {
+    FIRST_RUN
+        .get_or_init(|| {
+            caskade_app::runtime::block_on(async {
+                let source = DataSource::fixtures(3).await.expect("the fixture library");
+                source
+                    .settings
+                    .update("core.onboarding", |mut current| {
+                        current["completed"] = serde_json::json!(false);
+                        current["sounds"] = serde_json::json!(false);
+                        current
+                    })
+                    .await
+                    .expect("setup still to do");
+                source
+            })
+        })
+        .clone()
+}
+
+/// First-run setup, on its welcome.
+pub fn onboarding() -> Element {
+    framed("/", first_run)
+}
+
+/// Whether setup shows its welcome.
+pub fn onboarding_ready(doc: &BaseDocument) -> bool {
+    has(doc, "data-step", "welcome")
+}
+
+/// An answer the editor gets at once.
+fn answer<T: 'static>(value: T) -> crate::game::launch::Answer<T> {
+    Box::pin(async move { Ok(value) })
+}
+
+/// A change the screen's editor can't make: it only shows.
+fn refused<T: 'static>() -> crate::game::launch::Answer<T> {
+    Box::pin(async {
+        Err(caskade_core::error::ErrorReport::from(
+            "Screenshots change nothing.".to_owned(),
+        ))
+    })
+}
+
+/// The editor's data for its screen: `fixture-1` as the fixtures have it,
+/// no artwork, actions or save locations to show, and every change refused.
+fn still_edit_data() -> crate::game::editor::data::EditData {
+    use crate::game::editor::data::{EditData, SaveLocations};
+    use std::rc::Rc;
+    EditData {
+        state: Rc::new(|_| {
+            let mut game = caskade_core::model::Game::new("Fixture Game 0002");
+            game.id = "fixture-1".to_owned();
+            answer(Some(caskade_core::model::GameEditState {
+                automatic: game.clone(),
+                game,
+                manual: Vec::new(),
+            }))
+        }),
+        save: Rc::new(|_, _, _| refused()),
+        artwork: Rc::new(|_| answer(Some(Vec::new()))),
+        set_artwork: Rc::new(|_, _, _| refused()),
+        actions: Rc::new(|_| answer(Vec::new())),
+        save_action: Rc::new(|_, _| refused()),
+        delete_action: Rc::new(|_, _| refused()),
+        order_actions: Rc::new(|_, _, _| refused()),
+        action_settings: Rc::new(|_, _, _| refused()),
+        proton: Rc::new(|| answer(Default::default())),
+        saves: Rc::new(|_| {
+            answer(SaveLocations {
+                revision: 0,
+                preferences: caskade_core::saves::SavePreferences::default(),
+                matched: caskade_core::saves::SaveMatch::Unknown,
+                automatic: Vec::new(),
+                locations: Vec::new(),
+                warnings: Vec::new(),
+            })
+        }),
+        edit_saves: Rc::new(|_, _, _| refused()),
+    }
+}
+
+/// The game editor (#100) open on `fixture-1`'s details, over the fixture
+/// library.
+pub fn editor() -> Element {
+    use_data_source(fixtures);
+    use_context_provider(still_edit_data);
+    rsx! {
+        InputRoot {
+            crate::ui::ToastRegion {
+                crate::game::editor::GameEditor {
+                    game_id: "fixture-1",
+                    title: "Fixture Game 0002",
+                    on_close: |_| {},
+                }
+            }
+        }
+    }
+}
+
+/// Whether the editor shows the game's details.
+pub fn editor_ready(doc: &BaseDocument) -> bool {
+    has(doc, "data-cs", "game-editor") && has(doc, "data-field", "title")
 }

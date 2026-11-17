@@ -188,3 +188,72 @@ fn lt_and_rt_page_focus_along_a_shelf() {
     window.pad(Action::PagePrev);
     assert_eq!(at(&window), Some(0));
 }
+
+/// Home by keys alone (#153), in desktop mode with no pad: Tab reaches the
+/// hero's Resume · View details and Enter opens the game; Tab reaches its
+/// way back and Enter comes back to Home; Tab reaches a new game's card on
+/// a shelf and Enter opens it, then a shelf's View all and Enter opens the
+/// library.
+#[test]
+fn home_is_driven_by_keys_alone() {
+    use crate::frame::pad_tests::tab_to;
+    use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = home();
+    let inside = |window: &Window, node: blitz_dom::NodeId, root: blitz_dom::NodeId| {
+        let doc = window.doc.inner.borrow();
+        std::iter::successors(Some(node), |&id| doc.get_node(id).and_then(|n| n.parent))
+            .any(|id| id == root)
+    };
+    tab_to(&mut window, "Resume · View details", |window, node| {
+        window.attr(node, "data-part").as_deref() == Some("actions")
+            && window
+                .find("data-cs", "hero")
+                .is_some_and(|hero| inside(window, node, hero))
+    });
+    window.key(Key::Named(NamedKey::Enter));
+    window.settle_until("the hero's game", |window| {
+        matches!(window.route(), Route::Game { ref from, .. } if from.as_deref() == Some("/"))
+    });
+    window.settle_until("its way back", |window| {
+        window.find("data-part", "back").is_some()
+    });
+    tab_to(&mut window, "Back to Home", |window, node| {
+        window.attr(node, "data-part").as_deref() == Some("back")
+    });
+    window.key(Key::Named(NamedKey::Enter));
+    window.settle_until("Home again", |window| {
+        window.route() == Route::Home && window.find("data-focus-section", "shelf-added").is_some()
+    });
+    tab_to(
+        &mut window,
+        "a card on New in your library",
+        |window, node| {
+            window
+                .find("data-focus-section", "shelf-added")
+                .is_some_and(|shelf| inside(window, node, shelf))
+                && window
+                    .find_all("data-cs", "game-card")
+                    .into_iter()
+                    .any(|card| inside(window, node, card))
+        },
+    );
+    window.key(Key::Named(NamedKey::Enter));
+    window.settle_until("the card's game", |window| {
+        matches!(window.route(), Route::Game { .. })
+    });
+    window.go("/");
+    window.settle_until("Home's shelves again", |window| {
+        window
+            .find("data-focus-section", "shelf-released")
+            .is_some()
+    });
+    tab_to(&mut window, "a shelf's View all", |window, node| {
+        window.attr(node, "data-part").as_deref() == Some("view-all")
+    });
+    window.key(Key::Named(NamedKey::Enter));
+    window.settle_until("the library", |window| {
+        matches!(window.route(), Route::Library(_))
+    });
+}
