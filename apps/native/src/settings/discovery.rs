@@ -190,7 +190,7 @@ pub fn LibraryDiscoverySettings() -> Element {
         namespace: "core.discovery".into(),
         whole: true,
         fields: vec![
-            field("enabled", t!("Enable library discovery")),
+            field("enabled", t!("Enable discovery")),
             field("scanOnStartup", t!("Full scan on startup")),
             field("backgroundRefresh", t!("Background refresh")),
             field("refreshInterval", t!("Refresh interval")),
@@ -280,7 +280,7 @@ pub fn LibraryDiscoverySettings() -> Element {
                 title: t!("Automatic discovery"),
                 description: t!("Finds the games your launchers and your system already know about. It reads their records and never starts a launcher."),
                 SettingRow {
-                    label: t!("Enable library discovery"),
+                    label: t!("Enable discovery"),
                     description: t!("Off stops every scan, Scan now included, and watching folders."),
                     Switch { checked: enabled, on_change: toggle("enabled") }
                 }

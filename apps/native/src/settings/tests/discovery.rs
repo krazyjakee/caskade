@@ -170,7 +170,7 @@ fn the_preferences_read_and_save_and_off_stops_scans() {
         saved("core.discovery")["deepScans"]["customFolders"] == json!(true)
     });
     // Off dims the rest, says why, and Scan now waits.
-    let enabled = switch(&window, "Enable library discovery");
+    let enabled = switch(&window, "Enable discovery");
     space(&mut window, enabled);
     window.settle_until("off", |window| {
         saved("core.discovery")["enabled"] == json!(false)

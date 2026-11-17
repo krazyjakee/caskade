@@ -196,7 +196,7 @@ pub const INDEX: [Entry; 125] = [
     Entry {
         tab: "library-discovery",
         section: None,
-        label: || t!("Enable library discovery"),
+        label: || t!("Enable discovery"),
         words: Some(|| t!("scan, find games")),
     },
     Entry {

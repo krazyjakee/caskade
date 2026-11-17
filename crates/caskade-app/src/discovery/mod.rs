@@ -185,7 +185,7 @@ impl DiscoveryController {
         let (preferences, launchers) = config::preferences(&self.0.settings).await?;
         if !preferences.enabled {
             return Err(refused(caskade_core::tr!(
-                "Enable library discovery before scanning."
+                "Enable discovery before scanning."
             )));
         }
         let config = config::scan_config(&preferences, &launchers, self.0.service.env().os())?;

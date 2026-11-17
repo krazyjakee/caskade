@@ -284,7 +284,7 @@ where
                 Some(work) => work.await,
                 None => Err(ErrorReport::new(
                     caskade_ui_data::ErrorCode::Other,
-                    caskade_core::tr!("Library discovery isn't available here."),
+                    caskade_core::tr!("Discovery isn't available here."),
                 )),
             }
         })
