@@ -55,7 +55,6 @@ use crate::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap},
     path::PathBuf,
@@ -239,7 +238,7 @@ pub struct CoverUnavailable {
 }
 
 /// How a server answered last.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ConnectionState {
     Untested,
@@ -255,7 +254,7 @@ pub enum ConnectionState {
 }
 
 /// A server and what Caskade knows about it.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ServerStatus {
     pub id: String,
@@ -273,7 +272,7 @@ pub struct ServerStatus {
 }
 
 /// A RomM platform and the Caskade platform it would map to.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PlatformMatch {
     pub platform: RemotePlatform,
@@ -282,7 +281,7 @@ pub struct PlatformMatch {
 }
 
 /// What "Test connection" found.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ConnectionReport {
     pub version: Option<String>,
@@ -291,7 +290,7 @@ pub struct ConnectionReport {
 }
 
 /// What one sync did.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct RommSyncReport {
     pub server_id: String,
@@ -307,7 +306,7 @@ pub struct RommSyncReport {
 }
 
 /// One cached game.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CacheEntry {
     pub server_id: String,
@@ -322,7 +321,7 @@ pub struct CacheEntry {
     pub orphaned: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CacheStatus {
     pub dir: PathBuf,
@@ -333,7 +332,7 @@ pub struct CacheStatus {
 }
 
 /// The whole RomM panel: settings, server states and the cache.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct RommOverview {
     pub settings: RommSettings,
@@ -343,7 +342,7 @@ pub struct RommOverview {
 }
 
 /// A RomM game's download state, for the library and the game page.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct RommGameStatus {
     pub entry_id: String,
@@ -358,7 +357,7 @@ pub struct RommGameStatus {
     pub download: Option<DownloadProgress>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum DownloadPhase {
     Downloading,
@@ -370,7 +369,7 @@ pub enum DownloadPhase {
 }
 
 /// A download's progress; every change is sent to [`RommService::subscribe`].
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct DownloadProgress {
     pub entry_id: String,

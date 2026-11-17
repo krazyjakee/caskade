@@ -27,12 +27,11 @@ use std::{
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::exec::ExecError;
 
 /// What went wrong.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum FailureKind {
     /// The input file or folder (or the downloaded file) is gone.
@@ -63,7 +62,7 @@ pub enum FailureKind {
 }
 
 /// Where in the install it went wrong.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum FailureStage {
     Download,
@@ -78,7 +77,7 @@ pub enum FailureStage {
 }
 
 /// Whether security software may be involved.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum SecurityNote {
     /// A file vanished or was refused for no reason Caskade can see;
@@ -89,7 +88,7 @@ pub enum SecurityNote {
 }
 
 /// What the user can do about a failure.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum RecoveryAction {
     /// Run again, keeping a valid partial or finished download.
@@ -104,7 +103,7 @@ pub enum RecoveryAction {
 }
 
 /// A classified failure, safe to show: no credentials or tokens.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Failure {
     pub kind: FailureKind,

@@ -453,7 +453,6 @@ pub struct DefinitionProfile {
     Serialize,
     Deserialize,
     schemars::JsonSchema,
-    specta::Type,
 )]
 #[serde(rename_all = "snake_case")]
 pub enum InstallKind {

@@ -2,13 +2,12 @@ use std::{collections::BTreeMap, path::PathBuf};
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use url::Url;
 
 use super::{ArtifactId, Candidate, Format, Input, PayloadPlatform, RuntimeSpec, Step};
 
 /// Nonfatal, machine-readable diagnostic with human-readable context.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Warning {
     pub code: String,
     pub message: String,
@@ -17,7 +16,7 @@ pub struct Warning {
 }
 
 /// A discovered executable and the data needed to launch it.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct LaunchTarget {
     pub path: PathBuf,
     pub args: Vec<String>,
@@ -30,7 +29,7 @@ pub struct LaunchTarget {
 }
 
 /// A redistributable or runtime component discovered in the installed tree.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Dependency {
     pub id: String,
     pub name: String,
@@ -42,7 +41,7 @@ pub struct Dependency {
 }
 
 /// Successful managed installation. Paths other than `dir` are game-relative.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Installed {
     pub root_id: String,
     pub dir: PathBuf,
@@ -56,7 +55,7 @@ pub struct Installed {
     pub manifest: PathBuf,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum HandOff {
     /// File names relative to the resolved input set, passed to emulation import.
@@ -81,7 +80,7 @@ pub enum HandOff {
 }
 
 /// A resolver's proposed download asset, suitable for a choice dialog.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct DownloadAsset {
     pub name: String,
     pub url: Url,
@@ -90,7 +89,7 @@ pub struct DownloadAsset {
 }
 
 /// An explicit ambiguity; the default pipeline asks only when it cannot decide.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum Question {
     /// Observed install folders, never automatic permission to move or delete.
@@ -132,7 +131,7 @@ pub enum Question {
 }
 
 /// One answer to [`Question::ChooseDestination`].
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Destination {
     pub label: String,
     /// `None` keeps the files where they are.
@@ -143,7 +142,7 @@ pub struct Destination {
 
 /// Operating systems supported by the installer. Host capability detection is
 /// supplied separately; using this enum does not inspect the current machine.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum OperatingSystem {
     Windows,
@@ -152,7 +151,7 @@ pub enum OperatingSystem {
 }
 
 /// Machine-readable explanation for an unsupported input.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum Reason {
     UnknownFormat,
@@ -173,7 +172,7 @@ pub enum Reason {
 }
 
 /// Every analysis/execution result has an explicit, serializable outcome.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum InstallOutcome {
     Installed(Installed),

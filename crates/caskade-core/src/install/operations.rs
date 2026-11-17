@@ -8,17 +8,16 @@ use crate::{
 use caskade_installer::{Question, pipeline::RunControl};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{future::Future, path::PathBuf};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum JobAnswer {
     Select { index: u32 },
     Cancel,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Verification {
     pub checked_files: u64,

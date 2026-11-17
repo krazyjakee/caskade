@@ -1,12 +1,11 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{borrow::Cow, fmt, str::FromStr};
 use thiserror::Error;
 
 /// Identifies a source: `"steam"`, `"heroic.gog"`, `"windows.uninstall"`, …
 #[derive(
-    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema, Type,
+    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema,
 )]
 #[serde(transparent)]
 pub struct SourceId(Cow<'static, str>);
@@ -39,7 +38,7 @@ impl fmt::Display for SourceId {
 /// `GameEntry.external_id`. Within a component, `%` and `:` are written as
 /// `%25` and `%3A`; numbers have no sign or leading zeros.
 #[derive(
-    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema, Type,
+    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema,
 )]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 #[non_exhaustive]
@@ -53,7 +52,6 @@ pub enum ExternalId {
     },
     Gog {
         #[serde(with = "decimal")]
-        #[specta(type = String)]
         #[schemars(with = "String")]
         product_id: u64,
     },
@@ -64,7 +62,6 @@ pub enum ExternalId {
     },
     Itch {
         #[serde(with = "decimal")]
-        #[specta(type = String)]
         #[schemars(with = "String")]
         game_id: u64,
     },
@@ -73,7 +70,6 @@ pub enum ExternalId {
     },
     Ubisoft {
         #[serde(with = "decimal")]
-        #[specta(type = String)]
         #[schemars(with = "String")]
         id: u64,
     },

@@ -10,11 +10,10 @@ use crate::{
     model::{ExternalId, validation as v},
 };
 use serde::Serialize;
-use specta::Type;
 use sqlx::{QueryBuilder, Sqlite, SqliteConnection};
 
 /// A library game's age ratings and the minimum age they come to.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GameAgeRatings {
     pub ratings: Vec<IgdbAgeRating>,
@@ -24,11 +23,10 @@ pub struct GameAgeRatings {
 }
 
 /// A library game an IGDB game is in the library as.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbOwned {
     #[serde(with = "crate::igdb::decimal")]
-    #[specta(type = String)]
     pub igdb_id: u64,
     pub game_id: String,
     /// One of its entries is installed.

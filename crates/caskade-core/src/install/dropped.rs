@@ -17,14 +17,13 @@ use caskade_installer::{
     probe::{ProbeEngine, ProbeLimits},
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::BTreeMap,
     path::{Path, PathBuf},
 };
 
 /// A drop, ready to install.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DropPlan {
     /// What was dropped.
@@ -38,7 +37,7 @@ pub struct DropPlan {
     pub launch: Option<DropLaunch>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum DropKind {
     Shortcut,
@@ -49,7 +48,7 @@ pub enum DropKind {
     File,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DropLaunch {
     /// Relative to the installed folder, `/`-separated.

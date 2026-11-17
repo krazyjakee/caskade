@@ -18,7 +18,6 @@ use cap_std::{ambient_authority, fs::Dir};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use specta::Type;
 use std::{
     collections::BTreeMap,
     io::{self, Read},
@@ -27,7 +26,7 @@ use std::{
 };
 use tokio_util::sync::CancellationToken;
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum FolderSourceHandling {
     #[default]

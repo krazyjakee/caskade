@@ -2,12 +2,11 @@ use std::{collections::BTreeMap, path::PathBuf};
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use super::ArtifactId;
 
 /// The runtime to execute under. Prefix IDs are resolved by the runtime layer.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum RuntimeSpec {
     Native,
@@ -16,7 +15,7 @@ pub enum RuntimeSpec {
 }
 
 /// A source is either an input artifact or a path in the staging/game tree.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum SourcePath {
     /// An entry relative to an identified source artifact (`.` means its root).
@@ -28,7 +27,7 @@ pub enum SourcePath {
 }
 
 /// A program from the input, the game tree or a host tool resolved by runtime.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum Program {
     Source(SourcePath),
@@ -36,7 +35,7 @@ pub enum Program {
 }
 
 /// A registry value to replay into a Proton/Wine prefix, never the host registry.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct RegistryEntry {
     pub hive: RegistryHive,
     pub key: String,
@@ -45,7 +44,7 @@ pub struct RegistryEntry {
     pub value: RegistryValue,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum RegistryHive {
     CurrentUser,
@@ -70,7 +69,7 @@ impl RegistryHive {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum RegistryValue {
     String(String),
@@ -87,7 +86,7 @@ pub enum RegistryValue {
 /// to staging/the final game directory. Symlink targets are relative to the
 /// link's parent and must resolve inside the game tree. The executor validates
 /// these invariants through the safety layer before performing any operation.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum Step {
     Extract {
@@ -167,7 +166,7 @@ pub enum Step {
 }
 
 /// A recorded host-tool command that reverses an out-of-root installation.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct DelegateCommand {
     pub tool: String,
     pub args: Vec<String>,
@@ -179,7 +178,7 @@ pub struct DelegateCommand {
 
 /// A host-tool query that exits 0 while a delegate command has something to
 /// do, such as the package manager's "is this package installed".
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct DelegateCheck {
     pub tool: String,
     pub args: Vec<String>,

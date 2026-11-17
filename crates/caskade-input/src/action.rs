@@ -1,11 +1,8 @@
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// What the user asked for, whatever the device. The dotted names are the
 /// contract the frontend and plugins bind to.
-#[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize, Type,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum Action {
     #[serde(rename = "nav.up")]
     NavUp,
@@ -50,7 +47,7 @@ pub enum Action {
     Guide,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Source {
     Pad,
@@ -58,7 +55,7 @@ pub enum Source {
 }
 
 /// Which button labels to show in hints.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum GlyphFamily {
     Xbox,
@@ -102,7 +99,7 @@ impl GlyphFamily {
 }
 
 /// One action as the UI receives it.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InputAction {
     pub action: Action,
@@ -114,7 +111,7 @@ pub struct InputAction {
 }
 
 /// A connected pad.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PadInfo {
     pub id: u32,

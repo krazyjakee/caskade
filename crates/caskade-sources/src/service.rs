@@ -8,7 +8,6 @@ use caskade_discovery::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::sync::Arc;
 
 #[derive(Clone)]
@@ -19,7 +18,7 @@ pub struct DiscoveryService {
     pub(crate) sources: Vec<Arc<dyn Source>>,
     pub(crate) imports: Arc<tokio::sync::Mutex<()>>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScanOutcome {
     pub scan: ScanReport,

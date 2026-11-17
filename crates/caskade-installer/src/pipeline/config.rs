@@ -8,10 +8,9 @@ use crate::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::time::Duration;
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum CompatibilityRunner {
     #[default]
@@ -25,7 +24,7 @@ pub enum CompatibilityRunner {
     SystemWine,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct InstallerConfig {
     pub policy: Policy,
     pub compatibility_runner: CompatibilityRunner,

@@ -21,7 +21,6 @@ pub(crate) use pin::Throttle;
 
 use crate::{Error, Result, bus::Bus, db::LibraryStore, model::new_id, read, write};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::sync::{Arc, RwLock};
 
 /// The avatars an account may pick: the set the app ships
@@ -74,7 +73,7 @@ const NAME_MAX: usize = 64;
 /// The highest minimum age an age limit can name.
 const MAX_AGE: u8 = 99;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum AccountRole {
     /// Changes everything, other accounts included.
@@ -84,7 +83,7 @@ pub enum AccountRole {
 }
 
 /// What a standard account may change. An admin's are always all.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 // The plugin host has a `Permissions` too; the bindings need one name each.
 #[serde(rename = "AccountPermissions", rename_all = "camelCase", default)]
 pub struct Permissions {
@@ -104,7 +103,7 @@ impl Permissions {
 }
 
 /// An account as the app shows it; its PIN stays in the core.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Account {
     pub id: String,
@@ -128,7 +127,7 @@ pub struct Account {
 }
 
 /// An account's role, permissions and age limit: what only an admin sets.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountAccess {
     pub role: AccountRole,
@@ -140,7 +139,7 @@ pub struct AccountAccess {
 }
 
 /// A new account; only an admin makes one.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NewAccount {
     pub name: String,
@@ -151,7 +150,7 @@ pub struct NewAccount {
 }
 
 /// An account's new name and avatar, and (admins only) its access.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountUpdate {
     pub name: String,
@@ -161,7 +160,7 @@ pub struct AccountUpdate {
 }
 
 /// The answer to a PIN check: never which account matched.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(
     tag = "type",
     rename_all = "camelCase",

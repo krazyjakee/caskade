@@ -10,7 +10,6 @@ use caskade_streaming::{
     pairing::Paired,
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::events::{Event, Events};
 use std::time::Duration;
@@ -19,7 +18,7 @@ use std::time::Duration;
 const PAIRING_WAIT: Duration = Duration::from_secs(5 * 60);
 
 /// A pairing under way: the code to enter on the host.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PairingStarted {
     pub host_id: String,
@@ -31,7 +30,7 @@ pub struct PairingStarted {
 }
 
 /// How a pairing ended.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum PairingOutcome {
     Paired,
@@ -42,7 +41,7 @@ pub enum PairingOutcome {
 }
 
 /// `streaming_pair_with` ended; `message` says why in Caskade's words.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StreamingPairingFinished {
     pub host_id: String,
@@ -215,7 +214,7 @@ pub async fn streaming_repair(host: &StreamingHost) -> Result<HostOutcome, Comma
 
 /// Which streaming program: the one hosting here, or the one streaming to
 /// this device. People see neither's name.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum StreamingPart {
     Host,
@@ -232,7 +231,7 @@ impl StreamingPart {
 }
 
 /// A streaming program installed here, and whether a newer one waits.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StreamingProgram {
     pub part: StreamingPart,

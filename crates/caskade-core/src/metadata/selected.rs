@@ -16,13 +16,12 @@
 use super::{IgdbMatch, MatchSource, Metadata, RunReport};
 use crate::{Result, model::Game};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use tokio_util::sync::CancellationToken;
 
 /// Games a batch refreshes together.
 const BATCH: usize = 50;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum RefreshMode {
     /// Fill in what the games lack, from the cache; match the unmatched.
@@ -32,7 +31,7 @@ pub enum RefreshMode {
 }
 
 /// How a refresh of chosen games is going, or went.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RefreshStatus {
     pub mode: RefreshMode,

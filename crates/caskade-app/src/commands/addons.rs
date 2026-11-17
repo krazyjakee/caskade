@@ -13,9 +13,8 @@ use caskade_core::{
 };
 use caskade_plugin_host::PluginHost;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 /// The catalogue as Settings shows it.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogueView {
     pub status: CatalogueStatus,

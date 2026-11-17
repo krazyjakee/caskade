@@ -24,7 +24,6 @@ use caskade_core::{
     settings::{SettingsService, StreamingSettings},
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::{BTreeMap, HashMap},
     net::IpAddr,
@@ -37,7 +36,7 @@ use std::{
 pub const OWN_HOST_KEY: &str = "streaming.ownHost";
 
 /// Whether a host can be streamed from now.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum HostReach {
     Ready,
@@ -49,7 +48,7 @@ pub enum HostReach {
 }
 
 /// A host as the client sees it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StreamHost {
     /// Its unique id.

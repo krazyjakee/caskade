@@ -8,13 +8,12 @@ use caskade_backup::{
 };
 use caskade_core::{install::InstallService, launch::LaunchService};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::events::{Event, Events};
 use std::path::PathBuf;
 /// The backup status changed: a job's progress, its outcome, a staged
 /// restore, the schedule.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BackupChanged(pub BackupStatus);
 
 pub async fn backup_status(backups: &Backups) -> Result<BackupStatus, CommandError> {

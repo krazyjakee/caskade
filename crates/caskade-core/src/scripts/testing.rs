@@ -8,11 +8,10 @@ use crate::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use tokio_util::sync::CancellationToken;
 
 /// A test's result: the values the script saw, and its run.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScriptTest {
     pub context: Vec<ContextValue>,
@@ -20,7 +19,7 @@ pub struct ScriptTest {
 }
 
 /// One step of the order a launch runs scripts in.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScriptStep {
     pub phase: ScriptPhase,

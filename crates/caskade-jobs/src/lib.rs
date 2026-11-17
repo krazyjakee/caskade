@@ -4,7 +4,6 @@
 //! retains its slot until it actually stops; cancellation cannot oversubscribe it.
 
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     cell::RefCell,
     collections::VecDeque,
@@ -13,7 +12,7 @@ use std::{
 };
 use tokio::sync::{Notify, watch};
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Task {
     pub id: u32,
@@ -21,7 +20,7 @@ pub struct Task {
     pub queued: bool,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Snapshot {
     pub revision: u32,

@@ -2,13 +2,12 @@
 //! core's memory, never a wait on the network.
 use caskade_core::{db::LibraryStore, devices::Devices, sync::presence::Presence};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::error::{CommandError, report};
 use crate::events::{Event, Events};
 
 /// A game running on another device, as the webview shows it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayingElsewhere {
     pub device_id: String,
@@ -22,7 +21,7 @@ pub struct PlayingElsewhere {
 }
 
 /// What's running on other devices changed.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PlayingElsewhereChanged(pub Vec<PlayingElsewhere>);
 
 async fn playing(

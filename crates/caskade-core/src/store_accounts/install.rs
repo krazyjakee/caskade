@@ -14,7 +14,6 @@
 use super::{OwnedProduct, StoreAccounts};
 use crate::{Error, Result, model::InstallState};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::collections::BTreeSet;
 
 /// How long a handoff waits for discovery before it's no longer shown as
@@ -34,7 +33,7 @@ pub struct InstallTarget {
 }
 
 /// Whether an owned release can be installed here.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(
     tag = "type",
     rename_all = "camelCase",
@@ -58,7 +57,7 @@ pub enum OwnedInstallState {
     NotSupported,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "OwnedUnavailableReason")]
 pub enum UnavailableReason {
     NoLongerOwned,
@@ -67,7 +66,7 @@ pub enum UnavailableReason {
 }
 
 /// One owned release of a game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "OwnedRelease")]
 pub struct OwnedRelease {
     pub entry_id: String,

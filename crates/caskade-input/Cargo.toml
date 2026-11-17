@@ -13,7 +13,6 @@ gilrs = ["dep:gilrs"]
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
-specta = { version = "=2.0.0-rc.26", features = ["derive"] }
 tracing = "0.1"
 
 [target.'cfg(not(windows))'.dependencies]

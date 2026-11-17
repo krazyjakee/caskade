@@ -9,10 +9,9 @@ use caskade_discovery::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::collections::BTreeSet;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(default, rename_all = "camelCase")]
 pub struct ImportOptions {
     /// Seed aggregate Steam/Lutris/Heroic history on first import only.
@@ -28,7 +27,7 @@ impl Default for ImportOptions {
         }
     }
 }
-#[derive(Debug, Clone, Default, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ImportOutcome {
     pub imported: Vec<ImportedGame>,
@@ -37,7 +36,7 @@ pub struct ImportOutcome {
     pub warnings: Vec<String>,
     pub sources: Vec<SourceReport>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ImportedGame {
     pub game_id: String,
@@ -45,7 +44,7 @@ pub struct ImportedGame {
     pub entries: u32,
     pub seeded_history: bool,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct SkippedEntry {
     pub source: SourceId,

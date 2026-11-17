@@ -10,7 +10,6 @@ use super::{AddonKind, CatalogueEntry, CatalogueRelease};
 use caskade_core::{Error, Result};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use specta::Type;
 use std::{
     collections::BTreeMap,
     io::Read,
@@ -26,7 +25,7 @@ const MAX_UNPACKED: u64 = 512 << 20;
 
 /// Why a package didn't install. Integrity, safety and identity failures
 /// aren't the network's: retrying them gets the same answer.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum AddonFailure {
     /// The download didn't match the catalogue's size or SHA-256.
@@ -514,7 +513,7 @@ pub fn recover(work: &Path) -> Result<bool> {
 }
 
 /// What Caskade knows about an add-on it installed from the catalogue.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AddonRecord {
     /// The version installed from the catalogue.
@@ -526,7 +525,7 @@ pub struct AddonRecord {
     pub rejected: Option<RejectedRelease>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RejectedRelease {
     pub version: String,
@@ -535,7 +534,7 @@ pub struct RejectedRelease {
 }
 
 /// The user's choice about updates from the catalogue.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum UpdatePreference {
     /// Check when Settings opens and show what can be updated.
@@ -547,7 +546,7 @@ pub enum UpdatePreference {
 
 /// The add-on records and the update preference, kept in the library's
 /// settings table (backed up with it).
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct AddonRecords {
     pub updates: UpdatePreference,

@@ -10,7 +10,6 @@ use std::time::Duration;
 use caskade_core::i18n::Message;
 use caskade_core::settings::{AppUpdateSettings, SettingsService};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// The release feed: `latest.json` on the newest published GitHub release.
 /// A build can point elsewhere with `CASKADE_UPDATER_ENDPOINT`, to try an
@@ -29,7 +28,7 @@ pub const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(30 * 60);
 pub const PROGRESS_EVERY: Duration = Duration::from_millis(250);
 
 /// Where an update is.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum AppUpdatePhase {
     /// Not checked since startup.
@@ -55,7 +54,7 @@ impl AppUpdatePhase {
 }
 
 /// A newer release of Caskade.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AppRelease {
     pub version: String,
@@ -65,7 +64,7 @@ pub struct AppRelease {
     pub date: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AppUpdateStatus {
     pub current_version: String,
@@ -83,7 +82,7 @@ pub struct AppUpdateStatus {
 }
 
 /// Every change to the update status.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AppUpdateChanged(pub AppUpdateStatus);
 
 struct Inner<P> {

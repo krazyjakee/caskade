@@ -52,7 +52,6 @@ pub use catalog::{
 use catalog::{Pages, RawPage};
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 use serde_json::Value;
-use specta::Type;
 use std::{
     collections::{HashMap, HashSet},
     path::PathBuf,
@@ -83,11 +82,10 @@ pub const SEARCH_LIMIT: usize = 50;
 
 /// A game as the metadata server describes it. Ids cross to the webview
 /// as strings.
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbGame {
     #[serde(with = "decimal")]
-    #[specta(type = String)]
     pub id: u64,
     #[serde(default)]
     pub slug: Option<String>,
@@ -123,7 +121,6 @@ pub struct IgdbGame {
     pub game_type: Option<Value>,
     /// Set on editions and other versions of a parent game.
     #[serde(default, with = "decimal_option")]
-    #[specta(type = Option<String>)]
     pub version_parent: Option<u64>,
     #[serde(default)]
     pub images: IgdbImages,
@@ -143,7 +140,6 @@ pub struct IgdbGame {
     pub websites: Vec<IgdbWebsite>,
     /// IGDB's similar games, without the game itself or duplicates.
     #[serde(default, with = "decimals")]
-    #[specta(type = Vec<String>)]
     pub similar_games: Vec<u64>,
     /// IGDB's game status: `Released`, `Early Access`, `Cancelled`, …
     #[serde(default)]
@@ -155,7 +151,7 @@ pub struct IgdbGame {
 }
 
 /// A video of the game on YouTube.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbVideo {
     /// The YouTube video id; the server sends only well-formed ones.
@@ -165,12 +161,11 @@ pub struct IgdbVideo {
     pub name: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbPlatform {
     /// IGDB's platform id, for the catalog's platform filter.
     #[serde(default, with = "decimal_option")]
-    #[specta(type = Option<String>)]
     pub id: Option<u64>,
     #[serde(default)]
     pub name: Option<String>,
@@ -181,7 +176,7 @@ pub struct IgdbPlatform {
 /// One board's rating: `board` is `pegi`, `esrb`, `usk`, `cero`, `acb`,
 /// `grac`, `classind` or a board IGDB adds later; `rating` its label
 /// (`18`, `M`, `E10+`, `MA15+`, …).
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbAgeRating {
     pub board: String,
@@ -189,7 +184,7 @@ pub struct IgdbAgeRating {
 }
 
 /// How much of a release date is known.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ReleasePrecision {
     Day,
@@ -203,7 +198,7 @@ pub enum ReleasePrecision {
 }
 
 /// A release on one platform in one region.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbReleaseDate {
     #[serde(default)]
@@ -234,7 +229,7 @@ pub struct IgdbReleaseDate {
 }
 
 /// A storefront's page for the game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbStoreLink {
     /// `steam`, `gog`, `epic`, `itch`, `playstation`, `nintendo`, …
@@ -251,7 +246,7 @@ pub struct IgdbStoreLink {
 }
 
 /// Any other website of the game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbWebsite {
     /// `official`, `wiki`, `wikipedia`, `social`, `video`, `community` or `other`.
@@ -261,7 +256,7 @@ pub struct IgdbWebsite {
     pub url: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbExternalId {
     pub uid: String,
@@ -270,7 +265,7 @@ pub struct IgdbExternalId {
     pub source: Option<Value>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbImages {
     #[serde(default)]
@@ -286,7 +281,7 @@ pub struct IgdbImages {
     pub screenshots: Vec<IgdbImage>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbImage {
     pub image_id: String,
@@ -305,18 +300,16 @@ pub struct IgdbImage {
 }
 
 /// What a lookup found.
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbLookup {
     /// In the order asked for, without duplicates.
     pub games: Vec<IgdbGame>,
     /// Ids IGDB has no game for.
     #[serde(with = "decimals")]
-    #[specta(type = Vec<String>)]
     pub not_found: Vec<u64>,
     /// Ids without an answer yet: the server couldn't be reached or sent nothing usable for them.
     #[serde(with = "decimals")]
-    #[specta(type = Vec<String>)]
     pub pending: Vec<u64>,
 }
 

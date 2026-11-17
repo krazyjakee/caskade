@@ -126,7 +126,7 @@ pub(crate) fn unreachable(error: &Error) -> bool {
 
 /// What kind of failure an [`ErrorReport`] is. Stable: the webview,
 /// notifications and recovery code match on it, never on the text.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ErrorCode {
     /// The request can't be done as asked: bad input, an unsupported case.
@@ -174,7 +174,7 @@ pub enum ErrorCode {
 }
 
 /// What the user (or Caskade) can do about a failure, most useful first.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum RecoveryHint {
     /// Trying again unchanged may work.
@@ -198,7 +198,7 @@ pub enum RecoveryHint {
 
 /// A failure, safe to show and log: credentials, tokens and URL queries are
 /// redacted. Commands return it as their error (`CommandError` in the app).
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ErrorReport {
     pub code: ErrorCode,

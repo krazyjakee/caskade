@@ -3,11 +3,10 @@
 //! `NotificationsChanged` tells the webview to read it again.
 use caskade_achievements::notifications::{MemberPage, NotificationPage, Notifications};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::events::{Event, Events};
 /// The feed or its read state changed: read it again.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotificationsChanged {
     pub unread: u32,

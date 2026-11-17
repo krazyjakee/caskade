@@ -2,10 +2,9 @@ use super::{Artwork, LaunchSpec, new_id};
 use caskade_discovery::{ExternalId, GameRuntime, InstallState, SourceId, TrackingHint};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::PathBuf;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Game {
     pub id: String,
@@ -51,7 +50,7 @@ impl Game {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "snake_case",
@@ -62,7 +61,7 @@ pub enum InstallLocation {
     External { path: PathBuf },
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GameEntry {
     pub id: String,
@@ -127,7 +126,7 @@ impl GameEntry {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct StorageRoot {
     /// Exactly the identifier in `<path>/.caskade/root.json`.
@@ -150,7 +149,7 @@ impl StorageRoot {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum GameFilter {
     #[default]
@@ -164,7 +163,7 @@ pub enum GameFilter {
     /// Owned by a store account and not installed: ready to install (#170).
     Owned,
 }
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum GameSort {
     #[default]
@@ -179,7 +178,7 @@ pub enum GameSort {
     /// IGDB Visits PopScore, highest first; missing scores follow by title.
     Popular,
 }
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(default, rename_all = "camelCase")]
 pub struct ListGames {
     pub query: Option<String>,
@@ -202,7 +201,7 @@ impl Default for ListGames {
         }
     }
 }
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GameSummary {
     /// The querying account needs an admin PIN; a search is not an approval.
@@ -232,7 +231,7 @@ pub struct GameSummary {
     pub last_played_on: Option<PlayedOn>,
 }
 /// Another device a game was played on (#74).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayedOn {
     /// Its endpoint id.
@@ -240,13 +239,13 @@ pub struct PlayedOn {
     /// What this device calls it, when the two are paired.
     pub name: Option<String>,
 }
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GamePage {
     pub items: Vec<GameSummary>,
     pub total: u64,
 }
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GameDetails {
     pub game: Game,
@@ -257,14 +256,14 @@ pub struct GameDetails {
 }
 /// The first game whose title starts with `letter` (`#` for anything but
 /// A to Z), as an index into the library sorted by title.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct TitleLetter {
     pub letter: String,
     pub offset: u64,
 }
 /// A platform's games in one library filter, for the platform breakdown.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PlatformSummary {
     pub name: String,
@@ -272,7 +271,7 @@ pub struct PlatformSummary {
     pub playtime_ms: u64,
     pub last_played_at_ms: Option<i64>,
 }
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct LibraryStats {
     pub total: u64,

@@ -5,7 +5,6 @@ use super::LaunchSpec;
 use crate::tracking::TrackingMode;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::PathBuf;
 
 /// The source of entries the user adds by hand (#174). Their built-in
@@ -18,7 +17,7 @@ pub fn built_in_action_id(entry_id: &str) -> String {
 }
 pub(crate) const BUILT_IN_PREFIX: &str = "source:";
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ActionKind {
     /// Starts the game: a play session tracks it.
@@ -31,7 +30,7 @@ pub enum ActionKind {
 
 /// How a play action's game is found once it starts. `Automatic` is the
 /// release's usual tracking; the others say exactly which processes count.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ActionTracking {
     pub mode: TrackingMode,
@@ -45,7 +44,7 @@ pub struct ActionTracking {
     pub names: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GameAction {
     pub id: String,
@@ -67,7 +66,7 @@ pub struct GameAction {
 /// The built-in action as the user changed it: its name, tracking and
 /// Proton build. Its target stays the entry's `launch`, which rediscovery
 /// keeps current.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct BuiltInAction {
     #[serde(default)]
@@ -80,7 +79,7 @@ pub struct BuiltInAction {
 }
 
 /// A release's choice of action, apart from the game's default release.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct EntryActionSettings {
     /// The play action Play starts; `None` (or one that is gone) is the

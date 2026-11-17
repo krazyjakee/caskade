@@ -11,11 +11,10 @@ use crate::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{collections::BTreeMap, path::PathBuf};
 
 /// A profile's command line for a sample ROM, one token per chip.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ArgvPreview {
     pub sample_rom: String,
@@ -26,7 +25,7 @@ pub struct ArgvPreview {
     pub error: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "snake_case",
@@ -47,14 +46,14 @@ pub enum Availability {
 }
 
 /// A Replace override made against definition args that have changed since.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ArgsDrift {
     pub overridden_from: Vec<String>,
     pub definition_args: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ProfileView {
     pub id: String,
@@ -68,7 +67,7 @@ pub struct ProfileView {
     pub drift: Option<ArgsDrift>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum EmulatorStatus {
     Ready,
@@ -77,7 +76,7 @@ pub enum EmulatorStatus {
 }
 
 /// A definition profile not yet added to an emulator.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct AddableProfile {
     pub name: String,
@@ -85,7 +84,7 @@ pub struct AddableProfile {
     pub available: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct EmulatorView {
     pub emulator: Emulator,
@@ -97,7 +96,7 @@ pub struct EmulatorView {
 
 /// A BIOS file and, where an emulator is known to look for it, its state.
 /// `found`/`state` are `None` when no emulator is configured to check with.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct BiosEntry {
     pub file: String,
@@ -111,7 +110,7 @@ pub struct BiosEntry {
 }
 
 /// A profile being edited, previewed before it is saved.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ProfileDraft {
     pub install: EmulatorInstall,

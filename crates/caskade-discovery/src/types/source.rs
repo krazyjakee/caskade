@@ -2,7 +2,6 @@ use super::{DetectedGame, LauncherStatus, SourceError, SourceId};
 use crate::{OperatingSystem, env::HostEnv};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     path::PathBuf,
     sync::{
@@ -36,9 +35,7 @@ pub trait Source: Send + Sync {
 }
 
 /// A set of operating systems.
-#[derive(
-    Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema, Type,
-)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 pub struct OsSet {
     pub windows: bool,
     pub linux: bool,
@@ -87,7 +84,7 @@ impl OsSet {
 }
 
 /// A path to watch for changes.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 pub struct WatchPath {
     pub path: PathBuf,
     pub recursive: bool,

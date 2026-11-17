@@ -32,9 +32,7 @@ pub enum InputError {
 }
 pub type Result<T> = std::result::Result<T, InputError>;
 
-#[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema, specta::Type,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum SetKind {
     Inno,
@@ -45,9 +43,7 @@ pub enum SetKind {
     Discs,
 }
 
-#[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema, specta::Type,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum FolderKind {
     InstallerSet,
@@ -56,9 +52,7 @@ pub enum FolderKind {
     Unknown,
 }
 
-#[derive(
-    Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema, specta::Type,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ResolvedInput {
     File {

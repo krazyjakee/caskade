@@ -24,7 +24,6 @@ use crate::{
 };
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     process::Stdio,
     sync::Arc,
@@ -38,7 +37,7 @@ use tokio_util::sync::CancellationToken;
 
 /// The device is playing another game: Play asks before stopping it, then
 /// launches again with [`LaunchChoice::stop_host`].
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct HostBusy {
     pub entry_id: String,

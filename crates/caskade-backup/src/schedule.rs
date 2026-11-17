@@ -18,7 +18,6 @@ use super::{
 use caskade_core::{error::ErrorReport, settings::SettingsService};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::BTreeSet,
     path::{Path, PathBuf},
@@ -86,7 +85,7 @@ impl Default for BackupSettings {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", rename = "BackupSchedule")]
 pub enum Schedule {
     Off,
@@ -118,7 +117,7 @@ struct State {
 }
 
 /// How the last backup went.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LastBackup {
     pub at_ms: i64,
@@ -130,7 +129,7 @@ pub struct LastBackup {
 }
 
 /// What Settings → Backup shows, kept current by [`Backups::subscribe`].
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BackupStatus {
     pub running: Option<RunningJob>,
@@ -146,14 +145,14 @@ pub struct BackupStatus {
     pub last_restore: Option<RestoreOutcome>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupRunningJob")]
 pub struct RunningJob {
     pub kind: BackupJobKind,
     pub progress: Option<Progress>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum BackupJobKind {
     Backup,

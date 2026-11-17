@@ -4,11 +4,10 @@
 use super::InstallKind;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::{Component, Path, PathBuf};
 
 /// One installed emulator.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Emulator {
     pub id: String,
@@ -27,7 +26,7 @@ impl Emulator {
 }
 
 /// Where an emulator is installed; the kind decides how it launches (§5.1).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "snake_case",
@@ -69,7 +68,7 @@ impl EmulatorInstall {
 }
 
 /// How to run one kind of ROM with an emulator.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "snake_case",
@@ -120,7 +119,7 @@ impl EmulatorProfile {
 }
 
 /// Arguments of a built-in profile, or a game's extra arguments.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "snake_case",
@@ -160,7 +159,7 @@ impl ArgsOverride {
 }
 
 /// Commands run around a launch (instead of Playnite's PowerShell scripts).
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ProfileHooks {
     /// argv run before launch; a non-zero exit cancels the launch.
@@ -169,7 +168,7 @@ pub struct ProfileHooks {
 }
 
 /// How the game's process is found once the emulator starts.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "snake_case",
@@ -191,7 +190,7 @@ pub enum Tracking {
 }
 
 /// A profile of a configured emulator.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ProfileRef {
     pub emulator_id: String,
@@ -199,7 +198,7 @@ pub struct ProfileRef {
 }
 
 /// Per-platform choices.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PlatformSettings {
     pub platform: String,
@@ -210,7 +209,7 @@ pub struct PlatformSettings {
 }
 
 /// A saved ROM folder scan.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct RomScanner {
     pub id: String,
@@ -233,7 +232,7 @@ pub struct RomScanner {
 
 /// What an emulated game launches with. The plan calls this `LaunchTarget`;
 /// discovery and the installer already export types of that name.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "snake_case",
@@ -255,7 +254,7 @@ pub enum EmulatorTarget {
 }
 
 /// A ROM file of a game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GameRom {
     pub location: RomLocation,
@@ -293,7 +292,7 @@ impl GameRom {
 
 /// Where a ROM is. Paths under a scanner are relative to its folder, so
 /// moving a collection means editing one scanner (§4).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "snake_case",

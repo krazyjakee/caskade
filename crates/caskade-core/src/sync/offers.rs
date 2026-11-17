@@ -10,7 +10,6 @@ use std::collections::{BTreeSet, HashSet};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use specta::Type;
 
 use super::change::{EXISTS, Entity};
 use super::engine::SyncEngine;
@@ -18,7 +17,7 @@ use super::policy::Category;
 use crate::Result;
 
 /// An add-on another device has and this one doesn't.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AddonOffer {
     /// The device that has it.
@@ -90,7 +89,7 @@ async fn installed_here(pool: &sqlx::SqlitePool) -> Result<HashSet<String>> {
 
 /// A platform's preferred emulator from another device that waits here
 /// because this device has no emulator of that definition (#275).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EmulatorOffer {
     pub platform_id: String,
@@ -183,7 +182,7 @@ pub fn watch_emulators(
 
 /// A game another device has installed that could be copied here (#276).
 #[cfg(feature = "net")]
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceGame {
     pub game_id: String,

@@ -5,9 +5,8 @@
 
 use super::{AddonKind, AddonOs, Catalogue, CatalogueEntry, CatalogueRelease};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AppMode {
     Desktop,
@@ -26,7 +25,7 @@ pub struct HostFacts {
 }
 
 /// A plugin or theme installed now.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InstalledAddon {
     pub id: String,
@@ -35,7 +34,7 @@ pub struct InstalledAddon {
     pub version: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ReasonCode {
     /// Needs a plugin API this Caskade doesn't have.
@@ -50,7 +49,7 @@ pub enum ReasonCode {
     Kind,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CompatibilityReason {
     pub code: ReasonCode,
@@ -59,7 +58,7 @@ pub struct CompatibilityReason {
     pub message: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ItemState {
     /// Not installed, and a release fits.
@@ -72,7 +71,7 @@ pub enum ItemState {
     Incompatible,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Compatibility {
     pub state: ItemState,
@@ -84,7 +83,7 @@ pub struct Compatibility {
 }
 
 /// An entry with what it means here.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogueItem {
     pub entry: CatalogueEntry,

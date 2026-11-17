@@ -4,7 +4,6 @@
 use caskade_backup::peers::{HeldBackup, PeerBackups};
 use caskade_core::{devices::Devices, sync::SyncService};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::time::Duration;
 
 use crate::error::{CommandError, report};
@@ -13,7 +12,7 @@ use crate::error::{CommandError, report};
 const FETCH: Duration = Duration::from_secs(10 * 60);
 
 /// The backups one paired device keeps, of this device and others.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceBackups {
     pub device_id: String,

@@ -9,7 +9,6 @@ use caskade_installer::OperatingSystem;
 use md5::{Digest, Md5};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::HashMap,
     io::Read,
@@ -18,7 +17,7 @@ use std::{
     time::SystemTime,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum BiosState {
     Found,

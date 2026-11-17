@@ -25,7 +25,6 @@ use crate::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::HashMap,
     path::Path,
@@ -36,7 +35,7 @@ use std::{
 pub const ROMS_SOURCE: SourceId = SourceId::new("roms");
 
 /// A review choice for one ROM, by its path relative to the scanner folder.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(default, rename_all = "camelCase")]
 pub struct RomOverride {
     pub title: Option<String>,
@@ -55,7 +54,7 @@ impl RomOverride {
 }
 
 /// A scanner as the settings list shows it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScannerView {
     pub scanner: RomScanner,
@@ -71,7 +70,7 @@ pub struct ScannerView {
     pub flatpak_hint: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ScanMode {
     /// Stop at a review list (§6.1 manual).
@@ -80,7 +79,7 @@ pub enum ScanMode {
     Import,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ScanStatus {
     Running,
@@ -92,7 +91,7 @@ pub enum ScanStatus {
 }
 
 /// One ROM of a game in the review list.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewRom {
     pub path: String,
@@ -102,7 +101,7 @@ pub struct ReviewRom {
 }
 
 /// A game as a scan found it, with the stored choices applied.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewGame {
     pub title: String,
@@ -118,7 +117,7 @@ pub struct ReviewGame {
 /// What the user decided for one game of the review list. Merging puts the
 /// ROMs of several games in one choice; splitting spreads one game's ROMs
 /// over several.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewChoice {
     /// ROM paths, in disc order.
@@ -131,7 +130,7 @@ pub struct ReviewChoice {
 }
 
 /// What one scan changed in the library.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScanSummary {
     pub scanner_id: String,
@@ -147,7 +146,7 @@ pub struct ScanSummary {
 }
 
 /// Counts per scanner for `emulation.scan.completed`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScannerCount {
     pub scanner_id: String,
@@ -170,7 +169,7 @@ impl From<&ScanSummary> for ScannerCount {
 }
 
 /// A running or finished scan; every change is `emulation.scan.changed`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScanJob {
     pub id: String,

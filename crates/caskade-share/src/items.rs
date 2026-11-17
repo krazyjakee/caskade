@@ -45,7 +45,7 @@ use caskade_core::{Error, Result};
 pub(super) const MAX_GAMES: usize = 1000;
 
 /// Something other than a game to share.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(
     tag = "kind",
     rename_all = "camelCase",
@@ -89,7 +89,7 @@ pub(super) enum Details {
 }
 
 /// What a share is, as the recipient sees it before taking it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(
     tag = "kind",
     rename_all = "camelCase",
@@ -122,7 +122,7 @@ pub enum ShareContents {
 }
 
 /// A game of a shared collection, and whether the recipient has it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SharedGame {
     pub title: String,
@@ -133,7 +133,7 @@ pub struct SharedGame {
 }
 
 /// Whether a library has a game.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum GameHere {
     /// Installed on this device.

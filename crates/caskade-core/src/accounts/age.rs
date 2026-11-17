@@ -20,7 +20,6 @@ use crate::{
     lock,
 };
 use serde::Serialize;
-use specta::Type;
 use std::fmt;
 
 #[cfg(test)]
@@ -40,7 +39,7 @@ pub(crate) struct Approval {
 }
 
 /// Why the signed-in account can't start a game without an admin's PIN.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AgeRestriction {
     pub account_id: String,

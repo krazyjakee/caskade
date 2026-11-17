@@ -3,11 +3,10 @@
 use crate::error::ErrorReport;
 use caskade_discovery::ExternalId;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::collections::BTreeMap;
 
 /// A launcher or store account Caskade reads owned games from.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StoreAccount {
     pub id: String,
@@ -25,7 +24,7 @@ pub struct StoreAccount {
 }
 
 /// How the account's library refreshes went.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default, rename = "StoreSyncState")]
 pub struct SyncState {
     /// The last refresh that brought a complete library.
@@ -40,7 +39,7 @@ pub struct SyncState {
 }
 
 /// One product an account owns, as a provider lists it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "StoreProduct")]
 pub struct OwnedProduct {
     /// The provider's product id, unique in the account.
@@ -74,7 +73,7 @@ pub struct LibrarySnapshot {
 }
 
 /// What an account owns, as the library keeps it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "StoreEntitlement")]
 pub struct Entitlement {
     pub store_account_id: String,
@@ -90,7 +89,7 @@ pub struct Entitlement {
 }
 
 /// How a provider signs in (#165).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "StoreAuthKind")]
 pub enum AuthKind {
     /// A login page in the browser that calls back.
@@ -104,7 +103,7 @@ pub enum AuthKind {
 }
 
 /// What a provider can do.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "StoreProviderCapabilities")]
 pub struct ProviderCapabilities {
     pub id: String,
@@ -120,7 +119,7 @@ pub struct ProviderCapabilities {
 }
 
 /// A store account in Settings: the account, its provider and its library.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StoreAccountSummary {
     pub account: StoreAccount,
@@ -139,7 +138,7 @@ pub struct StoreAccountSummary {
 }
 
 /// Where a store account's connection is.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "StoreConnectionState")]
 pub enum StoreConnectionState {
     /// Disconnected: kept, not refreshed.
@@ -182,7 +181,7 @@ impl std::fmt::Debug for StoreCredentials {
 }
 
 /// What the user does to sign in, from the provider.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "StoreAuthChallenge")]
 pub struct AuthChallenge {
     /// The page to open: a login page, a device page, or where to get a key.
@@ -199,7 +198,7 @@ pub struct AuthChallenge {
 }
 
 /// One value a sign-in asks for.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "StoreAuthField")]
 pub struct AuthField {
     pub id: String,
@@ -211,7 +210,7 @@ pub struct AuthField {
 
 /// A sign-in under way. `flow_id` is also the `state` a browser callback
 /// must carry back.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "StoreAuthFlow")]
 pub struct AuthFlow {
     pub flow_id: String,
@@ -224,7 +223,7 @@ pub struct AuthFlow {
 }
 
 /// What finishes a sign-in.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase", rename = "StoreAuthInput")]
 pub enum AuthInput {
     /// The browser's callback: the query it came back with, `state` among it.
@@ -249,7 +248,7 @@ pub struct SignedIn {
 }
 
 /// What a refresh changed.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "StoreRefreshOutcome")]
 pub struct RefreshOutcome {
     /// New products, each now a library game (an existing one when an
@@ -267,7 +266,7 @@ pub struct RefreshOutcome {
 }
 
 /// What removing an account would do; nothing changes until it's confirmed.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "StoreRemovalPreview")]
 pub struct RemovalPreview {
     /// Games that only this account brought: they go.
@@ -277,7 +276,7 @@ pub struct RemovalPreview {
     pub kept: Vec<GameRef>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "StoreGameRef")]
 pub struct GameRef {
     pub game_id: String,
@@ -285,7 +284,7 @@ pub struct GameRef {
 }
 
 /// Who owns a library game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "GameOwnership")]
 pub struct Ownership {
     pub store_account_id: String,

@@ -1,11 +1,10 @@
 use super::{ExternalId, SourceId};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{collections::BTreeMap, path::PathBuf};
 
 /// One game as one source reports it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct DetectedGame {
     pub source: SourceId,
     /// Stable within the source: app id, registry key, file path, …
@@ -60,14 +59,14 @@ impl DetectedGame {
 }
 
 /// A local image of a game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Artwork {
     pub kind: ArtworkKind,
     pub path: PathBuf,
 }
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema, Type,
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
 )]
 #[serde(rename_all = "snake_case")]
 pub enum ArtworkKind {
@@ -81,7 +80,7 @@ pub enum ArtworkKind {
 }
 
 /// How to start a game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum LaunchTarget {
     /// A launcher URI such as `steam://rungameid/620`.
@@ -102,7 +101,7 @@ pub enum LaunchTarget {
 }
 
 /// What the game runs on.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum GameRuntime {
     Native,
@@ -114,7 +113,7 @@ pub enum GameRuntime {
 }
 
 /// A Wine-family prefix and the launcher that owns it, if any.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Prefix {
     pub path: PathBuf,
     pub arch: Option<PrefixArch>,
@@ -122,7 +121,7 @@ pub struct Prefix {
     pub owner: Option<SourceId>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum PrefixArch {
     Win32,
@@ -130,7 +129,7 @@ pub enum PrefixArch {
 }
 
 /// The compatibility tool a source recorded for a Windows game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct RunnerHint {
     pub kind: RunnerKind,
     /// As the source names it, e.g. `GE-Proton10-34` or `wine-ge-8-26`.
@@ -138,7 +137,7 @@ pub struct RunnerHint {
     pub path: Option<PathBuf>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum RunnerKind {
     Wine,
@@ -148,7 +147,7 @@ pub enum RunnerKind {
     Other,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum InstallState {
     Installed,
@@ -162,7 +161,7 @@ pub enum InstallState {
 
 /// How sure the source is that this is an installed game.
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema, Type,
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
 )]
 #[serde(rename_all = "snake_case")]
 pub enum Confidence {
@@ -174,7 +173,7 @@ pub enum Confidence {
 }
 
 /// Why a result was reported.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum Evidence {
     /// A file the source read.
@@ -186,7 +185,7 @@ pub enum Evidence {
 }
 
 /// How to uninstall the game through its owner; discovery never runs it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct UninstallInfo {
     pub target: LaunchTarget,
     /// An unattended variant (`QuietUninstallString`).
@@ -195,7 +194,7 @@ pub struct UninstallInfo {
 }
 
 /// Hints for M2 process tracking.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct TrackingHint {
     /// Steam's reaper and `SteamAppId` carry it.
     pub steam_app_id: Option<u32>,

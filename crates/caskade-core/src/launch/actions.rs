@@ -15,11 +15,10 @@ use crate::{
 use caskade_discovery::{GameRuntime, RunnerKind};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::Path;
 
 /// A play action Play can ask for.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ActionOption {
     pub id: String,
@@ -318,7 +317,7 @@ pub(crate) fn track(prepared: &mut PreparedLaunch, tracking: &ActionTracking) {
 }
 
 /// A release's actions as the game editor shows them (#178).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ReleaseActions {
     pub entry_id: String,

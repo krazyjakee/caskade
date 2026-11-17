@@ -25,7 +25,6 @@ use caskade_core::{
 };
 use caskade_plugin_host::{PluginHost, PluginPreview, PluginStatus};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::events::{Event, Events};
 use std::{
@@ -46,7 +45,7 @@ pub struct AddonFolders {
 pub struct AddonJobs(Mutex<HashMap<String, CancellationToken>>);
 
 /// How far an install is.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum AddonPhase {
     Downloading,
@@ -56,7 +55,7 @@ pub enum AddonPhase {
 }
 
 /// An install's progress, as it goes.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AddonProgress {
     pub id: String,
@@ -66,7 +65,7 @@ pub struct AddonProgress {
 }
 
 /// What became of an install or update.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(
     tag = "status",
     rename_all = "camelCase",

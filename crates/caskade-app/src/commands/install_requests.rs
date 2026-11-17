@@ -2,7 +2,6 @@
 //! Merely requesting never resolves a URL, downloads bytes or executes input.
 use caskade_core::install::{InstallService, JobSnapshot, dropped::DropPlan};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::events::{Event, Events};
 use std::{
@@ -10,7 +9,7 @@ use std::{
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InstallRequest {
     pub request_id: String,
@@ -27,7 +26,7 @@ pub struct InstallRequest {
     pub share: Option<caskade_share::ShareInfo>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum InputKind {
     Path,
@@ -40,7 +39,7 @@ pub enum InputKind {
 
 /// A game another device sends to this one: copied from it once confirmed
 /// (#233's copy, started from here).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PeerSend {
     pub device_id: String,
@@ -66,13 +65,13 @@ impl PeerSend {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InstallRequested(pub InstallRequest);
 
 /// A deep link turned down because the signed-in account may not install
 /// (#205), with the reason for people. Nothing was queued. Pastes and drops
 /// get the reason as their command's error instead.
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InstallRefused(pub String);
 
 struct Pending {

@@ -25,7 +25,6 @@ pub use service::{Clock, Notifications};
 use caskade_core::bus::SourceCount;
 use caskade_core::i18n::{Message, Text};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// How long a batch of game additions stays open after its first addition.
 pub const BATCH_MS: i64 = 60 * 60 * 1000;
@@ -36,7 +35,7 @@ pub const ENTRY_GRACE_MS: i64 = 30 * 1000;
 pub const KEEP_READ_MS: i64 = 90 * 24 * 60 * 60 * 1000;
 
 /// What a notification is about.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum NotificationCategory {
     /// Games new to the library, one item per hourly batch.
@@ -89,7 +88,7 @@ impl NotificationCategory {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Severity {
     Info,
@@ -116,7 +115,7 @@ impl Severity {
 }
 
 /// Where opening a notification goes.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum NotificationTarget {
     /// The list of what it is about (`Notifications::members`).
@@ -134,7 +133,7 @@ pub enum NotificationTarget {
 }
 
 /// One item of the feed.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Notification {
     pub id: String,
@@ -163,7 +162,7 @@ pub struct Notification {
 }
 
 /// A page of the feed, newest change first.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotificationPage {
     pub items: Vec<Notification>,
@@ -175,7 +174,7 @@ pub struct NotificationPage {
     pub revision: i64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum MemberKind {
     Game,
@@ -206,7 +205,7 @@ impl MemberKind {
 }
 
 /// Where a member's game is now.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum MemberState {
     /// Still in the library as it was.
@@ -220,7 +219,7 @@ pub enum MemberState {
 }
 
 /// One thing a notification is about.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotificationMember {
     pub kind: MemberKind,
@@ -236,7 +235,7 @@ pub struct NotificationMember {
     pub title: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MemberPage {
     pub items: Vec<NotificationMember>,

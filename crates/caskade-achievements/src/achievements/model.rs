@@ -4,11 +4,10 @@
 use caskade_core::error::ErrorReport;
 pub use caskade_core::model::{AchievementLink, LinkMethod};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// One achievement as its service defines it. Whatever the service doesn't
 /// supply is `None`, never made up.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AchievementDefinition {
     /// The service's own id (Steam's API name, RetroAchievements' number).
@@ -37,7 +36,7 @@ pub struct AchievementDefinition {
 }
 
 /// An account's state for one achievement.
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AchievementState {
     pub unlocked: bool,
@@ -53,7 +52,7 @@ pub struct AchievementState {
     pub hardcore: Option<HardcoreUnlock>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct HardcoreUnlock {
     pub unlocked: bool,
@@ -87,7 +86,7 @@ impl AchievementState {
 }
 
 /// What a set's last fetch found.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SetStatus {
     /// Never fetched yet.
@@ -106,7 +105,7 @@ pub enum SetStatus {
 }
 
 /// How a set's fetches went; kept with the set.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct SetSync {
     pub status: SetStatus,
@@ -125,7 +124,7 @@ pub struct SetSync {
 }
 
 /// One achievement with the account's state, for the UI.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Achievement {
     pub definition: AchievementDefinition,
@@ -133,7 +132,7 @@ pub struct Achievement {
 }
 
 /// Whose achievements a set holds.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SetAccount {
     pub store_account_id: String,
@@ -145,7 +144,7 @@ pub struct SetAccount {
 }
 
 /// One account's achievements for one of a game's releases.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AchievementSet {
     /// `None` until first fetched.
@@ -166,7 +165,7 @@ pub struct AchievementSet {
 }
 
 /// What an achievement service supplies.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AchievementCapabilities {
     /// Unlock times.

@@ -1,7 +1,7 @@
 //! Background tasks that outlive a panic: [`supervise`] starts them again
 //! after a pause, and [`log_panics`] sends every panic to the log.
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AppStatus {
     pub version: String,

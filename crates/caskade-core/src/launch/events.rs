@@ -1,8 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct LaunchTicket {
     pub game_id: String,
@@ -12,7 +11,7 @@ pub struct LaunchTicket {
 
 /// `game.started` and `game.exited` share identity fields. No process argv,
 /// environment variables or machine paths cross the frontend event bridge.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct LaunchEvent {
     /// Trusted launch.after payload; the frontend bridge forwards only session identity/timing.
@@ -26,7 +25,7 @@ pub struct LaunchEvent {
     pub duration_ms: u64,
     pub status: SessionStatus,
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum SessionStatus {
     Running,

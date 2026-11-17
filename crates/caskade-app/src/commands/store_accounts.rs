@@ -11,14 +11,13 @@ use caskade_core::{
     },
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::discovery::DiscoveryController;
 use crate::error::{CommandError, report};
 use crate::events::{Event, Events};
 
 /// Store accounts or what they own changed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct StoreAccountsChanged;
 
 /// Reconciles owned games after every library scan, and tells the UI of

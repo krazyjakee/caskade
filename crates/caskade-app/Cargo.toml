@@ -32,10 +32,9 @@ caskade-input = { path = "../caskade-input" }
 # Plugins, their UI and the themes they bundle.
 caskade-plugin-host = { path = "../caskade-plugin-host" }
 # The UI plugins draw from API 0.2 (#109).
-caskade-plugin-ui = { path = "../caskade-plugin-ui", features = ["specta"] }
+caskade-plugin-ui = { path = "../caskade-plugin-ui" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-specta = { version = "=2.0.0-rc.26", features = ["derive"] }
 tokio = { version = "1", features = ["rt", "rt-multi-thread", "sync", "time", "macros", "net", "io-util"] }
 tracing = "0.1"
 # The shells' logs (`logging.rs`): stderr and daily files.

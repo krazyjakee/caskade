@@ -23,7 +23,6 @@ use probe::NativeProbe;
 pub use probe::{Probe, Readings};
 
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::collections::{HashMap, VecDeque};
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::{Duration, Instant};
@@ -39,7 +38,7 @@ pub const HISTORY: usize = 60;
 const LEASE: Duration = Duration::from_secs(30);
 
 /// The history so far and how it is sampled.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SystemStatsSnapshot {
     /// Milliseconds between samples.
@@ -51,7 +50,7 @@ pub struct SystemStatsSnapshot {
 }
 
 /// One reading of the whole machine.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SystemSample {
     /// Increases by one per sample, across watches.
@@ -69,7 +68,7 @@ pub struct SystemSample {
     pub network: NetworkSample,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CpuSample {
     /// Overall utilization, 0–100, across every core. `None` for the first
@@ -81,7 +80,7 @@ pub struct CpuSample {
 }
 
 /// RAM in bytes.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MemorySample {
     pub total: u64,
@@ -90,7 +89,7 @@ pub struct MemorySample {
     pub available: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GpuSamples {
     pub devices: Vec<GpuSample>,
@@ -99,7 +98,7 @@ pub struct GpuSamples {
     pub unavailable: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GpuSample {
     /// Stable while the GPU stays: the DRM card on Linux (`card1`), the
@@ -116,7 +115,7 @@ pub struct GpuSample {
     pub unavailable: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum GpuVendor {
     Amd,
@@ -126,7 +125,7 @@ pub enum GpuVendor {
 }
 
 /// A volume's capacity in bytes.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DiskSample {
     /// Its mount point; stable while it stays mounted.
@@ -145,7 +144,7 @@ pub struct DiskSample {
     pub available: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NetworkSample {
     /// Physical first, then virtual, then loopback.
@@ -157,7 +156,7 @@ pub struct NetworkSample {
     pub transmitted: Option<f64>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InterfaceSample {
     pub name: String,
@@ -168,7 +167,7 @@ pub struct InterfaceSample {
     pub transmitted: Option<f64>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum InterfaceKind {
     /// A network card: counted in the totals.

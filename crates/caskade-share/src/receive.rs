@@ -35,7 +35,7 @@ const ABOUT_WAIT: Duration = Duration::from_secs(30);
 const DIAL_WAIT: Duration = Duration::from_secs(15);
 
 /// How the link reached the sharer.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ShareReach {
     /// Directly: the game can come.
@@ -46,7 +46,7 @@ pub enum ShareReach {
 }
 
 /// What a link shares, as its sharer says.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ShareInfo {
     pub sharer_id: String,
@@ -65,7 +65,7 @@ pub struct ShareInfo {
 }
 
 /// A share received here, or being received, as the app shows it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReceivedShare {
     /// Its install job.

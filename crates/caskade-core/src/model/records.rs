@@ -1,9 +1,8 @@
 use super::{ListGames, new_id};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ArtworkKind {
     Cover,
@@ -23,7 +22,7 @@ impl From<caskade_discovery::ArtworkKind> for ArtworkKind {
         }
     }
 }
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ArtworkThumbnail {
     pub size: u32,
@@ -31,7 +30,7 @@ pub struct ArtworkThumbnail {
     pub width: u32,
     pub height: u32,
 }
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Artwork {
     pub id: String,
@@ -68,7 +67,7 @@ impl Artwork {
         }
     }
 }
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PlaySession {
     pub id: String,
@@ -100,7 +99,7 @@ impl PlaySession {
         }
     }
 }
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "snake_case",
@@ -110,7 +109,7 @@ pub enum CollectionKind {
     Manual,
     Smart { query: ListGames },
 }
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Collection {
     pub id: String,
@@ -140,7 +139,7 @@ impl Collection {
 /// A new collection, or an existing one's name, description and rules.
 /// Its pin changes through `set_collection_pinned`, a manual one's games
 /// through `add_to_collection` and `remove_from_collection`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveCollection {
     /// `None` makes a new collection.
@@ -150,7 +149,7 @@ pub struct SaveCollection {
     pub kind: CollectionKind,
 }
 /// A collection as its card shows it.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CollectionSummary {
     pub id: String,
@@ -168,7 +167,7 @@ pub struct CollectionSummary {
 
 /// A release's identity at an achievement service that its store ids don't
 /// give (#189).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AchievementLink {
     pub entry_id: String,
@@ -179,7 +178,7 @@ pub struct AchievementLink {
     pub linked_at_ms: i64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum LinkMethod {
     /// The service recognised this hash of the release's ROM.

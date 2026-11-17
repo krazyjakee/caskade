@@ -10,7 +10,6 @@ use super::{
     snapshot,
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::BTreeSet,
     path::{Path, PathBuf},
@@ -27,7 +26,7 @@ pub const EXTENSION: &str = "zip";
 const MARGIN: u64 = 16 * 1024 * 1024;
 
 /// What to back up, and where.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupExportOptions")]
 pub struct ExportOptions {
     /// An existing folder.
@@ -39,7 +38,7 @@ pub struct ExportOptions {
 }
 
 /// A dry run's answer: what a backup would hold and leave out, and its size.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BackupPlan {
     pub destination: PathBuf,
@@ -53,7 +52,7 @@ pub struct BackupPlan {
     pub destination_exists: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupPlannedComponent")]
 pub struct PlannedComponent {
     pub id: Component,
@@ -63,7 +62,7 @@ pub struct PlannedComponent {
 }
 
 /// Where a backup is up to.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupPhase")]
 pub enum Phase {
     Snapshot,
@@ -75,7 +74,7 @@ pub enum Phase {
     Migrating,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupProgress")]
 pub struct Progress {
     pub phase: Phase,
@@ -84,7 +83,7 @@ pub struct Progress {
 }
 
 /// A finished, verified backup.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupExported")]
 pub struct Exported {
     pub path: PathBuf,

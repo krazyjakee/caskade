@@ -13,7 +13,6 @@ pub use names::{DiscPart, ParsedName, parse_name};
 pub use pipeline::scan_files;
 pub use playlists::playlist_references;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::PathBuf;
 pub use tokio_util::sync::CancellationToken;
 
@@ -94,7 +93,7 @@ pub struct ArchiveMember {
     pub path: PathBuf,
     pub size: u64,
 }
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RomGame {
     pub title: String,
@@ -105,13 +104,13 @@ pub struct RomGame {
     /// Includes claimed playlists/tracks, for retained review/exclusion choices.
     pub files: Vec<PathBuf>,
 }
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScanWarning {
     pub path: Option<PathBuf>,
     pub message: String,
 }
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScanReport {
     pub games: Vec<RomGame>,
@@ -119,14 +118,14 @@ pub struct ScanReport {
     pub enumerated: u32,
     pub skipped: u32,
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ScanPhase {
     Enumerate,
     Match,
     Group,
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScanProgress {
     pub phase: ScanPhase,

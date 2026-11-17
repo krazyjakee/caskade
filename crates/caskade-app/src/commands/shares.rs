@@ -6,13 +6,12 @@
 use caskade_core::install::JobSnapshot;
 use caskade_share::{ReceivedShare, ShareExpiry, ShareInfo, ShareRecord, Shares};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::error::{CommandError, report};
 use crate::events::{Event, Events};
 
 /// A share just made, and its link.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ShareCreated {
     pub share: ShareRecord,
@@ -20,7 +19,7 @@ pub struct ShareCreated {
 }
 
 /// The shares, or what's received, changed.
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SharesChanged;
 
 /// Shares release `entry_id` until `expiry`.

@@ -8,7 +8,7 @@ use std::{
 };
 use tokio::sync::{Mutex, broadcast};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct SettingsSnapshot {
     pub namespace: String,

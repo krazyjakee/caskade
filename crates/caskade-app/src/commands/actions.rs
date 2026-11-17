@@ -11,7 +11,6 @@ use caskade_core::{
     settings::SettingsService,
 };
 use serde::Serialize;
-use specta::Type;
 
 use crate::error::{CommandError, report};
 
@@ -107,7 +106,7 @@ pub async fn proton_builds(settings: &SettingsService) -> Result<ProtonBuilds, C
 
 /// A tool started, or the age limit holds the game back until an admin's
 /// PIN approves it (`game_age_approve`).
-#[derive(Debug, Clone, Serialize, Type)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ToolOutcome {
     Started,

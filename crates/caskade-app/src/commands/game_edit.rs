@@ -59,7 +59,7 @@ pub async fn game_artwork(
 }
 
 /// What the user does with one kind of a game's artwork.
-#[derive(Debug, Clone, serde::Deserialize, specta::Type)]
+#[derive(Debug, Clone, serde::Deserialize)]
 #[serde(tag = "op", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum ArtworkChange {
     /// Shows one of the game's images of that kind.
@@ -176,7 +176,7 @@ pub fn games_refresh_status(metadata: &Metadata) -> Option<RefreshStatus> {
 }
 
 /// How the refresh of chosen games' details is going (#176).
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct GamesRefreshChanged(pub caskade_core::metadata::RefreshStatus);
 
 /// Sends every change of the refresh's status to `events`.

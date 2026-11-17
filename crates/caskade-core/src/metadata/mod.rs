@@ -56,7 +56,6 @@ use crate::{
     now_ms,
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::{BTreeSet, HashMap, HashSet},
     sync::Arc,
@@ -71,7 +70,7 @@ const CHUNK: usize = 50;
 const RETRY_NONE: Duration = Duration::from_secs(7 * 24 * 60 * 60);
 
 /// How a game got its IGDB id.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum MatchSource {
     /// RomM matched the game's ROM.
@@ -167,14 +166,13 @@ impl IgdbMatch {
 }
 
 /// A game's match for the game page.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GameIgdb {
     /// The library game the match is on: not the one asked about when
     /// matching merged that one into a game that is the same game.
     pub game_id: String,
     #[serde(with = "crate::igdb::decimal_option")]
-    #[specta(type = Option<String>)]
     pub igdb_id: Option<u64>,
     pub source: MatchSource,
     /// Matched, but the game isn't filled in yet (the server couldn't be

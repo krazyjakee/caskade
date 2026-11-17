@@ -21,7 +21,6 @@ use caskade_i18n::{
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use specta::Type;
 use std::{
     path::Path,
     sync::{Arc, RwLock},
@@ -272,7 +271,7 @@ fn translate_schema(catalog: &Catalog, schema: &mut Value) {
 
 /// A plugin's catalog for the language in use, for `t` and `<Trans>` in its
 /// UI half (`@caskade/sdk`).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PluginMessages {
     /// The catalog's language; `en` when the plugin has none for the
@@ -286,7 +285,7 @@ pub struct PluginMessages {
     pub plurals: Vec<u8>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PluginMessage {
     pub context: Option<String>,

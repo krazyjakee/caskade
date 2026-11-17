@@ -21,7 +21,6 @@ pub use testing::{ScriptStep, ScriptTest, ScriptTests, effective_order, test, te
 use crate::model::validation as v;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::BTreeMap,
     path::PathBuf,
@@ -32,18 +31,7 @@ use tokio_util::sync::CancellationToken;
 
 /// When a script runs.
 #[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Serialize,
-    Deserialize,
-    JsonSchema,
-    Type,
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema,
 )]
 #[serde(rename_all = "snake_case")]
 pub enum ScriptPhase {
@@ -66,7 +54,7 @@ impl ScriptPhase {
 }
 
 /// Which launches a script belongs to.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "snake_case",
@@ -92,7 +80,7 @@ impl ScriptScope {
 
 /// The shells a script can be written for. `powershell` and `cmd` exist
 /// only on Windows; `pwsh` (PowerShell 7) wherever it is installed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum Shell {
     Sh,
@@ -154,7 +142,7 @@ impl Shell {
 }
 
 /// What a script runs.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "snake_case",
@@ -172,7 +160,7 @@ pub enum ScriptCommand {
 pub const DEFAULT_TIMEOUT_SECS: u32 = 60;
 pub const MAX_TIMEOUT_SECS: u32 = 3600;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct LifecycleScript {
     pub id: String,
@@ -257,7 +245,7 @@ impl LifecycleScript {
 }
 
 /// What a script knows about the launch. Unknown values are empty.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScriptContext {
     pub game_id: String,
@@ -295,7 +283,7 @@ pub struct ScriptContext {
 
 /// One value a script can read: its `{Placeholder}`, its environment
 /// variable and its value.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ContextValue {
     pub placeholder: String,
@@ -378,7 +366,7 @@ pub fn expand(text: &str, values: &[ContextValue]) -> String {
 }
 
 /// What running one script came to.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ScriptStatus {
     Succeeded,
@@ -392,7 +380,7 @@ pub enum ScriptStatus {
 
 /// One script's run, for people: its output is bounded and stripped of
 /// control characters.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScriptRun {
     pub script_id: String,
@@ -478,7 +466,7 @@ impl ScriptSet {
 }
 
 /// The runs of one phase.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScriptReport {
     pub game_id: String,

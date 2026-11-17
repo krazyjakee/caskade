@@ -7,12 +7,11 @@ use caskade_core::{
     sync::SyncService,
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::error::{CommandError, report};
 
 /// An add-on on another device.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceAddon {
     pub device_id: String,
@@ -55,7 +54,7 @@ pub async fn addons_from_devices(
 
 /// A platform's emulator on another device that this device doesn't have
 /// (#275): offered in Settings → Emulation, installed only when asked.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DeviceEmulator {
     pub platform_id: String,

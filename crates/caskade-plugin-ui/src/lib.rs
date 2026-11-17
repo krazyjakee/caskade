@@ -29,7 +29,6 @@ pub const MAX_ACTION: usize = 64;
 
 /// One of Caskade's components, as a plugin asks for it.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(
     tag = "type",
     rename_all = "camelCase",
@@ -99,7 +98,6 @@ pub enum Node {
         label: String,
         action: String,
         #[serde(default, skip_serializing_if = "Value::is_null")]
-        #[cfg_attr(feature = "specta", specta(type = Option<serde_json::Value>))]
         value: Value,
         #[serde(default)]
         variant: Variant,
@@ -120,7 +118,6 @@ fn two() -> u8 {
 
 /// A [`Node::Stats`] row.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(deny_unknown_fields)]
 pub struct Stat {
     pub label: String,
@@ -129,7 +126,6 @@ pub struct Stat {
 
 /// A [`Node::Bars`] bar.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(deny_unknown_fields)]
 pub struct Bar {
     pub label: String,
@@ -139,7 +135,6 @@ pub struct Bar {
 
 /// A [`Node::Segmented`] option.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(deny_unknown_fields)]
 pub struct Choice {
     pub value: String,
@@ -147,7 +142,6 @@ pub struct Choice {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(rename_all = "camelCase")]
 pub enum Direction {
     #[default]
@@ -156,7 +150,6 @@ pub enum Direction {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(rename_all = "camelCase")]
 pub enum Gap {
     None,
@@ -167,7 +160,6 @@ pub enum Gap {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(rename_all = "camelCase")]
 pub enum Tone {
     #[default]
@@ -179,7 +171,6 @@ pub enum Tone {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(rename_all = "camelCase")]
 pub enum Variant {
     #[default]
@@ -189,7 +180,6 @@ pub enum Variant {
 
 /// Where a contribution is drawn, as `render` and `act` get it.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(rename_all = "camelCase")]
 pub struct Context {
     /// `desktop` or `console`.
@@ -204,12 +194,10 @@ pub struct Context {
     pub game_title: Option<String>,
     /// What the plugin's last `act` returned as `state`, `null` before.
     #[serde(default)]
-    #[cfg_attr(feature = "specta", specta(type = serde_json::Value))]
     pub state: Value,
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(rename_all = "camelCase")]
 pub enum Mode {
     #[default]
@@ -220,11 +208,9 @@ pub enum Mode {
 /// What `act` returns: the contribution's new state (kept by Caskade and
 /// passed to the next `render`), and a notice to show.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Outcome {
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[cfg_attr(feature = "specta", specta(type = Option<serde_json::Value>))]
     pub state: Option<Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub notice: Option<String>,

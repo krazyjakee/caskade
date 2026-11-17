@@ -448,12 +448,3 @@ fn wire_format_uses_explicit_tags_and_relative_destinations() {
         serde_json::from_value::<Input>(json!({"type": "urls", "value": ["not a url"]})).is_err()
     );
 }
-
-#[test]
-fn specta_reflects_complete_public_graph() {
-    let types = specta::Types::default()
-        .register::<InstallPlan>()
-        .register::<InstallOutcome>()
-        .register::<PlanSet>();
-    assert!(types.len() >= 20);
-}

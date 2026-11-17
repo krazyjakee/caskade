@@ -9,7 +9,6 @@ use caskade_core::settings::{AppearanceSettings, SettingsService};
 use caskade_core::themes::{DEV_DEBOUNCE, ThemeInfo, ThemeService};
 use caskade_plugin_host::PluginHost;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
@@ -96,7 +95,7 @@ pub fn safe_mode(set: Option<SafeMode>) -> bool {
 }
 
 /// The theme to apply, ready for the stylesheet `<link>`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ResolvedTheme {
     /// The requested theme, or `caskade.default` when it can't be applied
@@ -208,7 +207,7 @@ pub async fn themes_reload(
 
 /// A dev theme (#140) was recompiled after its folder changed: re-apply it
 /// when it is the active one. `error` when it no longer compiles.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThemeReloaded {
     pub theme: String,

@@ -30,13 +30,12 @@ use crate::{
 use caskade_installer::OperatingSystem;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PlatformInfo {
     pub id: String,
@@ -46,7 +45,7 @@ pub struct PlatformInfo {
     pub bios: Vec<BiosEntry>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct DefinitionProfileInfo {
     pub name: String,
@@ -56,7 +55,7 @@ pub struct DefinitionProfileInfo {
     pub requires: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct DefinitionInfo {
     pub id: String,
@@ -67,7 +66,7 @@ pub struct DefinitionInfo {
     pub vars: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct VariableInfo {
     pub name: String,
@@ -76,7 +75,7 @@ pub struct VariableInfo {
 }
 
 /// Read-only data for the editor.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct EmulationCatalog {
     pub platforms: Vec<PlatformInfo>,

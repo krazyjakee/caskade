@@ -11,22 +11,10 @@
 use super::Game;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// A game field the editor changes.
 #[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Serialize,
-    Deserialize,
-    JsonSchema,
-    Type,
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema,
 )]
 #[serde(rename_all = "camelCase")]
 pub enum GameField {
@@ -80,7 +68,7 @@ impl GameField {
 }
 
 /// A text field's change.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "op",
     rename_all = "camelCase",
@@ -95,7 +83,7 @@ pub enum TextEdit {
 }
 
 /// A list field's change.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "op",
     rename_all = "camelCase",
@@ -115,7 +103,7 @@ pub enum ListEdit {
 }
 
 /// The release date's change.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "op",
     rename_all = "camelCase",
@@ -131,7 +119,7 @@ pub enum DateEdit {
 }
 
 /// The personal rating's change: 0 through 100, or none.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RatingEdit {
     /// Wider than the rating so an out-of-range number is reported on the
@@ -140,7 +128,7 @@ pub struct RatingEdit {
 }
 
 /// The notes' change; empty clears them.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NotesEdit {
     pub value: String,
@@ -148,7 +136,7 @@ pub struct NotesEdit {
 
 /// The fields to change; those left out stay as they are. Unknown keys
 /// fail the whole patch.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(default, rename_all = "camelCase", deny_unknown_fields)]
 pub struct GameEdit {
     pub title: Option<TextEdit>,
@@ -186,7 +174,7 @@ impl GameEdit {
 
 /// A game as the editor shows it: what the library shows, the automatic
 /// values beneath, and which fields are the user's.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GameEditState {
     pub game: Game,
@@ -198,7 +186,7 @@ pub struct GameEditState {
 }
 
 /// Why a field's change wasn't saved.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum FieldProblem {
     /// The value isn't allowed.
@@ -207,7 +195,7 @@ pub enum FieldProblem {
     Conflict,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct FieldError {
     pub field: GameField,
@@ -216,7 +204,7 @@ pub struct FieldError {
 }
 
 /// What became of a patch. A rejected patch saved nothing.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(
     tag = "status",
     rename_all = "camelCase",
@@ -249,7 +237,7 @@ pub const EDITABLE_ARTWORK: [super::ArtworkKind; 3] = [
 ];
 
 /// Who decides a kind of a game's artwork.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum ArtworkChoice {
     /// Automatic sources, in their usual precedence.
@@ -261,7 +249,7 @@ pub enum ArtworkChoice {
 }
 
 /// One kind of a game's artwork as the editor shows it.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ArtworkSlot {
     pub kind: super::ArtworkKind,
@@ -274,7 +262,7 @@ pub struct ArtworkSlot {
 }
 
 /// What a bulk edit (#173) does, or did, to one game.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum BulkStatus {
     /// Its fields change (preview) or changed (applied).
@@ -288,7 +276,7 @@ pub enum BulkStatus {
 }
 
 /// One field of one game in a bulk edit, as text to show.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct BulkChange {
     pub field: GameField,
@@ -296,7 +284,7 @@ pub struct BulkChange {
     pub after: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct BulkGameResult {
     pub game_id: String,

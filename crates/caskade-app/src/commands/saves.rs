@@ -10,7 +10,7 @@ use caskade_core::{
     },
 };
 /// The editor needs locations and counts, not saved file or registry contents.
-#[derive(serde::Serialize, specta::Type)]
+#[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveLocationView {
     spec: LocationSpec,
@@ -18,7 +18,7 @@ pub struct SaveLocationView {
     file_count: usize,
 }
 
-#[derive(serde::Serialize, specta::Type)]
+#[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveLocationsState {
     entry_id: String,
@@ -181,7 +181,7 @@ pub async fn saves_manifest_update(
 }
 
 /// Game ids whose save versions changed here (#241).
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct SaveVersionsChanged(pub String);
 
 /// Sends each game whose versions or save in place changed to `events`.

@@ -3,13 +3,12 @@
 //! Steam Deck's game mode doesn't have).
 
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::{Component, Path, PathBuf};
 use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
 /// One folder's contents and the places to jump to.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DirListing {
     /// The folder listed, absolute.
@@ -21,7 +20,7 @@ pub struct DirListing {
     pub places: Vec<Place>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DirEntry {
     pub name: String,
@@ -79,7 +78,7 @@ fn is_folder(entry: &std::fs::DirEntry, follow: &dyn Fn(PathBuf) -> Option<bool>
 }
 
 /// Home, the filesystem roots and mounted drives.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Place {
     pub label: String,

@@ -5,12 +5,11 @@
 use crate::settings::{SectionDefinition, SettingsService};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 pub const NAMESPACE: &str = "core.romm";
 
 /// How Caskade signs in to a server.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum RommAuth {
     /// Username and password, exchanged for an access token (`/api/token`).
@@ -21,7 +20,7 @@ pub enum RommAuth {
 }
 
 /// One RomM platform's import and launch choices.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RommPlatformMapping {
     /// RomM's platform slug, e.g. `snes`.
@@ -40,7 +39,7 @@ pub struct RommPlatformMapping {
 }
 
 /// A RomM server.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RommServerConfig {
     /// Stable id: the library source is `romm:<id>`.
@@ -103,7 +102,7 @@ impl RommServerConfig {
 }
 
 /// The download cache.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RommCacheSettings {
     /// An absolute folder; empty is `romm-cache/` on the default storage
@@ -136,7 +135,7 @@ impl RommCacheSettings {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RommSettings {
     #[schemars(length(max = 16))]

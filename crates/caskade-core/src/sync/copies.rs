@@ -3,7 +3,6 @@
 //! could come here. Copying (#233) and playing there (#234) come later.
 
 use serde::Serialize;
-use specta::Type;
 
 use super::presence::Presence;
 use crate::Result;
@@ -11,7 +10,7 @@ use crate::db::{CopyLocation, LibraryStore, this_os};
 use crate::devices::{DeviceKind, DeviceLink, DeviceOs, Devices};
 
 /// Why a copy can't come to this device.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum CopyBlocked {
     /// It starts through its store's launcher there: install it from the
@@ -22,7 +21,7 @@ pub enum CopyBlocked {
 }
 
 /// Another device's copy of a game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PeerCopy {
     pub device_id: String,

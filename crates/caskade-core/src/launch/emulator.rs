@@ -17,11 +17,10 @@ use crate::{
 use caskade_discovery::InstallState;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::{Path, PathBuf};
 
 /// The user's answers when a launch asked for them.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct LaunchChoice {
     /// Answers an ask-at-launch target, or a platform without a default.
@@ -39,7 +38,7 @@ pub struct LaunchChoice {
 
 /// What a launch needs to know before it can start. A list is empty when
 /// that part is already decided.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct LaunchPrompt {
     pub entry_id: String,
@@ -53,7 +52,7 @@ pub struct LaunchPrompt {
 }
 
 /// A profile that can run the game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ProfileOption {
     pub emulator_id: String,
@@ -65,7 +64,7 @@ pub struct ProfileOption {
 }
 
 /// One disc of a multi-disc game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct DiscOption {
     pub index: u32,

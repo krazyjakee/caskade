@@ -9,7 +9,6 @@ publish = false
 [dependencies]
 caskade-core = { path = "../caskade-core", default-features = false }
 serde = { version = "1", features = ["derive"] }
-specta = { version = "=2.0.0-rc.26", features = ["derive", "serde_json"] }
 # Same pin as caskade-core: disks and networks.
 sysinfo = { version = "=0.38.4", default-features = false, features = ["system", "disk", "network"] }
 tokio = { version = "1", features = ["rt-multi-thread", "sync", "macros", "time", "process", "fs", "io-util"] }

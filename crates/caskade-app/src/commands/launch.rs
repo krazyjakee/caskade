@@ -4,7 +4,6 @@ use caskade_core::{
     launch::{HostBusy, LaunchChoice, LaunchError, LaunchPrompt, LaunchService, LaunchTicket},
 };
 use serde::Serialize;
-use specta::Type;
 
 use crate::error::{CommandError, report};
 
@@ -13,7 +12,7 @@ use crate::error::{CommandError, report};
 /// An age limit holds it back until `game_age_approve` takes an admin's
 /// PIN for it (#209). A device streaming another game asks before it is
 /// stopped (#264): answer with `stopHost`.
-#[derive(Debug, Clone, Serialize, Type)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum LaunchOutcome {
     Started { ticket: LaunchTicket },

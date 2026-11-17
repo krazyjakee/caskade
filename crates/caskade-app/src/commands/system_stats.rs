@@ -5,11 +5,10 @@
 
 use caskade_system_stats::{SystemSample, SystemStats, SystemStatsSnapshot};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::events::{Event, Events};
 /// Each sample, while anyone watches.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SystemStatsSampled(pub SystemSample);
 
 /// Starts or renews `watcher`'s watch (it lasts 30 s unless renewed) and

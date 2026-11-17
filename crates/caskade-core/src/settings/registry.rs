@@ -5,7 +5,7 @@ use std::{collections::BTreeMap, sync::Arc};
 
 pub(crate) type Migration = Arc<dyn Fn(Value) -> Result<Value> + Send + Sync>;
 
-#[derive(Debug, Clone, Serialize, serde::Deserialize, schemars::JsonSchema, specta::Type)]
+#[derive(Debug, Clone, Serialize, serde::Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct SettingsSection {
     pub namespace: String,

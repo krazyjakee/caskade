@@ -1,9 +1,8 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// Preferred method on Windows. Other hosts prefer extracting Windows inputs.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum WindowsMethod {
     #[default]
@@ -13,7 +12,7 @@ pub enum WindowsMethod {
     Extract,
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ExecutionPolicy {
     #[schemars(title = "Never run installers")]
@@ -27,7 +26,7 @@ pub enum ExecutionPolicy {
 
 /// Family handlers translate these preferences into supported argument vectors.
 /// The engine never appends generic switches to format-specific commands.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(default)]
 pub struct PresetArgs {
     /// None lets the installer use its own language default.
@@ -44,7 +43,7 @@ impl Default for PresetArgs {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(default)]
 pub struct Policy {
     pub windows_method: WindowsMethod,

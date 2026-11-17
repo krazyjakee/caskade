@@ -6,17 +6,16 @@ use crate::{ClassifierConfig, Confidence, Evidence, LaunchTarget};
 pub use scan::classify_path;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::PathBuf;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum Verdict {
     NotAGame,
     Maybe,
     Likely,
 }
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(default)]
 pub struct Metadata {
     pub title: Option<String>,
@@ -26,7 +25,7 @@ pub struct Metadata {
     pub executable: Option<PathBuf>,
     pub known_game_folders: Vec<PathBuf>,
 }
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Classification {
     pub score: i32,
     pub verdict: Verdict,

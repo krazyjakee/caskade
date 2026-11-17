@@ -6,7 +6,7 @@ use caskade_core::accounts::{Account, AccountService, AccountUpdate, NewAccount,
 use crate::error::{CommandError, report};
 
 /// Every account (admins first, then by name), and which one is signed in.
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountList {
     pub accounts: Vec<Account>,

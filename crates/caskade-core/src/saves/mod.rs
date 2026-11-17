@@ -15,9 +15,8 @@ pub use service::Saves;
 
 use caskade_discovery::registry::{RegistryEntry, RegistryView};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum LocationKind {
     File,
@@ -25,14 +24,14 @@ pub enum LocationKind {
     Registry,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct LocationSpec {
     pub kind: LocationKind,
     pub path: String,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SavePreferences {
     /// None follows automatic Steam → GOG → title/alias matching.
@@ -41,7 +40,7 @@ pub struct SavePreferences {
     pub locations: Option<Vec<LocationSpec>>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum MatchMethod {
     Manual,
@@ -53,7 +52,7 @@ pub enum MatchMethod {
     Emulator,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(
     tag = "type",
     rename_all = "camelCase",
@@ -65,7 +64,7 @@ pub enum SaveMatch {
     Ambiguous { titles: Vec<String> },
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RegistrySnapshot {
     pub key: String,
@@ -73,7 +72,7 @@ pub struct RegistrySnapshot {
     pub values: Vec<RegistryEntry>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveLocation {
     pub spec: LocationSpec,
@@ -84,7 +83,7 @@ pub struct SaveLocation {
     pub registry: Vec<RegistrySnapshot>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveState {
     pub entry_id: String,

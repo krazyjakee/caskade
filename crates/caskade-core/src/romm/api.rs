@@ -6,7 +6,6 @@
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// `GET /api/heartbeat` (no authentication).
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -45,7 +44,7 @@ pub(crate) struct TokenResponse {
 }
 
 /// A platform on the server (`PlatformSchema`).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct RemotePlatform {
     pub id: u32,
@@ -71,7 +70,7 @@ impl RemotePlatform {
 }
 
 /// A collection on the server (`CollectionSchema`).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct RemoteCollection {
     pub id: u32,

@@ -15,11 +15,10 @@ use super::*;
 use caskade_installer::failure::{self, Failure, FailureKind, FailureStage, Probe, RecoveryAction};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::Path;
 
 /// What the user chose to do about a failed install or update.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum Recovery {
     /// Run again as before, keeping a valid download.

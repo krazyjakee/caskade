@@ -25,7 +25,7 @@ use crate::sync::change::{EXISTS, Entity, key_parts};
 pub(super) const PEER_PREFIX: &str = "peer:";
 
 /// Where a copy lives on its device.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum CopyLocation {
     /// A folder Caskade installed and manages.

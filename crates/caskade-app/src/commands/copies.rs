@@ -6,11 +6,10 @@ use caskade_core::devices::{DeviceLink, Devices};
 use caskade_core::install::{InstallService, JobSnapshot, PeerCopyTarget};
 use caskade_core::transfer::Transfers;
 use serde::Serialize;
-use specta::Type;
 
 use crate::error::{CommandError, report};
 /// Which way a copy goes.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TransferDirection {
     /// To this device.
@@ -20,7 +19,7 @@ pub enum TransferDirection {
 }
 
 /// How a copy is going.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TransferState {
     Running,
@@ -30,7 +29,7 @@ pub enum TransferState {
 }
 
 /// A copy between this device and another, as the app shows it.
-#[derive(Debug, Clone, PartialEq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TransferView {
     pub id: String,

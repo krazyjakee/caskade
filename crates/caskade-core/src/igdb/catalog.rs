@@ -24,7 +24,6 @@ use super::{Igdb, IgdbGame, IgdbReleaseDate, answer, decimal, decimals, readable
 use crate::{Error, Result, now_ms};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use specta::Type;
 use std::{
     collections::{HashMap, HashSet},
     sync::Arc,
@@ -43,7 +42,7 @@ const MAX_OFFSET: u32 = 5000;
 const MAX_FILTER_IDS: usize = 50;
 
 /// Ordering for catalog browse/search; relevance keeps IGDB's default.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum CatalogSort {
     #[default]
@@ -54,7 +53,7 @@ pub enum CatalogSort {
 }
 
 /// A catalog search, or a browse without `query` (most-rated first).
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogSearch {
     #[serde(default)]
@@ -68,10 +67,8 @@ pub struct CatalogSearch {
     pub limit: u32,
     /// IGDB platform ids (`IgdbCatalogFilters`); a game on any matches.
     #[serde(default, with = "decimals")]
-    #[specta(type = Vec<String>)]
     pub platforms: Vec<u64>,
     #[serde(default, with = "decimals")]
-    #[specta(type = Vec<String>)]
     pub genres: Vec<u64>,
     /// First released on or after this UTC day, `YYYY-MM-DD`.
     #[serde(default)]
@@ -82,7 +79,7 @@ pub struct CatalogSearch {
 }
 
 /// A page of recent or upcoming releases.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogReleases {
     #[serde(default)]
@@ -91,10 +88,8 @@ pub struct CatalogReleases {
     pub limit: u32,
     /// The release's own platform.
     #[serde(default, with = "decimals")]
-    #[specta(type = Vec<String>)]
     pub platforms: Vec<u64>,
     #[serde(default, with = "decimals")]
-    #[specta(type = Vec<String>)]
     pub genres: Vec<u64>,
     /// Upcoming only: undated (TBD) releases instead of dated ones.
     #[serde(default)]
@@ -102,7 +97,7 @@ pub struct CatalogReleases {
 }
 
 /// A page of the catalog.
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbCatalogPage {
     pub games: Vec<IgdbGame>,
@@ -119,17 +114,16 @@ pub struct IgdbCatalogPage {
 }
 
 /// The release that listed a game.
-#[derive(Debug, Clone, PartialEq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbListedRelease {
     #[serde(with = "decimal")]
-    #[specta(type = String)]
     pub game: u64,
     pub release: IgdbReleaseDate,
 }
 
 /// What the catalog can be narrowed by.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbCatalogFilters {
     pub platforms: Vec<IgdbFilterOption>,
@@ -139,11 +133,10 @@ pub struct IgdbCatalogFilters {
     pub stale: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IgdbFilterOption {
     #[serde(with = "decimal")]
-    #[specta(type = String)]
     pub id: u64,
     pub name: String,
     #[serde(default)]

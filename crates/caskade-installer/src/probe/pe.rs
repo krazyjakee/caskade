@@ -11,10 +11,9 @@ use quick_xml::{Reader, events::Event};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use specta::Type;
 use std::{collections::BTreeMap, path::Path};
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema)]
 pub struct PeProbeLimits {
     pub max_header_bytes: u64,
     pub max_resource_bytes: u64,
@@ -29,7 +28,7 @@ impl Default for PeProbeLimits {
         }
     }
 }
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct PeMetadata {
     pub machine: u16,
     pub architecture: String,

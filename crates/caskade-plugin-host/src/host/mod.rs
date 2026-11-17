@@ -19,7 +19,6 @@ use crate::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::BTreeMap,
     path::{Path, PathBuf},
@@ -74,7 +73,7 @@ pub enum HostError {
 
 pub type Result<T, E = HostError> = std::result::Result<T, E>;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum PluginStatus {
     /// The manifest is invalid; see `errors`.
@@ -89,7 +88,7 @@ pub enum PluginStatus {
 }
 
 /// A plugin as Settings → Plugins lists it.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PluginSummary {
     /// The manifest id, or the folder name when the manifest is unreadable.
@@ -116,7 +115,6 @@ pub struct PluginSummary {
     /// Problems that don't stop the plugin (#219): a translation catalog in
     /// `locales/` that can't be read, whose English shows instead.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    #[specta(optional)]
     pub warnings: Vec<ManifestError>,
 }
 
@@ -234,7 +232,7 @@ impl Entry {
 }
 
 /// A plugin folder offered for installation.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PluginPreview {
     pub plugin: PluginSummary,

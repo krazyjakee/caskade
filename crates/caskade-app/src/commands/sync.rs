@@ -19,13 +19,12 @@ use caskade_core::devices::{
 };
 use caskade_core::sync::SyncService;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 /// Devices changed: a pairing, a link state, a nearby device, a rename.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DevicesChanged(pub DevicesStatus);
 
 /// A `caskade://pair` link was opened; Settings → Devices asks an admin.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PairingLinkOpened(pub PairingLinkTarget);
 
 /// The last pairing link opened from outside, until accepted or dismissed.

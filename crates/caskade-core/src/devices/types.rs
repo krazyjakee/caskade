@@ -2,11 +2,10 @@
 //! devices, and a pairing under way.
 
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use super::DeviceKind;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DeviceOs {
     Linux,
@@ -15,7 +14,7 @@ pub enum DeviceOs {
 }
 
 /// How a device is reached right now.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DeviceLink {
     Lan,
@@ -25,7 +24,7 @@ pub enum DeviceLink {
 }
 
 /// Where this device's identity stands.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum IdentityStatus {
     /// Being read from the keychain.
@@ -40,7 +39,7 @@ pub enum IdentityStatus {
     KeychainUnavailable,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThisDevice {
     /// Its endpoint id, once the identity is ready.
@@ -62,7 +61,7 @@ pub struct ThisDevice {
 }
 
 /// A device paired with this one. Its grants stay in the core.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PairedDevice {
     pub id: String,
@@ -81,7 +80,7 @@ pub struct PairedDevice {
 }
 
 /// A Caskade device on this network that isn't paired.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NearbyDevice {
     pub id: String,
@@ -91,7 +90,7 @@ pub struct NearbyDevice {
     pub addresses: Vec<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum PairingState {
     /// Codes on screen, waiting for one or both users.
@@ -104,7 +103,7 @@ pub enum PairingState {
 }
 
 /// A code pairing: both devices show `code`, and both users confirm.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Pairing {
     pub device_id: String,
@@ -120,7 +119,7 @@ pub struct Pairing {
 }
 
 /// A pairing link to show or copy. It works once, until `expires_at_ms`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PairingLinkInfo {
     pub url: String,
@@ -129,7 +128,7 @@ pub struct PairingLinkInfo {
 
 /// A pairing link opened from outside the app (a `caskade://pair` link),
 /// shown for an admin to accept. The link itself stays in the app.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PairingLinkTarget {
     /// The device it pairs with.
@@ -139,7 +138,7 @@ pub struct PairingLinkTarget {
 }
 
 /// Everything Settings → Devices shows.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DevicesStatus {
     pub this_device: ThisDevice,

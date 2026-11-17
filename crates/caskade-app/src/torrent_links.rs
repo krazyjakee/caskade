@@ -10,7 +10,6 @@
 //! install request like a deep link (`deep_link::queue`).
 
 use serde::Serialize;
-use specta::Type;
 use std::path::{Path, PathBuf};
 
 /// The magnet link or `.torrent` file the OS started Caskade with: its
@@ -50,7 +49,7 @@ pub fn input_from_args(args: &[String], cwd: &Path) -> Option<String> {
 }
 
 /// How Caskade can take magnet links and `.torrent` files on this OS.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase", rename = "TorrentLinksSupport")]
 pub enum Support {
     /// Caskade becomes their default app (Linux).
@@ -63,7 +62,7 @@ pub enum Support {
 }
 
 /// Whether the OS opens magnet links and `.torrent` files with Caskade.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TorrentLinks {
     pub support: Support,

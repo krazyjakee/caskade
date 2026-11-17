@@ -5,7 +5,6 @@
 use caskade_installer::fetch::grant::entry_parts;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::BTreeMap,
     path::{Component, Path, PathBuf},
@@ -31,22 +30,19 @@ pub const MANIFEST: &str = "plugin.json";
 /// The largest manifest read.
 const MANIFEST_MAX: u64 = 256 * 1024;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Manifest {
     /// Editor hint; ignored.
     #[serde(rename = "$schema", default, skip_serializing_if = "Option::is_none")]
-    #[specta(skip)]
     pub schema: Option<String>,
     /// Reverse-DNS, e.g. `dev.example.howlongtobeat`.
     pub id: String,
     pub name: String,
     #[schemars(with = "String")]
-    #[specta(type = String)]
     pub version: semver::Version,
     /// The `caskade:plugin` API range the plugin targets, e.g. `^0.1`.
     #[schemars(with = "String")]
-    #[specta(type = String)]
     pub api: semver::VersionReq,
     #[serde(default)]
     pub description: Option<String>,
@@ -69,7 +65,7 @@ pub struct Manifest {
 }
 
 /// What the plugin asks for; granted by the user (#124 enforces).
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Permissions {
     /// Hosts the backend may reach, e.g. `howlongtobeat.com`.
@@ -85,7 +81,7 @@ pub struct Permissions {
     pub library: LibraryAccess,
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum LibraryAccess {
     #[default]
@@ -94,7 +90,7 @@ pub enum LibraryAccess {
     Write,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Contributes {
     /// UI contribution points, e.g. `game.details.tabs`.
@@ -113,7 +109,6 @@ pub struct Contributes {
     pub commands: Vec<Command>,
     /// A JSON Schema for the plugin's settings (#128).
     #[serde(default)]
-    #[specta(type = Option<serde_json::Value>)]
     pub settings: Option<serde_json::Value>,
     /// Data contributions such as emulator definitions.
     #[serde(default)]
@@ -123,7 +118,7 @@ pub struct Contributes {
     pub themes: Vec<PathBuf>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Slot {
     pub slot: String,
@@ -140,7 +135,7 @@ pub struct Slot {
 /// The modes a view or slot can declare.
 pub const MODES: &[&str] = &["desktop", "console"];
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct View {
     pub id: String,
@@ -153,7 +148,7 @@ pub struct View {
     pub modes: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
 pub struct Command {
     pub id: String,
@@ -161,7 +156,7 @@ pub struct Command {
 }
 
 /// A manifest problem, with the key it concerns.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ManifestError {
     /// JSON path of the offending key, e.g. `permissions.library`; empty

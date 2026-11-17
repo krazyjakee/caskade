@@ -4,7 +4,6 @@ use std::{collections::BTreeMap, path::PathBuf, time::Duration};
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 pub use crate::types::RuntimeSpec;
 
@@ -22,25 +21,14 @@ pub use registry_watch::RegistryWatcher;
 pub use watch::{OutOfRootWatcher, default_watch_roots};
 
 #[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Serialize,
-    Deserialize,
-    JsonSchema,
-    Type,
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema,
 )]
 #[serde(transparent)]
 pub struct ProcessId(pub u64);
 
 /// Resolved process invocation. Arguments remain separate OS arguments, and
 /// `env` contains overrides rather than an implicit shell command.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ProcessCommand {
     pub program: PathBuf,
     pub args: Vec<String>,
@@ -48,14 +36,12 @@ pub struct ProcessCommand {
     pub cwd: PathBuf,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ProcessExit {
     pub code: i32,
 }
 
-#[derive(
-    Debug, Clone, PartialEq, Eq, thiserror::Error, Serialize, Deserialize, JsonSchema, Type,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum RuntimeError {
     #[error("runtime operation {operation} is not implemented")]

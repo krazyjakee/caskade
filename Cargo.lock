@@ -3,12 +3,6 @@
 version = 4
 
 [[package]]
-name = "Inflector"
-version = "0.11.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe438c63458706e03479442743baae6c88256498e6431708f6dfc520a26515d3"
-
-[[package]]
 name = "ab_glyph"
 version = "0.2.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1622,7 +1616,6 @@ dependencies = [
  "schemars 1.2.3",
  "serde",
  "serde_json",
- "specta",
  "sqlx",
  "tempfile",
  "tokio",
@@ -1647,7 +1640,6 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.9",
- "specta",
  "tempfile",
  "tokio",
  "tokio-util",
@@ -1686,7 +1678,6 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.9",
- "specta",
  "tar",
  "tempfile",
  "tokio",
@@ -1711,7 +1702,6 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.9",
- "specta",
  "sqlx",
  "tempfile",
  "tokio",
@@ -1790,7 +1780,6 @@ dependencies = [
  "sha1 0.10.7",
  "sha2 0.10.9",
  "shlex",
- "specta",
  "sqlx",
  "sysinfo",
  "tempfile",
@@ -1836,7 +1825,6 @@ dependencies = [
  "serde_yaml_ng",
  "sha1 0.10.7",
  "sha2 0.10.9",
- "specta",
  "steamlocate",
  "sysinfo",
  "tempfile",
@@ -1878,7 +1866,6 @@ dependencies = [
  "gilrs",
  "serde",
  "serde_json",
- "specta",
  "tracing",
 ]
 
@@ -1942,7 +1929,6 @@ dependencies = [
  "sevenz-rust2",
  "sha1 0.10.7",
  "sha2 0.10.9",
- "specta",
  "sysinfo",
  "tar",
  "tempfile",
@@ -1967,7 +1953,6 @@ name = "caskade-jobs"
 version = "0.1.0"
 dependencies = [
  "serde",
- "specta",
  "tokio",
 ]
 
@@ -2081,7 +2066,6 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_path_to_error",
- "specta",
  "tempfile",
  "thiserror 2.0.21",
  "tokio",
@@ -2110,7 +2094,6 @@ version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
- "specta",
 ]
 
 [[package]]
@@ -2124,7 +2107,6 @@ dependencies = [
  "caskade-sync",
  "serde",
  "serde_json",
- "specta",
  "tempfile",
  "tokio",
  "tokio-util",
@@ -2149,7 +2131,6 @@ dependencies = [
  "schemars 1.2.3",
  "serde",
  "serde_json",
- "specta",
  "tempfile",
  "thiserror 2.0.21",
  "tokio",
@@ -2176,7 +2157,6 @@ dependencies = [
  "serde_json",
  "sha2 0.10.9",
  "socket2",
- "specta",
  "sysinfo",
  "tempfile",
  "tokio",
@@ -2222,7 +2202,6 @@ version = "0.1.0"
 dependencies = [
  "caskade-core",
  "serde",
- "specta",
  "sysinfo",
  "tempfile",
  "tokio",
@@ -12361,30 +12340,6 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps",
-]
-
-[[package]]
-name = "specta"
-version = "2.0.0-rc.26"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed155e448f42fc4be7a5cbc12bd43f6c549981f7c32fcba429ff6bc57cc4f30c"
-dependencies = [
- "rustc_version",
- "serde_json",
- "specta-macros",
- "url",
-]
-
-[[package]]
-name = "specta-macros"
-version = "2.0.0-rc.26"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b34b2516e16a9ddd3dc4e73cd6454cfe21fe209f8cb5a6f37346fe3774d759b3"
-dependencies = [
- "Inflector",
- "proc-macro2",
- "quote",
- "syn 2.0.119",
 ]
 
 [[package]]

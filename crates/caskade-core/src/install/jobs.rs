@@ -3,9 +3,8 @@
 use caskade_installer::{Question, Warning, events::Phase};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum JobKind {
     Install,
@@ -22,7 +21,7 @@ pub enum JobKind {
     MoveLocation,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum JobStatus {
     Queued,
@@ -43,7 +42,7 @@ impl JobStatus {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum JobPhase {
     Download,
@@ -62,7 +61,7 @@ impl From<Phase> for JobPhase {
 }
 
 /// The last progress report of the running phase.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct JobProgress {
     pub bytes: u64,
@@ -74,7 +73,7 @@ pub struct JobProgress {
 
 /// One install, uninstall or move as the UI sees it. `revision` grows on
 /// every change, so stale updates and answers can be told apart.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct JobSnapshot {
     pub id: String,

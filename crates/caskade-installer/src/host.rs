@@ -8,11 +8,10 @@ use std::{
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::OperatingSystem;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct FileSystemCaps {
     pub writable: bool,
     pub exec_bits: bool,
@@ -20,7 +19,7 @@ pub struct FileSystemCaps {
     pub case_sensitive: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum RunnerKind {
     Native,
@@ -28,7 +27,7 @@ pub enum RunnerKind {
     Wine,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct RunnerInfo {
     pub kind: RunnerKind,
     pub program: PathBuf,
@@ -37,7 +36,7 @@ pub struct RunnerInfo {
 /// Injected package inventory and host tools. Probe/plan never query the OS.
 /// `root` is set explicitly by a trusted boundary (e.g. a container test);
 /// ordinary delegated installs use pkexec for the OS authentication prompt.
-#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct PackageCapabilities {
     pub installed: BTreeSet<String>,
     pub managers: BTreeMap<String, PathBuf>,
@@ -49,7 +48,7 @@ impl PackageCapabilities {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct HostCaps {
     pub os: OperatingSystem,
     pub arch: String,

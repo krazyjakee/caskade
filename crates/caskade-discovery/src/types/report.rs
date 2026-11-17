@@ -1,12 +1,11 @@
 use super::{DetectedGame, SourceId};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::PathBuf;
 use thiserror::Error;
 
 /// The result of one scan.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ScanReport {
     /// Merged results, one group per game.
     pub groups: Vec<GameGroup>,
@@ -17,7 +16,7 @@ pub struct ScanReport {
 /// What changed between two scans of the same machine (§9). A group that
 /// keeps at least one of its entries is the same group: `updated` when its
 /// contents changed, otherwise not listed. `removed` holds the old groups.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ScanDelta {
     pub added: Vec<GameGroup>,
     pub updated: Vec<GameGroup>,
@@ -36,7 +35,7 @@ impl ScanDelta {
 }
 
 /// One game reported by one or more sources.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct GameGroup {
     /// Index into `entries`, chosen by source priority.
     pub primary: u32,
@@ -51,7 +50,7 @@ impl GameGroup {
 }
 
 /// One install of a launcher, or a launcher that was looked for and not found.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct LauncherStatus {
     pub source: SourceId,
     pub found: bool,
@@ -94,7 +93,7 @@ impl LauncherStatus {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum LauncherKind {
     Native,
@@ -124,7 +123,7 @@ impl LauncherKind {
 }
 
 /// How one source did during a scan.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct SourceReport {
     pub source: SourceId,
     pub duration_ms: u64,
@@ -136,7 +135,7 @@ pub struct SourceReport {
 }
 
 /// Why a source returned no games. It never fails the scan.
-#[derive(Debug, Clone, PartialEq, Eq, Error, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Error, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum SourceError {

@@ -364,7 +364,7 @@ fn metadata_reads_tree_size_and_tie_configuration_are_bounded() {
 }
 
 #[test]
-fn public_discovery_data_roundtrips_and_reflects() {
+fn public_discovery_data_roundtrips() {
     let root = fixture("unity.zip");
     let hints = DiscoveryHints::default();
     let result = discover(root.path(), &host(), &hints).unwrap();
@@ -379,10 +379,6 @@ fn public_discovery_data_roundtrips_and_reflects() {
         serde_json::to_value(hints).unwrap()["launch_targets"],
         json!([])
     );
-    let _ = specta::Types::default()
-        .register::<caskade_installer::discover::Discovery>()
-        .register::<DiscoveryHints>()
-        .register::<DiscoveryConfig>();
 }
 
 #[cfg(unix)]

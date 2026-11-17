@@ -15,14 +15,13 @@ use crate::{Error, Result, read, write};
 use caskade_theme::{DEFAULT_THEME, DirFiles, Files, Locales, MemFiles, Problem, Theme};
 use notify::{RecursiveMode, Watcher};
 use serde::Serialize;
-use specta::Type;
 use std::collections::{BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, RwLock, Weak};
 use std::time::Duration;
 
 /// Where a theme was found.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ThemeSource {
     Builtin,
@@ -32,7 +31,7 @@ pub enum ThemeSource {
     Dev,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThemeProblem {
     /// Relative to the theme folder.
@@ -53,7 +52,7 @@ impl From<Problem> for ThemeProblem {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ThemeInfo {
     pub id: String,
@@ -75,12 +74,11 @@ pub struct ThemeInfo {
     /// Problems that don't stop it applying (#219): a translation catalog
     /// in `locales/` that can't be read, whose English shows instead.
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    #[specta(optional)]
     pub warnings: Vec<ThemeProblem>,
 }
 
 /// The theme to apply for the one the settings name.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ActiveTheme {
     /// The requested theme, or `caskade.default` when it can't be applied.

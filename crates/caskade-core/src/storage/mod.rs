@@ -9,7 +9,6 @@ use crate::model::StorageRoot;
 pub use probe::{FileSystemProbe, RootProbe};
 use serde::{Deserialize, Serialize};
 pub use service::StorageService;
-use specta::Type;
 use std::path::PathBuf;
 pub use tokio_util::sync::CancellationToken;
 pub type Result<T> = std::result::Result<T, StorageError>;
@@ -40,7 +39,7 @@ pub enum StorageError {
     #[error("storage worker stopped: {0}")]
     Worker(String),
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum RootStatus {
     Online,
@@ -48,7 +47,7 @@ pub enum RootStatus {
     ReadOnly,
     IdentityMismatch,
 }
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RootCapabilities {
     pub writable: bool,
@@ -61,7 +60,7 @@ pub struct RootCapabilities {
     pub volume: Option<String>,
     pub warnings: Vec<String>,
 }
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StorageGame {
     pub entry_id: String,
@@ -72,7 +71,7 @@ pub struct StorageGame {
     pub available: bool,
     pub move_blocked: Option<String>,
 }
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RootSummary {
     pub root: StorageRoot,
@@ -90,7 +89,7 @@ pub struct LocationMove {
     pub target: StorageRoot,
     pub games: Vec<StorageGame>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MoveReport {
     pub entry_id: String,

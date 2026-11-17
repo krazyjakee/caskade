@@ -29,7 +29,6 @@ pub use service::{CatalogueService, CatalogueStatus};
 pub(crate) use validate::parse;
 
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// The catalogue format this Caskade reads.
 pub const CATALOGUE_FORMAT: u32 = 1;
@@ -42,14 +41,14 @@ pub const DEFAULT_ORIGIN: &str = match option_env!("CASKADE_CATALOGUE_URL") {
     None => "https://github.com/krazyjakee/caskade/releases/download/catalogue/catalogue.json",
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AddonKind {
     Plugin,
     Theme,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AddonOs {
     Linux,
@@ -72,7 +71,7 @@ impl AddonOs {
 
 /// An image a catalogue entry shows (a screenshot, a theme preview).
 /// Fetched and re-encoded by the artwork cache before it shows.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogueMedia {
     /// Absolute, resolved against the catalogue's address.
@@ -82,7 +81,7 @@ pub struct CatalogueMedia {
 }
 
 /// A release's download.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogueArtifact {
     /// Absolute, resolved against the catalogue's address.
@@ -93,7 +92,7 @@ pub struct CatalogueArtifact {
     pub size: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogueRelease {
     /// A semantic version.
@@ -114,7 +113,7 @@ pub struct CatalogueRelease {
     pub artifact: CatalogueArtifact,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogueEntry {
     /// The plugin's or theme's manifest id.
@@ -140,7 +139,7 @@ pub struct CatalogueEntry {
 
 /// A record the catalogue lists that can't be used, and why. The other
 /// records stay.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogueProblem {
     /// The record's id, when it has a readable one.
@@ -149,7 +148,7 @@ pub struct CatalogueProblem {
 }
 
 /// A validated catalogue.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Catalogue {
     /// When it was generated, as its publisher says.

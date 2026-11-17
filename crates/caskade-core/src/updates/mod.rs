@@ -32,7 +32,6 @@ use crate::{
 };
 use caskade_installer::{Input, manifest::InstallManifest};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::HashMap,
     future::Future,
@@ -129,7 +128,7 @@ impl UpdateRow {
 }
 
 /// An install's updates, for the game page.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GameUpdate {
     pub entry_id: String,

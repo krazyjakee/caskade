@@ -26,7 +26,6 @@ use std::time::{Duration, SystemTime};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use specta::Type;
 
 use super::export::{EXTENSION, PREFIX};
 use super::schedule::{BackupSettings, NAMESPACE};
@@ -39,7 +38,7 @@ use caskade_core::{Error, Result};
 const INDEX: &str = "index.json";
 
 /// A backup one device holds of another.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct HeldBackup {
     /// The device it's a backup of.

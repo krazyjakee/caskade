@@ -45,7 +45,6 @@ use caskade_core::{
 use config::{HostConfig, HostFiles};
 use process::{HostLaunch, HostRunner};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
@@ -62,7 +61,7 @@ pub const HTTPS_PORT: u16 = 47984;
 pub(crate) const SETTINGS: &str = "core.streaming";
 
 /// Where hosting is.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum HostState {
     Off,
@@ -77,7 +76,7 @@ pub enum HostState {
     Unsupported,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct HostStatus {
     pub state: HostState,
@@ -96,7 +95,7 @@ pub struct HostStatus {
 }
 
 /// How switching hosting on or off ended.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum HostOutcome {
     On,

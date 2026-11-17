@@ -79,7 +79,7 @@ fn new_row(kind: &str, title: String, size: i64, expiry: ShareExpiry) -> ShareRo
 }
 
 /// How long a link may last.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ShareExpiry {
     Day,
@@ -99,7 +99,7 @@ impl ShareExpiry {
 }
 
 /// How a share is going on this device.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "state", rename_all = "camelCase")]
 pub enum ShareState {
     /// Reading the game's files.
@@ -118,7 +118,7 @@ pub enum ShareState {
 }
 
 /// Someone who opened a share's link.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ShareRecipient {
     pub name: String,
@@ -131,7 +131,7 @@ pub struct ShareRecipient {
 }
 
 /// A share as the app shows it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ShareRecord {
     pub id: String,

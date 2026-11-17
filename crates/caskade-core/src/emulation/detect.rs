@@ -15,14 +15,13 @@ use caskade_discovery::{
 use regex::{Regex, RegexBuilder};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     fs,
     path::{Path, PathBuf},
 };
 
 /// A profile of a detected install and whether its required files exist.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct DetectedProfile {
     pub name: String,
@@ -30,7 +29,7 @@ pub struct DetectedProfile {
 }
 
 /// One install of one definition.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct DetectedInstall {
     /// Stable for one detection: definition, kind and where it is.

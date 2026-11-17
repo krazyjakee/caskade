@@ -8,11 +8,10 @@ use crate::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{collections::BTreeMap, path::PathBuf};
 
 /// How a detection ended, or that it is still running.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum DetectStatus {
     Running,
@@ -22,7 +21,7 @@ pub enum DetectStatus {
 }
 
 /// A detection and what it found (§5 steps 1–4).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct DetectJob {
     pub id: String,
@@ -35,7 +34,7 @@ pub struct DetectJob {
 }
 
 /// What an import created.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct DetectImport {
     /// Ids of the new emulators.

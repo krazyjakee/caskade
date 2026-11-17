@@ -28,7 +28,6 @@ use crate::{
     remote_file,
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::{BTreeSet, HashMap},
     path::PathBuf,
@@ -72,7 +71,7 @@ impl Default for PortsSettings {
 }
 
 /// How sure a port is the game's.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum PortMatch {
     /// The same IGDB game, through the Hasheous dumps.
@@ -82,7 +81,7 @@ pub enum PortMatch {
 }
 
 /// What this device can do with a port.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", tag = "state")]
 pub enum PortHere {
     /// A release file for this system: installs in one click.
@@ -99,7 +98,7 @@ pub enum PortHere {
 }
 
 /// A file the port wants from the user.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PortNeeds {
     pub label: String,
@@ -114,7 +113,7 @@ pub struct PortNeeds {
     pub have: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum PortFileHow {
     InAppPicker,
@@ -123,7 +122,7 @@ pub enum PortFileHow {
 }
 
 /// A port of a library game.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Port {
     /// The catalogue's key, e.g. `github:zelda64recomp/zelda64recomp`.
@@ -147,7 +146,7 @@ pub struct Port {
 }
 
 /// The catalogue's state.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PortsStatus {
     pub enabled: bool,
@@ -158,7 +157,7 @@ pub struct PortsStatus {
 }
 
 /// A game's ports and where they come from.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GamePorts {
     pub status: PortsStatus,

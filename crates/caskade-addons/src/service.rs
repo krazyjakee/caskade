@@ -8,7 +8,6 @@ use super::validate::MAX_CATALOGUE_BYTES;
 use super::{Catalogue, parse};
 use caskade_core::{Error, Result};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     path::{Path, PathBuf},
     sync::{Arc, RwLock},
@@ -26,7 +25,7 @@ const SIGNATURE_FILE: &str = "catalogue.json.sig";
 const META_FILE: &str = "catalogue.meta.json";
 
 /// Where the catalogue is and how it went.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CatalogueStatus {
     pub origin: String,

@@ -4,14 +4,13 @@
 
 use caskade_core::remote_play::{PlayOutcome, RemotePlay};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::error::{CommandError, report};
 use crate::events::{Event, Events};
 
 /// Another device asks to start a game here: the app plays it as Play would
 /// and says how it went (`remote_play_finished`).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RemotePlayRequested {
     pub request_id: String,

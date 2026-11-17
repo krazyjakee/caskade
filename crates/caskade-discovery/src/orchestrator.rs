@@ -18,7 +18,6 @@ use crate::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     any::Any,
     collections::{BTreeSet, VecDeque},
@@ -29,7 +28,7 @@ use std::{
 };
 
 /// What to scan and how long to spend on it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(default)]
 pub struct Config {
     pub sources: SourceSelection,
@@ -59,7 +58,7 @@ impl Default for Config {
 }
 
 /// Which sources run, mirroring the Settings toggles.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum SourceSelection {
     #[default]
@@ -83,7 +82,7 @@ impl SourceSelection {
 }
 
 /// Opt-in deep scans (§7, #98). All off by default.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(default)]
 pub struct DeepScans {
     pub folders: Vec<PathBuf>,
@@ -94,7 +93,7 @@ pub struct DeepScans {
 }
 
 /// The user's exclusion list (§8.3), applied by the merge step (#69).
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(default)]
 pub struct Exclusions {
     /// Globs matched against install dirs and launch programs.
@@ -103,16 +102,14 @@ pub struct Exclusions {
     pub external_ids: Vec<ExternalId>,
 }
 
-#[derive(
-    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema, Type,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema)]
 pub struct SourceKey {
     pub source: SourceId,
     pub key: String,
 }
 
 /// Classifier settings (§6.7, #79).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(default)]
 pub struct ClassifierConfig {
     /// Results below this are dropped; `Maybe` keeps the review list.

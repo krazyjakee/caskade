@@ -5,9 +5,7 @@ use std::{
 };
 
 /// Arguments stay separate all the way to tokio::process; no shell evaluation.
-#[derive(
-    Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema, specta::Type,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct LaunchCommand {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub emulation: Option<EmulationLaunch>,
@@ -43,9 +41,7 @@ impl LaunchCommand {
 
 /// What an emulator launch resolved to. `launch.before`
 /// interceptors may rewrite it with the argv; the frontend never receives it.
-#[derive(
-    Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema, specta::Type,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct EmulationLaunch {
     pub emulator_id: String,

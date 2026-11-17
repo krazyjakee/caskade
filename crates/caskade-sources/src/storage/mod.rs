@@ -8,7 +8,6 @@ use caskade_core::{bus::Bus, db::LibraryStore, model::StorageRoot};
 use caskade_installer::{Question, Warning, reconcile::Reconciler};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{path::PathBuf, sync::Arc};
 
 #[derive(Debug, thiserror::Error)]
@@ -32,7 +31,7 @@ pub enum StorageError {
 }
 pub type Result<T> = std::result::Result<T, StorageError>;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum StorageGameStatus {
     Unchanged,
@@ -41,7 +40,7 @@ pub enum StorageGameStatus {
     Pinned,
     Failed,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct StorageGameReport {
     pub relative_dir: PathBuf,
@@ -52,7 +51,7 @@ pub struct StorageGameReport {
     pub warnings: Vec<Warning>,
     pub error: Option<String>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct StorageRootReport {
     pub root: StorageRoot,
@@ -65,7 +64,7 @@ impl StorageRootReport {
         self.games.iter().filter(|g| g.entry_id.is_some()).count()
     }
 }
-#[derive(Debug, Clone, Default, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct StorageScanReport {
     pub roots: Vec<StorageRootReport>,

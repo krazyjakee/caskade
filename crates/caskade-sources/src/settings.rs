@@ -3,10 +3,9 @@ use crate::{ImportOptions, Result};
 use caskade_core::settings::{SectionDefinition, SettingsService};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 pub const IMPORT_SETTINGS: &str = "discovery.import";
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ImportSettings {
     pub seed_playtime: bool,

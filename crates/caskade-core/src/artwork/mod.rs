@@ -89,9 +89,7 @@ impl ArtworkError {
 
 /// Cache metadata has no game association: multiple Artwork entities may reuse
 /// these exact bytes with distinct opaque IDs, kinds, sources and game IDs.
-#[derive(
-    Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type, schemars::JsonSchema,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct CachedArtwork {
     pub content_hash: String,
@@ -100,9 +98,7 @@ pub struct CachedArtwork {
     pub height: u32,
     pub thumbnails: Vec<CachedThumbnail>,
 }
-#[derive(
-    Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type, schemars::JsonSchema,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct CachedThumbnail {
     pub size: u32,

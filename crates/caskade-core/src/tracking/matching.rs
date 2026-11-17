@@ -7,16 +7,7 @@ use std::{
 
 /// Explicit emulator tracking; ordinary games retain automatic path/ancestry hints.
 #[derive(
-    Debug,
-    Clone,
-    Copy,
-    Default,
-    PartialEq,
-    Eq,
-    Serialize,
-    Deserialize,
-    schemars::JsonSchema,
-    specta::Type,
+    Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema,
 )]
 #[serde(rename_all = "snake_case")]
 pub enum TrackingMode {

@@ -43,7 +43,6 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use super::Saves;
 use crate::bus::{Bus, Intercept, Interceptor};
@@ -62,7 +61,7 @@ const MAX_BYTES: u64 = 2 * 1024 * 1024 * 1024;
 const MAX_FILES: usize = 20_000;
 
 /// One version of a game's saves.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveVersion {
     /// The same on every device.
@@ -85,7 +84,7 @@ pub struct SaveVersion {
 }
 
 /// Why a version was made.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum VersionReason {
     /// After a play session.
@@ -133,7 +132,7 @@ impl Manifest {
 }
 
 /// A game's versions, as its Saves panel shows them.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveHistory {
     /// The account playing now; empty when none is signed in.
@@ -148,7 +147,7 @@ pub struct SaveHistory {
 }
 
 /// One version in a game's history.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct VersionState {
     pub version: SaveVersion,
@@ -159,7 +158,7 @@ pub struct VersionState {
 }
 
 /// What happened before a launch.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(
     tag = "type",
     rename_all = "camelCase",
@@ -181,7 +180,7 @@ pub enum SaveCheck {
 }
 
 /// The check before a launch, and whether other devices could be asked.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BeforePlay {
     pub check: SaveCheck,

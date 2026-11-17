@@ -10,11 +10,10 @@
 use crate::{Error, Result, install::dropped, launch::validate_target, model::*};
 use caskade_discovery::{GameRuntime, Prefix};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::path::{Path, PathBuf};
 
 /// What a game added by hand starts, worked out from what the user chose.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ManualTarget {
     /// The title the target suggests: a shortcut's name, a program's file
@@ -29,7 +28,7 @@ pub struct ManualTarget {
 }
 
 /// A game already in the library that may be the same one.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DuplicateGame {
     pub game_id: String,
@@ -37,7 +36,7 @@ pub struct DuplicateGame {
     pub reason: DuplicateReason,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DuplicateReason {
     /// One of its releases starts the same program or URI.
@@ -47,7 +46,7 @@ pub enum DuplicateReason {
 }
 
 /// A game to add by hand.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ManualGame {
     pub title: String,

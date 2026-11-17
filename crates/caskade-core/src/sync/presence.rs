@@ -20,7 +20,6 @@ use std::sync::{Arc, Mutex, RwLock};
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use super::engine::SyncEngine;
 use super::policy::Category;
@@ -41,7 +40,7 @@ const MAX_LINE: usize = 256 * 1024;
 const MAX_SESSIONS: usize = 64;
 
 /// A game running on another device.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Playing {
     /// The device it's running on.

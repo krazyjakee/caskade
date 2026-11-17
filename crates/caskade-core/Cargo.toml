@@ -42,7 +42,6 @@ serde_json = "1"
 # Ludusavi's loose YAML manifest, parsed only when downloading/indexing.
 serde_yaml_ng = "0.10"
 schemars = "1"
-specta = { version = "=2.0.0-rc.26", features = ["derive", "serde_json"] }
 directories = "6"
 # Emulator definitions: TOML data and detection regexes.
 toml = "0.8"

@@ -7,10 +7,9 @@ use caskade_discovery::{
     orchestrator::{SourceKey, SourceSelection},
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{path::PathBuf, time::Duration};
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OsCheck {
     pub id: String,

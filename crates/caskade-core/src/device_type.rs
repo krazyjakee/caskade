@@ -20,12 +20,11 @@ use caskade_discovery::registry::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use specta::Type;
 
 use crate::Result;
 use crate::settings::SettingsService;
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DeviceKind {
     #[default]

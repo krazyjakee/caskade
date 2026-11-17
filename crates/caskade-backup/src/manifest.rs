@@ -1,7 +1,6 @@
 //! The archive's table of contents: `manifest.json`, written last.
 
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// The archive format this Caskade writes. A reader refuses a newer one.
 pub const FORMAT: u32 = 1;
@@ -11,7 +10,7 @@ pub const MANIFEST: &str = "manifest.json";
 pub const DATABASE: &str = "library/library.sqlite";
 
 /// What a backup holds and how to check it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupManifest")]
 pub struct Manifest {
     /// [`FORMAT`] when written.
@@ -48,7 +47,6 @@ pub struct Manifest {
     Hash,
     Serialize,
     Deserialize,
-    Type,
     schemars::JsonSchema,
 )]
 #[serde(rename_all = "camelCase", rename = "BackupComponent")]
@@ -91,7 +89,7 @@ impl Component {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupComponentSummary")]
 pub struct ComponentSummary {
     pub id: Component,
@@ -99,7 +97,7 @@ pub struct ComponentSummary {
     pub bytes: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupTableRows")]
 pub struct TableRows {
     pub name: String,
@@ -108,7 +106,7 @@ pub struct TableRows {
 
 /// One file: its path in the archive (`/`-separated, relative), its size
 /// and its SHA-256.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupFile")]
 pub struct FileEntry {
     pub path: String,
@@ -118,7 +116,7 @@ pub struct FileEntry {
 }
 
 /// What a backup leaves out, and so what a restore can't bring back.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupExclusion")]
 pub enum Exclusion {
     /// Passwords and tokens (RomM's, stores'): they stay in the OS

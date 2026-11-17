@@ -27,22 +27,21 @@ pub use crate::commands::themes::ThemeReloaded;
 pub use crate::discovery::DiscoveryChanged;
 use caskade_core::bus::{Event as BusEvent, GameSession};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     sync::Arc,
     time::{Duration, Instant},
 };
 
 /// `game.started`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GameStarted(pub GameSession);
 
 /// `game.exited`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GameExited(pub GameSession);
 
 /// How the library changed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum LibraryChange {
     Added,
@@ -53,7 +52,7 @@ pub enum LibraryChange {
 }
 
 /// `library.game.added/updated/removed` and `library.scan.completed`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LibraryChanged {
     pub change: LibraryChange,
@@ -62,11 +61,11 @@ pub struct LibraryChanged {
 }
 
 /// A complete revisioned install/download/move snapshot.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct JobChanged(pub caskade_core::install::JobSnapshot);
 
 /// `settings.changed`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SettingsChanged {
     pub namespace: String,
@@ -74,7 +73,7 @@ pub struct SettingsChanged {
 }
 
 /// `emulation.changed`: refetch emulators, platforms or scanners.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EmulationChanged {
     /// `emulators`, `platforms` or `scanners`.
@@ -82,19 +81,19 @@ pub struct EmulationChanged {
 }
 
 /// Every change of an emulator detection.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EmulationDetectChanged(pub caskade_core::emulation::DetectJob);
 
 /// Every change of a ROM scan.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EmulationScanChanged(pub caskade_core::emulation::ScanJob);
 
 /// Every change of an emulator install or update.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EmulationSetupChanged(pub caskade_core::emulation::SetupJob);
 
 /// `plugin.disabled`: a backend plugin kept crashing and was turned off.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PluginDisabled {
     pub plugin: String,
@@ -102,14 +101,14 @@ pub struct PluginDisabled {
 }
 
 /// `plugins.changed`: a plugin was enabled, disabled, installed or removed.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PluginsChanged {
     pub plugin: String,
 }
 
 /// `plugin.reloaded`: a dev plugin changed on disk (#131).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PluginReloaded {
     pub plugin: String,
@@ -122,7 +121,7 @@ pub struct PluginReloaded {
 /// `account.changed`: an account was made, changed or deleted, or the
 /// active one changed. Refetch the accounts and what the active account
 /// owns (its collections).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountChanged {
     /// The signed-in account; `None` when nobody is.
@@ -130,7 +129,7 @@ pub struct AccountChanged {
 }
 
 /// `achievements.changed`: a game's achievements were fetched (#185).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AchievementsChanged {
     pub game_id: String,
@@ -138,7 +137,7 @@ pub struct AchievementsChanged {
 
 // Activity's background tasks: a whole revisioned snapshot. (No doc
 // comment: the bindings carry none for it.)
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BackgroundChanged(pub caskade_core::jobs::Snapshot);
 
 /// Everything the app tells its UI.

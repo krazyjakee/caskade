@@ -7,12 +7,11 @@
 use caskade_core::i18n;
 use caskade_core::settings::SettingsService;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use tokio::sync::watch;
 
 use crate::events::{Event, Events};
 /// The core's language changed: the webview loads its catalogs.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LocaleChanged {
     /// The language in use: a BCP 47 tag, `en` without a catalog.
@@ -20,7 +19,7 @@ pub struct LocaleChanged {
 }
 
 /// The language in use, and what the Language setting can offer.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LocaleInfo {
     /// The language in use.

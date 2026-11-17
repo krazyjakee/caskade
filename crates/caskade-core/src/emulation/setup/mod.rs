@@ -22,7 +22,6 @@ use crate::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::HashMap,
     path::PathBuf,
@@ -31,7 +30,7 @@ use std::{
 };
 
 /// An emulator Caskade installed, as stored.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ManagedEmulator {
     pub emulator_id: String,
@@ -65,7 +64,7 @@ impl ManagedEmulator {
 }
 
 /// An emulator Caskade can install on this OS.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Installable {
     pub definition_id: String,
@@ -88,7 +87,7 @@ pub struct Installable {
 }
 
 /// A platform the user has games for that no emulator runs yet.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct MissingPlatform {
     pub platform_id: String,
@@ -100,7 +99,7 @@ pub struct MissingPlatform {
     pub recommended: Option<Recommendation>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Recommendation {
     pub definition_id: String,
@@ -110,7 +109,7 @@ pub struct Recommendation {
 }
 
 /// Where an install or update is.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum SetupStatus {
     Queued,
@@ -141,7 +140,7 @@ impl super::job_table::TableJob for SetupJob {
 }
 
 /// One emulator install or update (§3.4).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct SetupJob {
     pub id: String,

@@ -14,7 +14,6 @@ use caskade_sources::{
     storage::{StorageScanReport, StorageSource},
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::{BTreeMap, BTreeSet},
     sync::{
@@ -24,7 +23,7 @@ use std::{
 };
 use tokio::sync::{Mutex, watch};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewItem {
     pub id: String,
@@ -33,7 +32,7 @@ pub struct ReviewItem {
     pub location: Option<String>,
     pub evidence: Vec<String>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DiscoverySnapshot {
     pub revision: u32,
@@ -54,7 +53,7 @@ pub struct DiscoverySnapshot {
     #[serde(default)]
     pub storage: Option<StorageScanReport>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DiscoveryChanged(pub DiscoverySnapshot);
 
 struct State {

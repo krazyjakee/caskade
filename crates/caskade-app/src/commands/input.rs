@@ -6,10 +6,9 @@ use crate::events::{Event as AppEvent, Events};
 use caskade_core::bus::{Bus, Event};
 use caskade_input::{Action, InputAction, InputEvent, InputService, PadInfo};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// One normalized action from a pad.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct InputActionEvent(pub InputAction);
 
 /// Where the service's events go. `focused` decides whether the user is in

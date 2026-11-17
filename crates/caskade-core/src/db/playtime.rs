@@ -28,13 +28,12 @@
 use super::{LibraryStore, decode};
 use crate::{Result, model::GameEntry};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use sqlx::SqliteConnection;
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Whether store totals are imported (`core.storeAccounts.playtimeImport`).
 #[derive(
-    Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, Type, schemars::JsonSchema,
+    Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, schemars::JsonSchema,
 )]
 #[serde(rename_all = "camelCase", rename = "PlaytimeImport")]
 pub enum PlaytimeImport {
@@ -56,7 +55,7 @@ pub struct RemoteTotal {
 }
 
 /// A game's play time and where it comes from.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "PlaytimeBreakdown")]
 pub struct PlaytimeBreakdown {
     pub total_ms: u64,
@@ -69,7 +68,7 @@ pub struct PlaytimeBreakdown {
 }
 
 /// One reported total.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "ReportedPlaytime")]
 pub struct ReportedPlaytime {
     /// `steam`, `gog`, `epic`, or the launcher that reported it.

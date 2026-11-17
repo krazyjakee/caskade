@@ -9,7 +9,6 @@ use crate::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{future::Future, path::Path, pin::Pin};
 
 pub type BiosFuture<'a> = Pin<Box<dyn Future<Output = Result<Vec<String>>> + Send + 'a>>;
@@ -24,7 +23,7 @@ pub trait BiosProvider: Send + Sync {
 }
 
 /// What a BIOS fetch did for a platform.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct BiosFetch {
     pub platform_id: String,

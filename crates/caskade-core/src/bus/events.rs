@@ -2,10 +2,9 @@
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// One play of a game: what `game.started` and `game.exited` carry.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct GameSession {
     pub game_id: String,
@@ -19,7 +18,7 @@ pub struct GameSession {
 }
 
 /// Per-source counts of a finished library scan.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct SourceCount {
     pub source: String,
@@ -28,7 +27,7 @@ pub struct SourceCount {
 
 /// Achievements newly unlocked on a set, after its baseline: what a
 /// notification announces. Never sent for the first fetch.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct NewUnlocks {
     pub game_id: String,
@@ -42,7 +41,7 @@ pub struct NewUnlocks {
 
 /// Every core event. The dotted name (`Event::name`) is the stable
 /// identifier plugins subscribe to.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum Event {

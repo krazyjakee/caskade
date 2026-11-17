@@ -8,7 +8,6 @@ use caskade_installer::{
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 impl InstallService {
     pub fn with_settings(self, settings: SettingsService) -> Self {
@@ -170,7 +169,7 @@ fn proton_choice(entry: &crate::model::GameEntry) -> Option<&str> {
 }
 
 /// The Proton builds a launch action can choose on this device (#177).
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ProtonBuilds {
     /// Installed builds by name, best first.

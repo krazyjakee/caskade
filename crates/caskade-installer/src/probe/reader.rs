@@ -4,9 +4,8 @@ use std::io::{self, Read, Seek, SeekFrom};
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ReadStats {
     pub bytes_read: u64,
     pub read_calls: u64,

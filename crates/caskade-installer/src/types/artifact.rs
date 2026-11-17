@@ -2,17 +2,16 @@ use std::{collections::BTreeMap, path::PathBuf};
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 /// Stable identifier within one probe result, also used by extraction steps.
 #[derive(
-    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema, Type,
+    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema,
 )]
 #[serde(transparent)]
 pub struct ArtifactId(pub String);
 
 /// Detected from bytes or a directory's structure, never by running the input.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum Format {
     Unknown,
@@ -55,7 +54,7 @@ pub enum Format {
 }
 
 /// The payload's platform, independent of the machine doing the analysis.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", content = "value", rename_all = "snake_case")]
 pub enum PayloadPlatform {
     Windows,
@@ -66,7 +65,7 @@ pub enum PayloadPlatform {
 }
 
 /// Role inferred from metadata, container entries and file names.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum Role {
     Installer,
@@ -80,7 +79,7 @@ pub enum Role {
 }
 
 /// A statically identified file, directory or entry inside a container.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct ArtifactNode {
     pub id: ArtifactId,
     /// Root nodes use an input-relative name; children use container-relative names.

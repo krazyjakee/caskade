@@ -356,9 +356,7 @@ pub struct StreamingSettings {
 
 /// Stream quality (#264): each part `None` is the client's automatic
 /// choice.
-#[derive(
-    Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, specta::Type,
-)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct StreamQuality {
     #[serde(default)]

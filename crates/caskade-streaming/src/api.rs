@@ -115,7 +115,7 @@ pub(crate) fn pinned_tls(
 }
 
 /// A device waiting to pair, as the host lists it.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PairRequest {
     pub id: String,
@@ -125,7 +125,7 @@ pub struct PairRequest {
 }
 
 /// A device the host paired with.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PairedClient {
     pub uuid: String,

@@ -17,7 +17,6 @@ use super::{
 };
 use caskade_core::{AppPaths, db::LibraryStore};
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::{
     collections::BTreeSet,
     fs,
@@ -31,7 +30,7 @@ const JOURNAL: &str = "journal.json";
 const LAST: &str = "last.json";
 
 /// What restoring an archive would do.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "BackupInspection")]
 pub struct Inspection {
     /// The backup's manifest without its file list.
@@ -52,7 +51,7 @@ pub struct Inspection {
 }
 
 /// What to restore.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RestoreOptions {
     pub archive: PathBuf,
@@ -62,7 +61,7 @@ pub struct RestoreOptions {
 }
 
 /// Where a restore is.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum RestoreState {
     /// Waiting for the restart that applies it.
@@ -76,7 +75,7 @@ pub enum RestoreState {
 }
 
 /// The journal, `<data>/restore/journal.json`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "RestoreJournal")]
 pub struct Journal {
     pub state: RestoreState,
@@ -91,7 +90,7 @@ pub struct Journal {
 }
 
 /// How the last restore ended, kept for the app to say so once.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RestoreOutcome {
     pub journal: Journal,

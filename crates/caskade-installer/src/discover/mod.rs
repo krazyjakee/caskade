@@ -13,7 +13,6 @@ use std::{
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use url::Url;
 
 use crate::{
@@ -27,7 +26,7 @@ pub use title::clean_title;
 
 /// Exact launch targets recovered by a format handler. Inno [Icons] and MSI
 /// Shortcut analysis can supply these in I1 without changing discovery ranking.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct LaunchHint {
     pub path: PathBuf,
     pub args: Vec<String>,
@@ -35,7 +34,7 @@ pub struct LaunchHint {
     pub reason: String,
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct DiscoveryHints {
     pub installer_title: Option<String>,
     pub package_name: Option<String>,
@@ -46,7 +45,7 @@ pub struct DiscoveryHints {
     pub launch_targets: Vec<LaunchHint>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct DiscoveryConfig {
     pub max_entries: u64,
     pub max_metadata_bytes: u64,
@@ -67,7 +66,7 @@ impl Default for DiscoveryConfig {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Discovery {
     pub title: String,
     pub ids: BTreeMap<String, String>,

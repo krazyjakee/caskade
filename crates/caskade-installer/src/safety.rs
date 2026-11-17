@@ -167,7 +167,7 @@ pub fn decode_name(bytes: &[u8], encoding: NameEncoding) -> Result<String> {
         .ok_or(SafetyError::InvalidEncoding)
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, schemars::JsonSchema, specta::Type)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct Limits {
     pub max_expansion_ratio: u64,
     pub max_total_bytes: u64,

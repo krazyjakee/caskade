@@ -10,9 +10,8 @@ use caskade_plugin_host::{PluginHost, PluginMessages, PluginStatus};
 /// draws, and what an action answers.
 pub use caskade_plugin_ui::{Context as UiContext, Node as UiNode, Outcome as UiOutcome};
 use serde::Serialize;
-use specta::Type;
 /// An enabled plugin with a UI half.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UiPlugin {
     pub id: String,
@@ -27,7 +26,7 @@ pub struct UiPlugin {
     pub contributes: Vec<UiContribution>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UiContribution {
     pub slot: String,
@@ -111,7 +110,7 @@ fn contributions(manifest: &caskade_plugin_host::Manifest) -> Vec<UiContribution
 }
 
 /// An enabled plugin whose backend draws its UI (API 0.2, #109).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DrawnPlugin {
     pub id: String,

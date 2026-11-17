@@ -6,14 +6,13 @@ use std::{
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use super::{
     ArtifactId, ArtifactNode, Format, PayloadPlatform, ProbeSource, ReadSeek, ReadStats, Role,
     magic,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ProbeLimits {
     pub max_depth: u32,
     pub max_read_bytes: u64,
@@ -30,14 +29,14 @@ impl Default for ProbeLimits {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Probe {
     pub root: ArtifactNode,
     pub io: ReadStats,
 }
 
 /// Metadata returned by a registered format probe, before it has listed children.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct Detection {
     pub format: Format,
     pub platform: PayloadPlatform,

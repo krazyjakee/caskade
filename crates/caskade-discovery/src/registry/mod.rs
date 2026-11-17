@@ -2,7 +2,6 @@
 //! The value representation is shared with the installer rather than copied.
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use specta::Type;
 use std::io;
 
 mod memory;
@@ -18,7 +17,7 @@ pub use wine::WineRegistry;
 pub use caskade_installer::{RegistryHive, RegistryValue};
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema, Type,
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, JsonSchema,
 )]
 #[serde(rename_all = "snake_case")]
 pub enum RegistryView {
@@ -37,7 +36,7 @@ impl RegistryView {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct RegistryKey {
     pub hive: RegistryHive,
     pub view: RegistryView,
@@ -53,7 +52,7 @@ impl RegistryKey {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema, Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct RegistryEntry {
     pub name: String,
     pub value: RegistryValue,

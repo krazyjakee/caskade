@@ -8,11 +8,10 @@ use caskade_core::romm::{
     RommServerConfig, RommService, RommSettings, RommSyncReport,
 };
 use serde::{Deserialize, Serialize};
-use specta::Type;
 
 use crate::events::{Event, Events};
 /// Every change of a RomM download (progress, done, failed, cancelled).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct RommDownloadChanged(pub DownloadProgress);
 
 /// Registers `core.romm`, builds the service, sends download progress to

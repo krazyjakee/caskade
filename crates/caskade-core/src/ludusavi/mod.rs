@@ -34,7 +34,7 @@ pub enum Refresh {
 }
 
 /// The cached manifest, as Settings → Devices shows it (#241).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, specta::Type)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ManifestStatus {
     /// A manifest is cached here and in use.
