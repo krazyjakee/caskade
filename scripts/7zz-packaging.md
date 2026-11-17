@@ -21,7 +21,7 @@ sidecar and is never a substitute for acceptance evidence.
 
 Populate `HostCaps.seven_zip` with the downloader's absolute `program` path.
 `SevenZip::from_host`/`SevenZip::pinned` verify the program hash and the Windows
-DLL hash. `SevenZip::new` is explicit utility injection for tests. The host
+DLL hash, or on macOS the release's Developer ID signature (below). `SevenZip::new` is explicit utility injection for tests. The host
 capability detector may discover an unpinned system tool; production sidecar
 construction rejects it until configured with a verified package.
 
@@ -70,9 +70,13 @@ pinned executable's bytes before verification; a signing pipeline that changes
 them must explicitly update its verified artifact manifest. The AppImage's
 bundler (linuxdeploy) does: it gives `usr/bin/7zz` a RUNPATH, so the Linux
 x86_64 program has a second pinned hash, the AppImage's, and the release's
-Linux build leg runs `scripts/check-bundled-7zz.py` on the deb and AppImage. Windows
-MSVC/ARM64 and macOS signing/notarization remain native verification items on
-#22.
+Linux build leg runs `scripts/check-bundled-7zz.py` on the deb and AppImage.
+macOS releases re-sign 7zz with Caskade's Developer ID (`scripts/macos/sign.sh`),
+and a notarizable signature carries a timestamp, so those bytes differ on every
+release: on macOS, `SevenZip::pinned` also accepts a 7zz whose signature passes
+`codesign --verify` against `MACOS_RELEASE_REQUIREMENT` (Apple's CA, Caskade's
+team, identifier `7zz`), and `sign.sh` checks each release's against it.
+Windows MSVC/ARM64 signing remains a native verification item on #22.
 
 ## Execution and fallback
 

@@ -7,7 +7,8 @@ commit per publish.)
 
 The workflow builds Linux x86_64 (deb and AppImage, on Ubuntu 22.04 so the
 AppImage runs on older glibc), Windows x86_64 (NSIS installer) and macOS on
-Apple silicon and Intel (app and dmg). It signs the updater bundles, uploads
+Apple silicon and Intel (app and dmg). It signs and notarizes the macOS app
+and dmg with Caskade's Developer ID, signs the updater bundles, uploads
 everything to a draft release with a `latest.json` for the in-app updater, and
 checks that `latest.json` lists all four platforms. Nothing reaches users until
 you publish the draft: the updater reads
@@ -33,7 +34,14 @@ The jobs, in order:
   --no-sign`), with a read-only token and no signing key, and uploads them as
   workflow artifacts. Build scripts, proc-macros and npm packages run here,
   so the key never does.
-- `sign` downloads the artifacts and signs the updater bundles with
+- `notarize` (one leg per macOS target, on a macOS runner) signs the leg's
+  app, and the 7zz in it, with the Developer ID and the hardened runtime,
+  has Apple notarize the app and then the dmg it puts it in, staples the
+  tickets, and checks them with macOS's `codesign`, `spctl` and `stapler`
+  (`scripts/macos/sign.sh`, below). Only this job and `prepare` see the Apple
+  secrets, and it installs no project dependencies.
+- `sign` downloads the artifacts, takes the notarized macOS files in place
+  of the build legs' unsigned ones, and signs the updater bundles with
   `tauri signer sign` from the Tauri CLI version in `pnpm-lock.yaml`. It runs
   no project code. It writes `latest.json` and uploads everything to the
   draft. Only this job and `prepare` see the key.
@@ -46,7 +54,8 @@ workflow (Actions → bundles → Run workflow, or
 `gh workflow run bundles.yml --repo krazyjakee/caskade --ref master`). It
 runs the same build legs and leaves the bundles as the run's artifacts
 (`bundles-<target>`, kept 7 days): no tag, no draft, no signatures, no
-secrets.
+secrets. Its macOS app is only ad-hoc signed, so a downloaded copy needs
+`xattr -dr com.apple.quarantine` before macOS opens it.
 
 ## The bundler
 
@@ -119,6 +128,87 @@ it only to make updater bundles.
    updates signed with this key. If it is lost, they can never update again:
    a new key only reaches users through a build they download and install by
    hand.
+
+5. Give the workflow the macOS signing identity and notary key (made below,
+   in `~/.apple-signing/caskade`):
+
+   ```sh
+   base64 -w0 ~/.apple-signing/caskade/identity.pem | gh secret set MACOS_SIGNING_PEM_B64 --repo krazyjakee/caskade
+   base64 -w0 ~/.apple-signing/caskade/notary.json | gh secret set MACOS_NOTARY_KEY_B64 --repo krazyjakee/caskade
+   ```
+
+   `prepare` stops the release when either is missing: a macOS build that
+   isn't notarized is one macOS calls damaged after a download.
+
+## macOS signing and notarization
+
+`scripts/macos/sign.sh` signs with [rcodesign] (apple-codesign 0.29.0; the
+release job downloads it SHA-256-checked), which needs no Mac and no
+Keychain: everything but the dmg works on Linux too. With
+`--for-notarization` it turns on the hardened runtime and requires a
+timestamp, then the script reads every signature back rather than trusting
+rcodesign's exit code (it exits 0 on an ad-hoc result). The hardened runtime
+gets one entitlement back, for the plugins' wasmtime
+(`scripts/macos/entitlements.plist` says why; CI's `native-macos` job checks
+a hardened build still compiles wasm, and warns if it no longer needs it).
+
+Re-signing changes the bundled 7zz's bytes, and its timestamp changes them on
+every release, so on macOS the app also accepts a 7zz that meets
+`MACOS_RELEASE_REQUIREMENT` (`SevenZip::pinned`, `scripts/7zz-packaging.md`).
+That names the team, `8MVM4FMRRC`: signing with another team's identity
+needs that constant changed too, or the release's 7-Zip is refused.
+
+To sign a bundle by hand (add `--notarize` to send it to Apple too):
+
+```sh
+MACOS_SIGNING_PEM=~/.apple-signing/caskade/identity.pem \
+MACOS_NOTARY_KEY=~/.apple-signing/caskade/notary.json \
+  scripts/macos/sign.sh Caskade_0.2.1_aarch64.app.tar.gz
+```
+
+The identity, minted without a Mac (keep `~/.apple-signing` out of the repo):
+
+1. A key and a certificate signing request. Apple never sees the key; losing
+   it means revoking the certificate and starting again.
+
+   ```sh
+   d=~/.apple-signing/caskade
+   mkdir -p "$d" && chmod 700 "$d"
+   openssl genrsa -out "$d/developer_id.key" 2048 && chmod 600 "$d/developer_id.key"
+   openssl req -new -key "$d/developer_id.key" -out "$d/developer_id.csr" -sha256 \
+     -subj "/emailAddress=<account email>/CN=<name>/C=GB"
+   ```
+
+2. At [Certificates][certs], add a **Developer ID Application** certificate
+   with the **G2 Sub-CA** profile, upload the CSR and download the `.cer`.
+   Only the Account Holder can, and an account has five.
+
+3. The PEM bundle: key, certificate, then its chain, in that order.
+
+   ```sh
+   curl -fsSLO https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
+   curl -fsSLO https://www.apple.com/appleca/AppleIncRootCertificate.cer
+   { cat "$d/developer_id.key"
+     openssl x509 -inform DER -in "$d/developerID_application.cer"
+     openssl x509 -inform DER -in DeveloperIDG2CA.cer
+     openssl x509 -inform DER -in AppleIncRootCertificate.cer
+   } > "$d/identity.pem" && chmod 600 "$d/identity.pem"
+   ```
+
+4. An App Store Connect API key with the Developer role, under
+   [Integrations][asc] (the `.p8` downloads once), in rcodesign's form:
+
+   ```sh
+   rcodesign encode-app-store-connect-api-key -o "$d/notary.json" <issuer-id> <key-id> AuthKey_<key-id>.p8
+   ```
+
+Notarization also needs the developer account's current agreements accepted:
+Apple answers `FORBIDDEN.REQUIRED_AGREEMENTS_MISSING_OR_EXPIRED` until the
+Account Holder accepts them on developer.apple.com.
+
+[rcodesign]: https://github.com/indygreg/apple-platform-rs
+[certs]: https://developer.apple.com/account/resources/certificates/list
+[asc]: https://appstoreconnect.apple.com/access/integrations/api
 
 ## Cutting a release
 
@@ -195,11 +285,11 @@ AppImage and macOS app are replaced whole. The Windows installer's hooks
 close a running `caskade-native.exe` and delete it, so it can't keep the old
 version running or keep the folder after an uninstall.
 
-The bundles aren't code-signed or notarized yet. Windows SmartScreen warns
-about an unknown publisher (More info → Run anyway). On macOS, Gatekeeper
-blocks the first start: allow it under System Settings → Privacy & Security,
-or run `xattr -dr com.apple.quarantine /Applications/Caskade.app`. The updater
-signature is separate from OS code signing and is always checked.
+The macOS app and dmg are signed with Caskade's Developer ID and notarized,
+with the tickets stapled, so they open after a download, offline too. The
+Windows installer isn't code-signed yet: SmartScreen warns about an unknown
+publisher (More info → Run anyway). The updater signature is separate from
+OS code signing and is always checked.
 
 ## What the bundles contain
 

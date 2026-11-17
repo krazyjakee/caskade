@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	What the hardened runtime gives back to Caskade's executable. Release builds
+	are signed with the hardened runtime (scripts/macos/sign.sh), which notarization
+	requires; this asks for the one thing it would take away.
+
+	allow-unsigned-executable-memory: plugins are wasm components that wasmtime
+	compiles with Cranelift at run time. It writes the code, then makes it
+	executable with mprotect, without MAP_JIT, so allow-jit doesn't cover it. CI
+	runs a hardened build of crates/caskade-component-cache/examples/hardened_jit.rs
+	with and without this file to check it is still needed and still enough.
+
+	Nothing else: the game and video windows' WebKit runs its JIT in WebKit's own
+	processes, the keychain needs no entitlement outside the sandbox, and games
+	are separate programs with their own signatures. 7zz is signed with none.
+-->
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+	<true/>
+</dict>
+</plist>

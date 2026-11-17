@@ -412,6 +412,22 @@ jobs:
           save-if: ${{ env.SAVE_CACHE }}
       - name: Check the native app
         run: cargo check -p caskade-native --all-targets --locked
+      # Releases run under the hardened runtime with
+      # scripts/macos/entitlements.plist: plugins' wasmtime must still compile
+      # there. An ad-hoc signature enforces the same runtime rules.
+      - name: Plugins compile under the hardened runtime
+        run: |
+          cargo build -p caskade-component-cache --example hardened_jit --locked
+          probe=target/debug/examples/hardened_jit
+          codesign --force --sign - --options runtime "$probe"
+          if answer=$("$probe" 2>&1); then
+            echo "::warning title=Entitlement unneeded?::wasmtime compiled under the hardened runtime without scripts/macos/entitlements.plist ($answer). Check whether it still needs allow-unsigned-executable-memory."
+          else
+            echo "Without the entitlement, as expected: $answer"
+          fi
+          codesign --force --sign - --options runtime --entitlements scripts/macos/entitlements.plist "$probe"
+          answer=$("$probe")
+          test "$answer" = 42
 
   # The installer suite (crates/caskade-installer/docs/ci.md).
   installer:

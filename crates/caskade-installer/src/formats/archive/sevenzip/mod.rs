@@ -99,7 +99,9 @@ impl SevenZip {
         }
     }
     /// Validate the installed binary against the verified 26.05 packages. The
-    /// Windows console also requires its matching pinned 7z.dll companion.
+    /// Windows console also requires its matching pinned 7z.dll companion. On
+    /// macOS the release's re-signed copy passes on its signature instead
+    /// (`MACOS_RELEASE_REQUIREMENT`).
     pub fn pinned(program: impl Into<PathBuf>) -> Result<Self> {
         use sha2::{Digest, Sha256};
         fn digest(path: &Path) -> Result<String> {
@@ -123,6 +125,7 @@ impl SevenZip {
             "08c3868b294fd12984bd1537a939ae7200ad695420dc65a2eeeec9f8fdf99772" => {
                 Some("311d0a45182401e10c71a12b33a5c4a7171f6a8c1d67eeec9ef5dc2a5c962fe8")
             }
+            _ if signed_by_caskade(&program) => None,
             _ => return Err(SevenZipError::UnpinnedBinary),
         };
         if let Some(expected) = dll
@@ -252,6 +255,35 @@ impl SevenZip {
         )
     }
 }
+/// The code requirement the macOS release's 7zz meets. Release builds re-sign
+/// the bundled 7zz with Caskade's Developer ID (scripts/macos/sign.sh), and a
+/// notarizable signature carries a timestamp, so its bytes differ on every
+/// release and no hash can pin them. macOS checks the signature instead: intact,
+/// issued under Apple's CA, Caskade's team, and signed as 7zz.
+/// scripts/macos/sign.sh reads this string to check each release.
+pub const MACOS_RELEASE_REQUIREMENT: &str =
+    r#"anchor apple generic and certificate leaf[subject.OU] = "8MVM4FMRRC" and identifier "7zz""#;
+
+#[cfg(target_os = "macos")]
+fn signed_by_caskade(program: &Path) -> bool {
+    use std::process::{Command, Stdio};
+    // A leading "=" makes codesign read the argument as requirement text.
+    Command::new("/usr/bin/codesign")
+        .args(["--verify", "--strict", "-R"])
+        .arg(format!("={MACOS_RELEASE_REQUIREMENT}"))
+        .arg(program)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .is_ok_and(|status| status.success())
+}
+
+#[cfg(not(target_os = "macos"))]
+fn signed_by_caskade(_: &Path) -> bool {
+    false
+}
+
 pub(super) fn resolved(input: &Path) -> Result<(PathBuf, u64)> {
     let resolved =
         crate::input::resolve_path(input).map_err(|e| SevenZipError::Listing(e.to_string()))?;

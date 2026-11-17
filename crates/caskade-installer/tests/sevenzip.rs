@@ -322,6 +322,20 @@ fn production_construction_rejects_an_unpinned_program_before_execution() {
     ));
 }
 
+// The signature check accepts Caskade's team only: an intact Apple-signed
+// program still fails it.
+#[cfg(target_os = "macos")]
+#[test]
+fn production_construction_rejects_a_program_signed_by_another_team() {
+    let root = tempfile::tempdir().unwrap();
+    let program = root.path().join("7zz");
+    std::fs::copy("/bin/ls", &program).unwrap();
+    assert!(matches!(
+        SevenZip::pinned(&program),
+        Err(SevenZipError::UnpinnedBinary)
+    ));
+}
+
 #[tokio::test]
 #[ignore = "native pinned sidecar fallback; prepare downloader and CASKADE_7ZZ"]
 async fn unsupported_native_codec_falls_back_after_executor_rollback() {

@@ -5,7 +5,10 @@ name: release
 # updater signing key: build scripts, proc-macros and npm packages run there.
 # Only the `sign` job holds the key, and it runs nothing but the pinned Tauri
 # CLI's `signer sign` on the legs' artifacts (the CLI is a build tool here:
-# it bundles and signs; the app has no Tauri runtime). Publishing the draft
+# it bundles and signs; the app has no Tauri runtime). Before it, `notarize`
+# signs the macOS app and dmg with the Developer ID and has Apple notarize
+# them (scripts/macos/sign.sh); only that job holds the Apple secrets, and it
+# runs no project dependencies either. Publishing the draft
 # by hand is what ships it: the in-app updater
 # reads releases/latest/download/latest.json, and releases/latest skips
 # drafts. See docs/RELEASING.md.
@@ -49,6 +52,21 @@ jobs:
           [ -n "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" ] || missing="$missing TAURI_SIGNING_PRIVATE_KEY_PASSWORD"
           if [ -n "$missing" ]; then
             echo "::error title=Updater signing secrets missing::Set the repository secret(s)$missing (Settings > Secrets and variables > Actions). Without them the bundles can't be signed for the in-app updater. See docs/RELEASING.md, One-time setup."
+            exit 1
+          fi
+
+      # A macOS release that isn't notarized is one Gatekeeper refuses to
+      # open after a download, so there is no unsigned fallback.
+      - name: macOS signing secrets are set
+        env:
+          MACOS_SIGNING_PEM_B64: ${{ secrets.MACOS_SIGNING_PEM_B64 }}
+          MACOS_NOTARY_KEY_B64: ${{ secrets.MACOS_NOTARY_KEY_B64 }}
+        run: |
+          missing=""
+          [ -n "$MACOS_SIGNING_PEM_B64" ] || missing="$missing MACOS_SIGNING_PEM_B64"
+          [ -n "$MACOS_NOTARY_KEY_B64" ] || missing="$missing MACOS_NOTARY_KEY_B64"
+          if [ -n "$missing" ]; then
+            echo "::error title=macOS signing secrets missing::Set the repository secret(s)$missing (Settings > Secrets and variables > Actions). Without them the macOS app can't be signed and notarized. See docs/RELEASING.md, One-time setup."
             exit 1
           fi
 
@@ -143,7 +161,7 @@ jobs:
 
           The Windows install, the macOS app, the AppImage and the .deb update themselves from inside Caskade (the .deb asks for your password once). A .deb of 0.1.1 or earlier doesn't: install this .deb over it once.
 
-          These builds aren't code-signed yet. On Windows, SmartScreen warns about an unknown publisher: choose More info, then Run anyway. On macOS, Gatekeeper blocks the first start: run `xattr -dr com.apple.quarantine /Applications/Caskade.app` in Terminal, or allow it under System Settings > Privacy & Security.
+          The macOS app is signed and notarized by Apple. The Windows installer isn't code-signed yet: SmartScreen warns about an unknown publisher, so choose More info, then Run anyway.
           BODY
             )
             body=${body//@VERSION@/$VERSION}
@@ -163,12 +181,72 @@ jobs:
       ref: refs/tags/${{ inputs.tag || github.ref_name }}
       version: ${{ needs.prepare.outputs.version }}
 
-  # The only job with the signing key. It runs no project code and installs
-  # no project dependencies: it signs the legs' updater bundles with the
-  # Tauri CLI version pinned in pnpm-lock.yaml, writes latest.json and
-  # uploads everything to the draft in one go.
-  sign:
+  # The only job with the Apple secrets: signs each macOS leg's app (and the
+  # 7zz in it) with the Developer ID and the hardened runtime, has Apple
+  # notarize the app and the dmg, staples the tickets, and checks the result
+  # with macOS's own codesign, spctl and stapler. It runs the repo's
+  # scripts/macos/sign.sh and the pinned rcodesign, and installs no project
+  # dependencies. The updater signatures come after, over the notarized files.
+  notarize:
     needs: [prepare, build]
+    runs-on: macos-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [aarch64-apple-darwin, x86_64-apple-darwin]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ env.TAG }}
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: bundles-${{ matrix.target }}
+          path: ${{ runner.temp }}/bundles
+
+      - name: rcodesign
+        env:
+          VERSION: "0.29.0"
+          SHA256: d98372d5524226ccf9dc0eda03d4e4f5826182dabb2fc3f2bd303ed9113a748d
+        run: |
+          name="apple-codesign-$VERSION-macos-universal"
+          curl -fsSL -o "$RUNNER_TEMP/$name.tar.gz" \
+            "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign/$VERSION/$name.tar.gz"
+          echo "$SHA256  $RUNNER_TEMP/$name.tar.gz" | shasum -a 256 -c -
+          tar -xzf "$RUNNER_TEMP/$name.tar.gz" -C "$RUNNER_TEMP"
+          echo "RCODESIGN=$RUNNER_TEMP/$name/rcodesign" >> "$GITHUB_ENV"
+
+      - name: Sign and notarize
+        env:
+          MACOS_SIGNING_PEM_B64: ${{ secrets.MACOS_SIGNING_PEM_B64 }}
+          MACOS_NOTARY_KEY_B64: ${{ secrets.MACOS_NOTARY_KEY_B64 }}
+        run: |
+          shopt -s nullglob
+          tarballs=("$RUNNER_TEMP"/bundles/*.app.tar.gz) dmgs=("$RUNNER_TEMP"/bundles/*.dmg)
+          if [ ${#tarballs[@]} -ne 1 ] || [ ${#dmgs[@]} -ne 1 ]; then
+            echo "::error title=macOS bundles::Expected one .app.tar.gz and one .dmg, found ${tarballs[*]} ${dmgs[*]}"
+            exit 1
+          fi
+          scripts/macos/sign.sh --notarize "${tarballs[0]}" "${dmgs[0]}"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: notarized-${{ matrix.target }}
+          path: ${{ runner.temp }}/bundles
+          if-no-files-found: error
+          retention-days: 7
+
+  # The only job with the updater's signing key. It runs no project code and
+  # installs no project dependencies: it signs the legs' updater bundles (the
+  # notarized ones for macOS) with the Tauri CLI version pinned in
+  # pnpm-lock.yaml, writes latest.json and uploads everything to the draft in
+  # one go.
+  sign:
+    needs: [prepare, build, notarize]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -184,6 +262,26 @@ jobs:
           pattern: bundles-*
           path: ${{ runner.temp }}/release
           merge-multiple: true
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: notarized-*
+          path: ${{ runner.temp }}/notarized
+          merge-multiple: true
+
+      # The build legs' macOS files are the unsigned ones: ship the
+      # notarized files in their place, under the same names.
+      - name: Take the notarized macOS bundles
+        working-directory: ${{ runner.temp }}
+        run: |
+          shopt -s nullglob
+          notarized=(notarized/*.dmg notarized/*.app.tar.gz)
+          if [ ${#notarized[@]} -ne 4 ]; then
+            echo "::error title=Notarized bundles::Expected two .dmg and two .app.tar.gz, found ${notarized[*]}"
+            exit 1
+          fi
+          rm -f release/*.dmg release/*.app.tar.gz
+          mv "${notarized[@]}" release/
 
       # --app-version binds each signature to the version (a trusted
       # comment): the app's updater refuses a signature for another version
