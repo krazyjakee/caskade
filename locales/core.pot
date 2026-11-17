@@ -5406,7 +5406,7 @@ msgid "Registry: {key}"
 msgstr ""
 
 #: crates/caskade-app/src/discovery/mod.rs
-msgid "Enable library discovery before scanning."
+msgid "Enable discovery before scanning."
 msgstr ""
 
 #: crates/caskade-app/src/discovery/mod.rs
@@ -5687,7 +5687,7 @@ msgid "Storage is unavailable. Open the Caskade desktop app to manage locations.
 msgstr ""
 
 #: apps/native/src/data/mod.rs
-msgid "Library discovery isn't available here."
+msgid "Discovery isn't available here."
 msgstr ""
 
 #: apps/native/src/dialogs.rs

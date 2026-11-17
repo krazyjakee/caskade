@@ -5408,8 +5408,8 @@ msgid "Registry: {key}"
 msgstr "Register: {key}"
 
 #: crates/caskade-app/src/discovery/mod.rs
-msgid "Enable library discovery before scanning."
-msgstr "Aktivera biblioteksidentifiering innan du skannar."
+msgid "Enable discovery before scanning."
+msgstr "Aktivera upptäckt innan du skannar."
 
 #: crates/caskade-app/src/discovery/mod.rs
 msgid "A discovery scan is already running."
@@ -5697,8 +5697,8 @@ msgid "Storage is unavailable. Open the Caskade desktop app to manage locations.
 msgstr ""
 
 #: apps/native/src/data/mod.rs
-msgid "Library discovery isn't available here."
-msgstr ""
+msgid "Discovery isn't available here."
+msgstr "Upptäckt är inte tillgänglig här."
 
 #: apps/native/src/dialogs.rs
 msgid "selected path is not UTF-8"
@@ -5735,6 +5735,9 @@ msgstr "Den här kopian av Caskade kan inte uppdatera sig själv: ladda ner den 
 #: apps/native/src/updater.rs
 msgid "Couldn't install the update: {error}"
 msgstr "Det gick inte att installera uppdateringen: {error}"
+
+#~ msgid "Enable library discovery before scanning."
+#~ msgstr "Aktivera biblioteksidentifiering innan du skannar."
 
 #~ msgctxt "settings section"
 #~ msgid "Library Discovery"

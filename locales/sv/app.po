@@ -3472,8 +3472,8 @@ msgstr "Emulatorer, ROM-skannrar, BIOS-filer och RomM-servrar."
 
 #: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search/search_index.rs
-msgid "Enable library discovery"
-msgstr "Aktivera biblioteksidentifiering"
+msgid "Enable discovery"
+msgstr "Aktivera upptäckt"
 
 #: apps/native/src/settings/plugins.rs
 msgid "Enable {plugin}"
@@ -13157,6 +13157,9 @@ msgstr "Installerad {installedVersion}"
 #: apps/native/src/collections/rules.rs
 msgid "“{text}”"
 msgstr "”{text}”"
+
+#~ msgid "Enable library discovery"
+#~ msgstr "Aktivera biblioteksidentifiering"
 
 #~ msgid "Automatic Library Discovery"
 #~ msgstr "Automatisk biblioteksidentifiering"

@@ -3450,7 +3450,7 @@ msgstr ""
 
 #: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/search/search_index.rs
-msgid "Enable library discovery"
+msgid "Enable discovery"
 msgstr ""
 
 #: apps/native/src/settings/plugins.rs

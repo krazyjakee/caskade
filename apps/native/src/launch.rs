@@ -330,7 +330,8 @@ impl<S: Shell> Loop<S> {
     /// window that was created hidden: the loop says it.
     fn show(&mut self, event_loop: &dyn ActiveEventLoop, window: &Arc<dyn Window>) {
         window.set_visible(true);
-        self.inner.window_event(event_loop, window.id(), WindowEvent::Occluded(false));
+        self.inner
+            .window_event(event_loop, window.id(), WindowEvent::Occluded(false));
     }
 
     /// Shows the window at start once its first content is in the document,

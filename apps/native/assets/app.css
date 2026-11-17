@@ -3552,6 +3552,14 @@
   [data-color-scheme="light"] body {
     color-scheme: light;
   }
+  button, select, summary, label, [role="button"], [role="tab"], [role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="option"], [role="switch"], [role="checkbox"], [role="radio"], [role="slider"], [role="combobox"] {
+    cursor: default;
+    user-select: none;
+  }
+  input:not( [type="button"], [type="checkbox"], [type="color"], [type="file"], [type="radio"], [type="range"], [type="reset"], [type="submit"] ), textarea {
+    cursor: text;
+    user-select: text;
+  }
   @keyframes cs-enter {
     from {
       opacity: 0;
