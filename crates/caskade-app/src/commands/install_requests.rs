@@ -122,16 +122,22 @@ async fn validated(value: String) -> Result<(InputKind, String), String> {
 fn is_network_or_device_path(value: &str) -> bool {
     let mut chars = value.chars();
     let separator = |c: Option<char>| matches!(c, Some('\\' | '/'));
-    if separator(chars.next()) && separator(chars.next()) {
-        return true;
-    }
-    #[cfg(windows)]
-    if let Some(std::path::Component::Prefix(prefix)) =
-        std::path::Path::new(value).components().next()
-        && !matches!(prefix.kind(), std::path::Prefix::Disk(_))
-    {
-        return true;
-    }
+    (separator(chars.next()) && separator(chars.next())) || has_non_disk_prefix(value)
+}
+
+/// Whether Windows reads `value` as starting with a prefix other than a
+/// drive letter (`\\?\`, `\\.\`, UNC).
+#[cfg(windows)]
+fn has_non_disk_prefix(value: &str) -> bool {
+    matches!(
+        std::path::Path::new(value).components().next(),
+        Some(std::path::Component::Prefix(prefix))
+            if !matches!(prefix.kind(), std::path::Prefix::Disk(_))
+    )
+}
+
+#[cfg(not(windows))]
+fn has_non_disk_prefix(_: &str) -> bool {
     false
 }
 

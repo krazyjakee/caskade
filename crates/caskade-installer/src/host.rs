@@ -312,21 +312,20 @@ fn find_tool(name: &str) -> Option<PathBuf> {
 }
 
 fn is_executable(path: &Path) -> bool {
-    let Ok(metadata) = path.metadata() else {
-        return false;
-    };
-    if !metadata.is_file() {
-        return false;
-    }
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        metadata.permissions().mode() & 0o111 != 0
-    }
-    #[cfg(not(unix))]
-    {
-        true
-    }
+    path.metadata()
+        .is_ok_and(|metadata| metadata.is_file() && has_execute_bit(&metadata))
+}
+
+#[cfg(unix)]
+fn has_execute_bit(metadata: &std::fs::Metadata) -> bool {
+    use std::os::unix::fs::PermissionsExt;
+    metadata.permissions().mode() & 0o111 != 0
+}
+
+/// Outside Unix any file can be run.
+#[cfg(not(unix))]
+fn has_execute_bit(_: &std::fs::Metadata) -> bool {
+    true
 }
 
 #[cfg(test)]

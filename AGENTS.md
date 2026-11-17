@@ -20,6 +20,8 @@ Keep the specs true: a change that alters what Caskade does or how a subsystem w
 
 ## Commands
 
+Rust toolchain: CI pins one stable release in every workflow (`rustup toolchain install 1.100.0`), never floating `stable`, so a new release's lints can't turn master red on their own. Bump it in a commit of its own: install the new version (`rustup toolchain install <v> --component clippy,rustfmt --target x86_64-pc-windows-gnu`), fix `cargo +<v> clippy` on Linux and windows-gnu, then change every workflow's pin. Run local Clippy gates with `cargo +1.100.0` when your default toolchain is older.
+
 Cargo commands share one heavy lane: run them under `flock /tmp/caskade-heavy.lock …`. `just` recipes take the lock themselves; never wrap a `just` recipe in `flock`.
 
 | Task                                             | Command                                                                                                                                                                                                                                               |
