@@ -5,7 +5,8 @@
 use blitz_traits::net::{NetHandler, Request};
 use caskade_core::artwork::ArtworkCache;
 use caskade_core::model::Artwork;
-use std::sync::OnceLock;
+use std::sync::{Mutex, OnceLock};
+use std::time::{Duration, Instant};
 
 /// The scheme, as the Tauri app registers it (`asset.rs`).
 pub const SCHEME: &str = "caskade-asset";
@@ -97,13 +98,16 @@ pub fn fetch_remote(
     let url = request.url.to_string();
     caskade_app::runtime::handle().spawn(async move {
         let Some(cache) = cache() else {
+            remote_failed(&url, "no artwork cache");
             handler.error(url, "no artwork cache".into());
             return;
         };
         let cached = match cache.download_metadata(&url).await {
             Ok(cached) => cached,
             Err(error) => {
-                handler.error(url, format!("remote image: {error}"));
+                let reason = format!("remote image: {error}");
+                remote_failed(&url, &reason);
+                handler.error(url, reason);
                 return;
             }
         };
@@ -115,28 +119,94 @@ pub fn fetch_remote(
         if response.status == 200 {
             handler.bytes(url, response.bytes.into());
         } else {
-            handler.error(url, format!("remote image: {}", response.status));
+            let reason = format!("remote image: {}", response.status);
+            remote_failed(&url, &reason);
+            handler.error(url, reason);
         }
     });
     Ok(())
 }
 
-/// The artwork cache, as the shell opened it (`paths.cache/artwork`), once
-/// the services are up.
+/// How often a failing image is logged: a Store page of covers failing
+/// alike logs one line, with how many more failed since, not one each.
+const LOG_EVERY: Duration = Duration::from_secs(30);
+
+/// Lets one line through every [`LOG_EVERY`], counting the ones it holds
+/// back.
+#[derive(Debug, Default)]
+struct Throttle {
+    last: Option<Instant>,
+    held: u32,
+}
+
+impl Throttle {
+    /// Whether to log now, and if so how many were held back before it.
+    fn allow(&mut self, now: Instant) -> Option<u32> {
+        if self
+            .last
+            .is_some_and(|last| now.duration_since(last) < LOG_EVERY)
+        {
+            self.held = self.held.saturating_add(1);
+            return None;
+        }
+        self.last = Some(now);
+        Some(std::mem::take(&mut self.held))
+    }
+}
+
+/// Logs why a remote image didn't load (#163), at debug level and
+/// throttled: the image handler alone says nothing anyone can read.
+fn remote_failed(url: &str, reason: &str) {
+    static THROTTLE: Mutex<Throttle> = Mutex::new(Throttle {
+        last: None,
+        held: 0,
+    });
+    if let Some(held) = caskade_core::lock(&THROTTLE).allow(Instant::now()) {
+        tracing::debug!(url, reason, held, "remote image failed");
+    }
+}
+
+/// The artwork cache, as the shell opened it (`paths.cache/artwork`,
+/// created when missing), once the services are up. A cache that can't
+/// open is logged with its path and the OS error, throttled, and tried
+/// again on the next image.
 fn cache() -> Option<&'static ArtworkCache> {
     static CACHE: OnceLock<ArtworkCache> = OnceLock::new();
+    static THROTTLE: Mutex<Throttle> = Mutex::new(Throttle {
+        last: None,
+        held: 0,
+    });
     if let Some(cache) = CACHE.get() {
         return Some(cache);
     }
     let services = crate::shell::services()?;
-    let cache = ArtworkCache::new(services.paths.cache.join("artwork")).ok()?;
-    Some(CACHE.get_or_init(|| cache))
+    let root = services.paths.cache.join("artwork");
+    match ArtworkCache::new(&root) {
+        Ok(cache) => Some(CACHE.get_or_init(|| cache)),
+        Err(error) => {
+            if let Some(held) = caskade_core::lock(&THROTTLE).allow(Instant::now()) {
+                tracing::warn!(path = %root.display(), %error, held, "artwork cache unavailable: images can't load");
+            }
+            None
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use caskade_core::model::{ArtworkKind, ArtworkThumbnail};
+
+    #[test]
+    fn failing_images_log_once_per_interval_with_the_count_held_back() {
+        let mut throttle = Throttle::default();
+        let start = Instant::now();
+        assert_eq!(throttle.allow(start), Some(0));
+        assert_eq!(throttle.allow(start + Duration::from_secs(1)), None);
+        assert_eq!(throttle.allow(start + Duration::from_secs(2)), None);
+        assert_eq!(throttle.allow(start + LOG_EVERY), Some(2));
+        assert_eq!(throttle.allow(start + LOG_EVERY), None);
+    }
 
     #[test]
     fn cards_and_rows_show_thumbnails_never_the_original() {

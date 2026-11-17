@@ -298,7 +298,9 @@ pub struct IgdbImage {
     pub alpha_channel: Option<bool>,
     #[serde(default)]
     pub image_type: Option<Value>,
-    /// The download URL, at the size the server picked for this kind.
+    /// The download URL, at the size the server picked for this kind;
+    /// always `https:` ([`https_image_url`]).
+    #[serde(deserialize_with = "https_image")]
     pub url: String,
 }
 
@@ -397,6 +399,9 @@ struct Inner {
     /// The server answered a popularity request: it has popularity and the
     /// catalog's sorts (#253).
     popularity_offered: std::sync::atomic::AtomicBool,
+    /// When the cache last failed to open and was logged: every lookup
+    /// tries again, so it's logged once per [`PAUSE`].
+    store_failure_logged: std::sync::Mutex<Option<Instant>>,
 }
 
 impl Igdb {
@@ -420,6 +425,7 @@ impl Igdb {
                 popularity: Mutex::new(()),
                 popularity_paused_until: std::sync::Mutex::default(),
                 popularity_offered: std::sync::atomic::AtomicBool::new(false),
+                store_failure_logged: std::sync::Mutex::default(),
             }),
         }
     }
@@ -432,6 +438,14 @@ impl Igdb {
                 crate::cache_db::open(self.inner.dir.join("games.sqlite"), "IGDB", Store::open)
             })
             .await
+            .inspect_err(|error| {
+                // The error names the file and the OS's reason (#155, #163).
+                let mut logged = crate::lock(&self.inner.store_failure_logged);
+                if logged.is_none_or(|at| at.elapsed() >= PAUSE) {
+                    *logged = Some(Instant::now());
+                    tracing::warn!(%error, "IGDB cache unavailable");
+                }
+            })
     }
 
     /// The games with `ids`: from the cache, and from the server for the
@@ -824,6 +838,21 @@ impl Decimal {
             Self::Text(text) => text.parse().map_err(E::custom),
         }
     }
+}
+
+/// `url` with IGDB's protocol-relative form (`//images.igdb.com/…`) made
+/// `https:`, so the artwork cache and the Store's image fetch, which take
+/// only absolute https URLs, accept it (#163). Other URLs are unchanged.
+pub fn https_image_url(url: &str) -> String {
+    let url = url.trim();
+    match url.strip_prefix("//") {
+        Some(rest) => format!("https://{rest}"),
+        None => url.to_owned(),
+    }
+}
+
+fn https_image<'de, D: Deserializer<'de>>(deserializer: D) -> Result<String, D::Error> {
+    String::deserialize(deserializer).map(|url| https_image_url(&url))
 }
 
 pub(crate) mod decimal {

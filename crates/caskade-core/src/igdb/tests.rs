@@ -951,3 +951,50 @@ async fn cache_creates_nested_folders_and_recovers_after_a_location_is_fixed() {
     assert!(cache.join("games.sqlite").is_file());
     assert!(!cache.join("games.sqlite.damaged").exists());
 }
+
+#[tokio::test]
+async fn protocol_relative_image_urls_read_as_https() {
+    // IGDB's own form (#163): the Store's image fetch and the artwork cache
+    // take only absolute https URLs.
+    assert_eq!(
+        https_image_url("//images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg"),
+        "https://images.igdb.com/igdb/image/upload/t_cover_big/co1.jpg"
+    );
+    assert_eq!(
+        https_image_url("https://i.ytimg.com/vi/x/hqdefault.jpg"),
+        "https://i.ytimg.com/vi/x/hqdefault.jpg"
+    );
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/games"))
+        .respond_with(move |_: &Request| {
+            let mut raw = game(7, "Relative");
+            raw["images"]["cover"]["url"] =
+                json!("//images.igdb.com/igdb/image/upload/t_cover_big_2x/co7.jpg");
+            raw["images"]["screenshots"] = json!([{"imageId": "sc7",
+                "url": "//images.igdb.com/igdb/image/upload/t_screenshot_huge/sc7.jpg"}]);
+            ResponseTemplate::new(200).set_body_json(json!({ "games": [raw], "notFound": [] }))
+        })
+        .mount(&server)
+        .await;
+    let cache = tempfile::tempdir().unwrap();
+    let igdb = Igdb::with_base_url(cache.path(), server.uri());
+    let fetched = igdb.games(&[7]).await.unwrap().games.remove(0);
+    // The cache keeps the server's JSON; a cached answer reads the same.
+    let cached = Igdb::with_base_url(cache.path(), unreachable())
+        .games(&[7])
+        .await
+        .unwrap()
+        .games
+        .remove(0);
+    for game in [fetched, cached] {
+        assert_eq!(
+            game.images.cover.unwrap().url,
+            "https://images.igdb.com/igdb/image/upload/t_cover_big_2x/co7.jpg"
+        );
+        assert_eq!(
+            game.images.screenshots[0].url,
+            "https://images.igdb.com/igdb/image/upload/t_screenshot_huge/sc7.jpg"
+        );
+    }
+}
