@@ -45,15 +45,15 @@ label,
 }
 
 input:not(
-    [type="button"],
-    [type="checkbox"],
-    [type="color"],
-    [type="file"],
-    [type="radio"],
-    [type="range"],
-    [type="reset"],
-    [type="submit"]
-  ),
+  [type="button"],
+  [type="checkbox"],
+  [type="color"],
+  [type="file"],
+  [type="radio"],
+  [type="range"],
+  [type="reset"],
+  [type="submit"]
+),
 textarea {
   cursor: text;
   user-select: text;
