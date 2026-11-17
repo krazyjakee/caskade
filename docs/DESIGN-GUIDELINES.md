@@ -57,6 +57,7 @@ Style only through the `--cs-*` tokens, through their Tailwind utilities (`bg-su
 - **Files and folders**: every control that opens a picker is also a drop zone, and pickers go through `use_path_picker`, which shows the in-app folder browser in console mode.
 - **Menus**: every item that has a context menu opens it from a right click, the context-menu key, Shift+F10, a pad's Start or an actions button. A game has one menu, the same everywhere.
 - Mouse-only gestures (hover, drag) always have another way in.
+- **Cursor**: controls (buttons, tabs, menu items, options, toggles, cards) show the arrow and their labels aren't selectable; links show the pointer; text fields show the I-beam. One base rule in `apps/native/styles/base.css` sets it, not each component.
 
 ## 6. Components and anatomy
 

@@ -21,6 +21,44 @@ body {
   color-scheme: light;
 }
 
+/* Controls show the arrow and their labels aren't selectable text, as in a
+   browser (#162); links keep the pointer (Blitz gives it to `<a href>`) and
+   text fields the I-beam. Cursor is inherited, so labels inside a control
+   take it too. */
+button,
+select,
+summary,
+label,
+[role="button"],
+[role="tab"],
+[role="menuitem"],
+[role="menuitemradio"],
+[role="menuitemcheckbox"],
+[role="option"],
+[role="switch"],
+[role="checkbox"],
+[role="radio"],
+[role="slider"],
+[role="combobox"] {
+  cursor: default;
+  user-select: none;
+}
+
+input:not(
+    [type="button"],
+    [type="checkbox"],
+    [type="color"],
+    [type="file"],
+    [type="radio"],
+    [type="range"],
+    [type="reset"],
+    [type="submit"]
+  ),
+textarea {
+  cursor: text;
+  user-select: text;
+}
+
 /* The focus ring is in index.css, with its utilities (#161). */
 
 /* The enter animation of `animate-enter` (index.css); themes add their own

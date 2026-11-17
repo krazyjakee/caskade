@@ -90,3 +90,27 @@ fn a_link_follows_on_enter_and_a_pad_but_not_space() {
     window.pad(Action::Confirm);
     assert_eq!(take_done(), ["home"]);
 }
+
+/// The buttons with the app's stylesheet, as the cursor comes from it.
+fn styled_buttons() -> Element {
+    rsx! {
+        style { {include_str!("../../../assets/app.css")} }
+        InputRoot {
+            Button { id: "save", on_press: |_| did("save"), "Save" }
+            Link { id: "home", href: "/home", on_press: |_| did("home"), "Home" }
+            input { id: "name", r#type: "text", value: "Pocket Quest" }
+        }
+    }
+}
+
+#[test]
+fn a_button_label_shows_the_arrow_not_the_text_cursor() {
+    let _one = one_window();
+    let mut window = Window::open(styled_buttons);
+    window.hover("save");
+    assert_eq!(window.cursor(), "Some(Default)", "over a button's label");
+    window.hover("home");
+    assert_eq!(window.cursor(), "Some(Pointer)", "over a link");
+    window.hover("name");
+    assert_eq!(window.cursor(), "Some(Text)", "over a text field");
+}

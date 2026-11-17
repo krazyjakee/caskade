@@ -209,6 +209,12 @@ impl Window {
         self.settle();
     }
 
+    /// The cursor Blitz asks the window for, by name (`Default`, `Text`,
+    /// `Pointer`).
+    pub(crate) fn cursor(&self) -> String {
+        format!("{:?}", self.doc.inner.borrow().get_cursor())
+    }
+
     /// What a screen reader gets from `id`'s subtree.
     pub(crate) fn heard(&self, id: &str) -> String {
         crate::a11y_snapshot::snapshot_of(&self.doc.inner.borrow(), self.id(id))
