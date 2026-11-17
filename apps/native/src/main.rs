@@ -190,6 +190,7 @@ fn main() {
     if hidden {
         tracing::info!("started at login: Caskade stays in the tray");
     }
+    // Created hidden either way: it shows with its first content (#165).
     let window = attributes(restored).with_visible(!hidden);
     if let Some(listener) = instance {
         caskade_app::single_instance::serve(listener, forwarded::take);
@@ -388,9 +389,10 @@ fn window_ready(window: Arc<dyn dioxus_native::winit::window::Window>) {
     tray::app_menu();
     // Windows and macOS: the tray icon, here on the main thread.
     #[cfg(not(target_os = "linux"))]
-    if !tray::start_here() && !window.is_visible().unwrap_or(true) {
-        // A login start without an icon to come back from shows the window.
-        window.set_visible(true);
+    if !tray::start_here() {
+        // A login start without an icon to come back from shows the window,
+        // with its first content (#165).
+        launch::ask(launch::Request::ShowWhenReady);
     }
     // A place saved on a monitor that's gone: back to the top left corner
     // of the screen there is.

@@ -154,14 +154,18 @@ pub fn OnboardingGate(children: Element) -> Element {
     match open() {
         None => rsx! {},
         Some(false) => children,
-        Some(true) => rsx! {
-            Onboarding {
-                on_done: move |_| {
-                    open.set(Some(false));
-                    router.navigate("/library?filter=all");
-                },
+        Some(true) => {
+            // What a first start shows the window with (#165).
+            crate::launch::content_ready();
+            rsx! {
+                Onboarding {
+                    on_done: move |_| {
+                        open.set(Some(false));
+                        router.navigate("/library?filter=all");
+                    },
+                }
             }
-        },
+        }
     }
 }
 

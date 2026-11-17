@@ -58,6 +58,8 @@ fn ViewError(errors: ErrorContext) -> Element {
 
 /// The shell itself failed: the whole window, keeping its controls.
 pub fn app_crash(errors: ErrorContext) -> Element {
+    // What a start shows the window with (#165).
+    crate::launch::content_ready();
     rsx! {
         AppCrash { errors }
     }

@@ -107,6 +107,8 @@ fn ModeActions() -> Element {
 
 #[component]
 fn Shell() -> Element {
+    // What a start shows the window with (#165).
+    crate::launch::content_ready();
     let router = use_router();
     #[cfg(test)]
     tests::ROUTER.with(|seen| seen.set(Some(router)));

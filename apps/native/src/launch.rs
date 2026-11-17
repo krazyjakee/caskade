@@ -6,7 +6,9 @@
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock, mpsc};
+use std::time::{Duration, Instant};
 
 use anyrender::WindowRenderer;
 use blitz_dom::{BaseDocument, DocumentConfig};
@@ -17,15 +19,20 @@ use dioxus_native::winit::{
     application::ApplicationHandler,
     event::{DeviceEvent, DeviceId, StartCause, WindowEvent},
     event_loop::{ActiveEventLoop, EventLoopProxy},
-    window::WindowId,
+    window::{Window, WindowId},
 };
 use dioxus_native::{DioxusNativeApplication, DioxusNativeWindowRenderer, WindowAttributes};
 
 /// What the shell asks the event loop for, from any thread.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Request {
-    /// Show the main window and bring it to the front.
+    /// Show the main window and bring it to the front. While a start waits
+    /// for its first content, the window shows with it instead (#165).
     Show,
+    /// Show the main window once its first content is drawn: a start that
+    /// meant to stay in the tray but has no icon to come back from.
+    #[cfg_attr(target_os = "linux", allow(dead_code))]
+    ShowWhenReady,
     /// Quit: the main window closes for good.
     Quit,
     /// The main window's close button, in the title bar Caskade draws
@@ -89,8 +96,76 @@ pub fn ask(request: Request) {
     }
 }
 
+/// How long a start waits for its first content before it shows the main
+/// window anyway (#165).
+const REVEAL_TIMEOUT: Duration = Duration::from_millis(1500);
+
+/// Whether the root has rendered its first content (#165).
+static CONTENT: AtomicBool = AtomicBool::new(false);
+
+/// The root renders what the user came for, beyond the empty frame: the
+/// shell, first-run setup, the account picker or the shell's failure. The
+/// main window, created hidden, shows with it (#165). Called as they render,
+/// inside the window's loop, which looks right after.
+pub fn content_ready() {
+    CONTENT.store(true, Ordering::Relaxed);
+}
+
+/// When the main window, created hidden, shows at start (#165): with the
+/// first frame that has content, or after [`REVEAL_TIMEOUT`] when the start
+/// is slow, so the user never sees a window of the theme's colour alone.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Reveal {
+    /// A start in the tray: the window shows when it's asked for.
+    Stay,
+    /// Waiting for the first content, until the deadline.
+    Waiting(Instant),
+    /// Shown, or asked for: the start has nothing more to do.
+    Done,
+}
+
+impl Reveal {
+    fn at_start(show: bool, now: Instant) -> Self {
+        if show {
+            Self::Waiting(now + REVEAL_TIMEOUT)
+        } else {
+            Self::Stay
+        }
+    }
+
+    /// A start that meant to stay in the tray shows after all, with its
+    /// content.
+    fn show_when_ready(&mut self, now: Instant) {
+        if *self == Self::Stay {
+            *self = Self::Waiting(now + REVEAL_TIMEOUT);
+        }
+    }
+
+    /// Whether to show the window now: its content is in the document, or
+    /// the wait is over. It says so once.
+    fn due(&mut self, content: bool, now: Instant) -> bool {
+        match *self {
+            Self::Waiting(deadline) if content || now >= deadline => {
+                *self = Self::Done;
+                true
+            }
+            _ => false,
+        }
+    }
+
+    /// When to wake to show the window anyway.
+    fn deadline(self) -> Option<Instant> {
+        match self {
+            Self::Waiting(deadline) => Some(deadline),
+            Self::Stay | Self::Done => None,
+        }
+    }
+}
+
 /// Runs the main window with `app` as its root until it closes for good,
-/// styled with `look` from its first frame.
+/// styled with `look` from its first frame. `window.visible` says whether
+/// it shows at start: it's created hidden either way, and shows with its
+/// first content ([`Reveal`]).
 pub fn run(
     app: fn() -> Element,
     window: WindowAttributes,
@@ -131,6 +206,9 @@ pub fn run(
     // The GPU backdrop, kept in step with the document before each frame
     // is painted (#149).
     let mut backdrop = crate::backdrop::Sync::default();
+    // Hidden until its first content (#165).
+    let reveal = Reveal::at_start(window.visible, Instant::now());
+    let window = window.with_visible(false);
     let config = WindowConfig::with_attributes(Box::new(document) as _, renderer.clone(), window)
         .with_before_paint(move |doc, renderer, time| backdrop.before_paint(doc, renderer, time));
     let application = DioxusNativeApplication::new(proxy, event_queue, config);
@@ -144,6 +222,7 @@ pub fn run(
         paint_cpu: false,
         released: false,
         look_again: Vec::new(),
+        reveal,
     }) {
         tracing::error!(%error, "the window's event loop failed");
     }
@@ -186,6 +265,8 @@ struct Loop<S> {
     released: bool,
     /// When to look at whether the window can be seen again.
     look_again: Vec<std::time::Instant>,
+    /// When the window shows at start (#165).
+    reveal: Reveal,
 }
 
 impl<S: Shell> Loop<S> {
@@ -196,7 +277,6 @@ impl<S: Shell> Loop<S> {
     /// The document keeps running. Shown again, the renderer resumes and
     /// the window is painted whole.
     fn follow_visibility(&mut self) {
-        use std::time::Instant;
         let now = Instant::now();
         let due = self.look_again.len();
         self.look_again.retain(|at| *at > now);
@@ -206,8 +286,9 @@ impl<S: Shell> Loop<S> {
         let Some(window) = crate::shell::main_window() else {
             return;
         };
-        // Before the first frame there's nothing to release.
-        if !self.released && !self.renderer.is_active() {
+        // Before the first frame there's nothing to release, and a start
+        // waiting to show its content keeps it (#165).
+        if (!self.released && !self.renderer.is_active()) || self.reveal.deadline().is_some() {
             return;
         }
         let hidden = window.is_visible() == Some(false) || window.is_minimized() == Some(true);
@@ -244,17 +325,54 @@ impl<S: Shell> Loop<S> {
         }
     }
 
+    /// Shows the main window. Blitz paints a window only once it's told the
+    /// window can be seen (`Occluded(false)`), which Windows never says of a
+    /// window that was created hidden: the loop says it.
+    fn show(&mut self, event_loop: &dyn ActiveEventLoop, window: &Arc<dyn Window>) {
+        window.set_visible(true);
+        self.inner.window_event(event_loop, window.id(), WindowEvent::Occluded(false));
+    }
+
+    /// Shows the window at start once its first content is in the document,
+    /// styled, or once the wait is over (#165).
+    fn reveal(&mut self, event_loop: &dyn ActiveEventLoop) {
+        let Some(window) = crate::shell::main_window() else {
+            return;
+        };
+        let content =
+            CONTENT.load(Ordering::Relaxed) && !self.doc.borrow().has_pending_critical_resources();
+        if !self.reveal.due(content, Instant::now()) {
+            return;
+        }
+        if content {
+            tracing::info!("the window shows with its first content");
+        } else {
+            tracing::info!("the window shows before its first content: the start is slow");
+        }
+        self.show(event_loop, window);
+        // A start in the tray that shows after all may have released the
+        // renderer already.
+        if self.released {
+            self.look_at_visibility(Duration::ZERO);
+        }
+    }
+
     fn handle(&mut self, event_loop: &dyn ActiveEventLoop) {
         while let Ok(request) = self.requests.try_recv() {
             match request {
+                // A start waiting for its content shows with it (a link or a
+                // second start right away).
+                Request::Show if self.reveal.deadline().is_some() => {}
                 Request::Show => {
+                    self.reveal = Reveal::Done;
                     if let Some(window) = crate::shell::main_window() {
-                        window.set_visible(true);
+                        self.show(event_loop, window);
                         window.set_minimized(false);
                         window.focus_window();
                     }
                     self.look_at_visibility(std::time::Duration::ZERO);
                 }
+                Request::ShowWhenReady => self.reveal.show_when_ready(Instant::now()),
                 Request::Fullscreen(on) => {
                     if let Some(window) = crate::shell::main_window() {
                         window.set_fullscreen(on.then_some(
@@ -264,6 +382,10 @@ impl<S: Shell> Loop<S> {
                 }
                 Request::Paste => crate::paste::fetch(event_loop),
                 Request::Hide | Request::Minimize => {
+                    // A start hidden before it showed stays so until asked.
+                    if request == Request::Hide && self.reveal.deadline().is_some() {
+                        self.reveal = Reveal::Stay;
+                    }
                     if let Some(window) = crate::shell::main_window() {
                         if request == Request::Hide {
                             window.set_visible(false);
@@ -408,9 +530,15 @@ impl<S: Shell> ApplicationHandler for Loop<S> {
                 window.request_redraw();
             }
         }
+        self.reveal(event_loop);
         self.follow_visibility();
         self.inner.about_to_wait(event_loop);
-        if let Some(&at) = self.look_again.iter().min() {
+        // A start waiting for its content wakes to show the window anyway.
+        let reveal = self
+            .reveal
+            .deadline()
+            .filter(|_| crate::shell::main_window().is_some());
+        if let Some(at) = self.look_again.iter().copied().chain(reveal).min() {
             use dioxus_native::winit::event_loop::ControlFlow;
             let wake = match event_loop.control_flow() {
                 ControlFlow::WaitUntil(other) => at.min(other),
@@ -436,5 +564,49 @@ impl<S: Shell> ApplicationHandler for Loop<S> {
 
     fn memory_warning(&mut self, event_loop: &dyn ActiveEventLoop) {
         self.inner.memory_warning(event_loop);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{REVEAL_TIMEOUT, Reveal};
+    use std::time::{Duration, Instant};
+
+    #[test]
+    fn a_start_shows_the_window_with_its_first_content() {
+        let start = Instant::now();
+        let mut reveal = Reveal::at_start(true, start);
+        assert_eq!(reveal.deadline(), Some(start + REVEAL_TIMEOUT));
+        assert!(!reveal.due(false, start + Duration::from_millis(100)));
+        assert!(reveal.due(true, start + Duration::from_millis(200)));
+        // Once.
+        assert_eq!(reveal, Reveal::Done);
+        assert_eq!(reveal.deadline(), None);
+        assert!(!reveal.due(true, start + Duration::from_millis(300)));
+    }
+
+    #[test]
+    fn a_slow_start_shows_the_window_after_the_wait() {
+        let start = Instant::now();
+        let mut reveal = Reveal::at_start(true, start);
+        assert!(!reveal.due(false, start + REVEAL_TIMEOUT - Duration::from_millis(1)));
+        assert!(reveal.due(false, start + REVEAL_TIMEOUT));
+        assert_eq!(reveal, Reveal::Done);
+    }
+
+    #[test]
+    fn a_start_in_the_tray_stays_hidden_until_asked() {
+        let start = Instant::now();
+        let mut reveal = Reveal::at_start(false, start);
+        assert_eq!(reveal.deadline(), None);
+        assert!(!reveal.due(true, start + REVEAL_TIMEOUT * 2));
+        // No tray icon to come back from: it shows with its content.
+        let later = start + Duration::from_secs(1);
+        reveal.show_when_ready(later);
+        assert_eq!(reveal.deadline(), Some(later + REVEAL_TIMEOUT));
+        assert!(reveal.due(true, later));
+        // A window already shown isn't waited for again.
+        reveal.show_when_ready(later);
+        assert_eq!(reveal, Reveal::Done);
     }
 }

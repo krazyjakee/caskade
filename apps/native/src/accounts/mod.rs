@@ -100,9 +100,13 @@ pub fn AccountGate(children: Element) -> Element {
         None => rsx! {},
         // Not knowing who is signed in must not open the shell, where every
         // change would be refused (#160): say why, and offer to ask again.
-        Some(Err(error)) => rsx! {
-            AccountsUnavailable { error, on_retry: move |_| list.restart() }
-        },
+        Some(Err(error)) => {
+            // What a start shows the window with (#165).
+            crate::launch::content_ready();
+            rsx! {
+                AccountsUnavailable { error, on_retry: move |_| list.restart() }
+            }
+        }
         Some(Ok(accounts))
             if accounts.accounts.is_empty()
                 || accounts
@@ -112,18 +116,22 @@ pub fn AccountGate(children: Element) -> Element {
         {
             children
         }
-        Some(Ok(accounts)) => rsx! {
-            picker::AccountPicker {
-                list: accounts,
-                on_signed_in: move |_| {
-                    // A collection page belonged to whoever was signed in
-                    // before.
-                    if matches!(router.peek(), Route::Collection { .. }) {
-                        router.navigate("/collections?filter=all");
-                    }
-                },
+        Some(Ok(accounts)) => {
+            // What a start shows the window with (#165).
+            crate::launch::content_ready();
+            rsx! {
+                picker::AccountPicker {
+                    list: accounts,
+                    on_signed_in: move |_| {
+                        // A collection page belonged to whoever was signed in
+                        // before.
+                        if matches!(router.peek(), Route::Collection { .. }) {
+                            router.navigate("/collections?filter=all");
+                        }
+                    },
+                }
             }
-        },
+        }
     }
 }
 
