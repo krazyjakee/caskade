@@ -46,6 +46,10 @@ pub fn Tabs(
     /// The tab list's name, for screen readers.
     label: String,
     #[props(default)] class: String,
+    /// The panel's classes: `flex min-h-0 flex-1 flex-col` lets a scrolling
+    /// child take the height the tabs are given (the game editor's, #153).
+    #[props(default)]
+    panel_class: String,
     children: Element,
 ) -> Element {
     let input = use_input();
@@ -125,6 +129,7 @@ pub fn Tabs(
                 role: "tabpanel",
                 "aria-labelledby": "{base}-tab-{at}",
                 "data-part": "tab-panel",
+                class: "{panel_class}",
                 {children}
             }
         }

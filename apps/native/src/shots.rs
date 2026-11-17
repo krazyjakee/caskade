@@ -223,7 +223,17 @@ fn default_only(out: &Path, themes: &ThemeService) -> Result<(), String> {
 /// renders at its window size, then keeps the top rows the site shows: the
 /// desktop's hero and first shelf, without the status bar; all of console
 /// mode, with its button hints.
-pub const WEBSITE: [(&str, fn() -> dioxus_native::prelude::Element, u32, u32, u32); 2] = [
+/// A website capture: its mode, root, window width and height, and the
+/// rows kept.
+pub type WebsiteShot = (
+    &'static str,
+    fn() -> dioxus_native::prelude::Element,
+    u32,
+    u32,
+    u32,
+);
+
+pub const WEBSITE: [WebsiteShot; 2] = [
     ("desktop", crate::frame::shot::website_home, 1440, 900, 780),
     (
         "console",

@@ -210,7 +210,7 @@ pub fn website_ready(doc: &BaseDocument) -> bool {
         let artwork = node
             .attr(LocalName::from("src"))
             .is_some_and(|src| src.starts_with("caskade-asset:"));
-        if element.name.local.as_ref() == "img" && artwork {
+        if &*element.name.local == "img" && artwork {
             covers += 1;
             loading |= element.raster_image_data().is_none();
         }

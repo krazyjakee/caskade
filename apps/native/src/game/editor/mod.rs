@@ -279,6 +279,7 @@ fn Editor(game_id: String, title: String, data: EditData, on_close: EventHandler
                     selected: tab(),
                     label: t!("Editor sections"),
                     class: "min-h-0 flex-1",
+                    panel_class: "flex min-h-0 flex-1 flex-col",
                     on_change: move |id: String| tab.set(id),
                     div { class: "min-h-0 flex-1 overflow-y-auto py-2",
                         // Every tab stays mounted, so switching keeps unsaved
