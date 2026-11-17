@@ -309,10 +309,12 @@ fn app_and_executable_symlinks_do_not_escape_the_fixture_or_bundle() {
         .unwrap();
     assert_eq!(games.len(), 1);
     assert_eq!(games[0].title, "Healthy");
+    let warnings = ctx.take_warnings();
     assert!(
-        ctx.take_warnings()
+        warnings
             .iter()
-            .any(|w| w.contains("bundle executable escapes bundle"))
+            .any(|w| w.contains("Inside.app") && w.contains("bundle executable escapes bundle")),
+        "{warnings:?}"
     );
 }
 
@@ -391,10 +393,12 @@ fn padded_shortcuts_missing_plists_and_classifier_limits_keep_healthy_games() {
     assert_eq!(games.len(), 1);
     assert_eq!(games[0].title, "Healthy");
     let warnings = ctx.take_warnings();
+    // Joined like the source joins it: Windows keeps the inner `/` (#155).
+    let missing = Path::new("Missing.app").join("Contents/Info.plist");
     assert!(
         warnings
             .iter()
-            .any(|w| w.contains("Missing.app/Contents/Info.plist")),
+            .any(|w| w.contains(&*missing.to_string_lossy())),
         "{warnings:?}"
     );
     assert!(

@@ -114,7 +114,10 @@ fn bundle(env: &HostEnv, dir: &Path, ctx: &ScanCtx) -> Result<Option<DetectedGam
         .or_else(|| dir.file_stem()?.to_str().map(str::to_owned))
         .unwrap_or_else(|| "macOS game".into());
     let Some(key) = dir.to_str() else {
-        ctx.warn("skipped non-Unicode app bundle path");
+        ctx.warn(format!(
+            "{}: skipped non-Unicode app bundle path",
+            dir.display()
+        ));
         return Ok(None);
     };
     let category = string(dict, "LSApplicationCategoryType");
@@ -243,7 +246,7 @@ impl Source for MacosApps {
             let root = match env.resolve_path(&root) {
                 Ok(p) => p,
                 Err(e) => {
-                    ctx.warn(format!("app directory: {e}"));
+                    ctx.warn(format!("{}: {e}", root.display()));
                     continue;
                 }
             };
