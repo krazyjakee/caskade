@@ -96,7 +96,7 @@ jobs:
   # The app's Rust suites (APP_SUITES) run in three jobs side by side (#137):
   # rust-checks lints and runs the small builds, rust the libraries' and
   # integration tests, rust-native caskade-native's own unit tests. Between
-  # them they run every target `cargo test` would: rust --lib, --test '*'
+  # them they run every target `cargo test` would: rust --lib, the integration tests
   # and --doc, rust-native --bins and --examples.
   rust-checks:
     needs: changes
@@ -237,7 +237,10 @@ jobs:
       # caskade-i18n's own tests (PO parsing, lint, plural rules, the
       # extractor) back the catalog checks.
       - name: Rust app suites
-        run: cargo test $APP_SUITES --timings --lib --test '*'
+        # Integration tests by name (scripts/ci-test-targets.py): `--test '*'`
+        # also names targets whose required features are off, which cargo
+        # refuses.
+        run: cargo test $APP_SUITES --timings --lib $(python3 scripts/ci-test-targets.py $APP_SUITES)
       - name: Documentation examples
         run: cargo test $APP_SUITES --doc
       # The system clock stepped for real, here where nothing else is running:
@@ -250,7 +253,7 @@ jobs:
           CASKADE_TEST_NATIVE: "1"
         run: >-
           { sudo systemctl stop chrony systemd-timesyncd 2>/dev/null || true; } &&
-          cargo test $APP_SUITES --lib --test '*'
+          cargo test $APP_SUITES --lib $(python3 scripts/ci-test-targets.py $APP_SUITES)
           clock_step:: -- --ignored --nocapture
       - name: Upload build timings
         if: always()
@@ -382,13 +385,21 @@ jobs:
       # A test binary without a manifest asking for Common Controls 6 dies
       # before its first test (STATUS_ENTRYPOINT_NOT_FOUND); one beside each
       # leaves what ships alone.
+      # Where the binary lands is cargo's to say (1.100 moved test binaries
+      # out of target/debug/deps): the manifest goes beside the executable
+      # its build reports.
       - name: Build the launch caller tests
-        run: cargo test -p caskade-native --test launch_cli --locked --no-run
+        run: mkdir -p target && cargo test -p caskade-native --test launch_cli --locked --no-run --message-format=json > target/launch-cli-build.json
       - name: Common Controls 6 for the test binaries
+        shell: python
         run: |
-          for test in target/debug/deps/launch_cli-*.exe; do
-            cp apps/native/tests/windows-test.manifest "$test.manifest"
-          done
+          import json, shutil
+          built = [json.loads(line) for line in open("target/launch-cli-build.json", encoding="utf-8") if line.startswith("{")]
+          tests = [m["executable"] for m in built if m.get("reason") == "compiler-artifact" and m.get("executable") and m["target"]["name"] == "launch_cli"]
+          assert tests, "no launch_cli test binary in the build's output"
+          for test in tests:
+              shutil.copyfile("apps/native/tests/windows-test.manifest", test + ".manifest")
+              print("manifest beside", test)
       - name: Launch caller tests
         run: "cargo test -p caskade-native --test launch_cli --locked --no-fail-fast"
 
