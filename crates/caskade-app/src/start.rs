@@ -582,11 +582,13 @@ pub fn start(core: Core, shell: Shell) -> Services {
     // Paired devices (#224–#226): the device key from the keychain (off
     // this thread: a locked keychain holds only sync), the endpoint and
     // pairing.
-    let devices = caskade_core::devices::Devices::new(
-        store.clone(),
-        accounts.clone(),
-        Arc::new(caskade_core::devices::Keychain),
-    );
+    let keys = Arc::new(caskade_core::devices::Keychain);
+    let devices = match sync_reach(fixtures_mode()) {
+        Some(reach) => {
+            caskade_core::devices::Devices::with_reach(store.clone(), accounts.clone(), keys, reach)
+        }
+        None => caskade_core::devices::Devices::new(store.clone(), accounts.clone(), keys),
+    };
     devices.set_settings(settings.clone());
     // Streaming pairs through sync with no code (#267): this host enters a
     // paired device's code; this client hands its over.
@@ -912,3 +914,21 @@ fn start_plugins(
     });
     Ok((plugins, hooks))
 }
+
+/// Fixtures mode, as the native shell reads it: `CASKADE_FIXTURES=1` in a
+/// debug build.
+fn fixtures_mode() -> bool {
+    cfg!(debug_assertions) && std::env::var("CASKADE_FIXTURES").is_ok_and(|value| value == "1")
+}
+
+/// Where the sync endpoint binds whatever the settings say: on 127.0.0.1
+/// only in fixtures mode (the window tests' runs), with no relays, address
+/// lookup, mDNS or router port mapping, so a run on fixture data sends
+/// nothing to the network (#135). `None`: where the settings say.
+fn sync_reach(fixtures: bool) -> Option<caskade_core::devices::Reach> {
+    fixtures.then(caskade_core::devices::Reach::loopback)
+}
+
+#[cfg(test)]
+#[path = "start_tests.rs"]
+mod tests;

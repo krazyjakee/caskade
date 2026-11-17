@@ -168,7 +168,12 @@ impl Devices {
         keys: Arc<dyn KeyStore>,
         reach: Reach,
     ) -> Self {
-        Self::build(store, accounts, keys, move |_| reach.clone())
+        // Dialers made before the first bind stay on loopback too, with no
+        // router port mapping (#135).
+        let loopback = matches!(reach.ip, caskade_sync::Ip::Loopback { .. });
+        let devices = Self::build(store, accounts, keys, move |_| reach.clone());
+        devices.inner.loopback.store(loopback, Ordering::Relaxed);
+        devices
     }
 
     /// Binds on what `reach` makes of the reach the settings ask for, at
