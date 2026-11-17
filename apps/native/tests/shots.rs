@@ -157,3 +157,53 @@ fn every_theme_renders_the_reference_screens_as_before() {
         kept.display()
     );
 }
+
+/// The website's captures (#150): Home over the website's sample library,
+/// on the desktop and in console mode, in English and Swedish, at the
+/// sizes the site shows them. Its covers come from the folder in
+/// `CASKADE_WEBSITE_ART` (`scripts/website-art.sh` downloads them; the test
+/// itself stays offline). It writes `apps/website/assets` (or the folder in
+/// `CASKADE_WRITE_WEBSITE`), so it runs only when asked:
+///
+/// `just website-shots`
+#[test]
+#[ignore = "writes the website's screenshots: just website-shots"]
+fn the_website_screenshots_are_written() {
+    let art = std::env::var_os("CASKADE_WEBSITE_ART")
+        .filter(|folder| !folder.is_empty())
+        .map(PathBuf::from)
+        .expect(
+            "CASKADE_WEBSITE_ART names the covers' folder: \
+             scripts/website-art.sh <folder> downloads them (just website-shots does both)",
+        );
+    let art = std::path::absolute(&art).unwrap();
+    let temp = tempfile::tempdir().unwrap();
+    let out = temp.path().join("out");
+    let output = Command::new(env!("CARGO_BIN_EXE_caskade-native"))
+        .arg("--shots")
+        .arg(&out)
+        .arg("--website-art")
+        .arg(&art)
+        // Nothing of the developer's: no settings, themes or language.
+        .env_clear()
+        .env("PATH", std::env::var_os("PATH").unwrap_or_default())
+        .env("HOME", temp.path())
+        .env("TZ", "UTC")
+        .output()
+        .expect("the native binary runs");
+    let log = String::from_utf8_lossy(&output.stderr);
+    assert!(output.status.success(), "{log}");
+    let to = std::env::var_os("CASKADE_WRITE_WEBSITE")
+        .filter(|folder| !folder.is_empty())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| Path::new(env!("CARGO_MANIFEST_DIR")).join("../website/assets"));
+    std::fs::create_dir_all(&to).unwrap();
+    for (mode, size) in [("desktop", (1440, 780)), ("console", (1440, 900))] {
+        for language in ["en", "sv"] {
+            let name = format!("{mode}-{language}.jpg");
+            let shot = out.join(&name);
+            assert_eq!(image::image_dimensions(&shot).unwrap(), size, "{name}");
+            std::fs::copy(&shot, to.join(&name)).unwrap();
+        }
+    }
+}

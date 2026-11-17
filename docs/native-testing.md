@@ -64,6 +64,7 @@ the token contracts; the `run-e2e` label too):
 | Headless tests and screenshots | `just test-native` |
 | The window tests | `just test-native-window` |
 | Rewrite the screenshots after a deliberate change | `just native-shots` |
+| The website's screenshots (Home over a sample library, desktop and console, English and Swedish; headless, `apps/website/assets`; downloads the covers first) | `just website-shots` |
 | Chromium's reference for `text_pixels` | `apps/native/scripts/text-oracle.sh` |
 | Run the app | `just dev` (native by default, your display; `just native` is also available) or `scripts/private-desktop.sh -- <binary>` |
 

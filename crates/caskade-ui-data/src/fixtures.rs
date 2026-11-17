@@ -235,10 +235,16 @@ pub fn themes_folder() -> std::path::PathBuf {
 /// unless a test needs another number) and the emulated ones, its bus bridged to
 /// [`Fixtures::events`] as the app's is.
 pub async fn open(count: usize) -> caskade_core::Result<Fixtures> {
+    open_games(library_games(count)).await
+}
+
+/// Opens a fixture library of `games` alone, as [`open`] does: the
+/// website's sample library (#150), for one.
+pub async fn open_games(games: Vec<FixtureGame>) -> caskade_core::Result<Fixtures> {
     let store = LibraryStore::in_memory().await?;
     let bus = Bus::default();
     let accounts = AccountService::open(store.clone(), bus.clone()).await?;
-    seed(&store, &library_games(count), caskade_core::now_ms()).await?;
+    seed(&store, &games, caskade_core::now_ms()).await?;
     let launch = LaunchService::new(store.clone()).with_bus(bus.clone());
     let (events, _) = broadcast::channel(1024);
     caskade_app::events::bridge(Events::new(Broadcast(events.clone())), &bus);

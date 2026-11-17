@@ -33,6 +33,8 @@ mod tests;
 
 #[allow(unused_imports)]
 pub use art::{SCHEME as ART_SCHEME, fetch as fetch_art, fetch_remote as fetch_remote_art};
+#[cfg(feature = "shots")]
+pub use art::use_cache as use_art_cache;
 
 /// A game's art for a small place (a search suggestion): the 96 px
 /// thumbnail.

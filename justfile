@@ -29,6 +29,14 @@ test-native-window:
 native-shots:
     CASKADE_WRITE_SHOTS=1 flock /tmp/caskade-heavy.lock cargo test -p caskade-native --features shots --test shots
 
+# Rewrite the website's screenshots (apps/website/assets/{desktop,console}-{en,sv}.jpg): the native app's Home over a sample library, rendered headless (#150); downloads the covers first
+website-shots:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    art="${CASKADE_WEBSITE_ART:-${XDG_CACHE_HOME:-$HOME/.cache}/caskade-website-art}"
+    scripts/website-art.sh "$art"
+    CASKADE_WEBSITE_ART="$art" flock /tmp/caskade-heavy.lock cargo test -p caskade-native --features shots --test shots the_website_screenshots_are_written -- --ignored
+
 # The native app's stylesheet (#90): Tailwind 4 over apps/native/src, after
 # changing its classes or apps/native/styles; CI fails while it's stale
 native-css:

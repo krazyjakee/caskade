@@ -64,18 +64,22 @@ If moving to a custom domain, update the canonical and alternate URL base in
 
 ## Refreshing screenshots
 
-The captures came from the retired webview app's fixture preview, through a
-Playwright script removed with it (#143). Until a native capture script
-exists (#150), take new ones from the native app on a private desktop with fixtures:
+`just website-shots` writes the four captures (`desktop-en.jpg`,
+`desktop-sv.jpg`, `console-en.jpg`, `console-sv.jpg`) from the native app's
+Home, in the default theme, on the desktop (1440x780: the hero and first
+shelf of a 1440x900 window) and in console mode (1440x900). First
+`scripts/website-art.sh` downloads the covers, Steam's public library art
+(`library_600x900.jpg`), into `~/.cache/caskade-website-art` (or
+`CASKADE_WEBSITE_ART`); covers already there are kept. Then the app renders
+headless with the reference screenshots' machinery
+(`apps/native/src/shots.rs`, `caskade-native --shots <folder> --website-art
+<folder>`): no window, display, session bus or network, and none of your
+settings, themes or library. The library is a fabricated sample of eight
+games (`WEBSITE_GAMES` in `apps/native/src/frame/shot.rs`), as the retired
+capture had, with made-up play times. To check the renders without replacing
+the committed ones, set `CASKADE_WRITE_WEBSITE=<folder>`.
 
-```sh
-cargo build -p caskade-native
-scripts/private-desktop.sh --size 1600x900 -- env CASKADE_FIXTURES=1 \
-  "$(cargo metadata --format-version 1 --no-deps | python3 -c 'import json,sys;print(json.load(sys.stdin)["target_directory"])')/debug/caskade-native"
-```
-
-Use a fabricated sample library only: no personal library, account or device
-data. Review all four images, then rebuild the website and commit them.
+Review all four images, then rebuild the website and commit them.
 
 ## Deployment
 

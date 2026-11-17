@@ -7,6 +7,11 @@
 //! and theme assets next to it) for another engine to render
 //! (`scripts/webkit-shots.py`). `tests/shots.rs` compares the PNGs with
 //! the committed ones.
+//!
+//! `--shots <folder> --website-art <folder>` writes the website's captures
+//! instead (#150, [`website`]): `{desktop,console}-{en,sv}.jpg`, over a
+//! sample library whose covers are in the second folder
+//! (`scripts/website-art.sh`).
 
 mod screens;
 
@@ -40,8 +45,16 @@ pub fn requested() -> Option<(PathBuf, Option<PathBuf>)> {
     Some((value("--shots")?, value("--themes")))
 }
 
-/// Writes every screen in every valid theme to `out`.
+/// Writes every screen in every valid theme to `out` (with
+/// `--website-art <folder>`, the website's captures).
 pub fn run(out: &Path, themes_folder: Option<&Path>) -> Result<(), String> {
+    let args: Vec<String> = std::env::args().collect();
+    if let Some(at) = args.iter().position(|arg| arg == "--website-art") {
+        let art = args
+            .get(at + 1)
+            .ok_or("--website-art needs the covers' folder")?;
+        return website(out, Path::new(art));
+    }
     std::fs::create_dir_all(out).map_err(|error| format!("{}: {error}", out.display()))?;
     let scratch;
     let folder = match themes_folder {
@@ -84,6 +97,78 @@ pub fn run(out: &Path, themes_folder: Option<&Path>) -> Result<(), String> {
     Ok(())
 }
 
+/// The website's captures (`apps/website/assets`, #150): Home over the
+/// website's sample library (`frame::shot::open_website`) in the default
+/// theme, on the desktop and in console mode, in English and Swedish. Each
+/// renders at its window size, then keeps the top rows the site shows: the
+/// desktop's hero and first shelf, without the status bar; all of console
+/// mode, with its button hints.
+pub const WEBSITE: [(&str, fn() -> dioxus_native::prelude::Element, u32, u32, u32); 2] = [
+    ("desktop", crate::frame::shot::website_home, 1440, 900, 780),
+    (
+        "console",
+        crate::frame::shot::website_console_home,
+        1440,
+        900,
+        900,
+    ),
+];
+
+/// The languages the website comes in.
+pub const WEBSITE_LANGUAGES: [&str; 2] = ["en", "sv"];
+
+/// Writes `<mode>-<language>.jpg` for [`WEBSITE`] and
+/// [`WEBSITE_LANGUAGES`] to `out`, with the covers in `art`.
+pub fn website(out: &Path, art: &Path) -> Result<(), String> {
+    std::fs::create_dir_all(out).map_err(|error| format!("{}: {error}", out.display()))?;
+    // The built-in themes only, and the covers' artwork cache, outside
+    // `out`.
+    let work = std::env::temp_dir().join(format!("caskade-website-{}", std::process::id()));
+    let themes_folder = work.join("themes");
+    std::fs::create_dir_all(&themes_folder).map_err(|error| error.to_string())?;
+    let written = crate::frame::shot::open_website(art, &work.join("artwork")).and_then(|()| {
+        let themes = ThemeService::new(&themes_folder);
+        crate::theme::serve(&themes);
+        write_website(out, &themes)
+    });
+    let _ = std::fs::remove_dir_all(&work);
+    written
+}
+
+fn write_website(out: &Path, themes: &ThemeService) -> Result<(), String> {
+    for language in WEBSITE_LANGUAGES {
+        // The core's words (`tr!`) and the UI's (`t!`).
+        caskade_core::i18n::set_locale(language);
+        caskade_ui_i18n::set_language(language);
+        for (mode, root, width, height, kept) in WEBSITE {
+            let (document, _) = settled(
+                themes,
+                "caskade.default",
+                mode,
+                root,
+                Some(crate::frame::shot::website_ready),
+                width,
+                height,
+            )?;
+            let mut pixels = paint(&mut document.inner.borrow_mut(), width, height);
+            pixels.truncate(width as usize * kept as usize * 4);
+            let rgb = image::DynamicImage::ImageRgba8(
+                image::RgbaImage::from_raw(width, kept, pixels)
+                    .ok_or("the render is smaller than the window")?,
+            )
+            .to_rgb8();
+            let jpg = out.join(format!("{mode}-{language}.jpg"));
+            let file = std::fs::File::create(&jpg)
+                .map_err(|error| format!("{}: {error}", jpg.display()))?;
+            image::codecs::jpeg::JpegEncoder::new_with_quality(std::io::BufWriter::new(file), 88)
+                .encode(rgb.as_raw(), width, kept, image::ExtendedColorType::Rgb8)
+                .map_err(|error| format!("{}: {error}", jpg.display()))?;
+            tracing::info!(jpg = %jpg.display(), "website shot");
+        }
+    }
+    Ok(())
+}
+
 fn render(
     out: &Path,
     themes: &ThemeService,
@@ -94,6 +179,37 @@ fn render(
     // says it's there.
     ready: Option<fn(&BaseDocument) -> bool>,
 ) -> Result<(), String> {
+    let (document, look) = settled(themes, theme, screen, root, ready, WIDTH, HEIGHT)?;
+    let mut doc = document.inner.borrow_mut();
+    let pixels = paint(&mut doc, WIDTH, HEIGHT);
+    let name = format!("{screen}-{theme}");
+    let png = out.join(format!("{name}.png"));
+    image::save_buffer(
+        &png,
+        &pixels,
+        WIDTH,
+        HEIGHT,
+        image::ExtendedColorType::Rgba8,
+    )
+    .map_err(|error| format!("{}: {error}", png.display()))?;
+    let html = out.join(format!("{name}.html"));
+    std::fs::write(&html, export(&doc, &look, themes, out)?)
+        .map_err(|error| format!("{}: {error}", html.display()))?;
+    tracing::info!(png = %png.display(), "shot");
+    Ok(())
+}
+
+/// `root` in `theme` at `width` × `height`, built and settled (with its
+/// data, given `ready`), and the look it has.
+fn settled(
+    themes: &ThemeService,
+    theme: &str,
+    screen: &str,
+    root: fn() -> dioxus_native::prelude::Element,
+    ready: Option<fn(&BaseDocument) -> bool>,
+    width: u32,
+    height: u32,
+) -> Result<(dioxus_native::DioxusDocument, crate::theme::Look), String> {
     let active = themes.resolve(theme);
     let scheme = match caskade_ui_theme::appearance::color_scheme(&active.modes, false) {
         "light" => ColorScheme::Light,
@@ -110,7 +226,7 @@ fn render(
     let mut document = dioxus_native::DioxusDocument::new(
         VirtualDom::new(root),
         DocumentConfig {
-            viewport: Some(Viewport::new(WIDTH, HEIGHT, 1.0, scheme)),
+            viewport: Some(Viewport::new(width, height, 1.0, scheme)),
             base_url: Some(crate::theme::BASE_URL.to_owned()),
             net_provider: Some(crate::theme::Net::shared(None)),
             font_ctx: Some(crate::theme::fonts()),
@@ -144,34 +260,26 @@ fn render(
             std::thread::sleep(std::time::Duration::from_millis(10));
         }
     }
-    let mut doc = document.inner.borrow_mut();
-    // Fonts a theme loads arrive as messages the next resolve takes, and
-    // lay the text out again in the one after.
-    // A still: animations (an overlay's or a toast's entrance) have
-    // ended by the last.
-    for time in [0.0, 10.0, 10.0] {
-        doc.resolve(time);
+    {
+        let mut doc = document.inner.borrow_mut();
+        // Fonts a theme loads arrive as messages the next resolve takes, and
+        // lay the text out again in the one after.
+        // A still: animations (an overlay's or a toast's entrance) have
+        // ended by the last.
+        for time in [0.0, 10.0, 10.0] {
+            doc.resolve(time);
+        }
     }
-    let pixels = render_to_buffer::<VelloCpuImageRenderer, _>(
-        |scene| blitz_paint::paint_scene(scene, &mut doc, 1.0, WIDTH, HEIGHT, 0, 0),
-        WIDTH,
-        HEIGHT,
-    );
-    let name = format!("{screen}-{theme}");
-    let png = out.join(format!("{name}.png"));
-    image::save_buffer(
-        &png,
-        &pixels,
-        WIDTH,
-        HEIGHT,
-        image::ExtendedColorType::Rgba8,
+    Ok((document, look))
+}
+
+/// A settled document's RGBA pixels at `width` × `height`.
+fn paint(doc: &mut BaseDocument, width: u32, height: u32) -> Vec<u8> {
+    render_to_buffer::<VelloCpuImageRenderer, _>(
+        |scene| blitz_paint::paint_scene(scene, doc, 1.0, width, height, 0, 0),
+        width,
+        height,
     )
-    .map_err(|error| format!("{}: {error}", png.display()))?;
-    let html = out.join(format!("{name}.html"));
-    std::fs::write(&html, export(&doc, &look, themes, out)?)
-        .map_err(|error| format!("{}: {error}", html.display()))?;
-    tracing::info!(png = %png.display(), "shot");
-    Ok(())
 }
 
 /// Elements HTML lets close themselves; inside `<svg>` any element may.

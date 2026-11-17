@@ -166,12 +166,21 @@ fn remote_failed(url: &str, reason: &str) {
     }
 }
 
+/// The artwork cache images are served from.
+static CACHE: OnceLock<ArtworkCache> = OnceLock::new();
+
+/// Serves images from `cache` where no services run: the website's
+/// captures (`crate::shots`, #150). The first cache set stays.
+#[cfg(feature = "shots")]
+pub fn use_cache(cache: ArtworkCache) {
+    let _ = CACHE.set(cache);
+}
+
 /// The artwork cache, as the shell opened it (`paths.cache/artwork`,
 /// created when missing), once the services are up. A cache that can't
 /// open is logged with its path and the OS error, throttled, and tried
 /// again on the next image.
 fn cache() -> Option<&'static ArtworkCache> {
-    static CACHE: OnceLock<ArtworkCache> = OnceLock::new();
     static THROTTLE: Mutex<Throttle> = Mutex::new(Throttle {
         last: None,
         held: 0,
