@@ -151,8 +151,6 @@ enum Shown {
     Plain,
     /// Appearance's reduced motion and reduced effects.
     Reduced,
-    /// The pseudo-locale (`en-XA`, debug builds only).
-    Pseudo,
 }
 
 /// Settings sections no image of stays the same: they show this machine's
@@ -200,20 +198,6 @@ fn default_only(out: &Path, themes: &ThemeService) -> Result<(), String> {
         Some(&crate::frame::shot::home_ready),
         Shown::Reduced,
     )?;
-    if caskade_ui_i18n::is_pseudo("en-XA") {
-        crate::frame::shot::open_page("/settings?tab=general");
-        render(
-            out,
-            themes,
-            DEFAULT_THEME,
-            "pseudo",
-            crate::frame::shot::page,
-            Some(&|doc: &BaseDocument| {
-                crate::frame::shot::has(doc, "id", "settings-tab-general-panel")
-            }),
-            Shown::Pseudo,
-        )?;
-    }
     Ok(())
 }
 
@@ -316,16 +300,9 @@ fn render(
             reduce_effects: true,
             ..AppearanceSettings::default()
         },
-        Shown::Plain | Shown::Pseudo => AppearanceSettings::default(),
+        Shown::Plain => AppearanceSettings::default(),
     };
-    if shown == Shown::Pseudo {
-        caskade_ui_i18n::set_language("en-XA");
-    }
-    let built = settled(themes, theme, screen, root, ready, prefs, (WIDTH, HEIGHT));
-    if shown == Shown::Pseudo {
-        caskade_ui_i18n::set_language("en");
-    }
-    let (document, look) = built?;
+    let (document, look) = settled(themes, theme, screen, root, ready, prefs, (WIDTH, HEIGHT))?;
     let mut doc = document.inner.borrow_mut();
     let pixels = paint(&mut doc, WIDTH, HEIGHT);
     let name = format!("{screen}-{theme}");
