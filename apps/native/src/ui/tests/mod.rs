@@ -59,11 +59,16 @@ impl Window {
         window
     }
 
-    /// Renders, lays out, and lets the input layer's jobs run.
+    /// Renders, lays out, and lets the input layer's jobs run, until it's
+    /// quiet ([`crate::frame::tests::Quiet`]).
     pub(crate) fn settle(&mut self) {
+        let mut quiet = crate::frame::tests::Quiet::new();
         for _ in 0..40 {
-            blitz_dom::Document::poll(&mut self.doc, None);
+            let worked = blitz_dom::Document::poll(&mut self.doc, None);
             self.doc.inner.borrow_mut().resolve(0.0);
+            if quiet.after(worked) {
+                return;
+            }
             std::thread::sleep(Duration::from_millis(3));
         }
     }

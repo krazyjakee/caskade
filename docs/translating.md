@@ -63,7 +63,7 @@ The app compiles the catalogs in, so rebuild it after changing a PO file.
 just i18n-check
 ```
 
-It runs what CI runs (the `rust` job of `.github/workflows/ci.yml`) and fails, naming the file and the entry, on:
+It runs what CI runs (the `rust-checks` job of `.github/workflows/ci.yml`) and fails, naming the file and the entry, on:
 
 - a template or PO file that doesn't match the code (run `just i18n`);
 - a PO file `msgfmt --check` rejects (a broken header, a missing plural form, a line ending that differs from the English), plugins' and themes' included;

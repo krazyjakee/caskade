@@ -46,9 +46,12 @@ changes reach `caskade-native` (`scripts/ci-scope.py`'s `native`: its own
 files, any crate it builds on, the vendored Blitz, themes, translations or
 the token contracts; the `run-e2e` label too):
 
-- **rust** (Linux): `cargo test -p caskade-native` with the other app
-  suites (the headless layers), Clippy, formatting, and the stylesheet
-  check (`build-css.mjs --check`).
+- **rust-native** (Linux, two shards: Settings and the game page, then the
+  rest): caskade-native's headless view and component tests (its binary's
+  unit tests) with the other app suites' binaries and examples.
+- **rust** (Linux): the app suites' library, integration and doc tests.
+- **rust-checks** (Linux): Clippy, formatting, the stylesheet check
+  (`build-css.mjs --check`), translations and the anatomy generator.
 - **native** (Linux): the window tests under Xvfb with Mesa's lavapipe,
   then the screenshots and the Chromium comparison.
 - **native-macos**: `cargo check -p caskade-native --all-targets`. Running

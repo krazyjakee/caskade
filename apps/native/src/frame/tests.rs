@@ -37,6 +37,42 @@ pub(crate) fn source() -> &'static DataSource {
 /// Pad actions reach every input root listening: one window at a time.
 pub(crate) use crate::input::tests::ONE_WINDOW as ONE;
 
+/// Rounds in a row with nothing to do before a settle may end early.
+const QUIET_ROUNDS: usize = 8;
+
+/// Ends a headless window's settle once it has gone quiet (#137): for
+/// [`QUIET_ROUNDS`] rounds in a row its document had no work, and the app's
+/// runtime held no more tasks than when the settle began (a change, query or
+/// timer a view starts is a task there until it's done). A settle that never
+/// goes quiet still stops at its round limit, as before.
+pub(crate) struct Quiet {
+    tasks: usize,
+    rounds: usize,
+}
+
+impl Quiet {
+    pub(crate) fn new() -> Self {
+        Self {
+            tasks: runtime_tasks(),
+            rounds: 0,
+        }
+    }
+
+    /// After a round, `busy` if the document had work: whether to stop.
+    pub(crate) fn after(&mut self, busy: bool) -> bool {
+        self.rounds = if busy || runtime_tasks() > self.tasks {
+            0
+        } else {
+            self.rounds + 1
+        };
+        self.rounds >= QUIET_ROUNDS
+    }
+}
+
+fn runtime_tasks() -> usize {
+    caskade_app::runtime::handle().metrics().num_alive_tasks()
+}
+
 /// The page the next window opens on.
 pub(crate) static START: std::sync::Mutex<&str> = std::sync::Mutex::new("/");
 
@@ -85,12 +121,17 @@ impl Window {
     }
 
     pub(crate) fn settle(&mut self) {
+        let mut quiet = Quiet::new();
         for _ in 0..30 {
-            blitz_dom::Document::poll(&mut self.doc, None);
+            let worked = blitz_dom::Document::poll(&mut self.doc, None);
             // At the time that's passed, so entrances (`animate-enter`)
             // finish as in the app; at 0 they'd stay where they start.
             let now = CLOCK.get_or_init(Instant::now).elapsed().as_secs_f64();
             self.doc.inner.borrow_mut().resolve(now);
+            let animating = self.doc.inner.borrow().is_animating();
+            if quiet.after(worked || animating) {
+                return;
+            }
             std::thread::sleep(Duration::from_millis(3));
         }
     }
