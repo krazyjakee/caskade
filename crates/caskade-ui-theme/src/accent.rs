@@ -307,8 +307,22 @@ mod tests {
          inherits them)",
     )];
 
+    /// `css` without its comments.
+    fn uncommented(mut css: &str) -> String {
+        let mut out = String::with_capacity(css.len());
+        while let Some(start) = css.find("/*") {
+            out.push_str(&css[..start]);
+            css = css[start..]
+                .find("*/")
+                .map_or("", |end| &css[start + end + 2..]);
+        }
+        out.push_str(css);
+        out
+    }
+
     /// The declarations of the first `:root { … }` block in `css`.
     fn root_tokens(css: &str) -> Vec<(String, String)> {
+        let css = &uncommented(css);
         let Some(start) = css.find(":root {") else {
             return Vec::new();
         };

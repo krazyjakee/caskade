@@ -55,7 +55,7 @@ const NAMED_BY_CONTENTS: &[&str] = &[
 /// The lines of `tree` that are controls without a name: no name of their
 /// own, and for the roles named by their contents no text inside them
 /// either (a quoted line indented under them).
-fn unnamed(tree: &str) -> Vec<String> {
+pub(crate) fn unnamed(tree: &str) -> Vec<String> {
     let lines: Vec<&str> = tree.lines().collect();
     let indent = |line: &str| line.len() - line.trim_start().len();
     lines

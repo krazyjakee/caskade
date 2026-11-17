@@ -276,6 +276,8 @@ pub fn ActionsTab(
                                         && current.as_deref() == Some(action.id.as_str());
                                     rsx! {
                                         li { key: "{action.id}", role: "option",
+                                            // AccessKit doesn't name an option from its content (#127).
+                                            "aria-label": "{action.name}",
                                             "aria-selected": if is_selected { "true" } else { "false" },
                                             Button {
                                                 "data-part": "action",

@@ -239,11 +239,15 @@ fn home_is_driven_by_keys_alone() {
                     .any(|card| inside(window, node, card))
         },
     );
+    // Enter on a card opens its quick look, as a click does.
     window.key(Key::Named(NamedKey::Enter));
-    window.settle_until("the card's game", |window| {
-        matches!(window.route(), Route::Game { .. })
+    window.settle_until("the card's quick look", |window| {
+        window.find("data-cs", "quick-look").is_some()
     });
-    window.go("/");
+    window.key(Key::Named(NamedKey::Escape));
+    window.settle_until("the quick look closed", |window| {
+        window.find("data-cs", "quick-look").is_none()
+    });
     window.settle_until("Home's shelves again", |window| {
         window
             .find("data-focus-section", "shelf-released")

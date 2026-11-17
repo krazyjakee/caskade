@@ -455,7 +455,16 @@ fn every_control_in_the_install_picker_has_a_name() {
     );
     window.until("the locations", |w| w.find("#root-options").is_some());
     window.settle();
-    names_every_control(&window, "the install picker");
+    // The picker sits in whatever asks for a location (the install dialog
+    // in the app), here on its own: its own tree is checked.
+    let picker = window.find("[data-cs=install-root-picker]").unwrap();
+    let tree = crate::a11y_snapshot::snapshot_of(&window.doc.inner.borrow(), picker);
+    let unnamed = crate::frame::a11y_tests::unnamed(&tree);
+    assert!(
+        unnamed.is_empty(),
+        "the install picker: controls a screen reader can't name:\n{}",
+        unnamed.join("\n")
+    );
 }
 
 #[cfg(target_os = "linux")]

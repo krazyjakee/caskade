@@ -63,6 +63,15 @@ fn library() -> Library {
             })
             .await
             .unwrap();
+        // Set up already: a settings change mustn't bring first-run setup
+        // back over the frame (pad tests open the whole frame).
+        settings
+            .update("core.onboarding", |mut value: Value| {
+                value["completed"] = json!(true);
+                value
+            })
+            .await
+            .unwrap();
         let backups = caskade_backup::Backups::new(store, paths);
         backups.set_settings(service);
         // The status follows jobs through the backups' watch, as the app runs it.
