@@ -923,8 +923,9 @@ fn fixtures_mode() -> bool {
 
 /// Where the sync endpoint binds whatever the settings say: on 127.0.0.1
 /// only in fixtures mode (the window tests' runs), with no relays, address
-/// lookup, mDNS or router port mapping, so a run on fixture data sends
-/// nothing to the network (#135). `None`: where the settings say.
+/// lookup, mDNS or router port mapping, so sync sends nothing beyond
+/// loopback (#135). Other services still reach the network in fixtures
+/// mode (#167). `None`: where the settings say.
 fn sync_reach(fixtures: bool) -> Option<caskade_core::devices::Reach> {
     fixtures.then(caskade_core::devices::Reach::loopback)
 }
