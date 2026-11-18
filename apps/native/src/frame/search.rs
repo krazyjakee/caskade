@@ -272,7 +272,7 @@ pub fn SearchBox() -> Element {
                     match_width: true,
                     id: list_id,
                     "aria-label": t!("Search games"),
-                    class: "z-40 mt-1.5 max-h-[28rem] overflow-y-auto rounded-control border border-border-strong bg-surface-overlay p-1 shadow-xl shadow-black/40 outline-none",
+                    class: "z-40 mt-1.5 max-h-[28rem] overflow-y-auto overscroll-contain rounded-control border border-border-strong bg-surface-overlay p-1 shadow-xl shadow-black/40 outline-none",
                     for (index, game) in games.iter().enumerate() {
                         Suggestion {
                             key: "{game.id}",

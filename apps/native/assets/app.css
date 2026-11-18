@@ -1302,6 +1302,9 @@
   .overscroll-contain {
     overscroll-behavior: contain;
   }
+  .overscroll-x-contain {
+    overscroll-behavior-x: contain;
+  }
   .rounded {
     border-radius: 0.25rem;
   }

@@ -186,7 +186,7 @@ pub fn ScreenshotViewer(
                     }
                 }
                 if many {
-                    ol { "data-part": "strip", class: "flex shrink-0 gap-2 overflow-x-auto py-2",
+                    ol { "data-part": "strip", class: "flex shrink-0 gap-2 overflow-x-auto overscroll-x-contain py-2",
                         for (index, each) in shots.iter().enumerate() {
                             li { key: "{each.full}",
                                 button {
@@ -219,7 +219,7 @@ pub fn Videos(title: String, videos: Vec<IgdbVideo>) -> Element {
     rsx! {
         section { "data-cs": "videos", "aria-labelledby": "videos-heading", class: "mt-8",
             h2 { id: "videos-heading", class: "mb-3 font-display text-xl font-semibold", {t!("Videos")} }
-            ul { "data-part": "items", class: "flex gap-3 overflow-x-auto pb-2",
+            ul { "data-part": "items", class: "flex gap-3 overflow-x-auto overscroll-x-contain pb-2",
                 for (index, video) in videos.into_iter().enumerate() {
                     {
                         let name = video.name.clone().unwrap_or_else(|| {

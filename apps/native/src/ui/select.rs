@@ -223,7 +223,7 @@ pub(crate) fn List(
             role: "listbox",
             match_width: true,
             "aria-label": label,
-            class: "z-40 max-h-[60vh] overflow-y-auto rounded-control border border-border-strong bg-surface-overlay p-1 shadow-xl shadow-black/40 outline-none animate-enter",
+            class: "z-40 max-h-[60vh] overflow-y-auto overscroll-contain rounded-control border border-border-strong bg-surface-overlay p-1 shadow-xl shadow-black/40 outline-none animate-enter",
             on_key_down: move |event: KeyboardEvent| {
                 let known = nodes.peek().clone();
                 let order: Vec<(NodeId, String)> = enabled

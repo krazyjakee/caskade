@@ -228,7 +228,7 @@ pub(super) fn AddonDetails(
                     StateBadge { item: item.clone() }
                 }
                 if !entry.screenshots.is_empty() {
-                    ul { "data-part": "screenshots", "aria-label": t!("Screenshots"), class: "flex gap-3 overflow-x-auto",
+                    ul { "data-part": "screenshots", "aria-label": t!("Screenshots"), class: "flex gap-3 overflow-x-auto overscroll-x-contain",
                         for (index, shot) in entry.screenshots.iter().enumerate() {
                             li { key: "{shot.url}", class: "shrink-0",
                                 Screenshot { id: entry.id.clone(), index: index as u32, alt: shot.alt.clone() }

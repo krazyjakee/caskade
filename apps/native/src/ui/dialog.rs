@@ -53,7 +53,7 @@ pub fn Dialog(
     );
     rsx! {
         div {
-            class: "fixed inset-0 z-50 grid place-items-center bg-surface-base/80 p-4 backdrop-blur-sm",
+            class: "fixed inset-0 z-50 grid place-items-center overflow-hidden overscroll-contain bg-surface-base/80 p-4 backdrop-blur-sm",
             onclick: move |_| close(),
             div {
                 role: if alert { "alertdialog" } else { "dialog" },

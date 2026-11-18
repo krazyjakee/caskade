@@ -24,6 +24,7 @@ mod choice_tests;
 mod field_tests;
 mod game_tests;
 mod overlay_tests;
+mod scroll_tests;
 mod setting_row_tests;
 mod showcase_tests;
 mod toggle_tests;

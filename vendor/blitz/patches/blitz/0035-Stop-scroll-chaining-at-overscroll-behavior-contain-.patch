@@ -1,0 +1,273 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Nico Burns <nico.burns@cognition.ai>
+Date: Wed, 18 Nov 2026 13:27:56 +0000
+Subject: [PATCH] Stop scroll chaining at overscroll-behavior: contain and none
+
+Stylo already computes `overscroll-behavior`, but `BaseDocument::scroll`
+chained whatever a scroller couldn't consume regardless, so `contain` and
+`none` behaved like `auto`. Zero the remainder on an axis whose value is
+`contain` or `none` (they behave the same, as Blitz draws no overscroll
+effect). It applies to scroll containers only; the viewport takes the
+root element's value, and text inputs, which scroll their own content,
+honour it too.
+
+A wheel's notches (`scroll_chain_smoothly`, from the previous patch) walk
+the chain to the first scroller that can move; they stop at a contained
+axis the same way.
+
+Ported from blitz#1636 (fixes blitz#1629) onto the pinned revision, with
+the tests from blitz#1631 and one for a wheel's notch.
+---
+ packages/blitz-dom/src/scrolling.rs           |  68 ++++++++++-
+ tests/blitz-tests/tests/all.rs                |   1 +
+ .../blitz-tests/tests/overscroll_behavior.rs  | 110 ++++++++++++++++++
+ 3 files changed, 174 insertions(+), 5 deletions(-)
+ create mode 100644 tests/blitz-tests/tests/overscroll_behavior.rs
+
+diff --git a/packages/blitz-dom/src/scrolling.rs b/packages/blitz-dom/src/scrolling.rs
+index 19d7bfaf0..4fbab5214 100644
+--- a/packages/blitz-dom/src/scrolling.rs
++++ b/packages/blitz-dom/src/scrolling.rs
+@@ -3,12 +3,31 @@
+ 
+ use blitz_traits::events::{BlitzScrollEvent, DomEvent, DomEventData};
+ use blitz_traits::node_id::NodeId;
+-use style::values::computed::Overflow;
++use style::values::computed::{Overflow, OverscrollBehavior};
+ use stylo_taffy::CopyStyleGetters;
+ use web_time::{SystemTime, UNIX_EPOCH};
+ 
+-use crate::BaseDocument;
+ use crate::util::Point;
++use crate::{BaseDocument, Node};
++
++/// Whether the node's `overscroll-behavior` stops scroll chaining on the x and y axes.
++/// `contain` and `none` both do, as Blitz draws no overscroll effect.
++fn overscroll_contains(node: &Node) -> (bool, bool) {
++    let Some(styles) = node.primary_styles() else {
++        return (false, false);
++    };
++    let contains = |behavior| {
++        matches!(
++            behavior,
++            OverscrollBehavior::Contain | OverscrollBehavior::None
++        )
++    };
++    let box_styles = styles.get_box();
++    (
++        contains(box_styles.overscroll_behavior_x),
++        contains(box_styles.overscroll_behavior_y),
++    )
++}
+ 
+ #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+ pub enum ScrollBehavior {
+@@ -194,9 +213,10 @@ impl BaseDocument {
+ 
+         // Transfer the delta the target could not consume to the next scroller in the chain.
+         if request.overflow == ScrollOverflow::Chain {
++            let (contain_x, contain_y) = self.contains_scroll(target);
+             let remainder = Point {
+-                x: unclamped.x - end.x,
+-                y: unclamped.y - end.y,
++                x: if contain_x { 0.0 } else { unclamped.x - end.x },
++                y: if contain_y { 0.0 } else { unclamped.y - end.y },
+             };
+             if remainder != Point::ZERO {
+                 if let Some(next) = self.next_scroller_in_chain(target) {
+@@ -259,6 +279,15 @@ impl BaseDocument {
+ 
+         let has_changed = remainder != delta;
+ 
++        // Text inputs scroll their own content, so they need no scroll container check.
++        let (contain_x, contain_y) = overscroll_contains(&self.nodes[node_id]);
++        if contain_x {
++            remainder.x = 0.0;
++        }
++        if contain_y {
++            remainder.y = 0.0;
++        }
++
+         if remainder != Point::ZERO {
+             if let Some(next) = self.next_scroller_in_chain(ScrollTarget::Node(node_id)) {
+                 let request = ScrollRequest {
+@@ -273,6 +302,24 @@ impl BaseDocument {
+         Some(has_changed)
+     }
+ 
++    /// Whether `overscroll-behavior` stops scroll chaining out of `target` on the x and y axes.
++    /// The property applies to scroll containers only, and the viewport takes the root
++    /// element's value.
++    fn contains_scroll(&self, target: ScrollTarget) -> (bool, bool) {
++        let node = match target {
++            ScrollTarget::Viewport => self.try_root_element(),
++            ScrollTarget::Node(node_id) => self.nodes.get(node_id).filter(|node| {
++                let is_scroll_container =
++                    |overflow| !matches!(overflow, Overflow::Visible | Overflow::Clip);
++                node.primary_styles().is_some_and(|styles| {
++                    is_scroll_container(styles.clone_overflow_x())
++                        || is_scroll_container(styles.clone_overflow_y())
++                })
++            }),
++        };
++        node.map_or((false, false), overscroll_contains)
++    }
++
+     /// The scroller which unconsumed scroll is transferred to: the node's parent, or the
+     /// viewport once the chain runs out of nodes.
+     fn next_scroller_in_chain(&self, target: ScrollTarget) -> Option<ScrollTarget> {
+@@ -483,7 +530,7 @@ impl BaseDocument {
+         if self.viewport.prefers_reduced_motion {
+             return self.scroll_chain_by(anchor_node_id, scroll_x, scroll_y, dispatch_event);
+         }
+-        let delta = Point {
++        let mut delta = Point {
+             x: -scroll_x,
+             y: -scroll_y,
+         };
+@@ -535,6 +582,17 @@ impl BaseDocument {
+                 }
+                 return true;
+             }
++            // `overscroll-behavior` keeps the step from leaving this scroller on its axes.
++            let (contain_x, contain_y) = self.contains_scroll(target);
++            if contain_x {
++                delta.x = 0.0;
++            }
++            if contain_y {
++                delta.y = 0.0;
++            }
++            if delta == Point::ZERO {
++                return false;
++            }
+             match self.next_scroller_in_chain(target) {
+                 Some(next) => target = next,
+                 None => return false,
+diff --git a/tests/blitz-tests/tests/all.rs b/tests/blitz-tests/tests/all.rs
+index 104023b46..be6cae673 100644
+--- a/tests/blitz-tests/tests/all.rs
++++ b/tests/blitz-tests/tests/all.rs
+@@ -52,6 +52,7 @@ mod link_cursor;
+ mod link_rel_attribute;
+ mod oof_dynamic_cb;
+ mod outset_box_shadow_shape;
++mod overscroll_behavior;
+ mod paint_order;
+ mod paint_tree_bench;
+ mod paint_tree_incremental;
+diff --git a/tests/blitz-tests/tests/overscroll_behavior.rs b/tests/blitz-tests/tests/overscroll_behavior.rs
+new file mode 100644
+index 000000000..e3b0648f5
+--- /dev/null
++++ b/tests/blitz-tests/tests/overscroll_behavior.rs
+@@ -0,0 +1,110 @@
++//! `overscroll-behavior` stops scroll chaining: the part of a wheel scroll an inner scroller
++//! can't consume goes to the page behind it unless the scroller's `overscroll-behavior` on
++//! that axis is `contain` or `none`.
++
++use blitz_test_harness::Harness;
++
++/// A 100px square scroller holding a 1000px square child, on a page that scrolls both ways.
++fn page(scroller_style: &str) -> Harness {
++    Harness::from_html(&format!(
++        r#"<html><body style="margin:0; width:3000px; height:3000px">
++            <div id="scroller" style="width:100px; height:100px; overflow:auto; {scroller_style}">
++                <div style="width:1000px; height:1000px"></div>
++            </div>
++        </body></html>"#
++    ))
++}
++
++/// Scroll the scroller to its end on both axes, then keep scrolling, returning the page's
++/// scroll offset.
++fn overscroll(harness: &mut Harness) -> (f64, f64) {
++    harness.wheel_at(50.0, 50.0, -2000.0, -2000.0);
++    let scroller = harness.node("#scroller");
++    let offset = *harness.base().get_node(scroller).unwrap().scroll_offset();
++    assert_eq!((offset.x, offset.y), (900.0, 900.0));
++    harness.wheel_at(50.0, 50.0, -100.0, -100.0);
++    let page = harness.base().viewport_scroll();
++    (page.x, page.y)
++}
++
++#[test]
++fn auto_chains_to_the_page() {
++    assert_eq!(overscroll(&mut page("")), (1200.0, 1200.0));
++}
++
++#[test]
++fn contain_keeps_the_scroll() {
++    assert_eq!(
++        overscroll(&mut page("overscroll-behavior: contain")),
++        (0.0, 0.0)
++    );
++}
++
++#[test]
++fn none_keeps_the_scroll() {
++    assert_eq!(
++        overscroll(&mut page("overscroll-behavior: none")),
++        (0.0, 0.0)
++    );
++}
++
++#[test]
++fn applies_per_axis() {
++    assert_eq!(
++        overscroll(&mut page("overscroll-behavior-y: contain")),
++        (1200.0, 0.0)
++    );
++}
++
++#[test]
++fn ignored_on_a_box_that_is_not_a_scroll_container() {
++    let mut harness = Harness::from_html(
++        r#"<html><body style="margin:0; height:3000px">
++            <div style="overscroll-behavior: contain">
++                <div id="target" style="height:100px"></div>
++            </div>
++        </body></html>"#,
++    );
++    harness.wheel_at(50.0, 50.0, 0.0, -100.0);
++    assert_eq!(harness.base().viewport_scroll().y, 100.0);
++}
++
++#[test]
++fn applies_to_text_inputs() {
++    let text = "line\n".repeat(50);
++    let mut harness = Harness::from_html(&format!(
++        r#"<html><body style="margin:0; height:3000px">
++            <textarea id="input" style="display:block; width:100px; height:100px; overscroll-behavior:contain">{text}</textarea>
++        </body></html>"#
++    ));
++    harness.wheel_at(50.0, 50.0, 0.0, -5000.0);
++    harness.wheel_at(50.0, 50.0, 0.0, -100.0);
++    assert_eq!(harness.base().viewport_scroll().y, 0.0);
++}
++
++#[test]
++fn contain_keeps_a_wheel_notch() {
++    use blitz_traits::events::{
++        BlitzWheelDelta, BlitzWheelEvent, MouseEventButtons, PointerCoords, UiEvent,
++    };
++
++    let mut harness = page("overscroll-behavior: contain");
++    harness.wheel_at(50.0, 50.0, -2000.0, -2000.0);
++    harness.dispatch(UiEvent::Wheel(BlitzWheelEvent {
++        delta: BlitzWheelDelta::Lines(0.0, -3.0),
++        coords: PointerCoords {
++            page_x: 50.0,
++            page_y: 50.0,
++            screen_x: 50.0,
++            screen_y: 50.0,
++            client_x: 50.0,
++            client_y: 50.0,
++        },
++        buttons: MouseEventButtons::empty(),
++        mods: Default::default(),
++        element: Default::default(),
++    }));
++    harness.tick(1.0);
++    assert!(!harness.base().is_scroll_animating());
++    assert_eq!(harness.base().viewport_scroll().y, 0.0);
++}

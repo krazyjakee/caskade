@@ -139,7 +139,7 @@ fn ConsoleSidebar() -> Element {
             "data-focus-section": "sidebar",
             // Scrolls: on a 1280×800 screen (a Steam Deck) the list with the
             // Library's filters is taller than the window.
-            class: "relative z-10 flex w-sidebar shrink-0 flex-col overflow-y-auto border-r border-border bg-surface-raised/80 px-4 pb-6",
+            class: "relative z-10 flex w-sidebar shrink-0 flex-col overflow-y-auto overscroll-contain border-r border-border bg-surface-raised/80 px-4 pb-6",
             div { "data-part": "brand", class: "flex h-topbar shrink-0 items-center gap-3 px-3",
                 super::Brand { class: "size-10" }
                 span { class: "font-display text-xl font-semibold tracking-[0.3em]", "CASKADE" }

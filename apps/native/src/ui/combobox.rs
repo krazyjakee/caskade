@@ -237,7 +237,7 @@ pub fn Combobox(
                     match_width: true,
                     id: "{list_id}",
                     "aria-label": "{label}",
-                    class: "z-40 max-h-[60vh] overflow-y-auto rounded-control border border-border-strong bg-surface-overlay p-1 shadow-xl shadow-black/40 outline-none",
+                    class: "z-40 max-h-[60vh] overflow-y-auto overscroll-contain rounded-control border border-border-strong bg-surface-overlay p-1 shadow-xl shadow-black/40 outline-none",
                     for (index, option) in matches.iter().enumerate() {
                         div {
                             key: "{option.value}",

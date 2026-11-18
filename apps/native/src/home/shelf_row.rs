@@ -141,7 +141,7 @@ pub fn ShelfRow(
             {notice}
             div {
                 "data-part": "items",
-                class: "grid grid-flow-col gap-4 overflow-x-auto pb-4",
+                class: "grid grid-flow-col gap-4 overflow-x-auto overscroll-x-contain pb-4",
                 style: "grid-auto-columns: calc((100% - {gaps}px) / {count}); grid-auto-rows: {crate::library::GRID_ROW - GRID_GAP}px;",
                 onmounted: move |event| {
                     items.set(event.data().downcast::<NodeHandle>().cloned());

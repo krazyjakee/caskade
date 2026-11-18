@@ -3,12 +3,31 @@
 
 use blitz_traits::events::{BlitzScrollEvent, DomEvent, DomEventData};
 use blitz_traits::node_id::NodeId;
-use style::values::computed::Overflow;
+use style::values::computed::{Overflow, OverscrollBehavior};
 use stylo_taffy::CopyStyleGetters;
 use web_time::{SystemTime, UNIX_EPOCH};
 
-use crate::BaseDocument;
 use crate::util::Point;
+use crate::{BaseDocument, Node};
+
+/// Whether the node's `overscroll-behavior` stops scroll chaining on the x and y axes.
+/// `contain` and `none` both do, as Blitz draws no overscroll effect.
+fn overscroll_contains(node: &Node) -> (bool, bool) {
+    let Some(styles) = node.primary_styles() else {
+        return (false, false);
+    };
+    let contains = |behavior| {
+        matches!(
+            behavior,
+            OverscrollBehavior::Contain | OverscrollBehavior::None
+        )
+    };
+    let box_styles = styles.get_box();
+    (
+        contains(box_styles.overscroll_behavior_x),
+        contains(box_styles.overscroll_behavior_y),
+    )
+}
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum ScrollBehavior {
@@ -194,9 +213,10 @@ impl BaseDocument {
 
         // Transfer the delta the target could not consume to the next scroller in the chain.
         if request.overflow == ScrollOverflow::Chain {
+            let (contain_x, contain_y) = self.contains_scroll(target);
             let remainder = Point {
-                x: unclamped.x - end.x,
-                y: unclamped.y - end.y,
+                x: if contain_x { 0.0 } else { unclamped.x - end.x },
+                y: if contain_y { 0.0 } else { unclamped.y - end.y },
             };
             if remainder != Point::ZERO {
                 if let Some(next) = self.next_scroller_in_chain(target) {
@@ -259,6 +279,15 @@ impl BaseDocument {
 
         let has_changed = remainder != delta;
 
+        // Text inputs scroll their own content, so they need no scroll container check.
+        let (contain_x, contain_y) = overscroll_contains(&self.nodes[node_id]);
+        if contain_x {
+            remainder.x = 0.0;
+        }
+        if contain_y {
+            remainder.y = 0.0;
+        }
+
         if remainder != Point::ZERO {
             if let Some(next) = self.next_scroller_in_chain(ScrollTarget::Node(node_id)) {
                 let request = ScrollRequest {
@@ -271,6 +300,24 @@ impl BaseDocument {
         }
 
         Some(has_changed)
+    }
+
+    /// Whether `overscroll-behavior` stops scroll chaining out of `target` on the x and y axes.
+    /// The property applies to scroll containers only, and the viewport takes the root
+    /// element's value.
+    fn contains_scroll(&self, target: ScrollTarget) -> (bool, bool) {
+        let node = match target {
+            ScrollTarget::Viewport => self.try_root_element(),
+            ScrollTarget::Node(node_id) => self.nodes.get(node_id).filter(|node| {
+                let is_scroll_container =
+                    |overflow| !matches!(overflow, Overflow::Visible | Overflow::Clip);
+                node.primary_styles().is_some_and(|styles| {
+                    is_scroll_container(styles.clone_overflow_x())
+                        || is_scroll_container(styles.clone_overflow_y())
+                })
+            }),
+        };
+        node.map_or((false, false), overscroll_contains)
     }
 
     /// The scroller which unconsumed scroll is transferred to: the node's parent, or the
@@ -483,7 +530,7 @@ impl BaseDocument {
         if self.viewport.prefers_reduced_motion {
             return self.scroll_chain_by(anchor_node_id, scroll_x, scroll_y, dispatch_event);
         }
-        let delta = Point {
+        let mut delta = Point {
             x: -scroll_x,
             y: -scroll_y,
         };
@@ -534,6 +581,17 @@ impl BaseDocument {
                     self.show_scrollbars(node_id);
                 }
                 return true;
+            }
+            // `overscroll-behavior` keeps the step from leaving this scroller on its axes.
+            let (contain_x, contain_y) = self.contains_scroll(target);
+            if contain_x {
+                delta.x = 0.0;
+            }
+            if contain_y {
+                delta.y = 0.0;
+            }
+            if delta == Point::ZERO {
+                return false;
             }
             match self.next_scroller_in_chain(target) {
                 Some(next) => target = next,

@@ -182,7 +182,7 @@ pub fn Menu(
                 "data-part": "list",
                 role: "menu",
                 "aria-label": label,
-                class: "max-h-[70vh] overflow-y-auto outline-none",
+                class: "max-h-[70vh] overflow-y-auto overscroll-contain outline-none",
                 onmounted: move |event| list.set(event.data().downcast::<NodeHandle>().cloned()),
                 onkeydown: move |event| {
                     let known = nodes.peek().clone();
