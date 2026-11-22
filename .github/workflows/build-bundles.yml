@@ -1,7 +1,8 @@
 name: build bundles
 # The release's build legs (#110, #143): Caskade for Linux (deb, AppImage),
 # Windows (NSIS) and macOS on Apple silicon and Intel (app, dmg, updater
-# tarball), uploaded as workflow artifacts named `bundles-<target>`. Each
+# tarball), uploaded as workflow artifacts named `bundles-<target>` (and
+# Windows's unbundled files as `staged-<target>`, for sign-windows.yml). Each
 # carries caskade-native as its `caskade` executable, with the pinned 7-Zip
 # beside it, packaged by the Tauri CLI's bundler (`tauri bundle`, a build
 # tool only: apps/native/Tauri.toml). Called by `release` (from a tag, then
@@ -166,6 +167,18 @@ jobs:
         if: contains(matrix.target, '-linux-')
         shell: bash
         run: python3 scripts/check-bundled-7zz.py "$RUNNER_TEMP"/bundles/*.deb "$RUNNER_TEMP"/bundles/*.AppImage
+
+      # Windows's executable and 7-Zip as staged, for sign-windows.yml to
+      # bundle again, signed, without building anything.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: contains(matrix.target, '-windows-')
+        with:
+          name: staged-${{ matrix.target }}
+          path: |
+            target/${{ matrix.target }}/release/caskade.exe
+            apps/native/binaries/
+          if-no-files-found: error
+          retention-days: 7
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

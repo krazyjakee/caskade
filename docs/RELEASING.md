@@ -8,7 +8,8 @@ commit per publish.)
 The workflow builds Linux x86_64 (deb and AppImage, on Ubuntu 22.04 so the
 AppImage runs on older glibc), Windows x86_64 (NSIS installer) and macOS on
 Apple silicon and Intel (app and dmg). It signs and notarizes the macOS app
-and dmg with Caskade's Developer ID, signs the updater bundles, uploads
+and dmg with Caskade's Developer ID, code-signs the Windows installer and the
+Caskade it installs with a Certum certificate, signs the updater bundles, uploads
 everything to a draft release with a `latest.json` for the in-app updater, and
 checks that `latest.json` lists all four platforms. Nothing reaches users until
 you publish the draft: the updater reads
@@ -40,8 +41,13 @@ The jobs, in order:
   tickets, and checks them with macOS's `codesign`, `spctl` and `stapler`
   (`scripts/macos/sign.sh`, below). Only this job and `prepare` see the Apple
   secrets, and it installs no project dependencies.
-- `sign` downloads the artifacts, takes the notarized macOS files in place
-  of the build legs' unsigned ones, and signs the updater bundles with
+- `windows-sign` (`.github/workflows/sign-windows.yml`, on a Windows runner)
+  logs in to Certum's cloud signing, bundles the Windows leg's `caskade.exe`
+  again with the pinned Tauri CLI, signing as it goes, and checks the result
+  with a silent install (below). Only this job and `prepare` see the
+  SimplySign secrets; it builds nothing and installs no project dependencies.
+- `sign` downloads the artifacts, takes the notarized macOS files and the
+  signed Windows installer in place of the build legs' unsigned ones, and signs the updater bundles with
   `tauri signer sign` from the Tauri CLI version in `pnpm-lock.yaml`. It runs
   no project code. It writes `latest.json` and uploads everything to the
   draft. Only this job and `prepare` see the key.
@@ -55,7 +61,9 @@ workflow (Actions → bundles → Run workflow, or
 runs the same build legs and leaves the bundles as the run's artifacts
 (`bundles-<target>`, kept 7 days): no tag, no draft, no signatures, no
 secrets. Its macOS app is only ad-hoc signed, so a downloaded copy needs
-`xattr -dr com.apple.quarantine` before macOS opens it.
+`xattr -dr com.apple.quarantine` before macOS opens it, and its Windows
+installer isn't code-signed (the `windows signing smoke` workflow can sign
+it, below).
 
 ## The bundler
 
@@ -140,6 +148,11 @@ it only to make updater bundles.
    `prepare` stops the release when either is missing: a macOS build that
    isn't notarized is one macOS calls damaged after a download.
 
+6. Give the workflow the Windows signing login, `SIMPLYSIGN_USER` and
+   `SIMPLYSIGN_TOTP_SECRET`, and the variable `WINDOWS_TIMESTAMP_URL`
+   (`http://time.certum.pl`). See Windows code signing, below. `prepare`
+   stops the release when either secret is missing.
+
 ## macOS signing and notarization
 
 `scripts/macos/sign.sh` signs with [rcodesign] (apple-codesign 0.29.0; the
@@ -209,6 +222,74 @@ Account Holder accepts them on developer.apple.com.
 [rcodesign]: https://github.com/indygreg/apple-platform-rs
 [certs]: https://developer.apple.com/account/resources/certificates/list
 [asc]: https://appstoreconnect.apple.com/access/integrations/api
+
+## Windows code signing
+
+The Windows installer, `caskade.exe`, the uninstaller and the installer's
+NSIS plugins are signed with the Certum "Open Source Code Signing in the
+Cloud" certificate that MoGen and daccord also use. It is issued to "Open
+Source Developer Jacob Cattrall" and expires 2027-08-11; Caskade qualifies
+because it is public and open source. Its key can't be exported and stays
+in Certum's cloud, so there is no `.pfx`:
+
+- `scripts/windows/simplysign-login.ps1` installs SimplySign Desktop on the
+  runner (a pinned version, its checksum and Authenticode signature
+  checked), makes the one-time code from `SIMPLYSIGN_TOTP_SECRET` (the
+  whole `otpauth://` link: Certum's codes are HMAC-SHA256), logs in as
+  `SIMPLYSIGN_USER` (the account ID in Certum CertManager) and waits for the
+  certificate to appear in `Cert:\CurrentUser\My`. It hands its SHA-1
+  fingerprint to later steps as `WINDOWS_CERT_SHA1`.
+- `scripts/windows/sign.ps1` signs with that certificate through
+  `signtool`, timestamps with `WINDOWS_TIMESTAMP_URL` (Certum's
+  `http://time.certum.pl` when unset; tried three times) and checks each
+  file with `signtool verify /pa`. It never signs the pinned 7-Zip
+  (`7zz.exe`, `7z.dll`): the app accepts those by their SHA-256
+  (`SevenZip::pinned`), and a signature would change their bytes.
+- `sign-windows.yml` gives the Tauri CLI's bundler `sign.ps1` as its
+  `bundle.windows.signCommand` and bundles the build leg's staged files
+  (the `staged-x86_64-pc-windows-msvc` artifact) again. The bundler signs
+  `caskade.exe` before packing it, the NSIS plugins, the uninstaller as
+  NSIS writes it, and the setup `.exe`; `TAURI_SKIP_SIDECAR_SIGNATURE_CHECK`
+  keeps it off the sidecar 7zz. The job then checks the 7-Zip files are
+  unchanged, installs the setup silently and checks that the installed
+  `caskade.exe` and `uninstall.exe` and the setup are signed, trusted and
+  timestamped, and that the installed 7-Zip is the pinned one.
+
+The signed setup `.exe` replaces the unsigned one before the `sign` job
+makes its updater signature, so updates install signed files too. A
+release never falls back to an unsigned installer: missing secrets stop
+`prepare`, and any failed login, signature, timestamp or check stops the
+release.
+
+To check the credentials without a release, run the `windows signing smoke`
+workflow (Actions → windows signing smoke → Run workflow): it signs and
+verifies a throwaway `.exe`. Give it a `bundles` run's id to also sign that
+run's Windows build exactly as a release does:
+
+```sh
+gh workflow run windows-signing-smoke.yml --repo krazyjakee/caskade --ref master -f bundles-run=<run id>
+```
+
+Things to know:
+
+- **Renewal**: the scripts find the certificate at login, not by a stored
+  fingerprint, so renewing it with Certum needs no secret changes.
+- **Don't use "Odzyskaj dostęp"** (recover access) in CertManager: it would
+  most likely issue a new TOTP secret, and signing would break in Caskade,
+  MoGen and daccord until all three secrets are updated.
+- **Shared login**: the three repos log in to the same SimplySign account.
+  Caskade's own signing jobs queue behind each other (the `simplysign`
+  concurrency group), but don't run a Caskade release while MoGen or daccord
+  is signing.
+- **Who can sign**: with the TOTP secret in CI, two-factor login becomes one
+  factor for anyone who can change these repos' workflows or secrets.
+- **Unsigned files**: only the pinned 7-Zip, by design (above).
+- **Moving the secrets**: GitHub secrets can't be read back. They came from
+  MoGen through a temporary workflow on a throwaway branch there, which
+  encrypted each with this repo's secrets public key and printed only the
+  ciphertext, then `PUT /repos/krazyjakee/caskade/actions/secrets/<name>`;
+  the branch and its run were deleted afterwards. Do the same to copy them
+  to another repo.
 
 ## Cutting a release
 
@@ -287,9 +368,10 @@ version running or keep the folder after an uninstall.
 
 The macOS app and dmg are signed with Caskade's Developer ID and notarized,
 with the tickets stapled, so they open after a download, offline too. The
-Windows installer isn't code-signed yet: SmartScreen warns about an unknown
-publisher (More info → Run anyway). The updater signature is separate from
-OS code signing and is always checked.
+Windows installer and what it installs are code-signed and timestamped
+(Windows code signing, above); SmartScreen may still warn about a new
+certificate until it has built a reputation. The updater signature is
+separate from OS code signing and is always checked.
 
 ## What the bundles contain
 

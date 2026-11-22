@@ -1,0 +1,67 @@
+name: windows signing smoke
+# Checks Windows code signing without a release (Actions → windows signing
+# smoke → Run workflow). Always: logs in to SimplySign, signs a throwaway
+# .exe and verifies it, so the credentials can be checked in a few minutes.
+# With a `bundles` run's id: also signs that run's Windows build the way a
+# release does (sign-windows.yml) and leaves the installer as this run's
+# artifact. See docs/RELEASING.md, Windows code signing.
+on:
+  workflow_dispatch:
+    inputs:
+      bundles-run:
+        description: A bundles run's id, to sign its Windows build too (optional)
+        required: false
+        type: string
+        default: ""
+permissions:
+  contents: read
+
+jobs:
+  credentials:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    concurrency:
+      group: simplysign
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: A throwaway .exe
+        shell: pwsh
+        run: |
+          $source = Join-Path $env:RUNNER_TEMP 'caskade-signing-smoke.cs'
+          $target = Join-Path $env:RUNNER_TEMP 'caskade-signing-smoke.exe'
+          'public static class Program { public static void Main() {} }' | Set-Content -Path $source -Encoding ascii
+          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo "/out:$target" $source
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path $target)) { throw 'Could not compile the throwaway .exe.' }
+          "SMOKE_EXE=$target" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Open the SimplySign session
+        shell: pwsh
+        env:
+          SIMPLYSIGN_USER: ${{ secrets.SIMPLYSIGN_USER }}
+          SIMPLYSIGN_TOTP_SECRET: ${{ secrets.SIMPLYSIGN_TOTP_SECRET }}
+          SIMPLYSIGN_TIMEOUT_SEC: 60
+        run: ./scripts/windows/simplysign-login.ps1 -Required
+
+      - name: Sign and verify it
+        shell: pwsh
+        env:
+          WINDOWS_TIMESTAMP_URL: ${{ vars.WINDOWS_TIMESTAMP_URL || 'http://time.certum.pl' }}
+        run: ./scripts/windows/sign.ps1 $env:SMOKE_EXE
+
+  bundle:
+    needs: credentials
+    if: inputs.bundles-run != ''
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/sign-windows.yml
+    with:
+      ref: ${{ github.sha }}
+      run-id: ${{ inputs.bundles-run }}
+    secrets:
+      SIMPLYSIGN_USER: ${{ secrets.SIMPLYSIGN_USER }}
+      SIMPLYSIGN_TOTP_SECRET: ${{ secrets.SIMPLYSIGN_TOTP_SECRET }}
