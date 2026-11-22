@@ -15,7 +15,7 @@
   is not documented in Certum's public user guide, but it is the application's
   own non-interactive login entry point. This script:
 
-    1. installs SimplySign Desktop if it isn't already present,
+    1. installs SimplySign Desktop (a pinned MSI) if it isn't already present,
     2. derives the current TOTP from the enrolment secret,
     3. launches the app in its direct auto-login mode,
     4. polls Cert:\CurrentUser\My until the cloud certificate shows up,
@@ -157,18 +157,10 @@ function Find-SimplySign {
 }
 
 function Install-SimplySign {
-    $winget = Get-Command winget -ErrorAction SilentlyContinue
-    if ($winget) {
-        Write-Host "Installing SimplySign Desktop via winget..."
-        & $winget.Source install --id Certum.SmartSignSimplySignDesktop --exact --silent `
-            --accept-package-agreements --accept-source-agreements --disable-interactivity
-        if ($LASTEXITCODE -eq 0) { return }
-        Write-Warn "winget install returned $LASTEXITCODE; trying Certum's pinned MSI."
-    }
-
-    # GitHub's windows-2022 image intentionally has no Microsoft Store and no
-    # winget. Certum publishes the same 64-bit installer directly; pin its hash
-    # so a mutable download URL can never silently change release signing code.
+    # Certum's own 64-bit installer, pinned by version and hash, so a mutable
+    # download URL can never silently change release signing code. Never
+    # winget: windows-latest has it now, and it installs whatever version its
+    # manifest names that day. A version Certum withdraws fails here, loudly.
     $version = '9.4.4.92'
     $uri = "https://files.certum.eu/software/SimplySignDesktop/Windows/$version/SimplySignDesktop-$version-64-bit-en.msi"
     $expectedSha256 = '8ec420fc27798b86078b7bd02fe7152097e1b3005bab51820eaca8e57df84da3'
