@@ -7,7 +7,7 @@ warm-proton.py>`, holding `~/caskade-cache/native/share`:
 
 ```
 native/share/caskade/umu/1.4.4/umu/umu-run
-native/share/umu/steamrt3/
+native/share/umu/steamrt<N>/   (steamrt4 since UMU-Proton 11.0-2e; steamrt3 before)
 native/share/Steam/compatibilitytools.d/UMU-Proton-<version>/
 ```
 

@@ -31,6 +31,18 @@ def tree(root):
     return sorted((str(p.relative_to(root)),os.readlink(p) if p.is_symlink() else p.read_text() if p.is_file() else None) for p in root.rglob('*'))
 
 class RunnerTools(unittest.TestCase):
+    def test_proton_takes_whichever_steam_runtime_umu_warmed(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);share=warmed_cache(root/'cache')
+            self.assertEqual(proton.prepare(root/'cache',root/'a/share')['runtime'],'steamrt3')
+            (share/'umu/steamrt4').mkdir()
+            self.assertEqual(proton.prepare(root/'cache',root/'b/share')['runtime'],'steamrt4')
+            (share/'umu/steamrt3').rmdir()
+            self.assertEqual(proton.prepare(root/'cache',root/'c/share')['runtime'],'steamrt4')
+            (share/'umu/steamrt4').rmdir();(share/'umu/steamrt-old').mkdir()
+            with self.assertRaisesRegex(ValueError,'no warmed umu Steam Runtime'):
+                proton.prepare(root/'cache',root/'d/share')
+
     def test_corpus_discards_links_oversized_and_non_hash_names_and_deduplicates(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

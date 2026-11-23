@@ -40,6 +40,15 @@ def clear(share, relative):
                     writable(Path(root, name))
         shutil.rmtree(path)
 
+def steam_runtime(source):
+    """The Steam Runtime umu warmed: the one its UMU-Proton runs on, steamrt3
+    before UMU-Proton 11.0-2e (18 Nov 2026), steamrt4 since. The newest if both."""
+    found = [path.name for path in (source / 'umu').glob('steamrt*')
+             if path.is_dir() and re.fullmatch(r'steamrt\d+', path.name)]
+    if not found:
+        raise ValueError('cache has no warmed umu Steam Runtime (steamrt<N>)')
+    return max(found, key=lambda name: int(name.removeprefix('steamrt')))
+
 def prepare(cache, destination):
     source = cache / 'native/share'
     for relative in DIRECTORIES:
@@ -52,8 +61,7 @@ def prepare(cache, destination):
     builds = sorted((path for path in (source / 'Steam/compatibilitytools.d').glob('UMU-Proton*') if (path / 'proton').is_file()), key=lambda path: [int(part) if part.isdigit() else part.lower() for part in re.split(r'(\d+)', path.name)])
     if not builds:
         raise ValueError('cache has no UMU-Proton build; GE-Proton is not the native acceptance default')
-    if not (source / 'umu/steamrt3').is_dir():
-        raise ValueError('cache has no warmed umu Steam Runtime (steamrt3)')
+    runtime = steam_runtime(source)
     # The last component stays unresolved: if it is a stale link, clear() removes
     # the link instead of the tree it points at.
     absolute = Path(os.path.abspath(destination))
@@ -68,7 +76,7 @@ def prepare(cache, destination):
     environment = {'XDG_DATA_HOME':str(share), 'PROTONPATH':str(proton),
                    'XDG_CACHE_HOME':str(share.parent / 'cache'), 'XDG_CONFIG_HOME':str(share.parent / 'config')}
     return {'schema_version':1, 'source_cache':str(source), 'umu_version':'1.4.4',
-            'proton':builds[-1].name, 'runtime':'steamrt3', 'environment':environment}
+            'proton':builds[-1].name, 'runtime':runtime, 'environment':environment}
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
