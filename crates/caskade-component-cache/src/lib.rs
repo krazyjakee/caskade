@@ -253,7 +253,7 @@ fn load(engine: &Engine, artifact: Trusted<'_>) -> wasmtime::Result<Component> {
 /// The wasmtime version these artifacts are for.
 pub fn wasmtime_version() -> &'static str {
     // Cargo.toml pins wasmtime exactly; a test checks the two agree.
-    "50.0.1"
+    "50.0.3"
 }
 
 #[cfg(test)]
