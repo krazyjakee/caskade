@@ -3041,6 +3041,7 @@ msgid "Devices & streaming"
 msgstr "Enheter och streaming"
 
 #: apps/native/src/frame/status_bar.rs
+#: apps/native/src/library/grid.rs
 msgid "Devices out of reach"
 msgstr "Enheter utom räckhåll"
 
@@ -4762,6 +4763,14 @@ msgstr "Installerat"
 #: apps/native/src/settings/emulation/setup.rs
 msgid "Installed by Caskade"
 msgstr "Installerad av Caskade"
+
+#: apps/native/src/library/grid.rs
+msgid "Installed on another device"
+msgstr "Installerat på en annan enhet"
+
+#: apps/native/src/library/grid.rs
+msgid "Installed on {devices}"
+msgstr "Installerat på {devices}"
 
 #: apps/native/src/settings/plugins.rs
 #: apps/native/src/settings/search/search_index.rs
@@ -10494,6 +10503,10 @@ msgstr "Det här jobbet behöver ett svar i Aktivitet innan det kan fortsätta."
 msgid "This launch comes from where the game was found, which keeps it up to date. Duplicate it to change what it starts."
 msgstr "Den här starten kommer från där spelet hittades, som håller den aktuell. Duplicera den för att ändra vad den startar."
 
+#: apps/native/src/library/view.rs
+msgid "This machine only"
+msgstr "Endast den här enheten"
+
 #: apps/native/src/flows/manual_game.rs
 msgid "This may already be in your library"
 msgstr "Det här kan redan finnas i ditt bibliotek"
@@ -12523,6 +12536,10 @@ msgstr "{count} versioner"
 #: apps/native/src/frame/status_bar.rs
 msgid "{description} · {queued} queued"
 msgstr "{description} · {queued} i kö"
+
+#: apps/native/src/library/grid.rs
+msgid "{devices} out of reach"
+msgstr "{devices} utom räckhåll"
 
 #: apps/native/src/settings/streaming/stream_from.rs
 msgid "{device} declined."

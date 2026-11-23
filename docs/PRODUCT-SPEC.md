@@ -41,6 +41,8 @@ Views:
 | **Activity** | Jobs (downloads, installs, updates, copies, questions waiting for an answer) and the notification feed, opened from the topbar's bell. |
 | **Settings** | General, Appearance, Plugins · Discovery, Launchers, Store accounts, Storage, Installer · Emulation, Scripts · Devices, Streaming · Profile, Accounts · Backup, Statistics, About. Searchable. |
 
+The Library's **This machine only** toggle starts on and hides games whose installed copies are all on other devices. Turn it off to see those games. Their device icon names the other machines on hover, and the library greys out the game when every machine with a copy is out of reach.
+
 Choosing a game opens its quick look: a side panel in desktop mode, the page itself in console mode. Double-clicking a game in the library plays it, as its menu's Play does; its card and quick look say Starting… at once, until the game runs. Every game card, hero, search result and release row opens the same game menu: Play or Stop, Play with…, tools, open the page, favourite, Add to collection…, Edit…, Share with someone…, open or copy its folder, move, uninstall, hide, and plugins' actions.
 
 ## 4. Features in place

@@ -3019,6 +3019,7 @@ msgid "Devices & streaming"
 msgstr ""
 
 #: apps/native/src/frame/status_bar.rs
+#: apps/native/src/library/grid.rs
 msgid "Devices out of reach"
 msgstr ""
 
@@ -4733,6 +4734,14 @@ msgstr ""
 
 #: apps/native/src/settings/emulation/setup.rs
 msgid "Installed by Caskade"
+msgstr ""
+
+#: apps/native/src/library/grid.rs
+msgid "Installed on another device"
+msgstr ""
+
+#: apps/native/src/library/grid.rs
+msgid "Installed on {devices}"
 msgstr ""
 
 #: apps/native/src/settings/plugins.rs
@@ -10436,6 +10445,10 @@ msgstr ""
 msgid "This launch comes from where the game was found, which keeps it up to date. Duplicate it to change what it starts."
 msgstr ""
 
+#: apps/native/src/library/view.rs
+msgid "This machine only"
+msgstr ""
+
 #: apps/native/src/flows/manual_game.rs
 msgid "This may already be in your library"
 msgstr ""
@@ -12452,6 +12465,10 @@ msgstr ""
 #. The running task, then how many wait after it
 #: apps/native/src/frame/status_bar.rs
 msgid "{description} · {queued} queued"
+msgstr ""
+
+#: apps/native/src/library/grid.rs
+msgid "{devices} out of reach"
 msgstr ""
 
 #: apps/native/src/settings/streaming/stream_from.rs

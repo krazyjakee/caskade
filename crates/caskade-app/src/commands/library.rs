@@ -62,9 +62,10 @@ pub async fn library_platforms(
     store: &LibraryStore,
     accounts: &AccountService,
     filter: GameFilter,
+    local_only: bool,
 ) -> Result<Vec<PlatformSummary>, CommandError> {
     store
-        .library_platforms_for_account(filter, accounts.active_id().as_deref())
+        .library_platforms_for_scope(filter, accounts.active_id().as_deref(), local_only)
         .await
         .map_err(report)
 }
@@ -87,8 +88,16 @@ pub async fn library_stats(
     store: &LibraryStore,
     accounts: &AccountService,
 ) -> Result<LibraryStats, CommandError> {
+    library_stats_for_scope(store, accounts, false).await
+}
+
+pub async fn library_stats_for_scope(
+    store: &LibraryStore,
+    accounts: &AccountService,
+    local_only: bool,
+) -> Result<LibraryStats, CommandError> {
     store
-        .library_stats_for_account(accounts.active_id().as_deref())
+        .library_stats_for_scope(accounts.active_id().as_deref(), local_only)
         .await
         .map_err(report)
 }

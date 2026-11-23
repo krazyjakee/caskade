@@ -9,6 +9,9 @@ use sqlx::{QueryBuilder, Sqlite};
 /// An entry's state alone, as on the game page: discovered launchers
 /// (`.desktop` files, many Lutris games) are installed without a folder.
 const INSTALLED: &str = "EXISTS(SELECT 1 FROM game_entries e WHERE e.game_id=g.id AND e.state_kind IN ('installed','updating','broken'))";
+/// The entries created from other devices' installed-copy announcements.
+const PEER_ENTRIES: &str =
+    " FROM game_entries pe WHERE pe.game_id=g.id AND pe.source_id LIKE 'peer:%'";
 /// Tracked sessions plus what reported totals add (#169, `db::playtime`).
 const PLAYTIME: &str = "(coalesce((SELECT sum(s.duration_ms) FROM play_sessions s WHERE s.game_id=g.id),0)+coalesce((SELECT sum(r.counted_ms) FROM remote_playtime r JOIN game_entries re ON re.id=r.entry_id WHERE re.game_id=g.id),0))";
 /// Owned by a store account that still owns it (#170).
@@ -176,7 +179,12 @@ impl LibraryStore {
         let mut query = QueryBuilder::<Sqlite>::new("SELECT ");
         age_blocked(&mut query, account);
         query.push(" AS admin_pin_needed,g.record_json,");
-        query.push(INSTALLED).push(" AS installed,").push(PLAYTIME).push(" AS playtime_ms,").push(RECENT).push(" AS last_played_at_ms,").push(played_on()).push(" AS played_on,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='cover' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.id LIMIT 1) AS cover,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='icon' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.record_json->>'$.source' LIKE 'igdb:%' DESC,a.id LIMIT 1) AS icon FROM (SELECT g.id,");
+        query
+            .push(INSTALLED)
+            .push(" AS installed,(SELECT json_group_array(DISTINCT substr(pe.source_id,6))")
+            .push(PEER_ENTRIES)
+            .push(") AS remote_device_ids,");
+        query.push(PLAYTIME).push(" AS playtime_ms,").push(RECENT).push(" AS last_played_at_ms,").push(played_on()).push(" AS played_on,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='cover' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.id LIMIT 1) AS cover,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='icon' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.record_json->>'$.source' LIKE 'igdb:%' DESC,a.id LIMIT 1) AS icon FROM (SELECT g.id,");
         query.push(key).push(" AS k FROM games g WHERE g.hidden=");
         query.push_bind(hidden);
         filters(&mut query, request, collection, hidden);
@@ -194,6 +202,7 @@ impl LibraryStore {
                 bool,
                 String,
                 bool,
+                sqlx::types::Json<Vec<String>>,
                 i64,
                 Option<i64>,
                 Option<String>,
@@ -216,7 +225,17 @@ impl LibraryStore {
         let items = rows
             .into_iter()
             .filter_map(
-                |(admin_pin_needed, record, installed, duration, last, played_on, cover, icon)| {
+                |(
+                    admin_pin_needed,
+                    record,
+                    installed,
+                    remote_devices,
+                    duration,
+                    last,
+                    played_on,
+                    cover,
+                    icon,
+                )| {
                     let game: Game = decode(record)
                         .inspect_err(
                             |error| tracing::warn!(%error, "game record unreadable; left out"),
@@ -238,6 +257,7 @@ impl LibraryStore {
                         cover: image(cover),
                         icon: image(icon),
                         installed,
+                        remote_device_ids: remote_devices.0,
                         playtime_ms: duration as u64,
                         last_played_at_ms: last,
                         last_played_on: played_on.and_then(|text| {
@@ -270,8 +290,18 @@ impl LibraryStore {
         filter: GameFilter,
         account: Option<&str>,
     ) -> Result<Vec<PlatformSummary>> {
+        self.library_platforms_for_scope(filter, account, false)
+            .await
+    }
+    pub async fn library_platforms_for_scope(
+        &self,
+        filter: GameFilter,
+        account: Option<&str>,
+        local_only: bool,
+    ) -> Result<Vec<PlatformSummary>> {
         let request = ListGames {
             filter,
+            local_only,
             ..Default::default()
         };
         let mut query = QueryBuilder::<Sqlite>::new("SELECT p.value,count(*),coalesce(sum(");
@@ -328,6 +358,13 @@ impl LibraryStore {
         self.library_stats_for_account(None).await
     }
     pub async fn library_stats_for_account(&self, account: Option<&str>) -> Result<LibraryStats> {
+        self.library_stats_for_scope(account, false).await
+    }
+    pub async fn library_stats_for_scope(
+        &self,
+        account: Option<&str>,
+        local_only: bool,
+    ) -> Result<LibraryStats> {
         // Each tab's count; play time is the whole library's. Ready to
         // Install counts other devices' copies that can come here (#232).
         let copyable = super::sync_copies::copyable_here_sql();
@@ -335,6 +372,7 @@ impl LibraryStore {
             "SELECT coalesce(sum(n),0),coalesce(sum(n AND {INSTALLED}),0),coalesce(sum(n AND g.favorite),0),coalesce(sum(n AND {RECENT} IS NOT NULL),0),coalesce(sum(n AND {EMULATED}),0),coalesce(sum({WEB}),0),coalesce(sum({PLAYTIME}),0),coalesce(sum(n AND ({OWNED} OR {copyable}) AND NOT {INSTALLED}),0) FROM (SELECT g.*,{NOT_WEB_ONLY} AS n FROM games g WHERE g.hidden=0"
         );
         let mut query = QueryBuilder::<Sqlite>::new(query);
+        local_games(&mut query, local_only);
         age_visibility(&mut query, &ListGames::default(), account);
         query.push(") g");
         let (total, installed, favorites, recent, emulated, web, playtime, owned): (
@@ -391,6 +429,7 @@ fn filters(
     collection: Option<&str>,
     hidden: bool,
 ) {
+    local_games(query, request.local_only);
     if request.filter != GameFilter::Web && collection.is_none() && !hidden {
         query.push(" AND ").push(NOT_WEB_ONLY);
     }
@@ -460,6 +499,17 @@ fn filters(
             .push(" AND g.rowid IN (SELECT rowid FROM game_search WHERE game_search MATCH ")
             .push_bind(long.join(" AND "))
             .push(")");
+    }
+}
+
+fn local_games(query: &mut QueryBuilder<Sqlite>, local_only: bool) {
+    if local_only {
+        query
+            .push(" AND (")
+            .push(INSTALLED)
+            .push(" OR NOT EXISTS(SELECT 1")
+            .push(PEER_ENTRIES)
+            .push("))");
     }
 }
 

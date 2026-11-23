@@ -39,6 +39,7 @@ async fn real_library_commands_filter_search_page_and_read_sessions() {
     let query = |filter: GameFilter, text: Option<&str>, offset: u32| ListGames {
         query: text.map(str::to_owned),
         filter,
+        local_only: false,
         platform: None,
         sort: GameSort::Title,
         offset,

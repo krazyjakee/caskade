@@ -30,6 +30,123 @@ fn open(href: &str) -> Window {
 }
 
 #[test]
+fn library_hides_games_on_other_machines_by_default_and_can_show_them() {
+    use crate::data::{DataSource, use_data_source};
+    use caskade_core::model::{Game, GameEntry, InstallState, SourceId};
+    use caskade_core::{
+        accounts::AccountService, bus::Bus, db::LibraryStore, launch::LaunchService,
+    };
+    use dioxus_native::{DioxusDocument, prelude::*};
+    use std::sync::OnceLock;
+
+    static SOURCE: OnceLock<DataSource> = OnceLock::new();
+
+    fn app() -> Element {
+        use_data_source(|| SOURCE.get().unwrap().clone());
+        rsx! {
+            style { {include_str!("../../assets/app.css")} }
+            crate::input::InputRoot {
+                crate::frame::Frame { start: "/library?filter=all&sort=title" }
+            }
+        }
+    }
+
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    SOURCE.get_or_init(|| {
+        caskade_app::runtime::block_on(async {
+            let store = LibraryStore::in_memory().await.unwrap();
+            let local = Game::new("Local game");
+            let remote = Game::new("Remote game");
+            store.upsert_games(&[local, remote.clone()]).await.unwrap();
+            let mut peer = GameEntry::new(&remote.id, SourceId::new("peer:den"), "copy");
+            peer.state = InstallState::Partial;
+            store.upsert_entry(&peer).await.unwrap();
+            let bus = Bus::default();
+            let accounts = AccountService::open(store.clone(), bus.clone())
+                .await
+                .unwrap();
+            let launch = LaunchService::new(store.clone());
+            let mut source = DataSource::fixtures(0).await.unwrap();
+            source.library = caskade_ui_data::Library::new(store, accounts, launch, bus);
+            source
+        })
+    });
+    let mut doc = DioxusDocument::new(
+        VirtualDom::new(app),
+        blitz_dom::DocumentConfig {
+            viewport: Some(blitz_traits::shell::Viewport::new(
+                1280,
+                800,
+                1.0,
+                blitz_traits::shell::ColorScheme::Dark,
+            )),
+            ..Default::default()
+        },
+    );
+    doc.initial_build();
+    let mut window = Window { doc };
+    window.settle_until("the local game", |window| {
+        window.view_text().contains("Local game")
+    });
+    assert!(!window.view_text().contains("Remote game"));
+    let toggle = window.get("data-part", "this-machine-only");
+    assert_eq!(window.attr(toggle, "aria-pressed").as_deref(), Some("true"));
+    window.click(toggle);
+    window.settle_until("the greyed-out remote card", |window| {
+        window.find("data-device-status", "offline").is_some()
+    });
+    assert_eq!(
+        window
+            .attr(window.get("data-part", "this-machine-only"), "aria-pressed")
+            .as_deref(),
+        Some("false")
+    );
+    let card = window.get("data-device-status", "offline");
+    assert!(window.text(card).contains("Remote game"));
+    assert!(window.find_in(card, "data-part", "remote-device").is_some());
+
+    window.go("/library?filter=all&layout=list");
+    window.settle_until("the greyed-out remote row", |window| {
+        window
+            .find("data-device-status", "offline")
+            .is_some_and(|node| window.attr(node, "data-cs").as_deref() == Some("game-row"))
+    });
+}
+
+#[test]
+fn a_reachable_machine_with_a_copy_keeps_the_game_bright() {
+    use caskade_core::devices::{DeviceLink, DeviceOs, PairedDevice};
+
+    let ids = ["den".to_owned(), "deck".to_owned()];
+    let paired = |id: &str, name: &str, link| PairedDevice {
+        id: id.into(),
+        name: name.into(),
+        kind: Default::default(),
+        os: DeviceOs::Linux,
+        link,
+        addresses: Vec::new(),
+        last_sync_ms: None,
+        paired_at_ms: 0,
+        syncing: false,
+        sync_error: None,
+    };
+    let mut devices = [
+        paired("den", "Den", DeviceLink::Offline),
+        paired("deck", "Deck", DeviceLink::Lan),
+        paired("other", "Other", DeviceLink::Lan),
+    ];
+    let reachable = super::grid::remote_copy(&ids, Some(&devices));
+    assert!(!reachable.offline);
+    assert_eq!(reachable.label, "Installed on Deck, Den");
+
+    devices[1].link = DeviceLink::Offline;
+    let offline = super::grid::remote_copy(&ids, Some(&devices));
+    assert!(offline.offline);
+    assert_eq!(offline.label, "Deck, Den out of reach");
+}
+
+#[test]
 fn the_sort_menu_and_the_lists_headers_sort_the_library() {
     let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();

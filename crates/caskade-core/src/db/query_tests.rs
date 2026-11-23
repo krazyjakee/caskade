@@ -5,6 +5,66 @@ use crate::model::*;
 use std::time::{Duration, Instant};
 
 #[tokio::test]
+async fn this_machine_only_excludes_peer_only_games_before_counting_and_paging() {
+    let store = LibraryStore::in_memory().await.unwrap();
+    let (local, _) = game_entry(&store, "Local and remote").await;
+    let remote = Game::new("Remote only");
+    let uninstalled = Game::new("Uninstalled here");
+    store
+        .upsert_games(&[remote.clone(), uninstalled.clone()])
+        .await
+        .unwrap();
+    for (game, source, copy) in [
+        (&local, "peer:den", "local-copy"),
+        (&remote, "peer:den", "remote-copy"),
+        (&remote, "peer:den", "second-copy"),
+        (&remote, "peer:laptop", "laptop-copy"),
+    ] {
+        let mut entry = GameEntry::new(&game.id, SourceId::new(source), copy);
+        entry.state = InstallState::Partial;
+        store.upsert_entry(&entry).await.unwrap();
+    }
+
+    let all = store.list_games(&ListGames::default()).await.unwrap();
+    assert_eq!(all.total, 3);
+    let peer = all.items.iter().find(|game| game.id == remote.id).unwrap();
+    assert!(!peer.installed);
+    assert_eq!(peer.remote_device_ids.len(), 2);
+    assert!(peer.remote_device_ids.contains(&"den".to_owned()));
+    assert!(peer.remote_device_ids.contains(&"laptop".to_owned()));
+
+    let query = ListGames {
+        local_only: true,
+        limit: 1,
+        offset: 1,
+        ..Default::default()
+    };
+    let page = store.list_games(&query).await.unwrap();
+    assert_eq!(page.total, 2);
+    assert_eq!(page.items[0].id, uninstalled.id);
+    assert_eq!(
+        store.game_ids(&query).await.unwrap(),
+        [local.id, uninstalled.id]
+    );
+    assert_eq!(
+        store
+            .library_stats_for_scope(None, true)
+            .await
+            .unwrap()
+            .total,
+        2
+    );
+    let letters = store.title_letters(&query).await.unwrap();
+    assert_eq!(
+        letters
+            .iter()
+            .map(|letter| letter.letter.as_str())
+            .collect::<Vec<_>>(),
+        ["L", "U"]
+    );
+}
+
+#[tokio::test]
 async fn search_triggers_cover_title_sort_aliases_tags_updates_deletes_and_literal_queries() {
     let store = LibraryStore::in_memory().await.unwrap();
     let mut game = Game::new("Café Adventure");

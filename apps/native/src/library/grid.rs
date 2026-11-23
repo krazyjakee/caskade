@@ -17,8 +17,9 @@ use super::window::{Frame, Layout, PAGE};
 use crate::data::{DataSource, change};
 use crate::input::{Bind, use_input, use_input_action};
 use crate::router::{LibraryRoute, RouteLink};
-use crate::ui::{CardGame, GameCard, GameRow};
+use crate::ui::{CardGame, GameCard, GameRow, RemoteCopy};
 use blitz_dom::ScrollBehavior;
+use caskade_core::devices::{DeviceLink, PairedDevice};
 use caskade_core::model::{GameSort, GameSummary, ListGames, TitleLetter};
 use caskade_ui_data::{Changed, Key as DataKey};
 use caskade_ui_i18n::{t, tp};
@@ -656,6 +657,28 @@ fn scroll_to(handle: &NodeHandle, top: f64, input: &crate::input::Input) {
     input.scrolled_by_code();
 }
 
+pub(super) fn remote_copy(device_ids: &[String], devices: Option<&[PairedDevice]>) -> RemoteCopy {
+    let peers: Vec<_> = devices
+        .unwrap_or_default()
+        .iter()
+        .filter(|device| device_ids.contains(&device.id))
+        .collect();
+    let offline = devices.is_some()
+        && peers
+            .iter()
+            .all(|device| device.link == DeviceLink::Offline);
+    let mut names: Vec<_> = peers.iter().map(|device| device.name.as_str()).collect();
+    names.sort_unstable();
+    names.dedup();
+    let label = match (offline, names.is_empty()) {
+        (false, false) => t!("Installed on {devices}", devices = names.join(", ")),
+        (true, false) => t!("{devices} out of reach", devices = names.join(", ")),
+        (false, true) => t!("Installed on another device"),
+        (true, true) => t!("Devices out of reach"),
+    };
+    RemoteCopy { label, offline }
+}
+
 /// The list's columns (`LibraryRow.tsx`'s `listColumns`): title, status,
 /// last played, playtime, size and actions, its header's; the rows' cells
 /// are as wide.
@@ -786,11 +809,27 @@ pub(crate) fn Game(
     let focus_key = format!("game-{}", game.id);
     // A pad starts on the first game.
     let first = (focus_first && index == 0).then_some("true");
+    let cover = (!list)
+        .then(|| art::url(game.cover.as_ref(), Variant::Card))
+        .flatten();
+    let mut card = CardGame::from_summary(&game, cover);
+    if !game.installed
+        && !game.remote_device_ids.is_empty()
+        && let Some(super::view::LibraryDevices(devices)) = try_consume_context()
+    {
+        let status = devices.read();
+        let paired = match &*status {
+            Some(Ok(Some(status))) => Some(status.devices.as_slice()),
+            Some(Ok(None)) => Some(&[][..]),
+            _ => None,
+        };
+        card.remote_copy = Some(remote_copy(&game.remote_device_ids, paired));
+    }
     let card = if list {
         let icon = art::url(game.icon.as_ref(), Variant::Icon);
         rsx! {
             GameRow {
-                game: CardGame::from_summary(&game, None),
+                game: card,
                 icon,
                 selected,
                 starting,
@@ -819,8 +858,6 @@ pub(crate) fn Game(
             }
         }
     } else {
-        let cover = art::url(game.cover.as_ref(), Variant::Card);
-        let mut card = CardGame::from_summary(&game, cover);
         if show_played_on {
             card.played_on = crate::home::played_on_label(game.last_played_on.as_ref());
         }

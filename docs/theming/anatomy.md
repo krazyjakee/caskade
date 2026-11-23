@@ -116,6 +116,7 @@ variant of the component, such as the library's card.
 - [`stop-host`](#stop-host): Stop the other game? (#264, #265): asked at Play when the device to stream from is playing another game; progress it hasn't saved is lost.
 - [`quick-look`](#quick-look): A game at a glance over the current view: in desktop mode a column on the right that a click on a game opens, in console mode a modal from a pad's X on a card; X again plays it.
 - [`collection-picker`](#collection-picker): Add to collection… in a game's menu (#99): a checkbox per manual collection that puts the game in it or takes it out at once, and a new collection with the game in it. Smart collections pick their own games, so they aren't listed.
+- [`library-view`](#library-view): Browse the library in a grid or list.
 - [`selection-bar`](#selection-bar): The bar of a library or collection view in selection mode: how many games are chosen, choosing the loaded ones or all of them, clearing, the bulk editor and Done.
 - [`games-refresh-start`](#games-refresh-start): Starts refreshing the chosen games' details and artwork from the built-in sources: missing details only, or the automatic ones fetched again.
 - [`bulk-editor`](#bulk-editor): One edit on the chosen games: the fields to change, a preview of what changes in which game, and what saved.
@@ -326,6 +327,7 @@ Root: `[data-cs="game-card"]`
 | `stores` | `[data-cs="game-card"] [data-part="stores"]` | How many stores sell it. |
 | `owned` | `[data-cs="game-card"] [data-part="owned"]` | Shown instead of stores when you own it. |
 | `favorite` (app only) | `[data-cs="game-card"] [data-part="favorite"]` | The favourite heart. |
+| `remote-device` (app only) | `[data-cs="game-card"] [data-part="remote-device"]` | The device icon for a game installed only on other devices. |
 | `storage-availability` (app only) | `[data-cs="game-card"] [data-part="storage-availability"]` | Shown when the managed copy is unavailable. |
 | `plugins` (app only) | `[data-cs="game-card"] [data-part="plugins"]` | Badges and overlays contributed by plugins. |
 | `select` (app only) | `[data-cs="game-card"] [data-part="select"]` | In selection mode, the check that shows whether the game is chosen. |
@@ -340,6 +342,7 @@ State on the root:
 - `data-status`: `installed`, `not-installed`, `available`, `emulated`
 - `data-variant`: `library`, `recent`, `store`, `web`
 - `data-storage-status` (app only): `unavailable`
+- `data-device-status` (app only): `remote`, `offline`
 - `data-tile` (app only): `small`, `large`, `huge`
 - `data-selected` (app only): `true`
 
@@ -356,6 +359,7 @@ Root: `[data-cs="game-row"]`
 | `icon` | `[data-cs="game-row"] [data-part="icon"]` | The game's icon, or its initial on generated art. |
 | `title` | `[data-cs="game-row"] [data-part="title"]` | The game's title; links to the game and covers the row. |
 | `favorite` | `[data-cs="game-row"] [data-part="favorite"]` | The favourite heart. |
+| `remote-device` | `[data-cs="game-row"] [data-part="remote-device"]` | The device icon for a game installed only on other devices. |
 | `storage-availability` | `[data-cs="game-row"] [data-part="storage-availability"]` | Shown when the managed copy is unavailable. |
 | `plugins` | `[data-cs="game-row"] [data-part="plugins"]` | Badges contributed by plugins. |
 | `badge` | `[data-cs="game-row"] [data-part="badge"]` | The status (a `status-badge`). |
@@ -372,6 +376,7 @@ State on the root:
 
 - `data-status`: `installed`, `not-installed`, `emulated`
 - `data-storage-status`: `unavailable`
+- `data-device-status`: `remote`, `offline`
 - `data-selected`: `true`
 
 Contains: [`status-badge`](#status-badge)
@@ -1726,6 +1731,19 @@ Root: `[data-cs="collection-picker"]`
 | `collections` | `[data-cs="collection-picker"] [data-part="collections"]` | The manual collections, a `checkbox` each. |
 
 Contains: [`checkbox`](#checkbox), [`text-field`](#text-field), [`button`](#button)
+
+## `library-view`
+
+Browse the library in a grid or list. Rendered by LibraryView (apps/native/src/library/view.rs).
+
+Root: `[data-cs="library-view"]`
+
+| Part | Selector | What it is |
+| --- | --- | --- |
+| `toolbar` | `[data-cs="library-view"] [data-part="toolbar"]` | The library's browse and view controls. |
+| `this-machine-only` | `[data-cs="library-view"] [data-part="this-machine-only"]` | The toggle that hides games installed only on other devices. |
+
+Contains: [`button`](#button), [`virtual-library`](#virtual-library)
 
 ## `selection-bar`
 

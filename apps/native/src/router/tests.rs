@@ -39,7 +39,7 @@ fn hrefs_read_and_write_as_tanstack_routers() {
 fn every_page_of_the_webview_parses_and_writes_back() {
     for href in [
         "/",
-        "/library?filter=installed&sort=title&layout=list&q=zelda&platform=SNES",
+        "/library?filter=installed&sort=title&layout=list&q=zelda&platform=SNES&remote=false",
         "/games/abc?from=%2Flibrary%3Ffilter%3Dall%26sort%3Drecent%26layout%3Dgrid",
         "/activity?tab=notifications&unread=true&open=n1",
         "/store?tab=upcoming&sort=popular&q=dark&platform=6&genre=12&year=2001&tbd=true",
@@ -82,6 +82,7 @@ fn a_library_link_leaving_things_out_comes_back_to_the_remembered_view() {
             filter: GameFilter::Favorites,
             sort: GameSort::Title,
             layout: Layout::List,
+            show_remote: false,
         },
         settings_tab: Some("storage"),
     };
@@ -217,7 +218,7 @@ fn navigation_remembers_the_library_view_and_the_last_page() {
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("native-views.json");
     let mut history = History::new(Memory::load(Some(file.clone())));
-    history.push("/library?filter=installed&sort=title&layout=list");
+    history.push("/library?filter=installed&sort=title&layout=list&remote=true");
     // A search keeps the remembered filter; its sort and layout stay.
     history.push("/library?filter=all&sort=title&layout=list&q=zelda");
     history.push("/collections/weekend");
@@ -228,6 +229,7 @@ fn navigation_remembers_the_library_view_and_the_last_page() {
             filter: GameFilter::Installed,
             sort: GameSort::Title,
             layout: Layout::List,
+            show_remote: true,
         }
     );
     assert_eq!(memory.last_view(), Some("/collections/weekend"));

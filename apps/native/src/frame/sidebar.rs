@@ -188,7 +188,7 @@ pub(super) fn LibraryNav(#[props(default)] console: bool) -> Element {
     let Route::Library(library) = &route else {
         return rsx! {};
     };
-    let stats = crate::data::use_library_stats();
+    let stats = crate::data::use_browsing_stats();
     let stats = stats
         .read()
         .as_ref()

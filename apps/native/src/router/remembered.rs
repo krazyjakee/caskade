@@ -23,6 +23,8 @@ struct SavedLibrary {
     filter: GameFilter,
     sort: GameSort,
     layout: String,
+    #[serde(default)]
+    show_remote: bool,
 }
 
 /// Where navigation's memory is kept: a file, or nowhere (fixtures mode,
@@ -47,6 +49,7 @@ impl Memory {
                 filter: library.filter,
                 sort: library.sort,
                 layout: Layout::parse(&library.layout),
+                show_remote: library.show_remote,
             })
             .unwrap_or_default();
         Self {
@@ -92,6 +95,7 @@ impl Memory {
                     filter,
                     sort: library.sort,
                     layout: library.layout,
+                    show_remote: library.show_remote,
                 };
                 changed |= prefs != self.remembered.library;
                 self.remembered.library = prefs;
@@ -121,6 +125,7 @@ impl Memory {
                 filter: library.filter,
                 sort: library.sort,
                 layout: library.layout.name().into(),
+                show_remote: library.show_remote,
             }),
             last_view: self.last_view.clone(),
         };

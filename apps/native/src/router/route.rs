@@ -88,6 +88,7 @@ pub struct LibraryPrefs {
     pub filter: GameFilter,
     pub sort: GameSort,
     pub layout: Layout,
+    pub show_remote: bool,
 }
 
 impl Default for LibraryPrefs {
@@ -96,6 +97,7 @@ impl Default for LibraryPrefs {
             filter: GameFilter::Recent,
             sort: GameSort::Recent,
             layout: Layout::Grid,
+            show_remote: false,
         }
     }
 }
@@ -114,6 +116,7 @@ pub struct LibraryRoute {
     pub filter: GameFilter,
     pub sort: GameSort,
     pub layout: Layout,
+    pub show_remote: bool,
     pub q: Option<String>,
     pub platform: Option<String>,
     /// No link named the filter: the user didn't choose it here.
@@ -198,6 +201,10 @@ fn library(href: &Href, remembered: &Remembered) -> LibraryRoute {
     let saved = remembered.library;
     let filter_given = href.get("filter").is_some();
     LibraryRoute {
+        show_remote: match href.get("remote") {
+            Some(Value::Bool(show_remote)) => *show_remote,
+            _ => saved.show_remote,
+        },
         filter: pick(&LIBRARY_FILTERS, filter_name, href.get_text("filter"))
             .unwrap_or(saved.filter),
         sort: pick(&SORTS, sort_name, href.get_text("sort")).unwrap_or(saved.sort),
@@ -326,6 +333,7 @@ impl Route {
                 .text("layout", Some(library.layout.name()))
                 .text("q", library.q.as_deref())
                 .text("platform", library.platform.as_deref())
+                .with("remote", Some(Value::Bool(library.show_remote)))
                 .with("opening", library.opening.then_some(Value::Bool(true))),
             Self::Game { id, from } => {
                 Href::new(format!("/games/{}", href::segment(id))).text("from", from.as_deref())

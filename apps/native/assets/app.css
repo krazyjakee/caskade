@@ -2230,6 +2230,9 @@
   .opacity-60 {
     opacity: 60%;
   }
+  .opacity-70 {
+    opacity: 70%;
+  }
   .opacity-100 {
     opacity: 100%;
   }
@@ -2835,6 +2838,9 @@
   .aria-pressed\:border-accent-alt[aria-pressed="true"] {
     border-color: var(--cs-color-accent-alt);
   }
+  .aria-pressed\:text-accent-alt[aria-pressed="true"] {
+    color: var(--cs-color-accent-alt);
+  }
   .aria-pressed\:text-fg[aria-pressed="true"] {
     color: var(--cs-color-fg);
   }
@@ -3188,6 +3194,9 @@
   }
   .data-\[cursor\=hidden\]\:cursor-none[data-cursor="hidden"] {
     cursor: none;
+  }
+  .data-\[device-status\=offline\]\:text-fg-muted[data-device-status="offline"] {
+    color: var(--cs-color-fg-muted);
   }
   .data-\[included\=false\]\:opacity-60[data-included="false"] {
     opacity: 60%;

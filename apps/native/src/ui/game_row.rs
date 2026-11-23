@@ -7,7 +7,7 @@ use caskade_ui_i18n::t;
 use caskade_ui_theme::anatomy::{Entry, Source};
 use dioxus_native::prelude::*;
 
-use super::game_card::CardGame;
+use super::game_card::{CardGame, RemoteCopy, RemoteCopyBadge};
 use super::icons::{CHECK, HEART, Svg};
 use super::interact::{Keys, flag, use_interaction};
 use super::status_badge::StatusBadge;
@@ -20,6 +20,10 @@ pub const ANATOMY: Entry = Entry {
             "The game's title; links to the game and covers the row.",
         ),
         ("favorite", "The favourite heart."),
+        (
+            "remote-device",
+            "The device icon for a game installed only on other devices.",
+        ),
         (
             "storage-availability",
             "Shown when the managed copy is unavailable.",
@@ -42,6 +46,7 @@ pub const ANATOMY: Entry = Entry {
     states: &[
         ("data-status", &["installed", "not-installed", "emulated"]),
         ("data-storage-status", &["unavailable"]),
+        ("data-device-status", &["remote", "offline"]),
         ("data-selected", &["true"]),
     ],
     contains: &["status-badge"],
@@ -106,20 +111,27 @@ pub fn GameRow(
         .next()
         .map(|c| c.to_uppercase().to_string())
         .unwrap_or_default();
+    let icon_tone = if game.remote_copy.as_ref().is_some_and(|copy| copy.offline) {
+        "grayscale opacity-70"
+    } else {
+        ""
+    };
     rsx! {
         div {
             role: "link",
             tabindex: "0",
-            "aria-label": "{game.title}",
+            "aria-label": game.accessible_name(),
             "aria-pressed": selected.map(|selected| if selected { "true" } else { "false" }),
             "data-cs": "game-row",
             "data-status": game.status.name(),
             "data-storage-status": game.storage_unavailable.then_some("unavailable"),
+            "data-device-status": game.remote_copy.as_ref().map(RemoteCopy::status),
             "data-selected": selected.and_then(flag),
             "data-focus-key": focus_key,
             "data-hovered": interaction.hovered(),
             "data-focus-visible": interaction.ring(),
-            class: if table { "relative flex h-full items-center gap-3 border-b border-border px-2 outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over" } else { "relative flex h-full items-center gap-4 border-b border-border px-3 outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over" },
+            class: "relative flex h-full items-center border-b border-border outline-none data-hovered:bg-surface-hover data-focus-visible:focus-ring-over data-[device-status=offline]:text-fg-muted",
+            class: if table { "gap-3 px-2" } else { "gap-4 px-3" },
             onfocusin: move |_| {
                 interaction.focus();
                 if let Some(on_focus) = on_focus {
@@ -146,7 +158,7 @@ pub fn GameRow(
                     }
                 }
             }
-            div { "data-part": "icon", "aria-hidden": "true", class: "grid size-7 shrink-0 place-items-center overflow-hidden rounded bg-surface-hover text-xs text-fg-muted",
+            div { "data-part": "icon", "aria-hidden": "true", class: "grid size-7 shrink-0 place-items-center overflow-hidden rounded bg-surface-hover text-xs text-fg-muted {icon_tone}",
                 if let Some(icon) = icon {
                     img { src: "{icon}", alt: "", class: "size-full object-cover" }
                 } else {
@@ -154,6 +166,9 @@ pub fn GameRow(
                 }
             }
             span { "data-part": "title", class: "min-w-0 grow truncate text-sm", "{game.title}" }
+            if let Some(copy) = game.remote_copy.clone() {
+                RemoteCopyBadge { copy }
+            }
             if starting {
                 span { "data-part": "starting", class: "shrink-0 text-xs text-fg-muted", {t!("Starting…")} }
             }

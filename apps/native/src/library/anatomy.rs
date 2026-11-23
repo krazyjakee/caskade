@@ -6,6 +6,7 @@ use caskade_ui_theme::anatomy::{Entry, Source};
 
 /// Every catalogued root the library view renders.
 pub const ANATOMY: &[Entry] = &[
+    LIBRARY_VIEW,
     SELECTION_BAR,
     GAMES_REFRESH_START,
     BULK_EDITOR,
@@ -15,6 +16,23 @@ pub const ANATOMY: &[Entry] = &[
     COLLECTION_DIALOG,
     ADD_WEB_GAME,
 ];
+
+pub const LIBRARY_VIEW: Entry = Entry {
+    parts: &[
+        ("toolbar", "The library's browse and view controls."),
+        (
+            "this-machine-only",
+            "The toggle that hides games installed only on other devices.",
+        ),
+    ],
+    contains: &["button", "virtual-library"],
+    ..Entry::new(
+        "library-view",
+        "LibraryView (apps/native/src/library/view.rs)",
+        Source::App,
+        "Browse the library in a grid or list.",
+    )
+};
 
 pub const SELECTION_BAR: Entry = Entry {
     parts: &[

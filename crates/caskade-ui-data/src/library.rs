@@ -97,9 +97,21 @@ impl Library {
         library::library_stats(&self.store, &self.accounts).await
     }
 
+    pub async fn stats_for_scope(&self, local_only: bool) -> Result<LibraryStats> {
+        library::library_stats_for_scope(&self.store, &self.accounts, local_only).await
+    }
+
     /// The platforms of a filter's games.
     pub async fn platforms(&self, filter: GameFilter) -> Result<Vec<PlatformSummary>> {
-        library::library_platforms(&self.store, &self.accounts, filter).await
+        self.platforms_for_scope(filter, false).await
+    }
+
+    pub async fn platforms_for_scope(
+        &self,
+        filter: GameFilter,
+        local_only: bool,
+    ) -> Result<Vec<PlatformSummary>> {
+        library::library_platforms(&self.store, &self.accounts, filter, local_only).await
     }
 
     /// Where each initial letter starts in a title-sorted query.

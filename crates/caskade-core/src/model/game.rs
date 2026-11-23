@@ -183,6 +183,9 @@ pub enum GameSort {
 pub struct ListGames {
     pub query: Option<String>,
     pub filter: GameFilter,
+    /// Exclude games with installed copies only on another device.
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    pub local_only: bool,
     /// Only games on this platform.
     pub platform: Option<String>,
     pub sort: GameSort,
@@ -194,6 +197,7 @@ impl Default for ListGames {
         Self {
             query: None,
             filter: GameFilter::All,
+            local_only: false,
             platform: None,
             sort: GameSort::Title,
             offset: 0,
@@ -223,6 +227,9 @@ pub struct GameSummary {
     /// The game's icon, for compact rows.
     pub icon: Option<Artwork>,
     pub installed: bool,
+    /// Devices that announced an installed copy of this game.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub remote_device_ids: Vec<String>,
     pub playtime_ms: u64,
     pub last_played_at_ms: Option<i64>,
     /// The other device its latest session was played on; `None` when it

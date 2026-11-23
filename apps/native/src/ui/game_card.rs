@@ -10,7 +10,9 @@ use caskade_ui_theme::anatomy::{Entry, Source};
 use dioxus_native::prelude::*;
 
 use super::game_art::GameArt;
-use super::icons::{CHECK, CIRCLE_CHECK, CLOCK, HARD_DRIVE, HEART, STORE, Svg};
+use super::icons::{
+    CHECK, CIRCLE_CHECK, CLOCK, HARD_DRIVE, HEART, LINK_2_OFF, MONITOR_SMARTPHONE, STORE, Svg,
+};
 use super::interact::{Keys, flag, use_interaction};
 use super::status_badge::{GameStatus, StatusBadge};
 
@@ -30,6 +32,10 @@ pub const ANATOMY: Entry = Entry {
         ("stores", "How many stores sell it."),
         ("owned", "Shown instead of stores when you own it."),
         ("favorite", "The favourite heart."),
+        (
+            "remote-device",
+            "The device icon for a game installed only on other devices.",
+        ),
         (
             "storage-availability",
             "Shown when the managed copy is unavailable.",
@@ -59,6 +65,7 @@ pub const ANATOMY: Entry = Entry {
         ),
         ("data-variant", &["library", "recent", "store", "web"]),
         ("data-storage-status", &["unavailable"]),
+        ("data-device-status", &["remote", "offline"]),
         ("data-tile", &["small", "large", "huge"]),
         ("data-selected", &["true"]),
     ],
@@ -71,6 +78,8 @@ pub const ANATOMY: Entry = Entry {
         "played-on",
         "starting",
         "data-storage-status",
+        "remote-device",
+        "data-device-status",
         "data-tile",
         "data-selected",
     ],
@@ -132,9 +141,41 @@ pub struct CardGame {
     pub played_on: Option<String>,
     /// The signed-in account's age limit holds it back (#106).
     pub admin_pin_needed: bool,
+    /// Installed only on other devices.
+    pub remote_copy: Option<RemoteCopy>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RemoteCopy {
+    pub label: String,
+    pub offline: bool,
+}
+
+impl RemoteCopy {
+    pub(super) fn status(&self) -> &'static str {
+        if self.offline { "offline" } else { "remote" }
+    }
+}
+
+#[component]
+pub(super) fn RemoteCopyBadge(copy: RemoteCopy) -> Element {
+    rsx! {
+        super::Tooltip { text: copy.label,
+            span { "data-part": "remote-device", "aria-hidden": "true", class: "flex shrink-0 items-center text-fg-muted",
+                Svg { icon: if copy.offline { LINK_2_OFF } else { MONITOR_SMARTPHONE }, class: "size-4" }
+            }
+        }
+    }
 }
 
 impl CardGame {
+    pub(super) fn accessible_name(&self) -> String {
+        self.remote_copy.as_ref().map_or_else(
+            || self.title.clone(),
+            |copy| format!("{}, {}", self.title, copy.label),
+        )
+    }
+
     /// A library game, with its cover's URL.
     pub fn from_summary(game: &GameSummary, cover: Option<String>) -> Self {
         Self {
@@ -225,22 +266,24 @@ pub fn GameCard(
         .last_played_ms
         .map(crate::library::date_time)
         .unwrap_or_else(|| caskade_ui_i18n::format::last_played(None));
+    let offline = game.remote_copy.as_ref().is_some_and(|copy| copy.offline);
     rsx! {
         div {
             role: "link",
             tabindex: "0",
-            "aria-label": "{game.title}",
+            "aria-label": game.accessible_name(),
             "aria-pressed": selected.map(|selected| if selected { "true" } else { "false" }),
             "data-cs": "game-card",
             "data-status": game.status.name(),
             "data-variant": variant.name(),
             "data-storage-status": game.storage_unavailable.then_some("unavailable"),
+            "data-device-status": game.remote_copy.as_ref().map(RemoteCopy::status),
             "data-selected": selected.and_then(flag),
             "data-focus-key": focus_key,
             "data-hovered": interaction.hovered(),
             "data-focus-visible": interaction.ring(),
             style: "--i: {index};",
-            class: "group relative flex h-full min-w-0 flex-col overflow-hidden rounded-card border border-border bg-surface-raised outline-none transition-colors duration-(--cs-motion-duration-fast) data-hovered:bg-surface-hover data-focus-visible:focus-ring-over",
+            class: "group relative flex h-full min-w-0 flex-col overflow-hidden rounded-card border border-border bg-surface-raised outline-none transition-colors duration-(--cs-motion-duration-fast) data-hovered:bg-surface-hover data-focus-visible:focus-ring-over data-[device-status=offline]:text-fg-muted",
             onfocusin: move |_| {
                 interaction.focus();
                 if let Some(on_focus) = on_focus {
@@ -256,7 +299,7 @@ pub fn GameCard(
             },
             ..attributes,
             div { class: "relative min-h-0 flex-1",
-                GameArt { part: "art", image: game.cover.clone(), class: "size-full" }
+                GameArt { part: "art", image: game.cover.clone(), class: if offline { "size-full grayscale opacity-70" } else { "size-full" } }
                 if variant != CardVariant::Library {
                     div { class: "absolute top-2 left-2",
                         StatusBadge { part: "badge", status: game.status }
@@ -275,7 +318,14 @@ pub fn GameCard(
                 }
             }
             div { class: "flex min-w-0 shrink-0 flex-col gap-1 px-3 py-2.5",
-                p { "data-part": "title", class: "truncate text-sm font-semibold", "{game.title}" }
+                if let Some(copy) = game.remote_copy.clone() {
+                    div { class: "flex min-w-0 items-center gap-2",
+                        RemoteCopyBadge { copy }
+                        p { "data-part": "title", class: "truncate text-sm font-semibold", "{game.title}" }
+                    }
+                } else {
+                    p { "data-part": "title", class: "truncate text-sm font-semibold", "{game.title}" }
+                }
                 if let Some(played_on) = &game.played_on {
                     p { "data-part": "played-on", title: "{played_on}", class: "truncate text-xs text-fg-subtle", "{played_on}" }
                 } else if variant != CardVariant::Recent && let Some(subtitle) = &game.subtitle {

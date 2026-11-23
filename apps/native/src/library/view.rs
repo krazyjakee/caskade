@@ -13,7 +13,8 @@ use super::{Events, Layout, VirtualLibrary};
 use crate::data::{Query, use_library, use_library_page, use_query};
 use crate::input::{Bind, use_input_action};
 use crate::router::{LIBRARY_FILTERS, LibraryRoute, Route, RouteLink, use_router};
-use crate::ui::{ErrorNotice, Select, SelectOption, Svg, icons};
+use crate::ui::{ErrorNotice, Select, SelectOption, Svg, Tooltip, icons};
+use caskade_core::devices::DevicesStatus;
 use caskade_core::model::TitleLetter;
 use caskade_core::model::{GameFilter, GameSort, ListGames};
 use caskade_ui_data::Key as DataKey;
@@ -23,6 +24,10 @@ use dioxus_native::prelude::*;
 
 /// The fewest games that get the alphabet bar.
 const ALPHABET_BAR_MIN_GAMES: u64 = 50;
+
+/// The reachability of all paired devices, read once for the view.
+#[derive(Clone, Copy)]
+pub(super) struct LibraryDevices(pub Query<Option<DevicesStatus>>);
 
 /// The sorts, in the menu's order, with their names.
 fn sorts() -> [(GameSort, &'static str, String); 6] {
@@ -153,28 +158,25 @@ fn use_library_drop() -> (Signal<bool>, Signal<Option<String>>) {
 #[component]
 pub fn LibraryView(library: LibraryRoute) -> Element {
     let router = use_router();
+    let devices = crate::data::status::use_devices();
+    use_context_provider(|| LibraryDevices(devices));
     let web = library.filter == GameFilter::Web;
     let query = ListGames {
         filter: library.filter,
+        local_only: !library.show_remote,
         sort: library.sort,
         query: library.q.clone(),
         platform: library.platform.clone(),
         ..ListGames::default()
     };
     // How many games there are, and whether they load.
-    let mut counted = use_signal(|| ListGames {
+    let count_query = ListGames {
         limit: 1,
         ..query.clone()
-    });
-    if counted.peek().filter != query.filter
-        || counted.peek().sort != query.sort
-        || counted.peek().query != query.query
-        || counted.peek().platform != query.platform
-    {
-        counted.set(ListGames {
-            limit: 1,
-            ..query.clone()
-        });
+    };
+    let mut counted = use_signal(|| count_query.clone());
+    if *counted.peek() != count_query {
+        counted.set(count_query);
     }
     let count = use_library_page(counted.into());
     let (total, error) = match &*count.read() {
@@ -205,7 +207,8 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                 && query.platform.is_none()
                 && query.query.is_none();
             if wanted {
-                data.platforms(GameFilter::Emulated).await
+                data.platforms_for_scope(GameFilter::Emulated, query.local_only)
+                    .await
             } else {
                 Ok(Vec::new())
             }
@@ -313,8 +316,11 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
         AllIdsProp(all)
     };
     let control = "flex items-center gap-1.5 rounded-control border border-border px-3 py-2 text-sm text-fg-muted outline-none hover:text-fg data-focus-visible:focus-ring";
+    let local_only = !library.show_remote;
+    let device_filter = t!("This machine only");
+    let toggle_devices = library_href(&library, |library| library.show_remote = local_only);
     rsx! {
-        div { "data-view": "library", class: "relative flex flex-1 flex-col",
+        div { "data-view": "library", "data-cs": "library-view", class: "relative flex flex-1 flex-col",
             if saving() {
                 CollectionDialog {
                     preset: caskade_core::model::CollectionKind::Smart { query: smart_preset(&query) },
@@ -396,6 +402,18 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                     }
                 }
                 div { class: "ml-auto flex flex-wrap items-center gap-2",
+                    if !web {
+                        Tooltip { text: device_filter.clone(),
+                            crate::ui::Button {
+                                "aria-label": device_filter,
+                                "aria-pressed": if local_only { "true" } else { "false" },
+                                "data-part": "this-machine-only",
+                                class: "rounded-control border border-border p-2 text-fg-muted outline-none data-hovered:text-fg aria-pressed:border-accent-alt aria-pressed:text-accent-alt data-focus-visible:focus-ring",
+                                on_press: move |_| router.replace(&toggle_devices),
+                                Svg { icon: if local_only { icons::MONITOR } else { icons::MONITOR_SMARTPHONE }, class: "size-4" }
+                            }
+                        }
+                    }
                     crate::ui::Button {
                         "data-part": "save-collection",
                         class: "flex items-center gap-1.5 rounded-control border border-border px-3 py-2 text-sm text-fg-muted outline-none data-focus-visible:focus-ring data-hovered:text-fg",

@@ -70,7 +70,7 @@ pub fn placeholder(title: String) -> Element {
 #[component]
 fn Library(library: LibraryRoute) -> Element {
     let router = use_router();
-    let stats = crate::data::use_library_stats();
+    let stats = crate::data::use_browsing_stats();
     // With nothing played, the library opens on every game; choosing
     // Recently Played by name keeps it (`router.tsx`).
     let nothing_recent = library.opening

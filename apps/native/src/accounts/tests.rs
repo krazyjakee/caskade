@@ -191,6 +191,7 @@ fn an_age_limit_asks_for_an_admins_pin_before_play_then_plays() {
     let first = block(source().library.page(&caskade_core::model::ListGames {
         query: None,
         filter: caskade_core::model::GameFilter::All,
+        local_only: false,
         platform: None,
         sort: caskade_core::model::GameSort::Title,
         offset: 0,

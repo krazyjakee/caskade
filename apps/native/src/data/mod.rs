@@ -495,5 +495,17 @@ pub fn use_library_stats() -> Query<LibraryStats> {
     )
 }
 
+/// Counts for the Library sidebar and its opening filter.
+pub fn use_browsing_stats() -> Query<LibraryStats> {
+    let router = crate::router::use_router();
+    let local_only = use_memo(
+        move || !matches!(router.route(), crate::router::Route::Library(library) if library.show_remote),
+    );
+    use_query(DataKey::Summary, move |library| {
+        let local_only = local_only();
+        async move { library.stats_for_scope(local_only).await }
+    })
+}
+
 #[cfg(test)]
 mod tests;

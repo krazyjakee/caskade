@@ -54,7 +54,7 @@ pub use dialog::{ConfirmDialog, Dialog};
 pub use error_notice::{ErrorNotice, NoticeVariant};
 pub use failure::FailureNotice;
 pub use game_art::GameArt;
-pub use game_card::{CardGame, GameCard, platform_line};
+pub use game_card::{CardGame, GameCard, RemoteCopy, platform_line};
 pub use game_row::{GameRow, TABLE_COLUMNS};
 pub use hero::Hero;
 pub use icons::{Icon, Svg};

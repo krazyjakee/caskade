@@ -125,6 +125,7 @@ fn summary(id: &str, release_date: Option<&str>) -> GameSummary {
         cover: None,
         icon: None,
         installed: true,
+        remote_device_ids: Vec::new(),
         playtime_ms: 0,
         last_played_at_ms: None,
         last_played_on: None,
