@@ -6,7 +6,7 @@
 use crate::activity::labels::is_running;
 use crate::data::status::{use_app_update, use_background, use_devices};
 use crate::router::RouteLink;
-use crate::ui::{Svg, icons};
+use crate::ui::{Svg, Tooltip, icons};
 use caskade_app::commands::app_update::AppUpdatePhase;
 use caskade_core::devices::{DeviceLink, PairedDevice};
 use caskade_core::install::{JobPhase, JobSnapshot, JobStatus};
@@ -208,30 +208,99 @@ fn SyncStatus() -> Element {
     let best = in_reach
         .first()
         .map_or(DeviceLink::Offline, |device| device.link);
-    let count = in_reach.len();
+    rsx! { SyncStatusLink { count: in_reach.len(), best, syncing } }
+}
+
+#[component]
+fn SyncStatusLink(count: usize, best: DeviceLink, syncing: bool) -> Element {
+    let label = if count == 0 {
+        t!("Devices out of reach")
+    } else {
+        t!("Devices: open Settings → Devices")
+    };
     rsx! {
-        RouteLink {
-            to: "/settings?tab=devices",
-            // Its own `data-status` says how devices are reached.
-            current: false,
-            "data-part": "sync",
-            "data-status": if syncing { "syncing" } else { link_name(best) },
-            "aria-label": t!("Devices: open Settings → Devices"),
-            class: "flex shrink-0 items-center gap-1.5 rounded-sm hover:text-fg data-focus-visible:focus-ring",
-            if syncing {
-                Svg {
-                    icon: icons::LOADER_CIRCLE,
-                    class: "size-3.5 animate-worker text-accent-alt [animation-play-state:var(--cs-motion-ambient,running)] motion-reduce:animate-none",
+        Tooltip { text: label.clone(),
+            RouteLink {
+                to: "/settings?tab=devices",
+                // Its own `data-status` says how devices are reached.
+                current: false,
+                "data-part": "sync",
+                "data-status": if syncing { "syncing" } else { link_name(best) },
+                "aria-label": label,
+                class: "flex min-w-6 shrink-0 items-center justify-center gap-1.5 rounded-sm hover:text-fg data-focus-visible:focus-ring",
+                if syncing {
+                    Svg {
+                        icon: icons::LOADER_CIRCLE,
+                        class: "size-3.5 animate-worker text-accent-alt [animation-play-state:var(--cs-motion-ambient,running)] motion-reduce:animate-none",
+                    }
                 }
-            }
-            span {
                 if count == 0 {
-                    {t!("Devices out of reach")}
+                    Svg { icon: icons::LINK_2_OFF, class: "size-3.5" }
                 } else {
-                    {tn!("# device in reach", "# devices in reach", count)}
+                    span { {tn!("# device in reach", "# devices in reach", count)} }
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::frame::tests::{ONE, Window};
+    use crate::{input::InputRoot, router::RouterRoot};
+    use blitz_dom::DocumentConfig;
+    use blitz_traits::shell::{ColorScheme, Viewport};
+    use dioxus_native::DioxusDocument;
+    use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
+
+    fn device_links() -> Element {
+        rsx! {
+            style { {include_str!("../../assets/app.css")} }
+            InputRoot {
+                RouterRoot { start: "/",
+                    SyncStatusLink { count: 0, best: DeviceLink::Offline, syncing: false }
+                    SyncStatusLink { count: 2, best: DeviceLink::Lan, syncing: false }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn the_offline_devices_link_has_an_icon_and_an_accessible_status() {
+        let _one = caskade_core::lock(&ONE);
+        let _runtime = caskade_app::runtime::handle().enter();
+        let mut doc = DioxusDocument::new(
+            VirtualDom::new(device_links),
+            DocumentConfig {
+                viewport: Some(Viewport::new(1280, 800, 1.0, ColorScheme::Dark)),
+                ..Default::default()
+            },
+        );
+        doc.initial_build();
+        let mut window = Window { doc };
+        window.settle();
+
+        let offline = window.get("data-status", "offline");
+        assert!(window.text(offline).is_empty());
+        assert!(window.find_in(offline, "d", "M2 2l20 20").is_some());
+        assert_eq!(
+            window.attr(offline, "href").as_deref(),
+            Some("/settings?tab=devices")
+        );
+        assert_eq!(
+            window.attr(offline, "aria-label").as_deref(),
+            Some("Devices out of reach")
+        );
+        assert_eq!(
+            window.text(window.get("data-status", "lan")),
+            "2 devices in reach"
+        );
+
+        window.key(Key::Named(NamedKey::Tab));
+        assert_eq!(window.focused(), Some(offline));
+        let tooltip = window.get("role", "tooltip");
+        assert_eq!(window.text(tooltip), "Devices out of reach");
     }
 }
 

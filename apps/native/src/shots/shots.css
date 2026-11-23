@@ -940,6 +940,9 @@
   .min-w-4 {
     min-width: calc(calc(0.25rem * var(--cs-density-scale)) * 4);
   }
+  .min-w-6 {
+    min-width: calc(calc(0.25rem * var(--cs-density-scale)) * 6);
+  }
   .min-w-7 {
     min-width: calc(calc(0.25rem * var(--cs-density-scale)) * 7);
   }

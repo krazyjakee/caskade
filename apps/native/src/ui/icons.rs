@@ -552,6 +552,13 @@ pub const LINK_2: Icon = Icon(&[
     "M15 7h2a5 5 0 1 1 0 10h-2",
     "M8 12L16 12",
 ]);
+/// lucide's `link-2-off`.
+pub const LINK_2_OFF: Icon = Icon(&[
+    "M9 17H7A5 5 0 0 1 7 7",
+    "M15 7h2a5 5 0 0 1 4 8",
+    "M8 12h4",
+    "M2 2l20 20",
+]);
 /// lucide's `trophy`.
 pub const TROPHY: Icon = Icon(&[
     "M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2",
