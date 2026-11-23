@@ -305,7 +305,7 @@ fn CurtainText(game_id: String) -> Element {
         .as_ref()
         .and_then(|game| game.as_ref().ok().cloned().flatten())
         .map(|game| game.game.title);
-    let family = crate::console::use_family();
+    let family = use_input().glyphs();
     let guide = crate::console::glyph(Action::Guide, family)
         .unwrap_or_else(|| caskade_ui_i18n::tp!("pad button", "Guide"));
     rsx! {

@@ -3488,11 +3488,6 @@ msgstr "Avsluta stream"
 msgid "End the stream? The game stops on the other device, and progress it hasn't saved is lost."
 msgstr "Avsluta streamen? Spelet stoppas på den andra enheten, och framsteg som inte har sparats går förlorade."
 
-#: apps/native/src/console/hint_bar.rs
-msgctxt "keyboard key"
-msgid "Enter"
-msgstr "Enter"
-
 #. Opens a RomM server's editor at its API token
 #: apps/native/src/settings/emulation/romm.rs
 #, fuzzy
@@ -3549,11 +3544,6 @@ msgstr "Miljövariabler"
 #: apps/native/src/flows/scripts.rs
 msgid "Errors"
 msgstr "Fel"
-
-#: apps/native/src/console/hint_bar.rs
-msgctxt "keyboard key"
-msgid "Esc"
-msgstr "Esc"
 
 #: apps/native/src/flows/storage.rs
 msgid "Estimated space: Unknown — free space will be checked again before installation."
@@ -7150,16 +7140,6 @@ msgstr "Personer"
 #: apps/native/src/settings/plugins.rs
 msgid "Permissions"
 msgstr "Behörigheter"
-
-#: apps/native/src/console/hint_bar.rs
-msgctxt "keyboard key"
-msgid "PgDn"
-msgstr "PgDn"
-
-#: apps/native/src/console/hint_bar.rs
-msgctxt "keyboard key"
-msgid "PgUp"
-msgstr "PgUp"
 
 #: crates/caskade-ui-i18n/src/format.rs
 msgctxt "byte unit"
@@ -13174,6 +13154,22 @@ msgstr "Installerad {installedVersion}"
 #: apps/native/src/collections/rules.rs
 msgid "“{text}”"
 msgstr "”{text}”"
+
+#~ msgctxt "keyboard key"
+#~ msgid "Enter"
+#~ msgstr "Enter"
+
+#~ msgctxt "keyboard key"
+#~ msgid "Esc"
+#~ msgstr "Esc"
+
+#~ msgctxt "keyboard key"
+#~ msgid "PgDn"
+#~ msgstr "PgDn"
+
+#~ msgctxt "keyboard key"
+#~ msgid "PgUp"
+#~ msgstr "PgUp"
 
 #~ msgid "Enable library discovery"
 #~ msgstr "Aktivera biblioteksidentifiering"

@@ -349,6 +349,14 @@ async fn seed(paths: &AppPaths, root: &Path) -> Seeded {
         )
         .await
         .unwrap();
+    // Keep the shelves limited to the two seeded games. The default
+    // discovery scan can import desktop entries from the host system.
+    let mut discovery = settings.get("core.discovery").await.unwrap().value;
+    discovery["enabled"] = false.into();
+    settings
+        .set("core.discovery", discovery, None)
+        .await
+        .unwrap();
     let mut onboarding = settings.get("core.onboarding").await.unwrap().value;
     onboarding["completed"] = true.into();
     onboarding["sounds"] = false.into();

@@ -83,7 +83,7 @@ variant of the component, such as the library's card.
 - [`console-shell`](#console-shell): Console mode's window (`[data-mode="console"]` on the root): the console sidebar, top bar and view, and the button-hint bar. `data-cursor` is `hidden` while the pointer rests.
 - [`console-sidebar`](#console-sidebar): Console mode's navigation: big targets.
 - [`console-topbar`](#console-topbar): Console mode's top bar: search and activity.
-- [`hint-bar`](#hint-bar): What each controller button does where focus is. `data-glyphs` is the controller family in hand: `xbox`, `playstation`, `nintendo`, `generic`, or `keyboard`.
+- [`hint-bar`](#hint-bar): What each controller button does where focus is. `data-glyphs` is the last controller family used (`xbox`, `playstation`, `nintendo`, or `generic`). The bar starts with `generic`.
 - [`game-curtain`](#game-curtain): Console mode's black screen behind a running game: it fades in when a game starts, so the game's window takes over without Caskade minimizing, and fades out when the last game exits. Always present in console mode; `data-state` is `covered` while it is down.
 - [`manual-game`](#manual-game): Adds a game by hand from Add game: one on this computer or behind a URI, started where it is, or a title-only record; games that may be the same offer to join or keep apart.
 - [`folder-browser`](#folder-browser): Console mode's file and folder picker, in place of the native dialogs a controller can't drive. A opens a folder or picks a file, B cancels, LB/RB go to the previous and next place, LT/RT page through the folder, Start picks the folder shown. `data-kind` is what it picks.
@@ -1261,7 +1261,7 @@ Contains: [`search`](#search), [`select`](#select), [`avatar`](#avatar)
 
 ## `hint-bar`
 
-What each controller button does where focus is. `data-glyphs` is the controller family in hand: `xbox`, `playstation`, `nintendo`, `generic`, or `keyboard`. Rendered by HintBar (apps/native/src/console/hint_bar.rs).
+What each controller button does where focus is. `data-glyphs` is the last controller family used (`xbox`, `playstation`, `nintendo`, or `generic`). The bar starts with `generic`. Rendered by HintBar (apps/native/src/console/hint_bar.rs).
 
 Root: `[data-cs="hint-bar"]`
 

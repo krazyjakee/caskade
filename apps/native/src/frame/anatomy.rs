@@ -116,7 +116,7 @@ pub const HINT_BAR: Entry = Entry {
         "hint-bar",
         "HintBar (apps/native/src/console/hint_bar.rs)",
         Source::App,
-        "What each controller button does where focus is. `data-glyphs` is the controller family in hand: `xbox`, `playstation`, `nintendo`, `generic`, or `keyboard`.",
+        "What each controller button does where focus is. `data-glyphs` is the last controller family used (`xbox`, `playstation`, `nintendo`, or `generic`). The bar starts with `generic`.",
     )
 };
 

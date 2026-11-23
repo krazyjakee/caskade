@@ -39,6 +39,7 @@ pub fn ShelfRow(
     children: Element,
 ) -> Element {
     let input = use_input();
+    let family = crate::console::is_console().then(|| input.glyphs());
     let mut me = use_signal(|| None::<NodeId>);
     let mut items = use_signal(|| None::<NodeHandle>);
     // Measured once laid out; a render after a scroll or a resized window
@@ -109,7 +110,6 @@ pub fn ShelfRow(
         },
         move || page.call(1),
     );
-    let family = crate::console::use_family();
     let heading = format!("shelf-{id}-heading");
     let gaps = GRID_GAP * (count as f64 - 1.0);
     rsx! {
@@ -124,7 +124,7 @@ pub fn ShelfRow(
                 h2 { id: "{heading}", "data-part": "title", class: "font-display text-xl font-semibold", "{title}" }
                 span { class: "ml-auto flex items-center gap-4",
                     // Console mode shows the buttons that page it (#107).
-                    if crate::console::is_console() {
+                    if let Some(family) = family {
                         span { "data-part": "pager", "aria-hidden": "true", class: "flex gap-1.5",
                             for action in [caskade_ui_input::Action::PagePrev, caskade_ui_input::Action::PageNext] {
                                 kbd {

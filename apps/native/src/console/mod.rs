@@ -14,7 +14,7 @@ mod hint_bar;
 #[cfg(test)]
 mod tests;
 
-pub use hint_bar::{HintBar, glyph, use_family};
+pub use hint_bar::{HintBar, glyph};
 
 /// Which shell the window shows.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]

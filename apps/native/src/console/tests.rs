@@ -75,13 +75,13 @@ fn the_hint_bar_shows_what_each_button_does_in_the_controllers_glyphs() {
     let _runtime = caskade_app::runtime::handle().enter();
     let _desktop = Desktop;
     let mut window = open();
-    to_console(&mut window);
-    window.settle_until("pad hints", |window| {
-        window
-            .find("data-cs", "hint-bar")
-            .is_some_and(|bar| window.attr(bar, "data-glyphs").as_deref() == Some("xbox"))
+    assert_eq!(window.text(window.get("data-part", "shortcut")), "CTRL K");
+    // Enter console mode before any controller has sent input.
+    super::request_console();
+    window.settle_until("console hints", |window| {
+        window.find("data-cs", "hint-bar").is_some()
     });
-    let bar = window.get("data-cs", "hint-bar");
+    let family = |window: &Window| window.attr(window.get("data-cs", "hint-bar"), "data-glyphs");
     let hint = |window: &Window, action: &str| {
         window
             .find_all("data-part", "hint")
@@ -89,9 +89,17 @@ fn the_hint_bar_shows_what_each_button_does_in_the_controllers_glyphs() {
             .find(|&hint| window.attr(hint, "data-action").as_deref() == Some(action))
             .map(|hint| window.text(hint))
     };
+    assert_eq!(family(&window).as_deref(), Some("generic"));
     assert_eq!(hint(&window, "confirm").as_deref(), Some("ASelect"));
     assert_eq!(hint(&window, "back").as_deref(), Some("BBack"));
+    assert_eq!(hint(&window, "view").as_deref(), Some("SelectDesktop mode"));
+
+    window.pad(Action::NavDown);
+    window.settle_until("Xbox hints", |window| {
+        family(window).as_deref() == Some("xbox")
+    });
     assert_eq!(hint(&window, "view").as_deref(), Some("ViewDesktop mode"));
+    let bar = window.get("data-cs", "hint-bar");
     assert!(
         window.find_in(bar, "data-part", "clock").is_some(),
         "{}",
@@ -101,14 +109,12 @@ fn the_hint_bar_shows_what_each_button_does_in_the_controllers_glyphs() {
     assert_eq!(window.text(window.get("data-part", "shortcut")), "Y");
     let pager = window.get("data-part", "pager");
     assert_eq!(window.text(pager), "LTRT");
-    // A key pressed: the keyboard's names.
-    window.key(Key::Named(NamedKey::ArrowDown));
-    window.settle_until("keyboard hints", |window| {
-        window
-            .find("data-cs", "hint-bar")
-            .is_some_and(|bar| window.attr(bar, "data-glyphs").as_deref() == Some("keyboard"))
-    });
-    assert_eq!(hint(&window, "confirm").as_deref(), Some("EnterSelect"));
+    window.key(Key::Named(NamedKey::ArrowUp));
+    window.click(window.nav_link("Home"));
+    assert_eq!(family(&window).as_deref(), Some("xbox"));
+    assert_eq!(hint(&window, "confirm").as_deref(), Some("ASelect"));
+    assert_eq!(window.text(window.get("data-part", "shortcut")), "Y");
+    assert_eq!(window.text(window.get("data-part", "pager")), "LTRT");
 }
 
 fn session(id: &str) -> GameSession {

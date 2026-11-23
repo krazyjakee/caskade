@@ -56,10 +56,10 @@ fn Highlight(text: String, query: String) -> Element {
 
 #[component]
 pub fn SearchBox() -> Element {
-    // The pad family for the shortcut in console mode (#107).
-    let family = crate::console::use_family();
     let router = use_router();
     let input = use_input();
+    let console = crate::console::is_console();
+    let family = console.then(|| input.glyphs());
     let list_id = "search-suggestions";
     // The library's search shows here, so it says what the results are for.
     let route = router.route();
@@ -251,9 +251,7 @@ pub fn SearchBox() -> Element {
                 kbd {
                     "data-part": "shortcut",
                     class: "whitespace-nowrap rounded border border-border-strong px-1.5 py-0.5 font-mono text-[10px] text-fg-subtle",
-                    // Console mode names the pad's search button (Y), or `/`
-                    // on the keyboard (#107).
-                    if crate::console::is_console() {
+                    if let Some(family) = family {
                         {crate::console::glyph(caskade_ui_input::Action::Search, family).unwrap_or_default()}
                     } else {
                         {tp!(note = "The keyboard shortcut that focuses the search", "keyboard key",

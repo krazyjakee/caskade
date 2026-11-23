@@ -27,7 +27,7 @@ Caskade's window is a native Dioxus/Blitz app; the earlier Tauri/React webview a
 Caskade has two modes over the same views:
 
 - **Desktop mode**: a window with a sidebar, a topbar that is also the title bar, and a status bar. Mouse, keyboard and drag and drop.
-- **Console mode**: fullscreen, larger type and cards, a hint bar showing what each pad button does, and an on-screen keyboard. It starts by itself under gamescope, on a handheld or TV (detected), with `--console`, or from the setting. The guide button brings Caskade back over a running game.
+- **Console mode**: fullscreen, larger type and cards, a hint bar showing what each pad button does, and an on-screen keyboard. Prompts always show controller buttons. They start with a generic layout and follow the last controller used. Console mode starts by itself under gamescope, on a handheld or TV (detected), with `--console`, or from the setting. The guide button brings Caskade back over a running game.
 
 Views:
 

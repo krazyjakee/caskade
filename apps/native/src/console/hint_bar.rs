@@ -1,61 +1,14 @@
 //! The button-hint bar (#107; the webview's `HintBar.tsx` and `glyphs.ts`):
 //! what each button does where focus is now, in the glyphs of the
-//! controller in hand (keys when no pad is in use), and the clock.
+//! last controller used, or a generic controller at startup, and the clock.
 
 use caskade_ui_i18n::intl::Clock;
-use caskade_ui_i18n::{format, t, tp};
-use caskade_ui_input::{Action, GlyphFamily, InputSource};
+use caskade_ui_i18n::{format, t};
+use caskade_ui_input::{Action, GlyphFamily};
 use dioxus_native::prelude::*;
 
-/// A pad family, or the keyboard when no pad is in use.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Family {
-    Pad(GlyphFamily),
-    Keyboard,
-}
-
-impl Family {
-    pub fn name(self) -> &'static str {
-        match self {
-            Self::Keyboard => "keyboard",
-            Self::Pad(GlyphFamily::Xbox) => "xbox",
-            Self::Pad(GlyphFamily::Playstation) => "playstation",
-            Self::Pad(GlyphFamily::Nintendo) => "nintendo",
-            Self::Pad(GlyphFamily::Generic) => "generic",
-        }
-    }
-}
-
-/// The family last used: the pad's, or the keyboard.
-pub fn use_family() -> Family {
-    let input = crate::input::use_input();
-    match input.source() {
-        Some(InputSource::Pad) => Family::Pad(input.glyphs()),
-        _ => Family::Keyboard,
-    }
-}
-
-/// The label of `action`'s button, or `None` when the family has none (the
-/// keyboard has no guide key).
-pub fn glyph(action: Action, family: Family) -> Option<String> {
-    let family = match family {
-        Family::Pad(family) => family,
-        Family::Keyboard => {
-            return Some(match action {
-                Action::Confirm => tp!("keyboard key", "Enter"),
-                Action::Back => tp!("keyboard key", "Esc"),
-                Action::Details => "I".into(),
-                Action::Search => "/".into(),
-                Action::TabPrev => "[".into(),
-                Action::TabNext => "]".into(),
-                Action::PagePrev => tp!("keyboard key", "PgUp"),
-                Action::PageNext => tp!("keyboard key", "PgDn"),
-                Action::Menu => "M".into(),
-                Action::View => "V".into(),
-                _ => return None,
-            });
-        }
-    };
+/// The label of `action`'s controller button, if shown in a hint.
+pub fn glyph(action: Action, family: GlyphFamily) -> Option<String> {
     let face = |xbox: &str, playstation: &str, nintendo: &str| {
         match family {
             GlyphFamily::Xbox | GlyphFamily::Generic => xbox,
@@ -171,7 +124,13 @@ fn ClockText() -> Element {
 #[component]
 pub fn HintBar() -> Element {
     let input = crate::input::use_input();
-    let family = use_family();
+    let family = input.glyphs();
+    let family_name = match family {
+        GlyphFamily::Xbox => "xbox",
+        GlyphFamily::Playstation => "playstation",
+        GlyphFamily::Nintendo => "nintendo",
+        GlyphFamily::Generic => "generic",
+    };
     let active = input.hints();
     let hints: Vec<(Action, String, String)> = ORDER
         .iter()
@@ -184,7 +143,7 @@ pub fn HintBar() -> Element {
     rsx! {
         footer {
             "data-cs": "hint-bar",
-            "data-glyphs": family.name(),
+            "data-glyphs": family_name,
             class: "relative z-10 flex h-(--cs-hintbar-height) shrink-0 items-center gap-6 border-t border-border bg-surface-raised/90 px-8",
             ul {
                 "aria-label": t!(

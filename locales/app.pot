@@ -3466,11 +3466,6 @@ msgstr ""
 msgid "End the stream? The game stops on the other device, and progress it hasn't saved is lost."
 msgstr ""
 
-#: apps/native/src/console/hint_bar.rs
-msgctxt "keyboard key"
-msgid "Enter"
-msgstr ""
-
 #. Opens a RomM server's editor at its API token
 #: apps/native/src/settings/emulation/romm.rs
 msgid "Enter API token"
@@ -3524,11 +3519,6 @@ msgstr ""
 
 #: apps/native/src/flows/scripts.rs
 msgid "Errors"
-msgstr ""
-
-#: apps/native/src/console/hint_bar.rs
-msgctxt "keyboard key"
-msgid "Esc"
 msgstr ""
 
 #: apps/native/src/flows/storage.rs
@@ -7115,16 +7105,6 @@ msgstr ""
 
 #: apps/native/src/settings/plugins.rs
 msgid "Permissions"
-msgstr ""
-
-#: apps/native/src/console/hint_bar.rs
-msgctxt "keyboard key"
-msgid "PgDn"
-msgstr ""
-
-#: apps/native/src/console/hint_bar.rs
-msgctxt "keyboard key"
-msgid "PgUp"
 msgstr ""
 
 #: crates/caskade-ui-i18n/src/format.rs
