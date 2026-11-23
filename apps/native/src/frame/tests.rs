@@ -450,6 +450,42 @@ fn every_page_of_the_webview_opens() {
 }
 
 #[test]
+fn settings_scroll_does_not_carry_over_to_the_library() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = Window::open();
+    window.click(window.nav_link("Settings"));
+    assert!(matches!(window.route(), Route::Settings { .. }));
+
+    let view = window.get("data-cs", "view");
+    window.doc.inner.borrow_mut().scroll_to(
+        view,
+        0.0,
+        10_000.0,
+        blitz_dom::ScrollBehavior::Instant,
+    );
+    window.settle();
+    let scroll_top = |window: &Window| {
+        let view = window.get("data-cs", "view");
+        window
+            .doc
+            .inner
+            .borrow()
+            .get_node(view)
+            .unwrap()
+            .scroll_offset()
+            .y
+    };
+    assert!(scroll_top(&window) > 0.0, "Settings should have scrolled");
+
+    window.click(window.nav_link("Library"));
+    window.settle_until("the library's first game", |window| {
+        window.find("data-index", "0").is_some()
+    });
+    assert_eq!(scroll_top(&window), 0.0);
+}
+
+#[test]
 fn the_sidebar_navigates_by_mouse_with_the_librarys_filters_and_counts() {
     let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();

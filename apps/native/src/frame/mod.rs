@@ -114,14 +114,12 @@ fn Shell() -> Element {
     let router = use_router();
     #[cfg(test)]
     tests::ROUTER.with(|seen| seen.set(Some(router)));
-    // Keyed by visit, so each view enters again on navigation.
-    let key = router.key();
     let drag = window::use_drag();
     // Console mode swaps the shell; the routes and views stay the same.
     if crate::console::is_console() {
         return rsx! {
             ModeActions {}
-            console::ConsoleShell { view_key: key }
+            console::ConsoleShell {}
             console::GameCurtain {}
         };
     }
@@ -150,20 +148,33 @@ fn Shell() -> Element {
                 sidebar::Sidebar {}
                 div { "data-part": "main", class: "relative flex min-w-0 flex-1 flex-col",
                     topbar::Topbar {}
-                    main {
-                        "data-cs": "view",
-                        "data-focus-section": "main",
-                        class: "min-h-0 flex-1 overflow-y-auto px-6 pb-8",
-                        div { key: "{key}", class: "flex min-h-full animate-enter flex-col",
-                            ErrorBoundary { handle_error: error::view_error,
-                                views::Outlet {}
-                            }
-                        }
-                    }
+                    View { padding: "px-6" }
                 }
             }
             status_bar::StatusBar {}
             window::ResizeEdges {}
+        }
+    }
+}
+
+#[component]
+fn View(padding: &'static str) -> Element {
+    let path = use_router().route().path();
+    rsx! {
+        // Dioxus applies keys to lists. Give each page its own scroller,
+        // while in-page changes such as sorting keep the page mounted.
+        for path in [path] {
+            main {
+                key: "{path}",
+                "data-cs": "view",
+                "data-focus-section": "main",
+                class: "min-h-0 flex-1 overflow-y-auto {padding} pb-8",
+                div { class: "flex min-h-full animate-enter flex-col",
+                    ErrorBoundary { handle_error: error::view_error,
+                        views::Outlet {}
+                    }
+                }
+            }
         }
     }
 }

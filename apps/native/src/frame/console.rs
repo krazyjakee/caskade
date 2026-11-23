@@ -68,7 +68,7 @@ fn ShellBindings() -> Element {
 
 /// Console mode's window: sidebar, top bar, view and hints.
 #[component]
-pub fn ConsoleShell(view_key: String) -> Element {
+pub fn ConsoleShell() -> Element {
     // The cards' "Playing on …" marks, read once.
     crate::game::provide_playing_marks();
     // The pointer hides when it rests (2.5 s after it last moved).
@@ -111,16 +111,7 @@ pub fn ConsoleShell(view_key: String) -> Element {
                 ConsoleSidebar {}
                 div { "data-part": "main", class: "relative flex min-w-0 flex-1 flex-col",
                     ConsoleTopbar {}
-                    main {
-                        "data-cs": "view",
-                        "data-focus-section": "main",
-                        class: "min-h-0 flex-1 overflow-y-auto px-8 pb-8",
-                        div { key: "{view_key}", class: "flex min-h-full animate-enter flex-col",
-                            ErrorBoundary { handle_error: super::error::view_error,
-                                super::views::Outlet {}
-                            }
-                        }
-                    }
+                    super::View { padding: "px-8" }
                 }
             }
             HintBar {}
