@@ -191,9 +191,8 @@ Settings → Backup (admins): back up now, daily or weekly automatic backups wit
 
 | Issue | What it needs |
 | --- | --- |
-| [#120](https://github.com/krazyjakee/caskade/issues/120) | Real-hardware checks for closed issues across macOS, Steam Deck (gamescope), Wayland, Windows 11, and Cinnamon (login start, GPU/scroll pacing, screen readers, IME, tray, notarized macOS updates, streaming, and paired-device checks). |
-| [#181](https://github.com/krazyjakee/caskade/issues/181) | Meet and enforce the 250 MB tray-idle anonymous+swap memory budget on real 8,000+ game libraries, with an automated idle-bench budget gate. |
-| [#177](https://github.com/krazyjakee/caskade/issues/177) | Brand and OS packaging polish (refined app icon, branded NSIS and macOS DMG installers, and Linux desktop/AppStream metadata). |
+| [#120](https://github.com/krazyjakee/caskade/issues/120) | Real-hardware checks for closed issues across macOS, Steam Deck (gamescope), Wayland, Windows 11, and Cinnamon (login start, GPU/scroll pacing, screen readers, IME, tray, notarized macOS updates, streaming, L8 real-library idle memory, and paired-device checks). |
+| [#177](https://github.com/krazyjakee/caskade/issues/177) | Verify branded Windows NSIS installer (signed + silent install) and branded macOS DMG layout (notarization + stapling) on Windows/macOS runners or release tag (refined icons and Linux `.desktop`/AppStream metadata are landed and verified). |
 
 The procedures for manual hardware checks, grouped by the machines they need, are in [manual checks](manual-checks.md).
 
