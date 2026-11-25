@@ -1,0 +1,118 @@
+name: Bug report
+description: Report a bug or crash in Caskade
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please search existing issues first to avoid duplicates.
+
+        If you found a **security vulnerability**, do not open a public issue — report it privately via [Security Advisories](https://github.com/krazyjakee/caskade/security/advisories/new) (see `SECURITY.md`).
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - Windows
+        - macOS
+    validations:
+      required: true
+
+  - type: input
+    id: os-details
+    attributes:
+      label: OS version and desktop environment
+      description: Include your distro/version, desktop environment, and Wayland or X11 on Linux.
+      placeholder: e.g. Ubuntu 24.04 (GNOME, Wayland) / SteamOS 3.6 / Windows 11 24H2
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Caskade version
+      description: Check **Settings → About** in Caskade, or provide the git commit if built from source.
+      placeholder: e.g. 0.1.0 (Release build) or commit abc1234
+    validations:
+      required: true
+
+  - type: dropdown
+    id: bundle
+    attributes:
+      label: Bundle type
+      description: How did you install or run Caskade?
+      options:
+        - AppImage
+        - .deb
+        - Windows installer
+        - macOS DMG
+        - Source build
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: renderer
+    attributes:
+      label: Renderer
+      description: Whether Caskade is rendering on the GPU or CPU fallback.
+      options:
+        - GPU (default)
+        - CPU
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the exact steps needed to trigger the problem.
+      placeholder: |
+        1. Open Caskade in desktop/console mode
+        2. Go to ...
+        3. Click / press ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead? Include any error message shown.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Paste relevant lines from Caskade's daily log (`caskade.YYYY-MM-DD.log`) or terminal output (set `RUST_LOG=debug` for more detail).
+        Log folder locations:
+        - **Linux:** `~/.local/share/caskade/logs/` (`$XDG_DATA_HOME/caskade/logs/`)
+        - **Windows:** `%LOCALAPPDATA%\Caskade\Caskade\data\logs\`
+        - **macOS:** `~/Library/Application Support/dev.Caskade.Caskade/logs/`
+
+        If an in-app **Open logs folder** or **Copy system info** action is available under **Settings → About**, you can use that too.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Screenshots, gamepad/hardware details, specific game or emulator, or anything else that helps reproduce the issue.
+    validations:
+      required: false

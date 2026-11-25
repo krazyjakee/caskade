@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/krazyjakee/caskade/security/advisories/new
+    about: Please report security issues privately rather than in a public issue.
+  - name: GitHub Discussions
+    url: https://github.com/krazyjakee/caskade/discussions
+    about: Ask questions, share themes or plugins, and discuss ideas with the community.

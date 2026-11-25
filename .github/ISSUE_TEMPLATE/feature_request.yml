@@ -1,0 +1,43 @@
+name: Feature request
+description: Suggest a feature or improvement for Caskade
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before proposing a new feature, please check [docs/MISSION.md](https://github.com/krazyjakee/caskade/blob/master/docs/MISSION.md) and [docs/PRODUCT-SPEC.md](https://github.com/krazyjakee/caskade/blob/master/docs/PRODUCT-SPEC.md) to see what is already planned or intentionally out of scope.
+
+        For open-ended ideas or questions, consider starting a thread in [GitHub Discussions](https://github.com/krazyjakee/caskade/discussions).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What problem does this solve, or what workflow is difficult today?
+      placeholder: I want to ... so that ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe how you envision this working in Caskade (desktop mode, console/gamepad mode, settings, CLI, etc.).
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you considered other approaches or workarounds?
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Mockups, examples, platform constraints, or references to related issues.
+    validations:
+      required: false

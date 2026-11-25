@@ -1,0 +1,38 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    ignore:
+      # Cargo.lock pins iroh, iroh-base, iroh-relay, iroh-dns and noq together
+      # (see AGENTS.md). Never update them automatically.
+      - dependency-name: "iroh"
+      - dependency-name: "iroh-base"
+      - dependency-name: "iroh-relay"
+      - dependency-name: "iroh-dns"
+      - dependency-name: "iroh*"
+      - dependency-name: "noq"
+      - dependency-name: "noq*"
