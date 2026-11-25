@@ -122,7 +122,7 @@ libappindicator-sys = "0.9"
 
 # Windows and macOS: the OS's dialogs (`dialogs.rs`), as Tauri builds them.
 [target.'cfg(not(target_os = "linux"))'.dependencies]
-rfd = { version = "0.16", default-features = false, features = ["common-controls-v6"] }
+rfd = { version = "0.18", default-features = false, features = ["common-controls-v6"] }
 
 # Windows: whether the OS asks for less motion (`theme.rs`), as caskade-app
 # reads the registry.
