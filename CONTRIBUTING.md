@@ -44,19 +44,19 @@ pnpm install
 
 See [AGENTS.md](AGENTS.md) and [`justfile`](justfile) for the full list of commands. On Linux, `just` recipes serialize Cargo invocations with `flock /tmp/caskade-heavy.lock`.
 
-| Task | Command |
-| --- | --- |
-| Build and run the native app | `just dev` |
-| Build without running | `cargo build` |
-| Run app Rust + JS tests | `just test-app` |
-| Run native UI & screenshot tests | `just test-native` |
-| Run native window / console E2E tests | `just test-native-window` |
-| Run installer / discovery tests | `just test-installer`, `just test-discovery` |
-| Run plugin host / theme tests | `cargo test -p caskade-plugin-host`, `cargo test -p caskade-theme` |
-| Lint Rust (matches CI) | `cargo +1.100.0 clippy --workspace --all-targets -- -D warnings` |
-| Typecheck & lint JS tooling | `pnpm typecheck` and `pnpm lint` |
-| Rebuild native stylesheet | `just native-css` |
-| Update / check translations | `just i18n` and `just i18n-check` |
+| Task                                  | Command                                                            |
+| ------------------------------------- | ------------------------------------------------------------------ |
+| Build and run the native app          | `just dev`                                                         |
+| Build without running                 | `cargo build`                                                      |
+| Run app Rust + JS tests               | `just test-app`                                                    |
+| Run native UI & screenshot tests      | `just test-native`                                                 |
+| Run native window / console E2E tests | `just test-native-window`                                          |
+| Run installer / discovery tests       | `just test-installer`, `just test-discovery`                       |
+| Run plugin host / theme tests         | `cargo test -p caskade-plugin-host`, `cargo test -p caskade-theme` |
+| Lint Rust (matches CI)                | `cargo +1.100.0 clippy --workspace --all-targets -- -D warnings`   |
+| Typecheck & lint JS tooling           | `pnpm typecheck` and `pnpm lint`                                   |
+| Rebuild native stylesheet             | `just native-css`                                                  |
+| Update / check translations           | `just i18n` and `just i18n-check`                                  |
 
 ## Rules and expectations for pull requests
 

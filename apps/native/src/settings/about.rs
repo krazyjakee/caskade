@@ -165,7 +165,12 @@ fn build_label() -> String {
 }
 
 /// The short git commit SHA embedded by `build.rs`, when available.
+/// Headless reference screenshots (`--shots`) use a fixed placeholder so
+/// committed golden PNGs don't churn on every commit.
 fn git_sha() -> Option<&'static str> {
+    if std::env::args().any(|arg| arg == "--shots") {
+        return Some("00000000");
+    }
     option_env!("CASKADE_GIT_SHA").filter(|sha| !sha.is_empty())
 }
 
@@ -220,6 +225,11 @@ fn AboutPage() -> Element {
         })
         .unwrap_or(false);
     let (renderer, adapter) = crate::shell::renderer_info(cpu_paint);
+    let adapter = if std::env::args().any(|arg| arg == "--shots") {
+        None
+    } else {
+        adapter
+    };
     let diagnostics = use_diagnostics();
     let toasts = try_use_context::<Toasts>();
     let mut opening_logs = use_signal(|| false);

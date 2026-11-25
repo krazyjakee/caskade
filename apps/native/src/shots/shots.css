@@ -811,11 +811,11 @@
   .w-1\/3 {
     width: calc(1 / 3 * 100%);
   }
+  .w-2\/3 {
+    width: calc(2 / 3 * 100%);
+  }
   .w-2\/5 {
     width: calc(2 / 5 * 100%);
-  }
-  .w-3\/4 {
-    width: calc(3 / 4 * 100%);
   }
   .w-4 {
     width: calc(calc(0.25rem * var(--cs-density-scale)) * 4);
@@ -1794,6 +1794,9 @@
   .from-25\% {
     --tw-gradient-from-position: 25%;
   }
+  .from-30\% {
+    --tw-gradient-from-position: 30%;
+  }
   .via-accent-alt {
     --tw-gradient-via: var(--cs-color-accent-alt);
     --tw-gradient-via-stops: var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position);
@@ -1812,8 +1815,8 @@
     --tw-gradient-via-stops: var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position);
     --tw-gradient-stops: var(--tw-gradient-via-stops);
   }
-  .via-50\% {
-    --tw-gradient-via-position: 50%;
+  .via-55\% {
+    --tw-gradient-via-position: 55%;
   }
   .to-accent-alt {
     --tw-gradient-to: var(--cs-color-accent-alt);

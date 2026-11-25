@@ -358,11 +358,15 @@ fn ContinueHero(game: GameSummary) -> Element {
                     }
                 }
             },
-            GameArt { part: "art", image: hero_art, class: "absolute inset-y-0 right-0 w-3/4" }
+            div {
+                "aria-hidden": "true",
+                class: "pointer-events-none absolute inset-y-0 right-0 w-2/3 overflow-hidden",
+                GameArt { part: "art", image: hero_art, class: "size-full" }
+            }
             div {
                 "data-part": "shade",
                 "aria-hidden": "true",
-                class: "pointer-events-none absolute inset-0 bg-linear-to-r from-surface-raised from-25% via-surface-raised/85 via-50% to-transparent",
+                class: "pointer-events-none absolute inset-0 bg-linear-to-r from-surface-raised from-30% via-surface-raised/85 via-55% to-transparent",
             }
             div { "data-part": "content", class: "relative z-10 flex max-w-2xl flex-col justify-center p-8",
                 p { "data-part": "eyebrow", class: "font-mono text-xs tracking-widest text-accent-alt uppercase",
