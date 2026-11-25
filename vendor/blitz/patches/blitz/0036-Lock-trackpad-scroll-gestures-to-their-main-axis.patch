@@ -1,0 +1,669 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Nico Burns <nico@nicoburns.com>
+Date: Wed, 18 Nov 2026 15:34:42 +0000
+Subject: [PATCH] Lock trackpad scroll gestures to their main axis
+
+Trackpad swipes are rarely straight, and Blitz applied both deltas of
+every wheel event, so a vertical swipe over a horizontal scroller moved
+it sideways, and a horizontal swipe on it moved the page a little.
+
+BlitzWheelEvent now carries winit's gesture phase and scroll source.
+Each event in a trackpad gesture is locked by a decayed sum of the
+gesture's recent movement (as in Chromium): to an axis while recent
+movement along it is at least twice the other, and to both while
+diagonal, so a gesture that turns unlocks and can lock again. Momentum
+scrolling carries on from the finger gesture it follows; physical mouse
+wheels and events outside a gesture scroll both axes as before, and
+mouse-wheel notches still take 0034's smooth scroll path. Cancelled
+wheel events still update the gesture state.
+
+Ported from blitz#1638 (commit bb611089, fixes blitz#1630) onto the
+pinned revision, keeping 0034's smooth wheel-notch path and updating
+0035's overscroll-behavior test for the new BlitzWheelEvent fields.
+
+Co-authored-by: Jake Cattrall <krazyjakee@gmail.com>
+---
+ examples/assets/wheel_axis_lock.html          |  24 ++++
+ packages/blitz-dom/src/document.rs            |  10 +-
+ packages/blitz-dom/src/events/driver.rs       |  21 +--
+ packages/blitz-dom/src/events/mod.rs          |  11 +-
+ packages/blitz-dom/src/events/pointer.rs      | 101 +++++++++++++-
+ packages/blitz-shell/src/window.rs            |  23 ++-
+ packages/blitz-test-harness/src/input.rs      |  27 +++-
+ packages/blitz-traits/src/events.rs           |  45 ++++++
+ tests/blitz-tests/tests/all.rs                |   1 +
+ .../blitz-tests/tests/fragment_navigation.rs  |   2 +
+ .../blitz-tests/tests/overscroll_behavior.rs  |   2 +
+ tests/blitz-tests/tests/wheel_axis_lock.rs    | 131 ++++++++++++++++++
+ 12 files changed, 374 insertions(+), 24 deletions(-)
+ create mode 100644 examples/assets/wheel_axis_lock.html
+ create mode 100644 tests/blitz-tests/tests/wheel_axis_lock.rs
+
+diff --git a/examples/assets/wheel_axis_lock.html b/examples/assets/wheel_axis_lock.html
+new file mode 100644
+index 000000000..9a3acd0c1
+--- /dev/null
++++ b/examples/assets/wheel_axis_lock.html
+@@ -0,0 +1,24 @@
++<!DOCTYPE html>
++<html>
++<head>
++  <title>Trackpad scroll axis lock</title>
++  <style>
++    body { margin: 0; font-family: sans-serif; }
++    p, ol { margin: 16px; max-width: 600px; }
++    .row { width: 400px; height: 150px; margin: 16px; overflow-x: auto; overflow-y: hidden; border: 1px solid #888; }
++    .row > div { width: 3000px; height: 150px; background: linear-gradient(to right, red, yellow, green, blue); }
++    .page { height: 3000px; background: linear-gradient(white, #aaa); }
++  </style>
++</head>
++<body>
++  <p>Swipe on a trackpad with the pointer over the coloured row:</p>
++  <ol>
++    <li>A slightly crooked vertical swipe scrolls the page and leaves the row still, also while it coasts.</li>
++    <li>A horizontal swipe scrolls the row and not the page.</li>
++    <li>A diagonal swipe scrolls both.</li>
++    <li>A swipe that starts vertical and turns sideways starts scrolling the row.</li>
++  </ol>
++  <div class="row"><div></div></div>
++  <div class="page"></div>
++</body>
++</html>
+diff --git a/packages/blitz-dom/src/document.rs b/packages/blitz-dom/src/document.rs
+index 9cef1af01..790ad098b 100644
+--- a/packages/blitz-dom/src/document.rs
++++ b/packages/blitz-dom/src/document.rs
+@@ -1,5 +1,5 @@
+ use crate::NodeTree;
+-use crate::events::{DragMode, handle_dom_event};
++use crate::events::{DragMode, WheelGesture, handle_dom_event};
+ use crate::layout::construct::ConstructionTask;
+ use crate::layout::damage::ALL_DAMAGE;
+ use crate::mutator::ViewportMut;
+@@ -368,6 +368,8 @@ pub struct BaseDocument {
+     pub(crate) scrollbar_activity: HashMap<NodeId, Instant>,
+     /// Whether and what kind of scroll animation is currently in progress
+     pub(crate) scroll_animation: ScrollAnimationState,
++    /// The trackpad scroll gesture under way, locked to its main axis
++    pub(crate) wheel_gesture: WheelGesture,
+ 
+     /// Text selection state (for non-input text)
+     pub(crate) text_selection: TextSelection,
+@@ -605,6 +607,7 @@ impl BaseDocument {
+             hovered_scrollbar: None,
+             scrollbar_activity: HashMap::new(),
+             scroll_animation: ScrollAnimationState::None,
++            wheel_gesture: WheelGesture::default(),
+             text_selection: TextSelection::default(),
+             scratch: DocumentScratch::default(),
+         };
+@@ -740,12 +743,15 @@ impl BaseDocument {
+         DocumentMutator::new(self)
+     }
+ 
++    /// Run an event's default action. `default_prevented` says whether a handler prevented
++    /// it, in which case only state that must follow every event is updated.
+     pub fn handle_dom_event<F: FnMut(DomEvent)>(
+         &mut self,
+         event: &mut DomEvent,
++        default_prevented: bool,
+         dispatch_event: F,
+     ) {
+-        handle_dom_event(self, event, dispatch_event)
++        handle_dom_event(self, event, default_prevented, dispatch_event)
+     }
+ 
+     pub fn as_any_mut(&mut self) -> &mut dyn Any {
+diff --git a/packages/blitz-dom/src/events/driver.rs b/packages/blitz-dom/src/events/driver.rs
+index 04de53944..90926667d 100644
+--- a/packages/blitz-dom/src/events/driver.rs
++++ b/packages/blitz-dom/src/events/driver.rs
+@@ -305,7 +305,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+             // composition events and the input they generate.
+             UiEvent::Ime(data) => {
+                 let mut event = DomEvent::new(target, DomEventData::Ime(data));
+-                self.run_default_action(&mut event);
++                self.run_default_action(&mut event, false);
+                 self.process_queue();
+             }
+             UiEvent::Paste(text) => {
+@@ -319,7 +319,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+             UiEvent::AppleStandardKeybinding(data) => {
+                 let mut dom_event =
+                     DomEvent::new(target, DomEventData::AppleStandardKeybinding(data));
+-                self.run_default_action(&mut dom_event);
++                self.run_default_action(&mut dom_event, false);
+                 self.process_queue();
+             }
+             UiEvent::Accessibility(_) | UiEvent::ScrollAnimationFrame => {}
+@@ -483,18 +483,14 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+             }
+         }
+ 
+-        if !event_state.is_cancelled() {
+-            self.run_default_action(&mut ptr_event);
+-        }
++        self.run_default_action(&mut ptr_event, event_state.is_cancelled());
+         self.process_queue();
+     }
+ 
+     fn process_queue(&mut self) {
+         while let Some(mut event) = self.queue.pop_front() {
+             let event_state = self.run_handler_event(&mut event, EventState::default());
+-            if !event_state.is_cancelled() {
+-                self.run_default_action(&mut event);
+-            }
++            self.run_default_action(&mut event, event_state.is_cancelled());
+         }
+     }
+ 
+@@ -560,8 +556,13 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
+         event_state
+     }
+ 
+-    fn run_default_action(&mut self, event: &mut DomEvent) {
++    /// Hand an event to the document once its handlers have run. This happens for every
++    /// event, including one whose default action was prevented: the document decides what,
++    /// if anything, it still has to do with it.
++    fn run_default_action(&mut self, event: &mut DomEvent, default_prevented: bool) {
+         let mut doc = self.doc.inner_mut();
+-        doc.handle_dom_event(event, |new_evt| self.queue.push_back(new_evt));
++        doc.handle_dom_event(event, default_prevented, |new_evt| {
++            self.queue.push_back(new_evt)
++        });
+     }
+ }
+diff --git a/packages/blitz-dom/src/events/mod.rs b/packages/blitz-dom/src/events/mod.rs
+index 47a8c10f1..215a16785 100644
+--- a/packages/blitz-dom/src/events/mod.rs
++++ b/packages/blitz-dom/src/events/mod.rs
+@@ -11,7 +11,7 @@ use focus::generate_focus_events;
+ pub(crate) use ime::handle_ime_event;
+ pub use keyboard::TextFieldCommand;
+ use keyboard::{KeyboardOrTextInputEvent, handle_key_or_input_event};
+-pub(crate) use pointer::DragMode;
++pub(crate) use pointer::{DragMode, WheelGesture};
+ use pointer::{handle_click, handle_pointerdown, handle_pointermove, handle_pointerup};
+ 
+ use crate::{BaseDocument, events::pointer::handle_wheel};
+@@ -107,8 +107,17 @@ fn map_dom_event_to_ui_event(
+ pub(crate) fn handle_dom_event<F: FnMut(DomEvent)>(
+     doc: &mut BaseDocument,
+     event: &mut DomEvent,
++    default_prevented: bool,
+     mut dispatch_event: F,
+ ) {
++    if default_prevented {
++        // A scroll gesture has to see each of its events to know where it starts and ends.
++        if let DomEventData::Wheel(data) = &event.data {
++            doc.wheel_gesture.track(data);
++        }
++        return;
++    }
++
+     let target_node_id = event.target;
+     let node = &mut doc.nodes[target_node_id];
+     let pos = node.absolute_position(0.0, 0.0);
+diff --git a/packages/blitz-dom/src/events/pointer.rs b/packages/blitz-dom/src/events/pointer.rs
+index 1532d7834..ae6adbeb6 100644
+--- a/packages/blitz-dom/src/events/pointer.rs
++++ b/packages/blitz-dom/src/events/pointer.rs
+@@ -7,7 +7,8 @@ use web_time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+ use blitz_traits::{
+     events::{
+         BlitzInputEvent, BlitzPointerEvent, BlitzPointerId, BlitzWheelDelta, BlitzWheelEvent,
+-        DomEvent, DomEventData, MouseEventButton, MouseEventButtons,
++        BlitzWheelPhase, BlitzWheelSource, DomEvent, DomEventData, MouseEventButton,
++        MouseEventButtons,
+     },
+     navigation::NavigationOptions,
+ };
+@@ -917,6 +918,87 @@ pub(crate) fn handle_click(
+     }
+ }
+ 
++/// The axes a wheel event's default scroll moves.
++#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
++pub(crate) enum WheelAxes {
++    #[default]
++    Both,
++    Horizontal,
++    Vertical,
++}
++
++/// Locks a trackpad scroll gesture to its main axis, as browsers do. Swipes are rarely
++/// straight, so without a lock a vertical swipe also nudges horizontal scrollers sideways.
++///
++/// Each event is locked by the gesture's recent movement, as in Chromium: to an axis while
++/// the movement mostly follows it, and to neither while it is diagonal. So a gesture that
++/// turns unlocks and can lock again. Momentum scrolling carries on from the gesture it
++/// follows. Events from devices that report no gestures scroll as they come.
++#[derive(Clone, Copy, Debug, Default)]
++pub(crate) enum WheelGesture {
++    /// No gesture is under way: events scroll both axes.
++    #[default]
++    Idle,
++    /// A gesture is under way. `recent` is how far it has moved along each axis, counting
++    /// each event's movement for less as newer events arrive.
++    Active { recent: (f64, f64) },
++    /// The fingers have lifted from a gesture. Momentum scrolling that follows directly
++    /// carries on from its recent movement.
++    Lifted { recent: (f64, f64) },
++}
++
++impl WheelGesture {
++    /// An event locks to an axis when the recent movement along that axis is at least this
++    /// many times the movement along the other.
++    const LOCK_RATIO: f64 = 2.0;
++    /// How much of the recent movement is kept each time an event arrives.
++    const DECAY: f64 = 0.8;
++
++    /// Place a wheel event in the gesture, returning the axes its default scroll moves.
++    ///
++    /// Every wheel event must pass through here exactly once, including those whose default
++    /// scroll is prevented, or the gesture loses track of where it starts and ends.
++    pub(crate) fn track(&mut self, event: &BlitzWheelEvent) -> WheelAxes {
++        if event.source == BlitzWheelSource::Wheel {
++            *self = Self::Idle;
++            return WheelAxes::Both;
++        }
++
++        let started = event.phase == BlitzWheelPhase::Started;
++        let recent = match *self {
++            Self::Lifted { recent } if started && event.source == BlitzWheelSource::Momentum => {
++                recent
++            }
++            _ if started => (0.0, 0.0),
++            Self::Active { recent } => recent,
++            Self::Idle | Self::Lifted { .. } => {
++                *self = Self::Idle;
++                return WheelAxes::Both;
++            }
++        };
++
++        let (x, y) = event.delta.to_pixels(LINE_SCROLL_PX);
++        let x = recent.0 * Self::DECAY + x.abs();
++        let y = recent.1 * Self::DECAY + y.abs();
++        let axes = if y >= x * Self::LOCK_RATIO {
++            WheelAxes::Vertical
++        } else if x >= y * Self::LOCK_RATIO {
++            WheelAxes::Horizontal
++        } else {
++            WheelAxes::Both
++        };
++
++        *self = match event.phase {
++            BlitzWheelPhase::Ended if event.source == BlitzWheelSource::Finger => {
++                Self::Lifted { recent: (x, y) }
++            }
++            BlitzWheelPhase::Ended | BlitzWheelPhase::Cancelled => Self::Idle,
++            BlitzWheelPhase::Started | BlitzWheelPhase::Moved => Self::Active { recent: (x, y) },
++        };
++        axes
++    }
++}
++
+ /// How far one line of a wheel delta scrolls, in CSS pixels: Chromium's
+ /// values (a notch is one line on Windows and Linux, so 100 px; macOS
+ /// reports accelerated fractions of lines, 40 px each).
+@@ -931,18 +1013,25 @@ pub(crate) fn handle_wheel<F: FnMut(DomEvent)>(
+     event: BlitzWheelEvent,
+     mut dispatch_event: F,
+ ) {
++    let (scroll_x, scroll_y) = event.delta.to_pixels(LINE_SCROLL_PX);
++    let (scroll_x, scroll_y) = match doc.wheel_gesture.track(&event) {
++        WheelAxes::Both => (scroll_x, scroll_y),
++        WheelAxes::Horizontal => (scroll_x, 0.0),
++        WheelAxes::Vertical => (0.0, scroll_y),
++    };
++
+     // A wheel's notches (lines) step a practical distance and glide there;
+     // pixel deltas (a touchpad, a smooth-scrolling wheel) are already smooth
+     // and follow the fingers at once.
+     let has_changed = match event.delta {
+-        BlitzWheelDelta::Lines(x, y) => doc.scroll_chain_smoothly(
++        BlitzWheelDelta::Lines(..) => doc.scroll_chain_smoothly(
+             doc.get_hover_node_id(),
+-            x * LINE_SCROLL_PX,
+-            y * LINE_SCROLL_PX,
++            scroll_x,
++            scroll_y,
+             &mut dispatch_event,
+         ),
+-        BlitzWheelDelta::Pixels(x, y) => {
+-            doc.scroll_chain_by(doc.get_hover_node_id(), x, y, &mut dispatch_event)
++        BlitzWheelDelta::Pixels(..) => {
++            doc.scroll_chain_by(doc.get_hover_node_id(), scroll_x, scroll_y, &mut dispatch_event)
+         }
+     };
+     if has_changed {
+diff --git a/packages/blitz-shell/src/window.rs b/packages/blitz-shell/src/window.rs
+index 10876d4c8..24c81d453 100644
+--- a/packages/blitz-shell/src/window.rs
++++ b/packages/blitz-shell/src/window.rs
+@@ -10,8 +10,8 @@ use blitz_dom::Document;
+ use blitz_dom::PaintDamage;
+ use blitz_paint::{paint_scene, paint_scene_damaged};
+ use blitz_traits::events::{
+-    BlitzPointerEvent, BlitzPointerId, BlitzWheelDelta, BlitzWheelEvent, MouseEventButton,
+-    MouseEventButtons, PointerCoords, PointerDetails, UiEvent,
++    BlitzPointerEvent, BlitzPointerId, BlitzWheelDelta, BlitzWheelEvent, BlitzWheelPhase,
++    BlitzWheelSource, MouseEventButton, MouseEventButtons, PointerCoords, PointerDetails, UiEvent,
+ };
+ use blitz_traits::shell::Viewport;
+ use winit::dpi::{LogicalPosition, PhysicalInsets, PhysicalPosition};
+@@ -1021,7 +1021,12 @@ impl<Rend: WindowRenderer> View<Rend> {
+                 self.doc.handle_ui_event(event);
+                 self.request_redraw();
+             }
+-            WindowEvent::MouseWheel { delta, .. } => {
++            WindowEvent::MouseWheel {
++                delta,
++                phase,
++                source,
++                ..
++            } => {
+                 let blitz_delta = match delta {
+                     winit::event::MouseScrollDelta::LineDelta(x, y) => BlitzWheelDelta::Lines(x as f64, y as f64),
+                     winit::event::MouseScrollDelta::PixelDelta(pos) => BlitzWheelDelta::Pixels(pos.x, pos.y),
+@@ -1034,6 +1039,18 @@ impl<Rend: WindowRenderer> View<Rend> {
+ 
+                 let event = BlitzWheelEvent {
+                     delta: blitz_delta,
++                    phase: match phase {
++                        winit::event::TouchPhase::Started => BlitzWheelPhase::Started,
++                        winit::event::TouchPhase::Moved => BlitzWheelPhase::Moved,
++                        winit::event::TouchPhase::Ended => BlitzWheelPhase::Ended,
++                        winit::event::TouchPhase::Cancelled => BlitzWheelPhase::Cancelled,
++                    },
++                    source: match source {
++                        winit::event::ScrollSource::Wheel => BlitzWheelSource::Wheel,
++                        winit::event::ScrollSource::Finger => BlitzWheelSource::Finger,
++                        winit::event::ScrollSource::Momentum => BlitzWheelSource::Momentum,
++                        _ => BlitzWheelSource::Unknown,
++                    },
+                     coords: self.pointer_coords(self.pointer_pos),
+                     buttons: self.buttons,
+                     mods: winit_modifiers_to_kbt_modifiers(self.keyboard_modifiers.state()),
+diff --git a/packages/blitz-test-harness/src/input.rs b/packages/blitz-test-harness/src/input.rs
+index e2cf0ac07..389d9dbe7 100644
+--- a/packages/blitz-test-harness/src/input.rs
++++ b/packages/blitz-test-harness/src/input.rs
+@@ -7,8 +7,8 @@
+ use blitz_dom::Document;
+ use blitz_traits::events::{
+     BlitzImeEvent, BlitzKeyEvent, BlitzPointerEvent, BlitzPointerId, BlitzWheelDelta,
+-    BlitzWheelEvent, KeyState, MouseEventButton, MouseEventButtons, Point, PointerCoords,
+-    PointerDetails, UiEvent,
++    BlitzWheelEvent, BlitzWheelPhase, BlitzWheelSource, KeyState, MouseEventButton,
++    MouseEventButtons, Point, PointerCoords, PointerDetails, UiEvent,
+ };
+ use keyboard_types::{Code, Key, Location, Modifiers};
+ use smol_str::SmolStr;
+@@ -185,9 +185,32 @@ impl<D: Document> Harness<D> {
+     /// Negative `delta_y` scrolls the content down (like rolling the wheel towards you).
+     /// The mouse is first moved to `(x, y)` so the wheel targets the hovered element.
+     pub fn wheel_at(&mut self, x: f32, y: f32, delta_x: f64, delta_y: f64) {
++        self.wheel_gesture_at(
++            x,
++            y,
++            delta_x,
++            delta_y,
++            BlitzWheelPhase::Moved,
++            BlitzWheelSource::Unknown,
++        );
++    }
++
++    /// [`Harness::wheel_at`], as part of a trackpad gesture: `phase` and `source` place the
++    /// event in the gesture.
++    pub fn wheel_gesture_at(
++        &mut self,
++        x: f32,
++        y: f32,
++        delta_x: f64,
++        delta_y: f64,
++        phase: BlitzWheelPhase,
++        source: BlitzWheelSource,
++    ) {
+         self.move_mouse_to(x, y);
+         let event = BlitzWheelEvent {
+             delta: BlitzWheelDelta::Pixels(delta_x, delta_y),
++            phase,
++            source,
+             coords: coords(x, y),
+             buttons: MouseEventButtons::empty(),
+             mods: Modifiers::default(),
+diff --git a/packages/blitz-traits/src/events.rs b/packages/blitz-traits/src/events.rs
+index 3335c7ee9..c6e7ae94a 100644
+--- a/packages/blitz-traits/src/events.rs
++++ b/packages/blitz-traits/src/events.rs
+@@ -633,9 +633,54 @@ pub enum BlitzWheelDelta {
+     Pixels(f64, f64),
+ }
+ 
++impl BlitzWheelDelta {
++    /// The delta as `(x, y)` in pixels, counting each line as `line_px` pixels.
++    pub fn to_pixels(&self, line_px: f64) -> (f64, f64) {
++        match *self {
++            Self::Lines(x, y) => (x * line_px, y * line_px),
++            Self::Pixels(x, y) => (x, y),
++        }
++    }
++}
++
++/// Where a [`BlitzWheelEvent`] falls in a scroll gesture.
++///
++/// Devices that report no gestures (most mouse wheels) send every event as
++/// [`BlitzWheelPhase::Moved`].
++#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
++pub enum BlitzWheelPhase {
++    /// The fingers touched the trackpad, or momentum scrolling began.
++    Started,
++    /// The gesture moved, or the device reports no gestures.
++    #[default]
++    Moved,
++    /// The fingers left the trackpad, or momentum scrolling stopped.
++    Ended,
++    /// The system cancelled the gesture.
++    Cancelled,
++}
++
++/// What drives a [`BlitzWheelEvent`].
++#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
++pub enum BlitzWheelSource {
++    /// The platform doesn't say.
++    #[default]
++    Unknown,
++    /// A physical wheel, usually on a mouse.
++    Wheel,
++    /// Fingers moving on a trackpad.
++    Finger,
++    /// The system continuing a finger scroll after the fingers lifted.
++    Momentum,
++}
++
+ #[derive(Clone, Debug)]
+ pub struct BlitzWheelEvent {
+     pub delta: BlitzWheelDelta,
++    /// Where the event falls in a scroll gesture.
++    pub phase: BlitzWheelPhase,
++    /// What drives the event.
++    pub source: BlitzWheelSource,
+     pub coords: PointerCoords,
+     pub buttons: MouseEventButtons,
+     pub mods: Modifiers,
+diff --git a/tests/blitz-tests/tests/all.rs b/tests/blitz-tests/tests/all.rs
+index be6cae673..bb01c9eca 100644
+--- a/tests/blitz-tests/tests/all.rs
++++ b/tests/blitz-tests/tests/all.rs
+@@ -86,6 +86,7 @@ mod touch_events;
+ mod transform_2d_subset;
+ mod transform_viewport_scale;
+ mod ua_stylesheet_order;
++mod wheel_axis_lock;
+ mod whitespace_modes;
+ 
+ #[test]
+diff --git a/tests/blitz-tests/tests/fragment_navigation.rs b/tests/blitz-tests/tests/fragment_navigation.rs
+index 5ee6fa4e0..e0cdef3f8 100644
+--- a/tests/blitz-tests/tests/fragment_navigation.rs
++++ b/tests/blitz-tests/tests/fragment_navigation.rs
+@@ -76,6 +76,8 @@ fn wheel_at(doc: &mut HtmlDocument, x: f32, y: f32, delta_x: f64, delta_y: f64)
+     doc.handle_ui_event(UiEvent::PointerMove(event.clone()));
+     doc.handle_ui_event(UiEvent::Wheel(BlitzWheelEvent {
+         delta: BlitzWheelDelta::Pixels(delta_x, delta_y),
++        phase: Default::default(),
++        source: Default::default(),
+         coords: event.coords,
+         buttons: MouseEventButtons::empty(),
+         mods: Default::default(),
+diff --git a/tests/blitz-tests/tests/overscroll_behavior.rs b/tests/blitz-tests/tests/overscroll_behavior.rs
+index e3b0648f5..de464651a 100644
+--- a/tests/blitz-tests/tests/overscroll_behavior.rs
++++ b/tests/blitz-tests/tests/overscroll_behavior.rs
+@@ -92,6 +92,8 @@ fn contain_keeps_a_wheel_notch() {
+     harness.wheel_at(50.0, 50.0, -2000.0, -2000.0);
+     harness.dispatch(UiEvent::Wheel(BlitzWheelEvent {
+         delta: BlitzWheelDelta::Lines(0.0, -3.0),
++        phase: Default::default(),
++        source: Default::default(),
+         coords: PointerCoords {
+             page_x: 50.0,
+             page_y: 50.0,
+diff --git a/tests/blitz-tests/tests/wheel_axis_lock.rs b/tests/blitz-tests/tests/wheel_axis_lock.rs
+new file mode 100644
+index 000000000..d5a67acb6
+--- /dev/null
++++ b/tests/blitz-tests/tests/wheel_axis_lock.rs
+@@ -0,0 +1,131 @@
++//! A trackpad scroll gesture locks to the axis it mostly moves along, so a slightly crooked
++//! vertical swipe over a horizontal scroller doesn't move it sideways. Devices that report no
++//! gestures scroll both axes as before.
++
++use blitz_test_harness::Harness;
++use blitz_traits::events::BlitzWheelPhase::{self, Ended, Moved, Started};
++use blitz_traits::events::BlitzWheelSource::{self, Finger, Momentum, Unknown};
++
++/// A page that scrolls vertically, holding a 100px tall row that scrolls horizontally.
++fn page() -> Harness {
++    Harness::from_html(
++        r#"<html><body style="margin:0; height:3000px">
++            <div id="row" style="width:100px; height:100px; overflow-x:auto; overflow-y:hidden">
++                <div style="width:1000px; height:100px"></div>
++            </div>
++        </body></html>"#,
++    )
++}
++
++/// Send a gesture over the row as `(dx, dy, phase, source)` steps, returning the row's
++/// horizontal scroll offset and the page's vertical one.
++fn gesture(steps: &[(f64, f64, BlitzWheelPhase, BlitzWheelSource)]) -> (f64, f64) {
++    let mut harness = page();
++    for &(dx, dy, phase, source) in steps {
++        harness.wheel_gesture_at(50.0, 50.0, dx, dy, phase, source);
++    }
++    let row = harness.node("#row");
++    let row_x = harness.base().get_node(row).unwrap().scroll_offset().x;
++    (row_x, harness.base().viewport_scroll().y)
++}
++
++#[test]
++fn a_mostly_vertical_gesture_and_its_momentum_scroll_only_vertically() {
++    assert_eq!(
++        gesture(&[
++            (0.0, 0.0, Started, Finger),
++            (-3.0, -30.0, Moved, Finger),
++            (-20.0, -30.0, Moved, Finger),
++            (-5.0, -10.0, Ended, Finger),
++            (0.0, 0.0, Started, Momentum),
++            (-5.0, -20.0, Moved, Momentum),
++            (0.0, 0.0, Ended, Momentum),
++        ]),
++        (0.0, 90.0)
++    );
++}
++
++#[test]
++fn a_mostly_horizontal_gesture_scrolls_only_horizontally() {
++    assert_eq!(
++        gesture(&[
++            (-30.0, -5.0, Started, Finger),
++            (-30.0, -10.0, Moved, Finger),
++        ]),
++        (60.0, 0.0)
++    );
++}
++
++#[test]
++fn a_small_first_movement_does_not_decide_the_axis() {
++    assert_eq!(
++        gesture(&[
++            (-1.0, 0.0, Started, Finger),
++            (0.0, -30.0, Moved, Finger),
++            (-2.0, -30.0, Moved, Finger),
++        ]),
++        (1.0, 60.0)
++    );
++}
++
++#[test]
++fn a_diagonal_gesture_scrolls_both_axes() {
++    assert_eq!(
++        gesture(&[
++            (0.0, 0.0, Started, Finger),
++            (-20.0, -20.0, Moved, Finger),
++            (-10.0, 0.0, Moved, Finger),
++        ]),
++        (30.0, 20.0)
++    );
++}
++
++#[test]
++fn a_gesture_that_turns_changes_its_axis() {
++    assert_eq!(
++        gesture(&[
++            (0.0, -30.0, Started, Finger),
++            (-30.0, 0.0, Moved, Finger),
++            (-30.0, 0.0, Moved, Finger),
++            (-30.0, 0.0, Moved, Finger),
++            (-30.0, -5.0, Moved, Finger),
++        ]),
++        (120.0, 30.0)
++    );
++}
++
++#[test]
++fn each_gesture_decides_its_own_axis() {
++    assert_eq!(
++        gesture(&[
++            (0.0, -30.0, Started, Finger),
++            (0.0, 0.0, Ended, Finger),
++            (-30.0, 0.0, Started, Finger),
++            (-10.0, -10.0, Moved, Finger),
++        ]),
++        (40.0, 30.0)
++    );
++}
++
++#[test]
++fn events_outside_a_gesture_scroll_both_axes() {
++    assert_eq!(
++        gesture(&[
++            (-3.0, -30.0, Moved, Unknown),
++            (-10.0, -10.0, Moved, Unknown),
++        ]),
++        (13.0, 40.0)
++    );
++}
++
++#[test]
++fn events_after_a_gesture_scroll_both_axes() {
++    assert_eq!(
++        gesture(&[
++            (0.0, -30.0, Started, Finger),
++            (0.0, 0.0, Ended, Finger),
++            (-10.0, -10.0, Moved, Unknown),
++        ]),
++        (10.0, 40.0)
++    );
++}

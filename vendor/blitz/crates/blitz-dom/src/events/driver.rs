@@ -305,7 +305,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
             // composition events and the input they generate.
             UiEvent::Ime(data) => {
                 let mut event = DomEvent::new(target, DomEventData::Ime(data));
-                self.run_default_action(&mut event);
+                self.run_default_action(&mut event, false);
                 self.process_queue();
             }
             UiEvent::Paste(text) => {
@@ -319,7 +319,7 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
             UiEvent::AppleStandardKeybinding(data) => {
                 let mut dom_event =
                     DomEvent::new(target, DomEventData::AppleStandardKeybinding(data));
-                self.run_default_action(&mut dom_event);
+                self.run_default_action(&mut dom_event, false);
                 self.process_queue();
             }
             UiEvent::Accessibility(_) | UiEvent::ScrollAnimationFrame => {}
@@ -483,18 +483,14 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
             }
         }
 
-        if !event_state.is_cancelled() {
-            self.run_default_action(&mut ptr_event);
-        }
+        self.run_default_action(&mut ptr_event, event_state.is_cancelled());
         self.process_queue();
     }
 
     fn process_queue(&mut self) {
         while let Some(mut event) = self.queue.pop_front() {
             let event_state = self.run_handler_event(&mut event, EventState::default());
-            if !event_state.is_cancelled() {
-                self.run_default_action(&mut event);
-            }
+            self.run_default_action(&mut event, event_state.is_cancelled());
         }
     }
 
@@ -560,8 +556,13 @@ impl<'doc, Handler: EventHandler> EventDriver<'doc, Handler> {
         event_state
     }
 
-    fn run_default_action(&mut self, event: &mut DomEvent) {
+    /// Hand an event to the document once its handlers have run. This happens for every
+    /// event, including one whose default action was prevented: the document decides what,
+    /// if anything, it still has to do with it.
+    fn run_default_action(&mut self, event: &mut DomEvent, default_prevented: bool) {
         let mut doc = self.doc.inner_mut();
-        doc.handle_dom_event(event, |new_evt| self.queue.push_back(new_evt));
+        doc.handle_dom_event(event, default_prevented, |new_evt| {
+            self.queue.push_back(new_evt)
+        });
     }
 }

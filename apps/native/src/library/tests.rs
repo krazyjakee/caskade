@@ -189,6 +189,8 @@ impl Window {
         blitz_dom::Document::handle_ui_event(&mut self.doc, UiEvent::PointerMove(pointer));
         let event = BlitzWheelEvent {
             delta: BlitzWheelDelta::Pixels(0.0, -by),
+            phase: Default::default(),
+            source: Default::default(),
             coords: PointerCoords {
                 page_x: x,
                 page_y: y,
