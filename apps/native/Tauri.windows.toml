@@ -9,3 +9,8 @@ targets = ["nsis"]
 
 [bundle.windows.nsis]
 installerHooks = "packaging/windows/hooks.nsh"
+installerIcon = "icons/icon.ico"
+sidebarImage = "packaging/windows/nsis-sidebar.bmp"
+headerImage = "packaging/windows/nsis-header.bmp"
+displayLanguageSelector = true
+languages = ["English", "Swedish"]

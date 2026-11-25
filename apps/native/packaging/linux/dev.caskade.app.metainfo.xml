@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>dev.caskade.app</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Caskade</name>
+  <summary>Game library and launcher</summary>
+  <summary xml:lang="sv">Spelbibliotek och spelstartare</summary>
+  <description>
+    <p>
+      Caskade is a cross-platform game library and launcher that brings your PC
+      games, storefronts, emulators, ROMs, and streaming clients together in one
+      fast native interface for both desktop and TV.
+    </p>
+    <p>
+      Browse and organize your collection with rich metadata, switch to a
+      gamepad-first console mode on the couch, and launch games without leaving
+      your library.
+    </p>
+  </description>
+  <developer id="dev.caskade">
+    <name>Caskade</name>
+  </developer>
+  <launchable type="desktop-id">Caskade.desktop</launchable>
+  <url type="homepage">https://caskade.app</url>
+  <url type="bugtracker">https://github.com/krazyjakee/caskade/issues</url>
+  <url type="vcs-browser">https://github.com/krazyjakee/caskade</url>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Desktop library view</caption>
+      <image>https://caskade.app/assets/desktop-en.jpg</image>
+    </screenshot>
+    <screenshot>
+      <caption>Console mode</caption>
+      <image>https://caskade.app/assets/console-en.jpg</image>
+    </screenshot>
+  </screenshots>
+  <categories>
+    <category>Game</category>
+  </categories>
+  <content_rating type="oars-1.1" />
+</component>

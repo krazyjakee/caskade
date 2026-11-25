@@ -1,1 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="112 112 800 800"><title>Caskade</title><circle cx="512" cy="512" r="340" fill="none" stroke="#38bdf8" stroke-width="80"/><polygon points="625.1,314 710,398.9 398.9,710 314,625.1" fill="#a78bfa"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="112 112 800 800">
+  <title>Caskade</title>
+  <defs>
+    <linearGradient id="cyan" x1="20%" y1="15%" x2="80%" y2="85%">
+      <stop offset="0%" stop-color="#56ccf9"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="violet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c4b5fd"/>
+      <stop offset="50%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <circle cx="512" cy="512" r="340" fill="none" stroke="url(#cyan)" stroke-width="80"/>
+  <rect x="292" y="452" width="440" height="120" rx="12" transform="rotate(-45 512 512)" fill="url(#violet)"/>
+</svg>

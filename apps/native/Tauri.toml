@@ -16,9 +16,15 @@ mainBinaryName = "caskade"
 [bundle]
 active = true
 targets = ["deb", "appimage"]
+category = "Game"
 # The package and installer description (otherwise the crate's).
 shortDescription = "Game library and launcher"
-icon = ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.png"]
+longDescription = """
+Caskade brings your PC games, storefronts, emulators, ROMs, and streaming
+clients together in one fast, cross-platform library and launcher for desktop
+and TV.
+"""
+icon = ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.png", "icons/icon.ico"]
 # Pinned 7-Zip beside the executable, staged by scripts/7zz-sidecar.py.
 externalBin = ["binaries/7zz"]
 # Release CI turns this on to get macOS's .app.tar.gz; signing is the
@@ -33,9 +39,14 @@ createUpdaterArtifacts = false
 # WebKitGTK and GTK, for game and video windows, itself).
 [bundle.linux.deb]
 depends = ["libayatana-appindicator3-1"]
+desktopTemplate = "packaging/linux/caskade.desktop"
+
+[bundle.linux.deb.files]
+"/usr/share/metainfo/dev.caskade.app.metainfo.xml" = "packaging/linux/dev.caskade.app.metainfo.xml"
 
 [bundle.linux.appimage.files]
 "/usr/lib/libayatana-appindicator3.so.1" = "/usr/lib/x86_64-linux-gnu/libayatana-appindicator3.so.1"
+"/usr/share/metainfo/dev.caskade.app.metainfo.xml" = "packaging/linux/dev.caskade.app.metainfo.xml"
 
 # Registered by the installers: NSIS, the .desktop file and Info.plist.
 [plugins.deep-link.desktop]
