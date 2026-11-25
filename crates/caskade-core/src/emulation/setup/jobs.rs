@@ -165,13 +165,13 @@ impl EmulatorSetup {
             if let Err(error) = &result {
                 tracing::warn!(job = id, %error, "emulator install failed");
             }
+            let _ = tokio::fs::remove_dir_all(service.inner.cache.join(&id)).await;
             service.update_job(&id, |job| {
                 job.status = status;
                 if status == SetupStatus::Failed {
                     job.error = result.err().map(|error| error.to_string());
                 }
             });
-            let _ = tokio::fs::remove_dir_all(service.inner.cache.join(&id)).await;
         });
         Ok(job)
     }
