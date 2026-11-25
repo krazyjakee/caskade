@@ -9,7 +9,7 @@ use crate::{
 use caskade_core::{
     AppPaths,
     bus::BusOptions,
-    model::{Game, GameEntry, SourceId},
+    model::{Game, GameEntry, InstallState, LaunchSpec, SourceId},
 };
 use std::sync::atomic::{AtomicBool, Ordering};
 use wiremock::{Mock, MockServer, matchers::path_regex};

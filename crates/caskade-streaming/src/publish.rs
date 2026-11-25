@@ -21,8 +21,6 @@ use super::{
     StreamingHost,
     api::{App, HostApi},
 };
-#[cfg(test)]
-use caskade_core::model::{InstallState, LaunchSpec};
 use caskade_core::{
     Result,
     accounts::AccountService,
