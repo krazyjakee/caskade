@@ -6,18 +6,14 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
     fs::File,
-    io::{Cursor, Read, Write},
+    io::{Cursor, Read},
     path::Path,
-    sync::{
-        Arc,
-        atomic::{AtomicU64, Ordering},
-    },
+    sync::Arc,
 };
 
 pub const MAX_INPUT_BYTES: usize = 16 * 1024 * 1024;
 pub(super) const MAX_ASSET_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_PIXELS: u64 = 16 * 1024 * 1024;
-static NEXT_TEMP: AtomicU64 = AtomicU64::new(0);
 
 /// Clones share the cache; all instances use the application resource queue.
 #[derive(Clone)]
@@ -122,18 +118,18 @@ impl ArtworkCache {
         let image = decode(bytes)?;
         let mut thumbnails = Vec::with_capacity(THUMBNAIL_SIZES.len());
         let original_bytes = encode_webp(&image)?;
-        atomic_write(&directory, "original.webp", &original_bytes)?;
+        crate::fs::atomic_write_dir(&directory, "original.webp", &original_bytes)?;
         for size in THUMBNAIL_SIZES {
             let file = format!("thumb-{size}.webp");
             // Never upscale a small icon to a cover-sized allocation, and reuse
             // the already-encoded original WebP bytes without re-encoding.
             let (width, height) = if image.width().max(image.height()) <= size {
-                atomic_write(&directory, &file, &original_bytes)?;
+                crate::fs::atomic_write_dir(&directory, &file, &original_bytes)?;
                 (image.width(), image.height())
             } else {
                 let thumbnail = image.thumbnail(size, size);
                 let bytes = encode_webp(&thumbnail)?;
-                atomic_write(&directory, &file, &bytes)?;
+                crate::fs::atomic_write_dir(&directory, &file, &bytes)?;
                 (thumbnail.width(), thumbnail.height())
             };
             thumbnails.push(CachedThumbnail {
@@ -156,7 +152,7 @@ impl ArtworkCache {
             schema_version: 1,
             artwork: artwork.clone(),
         };
-        atomic_write(&directory, "entry.json", &serde_json::to_vec(&document)?)?;
+        crate::fs::atomic_write_dir(&directory, "entry.json", &serde_json::to_vec(&document)?)?;
         Ok(artwork)
     }
 
@@ -239,45 +235,6 @@ pub(super) fn lock(directory: &Dir) -> Result<File> {
         .into_std();
     file.lock_exclusive()?;
     Ok(file)
-}
-
-pub(super) fn atomic_write(directory: &Dir, name: &str, bytes: &[u8]) -> Result<()> {
-    // Only capability-relative names reach this function. create_new avoids
-    // trusting any pre-existing temp file, including after a previous crash.
-    let mut candidate = None;
-    for _ in 0..100 {
-        let name = format!(
-            ".tmp-{}-{}",
-            std::process::id(),
-            NEXT_TEMP.fetch_add(1, Ordering::Relaxed)
-        );
-        match directory.open_with(&name, OpenOptions::new().write(true).create_new(true)) {
-            Ok(file) => {
-                candidate = Some((name, file));
-                break;
-            }
-            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {}
-            Err(e) => return Err(e.into()),
-        }
-    }
-    let (temporary, mut file) =
-        candidate.ok_or(ArtworkError::Invalid("artwork temp namespace exhausted"))?;
-    let result = (|| {
-        file.write_all(bytes)?;
-        // Disposable cache files are published atomically via rename (with
-        // entry.json written last); skipping per-file fsync avoids 5 disk
-        // barriers per downloaded cover.
-        drop(file);
-        // A previous interrupted generation may have published this file.
-        if directory.try_exists(name)? {
-            directory.remove_file(name)?;
-        }
-        directory.rename(&temporary, directory, name)
-    })();
-    if result.is_err() {
-        let _ = directory.remove_file(&temporary);
-    }
-    result.map_err(Into::into)
 }
 
 fn decode(bytes: &[u8]) -> Result<DynamicImage> {

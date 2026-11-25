@@ -1,6 +1,6 @@
 //! The settings schemas' titles and descriptions in the language in use
 //! (#214). The core serves them translated (`SettingsService::sections`)
-//! and the webview shows them as they come.
+//! and the UI shows them as they come.
 //!
 //! schemars writes them from `#[schemars(title)]` attributes and doc
 //! comments, which extraction can't read, so each is marked again below

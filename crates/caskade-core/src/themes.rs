@@ -12,7 +12,7 @@
 //! own `locales/<lang>.po` (#219); a catalog that can't be read is one of
 //! its `warnings`, and its English shows.
 use crate::{Error, Result, read, write};
-use caskade_theme::{DEFAULT_THEME, DirFiles, Files, Locales, MemFiles, Problem, Theme};
+use caskade_theme::{DEFAULT_THEME, DirFiles, Files, Locales, MemFiles, Theme};
 use notify::{RecursiveMode, Watcher};
 use serde::Serialize;
 use std::collections::{BTreeSet, HashMap};
@@ -31,26 +31,7 @@ pub enum ThemeSource {
     Dev,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ThemeProblem {
-    /// Relative to the theme folder.
-    pub file: String,
-    pub line: Option<u32>,
-    pub column: Option<u32>,
-    pub message: String,
-}
-
-impl From<Problem> for ThemeProblem {
-    fn from(problem: Problem) -> Self {
-        Self {
-            file: problem.file,
-            line: problem.line,
-            column: problem.column,
-            message: problem.message,
-        }
-    }
-}
+pub use caskade_theme::Problem as ThemeProblem;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -555,7 +536,7 @@ impl ThemeService {
     pub fn check_folder(folder: &Path) -> Vec<ThemeProblem> {
         match Theme::load(&DirFiles::new(folder)) {
             Ok(_) => Vec::new(),
-            Err(problems) => problems.into_iter().map(ThemeProblem::from).collect(),
+            Err(problems) => problems,
         }
     }
 
@@ -681,10 +662,9 @@ fn entry(files: Arc<dyn Files>, source: ThemeSource, folder: Option<&Path>) -> E
         .unwrap_or_else(|| DEFAULT_THEME.to_owned());
     let (theme, problems) = match Theme::load(files.as_ref()) {
         Ok(theme) => (Some(theme), Vec::new()),
-        Err(problems) => (None, problems.into_iter().map(ThemeProblem::from).collect()),
+        Err(problems) => (None, problems),
     };
     let (locales, warnings) = Locales::load(files.as_ref());
-    let warnings: Vec<ThemeProblem> = warnings.into_iter().map(ThemeProblem::from).collect();
     // A theme with a broken theme.json is still listed, by its folder name.
     let manifest = theme
         .as_ref()

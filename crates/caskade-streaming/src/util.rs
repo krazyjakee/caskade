@@ -1,16 +1,11 @@
 //! Small helpers the streaming modules share.
 
 use caskade_core::Result;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-/// Writes `path` through a `.part` file beside it, so a reader never sees
-/// half of it.
+/// Atomically writes `path`, so a reader never sees half of it.
 pub(crate) fn write_atomically(path: &Path, bytes: impl AsRef<[u8]>) -> Result<()> {
-    let mut part = path.as_os_str().to_owned();
-    part.push(".part");
-    let part = PathBuf::from(part);
-    std::fs::write(&part, bytes)?;
-    std::fs::rename(&part, path)?;
+    caskade_core::fs::atomic_write_path(path, bytes.as_ref())?;
     Ok(())
 }
 

@@ -124,7 +124,7 @@ pub(crate) fn apply(entry: &GameEntry, action: &GameAction) -> GameEntry {
     let mut entry = entry.clone();
     if action.id != built_in_action_id(&entry.id) {
         if matches!(entry.runtime, GameRuntime::Windows { .. })
-            && !matches!(&action.target, LaunchSpec::Executable { path, .. } if windows_program(path))
+            && !matches!(&action.target, LaunchSpec::Executable { path, .. } if is_windows_program(path))
         {
             entry.runtime = GameRuntime::Native;
         }
@@ -155,7 +155,7 @@ fn runs_proton(entry: &GameEntry) -> bool {
         }
 }
 
-fn windows_program(path: &Path) -> bool {
+pub fn is_windows_program(path: &Path) -> bool {
     path.extension()
         .and_then(|ext| ext.to_str())
         .is_some_and(|ext| {
@@ -269,7 +269,7 @@ pub fn validate_tracking(entry: &GameEntry, action: &GameAction) -> Result<()> {
         (LaunchSpec::Executable { path, .. }, TrackingMode::OriginalProcess)
             if !cfg!(windows)
                 && matches!(entry.runtime, GameRuntime::Windows { .. })
-                && windows_program(path) =>
+                && is_windows_program(path) =>
         {
             return unsupported(crate::tr!(
                 "a Windows program runs through Wine or Proton here, so the process Caskade starts isn't the game: track it by process tree, folder or process names"

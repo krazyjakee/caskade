@@ -727,7 +727,8 @@ async fn fetch(url: &str, max: u64) -> Result<Vec<u8>, String> {
         let path = parsed
             .to_file_path()
             .map_err(|()| "not a file path".to_owned())?;
-        let size = std::fs::metadata(&path)
+        let size = tokio::fs::metadata(&path)
+            .await
             .map_err(|e| format!("{}: {e}", path.display()))?
             .len();
         if size > max {
@@ -736,16 +737,14 @@ async fn fetch(url: &str, max: u64) -> Result<Vec<u8>, String> {
                 path.display()
             ));
         }
-        return std::fs::read(&path).map_err(|e| format!("{}: {e}", path.display()));
+        return tokio::fs::read(&path)
+            .await
+            .map_err(|e| format!("{}: {e}", path.display()));
     }
     #[cfg(feature = "net")]
     {
-        let client = reqwest::Client::builder()
-            .user_agent(concat!("Caskade/", env!("CARGO_PKG_VERSION")))
-            .timeout(std::time::Duration::from_secs(120))
-            .build()
-            .map_err(|e| e.to_string())?;
-        let response = client
+        let client = caskade_core::http::client().map_err(|e| e.to_string())?;
+        let mut response = client
             .get(parsed)
             .send()
             .await
@@ -756,14 +755,15 @@ async fn fetch(url: &str, max: u64) -> Result<Vec<u8>, String> {
                 response.status().as_u16()
             ));
         }
-        if response.content_length().is_some_and(|length| length > max) {
-            return Err("larger than its catalogue size".to_owned());
-        }
-        let bytes = response.bytes().await.map_err(|e| e.to_string())?;
-        if bytes.len() as u64 > max {
-            return Err("larger than its catalogue size".to_owned());
-        }
-        Ok(bytes.to_vec())
+        let max = usize::try_from(max).unwrap_or(usize::MAX);
+        caskade_core::http::read_bounded(&mut response, max)
+            .await
+            .map_err(|error| match error {
+                caskade_core::http::ReadBodyError::TooLarge => {
+                    "larger than its catalogue size".to_owned()
+                }
+                caskade_core::http::ReadBodyError::Net(error) => error.to_string(),
+            })
     }
     #[cfg(not(feature = "net"))]
     Err("fetching over HTTP needs the net feature".to_owned())

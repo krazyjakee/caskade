@@ -6,7 +6,7 @@
 //! [`AccountService`] holds the active account and decides who may change
 //! what; the store keeps the rules every change must leave intact (an
 //! admin remains; while standard accounts exist, every admin has a PIN).
-//! A PIN never reaches logs, events, errors or the webview: only its
+//! A PIN never reaches logs, events, errors or the UI: only its
 //! argon2id hash is stored, and checks answer [`PinCheck`].
 
 mod age;

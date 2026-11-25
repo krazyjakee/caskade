@@ -10,7 +10,7 @@
 //!   first use asks before a new identity is made ([`Devices::create_identity`]).
 //! - **Paired devices** live in `paired_devices` (migration 0031) with the
 //!   grants each side presents. Grants are credentials: the table is local
-//!   (never synced), left out of backups, and never sent to the webview.
+//!   (never synced), left out of backups, and never sent to the UI.
 //! - **Admission** ([`gate`]) is in memory: a paired device with its grant, a
 //!   pairing link once before it expires, and one code pairing at a time.
 //! - **Only admins** pair, confirm, mint or accept links, forget, rename this

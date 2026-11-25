@@ -11,6 +11,7 @@ use crate::{
 };
 use serde::Serialize;
 use sqlx::{QueryBuilder, Sqlite, SqliteConnection};
+use std::collections::{HashMap, HashSet};
 
 /// A library game's age ratings and the minimum age they come to.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
@@ -84,6 +85,41 @@ fn read(row: Row) -> Result<IgdbMatch> {
     })
 }
 
+async fn write_igdb_match_on(
+    connection: &mut SqliteConnection,
+    row: &IgdbMatch,
+    guard: &'static str,
+) -> Result<bool> {
+    v::id(&row.game_id)?;
+    let igdb_id =
+        row.igdb_id
+            .map(|id| {
+                i64::try_from(id).ok().filter(|id| *id > 0).ok_or_else(|| {
+                    crate::Error::Invalid(crate::tr!("{id} is not an IGDB id", id = id))
+                })
+            })
+            .transpose()?;
+    // Constants only.
+    let sql = format!(
+        "INSERT INTO igdb_matches(game_id,igdb_id,source,pending,checked_at_ms,dumps,applied_json) \
+         VALUES(?,?,?,?,?,?,?) ON CONFLICT(game_id) DO UPDATE SET igdb_id=excluded.igdb_id,\
+         source=excluded.source,pending=excluded.pending,checked_at_ms=excluded.checked_at_ms,\
+         dumps=excluded.dumps,applied_json=excluded.applied_json{guard}"
+    );
+    let saved = sqlx::query(sqlx::AssertSqlSafe(sql))
+        .bind(&row.game_id)
+        .bind(igdb_id)
+        .bind(row.source.as_str())
+        .bind(row.pending)
+        .bind(row.checked_at_ms)
+        .bind(&row.dumps)
+        .bind(v::json(&row.applied)?)
+        .execute(connection)
+        .await?
+        .rows_affected();
+    Ok(saved > 0)
+}
+
 impl LibraryStore {
     pub async fn igdb_match(&self, game_id: &str) -> Result<Option<IgdbMatch>> {
         sqlx::query_as::<_, Row>(
@@ -97,8 +133,46 @@ impl LibraryStore {
         .transpose()
     }
 
+    /// Batch-loads IGDB matches for `game_ids` in chunked queries.
+    pub(crate) async fn igdb_matches(
+        &self,
+        game_ids: &[String],
+    ) -> Result<HashMap<String, IgdbMatch>> {
+        let mut out = HashMap::new();
+        for chunk in game_ids.chunks(500) {
+            let mut query = QueryBuilder::<Sqlite>::new(
+                "SELECT game_id,igdb_id,source,pending,checked_at_ms,dumps,applied_json \
+                 FROM igdb_matches WHERE game_id IN (",
+            );
+            let mut list = query.separated(", ");
+            for id in chunk {
+                list.push_bind(id.as_str());
+            }
+            query.push(")");
+            let rows: Vec<Row> = query.build_query_as().fetch_all(&self.pool).await?;
+            for row in rows {
+                let parsed = read(row)?;
+                out.insert(parsed.game_id.clone(), parsed);
+            }
+        }
+        Ok(out)
+    }
+
     pub async fn save_igdb_match(&self, row: &IgdbMatch) -> Result<()> {
         self.write_igdb_match(row, "").await.map(drop)
+    }
+
+    /// Saves a batch of IGDB matches inside one write transaction.
+    pub(crate) async fn save_igdb_matches(&self, rows: &[IgdbMatch]) -> Result<()> {
+        if rows.is_empty() {
+            return Ok(());
+        }
+        let mut tx = self.begin_write().await?;
+        for row in rows {
+            write_igdb_match_on(&mut tx, row, "").await?;
+        }
+        tx.commit().await?;
+        Ok(())
     }
 
     /// Saves an automatic match, unless the game has one chosen by hand.
@@ -108,35 +182,29 @@ impl LibraryStore {
             .await
     }
 
+    /// Saves a batch of automatic matches inside one write transaction,
+    /// skipping any row the user set by hand. Returns the rows that were saved.
+    pub(crate) async fn save_auto_igdb_matches(
+        &self,
+        rows: &[IgdbMatch],
+    ) -> Result<Vec<IgdbMatch>> {
+        if rows.is_empty() {
+            return Ok(Vec::new());
+        }
+        let mut tx = self.begin_write().await?;
+        let mut saved = Vec::with_capacity(rows.len());
+        for row in rows {
+            if write_igdb_match_on(&mut tx, row, " WHERE igdb_matches.source<>'manual'").await? {
+                saved.push(row.clone());
+            }
+        }
+        tx.commit().await?;
+        Ok(saved)
+    }
+
     async fn write_igdb_match(&self, row: &IgdbMatch, guard: &'static str) -> Result<bool> {
-        v::id(&row.game_id)?;
-        let igdb_id = row
-            .igdb_id
-            .map(|id| {
-                i64::try_from(id).ok().filter(|id| *id > 0).ok_or_else(|| {
-                    crate::Error::Invalid(crate::tr!("{id} is not an IGDB id", id = id))
-                })
-            })
-            .transpose()?;
-        // Constants only.
-        let sql = format!(
-            "INSERT INTO igdb_matches(game_id,igdb_id,source,pending,checked_at_ms,dumps,applied_json) \
-             VALUES(?,?,?,?,?,?,?) ON CONFLICT(game_id) DO UPDATE SET igdb_id=excluded.igdb_id,\
-             source=excluded.source,pending=excluded.pending,checked_at_ms=excluded.checked_at_ms,\
-             dumps=excluded.dumps,applied_json=excluded.applied_json{guard}"
-        );
-        let saved = sqlx::query(sqlx::AssertSqlSafe(sql))
-            .bind(&row.game_id)
-            .bind(igdb_id)
-            .bind(row.source.as_str())
-            .bind(row.pending)
-            .bind(row.checked_at_ms)
-            .bind(&row.dumps)
-            .bind(v::json(&row.applied)?)
-            .execute(&self.pool)
-            .await?
-            .rows_affected();
-        Ok(saved > 0)
+        let mut connection = self.pool.acquire().await?;
+        write_igdb_match_on(&mut connection, row, guard).await
     }
 
     /// The game's age ratings; `None` when there is no such game.
@@ -251,6 +319,80 @@ impl LibraryStore {
             }
         }
         Ok(ids)
+    }
+
+    /// Batch-loads synced store ids for `game_ids` in chunked queries.
+    pub(crate) async fn synced_store_ids_batch(
+        &self,
+        game_ids: &[&str],
+    ) -> Result<HashMap<String, Vec<ExternalId>>> {
+        let mut out: HashMap<String, Vec<ExternalId>> = HashMap::new();
+        for chunk in game_ids.chunks(500) {
+            let mut query = QueryBuilder::<Sqlite>::new(
+                "SELECT target, value_json FROM sync_changes \
+                 WHERE entity='game' AND field='identity' AND value_json IS NOT NULL AND target IN (",
+            );
+            let mut list = query.separated(", ");
+            for id in chunk {
+                list.push_bind(*id);
+            }
+            query.push(") ORDER BY wall DESC, counter DESC");
+            let rows: Vec<(String, String)> = query.build_query_as().fetch_all(&self.pool).await?;
+            for (target, identity) in rows {
+                let Ok(identity) = serde_json::from_str::<serde_json::Value>(&identity) else {
+                    continue;
+                };
+                let keys = identity
+                    .get("stores")
+                    .and_then(serde_json::Value::as_array)
+                    .into_iter()
+                    .flatten()
+                    .filter_map(serde_json::Value::as_str);
+                let ids = out.entry(target).or_default();
+                for id in keys.filter_map(store_id) {
+                    if !ids.contains(&id) {
+                        ids.push(id);
+                    }
+                }
+            }
+        }
+        Ok(out)
+    }
+
+    /// Batch-loads synced IGDB ids for `game_ids` in chunked queries.
+    pub(crate) async fn synced_igdb_ids_batch(
+        &self,
+        game_ids: &[&str],
+    ) -> Result<HashMap<String, u64>> {
+        let mut out = HashMap::new();
+        let mut seen = HashSet::new();
+        for chunk in game_ids.chunks(500) {
+            let mut query = QueryBuilder::<Sqlite>::new(
+                "SELECT target, json_extract(value_json,'$.igdb') FROM sync_changes \
+                 WHERE entity='game' AND field='identity' \
+                 AND json_valid(value_json) AND json_type(value_json,'$.igdb')='integer' \
+                 AND target IN (",
+            );
+            let mut list = query.separated(", ");
+            for id in chunk {
+                list.push_bind(*id);
+            }
+            query.push(") ORDER BY wall DESC, counter DESC");
+            let rows: Vec<(String, Option<i64>)> =
+                query.build_query_as().fetch_all(&self.pool).await?;
+            for (target, igdb) in rows {
+                if !seen.insert(target.clone()) {
+                    continue;
+                }
+                if let Some(id) = igdb
+                    .and_then(|id| u64::try_from(id).ok())
+                    .filter(|id| *id > 0)
+                {
+                    out.insert(target, id);
+                }
+            }
+        }
+        Ok(out)
     }
 
     /// The IGDB id the device that sent `game_id` matched it to, from the

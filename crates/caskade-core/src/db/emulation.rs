@@ -5,21 +5,9 @@
 use super::{LibraryStore, decode};
 use crate::{
     Error, Result,
-    emulation::{
-        Emulator, EmulatorInstall, EmulatorProfile, PlatformSettings, ProfileRef, RomScanner,
-    },
+    emulation::{Emulator, EmulatorProfile, PlatformSettings, ProfileRef, RomScanner},
     model::validation as v,
 };
-
-fn install_kind(install: &EmulatorInstall) -> &'static str {
-    match install {
-        EmulatorInstall::Folder { .. } => "folder",
-        EmulatorInstall::Path { .. } => "path",
-        EmulatorInstall::Flatpak { .. } => "flatpak",
-        EmulatorInstall::AppImage { .. } => "app_image",
-        EmulatorInstall::AppBundle { .. } => "app_bundle",
-    }
-}
 
 impl LibraryStore {
     /// Saves an emulator and its profiles in order. Profiles missing from
@@ -50,7 +38,7 @@ impl LibraryStore {
             .bind(&emulator.id)
             .bind(&emulator.name)
             .bind(&emulator.definition)
-            .bind(install_kind(&emulator.install))
+            .bind(emulator.install.kind_str())
             .bind(v::json(&record)?)
             .execute(&mut *tx)
             .await?;
@@ -288,7 +276,9 @@ fn platform_settings(
 mod tests {
     use super::*;
     use crate::{
-        emulation::{ArgsOverride, EmulatorTarget, GameRom, ProfileHooks, Tracking},
+        emulation::{
+            ArgsOverride, EmulatorInstall, EmulatorTarget, GameRom, ProfileHooks, Tracking,
+        },
         model::{Game, GameEntry, InstallLocation, LaunchSpec},
     };
     use std::path::PathBuf;

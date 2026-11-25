@@ -13,9 +13,10 @@
 //! is watched by Activity, and it can be cancelled between batches, which
 //! keeps every game as it was or as it was refreshed.
 
-use super::{IgdbMatch, MatchSource, Metadata, RunReport};
-use crate::{Result, model::Game};
+use super::{IgdbMatch, MatchSource, Metadata, RunReport, fetch_games};
+use crate::{Result, db::LibraryStore, model::Game};
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
 use tokio_util::sync::CancellationToken;
 
 /// Games a batch refreshes together.
@@ -73,23 +74,47 @@ impl RefreshStatus {
     }
 }
 
-/// What a game looks like to a refresh: its details and artwork.
-type Snapshot = Option<(Game, Vec<String>)>;
+/// Batch-loads sorted artwork content hashes for `game_ids`.
+async fn fetch_artwork_hashes(
+    store: &LibraryStore,
+    game_ids: &[&str],
+) -> Result<HashMap<String, Vec<String>>> {
+    let mut out: HashMap<String, Vec<String>> = HashMap::new();
+    for chunk in game_ids.chunks(500) {
+        let mut qb = sqlx::QueryBuilder::<sqlx::Sqlite>::new(
+            "SELECT game_id, content_hash FROM artwork WHERE game_id IN (",
+        );
+        let mut list = qb.separated(", ");
+        for id in chunk {
+            list.push_bind(*id);
+        }
+        qb.push(")");
+        let rows: Vec<(String, String)> = qb.build_query_as().fetch_all(&store.pool).await?;
+        for (game_id, hash) in rows {
+            out.entry(game_id).or_default().push(hash);
+        }
+    }
+    for hashes in out.values_mut() {
+        hashes.sort();
+    }
+    Ok(out)
+}
 
 impl Metadata {
-    async fn snapshot(&self, game_id: &str) -> Result<Snapshot> {
+    async fn snapshots(&self, game_ids: &[String]) -> Result<HashMap<String, (Game, Vec<String>)>> {
+        if game_ids.is_empty() {
+            return Ok(HashMap::new());
+        }
         let store = &self.inner.store;
-        let Some(game) = store.game(game_id).await? else {
-            return Ok(None);
-        };
-        let mut artwork: Vec<String> = store
-            .artwork_for_game(game_id)
-            .await?
-            .into_iter()
-            .map(|art| art.content_hash)
-            .collect();
-        artwork.sort();
-        Ok(Some((game, artwork)))
+        let ids: Vec<&str> = game_ids.iter().map(String::as_str).collect();
+        let games = fetch_games(store, &ids).await?;
+        let mut artwork = fetch_artwork_hashes(store, &ids).await?;
+        let mut out = HashMap::with_capacity(games.len());
+        for (id, game) in games {
+            let hashes = artwork.remove(&id).unwrap_or_default();
+            out.insert(id, (game, hashes));
+        }
+        Ok(out)
     }
 
     /// Refreshes `game_ids` in batches, calling `progress` after each, until
@@ -119,14 +144,16 @@ impl Metadata {
                 status.done += batch.len() as u32;
                 continue;
             }
+            let before_snapshots = self.snapshots(batch).await?;
+            let before_matches = store.igdb_matches(batch).await?;
             let mut before = Vec::with_capacity(batch.len());
             let mut matched: Vec<IgdbMatch> = Vec::new();
             let mut unmatched = Vec::new();
-            let mut looked = Vec::new();
+            let mut looked: HashSet<String> = HashSet::with_capacity(batch.len());
             for id in batch {
-                let snapshot = self.snapshot(id).await?;
-                let row = store.igdb_match(id).await?;
-                match (&snapshot, &row) {
+                let snapshot = before_snapshots.get(id).cloned();
+                let row = before_matches.get(id);
+                match (&snapshot, row) {
                     (None, _) => status.skipped += 1,
                     // The user said it isn't on IGDB.
                     (Some(_), Some(row))
@@ -136,11 +163,11 @@ impl Metadata {
                     }
                     (Some(_), Some(row)) if row.igdb_id.is_some() => {
                         matched.push(row.clone());
-                        looked.push(id.clone());
+                        looked.insert(id.clone());
                     }
                     (Some(_), _) => {
                         unmatched.push(id.clone());
-                        looked.push(id.clone());
+                        looked.insert(id.clone());
                     }
                 }
                 before.push((id.clone(), snapshot));
@@ -156,29 +183,32 @@ impl Metadata {
             }
             if !failed_batch {
                 // Matched games apply again, from what the cache has now.
-                let mut rows = Vec::with_capacity(matched.len());
-                for mut row in matched {
+                for row in &mut matched {
                     row.pending = true;
-                    store.save_igdb_match(&row).await?;
-                    rows.push(row);
                 }
-                self.apply_rows(rows, &mut report, None).await?;
+                store.save_igdb_matches(&matched).await?;
+                self.apply_rows(matched, &mut report, None).await?;
                 self.run_games(&unmatched, dumps.as_deref(), &mut report, None)
                     .await?;
                 failed_batch = report.unreachable;
             }
             unreachable |= failed_batch;
+            let looked_ids: Vec<String> = looked.iter().cloned().collect();
+            let after_snapshots = self.snapshots(&looked_ids).await?;
+            let after_matches = store.igdb_matches(&looked_ids).await?;
+            let unanswered: HashSet<&str> = report.unanswered.iter().map(String::as_str).collect();
             for (id, earlier) in before {
                 if !looked.contains(&id) {
                     continue;
                 }
-                let now = self.snapshot(&id).await?;
-                let row = store.igdb_match(&id).await?;
-                let pending = row.as_ref().is_some_and(|row| row.pending);
-                if (failed_batch && (pending || now == earlier)) || report.unanswered.contains(&id)
+                let now = after_snapshots.get(&id);
+                let row = after_matches.get(&id);
+                let pending = row.is_some_and(|row| row.pending);
+                if (failed_batch && (pending || now == earlier.as_ref()))
+                    || unanswered.contains(id.as_str())
                 {
                     status.failed.push(id);
-                } else if now != earlier {
+                } else if now != earlier.as_ref() {
                     status.updated += 1;
                     self.inner
                         .bus

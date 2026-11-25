@@ -12,7 +12,7 @@ use crate::{
     Result,
     model::{Game, GameEntry, InstallState, LaunchSpec, SourceId},
 };
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 /// The source of a host's releases.
 fn stream_source(host_id: &str) -> SourceId {
@@ -74,9 +74,13 @@ impl LibraryStore {
                 .bind(source.as_str())
                 .fetch_all(&mut *tx)
                 .await?;
+        let mut apps_by_id: HashMap<&str, &StreamApp> = HashMap::with_capacity(apps.len());
+        for app in apps {
+            apps_by_id.entry(app.id.as_str()).or_insert(app);
+        }
         let mut sync = StreamSync::default();
         for (entry_id, game_id, external_id) in &known {
-            if let Some(app) = apps.iter().find(|app| app.id == *external_id) {
+            if let Some(&app) = apps_by_id.get(external_id.as_str()) {
                 // Each release streams its app by name (#264); releases
                 // from before that, or an app renamed in place, catch up.
                 let launch = serde_json::to_string(&stream_launch(host_id, app))?;

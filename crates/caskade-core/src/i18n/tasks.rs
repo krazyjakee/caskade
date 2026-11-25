@@ -1,7 +1,7 @@
 //! The status bar's background work in the language in use. The queue's
 //! labels come from crates without gettext (the installer, discovery's
 //! adapter, the plugin host) as well as the core, so a snapshot is said
-//! again from the core's catalog as it leaves for the webview. A label it
+//! again from the core's catalog as it leaves for the UI. A label it
 //! doesn't know, one the core already translated, stays as it came.
 
 use crate::{jobs::Snapshot, tr};

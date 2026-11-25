@@ -50,38 +50,43 @@ impl Metadata {
     }
 
     /// An id from the game's RomM ROM or the Hasheous dumps.
-    pub(super) async fn find_local(&self, game: &Game, entries: &[GameEntry]) -> Result<Local> {
+    pub(super) async fn find_local(
+        &self,
+        game: &Game,
+        entries: &[GameEntry],
+        romm_roms: &HashMap<String, crate::romm::RommRom>,
+    ) -> Result<Local> {
         let mut hashes = Vec::new();
         for entry in entries {
             if !entry.source_id.as_str().starts_with("romm:") {
                 continue;
             }
-            let Some(rom) = self.inner.store.romm_rom_by_entry(&entry.id).await? else {
+            let Some(rom) = romm_roms.get(&entry.id) else {
                 continue;
             };
             if let Some(id) = rom.rom.igdb_id.filter(|id| *id > 0) {
                 return Ok(Local::Found(u64::from(id), MatchSource::Romm));
             }
             hashes.push(RomHashes {
-                sha1: rom.rom.sha1_hash,
-                md5: rom.rom.md5_hash,
-                crc: rom.rom.crc_hash,
+                sha1: rom.rom.sha1_hash.clone(),
+                md5: rom.rom.md5_hash.clone(),
+                crc: rom.rom.crc_hash.clone(),
                 size: Some(rom.rom.fs_size_bytes),
                 ..Default::default()
             });
             hashes.extend(
                 rom.rom
                     .files
-                    .into_iter()
+                    .iter()
                     .filter(|file| {
                         file.category
                             .as_deref()
                             .is_none_or(|category| category == "game")
                     })
                     .map(|file| RomHashes {
-                        sha1: file.sha1_hash,
-                        md5: file.md5_hash,
-                        crc: file.crc_hash,
+                        sha1: file.sha1_hash.clone(),
+                        md5: file.md5_hash.clone(),
+                        crc: file.crc_hash.clone(),
                         size: Some(file.file_size_bytes),
                         ..Default::default()
                     }),

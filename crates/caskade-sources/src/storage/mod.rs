@@ -31,15 +31,7 @@ pub enum StorageError {
 }
 pub type Result<T> = std::result::Result<T, StorageError>;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub enum StorageGameStatus {
-    Unchanged,
-    Reconciled,
-    NeedsUser,
-    Pinned,
-    Failed,
-}
+pub use caskade_installer::reconcile::ReconcileStatus as StorageGameStatus;
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct StorageGameReport {

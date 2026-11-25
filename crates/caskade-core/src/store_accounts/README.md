@@ -116,14 +116,11 @@ also deletes the sign-in.
 
 In the app, `store_connect_begin` / `_complete` / `_cancel`,
 `store_auth_flows` and `store_account_cancel_refresh` join the commands
-above (connecting is for admins). Settings → Store accounts
-(`views/settings/stores/`, admins only) lists each provider with Connect,
-the sign-in (page link, device code, key field, or nothing for a
-launcher), each account's state, counts, last refresh and error, Refresh
-or Stop, Reconnect, Disconnect (explaining the library stays) and
-Remove… (with the preview), and the background refresh settings.
-`api/storeAccounts.ts` falls back to `storeAccountsFixtures.ts` in the
-browser preview.
+above (connecting is for admins). Settings → Store accounts (admins only)
+lists each provider with Connect, the sign-in (page link, device code, key
+field, or nothing for a launcher), each account's state, counts, last refresh
+and error, Refresh or Stop, Reconnect, Disconnect (explaining the library
+stays) and Remove… (with the preview), and the background refresh settings.
 
 ## Providers
 
@@ -266,8 +263,8 @@ release's first total only, `never` none and removes the account's. Totals
 survive disconnecting; removing an account removes its releases and so
 their totals. Changed games are announced with `LibraryGameUpdated`.
 `game_playtime` (`PlaytimeBreakdown`) says what was tracked and what each
-source reported; the game page shows it beside the play time
-(`views/game/PlaytimeSources.tsx`). All arithmetic saturates.
+source reported; the game page shows it beside the play time. All arithmetic
+saturates.
 
 ## Installing owned games (#170, `install.rs`)
 
@@ -294,8 +291,8 @@ default release.
 
 The Library's Ready to Install tab (`GameFilter::Owned`, counted in
 `LibraryStats::owned`) lists games an account still owns with no copy
-installed. The game page's `OwnedReleases` (`views/game/`) shows each
-owned release, its freshness and state, and Install with <launcher> (the
-page's main action when nothing is installed), by mouse, keyboard or pad.
+installed. The game page's owned releases section shows each owned release, its
+freshness and state, and Install with <launcher> (the page's main action when
+nothing is installed), by mouse, keyboard or pad.
 Commands: `game_owned_releases`, `owned_install` (installs: the Install
 permission) and `owned_install_cancel`.

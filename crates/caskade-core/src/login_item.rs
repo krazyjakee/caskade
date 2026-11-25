@@ -345,12 +345,7 @@ fn write_or_remove(path: &Path, contents: Option<String>) -> io::Result<bool> {
             if std::fs::read_to_string(path).is_ok_and(|now| now == contents) {
                 return Ok(false);
             }
-            if let Some(parent) = path.parent() {
-                std::fs::create_dir_all(parent)?;
-            }
-            let staged = path.with_extension("tmp");
-            std::fs::write(&staged, contents)?;
-            std::fs::rename(&staged, path)?;
+            crate::fs::atomic_write_path(path, contents.as_bytes())?;
             Ok(true)
         }
         None => match std::fs::remove_file(path) {

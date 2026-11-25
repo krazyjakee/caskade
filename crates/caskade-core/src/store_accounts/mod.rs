@@ -650,7 +650,7 @@ impl StoreAccounts {
     /// The account's sign-in for a call to its store, renewed first (and
     /// kept) when it has expired or is about to and can be. `Ok(None)` for
     /// a provider that reads a launcher's own sign-in; `Expired` when there
-    /// is none. Stays in the core: never send it to the webview, store or
+    /// is none. Stays in the core: never send it to the UI, store or
     /// log it. Callers wait out `sync.retry_at_ms` too.
     pub async fn credentials(
         &self,

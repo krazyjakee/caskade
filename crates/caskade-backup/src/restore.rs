@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeSet,
     fs,
-    io::{Read, Write},
+    io::Read,
     path::{Path, PathBuf},
 };
 use tokio_util::sync::CancellationToken;
@@ -220,13 +220,11 @@ async fn survey(
 ) -> Result<Inspection, BackupError> {
     let roots: Vec<String> = sqlx::query_scalar("SELECT path FROM storage_roots ORDER BY path")
         .fetch_all(&mut *connection)
-        .await
-        .map_err(caskade_core::Error::from)?;
+        .await?;
     let external: Vec<String> =
         sqlx::query_scalar("SELECT external_path FROM game_entries WHERE location_kind='external'")
             .fetch_all(&mut *connection)
-            .await
-            .map_err(caskade_core::Error::from)?;
+            .await?;
     let (missing_roots, missing_games) = tokio::task::spawn_blocking(move || {
         let missing_roots: Vec<PathBuf> = roots
             .into_iter()
@@ -500,8 +498,7 @@ async fn prepare(file: &Path, components: &BTreeSet<Component>) -> Result<(), Ba
             // asks again, as a newly installed one would.
             sqlx::query("UPDATE plugins SET enabled=0, grants_json='null'")
                 .execute(&mut connection)
-                .await
-                .map_err(caskade_core::Error::from)?;
+                .await?;
         }
         snapshot::check(&mut connection).await
     }
@@ -688,29 +685,14 @@ fn write_outcome(dir: &Path, journal: &Journal, error: Option<String>) {
     };
     if let Err(error) = serde_json::to_vec(&outcome)
         .map_err(std::io::Error::other)
-        .and_then(|bytes| atomic_write(dir, LAST, &bytes))
+        .and_then(|bytes| caskade_core::fs::atomic_write_path(&dir.join(LAST), &bytes))
     {
         tracing::warn!(%error, "the restore's outcome wasn't kept");
     }
 }
 
 fn write_journal(dir: &Path, journal: &Journal) -> Result<(), BackupError> {
-    atomic_write(dir, JOURNAL, &serde_json::to_vec_pretty(journal)?)?;
-    Ok(())
-}
-
-fn atomic_write(dir: &Path, name: &str, bytes: &[u8]) -> std::io::Result<()> {
-    fs::create_dir_all(dir)?;
-    let temporary = dir.join(format!(".{name}.{}.tmp", caskade_core::model::new_id()));
-    let mut file = fs::File::create(&temporary)?;
-    file.write_all(bytes)?;
-    file.sync_all()?;
-    drop(file);
-    fs::rename(&temporary, dir.join(name))?;
-    #[cfg(unix)]
-    if let Ok(dir) = fs::File::open(dir) {
-        let _ = dir.sync_all();
-    }
+    caskade_core::fs::atomic_write_path(&dir.join(JOURNAL), &serde_json::to_vec_pretty(journal)?)?;
     Ok(())
 }
 

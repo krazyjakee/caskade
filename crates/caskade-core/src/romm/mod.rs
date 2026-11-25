@@ -28,6 +28,7 @@
 
 pub mod api;
 mod artwork;
+mod assemble;
 mod bios;
 mod cache;
 #[cfg(feature = "net")]
@@ -722,14 +723,14 @@ impl RommService {
         );
     }
 
-    /// Records how a request went: offline, an error or connected.
-    fn note<T>(&self, server: &str, outcome: &Result<T>) {
-        match outcome {
-            Ok(_) => self.set_state(server, |state| {
+    /// Records how a request went: connected (`None`) or an error (`Some`).
+    fn note(&self, server: &str, error: Option<&RommError>) {
+        match error {
+            None => self.set_state(server, |state| {
                 state.state = Some(ConnectionState::Connected);
                 state.error = None;
             }),
-            Err(error) => self.note_error(server, error),
+            Some(error) => self.note_error(server, error),
         }
     }
 
@@ -829,7 +830,7 @@ impl RommService {
         let outcome = self.test_inner(&server, secret).await;
         if self.settings().await?.server(&server.id).is_some() {
             let was_offline = self.offline(&server.id);
-            self.note(&server.id, &outcome);
+            self.note(&server.id, outcome.as_ref().err());
             if let Ok(report) = &outcome {
                 self.set_state(&server.id, |state| state.version = report.version.clone());
                 if was_offline {

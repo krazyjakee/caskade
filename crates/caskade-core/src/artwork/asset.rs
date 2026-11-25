@@ -3,7 +3,7 @@ use super::{
     cache::{MAX_ASSET_BYTES, bounded},
 };
 
-/// Adapter-independent HTTP result; Tauri never receives an ambient file path.
+/// Framework-independent HTTP result; callers never receive an ambient file path.
 pub struct AssetResponse {
     pub status: u16,
     pub mime: &'static str,
@@ -21,8 +21,9 @@ impl AssetResponse {
     }
 }
 
-/// Resolve a raw scheme URI, Windows WebView URI, or raw URI path. Reject raw
-/// traversal/encoding before a URL library could normalize dot segments away.
+/// Resolve a `caskade-asset://` URI, `http://caskade-asset.localhost` URI, or
+/// raw URI path. Reject raw traversal/encoding before a URL library could
+/// normalize dot segments away.
 pub async fn serve(cache: &ArtworkCache, uri: &str) -> AssetResponse {
     if uri.len() > 1024 {
         return AssetResponse::error(400);
@@ -36,8 +37,8 @@ pub async fn serve(cache: &ArtworkCache, uri: &str) -> AssetResponse {
     } else {
         return AssetResponse::error(400);
     };
-    // Tauri convertFileSrc percent-encodes the entire cache key, including
-    // its separator. Decode exactly once, then validate the resulting grammar.
+    // Callers may percent-encode the entire cache key, including its separator.
+    // Decode exactly once, then validate the resulting grammar.
     let Some(path) = decode_path(path) else {
         return AssetResponse::error(400);
     };

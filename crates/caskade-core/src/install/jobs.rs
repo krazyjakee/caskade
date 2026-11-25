@@ -1,6 +1,7 @@
 //! Install job snapshots: what the UI lists and follows.
 
-use caskade_installer::{Question, Warning, events::Phase};
+pub use caskade_installer::events::Phase as JobPhase;
+use caskade_installer::{Question, Warning};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -39,24 +40,6 @@ pub enum JobStatus {
 impl JobStatus {
     pub fn is_finished(self) -> bool {
         matches!(self, Self::Completed | Self::Failed | Self::Cancelled)
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[serde(rename_all = "camelCase")]
-pub enum JobPhase {
-    Download,
-    Install,
-    Move,
-}
-
-impl From<Phase> for JobPhase {
-    fn from(phase: Phase) -> Self {
-        match phase {
-            Phase::Download => Self::Download,
-            Phase::Install => Self::Install,
-            Phase::Move => Self::Move,
-        }
     }
 }
 

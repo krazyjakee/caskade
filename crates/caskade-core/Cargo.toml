@@ -1,7 +1,7 @@
 [package]
 name = "caskade-core"
 version = "0.1.0"
-description = "Caskade's domain, library store, launch pipeline and hook bus (no Tauri dependency)"
+description = "Caskade's domain, library store, launch pipeline and hook bus (no UI toolkit dependency)"
 edition.workspace = true
 rust-version.workspace = true
 

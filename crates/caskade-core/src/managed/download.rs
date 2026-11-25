@@ -27,7 +27,7 @@ pub(crate) fn client() -> Result<reqwest::Client> {
                 attempt.follow()
             }
         }))
-        .user_agent(concat!("Caskade/", env!("CARGO_PKG_VERSION")))
+        .user_agent(crate::http::USER_AGENT)
         .build()
         .map_err(net)?;
     Ok(CLIENT.get_or_init(|| client).clone())

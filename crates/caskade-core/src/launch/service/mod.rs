@@ -264,7 +264,7 @@ impl LaunchService {
     /// [`Self::launch_with`] for a program that asked Caskade for the launch
     /// (`caskade --launch`, #256): `env` joins the game's environment, after
     /// the target's own and before plugins' `launch.before` hooks. The
-    /// webview never supplies it.
+    /// UI never supplies it.
     pub async fn launch_with_env(
         &self,
         entry_id: &str,

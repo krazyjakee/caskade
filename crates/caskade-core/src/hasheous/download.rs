@@ -20,7 +20,7 @@ fn client() -> Result<reqwest::Client> {
         // Dumps reach hundreds of MiB: no total timeout, only a stall one.
         .read_timeout(Duration::from_secs(60))
         .redirect(reqwest::redirect::Policy::limited(5))
-        .user_agent(concat!("Caskade/", env!("CARGO_PKG_VERSION")))
+        .user_agent(crate::http::USER_AGENT)
         .build()
         .map_err(net)
 }
@@ -41,13 +41,14 @@ pub(super) async fn listing(base: &str) -> Result<Vec<Listed>> {
         .map_err(net)?
         .error_for_status()
         .map_err(net)?;
-    let mut bytes = Vec::new();
-    while let Some(chunk) = response.chunk().await.map_err(net)? {
-        if chunk.len() > MAX_LISTING - bytes.len() {
-            return Err(invalid(crate::tr!("Hasheous listing exceeds 8 MiB")));
-        }
-        bytes.extend_from_slice(&chunk);
-    }
+    let bytes = crate::http::read_bounded(&mut response, MAX_LISTING)
+        .await
+        .map_err(|error| match error {
+            crate::http::ReadBodyError::Net(error) => net(error),
+            crate::http::ReadBodyError::TooLarge => {
+                invalid(crate::tr!("Hasheous listing exceeds 8 MiB"))
+            }
+        })?;
     Ok(serde_json::from_slice(&bytes)?)
 }
 

@@ -29,14 +29,14 @@ pub(super) async fn take(store: &LibraryStore, file: &Path) -> Result<Snapshot, 
 
 /// A plain connection: no migrations, no WAL beside the file.
 pub(super) async fn open(file: &Path) -> Result<SqliteConnection, BackupError> {
-    Ok(SqliteConnectOptions::new()
+    SqliteConnectOptions::new()
         .filename(file)
         .journal_mode(SqliteJournalMode::Delete)
         .foreign_keys(false)
         .disable_statement_logging()
         .connect()
         .await
-        .map_err(caskade_core::Error::from)?)
+        .map_err(Into::into)
 }
 
 async fn scrub(connection: &mut SqliteConnection) -> Result<Snapshot, BackupError> {
@@ -45,8 +45,7 @@ async fn scrub(connection: &mut SqliteConnection) -> Result<Snapshot, BackupErro
         if existing.iter().any(|name| name == table) {
             sqlx::query(AssertSqlSafe(format!("DELETE FROM \"{table}\"")))
                 .execute(&mut *connection)
-                .await
-                .map_err(caskade_core::Error::from)?;
+                .await?;
         }
     }
     let (filter, binds) = policy::settings_filter();
@@ -55,14 +54,8 @@ async fn scrub(connection: &mut SqliteConnection) -> Result<Snapshot, BackupErro
     for bind in binds {
         query = query.bind(bind);
     }
-    query
-        .execute(&mut *connection)
-        .await
-        .map_err(caskade_core::Error::from)?;
-    sqlx::query("VACUUM")
-        .execute(&mut *connection)
-        .await
-        .map_err(caskade_core::Error::from)?;
+    query.execute(&mut *connection).await?;
+    sqlx::query("VACUUM").execute(&mut *connection).await?;
     check(connection).await?;
     read(connection).await
 }
@@ -71,8 +64,7 @@ async fn scrub(connection: &mut SqliteConnection) -> Result<Snapshot, BackupErro
 pub(super) async fn check(connection: &mut SqliteConnection) -> Result<(), BackupError> {
     let answers: Vec<String> = sqlx::query_scalar("PRAGMA integrity_check")
         .fetch_all(&mut *connection)
-        .await
-        .map_err(caskade_core::Error::from)?;
+        .await?;
     if answers != ["ok"] {
         return Err(BackupError::Damaged(caskade_core::tr!(
             "the library database failed its integrity check: {why}",
@@ -87,15 +79,13 @@ pub(super) async fn read(connection: &mut SqliteConnection) -> Result<Snapshot, 
     let schema_version: i64 =
         sqlx::query_scalar("SELECT COALESCE(MAX(version),0) FROM _sqlx_migrations WHERE success")
             .fetch_one(&mut *connection)
-            .await
-            .map_err(caskade_core::Error::from)?;
+            .await?;
     let mut rows = Vec::new();
     for name in tables(connection).await? {
         let count: i64 =
             sqlx::query_scalar(AssertSqlSafe(format!("SELECT COUNT(*) FROM \"{name}\"")))
                 .fetch_one(&mut *connection)
-                .await
-                .map_err(caskade_core::Error::from)?;
+                .await?;
         rows.push(TableRows {
             name,
             rows: u64::try_from(count).unwrap_or(0),
@@ -103,8 +93,7 @@ pub(super) async fn read(connection: &mut SqliteConnection) -> Result<Snapshot, 
     }
     let artwork = sqlx::query_as(caskade_core::db::ARTWORK_HASHES)
         .fetch_all(&mut *connection)
-        .await
-        .map_err(caskade_core::Error::from)?;
+        .await?;
     Ok(Snapshot {
         schema_version,
         tables: rows,
@@ -115,7 +104,7 @@ pub(super) async fn read(connection: &mut SqliteConnection) -> Result<Snapshot, 
 /// The database's own tables, by name: SQLite's internal ones, sqlx's
 /// migration record and FTS shadow tables left out.
 async fn tables(connection: &mut SqliteConnection) -> Result<Vec<String>, BackupError> {
-    Ok(sqlx::query_scalar(
+    sqlx::query_scalar(
         "SELECT name FROM pragma_table_list WHERE schema='main' \
          AND type IN ('table','virtual') \
          AND name NOT LIKE 'sqlite\\_%' ESCAPE '\\' \
@@ -123,5 +112,5 @@ async fn tables(connection: &mut SqliteConnection) -> Result<Vec<String>, Backup
     )
     .fetch_all(&mut *connection)
     .await
-    .map_err(caskade_core::Error::from)?)
+    .map_err(Into::into)
 }

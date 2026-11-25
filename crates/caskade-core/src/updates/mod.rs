@@ -305,12 +305,22 @@ impl Updates {
     /// Installs whose root is offline wait for the next call.
     pub async fn track_missing(&self) -> Result<usize> {
         let store = &self.inner.store;
+        let entries = store.untracked_managed_entries().await?;
+        if entries.is_empty() {
+            return Ok(0);
+        }
+        let roots: HashMap<String, _> = store
+            .roots()
+            .await?
+            .into_iter()
+            .map(|root| (root.id.clone(), root))
+            .collect();
         let mut followed = 0;
-        for entry in store.untracked_managed_entries().await? {
+        for entry in entries {
             let Some(InstallLocation::Managed { root_id, rel_dir }) = &entry.location else {
                 continue;
             };
-            let Some(root) = store.get_root(root_id).await? else {
+            let Some(root) = roots.get(root_id) else {
                 continue;
             };
             let dir = root.path.join(rel_dir);

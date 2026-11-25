@@ -43,9 +43,43 @@ impl LibraryStore {
             .rows_affected()
             > 0)
     }
+    /// Deletes the given entries and any of `game_ids` left with no remaining
+    /// entries, inside one write transaction.
+    pub async fn delete_entries_and_orphans(
+        &self,
+        entry_ids: &[String],
+        game_ids: &[String],
+    ) -> Result<()> {
+        if entry_ids.is_empty() && game_ids.is_empty() {
+            return Ok(());
+        }
+        let mut tx = self.begin_write().await?;
+        for chunk in entry_ids.chunks(500) {
+            let mut query =
+                sqlx::QueryBuilder::<sqlx::Sqlite>::new("DELETE FROM game_entries WHERE id IN (");
+            let mut list = query.separated(", ");
+            for id in chunk {
+                list.push_bind(id);
+            }
+            query.push(")");
+            query.build().execute(&mut *tx).await?;
+        }
+        for chunk in game_ids.chunks(500) {
+            let mut query =
+                sqlx::QueryBuilder::<sqlx::Sqlite>::new("DELETE FROM games WHERE id IN (");
+            let mut list = query.separated(", ");
+            for id in chunk {
+                list.push_bind(id);
+            }
+            query.push(") AND NOT EXISTS(SELECT 1 FROM game_entries e WHERE e.game_id=games.id)");
+            query.build().execute(&mut *tx).await?;
+        }
+        tx.commit().await?;
+        Ok(())
+    }
     pub async fn upsert_artwork(&self, artwork: &Artwork) -> Result<Artwork> {
         artwork.validate()?;
-        let kind = artwork_kind(artwork.kind);
+        let kind = artwork.kind.as_str();
         sqlx::query("INSERT INTO artwork(id,game_id,kind,content_hash,record_json) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET game_id=excluded.game_id,kind=excluded.kind,content_hash=excluded.content_hash,record_json=excluded.record_json").bind(&artwork.id).bind(&artwork.game_id).bind(kind).bind(&artwork.content_hash).bind(v::json(artwork)?).execute(&self.pool).await?;
         Ok(artwork.clone())
     }
@@ -72,7 +106,7 @@ impl LibraryStore {
             "SELECT EXISTS(SELECT 1 FROM artwork WHERE content_hash=? AND kind=? AND game_id<>?)",
         )
         .bind(content_hash)
-        .bind(artwork_kind(kind))
+        .bind(kind.as_str())
         .bind(game_id)
         .fetch_one(&self.pool)
         .await?)
@@ -424,15 +458,4 @@ async fn touch_collection(tx: &mut sqlx::SqliteConnection, id: &str) -> Result<(
         .execute(&mut *tx)
         .await?;
     Ok(())
-}
-
-/// An artwork kind as the `artwork` table's `kind` column has it.
-fn artwork_kind(kind: ArtworkKind) -> &'static str {
-    match kind {
-        ArtworkKind::Cover => "cover",
-        ArtworkKind::Hero => "hero",
-        ArtworkKind::Logo => "logo",
-        ArtworkKind::Icon => "icon",
-        ArtworkKind::Screenshot => "screenshot",
-    }
 }

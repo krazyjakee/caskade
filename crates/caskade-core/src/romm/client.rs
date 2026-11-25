@@ -158,7 +158,7 @@ impl Client {
                 }
             }))
             .danger_accept_invalid_certs(config.allow_invalid_certs)
-            .user_agent(concat!("Caskade/", env!("CARGO_PKG_VERSION")))
+            .user_agent(crate::http::USER_AGENT)
             .build()
             .map_err(net)?;
         Ok(Self {
@@ -537,12 +537,12 @@ impl Client {
 }
 
 async fn read(mut response: reqwest::Response, max: usize) -> Result<Vec<u8>, RommError> {
-    let mut bytes = Vec::new();
-    while let Some(chunk) = response.chunk().await.map_err(net)? {
-        if chunk.len() > max - bytes.len() {
-            return Err(RommError::Server(crate::tr!("the response is too large")));
-        }
-        bytes.extend_from_slice(&chunk);
-    }
-    Ok(bytes)
+    crate::http::read_bounded(&mut response, max)
+        .await
+        .map_err(|error| match error {
+            crate::http::ReadBodyError::Net(error) => net(error),
+            crate::http::ReadBodyError::TooLarge => {
+                RommError::Server(crate::tr!("the response is too large"))
+            }
+        })
 }

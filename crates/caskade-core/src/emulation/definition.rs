@@ -472,6 +472,17 @@ impl InstallKind {
         Self::AppBundle,
     ];
 
+    /// The snake_case tag of this install kind (as stored in SQLite and JSON).
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Folder => "folder",
+            Self::Path => "path",
+            Self::Flatpak => "flatpak",
+            Self::AppImage => "app_image",
+            Self::AppBundle => "app_bundle",
+        }
+    }
+
     /// The key used in `[vars.<os>.<kind>]` and `[detect.<os>]`.
     pub fn key(self) -> &'static str {
         match self {

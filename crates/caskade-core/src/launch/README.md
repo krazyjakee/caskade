@@ -1,9 +1,9 @@
 # Launch and session lifecycle (#108)
 
 `LaunchService::new(LibraryStore)` exposes `launch(entry_id)`, `recover()` and
-`shutdown()`. The Tauri adapter accepts a stored entry ID, never an arbitrary
+`shutdown()`. The application layer accepts a stored entry ID, never an arbitrary
 process command. `launch` returns a `LaunchHandle` immediately; dropping the
-handle keeps tracking active. Its `ticket` is the frontend response and `wait()`
+handle keeps tracking active. Its `ticket` is the UI response and `wait()`
 is useful for tests/headless callers. Call `recover()` at startup before
 accepting launches. Call `shutdown()` at app shutdown: it stops observation,
 retains the open session and leaves the user's game running. Storage operations

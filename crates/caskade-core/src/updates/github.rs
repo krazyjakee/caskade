@@ -278,7 +278,7 @@ mod http {
             .redirect(reqwest::redirect::Policy::none())
             .connect_timeout(Duration::from_secs(15))
             .timeout(Duration::from_secs(30))
-            .user_agent(concat!("Caskade/", env!("CARGO_PKG_VERSION")))
+            .user_agent(crate::http::USER_AGENT)
             .build()
             .map_err(net)?;
         Ok(CLIENT.get_or_init(|| client).clone())
@@ -318,15 +318,14 @@ mod http {
         if !response.status().is_success() {
             return Err(status(&response));
         }
-        let mut bytes = Vec::new();
-        while let Some(chunk) = response.chunk().await.map_err(net)? {
-            if chunk.len() > MAX_FEED - bytes.len() {
-                return Err(Error::Invalid(crate::tr!(
-                    "GitHub's release feed is too large"
-                )));
-            }
-            bytes.extend_from_slice(&chunk);
-        }
+        let bytes = crate::http::read_bounded(&mut response, MAX_FEED)
+            .await
+            .map_err(|error| match error {
+                crate::http::ReadBodyError::Net(error) => net(error),
+                crate::http::ReadBodyError::TooLarge => {
+                    Error::Invalid(crate::tr!("GitHub's release feed is too large"))
+                }
+            })?;
         String::from_utf8(bytes)
             .map(Some)
             .map_err(|_| Error::Invalid(crate::tr!("GitHub's release feed isn't UTF-8")))

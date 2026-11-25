@@ -68,7 +68,7 @@ impl WebGames {
                 (page, None)
             }
         };
-        let rel_dir = free_folder(&root.path, &folder_name(&title))?;
+        let rel_dir = crate::fs::free_folder(&root.path, &folder_name(&title))?;
         let dir = root.path.join(&rel_dir);
         let command = player
             .capture(&entry, &start, size, &dir)
@@ -218,26 +218,9 @@ fn folder_name(title: &str) -> String {
     }
 }
 
-/// `name`, or `name (2)`, `name (3)`, …: the first that `root` hasn't got.
-fn free_folder(root: &Path, name: &str) -> crate::Result<PathBuf> {
-    for n in 1..1000 {
-        let candidate = if n == 1 {
-            name.to_owned()
-        } else {
-            format!("{name} ({n})")
-        };
-        if !root.join(&candidate).exists() {
-            return Ok(PathBuf::from(candidate));
-        }
-    }
-    Err(crate::Error::Invalid(
-        "no free folder name for the game".into(),
-    ))
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{folder_name, free_folder};
+    use super::folder_name;
 
     #[test]
     fn folder_names_are_safe_and_free() {
@@ -249,7 +232,7 @@ mod tests {
         std::fs::create_dir(root.path().join("Needle")).unwrap();
         std::fs::create_dir(root.path().join("Needle (2)")).unwrap();
         assert_eq!(
-            free_folder(root.path(), "Needle").unwrap(),
+            crate::fs::free_folder(root.path(), "Needle").unwrap(),
             std::path::Path::new("Needle (3)")
         );
     }

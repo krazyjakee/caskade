@@ -56,11 +56,13 @@ impl ScannerService {
         let found: Vec<(PathBuf, &Platform)> = match own {
             Some(platform) => vec![(folder.to_owned(), platform)],
             None => {
-                let mut dirs: Vec<_> = std::fs::read_dir(folder)?
-                    .filter_map(|entry| entry.ok())
-                    .filter(|entry| entry.file_type().is_ok_and(|kind| kind.is_dir()))
-                    .map(|entry| entry.path())
-                    .collect();
+                let mut entries = tokio::fs::read_dir(folder).await?;
+                let mut dirs = Vec::new();
+                while let Ok(Some(entry)) = entries.next_entry().await {
+                    if entry.file_type().await.is_ok_and(|kind| kind.is_dir()) {
+                        dirs.push(entry.path());
+                    }
+                }
                 dirs.sort();
                 let mut found = Vec::new();
                 for dir in dirs {

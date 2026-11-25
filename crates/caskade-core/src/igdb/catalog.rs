@@ -18,10 +18,10 @@
 //! `tbd` lists the undated ones. Both list a game once per release, so a
 //! game released on one platform and coming to another is on both. The
 //! server's paging counts release rows: a game can come up again on a
-//! later page for another platform, and the webview keeps the first.
+//! later page for another platform, and the UI keeps the first.
 
-use super::{Igdb, IgdbGame, IgdbReleaseDate, answer, decimal, decimals, readable, unique};
-use crate::{Error, Result, now_ms};
+use super::{Igdb, IgdbGame, IgdbReleaseDate, decimal, decimals, readable, unique};
+use crate::{Error, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{
@@ -435,36 +435,8 @@ impl Igdb {
     /// than a day are fetched again; when that fails, the cached answer
     /// stands. Fails only when nothing could be answered.
     pub async fn catalog_games(&self, ids: &[u64]) -> Result<super::IgdbLookup> {
-        let ids = unique(ids);
-        let store = self.store().await?;
-        let fresh = super::CATALOG_FRESH
-            .as_millis()
-            .try_into()
-            .unwrap_or(i64::MAX);
-        let since = now_ms().saturating_sub(fresh);
-        let mut known = store.get(&store.fetched_since(&ids, since).await?).await?;
-        let stale: Vec<u64> = ids
-            .iter()
-            .copied()
-            .filter(|id| !known.contains_key(id))
-            .collect();
-        let (claim, waits) = self.claim(&stale);
-        let fetched = self.fetch(store, &claim.ids, &mut known).await;
-        drop(claim);
-        for flight in waits {
-            drop(flight.lock().await);
-        }
-        // What the server didn't answer: the cache's answer, however old.
-        let rest: Vec<u64> = ids
-            .iter()
-            .copied()
-            .filter(|id| !known.contains_key(id))
-            .collect();
-        known.extend(store.get(&rest).await?);
-        match fetched {
-            Err(error) if known.is_empty() => Err(error),
-            _ => Ok(answer(&ids, known)),
-        }
+        self.fetch_with_freshness(ids, super::CATALOG_FRESH, true)
+            .await
     }
 
     async fn catalog_releases(

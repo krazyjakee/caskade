@@ -150,7 +150,7 @@ pub async fn download(
         )
     };
     let client = reqwest::Client::builder()
-        .user_agent(concat!("Caskade/", env!("CARGO_PKG_VERSION")))
+        .user_agent(caskade_core::http::USER_AGENT)
         .connect_timeout(std::time::Duration::from_secs(20))
         .redirect(reqwest::redirect::Policy::limited(5))
         .build()

@@ -284,7 +284,7 @@ async fn pins_are_salted_argon2id_hashes() {
         assert!(!hash.contains("4321"));
     }
     assert_ne!(hashes[0], hashes[1], "a salt per account");
-    // The webview's view of an account has no hash.
+    // The UI's view of an account has no hash.
     let json = serde_json::to_string(&accounts.list().await.unwrap()).unwrap();
     assert!(!json.contains("argon2"));
 

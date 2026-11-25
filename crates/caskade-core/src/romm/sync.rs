@@ -176,7 +176,7 @@ impl RommService {
         self.set_state(server_id, |state| state.syncing = true);
         let was_offline = self.offline(server_id);
         let outcome = self.sync_inner(&config, trigger).await;
-        self.note(server_id, &outcome);
+        self.note(server_id, outcome.as_ref().err());
         self.set_state(server_id, |state| {
             state.syncing = false;
             if outcome.is_ok() {

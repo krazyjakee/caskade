@@ -1,6 +1,6 @@
 use super::{
     ArtworkCache, ArtworkError, CachedArtwork, Result,
-    cache::{MAX_INPUT_BYTES, atomic_write, bounded, digest, lock},
+    cache::{MAX_INPUT_BYTES, bounded, digest, lock},
 };
 use std::{
     collections::HashMap,
@@ -97,23 +97,19 @@ impl ArtworkCache {
             .map_err(download_error)?
             .error_for_status()
             .map_err(ArtworkError::download)?;
-        if response
-            .content_length()
-            .is_some_and(|n| n > MAX_INPUT_BYTES as u64)
-        {
-            return Err(ArtworkError::Limit("artwork response exceeds 16 MiB"));
-        }
-        let mut bytes = Vec::new();
-        while let Some(chunk) = response.chunk().await.map_err(ArtworkError::download)? {
-            if chunk.len() > MAX_INPUT_BYTES - bytes.len() {
-                return Err(ArtworkError::Limit("artwork response exceeds 16 MiB"));
-            }
-            bytes.extend_from_slice(&chunk);
-        }
+        let bytes = crate::http::read_bounded(&mut response, MAX_INPUT_BYTES)
+            .await
+            .map_err(|error| match error {
+                crate::http::ReadBodyError::Net(error) => ArtworkError::download(error),
+                crate::http::ReadBodyError::TooLarge => {
+                    ArtworkError::Limit("artwork response exceeds 16 MiB")
+                }
+            })?;
         let artwork = self.import_bytes(bytes).await?;
         let hash = artwork.content_hash.clone();
-        caskade_jobs::blocking(crate::tr!("Saving artwork"), move || {
-            atomic_write(&directory, "content.json", &serde_json::to_vec(&hash)?)
+        caskade_jobs::blocking(crate::tr!("Saving artwork"), move || -> Result<()> {
+            crate::fs::atomic_write_dir(&directory, "content.json", &serde_json::to_vec(&hash)?)?;
+            Ok(())
         })
         .await
         .map_err(|_| ArtworkError::Worker)??;
@@ -173,36 +169,7 @@ fn public_host(url: &url::Url) -> bool {
     }
 }
 
-/// Not loopback, private, link-local, shared (CGNAT), unspecified,
-/// broadcast, multicast or documentation space.
-pub(super) fn public_ip(ip: IpAddr) -> bool {
-    match ip {
-        IpAddr::V4(ip) => {
-            let [a, b, ..] = ip.octets();
-            !(ip.is_loopback()
-                || ip.is_private()
-                || ip.is_link_local()
-                || ip.is_unspecified()
-                || ip.is_broadcast()
-                || ip.is_multicast()
-                || ip.is_documentation()
-                || a == 0
-                || (a == 100 && (64..128).contains(&b))
-                || a >= 240)
-        }
-        IpAddr::V6(ip) => match ip.to_ipv4_mapped() {
-            Some(v4) => public_ip(IpAddr::V4(v4)),
-            None => {
-                let first = ip.segments()[0];
-                !(ip.is_loopback()
-                    || ip.is_unspecified()
-                    || ip.is_multicast()
-                    || (first & 0xfe00) == 0xfc00
-                    || (first & 0xffc0) == 0xfe80)
-            }
-        },
-    }
-}
+pub(super) use caskade_installer::fetch::grant::public_ip;
 
 /// Resolves names with the system resolver and keeps only public addresses,
 /// so a name that points at loopback or the LAN (DNS rebinding included)

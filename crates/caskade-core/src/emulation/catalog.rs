@@ -5,7 +5,7 @@
 use super::{
     Bios, DefinitionProfile, EmulatorDefinition, InstallKind, InstallSource, OSES, Platform,
     Region, SetupAction, SetupStep, Tracking, Vars, os_key,
-    vars::{Expander, VarContext, builtin, leads_with_rom_name, names},
+    vars::{Expander, VarContext, builtin, names},
 };
 use caskade_installer::OperatingSystem;
 use serde::Deserialize;
@@ -750,19 +750,7 @@ pub fn resolve(
         context,
     };
     Ok(Resolved {
-        args: args
-            .iter()
-            .map(|arg| {
-                let value = expander.expand(arg)?;
-                if value.starts_with('-') && leads_with_rom_name(vars, arg, os, kind) {
-                    return Err(crate::tr!(
-                        "the ROM file name {file} starts with `-`, which the emulator would read as an option; rename the file",
-                        file = format!("{value:?}")
-                    ));
-                }
-                Ok(value)
-            })
-            .collect::<Result<_, _>>()?,
+        args: expander.expand_args(args)?,
         working_dir: working_dir.map(|dir| expander.expand(dir)).transpose()?,
         requires: requires
             .iter()

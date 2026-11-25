@@ -281,7 +281,7 @@ impl EmulatorLaunches {
             folders: self.service.folders().clone(),
         };
         let templates = templates(&catalog, emulator, emulator_profile)?;
-        let expand = Expand {
+        let expand = emulation::Expander {
             vars: templates.vars,
             os: self.service.os(),
             kind: emulator.install.kind(),
@@ -292,20 +292,30 @@ impl EmulatorLaunches {
             Some(display) => &display.windowed,
             None => &Vec::new(),
         };
-        let display = expand.all(display)?;
-        let args = expand.all(&game_args.apply(&templates.args))?;
+        let display = expand.expand_args(display).map_err(LaunchError::Invalid)?;
+        let args = expand
+            .expand_args(&game_args.apply(&templates.args))
+            .map_err(LaunchError::Invalid)?;
         let working_dir = templates
             .working_dir
             .as_deref()
-            .map(|dir| expand.one(dir))
+            .map(|dir| expand.expand_arg(dir).map_err(LaunchError::Invalid))
             .transpose()?;
         let env = templates
             .env
             .iter()
-            .map(|(key, value)| Ok((key.clone(), expand.one(value)?)))
+            .map(|(key, value)| {
+                Ok((
+                    key.clone(),
+                    expand.expand_arg(value).map_err(LaunchError::Invalid)?,
+                ))
+            })
             .collect::<Result<_>>()?;
-        let hook =
-            |argv: &Option<Vec<String>>| argv.as_deref().map(|argv| expand.all(argv)).transpose();
+        let hook = |argv: &Option<Vec<String>>| {
+            argv.as_deref()
+                .map(|argv| expand.expand_args(argv).map_err(LaunchError::Invalid))
+                .transpose()
+        };
         let (before, after_exit) = (
             hook(&templates.hooks.before)?,
             hook(&templates.hooks.after_exit)?,
@@ -357,12 +367,14 @@ impl EmulatorLaunches {
             }
             Tracking::Folder { path } => {
                 target.mode = TrackingMode::Folder;
-                target.real_dir = Some(PathBuf::from(expand.one(&path)?));
+                target.real_dir = Some(PathBuf::from(
+                    expand.expand_arg(&path).map_err(LaunchError::Invalid)?,
+                ));
                 false
             }
             Tracking::ProcessName { name } if !name.is_empty() => {
                 target.mode = TrackingMode::ProcessName;
-                target.exe_names = vec![expand.one(&name)?];
+                target.exe_names = vec![expand.expand_arg(&name).map_err(LaunchError::Invalid)?];
                 false
             }
             Tracking::ProcessName { .. } => {
@@ -634,34 +646,6 @@ fn templates<'a>(
             tracking: tracking.clone(),
             hooks: hooks.clone(),
         }),
-    }
-}
-
-/// Expands templates with one launch's variables.
-struct Expand<'a> {
-    vars: &'a Vars,
-    os: emulation::OperatingSystem,
-    kind: InstallKind,
-    context: &'a VarContext,
-}
-
-impl Expand<'_> {
-    fn all(&self, templates: &[String]) -> Result<Vec<String>> {
-        emulation::resolve(
-            self.vars,
-            templates,
-            None,
-            &[],
-            self.os,
-            self.kind,
-            self.context,
-        )
-        .map(|resolved| resolved.args)
-        .map_err(LaunchError::Invalid)
-    }
-
-    fn one(&self, template: &str) -> Result<String> {
-        Ok(self.all(&[template.to_owned()])?.remove(0))
     }
 }
 

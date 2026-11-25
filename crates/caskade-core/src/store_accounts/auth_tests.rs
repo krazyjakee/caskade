@@ -219,7 +219,7 @@ async fn a_browser_sign_in_checks_its_state_and_keeps_the_token_in_the_keychain(
     );
     let kept = world.keychain.get(&account.id).await.unwrap().unwrap();
     assert!(kept.contains(TOKEN));
-    // Nothing a webview or a backup sees holds the token.
+    // Nothing the UI or a backup sees holds the token.
     let summary = summary(&world, &account.id).await;
     assert_eq!(summary.state, StoreConnectionState::Connected);
     assert!(!summary.session_only);

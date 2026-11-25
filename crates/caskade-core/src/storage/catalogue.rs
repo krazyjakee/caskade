@@ -1,9 +1,6 @@
 use super::*;
-use cap_std::fs::{Dir, OpenOptions};
-use std::{
-    io::{Read, Write},
-    path::Path,
-};
+use cap_std::fs::Dir;
+use std::{io::Read, path::Path};
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Catalogue {
@@ -16,7 +13,7 @@ pub(super) fn write(config: &Path, roots: &[StorageRoot]) -> Result<()> {
             "storage catalogue supports at most 128 locations"
         )));
     }
-    let bytes = serde_json::to_vec(&Catalogue {
+    let mut bytes = serde_json::to_vec(&Catalogue {
         schema_version: 1,
         roots: roots.to_vec(),
     })?;
@@ -25,24 +22,11 @@ pub(super) fn write(config: &Path, roots: &[StorageRoot]) -> Result<()> {
             "root catalogue exceeds its recovery budget"
         )));
     }
+    bytes.push(b'\n');
     std::fs::create_dir_all(config)?;
     let dir = Dir::open_ambient_dir(config, cap_std::ambient_authority())?;
-    let temporary = format!(".storage-roots-{}.tmp", crate::model::new_id());
-    let mut file = dir.open_with(&temporary, OpenOptions::new().write(true).create_new(true))?;
-    let result = (|| {
-        file.write_all(&bytes)?;
-        file.write_all(b"\n")?;
-        file.sync_all()?;
-        drop(file);
-        dir.rename(&temporary, &dir, "storage-roots.json")?;
-        #[cfg(unix)]
-        dir.open(".")?.sync_all()?;
-        Ok(())
-    })();
-    if result.is_err() {
-        let _ = dir.remove_file(&temporary);
-    }
-    result
+    crate::fs::atomic_write_dir(&dir, "storage-roots.json", &bytes)?;
+    Ok(())
 }
 pub(super) fn read(config: &Path) -> Result<Vec<StorageRoot>> {
     if !config.exists() {

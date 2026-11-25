@@ -1,17 +1,14 @@
 //! Bounded remount recovery: a recorded volume-relative folder on current
 //! mounts, authenticated by root.json. Never traverses an entire drive.
 use super::{Result, StorageError};
-use cap_std::fs::{Dir, OpenOptions};
-use caskade_core::{
-    model::{StorageRoot, new_id},
-    storage::StorageService,
-};
+use cap_std::fs::Dir;
+use caskade_core::{model::StorageRoot, storage::StorageService};
 use caskade_discovery::HostEnv;
 use caskade_installer::manifest::{ManifestPath, RootManifest};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, BTreeSet},
-    io::{Read, Write},
+    io::Read,
     path::{Path, PathBuf},
 };
 
@@ -174,20 +171,8 @@ fn read(config: &Path) -> Result<Hints> {
 fn write(config: &Path, hints: &Hints) -> Result<()> {
     std::fs::create_dir_all(config)?;
     let dir = Dir::open_ambient_dir(config, cap_std::ambient_authority())?;
-    let temporary = format!(".storage-volume-hints-{}.tmp", new_id());
-    let mut file = dir.open_with(&temporary, OpenOptions::new().create_new(true).write(true))?;
-    let result = (|| -> Result<()> {
-        serde_json::to_writer(&mut file, hints).map_err(caskade_core::Error::from)?;
-        file.write_all(b"\n")?;
-        file.sync_all()?;
-        drop(file);
-        dir.rename(&temporary, &dir, FILE)?;
-        #[cfg(unix)]
-        dir.open(".")?.sync_all()?;
-        Ok(())
-    })();
-    if result.is_err() {
-        let _ = dir.remove_file(temporary);
-    }
-    result
+    let mut bytes = serde_json::to_vec(hints).map_err(caskade_core::Error::from)?;
+    bytes.push(b'\n');
+    caskade_core::fs::atomic_write_dir(&dir, FILE, &bytes)?;
+    Ok(())
 }

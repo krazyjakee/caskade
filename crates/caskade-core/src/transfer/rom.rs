@@ -102,21 +102,6 @@ pub(crate) fn move_path(from: &Path, to: &Path) -> std::io::Result<()> {
     }
 }
 
-/// `name`, or `name (2)`, `name (3)`, …: the first that `root` hasn't got.
-pub(crate) fn free_folder(root: &Path, name: &str) -> Result<PathBuf> {
-    for n in 1..1000 {
-        let candidate = if n == 1 {
-            name.to_owned()
-        } else {
-            format!("{name} ({n})")
-        };
-        if !root.join(&candidate).exists() {
-            return Ok(PathBuf::from(candidate));
-        }
-    }
-    Err(Error::Invalid(crate::tr!("no free folder name for it")))
-}
-
 /// Whether `entry` launches through an emulator.
 pub fn emulated(entry: &GameEntry) -> bool {
     matches!(entry.launch, Some(LaunchSpec::Emulator { .. }))
@@ -351,7 +336,7 @@ pub async fn place(
         let name = super::folder_name(title);
         let names: Vec<String> = rom.roms.iter().map(|rom| rom.file.clone()).collect();
         tokio::task::spawn_blocking(move || {
-            let dir = base.join(free_folder(&base, &name)?);
+            let dir = base.join(crate::fs::free_folder(&base, &name)?);
             std::fs::create_dir_all(&dir)?;
             for name in &names {
                 move_path(&folder.join(name), &dir.join(name))?;

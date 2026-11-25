@@ -35,7 +35,7 @@ regex = "1"
 insta = { version = "1", features = ["json"] }
 caskade-emulation-fixtures = { path = "../caskade-emulation-fixtures" }
 tempfile = "=3.27.0"
-# The live streaming test (tests/streaming.rs), with `live-tests`.
+# The live streaming tests (tests/streaming/), with `live-tests`.
 caskade-streaming = { path = "../caskade-streaming", default-features = false }
 
 [lints]

@@ -53,7 +53,7 @@ pub use setup::{
     BiosFetch, BiosFuture, BiosProvider, EmulatorSetup, Installable, ManagedEmulator,
     MissingPlatform, Recommendation, SetupJob, SetupStatus,
 };
-pub use vars::{BUILTINS, OsFolders, VarContext, builtin, names};
+pub use vars::{BUILTINS, Expander, OsFolders, VarContext, builtin, names};
 
 use crate::{Error, Result};
 

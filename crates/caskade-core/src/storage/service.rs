@@ -329,14 +329,11 @@ impl StorageService {
         {
             return Err(StorageError::Running);
         }
-        for entry in entries {
-            self.store.delete_entry(&entry.id).await?;
-        }
-        for id in games {
-            if self.store.entries_for_game(&id).await?.is_empty() {
-                self.store.delete_game(&id).await?;
-            }
-        }
+        let entry_ids: Vec<String> = entries.into_iter().map(|entry| entry.id).collect();
+        let game_ids: Vec<String> = games.into_iter().collect();
+        self.store
+            .delete_entries_and_orphans(&entry_ids, &game_ids)
+            .await?;
         let roots = self
             .store
             .roots()

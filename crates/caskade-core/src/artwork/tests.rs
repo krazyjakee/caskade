@@ -17,7 +17,7 @@ fn png(width: u32, height: u32) -> Vec<u8> {
     bytes.into_inner()
 }
 
-/// `art`'s `size` thumbnail as the webview asks for it.
+/// `art`'s `size` thumbnail as the UI asks for it.
 fn thumbnail_uri(art: &CachedArtwork, size: u32) -> Option<String> {
     art.thumbnails
         .iter()

@@ -34,6 +34,35 @@ pub const DEFAULT_BOARD: &str = "pegi";
 /// The boards the table knows, in the order a game page lists them.
 pub const BOARDS: [&str; 7] = ["pegi", "esrb", "usk", "cero", "acb", "grac", "classind"];
 
+/// Each board's canonical labels and the minimum age each allows, in
+/// ascending order; labels that come to the same age are one step.
+pub fn board_steps(board: &str) -> &'static [(&'static str, u8)] {
+    match board {
+        "pegi" => &[("3", 3), ("7", 7), ("12", 12), ("16", 16), ("18", 18)],
+        "esrb" => &[
+            ("EC", 3),
+            ("E", 6),
+            ("E10+", 10),
+            ("T", 13),
+            ("M", 17),
+            ("AO", 18),
+        ],
+        "usk" => &[("0", 0), ("6", 6), ("12", 12), ("16", 16), ("18", 18)],
+        "cero" => &[("A", 0), ("B", 12), ("C", 15), ("D", 17), ("Z", 18)],
+        "acb" => &[("G", 0), ("PG", 8), ("M", 15), ("R18+", 18)],
+        "grac" => &[("All", 0), ("12", 12), ("15", 15), ("18", 18)],
+        "classind" => &[
+            ("L", 0),
+            ("10", 10),
+            ("12", 12),
+            ("14", 14),
+            ("16", 16),
+            ("18", 18),
+        ],
+        _ => &[],
+    }
+}
+
 /// The most ratings a game keeps.
 pub(crate) const MAX_RATINGS: usize = 32;
 
@@ -101,48 +130,19 @@ fn lookup(board: &str, rating: &str) -> Known {
     if let Some(rest) = label.strip_prefix(board.to_ascii_uppercase().as_str()) {
         label = rest.trim_start_matches([' ', '-', '_', ':']).to_owned();
     }
-    let age = match (board.as_str(), label.as_str()) {
-        ("pegi", "3") => 3,
-        ("pegi", "7") => 7,
-        ("pegi", "12") => 12,
-        ("pegi", "16") => 16,
-        ("pegi", "18") => 18,
-        ("esrb", "RP") => return Known::Unrated,
-        ("esrb", "EC") => 3,
-        ("esrb", "E") => 6,
-        ("esrb", "E10+" | "E10") => 10,
-        ("esrb", "T") => 13,
-        ("esrb", "M") => 17,
-        ("esrb", "AO") => 18,
-        ("usk", "0") => 0,
-        ("usk", "6") => 6,
-        ("usk", "12") => 12,
-        ("usk", "16") => 16,
-        ("usk", "18") => 18,
-        ("cero", "A") => 0,
-        ("cero", "B") => 12,
-        ("cero", "C") => 15,
-        ("cero", "D") => 17,
-        ("cero", "Z") => 18,
-        ("acb", "G") => 0,
-        ("acb", "PG") => 8,
-        ("acb", "M") => 15,
-        ("acb", "MA15+" | "MA15") => 15,
-        ("acb", "R18+" | "R18" | "X18+" | "X18" | "RC") => 18,
-        ("grac", "TESTING") => return Known::Unrated,
-        ("grac", "ALL") => 0,
-        ("grac", "12") => 12,
-        ("grac", "15") => 15,
-        ("grac", "18") => 18,
-        ("classind", "L") => 0,
-        ("classind", "10") => 10,
-        ("classind", "12") => 12,
-        ("classind", "14") => 14,
-        ("classind", "16") => 16,
-        ("classind", "18") => 18,
-        _ => return Known::Unknown,
-    };
-    Known::Age(age)
+    if let Some((_, age)) = board_steps(&board)
+        .iter()
+        .find(|(step, _)| step.eq_ignore_ascii_case(&label))
+    {
+        return Known::Age(*age);
+    }
+    match (board.as_str(), label.as_str()) {
+        ("esrb", "RP") | ("grac", "TESTING") => Known::Unrated,
+        ("esrb", "E10") => Known::Age(10),
+        ("acb", "MA15+" | "MA15") => Known::Age(15),
+        ("acb", "R18" | "X18+" | "X18" | "RC") => Known::Age(18),
+        _ => Known::Unknown,
+    }
 }
 
 /// Logs a rating the table doesn't know, the first time it comes up.

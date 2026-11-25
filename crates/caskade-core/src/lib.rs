@@ -2,9 +2,10 @@
 //! library store, artwork cache, settings, launch pipeline, process
 //! tracking, play sessions and the in-process hook bus.
 //!
-//! The crate has no Tauri dependency: `caskade-app` builds every app
-//! shell's commands on it, so everything here is unit-testable. The library
-//! emits `tracing` events and spans without setting a global subscriber.
+//! The crate has no UI toolkit dependency: `caskade-app` builds the
+//! application layer's commands on it, so everything here is unit-testable.
+//! The library emits `tracing` events and spans without setting a global
+//! subscriber.
 
 pub mod accounts;
 pub mod artwork;
@@ -18,7 +19,10 @@ pub mod device_type;
 pub mod devices;
 pub mod emulation;
 pub mod error;
+pub mod fs;
 pub mod hasheous;
+#[cfg(feature = "net")]
+pub mod http;
 pub mod i18n;
 pub mod icons;
 pub mod igdb;

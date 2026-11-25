@@ -7,23 +7,42 @@ use crate::{
     Result,
     model::{AchievementLink, LinkMethod, validation as v},
 };
+use sqlx::{QueryBuilder, Sqlite};
+use std::collections::{HashMap, HashSet};
 
 impl LibraryStore {
     /// The links of these releases, to any service.
     pub async fn achievement_links(&self, entry_ids: &[String]) -> Result<Vec<AchievementLink>> {
-        let mut links = vec![];
-        for entry in entry_ids {
-            links.extend(
-                sqlx::query_scalar::<_, String>(
-                    "SELECT record_json FROM achievement_links WHERE entry_id=? ORDER BY provider",
-                )
-                .bind(entry)
-                .fetch_all(&self.pool)
-                .await?
-                .into_iter()
-                .map(decode::<AchievementLink>)
-                .collect::<Result<Vec<_>>>()?,
+        if entry_ids.is_empty() {
+            return Ok(Vec::new());
+        }
+        let mut unique: Vec<&str> = Vec::with_capacity(entry_ids.len());
+        let mut seen = HashSet::with_capacity(entry_ids.len());
+        for id in entry_ids {
+            if seen.insert(id.as_str()) {
+                unique.push(id.as_str());
+            }
+        }
+        let mut by_entry: HashMap<String, Vec<AchievementLink>> = HashMap::new();
+        for chunk in unique.chunks(500) {
+            let mut query = QueryBuilder::<Sqlite>::new(
+                "SELECT entry_id, record_json FROM achievement_links WHERE entry_id IN (",
             );
+            let mut list = query.separated(", ");
+            for id in chunk {
+                list.push_bind(*id);
+            }
+            query.push(") ORDER BY provider");
+            let rows: Vec<(String, String)> = query.build_query_as().fetch_all(&self.pool).await?;
+            for (entry_id, json) in rows {
+                by_entry.entry(entry_id).or_default().push(decode(json)?);
+            }
+        }
+        let mut links = Vec::new();
+        for id in entry_ids {
+            if let Some(found) = by_entry.get(id) {
+                links.extend(found.iter().cloned());
+            }
         }
         Ok(links)
     }

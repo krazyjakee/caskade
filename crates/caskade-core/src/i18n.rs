@@ -1,5 +1,5 @@
 //! The core's language (#212): the `core` gettext domain, which covers the
-//! Rust crates, the Tauri adapter and the tray. See `docs/translating.md`.
+//! Rust crates, the application layer and the tray. See `docs/translating.md`.
 //!
 //! Mark text people read with the macros below; `just i18n` extracts them
 //! into `locales/core.pot`, and each language's `locales/<lang>/core.po`
@@ -123,7 +123,7 @@ async fn language_setting(settings: &SettingsService) -> String {
 
 /// Switches to the Language setting (`core.general.language`) and returns
 /// the language in use. The app calls it before its window loads, so the
-/// webview's first render is already in it.
+/// UI's first render is already in it.
 pub async fn apply_setting(settings: &SettingsService) -> String {
     let language = language_setting(settings).await;
     set_locale(&language)

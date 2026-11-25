@@ -155,18 +155,22 @@ impl PeerDownloads {
         let mut kept = self.inner.kept.lock().await;
         let dir = &self.inner.dir;
         let mut gone = Vec::new();
-        kept.retain(|entry| {
-            let intact = std::fs::metadata(dir.join(&entry.sha256).join(&entry.name))
+        let mut intact = Vec::with_capacity(kept.len());
+        for entry in kept.drain(..) {
+            let ok = tokio::fs::metadata(dir.join(&entry.sha256).join(&entry.name))
+                .await
                 .is_ok_and(|metadata| metadata.is_file() && metadata.len() == entry.size);
-            if !intact {
-                gone.push(entry.sha256.clone());
+            if ok {
+                intact.push(entry);
+            } else {
+                gone.push(entry.sha256);
             }
-            intact
-        });
+        }
+        *kept = intact;
         if gone.is_empty() {
             return;
         }
-        self.save(&kept);
+        self.save(&kept).await;
         drop(kept);
         for sha in gone {
             tracing::info!(sha, "a kept download's file is gone");
@@ -185,15 +189,13 @@ impl PeerDownloads {
             .peer_downloads
     }
 
-    fn save(&self, kept: &[Kept]) {
+    async fn save(&self, kept: &[Kept]) {
         let Ok(bytes) = serde_json::to_vec_pretty(kept) else {
             return;
         };
         let path = self.inner.dir.join(INDEX);
-        let partial = self.inner.dir.join(".index.json.partial");
-        if std::fs::write(&partial, bytes).is_ok() {
-            let _ = std::fs::rename(&partial, &path);
-        }
+        let _ =
+            tokio::task::spawn_blocking(move || crate::fs::atomic_write_path(&path, &bytes)).await;
     }
 
     async fn keep_file(&self, request: &DownloadRequest, file: &DownloadedFile) -> Result<()> {
@@ -208,7 +210,7 @@ impl PeerDownloads {
             }
             known.validator = file.validator.clone().or(known.validator.take());
             known.kept_ms = crate::now_ms();
-            self.save(&kept);
+            self.save(&kept).await;
             return Ok(());
         }
         if file.size > BUDGET {
@@ -240,7 +242,7 @@ impl PeerDownloads {
         {
             Ok(offered) => offered,
             Err(error) => {
-                let _ = std::fs::remove_dir_all(&folder);
+                let _ = tokio::fs::remove_dir_all(&folder).await;
                 return Err(error);
             }
         };
@@ -267,7 +269,7 @@ impl PeerDownloads {
             }
             stays
         });
-        self.save(&kept);
+        self.save(&kept).await;
         drop(kept);
         for sha in gone {
             let _ = self
@@ -470,7 +472,7 @@ impl PeerDownloads {
         };
         entry.release = Some(key.to_owned());
         entry.version = version;
-        self.save(&kept);
+        self.save(&kept).await;
     }
 
     /// The newest release `key` a device nearby keeps: its URL, file name

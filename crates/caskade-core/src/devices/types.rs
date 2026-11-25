@@ -23,6 +23,17 @@ pub enum DeviceLink {
     Offline,
 }
 
+impl DeviceLink {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Lan => "lan",
+            Self::Direct => "direct",
+            Self::Relay => "relay",
+            Self::Offline => "offline",
+        }
+    }
+}
+
 /// Where this device's identity stands.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

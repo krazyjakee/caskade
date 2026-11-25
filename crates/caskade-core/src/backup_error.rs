@@ -75,3 +75,9 @@ impl From<serde_json::Error> for BackupError {
         Self::Io(std::io::Error::other(error))
     }
 }
+
+impl From<sqlx::Error> for BackupError {
+    fn from(error: sqlx::Error) -> Self {
+        Self::from(crate::Error::from(error))
+    }
+}

@@ -89,7 +89,7 @@ pub async fn place(
         let (folder, base) = (folder.to_owned(), root.path.clone());
         let name = super::folder_name(title);
         tokio::task::spawn_blocking(move || {
-            let rel_dir = rom::free_folder(&base, &name)?;
+            let rel_dir = crate::fs::free_folder(&base, &name)?;
             let target = base.join(&rel_dir);
             rom::move_path(&folder, &target)?;
             let bundle = bundle::Bundle::open(&target).map_err(|_| {

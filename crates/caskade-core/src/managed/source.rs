@@ -158,15 +158,14 @@ async fn dolphin(endpoint: &Url, artifact: &str) -> Result<Resolved> {
         .map_err(net)?
         .error_for_status()
         .map_err(net)?;
-    let mut body = Vec::new();
-    while let Some(chunk) = response.chunk().await.map_err(net)? {
-        if chunk.len() > MAX_BODY - body.len() {
-            return Err(Error::Invalid(crate::tr!(
-                "Dolphin's update endpoint sent more than 1 MiB"
-            )));
-        }
-        body.extend_from_slice(&chunk);
-    }
+    let body = crate::http::read_bounded(&mut response, MAX_BODY)
+        .await
+        .map_err(|error| match error {
+            crate::http::ReadBodyError::Net(error) => net(error),
+            crate::http::ReadBodyError::TooLarge => {
+                Error::Invalid(crate::tr!("Dolphin's update endpoint sent more than 1 MiB"))
+            }
+        })?;
     let latest: Latest = serde_json::from_slice(&body)?;
     let found = latest
         .artifacts

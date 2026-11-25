@@ -56,7 +56,7 @@ pub enum EmulatorInstall {
 }
 
 impl EmulatorInstall {
-    pub fn kind(&self) -> InstallKind {
+    pub const fn kind(&self) -> InstallKind {
         match self {
             Self::Folder { .. } => InstallKind::Folder,
             Self::Path { .. } => InstallKind::Path,
@@ -64,6 +64,11 @@ impl EmulatorInstall {
             Self::AppImage { .. } => InstallKind::AppImage,
             Self::AppBundle { .. } => InstallKind::AppBundle,
         }
+    }
+
+    /// The snake_case tag of this install's kind (as stored in SQLite and JSON).
+    pub const fn kind_str(&self) -> &'static str {
+        self.kind().as_str()
     }
 }
 

@@ -15,7 +15,7 @@ use std::{
 /// The files a release shipped, relative to the install folder.
 pub(crate) const SHIPPED: &str = ".caskade/shipped.json";
 /// User files a newer release also ships go here, per old version.
-pub(crate) const BACKUP: &str = ".caskade/update-backup";
+pub(crate) use crate::install::UPDATE_BACKUP_DIR as BACKUP;
 
 fn invalid(message: impl Into<String>) -> Error {
     Error::Invalid(message.into())

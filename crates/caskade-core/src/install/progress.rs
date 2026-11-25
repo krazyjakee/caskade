@@ -58,7 +58,7 @@ impl Progress {
 
 impl EventSink for Progress {
     fn emit(&self, event: JobEvent) {
-        let phase = JobPhase::from(event.phase);
+        let phase = event.phase;
         let progress = JobProgress {
             bytes: event.bytes,
             total_bytes: event.total_bytes,

@@ -1,9 +1,12 @@
 //! A file fetched again only when it changed (ETag), gzip-decoded and
 //! bounded: Ludusavi's save manifest, the ports catalogue.
 
-use crate::{Error, Result, error::net};
-use reqwest::header::{ACCEPT_ENCODING, CONTENT_ENCODING, ETAG, IF_NONE_MATCH};
-use std::{io::Read, sync::OnceLock, time::Duration};
+use crate::{
+    Error, Result,
+    error::net,
+    http::{self, ReadGzipError},
+};
+use reqwest::header::{ACCEPT_ENCODING, ETAG, IF_NONE_MATCH};
 
 const MAX_RESPONSE: usize = 64 << 20;
 
@@ -18,19 +21,7 @@ pub(crate) enum Response {
 /// Fetches `url`, `what` naming it in errors. With `etag`, an unchanged
 /// file answers [`Response::Unchanged`].
 pub(crate) async fn fetch(url: &str, etag: Option<&str>, what: &str) -> Result<Response> {
-    static CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
-    let client = match CLIENT.get() {
-        Some(client) => client,
-        None => {
-            let client = reqwest::Client::builder()
-                .connect_timeout(Duration::from_secs(15))
-                .timeout(Duration::from_secs(120))
-                .user_agent(concat!("Caskade/", env!("CARGO_PKG_VERSION")))
-                .build()
-                .map_err(net)?;
-            CLIENT.get_or_init(|| client)
-        }
-    };
+    let client = http::client().map_err(net)?;
     let mut request = client.get(url).header(ACCEPT_ENCODING, "gzip");
     if let Some(etag) = etag {
         request = request.header(IF_NONE_MATCH, etag);
@@ -50,32 +41,13 @@ pub(crate) async fn fetch(url: &str, etag: Option<&str>, what: &str) -> Result<R
         .get(ETAG)
         .and_then(|etag| etag.to_str().ok())
         .map(str::to_owned);
-    let gzip = response
-        .headers()
-        .get(CONTENT_ENCODING)
-        .is_some_and(|encoding| encoding.as_bytes().eq_ignore_ascii_case(b"gzip"));
-    let mut bytes = Vec::new();
-    while let Some(chunk) = response.chunk().await.map_err(net)? {
-        if chunk.len() > MAX_RESPONSE - bytes.len() {
-            return Err(invalid(format!("{what} exceeds 64 MiB")));
-        }
-        bytes.extend_from_slice(&chunk);
-    }
-    if gzip {
-        let what = what.to_owned();
-        bytes = tokio::task::spawn_blocking(move || -> Result<Vec<u8>> {
-            let mut decoded = Vec::new();
-            flate2::read::GzDecoder::new(bytes.as_slice())
-                .take(MAX_RESPONSE as u64 + 1)
-                .read_to_end(&mut decoded)?;
-            if decoded.len() > MAX_RESPONSE {
-                return Err(invalid(format!("{what} exceeds 64 MiB")));
-            }
-            Ok(decoded)
-        })
+    let bytes = http::read_bounded_gzip(&mut response, MAX_RESPONSE)
         .await
-        .map_err(|error| invalid(error.to_string()))??;
-    }
+        .map_err(|error| match error {
+            ReadGzipError::Net(error) => net(error),
+            ReadGzipError::TooLarge => invalid(format!("{what} exceeds 64 MiB")),
+            ReadGzipError::Gzip(error) => Error::Io(error),
+        })?;
     Ok(Response::Changed { bytes, etag })
 }
 

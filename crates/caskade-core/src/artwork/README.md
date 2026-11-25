@@ -28,14 +28,14 @@ artwork repository; deleting an association does not delete shared cache bytes.
 
 UI grids select `thumb-320.webp`, lists select `thumb-96.webp`, and details select
 `thumb-960.webp`. Missing thumbnail metadata means placeholder artwork, never an
-original-image fallback. Pass the relative thumbnail path to Tauri's
-`convertFileSrc(path, "caskade-asset")`. Linux/macOS use
-`caskade-asset://localhost/<hash>/<variant>.webp`; Windows uses
-`http://caskade-asset.localhost/...`. Tauri percent-encodes separators: the core
-resolver decodes once, then checks the exact hash/variant grammar. Traversal,
-double encoding, foreign hosts, arbitrary extensions and cache manifest/lock
-files are rejected. Capability-relative opens prevent symlink escapes even
-when files change between checks. No ambient path reaches the webview.
+original-image fallback. Asset URIs accept `/<hash>/<variant>.webp`,
+`caskade-asset://localhost/<hash>/<variant>.webp`, or
+`http://caskade-asset.localhost/<hash>/<variant>.webp`, including percent-encoded
+separators: the core resolver decodes once, then checks the exact hash/variant
+grammar. Traversal, double encoding, foreign hosts, arbitrary extensions and
+cache manifest/lock files are rejected. Capability-relative opens prevent
+symlink escapes even when files change between checks. No ambient path reaches
+the UI.
 
 `artwork::serve(&cache, uri)` runs reads off-thread and returns a framework-free
 HTTP result. The native app (`apps/native/src/library/art.rs`) reads covers

@@ -80,7 +80,7 @@ impl StorageSource {
             check(&cancel)?;
             let mut game = StorageGameReport {
                 relative_dir: scanned.relative_dir.clone(),
-                status: status(scanned.status),
+                status: scanned.status,
                 game_id: None,
                 entry_id: None,
                 question: scanned.question,
@@ -246,15 +246,5 @@ impl StorageSource {
             return Ok(Some(vec![previous, current]));
         }
         Ok(None)
-    }
-}
-
-fn status(status: ReconcileStatus) -> StorageGameStatus {
-    match status {
-        ReconcileStatus::Unchanged => StorageGameStatus::Unchanged,
-        ReconcileStatus::Reconciled => StorageGameStatus::Reconciled,
-        ReconcileStatus::NeedsUser => StorageGameStatus::NeedsUser,
-        ReconcileStatus::Pinned => StorageGameStatus::Pinned,
-        ReconcileStatus::Failed => StorageGameStatus::Failed,
     }
 }

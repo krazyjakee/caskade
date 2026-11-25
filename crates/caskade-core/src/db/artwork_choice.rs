@@ -23,16 +23,6 @@ macro_rules! shown_sql {
 }
 pub(super) const SHOWN: &str = shown_sql!();
 
-fn kind_text(kind: ArtworkKind) -> &'static str {
-    match kind {
-        ArtworkKind::Cover => "cover",
-        ArtworkKind::Hero => "hero",
-        ArtworkKind::Logo => "logo",
-        ArtworkKind::Icon => "icon",
-        ArtworkKind::Screenshot => "screenshot",
-    }
-}
-
 fn editable(kind: ArtworkKind) -> Result<()> {
     if EDITABLE_ARTWORK.contains(&kind) {
         Ok(())
@@ -74,14 +64,14 @@ async fn take_over(
 ) -> Result<()> {
     sqlx::query("INSERT OR IGNORE INTO artwork_choices(game_id,kind) VALUES(?,?)")
         .bind(game_id)
-        .bind(kind_text(kind))
+        .bind(kind.as_str())
         .execute(&mut *conn)
         .await?;
     sqlx::query(
         "DELETE FROM artwork WHERE game_id=? AND kind=? AND record_json->>'$.source'='user'",
     )
     .bind(game_id)
-    .bind(kind_text(kind))
+    .bind(kind.as_str())
     .execute(&mut *conn)
     .await?;
     if let Some(image) = image {
@@ -91,7 +81,7 @@ async fn take_over(
         )
         .bind(&image.id)
         .bind(game_id)
-        .bind(kind_text(kind))
+        .bind(kind.as_str())
         .bind(&image.content_hash)
         .bind(v::json(image)?)
         .execute(&mut *conn)
@@ -148,7 +138,7 @@ impl LibraryStore {
                         .cloned()
                         .partition(|art| art.source == USER_ARTWORK_SOURCE);
                     automatic_order(kind, &mut automatic);
-                    let controlled = chosen.iter().any(|text| text == kind_text(kind));
+                    let controlled = chosen.iter().any(|text| text == kind.as_str());
                     let (choice, shown) = match (controlled, user.into_iter().next()) {
                         (false, _) => (ArtworkChoice::Automatic, automatic.first().cloned()),
                         (true, Some(image)) => (ArtworkChoice::Chosen, Some(image)),
@@ -182,7 +172,7 @@ impl LibraryStore {
             )
             .bind(artwork_id)
             .bind(game_id)
-            .bind(kind_text(kind))
+            .bind(kind.as_str())
             .fetch_optional(&mut *tx)
             .await?
             .ok_or_else(|| missing("artwork", artwork_id))?,
@@ -257,14 +247,14 @@ impl LibraryStore {
         exists(&mut tx, game_id).await?;
         sqlx::query("DELETE FROM artwork_choices WHERE game_id=? AND kind=?")
             .bind(game_id)
-            .bind(kind_text(kind))
+            .bind(kind.as_str())
             .execute(&mut *tx)
             .await?;
         sqlx::query(
             "DELETE FROM artwork WHERE game_id=? AND kind=? AND record_json->>'$.source'='user'",
         )
         .bind(game_id)
-        .bind(kind_text(kind))
+        .bind(kind.as_str())
         .execute(&mut *tx)
         .await?;
         tx.commit().await?;

@@ -98,7 +98,7 @@ async fn answers_are_fetched_once() {
     );
     assert_eq!(igdb.cached().await.unwrap(), 5);
 
-    // Ids cross to the webview as strings, and read back from either form.
+    // Ids serialize as decimal strings, and read back from either form.
     let sent = serde_json::to_value(&first).unwrap();
     assert_eq!(sent["games"][0]["id"], "1942");
     assert_eq!(sent["notFound"], json!(["5000"]));

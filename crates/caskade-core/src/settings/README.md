@@ -27,13 +27,11 @@ invalid values leave the old DB value untouched. HTTP/file schema references do
 not have a retriever. Values have a 64 KiB budget; the persisted envelope has a
 small separate allowance. Validation errors name fields without printing values.
 
-Typed `settings_sections/get/set/reset` commands live in the Tauri adapter and
-are included in generated bindings. The frontend `api/settings.ts` maps those
-commands; `SettingsProvider` invalidates affected section queries on events.
-`useSettingsSection` serializes edits and reads the latest backend revision
-before applying each updater, avoiding lost rapid edits. Delayed subscriptions
-clean up under StrictMode. Loading/save errors are visible, and reset writes the
-registered defaults. No localStorage or implicit mock fallback is used.
+Typed `settings_sections/get/set/reset` commands live in `caskade-app`
+(`crates/caskade-app/src/commands/settings.rs`) and are called by the native UI
+through `caskade-ui-data`. Writes read the latest backend revision before
+applying updates, loading/save errors are visible, and reset writes the
+registered defaults.
 
 General, Appearance, launcher and discovery preferences use this service while
 preserving their panel layouts. The cache directory is a read-only backend

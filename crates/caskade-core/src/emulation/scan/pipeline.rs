@@ -4,7 +4,7 @@ use super::{
 };
 use crate::emulation::{GameRom, RomLocation};
 use std::{
-    collections::{BTreeMap, BTreeSet},
+    collections::{BTreeMap, BTreeSet, HashSet},
     path::{Path, PathBuf},
 };
 
@@ -83,26 +83,23 @@ pub fn scan_files(
             .push(path.clone());
     }
     let mut candidates = BTreeMap::new();
-    let accepted = |path: &Path| {
-        request.extensions.iter().any(|e| {
-            e.trim_start_matches('.')
-                .eq_ignore_ascii_case(&extension(path))
-        })
-    };
+    let accepted_exts: HashSet<String> = request
+        .extensions
+        .iter()
+        .map(|e| e.trim_start_matches('.').to_ascii_lowercase())
+        .collect();
     for (path, file) in &inventory {
         check(cancel)?;
         let mut inner: Vec<&ArchiveMember> = Vec::new();
-        let direct = accepted(Path::new(path));
-        if !direct
-            && request.scanner.scan_archives
-            && matches!(extension(Path::new(path)).as_str(), "zip" | "7z")
-        {
+        let path_ext = extension(Path::new(path));
+        let direct = accepted_exts.contains(&path_ext);
+        if !direct && request.scanner.scan_archives && matches!(path_ext.as_str(), "zip" | "7z") {
             if file.archive_entries.len() > request.limits.max_archive_entries {
                 return Err(ScanError::Limit("archive entries"));
             }
             for entry in &file.archive_entries {
                 let entry_path = path_text(&entry.path)?;
-                if accepted(&entry.path)
+                if accepted_exts.contains(&extension(&entry.path))
                     && !entry_path.split('/').any(|p| p.starts_with('.'))
                     && !exclusions.matches(&format!("{path}/{entry_path}"))
                 {
@@ -113,32 +110,34 @@ pub fn scan_files(
         if !direct && inner.is_empty() {
             continue;
         }
-        let extensions: Vec<_> = if direct {
-            vec![extension(Path::new(path))]
-        } else {
-            inner.iter().map(|entry| extension(&entry.path)).collect()
-        };
-        let inferred: Vec<_> = request
-            .platforms
-            .iter()
-            .filter(|p| {
-                p.extensions
-                    .iter()
-                    .any(|e| extensions.iter().any(|ext| e.eq_ignore_ascii_case(ext)))
-            })
-            .collect();
         let platform = if let Some(id) = &request.scanner.platform {
             id.clone()
-        } else if inferred.len() == 1 {
-            inferred[0].id.clone()
-        } else if request.platforms.len() == 1 {
-            request.platforms[0].id.clone()
         } else {
-            report.warnings.push(warning(
-                path,
-                &crate::tr!("ROM matches multiple platforms; choose a scanner platform"),
-            ));
-            continue;
+            let extensions: Vec<String> = if direct {
+                vec![path_ext]
+            } else {
+                inner.iter().map(|entry| extension(&entry.path)).collect()
+            };
+            let inferred: Vec<_> = request
+                .platforms
+                .iter()
+                .filter(|p| {
+                    p.extensions
+                        .iter()
+                        .any(|e| extensions.iter().any(|ext| e.eq_ignore_ascii_case(ext)))
+                })
+                .collect();
+            if inferred.len() == 1 {
+                inferred[0].id.clone()
+            } else if request.platforms.len() == 1 {
+                request.platforms[0].id.clone()
+            } else {
+                report.warnings.push(warning(
+                    path,
+                    &crate::tr!("ROM matches multiple platforms; choose a scanner platform"),
+                ));
+                continue;
+            }
         };
         let parsed = parse_name(Path::new(path), request.regions);
         if parsed.title.is_empty() {

@@ -17,6 +17,7 @@ pub mod offers;
 pub mod policy;
 #[cfg(feature = "net")]
 pub mod presence;
+mod romm;
 #[cfg(feature = "net")]
 pub mod service;
 pub mod settings;

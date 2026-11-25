@@ -19,13 +19,16 @@
 //! other, so a device that never saw the deletion can't bring the row back
 //! with an older value.
 
+mod map;
+
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::sync::{Arc, OnceLock};
 
 use serde_json::Value;
 use tokio::sync::Mutex;
 
-use super::change::{Change, EXISTS, Entity, join_key, key_parts};
+use self::map::Mapped;
+use super::change::{Change, EXISTS, Entity, key_parts};
 use super::clock::{Clock, Hlc, Stamp};
 use super::policy::{Category, SyncSettings};
 use crate::db::{Applied, FieldKey, LibraryStore, Seen};
@@ -178,15 +181,6 @@ impl State {
             entries.push((field.into_boxed_str(), winner));
         }
     }
-}
-
-/// What a change maps to here.
-enum Mapped {
-    /// Its key and value in this device's ids.
-    To(String, Option<Value>),
-    /// Done without a write (an identity: the match is the result).
-    Done(String),
-    Wait,
 }
 
 /// Capture order: what others depend on first (accounts, then games and
@@ -352,7 +346,10 @@ impl SyncEngine {
             .store
             .sync_snapshot_for_device(Some(&self.device))
             .await?;
-        self.settings_snapshot(&mut snapshot.values).await;
+        if let Some(settings) = self.hooks.settings() {
+            super::settings::snapshot(settings, &mut snapshot.values).await;
+            super::romm::snapshot(settings, &mut snapshot.values).await;
+        }
         // Build a borrowed lookup index of snapshot keys so the tombstone loop
         // checks membership without cloning ~29,000 `(key, field)` strings.
         let mut present: HashMap<Entity, HashMap<&str, Vec<&str>>> = HashMap::new();
@@ -601,7 +598,19 @@ impl SyncEngine {
                         }
                     }
                     Mapped::To(target, value) if change.entity == Entity::RommServer => {
-                        if self.apply_romm(change, &target, value.clone()).await? {
+                        let Some(settings) = self.hooks.settings() else {
+                            continue;
+                        };
+                        if super::romm::apply(
+                            settings,
+                            &self.store,
+                            self.hooks.romm_removed.get(),
+                            change,
+                            &target,
+                            value.clone(),
+                        )
+                        .await?
+                        {
                             state.set(
                                 (change.entity, target, change.field.clone()),
                                 value.as_ref(),
@@ -667,334 +676,6 @@ impl SyncEngine {
         self.store.sync_compact(&peers).await
     }
 
-    /// A change's key and value in this device's ids.
-    async fn map_with_index(
-        &self,
-        change: &Change,
-        creates: bool,
-        index: &mut Option<crate::db::SyncGameIndex>,
-    ) -> Result<Mapped> {
-        if change.origin == self.device {
-            return Ok(Mapped::To(change.key.clone(), change.value.clone()));
-        }
-        if change.entity == Entity::Game && change.field == "identity" {
-            return Ok(
-                match self
-                    .game_with_index(&change.origin, &change.key, creates, index)
-                    .await?
-                {
-                    Some(game) => Mapped::Done(game),
-                    None => Mapped::Wait,
-                },
-            );
-        }
-        let mut parts: Vec<String> = key_parts(&change.key)
-            .into_iter()
-            .map(str::to_owned)
-            .collect();
-        for &part in change.entity.game_parts() {
-            let Some(origin_game) = parts.get(part).cloned() else {
-                return Ok(Mapped::Wait);
-            };
-            match self
-                .game_with_index(&change.origin, &origin_game, creates, index)
-                .await?
-            {
-                Some(game) => parts[part] = game,
-                None => return Ok(Mapped::Wait),
-            }
-        }
-        let mut value = change.value.clone();
-        // An account another device named: the same here, or this device's
-        // household admin for another device's untouched default admin.
-        match (change.entity, change.field.as_str(), value.as_mut()) {
-            (Entity::Collection, "account", Some(account)) => {
-                if let Some(local) = account.as_str().map(str::to_owned)
-                    && let Some(local) = self.store.sync_local_account(&local).await?
-                {
-                    *account = Value::String(local);
-                }
-            }
-            (Entity::SaveVersion, _, Some(record)) => {
-                if let Some(account) = record.get("account").and_then(Value::as_str)
-                    && !account.is_empty()
-                    && let Some(local) = self.store.sync_local_account(account).await?
-                {
-                    record["account"] = Value::String(local);
-                }
-            }
-            _ => {}
-        }
-        // A record names its game; a session's `device` field doesn't.
-        if matches!(change.entity, Entity::Session | Entity::SaveVersion)
-            && change.field == EXISTS
-            && let Some(record) = value.as_mut()
-        {
-            let origin_game = record
-                .get("game")
-                .and_then(Value::as_str)
-                .unwrap_or_default()
-                .to_owned();
-            match self
-                .game_with_index(&change.origin, &origin_game, creates, index)
-                .await?
-            {
-                Some(game) => record["game"] = Value::String(game),
-                None => return Ok(Mapped::Wait),
-            }
-        }
-        if change.entity == Entity::KeptApart
-            && change.field == EXISTS
-            && change.value.is_some()
-            && let Some(separated) = self
-                .keep_apart(&change.origin, &change.key, &parts[0])
-                .await?
-        {
-            // Separating changes entries/games; drop any cached index so subsequent
-            // lookups reflect the separated game cleanly.
-            *index = None;
-            parts[0] = separated;
-        }
-        let refs: Vec<&str> = parts.iter().map(String::as_str).collect();
-        Ok(Mapped::To(join_key(&refs), value))
-    }
-
-    /// The game here that `origin`'s game `id` is (#229): matched once and
-    /// remembered, by the ids the identity names, its IGDB id, store ids,
-    /// then title; a title-only game when nothing matches and `creates`.
-    /// `None` until the game's identity has arrived.
-    pub async fn game(&self, origin: &str, id: &str, creates: bool) -> Result<Option<String>> {
-        self.game_with_index(origin, id, creates, &mut None).await
-    }
-
-    async fn game_with_index(
-        &self,
-        origin: &str,
-        id: &str,
-        creates: bool,
-        index: &mut Option<crate::db::SyncGameIndex>,
-    ) -> Result<Option<String>> {
-        if origin == self.device {
-            return Ok(self
-                .store
-                .sync_game_exists(id)
-                .await?
-                .then(|| id.to_owned()));
-        }
-        if let Some(game) = self.store.sync_mapped_game(origin, id).await? {
-            return Ok(Some(game));
-        }
-        let Some(identity) = self.store.sync_identity(origin, id).await? else {
-            return Ok(None);
-        };
-        let aliases = identity
-            .get("same")
-            .and_then(Value::as_array)
-            .cloned()
-            .unwrap_or_default();
-        for alias in aliases.iter().filter_map(Value::as_str) {
-            let parts = key_parts(alias);
-            let [alias_origin, alias_id] = parts[..] else {
-                continue;
-            };
-            let found = if alias_origin == self.device {
-                self.store
-                    .sync_game_exists(alias_id)
-                    .await?
-                    .then(|| alias_id.to_owned())
-            } else {
-                self.store.sync_mapped_game(alias_origin, alias_id).await?
-            };
-            if let Some(game) = found {
-                self.store
-                    .set_sync_mapped_game(origin, id, &game, "same")
-                    .await?;
-                return Ok(Some(game));
-            }
-        }
-        let found = if let Some(cached) = index.as_ref() {
-            cached.find(&identity)
-        } else {
-            let built = self.store.sync_game_index().await?;
-            let found = built.find(&identity);
-            *index = Some(built);
-            found
-        };
-        if let Some((game, method)) = found {
-            self.store
-                .set_sync_mapped_game(origin, id, &game, method)
-                .await?;
-            return Ok(Some(game));
-        }
-        if !creates {
-            return Ok(None);
-        }
-        let game = self.store.sync_create_game(&identity).await?;
-        if let Some(cached) = index.as_mut() {
-            cached.record_created(game.clone(), &identity);
-        }
-        self.store
-            .set_sync_mapped_game(origin, id, &game, "created")
-            .await?;
-        self.arrived
-            .store(true, std::sync::atomic::Ordering::Relaxed);
-        Ok(Some(game))
-    }
-
-    /// `origin` kept its game `id` apart, and here it's part of `local`
-    /// with other entries: separate the entries it has, as `origin` did.
-    /// Returns the separated game.
-    async fn keep_apart(&self, origin: &str, id: &str, local: &str) -> Result<Option<String>> {
-        let Some(identity) = self.store.sync_identity(origin, id).await? else {
-            return Ok(None);
-        };
-        let stores: HashSet<&str> = identity
-            .get("stores")
-            .and_then(Value::as_array)
-            .into_iter()
-            .flatten()
-            .filter_map(Value::as_str)
-            .collect();
-        if stores.is_empty() {
-            return Ok(None);
-        }
-        let entries = self.store.sync_game_entry_stores(local).await?;
-        let (theirs, others): (Vec<_>, Vec<_>) = entries
-            .into_iter()
-            .partition(|(_, keys)| keys.iter().any(|key| stores.contains(key.as_str())));
-        if theirs.is_empty() || others.is_empty() {
-            return Ok(None);
-        }
-        let ids: Vec<String> = theirs.into_iter().map(|(entry, _)| entry).collect();
-        let Some(game) = self.store.sync_separate(&ids).await? else {
-            return Ok(None);
-        };
-        self.store
-            .set_sync_mapped_game(origin, id, &game, "keptApart")
-            .await?;
-        Ok(Some(game))
-    }
-
-    /// Synced settings' fields: appearance and the rating board where they
-    /// aren't the defaults (`sync::settings`), and each RomM server's shared
-    /// definition, as `policy` projects `core.romm` (no secrets, no cache, no
-    /// emulator or profile choices).
-    async fn settings_snapshot(&self, values: &mut HashMap<crate::db::FieldKey, Value>) {
-        let Some(settings) = self.hooks.settings() else {
-            return;
-        };
-        super::settings::snapshot(settings, values).await;
-        let Ok(romm) = settings.get(crate::romm::NAMESPACE).await else {
-            return;
-        };
-        let Some(rule) = super::policy::setting(crate::romm::NAMESPACE) else {
-            return;
-        };
-        let everything = SyncSettings {
-            categories: Category::ALL
-                .into_iter()
-                .map(|category| (category, super::policy::CategoryState::Sync))
-                .collect(),
-            ..SyncSettings::default()
-        };
-        let Some(projected) = rule.project(&romm.value, &everything) else {
-            return;
-        };
-        for server in projected
-            .get("servers")
-            .and_then(Value::as_array)
-            .into_iter()
-            .flatten()
-        {
-            if let Some(id) = server.get("id").and_then(Value::as_str) {
-                values.insert(
-                    (Entity::RommServer, id.to_owned(), EXISTS.to_owned()),
-                    server.clone(),
-                );
-            }
-        }
-    }
-
-    /// Applies a RomM server's definition to `core.romm` here, keeping this
-    /// device's own choices for it (cache, emulator and profile per platform,
-    /// sync schedule). A new server arrives without a password: this device
-    /// asks for its own. `true` when written; a superseded change, or one
-    /// this device can't hold, is marked applied without a write.
-    async fn apply_romm(
-        &self,
-        change: &Change,
-        target: &str,
-        value: Option<Value>,
-    ) -> Result<bool> {
-        let Some(settings) = self.hooks.settings() else {
-            return Ok(false);
-        };
-        if let Some(current) = self
-            .store
-            .sync_field(change.entity, target, &change.field)
-            .await?
-            && current.stamp >= change.stamp()
-        {
-            self.store.sync_mark_applied(change, Some(target)).await?;
-            return Ok(false);
-        }
-        let Ok(snapshot) = settings.get(crate::romm::NAMESPACE).await else {
-            return Ok(false);
-        };
-        let mut section = snapshot.value;
-        let mut servers: Vec<Value> = section
-            .get("servers")
-            .and_then(Value::as_array)
-            .cloned()
-            .unwrap_or_default();
-        let existing = servers
-            .iter()
-            .position(|server| server.get("id").and_then(Value::as_str) == Some(target));
-        match &value {
-            Some(incoming) => {
-                let mut server = match existing {
-                    Some(index) => servers[index].clone(),
-                    None => {
-                        serde_json::to_value(crate::romm::RommServerConfig::new(target, "", ""))?
-                    }
-                };
-                for (key, field) in incoming.as_object().into_iter().flatten() {
-                    if key == "platforms" {
-                        server[key.as_str()] = merge_platforms(server.get(key), field);
-                    } else {
-                        server[key.as_str()] = field.clone();
-                    }
-                }
-                match existing {
-                    Some(index) => servers[index] = server,
-                    None => servers.push(server),
-                }
-            }
-            None => {
-                if let Some(index) = existing {
-                    servers.remove(index);
-                }
-            }
-        }
-        section["servers"] = Value::Array(servers);
-        if let Err(error) = settings.set(crate::romm::NAMESPACE, section, None).await {
-            // A definition this device can't hold: keep its own.
-            tracing::warn!(%error, "a RomM server from another device wasn't applied");
-            self.store.sync_mark_applied(change, Some(target)).await?;
-            return Ok(false);
-        }
-        self.store
-            .sync_record_applied(change, target, value.clone())
-            .await?;
-        if value.is_none()
-            && existing.is_some()
-            && let Some(removed) = self.hooks.romm_removed.get()
-        {
-            removed(target.to_owned());
-        }
-        Ok(true)
-    }
-
     /// The field's winner here, for tests and status.
     pub async fn winner(&self, entity: Entity, key: &str, field: &str) -> Option<Stamp> {
         let state = self.state.lock().await;
@@ -1026,30 +707,6 @@ fn is_text_of(text: &str, value: &Value) -> bool {
     }
     let mut rest = Matches(text.as_bytes());
     serde_json::to_writer(&mut rest, value).is_ok() && rest.0.is_empty()
-}
-
-/// A server's platform mappings from another device, each keeping this
-/// device's emulator and profile for it.
-fn merge_platforms(local: Option<&Value>, incoming: &Value) -> Value {
-    let local: Vec<Value> = local.and_then(Value::as_array).cloned().unwrap_or_default();
-    let merged = incoming
-        .as_array()
-        .into_iter()
-        .flatten()
-        .map(|platform| {
-            let slug = platform.get("slug");
-            let mut item = local
-                .iter()
-                .find(|mine| mine.get("slug") == slug)
-                .cloned()
-                .unwrap_or_else(|| serde_json::json!({ "emulatorId": null, "profileId": null }));
-            for (key, field) in platform.as_object().into_iter().flatten() {
-                item[key.as_str()] = field.clone();
-            }
-            item
-        })
-        .collect();
-    Value::Array(merged)
 }
 
 #[cfg(test)]

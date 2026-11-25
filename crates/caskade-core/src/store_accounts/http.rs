@@ -3,26 +3,17 @@
 //! logged or put in an error.
 
 use super::ProviderError;
+use crate::http::ReadBodyError;
 use reqwest::{RequestBuilder, Response, StatusCode, header::RETRY_AFTER};
 use serde::de::DeserializeOwned;
-use std::{sync::OnceLock, time::Duration};
+use std::time::Duration;
 
 /// At most this much of an answer is read.
 const MAX_BODY: usize = 64 * 1024 * 1024;
 
 /// One client for every store request.
 pub fn client() -> std::result::Result<reqwest::Client, ProviderError> {
-    static CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
-    if let Some(client) = CLIENT.get() {
-        return Ok(client.clone());
-    }
-    let client = reqwest::Client::builder()
-        .connect_timeout(Duration::from_secs(30))
-        .timeout(Duration::from_secs(120))
-        .user_agent(concat!("Caskade/", env!("CARGO_PKG_VERSION")))
-        .build()
-        .map_err(|error| ProviderError::Other(crate::error::describe_net(error)))?;
-    Ok(CLIENT.get_or_init(|| client).clone())
+    crate::http::client().map_err(|error| ProviderError::Other(crate::error::describe_net(error)))
 }
 
 /// Sends `request` and reads its JSON answer. `store` names the store in
@@ -113,21 +104,17 @@ pub async fn read_body(
     store: &str,
     max: usize,
 ) -> std::result::Result<Vec<u8>, ProviderError> {
-    let mut bytes = Vec::new();
-    while let Some(chunk) = response
-        .chunk()
+    crate::http::read_bounded(&mut response, max)
         .await
-        .map_err(|error| ProviderError::Offline(crate::error::describe_net(error.without_url())))?
-    {
-        if bytes.len() + chunk.len() > max {
-            return Err(ProviderError::Other(crate::tr!(
+        .map_err(|error| match error {
+            ReadBodyError::Net(error) => {
+                ProviderError::Offline(crate::error::describe_net(error.without_url()))
+            }
+            ReadBodyError::TooLarge => ProviderError::Other(crate::tr!(
                 "{store} sent too large an answer",
                 store = store
-            )));
-        }
-        bytes.extend_from_slice(&chunk);
-    }
-    Ok(bytes)
+            )),
+        })
 }
 
 /// "<store> answered HTTP <status>".

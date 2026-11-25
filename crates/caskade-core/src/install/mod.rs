@@ -10,6 +10,7 @@
 
 mod attach;
 mod carry;
+pub(crate) use carry::BACKUP_DIR as UPDATE_BACKUP_DIR;
 mod downloads;
 mod failure_text;
 pub use attach::{AttachTo, PlacedFile};

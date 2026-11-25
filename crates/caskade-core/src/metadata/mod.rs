@@ -427,127 +427,163 @@ impl Metadata {
         report: &mut RunReport,
         progress: Option<&mut Progress>,
     ) -> Result<()> {
+        if game_ids.is_empty() {
+            return Ok(());
+        }
         let store = &self.inner.store;
         let retry_before = retry_none_before();
+        let existing_matches = store.igdb_matches(game_ids).await?;
         let mut rows: Vec<IgdbMatch> = Vec::with_capacity(game_ids.len());
-        let mut unmatched = Vec::new();
+        let mut need_match: Vec<&str> = Vec::new();
         for game_id in game_ids {
-            let row = store.igdb_match(game_id).await?;
             // A match, or the user's choice of none.
-            if let Some(row) = &row
+            if let Some(row) = existing_matches.get(game_id.as_str())
                 && (row.igdb_id.is_some() || row.source == MatchSource::Manual)
             {
                 rows.push(row.clone());
-                continue;
+            } else {
+                need_match.push(game_id.as_str());
             }
-            let Some(game) = store.game(game_id).await? else {
-                continue;
-            };
-            let entries = store.entries_for_game(game_id).await?;
-            let local = self.find_local(&game, &entries).await?;
-            // The entries' ids, then those of the game on other devices: a
-            // game that came by sync has no entries here until it's
-            // installed, and is matched by what its devices know it as (#75).
-            let mut ids: Vec<ExternalId> = entries
-                .iter()
-                .flat_map(|entry| entry.ids.iter().cloned())
+        }
+        let mut pending_saves: Vec<IgdbMatch> = Vec::new();
+        let mut unmatched = Vec::new();
+        if !need_match.is_empty() {
+            let games_map = fetch_games(store, &need_match).await?;
+            let entries_map = fetch_entries(store, &need_match).await?;
+            let romm_entry_ids: Vec<&str> = entries_map
+                .values()
+                .flatten()
+                .filter(|entry| entry.source_id.as_str().starts_with("romm:"))
+                .map(|entry| entry.id.as_str())
                 .collect();
-            // Nothing here knows the game, but the device it came from
-            // matched it: a ROM matched by name or by RomM there has no
-            // store id to ask about here (#75). Store ids of its own here
-            // are asked about instead.
-            if !matches!(local, find::Local::Found(..))
-                && find::store_ids(&ids, &HashMap::new()).is_empty()
-                && let Some(igdb_id) = store.synced_igdb_id(game_id).await?
-            {
-                rows.extend(
-                    self.matched(game_id, Some(igdb_id), MatchSource::Device, dumps)
-                        .await?,
-                );
-                report.matched += 1;
-                continue;
-            }
-            ids.extend(store.synced_store_ids(game_id).await?);
-            let web_title = entries.iter().any(|entry| {
-                entry.source_id.as_str() == "web"
-                    || matches!(entry.launch, Some(crate::model::LaunchSpec::Web { .. }))
-            }) && find::store_ids(&ids, &HashMap::new()).is_empty();
-            if matches!(local, find::Local::Unsure)
-                && find::store_ids(&ids, &HashMap::new()).is_empty()
-                && !web_title
-            {
-                // Nothing else to ask, and the dumps couldn't answer: left
-                // for the next run instead of recorded as none (#160).
-                report.deferred += 1;
-                report.unanswered.push(game_id.clone());
-                continue;
-            }
-            match local {
-                find::Local::Found(igdb_id, source) => {
-                    rows.extend(self.matched(game_id, Some(igdb_id), source, dumps).await?);
+            let romm_roms = fetch_romm_roms(store, &romm_entry_ids).await?;
+            let synced_igdb = store.synced_igdb_ids_batch(&need_match).await?;
+            let synced_stores = store.synced_store_ids_batch(&need_match).await?;
+            for &game_id in &need_match {
+                let row = existing_matches.get(game_id);
+                let Some(game) = games_map.get(game_id) else {
+                    continue;
+                };
+                let entries = entries_map.get(game_id).map(Vec::as_slice).unwrap_or(&[]);
+                let local = self.find_local(game, entries, &romm_roms).await?;
+                // The entries' ids, then those of the game on other devices: a
+                // game that came by sync has no entries here until it's
+                // installed, and is matched by what its devices know it as (#75).
+                let mut ids: Vec<ExternalId> = entries
+                    .iter()
+                    .flat_map(|entry| entry.ids.iter().cloned())
+                    .collect();
+                // Nothing here knows the game, but the device it came from
+                // matched it: a ROM matched by name or by RomM there has no
+                // store id to ask about here (#75). Store ids of its own here
+                // are asked about instead.
+                if !matches!(local, find::Local::Found(..))
+                    && find::store_ids(&ids, &HashMap::new()).is_empty()
+                    && let Some(&igdb_id) = synced_igdb.get(game_id)
+                {
+                    pending_saves.push(build_matched(
+                        game_id,
+                        Some(igdb_id),
+                        MatchSource::Device,
+                        dumps,
+                        row,
+                    ));
                     report.matched += 1;
+                    continue;
                 }
-                find::Local::NotFound | find::Local::Unsure => match row {
-                    // Due only because the dumps changed: the server's
-                    // answer for its store ids stands until the week is up.
-                    Some(mut row)
-                        if row.source == MatchSource::None && row.checked_at_ms >= retry_before =>
-                    {
-                        if let Some(dumps) = dumps {
-                            dumps.clone_into(&mut row.dumps);
-                        }
-                        rows.extend(store.save_auto_igdb_match(&row).await?.then_some(row));
+                if let Some(extra) = synced_stores.get(game_id) {
+                    ids.extend(extra.iter().cloned());
+                }
+                let web_title = entries.iter().any(|entry| {
+                    entry.source_id.as_str() == "web"
+                        || matches!(entry.launch, Some(crate::model::LaunchSpec::Web { .. }))
+                }) && find::store_ids(&ids, &HashMap::new()).is_empty();
+                if matches!(local, find::Local::Unsure)
+                    && find::store_ids(&ids, &HashMap::new()).is_empty()
+                    && !web_title
+                {
+                    // Nothing else to ask, and the dumps couldn't answer: left
+                    // for the next run instead of recorded as none (#160).
+                    report.deferred += 1;
+                    report.unanswered.push(game_id.to_owned());
+                    continue;
+                }
+                match local {
+                    find::Local::Found(igdb_id, source) => {
+                        pending_saves.push(build_matched(
+                            game_id,
+                            Some(igdb_id),
+                            source,
+                            dumps,
+                            row,
+                        ));
+                        report.matched += 1;
                     }
-                    _ => {
-                        if find::store_ids(&ids, &HashMap::new()).is_empty() {
-                            if web_title {
-                                // Search only web titles, and never guess from
-                                // the server's first or closest result.
-                                if report.unreachable {
-                                    report.deferred += 1;
-                                    report.unanswered.push(game_id.clone());
-                                    continue;
-                                }
-                                match self.find_web_title(&game.title).await {
-                                    Ok(Some(id)) => {
-                                        rows.extend(
-                                            self.matched(
+                    find::Local::NotFound | find::Local::Unsure => match row {
+                        // Due only because the dumps changed: the server's
+                        // answer for its store ids stands until the week is up.
+                        Some(row)
+                            if row.source == MatchSource::None
+                                && row.checked_at_ms >= retry_before =>
+                        {
+                            let mut row = row.clone();
+                            if let Some(dumps) = dumps {
+                                dumps.clone_into(&mut row.dumps);
+                            }
+                            pending_saves.push(row);
+                        }
+                        _ => {
+                            if find::store_ids(&ids, &HashMap::new()).is_empty() {
+                                if web_title {
+                                    // Search only web titles, and never guess from
+                                    // the server's first or closest result.
+                                    if report.unreachable {
+                                        report.deferred += 1;
+                                        report.unanswered.push(game_id.to_owned());
+                                        continue;
+                                    }
+                                    match self.find_web_title(&game.title).await {
+                                        Ok(Some(id)) => {
+                                            pending_saves.push(build_matched(
                                                 game_id,
                                                 Some(id),
                                                 MatchSource::Title,
                                                 dumps,
-                                            )
-                                            .await?,
-                                        );
-                                        report.matched += 1;
-                                        continue;
-                                    }
-                                    Ok(None) => {}
-                                    Err(error) => {
-                                        tracing::warn!(%error, "IGDB web title matching deferred");
-                                        report.unreachable = true;
-                                        report.deferred += 1;
-                                        report.unanswered.push(game_id.clone());
-                                        continue;
+                                                row,
+                                            ));
+                                            report.matched += 1;
+                                            continue;
+                                        }
+                                        Ok(None) => {}
+                                        Err(error) => {
+                                            tracing::warn!(%error, "IGDB web title matching deferred");
+                                            report.unreachable = true;
+                                            report.deferred += 1;
+                                            report.unanswered.push(game_id.to_owned());
+                                            continue;
+                                        }
                                     }
                                 }
+                                if matches!(local, find::Local::Unsure) {
+                                    report.deferred += 1;
+                                    report.unanswered.push(game_id.to_owned());
+                                    continue;
+                                }
+                                // No usable match from any source.
+                                report.none += 1;
+                                pending_saves.push(build_matched(
+                                    game_id,
+                                    None,
+                                    MatchSource::None,
+                                    dumps,
+                                    row,
+                                ));
+                            } else {
+                                unmatched.push((game_id.to_owned(), ids));
                             }
-                            if matches!(local, find::Local::Unsure) {
-                                report.deferred += 1;
-                                report.unanswered.push(game_id.clone());
-                                continue;
-                            }
-                            // No usable match from any source.
-                            report.none += 1;
-                            rows.extend(
-                                self.matched(game_id, None, MatchSource::None, dumps)
-                                    .await?,
-                            );
-                        } else {
-                            unmatched.push((game_id.clone(), ids));
                         }
-                    }
-                },
+                    },
+                }
             }
         }
         let namespaces: BTreeSet<String> = unmatched
@@ -599,9 +635,16 @@ impl Metadata {
                     report.none += 1;
                     MatchSource::None
                 };
-                rows.extend(self.matched(&game_id, igdb_id, source, dumps).await?);
+                pending_saves.push(build_matched(
+                    &game_id,
+                    igdb_id,
+                    source,
+                    dumps,
+                    existing_matches.get(game_id.as_str()),
+                ));
             }
         }
+        rows.extend(store.save_auto_igdb_matches(&pending_saves).await?);
         rows.retain(|row| row.pending);
         self.apply_rows(rows, report, progress).await
     }
@@ -615,30 +658,6 @@ impl Metadata {
         #[cfg(not(feature = "net"))]
         let _ = namespaces;
         HashMap::new()
-    }
-
-    /// Saves an automatic answer for `game_id`, keeping what earlier
-    /// applies wrote so this one can replace it, and the dumps it was found
-    /// against when they are unknown now. `None` when the user chose a
-    /// match meanwhile.
-    async fn matched(
-        &self,
-        game_id: &str,
-        igdb_id: Option<u64>,
-        source: MatchSource,
-        dumps: Option<&str>,
-    ) -> Result<Option<IgdbMatch>> {
-        let store = &self.inner.store;
-        let mut row = IgdbMatch::new(game_id, igdb_id, source, dumps.unwrap_or_default());
-        if let Some(old) = store.igdb_match(game_id).await? {
-            row.applied = old.applied;
-            if dumps.is_none() {
-                row.dumps = old.dumps;
-            }
-        }
-        // Nothing to undo for a game nothing was ever applied to.
-        row.pending = igdb_id.is_some() || row.applied != Applied::default();
-        Ok(store.save_auto_igdb_match(&row).await?.then_some(row))
     }
 
     /// Fetches the IGDB games of `rows` and applies them. Rows stay pending
@@ -734,6 +753,101 @@ impl Metadata {
             }
         }
     }
+}
+
+/// Builds an automatic match row for `game_id`, keeping what earlier applies
+/// wrote so this one can replace it, and the dumps it was found against when
+/// they are unknown now.
+fn build_matched(
+    game_id: &str,
+    igdb_id: Option<u64>,
+    source: MatchSource,
+    dumps: Option<&str>,
+    old: Option<&IgdbMatch>,
+) -> IgdbMatch {
+    let mut row = IgdbMatch::new(game_id, igdb_id, source, dumps.unwrap_or_default());
+    if let Some(old) = old {
+        row.applied = old.applied.clone();
+        if dumps.is_none() {
+            row.dumps = old.dumps.clone();
+        }
+    }
+    // Nothing to undo for a game nothing was ever applied to.
+    row.pending = igdb_id.is_some() || row.applied != Applied::default();
+    row
+}
+
+/// Batch-loads games by id in chunked queries.
+pub(super) async fn fetch_games(
+    store: &LibraryStore,
+    game_ids: &[&str],
+) -> Result<HashMap<String, crate::model::Game>> {
+    let mut out = HashMap::new();
+    for chunk in game_ids.chunks(500) {
+        let mut qb = sqlx::QueryBuilder::<sqlx::Sqlite>::new(
+            "SELECT id, record_json FROM games WHERE id IN (",
+        );
+        let mut list = qb.separated(", ");
+        for id in chunk {
+            list.push_bind(*id);
+        }
+        qb.push(")");
+        let rows: Vec<(String, String)> = qb.build_query_as().fetch_all(&store.pool).await?;
+        for (id, record) in rows {
+            out.insert(id, serde_json::from_str(&record)?);
+        }
+    }
+    Ok(out)
+}
+
+/// Batch-loads entries for `game_ids`, preserving `entries_for_game` order.
+async fn fetch_entries(
+    store: &LibraryStore,
+    game_ids: &[&str],
+) -> Result<HashMap<String, Vec<crate::model::GameEntry>>> {
+    let mut out: HashMap<String, Vec<crate::model::GameEntry>> = HashMap::new();
+    for chunk in game_ids.chunks(500) {
+        let mut qb = sqlx::QueryBuilder::<sqlx::Sqlite>::new(
+            "SELECT game_id, record_json FROM game_entries WHERE game_id IN (",
+        );
+        let mut list = qb.separated(", ");
+        for id in chunk {
+            list.push_bind(*id);
+        }
+        qb.push(") ORDER BY source_id, external_id, id");
+        let rows: Vec<(String, String)> = qb.build_query_as().fetch_all(&store.pool).await?;
+        for (game_id, record) in rows {
+            out.entry(game_id)
+                .or_default()
+                .push(serde_json::from_str(&record)?);
+        }
+    }
+    Ok(out)
+}
+
+/// Batch-loads RomM ROM records for `entry_ids`, preserving `romm_rom_by_entry` order.
+async fn fetch_romm_roms(
+    store: &LibraryStore,
+    entry_ids: &[&str],
+) -> Result<HashMap<String, crate::romm::RommRom>> {
+    let mut out = HashMap::new();
+    for chunk in entry_ids.chunks(500) {
+        let mut qb = sqlx::QueryBuilder::<sqlx::Sqlite>::new(
+            "SELECT entry_id, record_json FROM romm_roms WHERE entry_id IN (",
+        );
+        let mut list = qb.separated(", ");
+        for id in chunk {
+            list.push_bind(*id);
+        }
+        qb.push(") ORDER BY server_id, rom_id");
+        let rows: Vec<(String, String)> = qb.build_query_as().fetch_all(&store.pool).await?;
+        for (entry_id, record) in rows {
+            if let std::collections::hash_map::Entry::Vacant(slot) = out.entry(entry_id) {
+                slot.insert(serde_json::from_str(&record)?);
+            }
+        }
+    }
+    Ok(out)
 }
 
 /// Games without a match found before this are asked about again.

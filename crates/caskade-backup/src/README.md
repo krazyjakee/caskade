@@ -190,14 +190,13 @@ applies a staged restore by restarting, refused while a game runs or an
 install, move or update is under way. `backup_reveal` shows only files
 named like backups in the backup folder or the last backup's.
 
-The webview's Settings → Backup tab (`views/settings/backup/`, admins
-only) chooses the folder through `usePathPicker` (or a drop), the
-components with their sizes from the plan, Back up now with progress,
-Cancel and Show in folder, the schedule and retention, and restores: a
-backup chosen or dropped is inspected and previewed (components, an older
-Caskade's, another OS's, locations and games not found here) before
-Restore and restart. `api/backup.ts` falls back to an in-memory fixture
-(`backupFixtures.ts`) in the browser preview.
+Settings → Backup (`apps/native/src/settings/backup.rs` and
+`apps/native/src/settings/backup/`, admins only) chooses the folder
+through the native folder picker, shows the components with their sizes
+from the plan, Back up now with progress, Cancel and Show in folder, the
+schedule and retention, and restores: a chosen backup is inspected and
+previewed (components, an older Caskade's, another OS's, locations and
+games not found here) before Restore and restart.
 
 ## On another device (#243)
 

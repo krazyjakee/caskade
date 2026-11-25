@@ -4,7 +4,7 @@ use super::LibraryStore;
 use crate::Result;
 
 /// A row of `paired_devices`. Its grants are credentials: never logged,
-/// never sent to the webview.
+/// never sent to the UI.
 #[derive(Clone, PartialEq, Eq)]
 pub struct PairedDeviceRecord {
     pub endpoint_id: String,

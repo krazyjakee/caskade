@@ -292,10 +292,11 @@ impl InstallService {
             }
         };
         for root in roots {
-            let Ok(entries) = std::fs::read_dir(root.path.join(SET_ASIDE)) else {
+            let Ok(mut entries) = tokio::fs::read_dir(root.path.join(SET_ASIDE)).await else {
                 continue;
             };
-            for aside in entries.flatten().map(|entry| entry.path()) {
+            while let Ok(Some(entry)) = entries.next_entry().await {
+                let aside = entry.path();
                 if let Err(error) = self.recover_update(&root, aside.clone()).await {
                     tracing::warn!(%error, path = %aside.display(), "interrupted update left as it is");
                 }
@@ -327,7 +328,7 @@ impl InstallService {
             )));
         }
         let game_dir = root.path.join(rel_dir);
-        if !game_dir.exists() {
+        if !tokio::fs::try_exists(&game_dir).await.unwrap_or(false) {
             move_dir(aside, game_dir).await?;
             tracing::info!(entry_id = %entry.id, "interrupted update undone");
         } else {

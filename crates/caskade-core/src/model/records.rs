@@ -11,6 +11,18 @@ pub enum ArtworkKind {
     Icon,
     Screenshot,
 }
+
+impl ArtworkKind {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Cover => "cover",
+            Self::Hero => "hero",
+            Self::Logo => "logo",
+            Self::Icon => "icon",
+            Self::Screenshot => "screenshot",
+        }
+    }
+}
 impl From<caskade_discovery::ArtworkKind> for ArtworkKind {
     fn from(kind: caskade_discovery::ArtworkKind) -> Self {
         match kind {

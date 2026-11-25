@@ -2,7 +2,7 @@
 mod actions;
 pub use actions::{
     ActionOption, ReleaseActions, built_in_action, delete_action, entry_actions, game_actions,
-    save_action, validate_target, validate_tracking,
+    is_windows_program, save_action, validate_target, validate_tracking,
 };
 mod bus;
 mod command;

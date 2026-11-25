@@ -356,7 +356,7 @@ impl CatalogueService {
     #[cfg(feature = "net")]
     async fn fetch(&self) -> std::result::Result<(Vec<u8>, Option<Vec<u8>>), (Error, bool)> {
         let client = reqwest::Client::builder()
-            .user_agent(concat!("Caskade/", env!("CARGO_PKG_VERSION")))
+            .user_agent(caskade_core::http::USER_AGENT)
             .timeout(std::time::Duration::from_secs(30))
             .redirect(reqwest::redirect::Policy::limited(5))
             .build()
@@ -401,20 +401,20 @@ async fn get(
             false,
         ));
     }
-    let mut body = Vec::new();
-    while let Some(chunk) = response.chunk().await.map_err(fail)? {
-        if body.len() + chunk.len() > max {
-            let message = if max == MAX_SIGNATURE_BYTES {
-                caskade_core::tr!(
-                    "the catalogue's signature is larger than {kib} KiB",
-                    kib = max >> 10
-                )
-            } else {
-                caskade_core::tr!("the catalogue is larger than {mib} MiB", mib = max >> 20)
-            };
-            return Err((Error::Invalid(message), false));
-        }
-        body.extend_from_slice(&chunk);
-    }
-    Ok(body)
+    caskade_core::http::read_bounded(&mut response, max)
+        .await
+        .map_err(|error| match error {
+            caskade_core::http::ReadBodyError::Net(error) => fail(error),
+            caskade_core::http::ReadBodyError::TooLarge => {
+                let message = if max == MAX_SIGNATURE_BYTES {
+                    caskade_core::tr!(
+                        "the catalogue's signature is larger than {kib} KiB",
+                        kib = max >> 10
+                    )
+                } else {
+                    caskade_core::tr!("the catalogue is larger than {mib} MiB", mib = max >> 20)
+                };
+                (Error::Invalid(message), false)
+            }
+        })
 }

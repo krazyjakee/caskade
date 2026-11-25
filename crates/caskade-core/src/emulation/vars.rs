@@ -228,6 +228,27 @@ impl Expander<'_> {
         self.expand_at(template, &mut Vec::new(), false)
     }
 
+    /// Expands one argv token template, rejecting a ROM file name that starts
+    /// with `-` when the token leads with `{RomName}`/`{RomNameNoExt}` (CSK-10).
+    pub fn expand_arg(&self, template: &str) -> Result<String, String> {
+        let value = self.expand(template)?;
+        if value.starts_with('-') && leads_with_rom_name(self.vars, template, self.os, self.kind) {
+            return Err(crate::tr!(
+                "the ROM file name {file} starts with `-`, which the emulator would read as an option; rename the file",
+                file = format!("{value:?}")
+            ));
+        }
+        Ok(value)
+    }
+
+    /// Expands a slice of argv token templates with [`Self::expand_arg`].
+    pub fn expand_args(&self, templates: &[String]) -> Result<Vec<String>, String> {
+        templates
+            .iter()
+            .map(|template| self.expand_arg(template))
+            .collect()
+    }
+
     pub(super) fn expand_glob(&self, template: &str) -> Result<String, String> {
         self.expand_at(template, &mut Vec::new(), true)
     }
