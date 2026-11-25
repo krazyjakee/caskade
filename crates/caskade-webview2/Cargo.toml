@@ -9,7 +9,7 @@ publish = false
 # The webview2-com and windows-core that wry already builds.
 [target.'cfg(windows)'.dependencies]
 webview2-com = "0.39"
-windows-core = "0.62"
+windows-core = "0.100"
 
 # Not the workspace lints: they forbid `unsafe_code`, and WebView2's COM calls
 # are all `unsafe`. The crate denies unsafe code itself and allows it call by
