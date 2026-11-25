@@ -29,6 +29,7 @@
 
 pub mod catalog;
 pub mod catalogs;
+pub mod completion;
 #[cfg(feature = "extract")]
 pub mod extract;
 pub mod format;

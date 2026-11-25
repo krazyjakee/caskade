@@ -85,6 +85,27 @@ pub fn day(at: DateTime) -> String {
     intl::day(&format_locale(), at)
 }
 
+/// `YYYY-MM-DD` as the language writes a day; the text as it came when it
+/// isn't one.
+pub fn iso_day(date: &str) -> String {
+    let mut parts = date.splitn(3, '-').map(|part| part.parse::<u32>().ok());
+    match (
+        parts.next().flatten(),
+        parts.next().flatten(),
+        parts.next().flatten(),
+    ) {
+        (Some(year), Some(month @ 1..=12), Some(d @ 1..=31)) => day(DateTime {
+            year: year as i32,
+            month: month as u8,
+            day: d as u8,
+            hour: 0,
+            minute: 0,
+            second: 0,
+        }),
+        _ => date.to_owned(),
+    }
+}
+
 /// A day and time: `Oct 28, 2026, 2:05 PM`.
 pub fn date_time(at: DateTime) -> String {
     intl::date_time(&format_locale(), at)

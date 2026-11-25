@@ -1,6 +1,6 @@
 # Backdrop compositions
 
-Generated from `crates/caskade-theme/src/backdrop.rs`: `CASKADE_WRITE_BACKDROP=1 cargo test -p caskade-theme --test backdrop`. Do not edit.
+Generated from `crates/caskade-theme/src/backdrop/`: `CASKADE_WRITE_BACKDROP=1 cargo test -p caskade-theme --test backdrop`. Do not edit.
 
 A theme's `backdrop.json` describes the backdrop the native app draws on the GPU beneath its window (#149). How it fits with `theme.css`, inheritance and custom CSS is in [the theming contract](README.md#backdrops-149).
 
@@ -118,4 +118,4 @@ struct Input {
 
 It may declare helper functions, structs and constants, but no module-scope `var`, bindings, textures, `override`s or entry points: it can read nothing but its input. Files are at most 64 KiB; a backdrop has at most 2 shader layers. `caskade-theme lint` parses and validates it, and every name it declares is prefixed, so it can't clash with another theme's shader or the app's own code.
 
-A shader runs only when the backdrop moves or changes: the window's frames compose the backdrop as last drawn. The GPU times it where it can, and a shader that takes more than 8 ms a frame, or 40 ms a second of motion, stops moving: it stays on its last frame. Without a usable GPU, and in the webview, the theme's CSS backdrop is drawn instead.
+A shader runs only when the backdrop moves or changes: the window's frames compose the backdrop as last drawn. The GPU times it where it can, and a shader that takes more than 8 ms a frame, or 40 ms a second of motion, stops moving: it stays on its last frame. Without a usable GPU, the theme's CSS backdrop is drawn instead.

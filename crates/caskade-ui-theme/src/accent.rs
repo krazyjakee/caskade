@@ -1,6 +1,5 @@
 //! A user accent (Appearance → Accent, #141): its derived tones, kept
-//! readable against the active theme's surfaces. The webview's
-//! `appearance/accent.ts`, number for number. Colours are `#rrggbb`.
+//! readable against the active theme's surfaces. Colours are `#rrggbb`.
 
 pub type Rgb = [f64; 3];
 
@@ -126,7 +125,7 @@ pub struct Accent {
 }
 
 impl Accent {
-    /// The tokens it sets, in the order the webview sets them.
+    /// The tokens it sets, in canonical order.
     pub fn tokens(&self) -> [(&'static str, &str); 4] {
         [
             ("--cs-color-accent", &self.accent),
@@ -454,13 +453,13 @@ mod tests {
         }
     }
 
-    /// The webview's `deriveAccent` gives these for the same inputs (run in
-    /// Node on 10 Nov 2026): both apps show the same accent.
+    /// Reference tones for fixed inputs: guards the OKLCH adjustment and
+    /// contrast math against drift.
     #[test]
-    fn matches_the_webview_tone_for_tone() {
+    fn derives_expected_tones_for_reference_inputs() {
         let tones = |accent: Accent| (accent.accent, accent.strong, accent.fg, accent.glow);
         let owned = |[a, b, c, d]: [&str; 4]| (a.into(), b.into(), c.into(), d.into());
-        for (chosen, surfaces, webview) in [
+        for (chosen, surfaces, expected) in [
             (
                 "#1a1f4a",
                 dark(),
@@ -479,7 +478,7 @@ mod tests {
         ] {
             assert_eq!(
                 tones(derive(chosen, &surfaces).unwrap()),
-                owned(webview),
+                owned(expected),
                 "{chosen}"
             );
         }

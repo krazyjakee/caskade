@@ -53,7 +53,8 @@ const MAX_TEXT: usize = 1 << 20;
 const MAX_CHAIN: usize = 8;
 
 /// One thing wrong with a theme.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Problem {
     /// Relative to the theme folder: `theme.json`, `theme.css`, `assets/x.js`.
     pub file: String,

@@ -1,8 +1,7 @@
 //! The user's CSS (#142): one stylesheet in `@layer cs.user`, which beats
 //! every theme and component style without `!important`. Like themes, it
 //! can't load anything from other origins: a remote `@import` or `url()`
-//! refuses the whole sheet, with a message. The webview's
-//! `appearance/userCss.ts`, rule for rule.
+//! refuses the whole sheet, with a message.
 
 /// The most custom CSS kept, in characters (`core.appearance.customCss`).
 pub const USER_CSS_MAX: usize = 32 * 1024;

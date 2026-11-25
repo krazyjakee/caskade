@@ -145,6 +145,28 @@ fn numbers_sizes_and_durations_follow_the_language() {
     set_language("en");
 }
 
+#[test]
+fn iso_day_formats_valid_dates_and_falls_back_on_invalid_input() {
+    let _one = LANGUAGE.lock().unwrap_or_else(|e| e.into_inner());
+    set_language("en-US");
+    assert_eq!(format::iso_day("2024-03-14"), "Mar 14, 2024");
+    set_language("sv");
+    assert_eq!(format::iso_day("2026-10-28"), "28 okt. 2026");
+    for invalid in [
+        "",
+        "2024-00-10",
+        "2024-13-10",
+        "2024-03-00",
+        "2024-03-32",
+        "2024-03",
+        "2024-03-14-extra",
+        "not-a-date",
+    ] {
+        assert_eq!(format::iso_day(invalid), invalid);
+    }
+    set_language("en");
+}
+
 /// Literals the UI shows as they are in every language: the app's name.
 const NOT_TRANSLATED: &[(&str, &str)] = &[
     ("apps/native/src/main.rs", "Caskade"),

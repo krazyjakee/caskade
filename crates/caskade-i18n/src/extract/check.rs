@@ -5,11 +5,14 @@
 //! translated. See `docs/translating.md`.
 
 use super::{DOMAINS, ExtractError, Syntax, languages, read_catalog, sorted_entries};
+use crate::completion::{CompletionError, count};
 use crate::message::{self, Token};
 use crate::po::{Message, Po};
-use std::collections::{BTreeSet, HashSet};
+use std::collections::BTreeSet;
 use std::path::Path;
 use std::process::{Command, Stdio};
+
+pub use crate::completion::Completion;
 
 /// What a text must keep: placeholder names (`#` for an ICU plural's
 /// count) and numbered tags, in any order.
@@ -347,56 +350,17 @@ pub fn check_catalogs(root: &Path) -> Result<Vec<String>, String> {
     Ok(problems)
 }
 
-/// One language's translated messages in one domain, over the template's.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Completion {
-    pub domain: &'static str,
-    pub translated: usize,
-    pub total: usize,
-}
-
 /// Each translated language's completion by domain, from the templates and
 /// catalogs on disk. A message counts when every form is translated and
 /// it isn't fuzzy; obsolete entries and messages no template has don't.
 pub fn completion(root: &Path) -> Result<Vec<(String, Vec<Completion>)>, ExtractError> {
-    let mut templates = Vec::new();
-    for domain in DOMAINS {
-        let keys: HashSet<(Option<String>, String)> = read_catalog(&domain.template_path(root))?
-            .map(|po| {
-                po.messages
-                    .iter()
-                    .map(|message| (message.context.clone(), message.id.clone()))
-                    .collect()
-            })
-            .unwrap_or_default();
-        templates.push(keys);
-    }
-    let mut result = Vec::new();
-    for language in languages(root)? {
-        let mut domains = Vec::new();
-        for (domain, template) in DOMAINS.iter().zip(&templates) {
-            let translated = read_catalog(&domain.catalog_path(root, &language))?
-                .map(|po| {
-                    po.messages
-                        .iter()
-                        .filter(|message| {
-                            !message.is_fuzzy()
-                                && !message.translations.is_empty()
-                                && message.translations.iter().all(|form| !form.is_empty())
-                                && template.contains(&(message.context.clone(), message.id.clone()))
-                        })
-                        .count()
-                })
-                .unwrap_or(0);
-            domains.push(Completion {
-                domain: domain.name,
-                translated,
-                total: template.len(),
-            });
-        }
-        result.push((language, domains));
-    }
-    Ok(result)
+    let names = DOMAINS.map(|domain| domain.name);
+    count(&root.join("locales"), &names)
+        .map(|report| report.languages)
+        .map_err(|error| match error {
+            CompletionError::Io(path, error) => ExtractError::Io(path, error),
+            CompletionError::Parse(path, error) => ExtractError::Catalog(path, error.to_string()),
+        })
 }
 
 #[cfg(test)]

@@ -1,6 +1,5 @@
-//! Appearance settings (#141) as the root element's attributes and tokens,
-//! as the webview's `appearance/apply.ts` and `themes/apply.ts` set them on
-//! `<html>`: each choice is a token set the stylesheet selects by an
+//! Appearance settings (#141) as the root element's attributes and tokens
+//! on `<html>`: each choice is a token set the stylesheet selects by an
 //! attribute (`data-density`, `data-motion`, `data-effects`,
 //! `data-color-scheme`) or an inline token (`--cs-ui-scale`, the accent's).
 
@@ -42,8 +41,8 @@ pub type Attributes = Vec<(&'static str, Option<String>)>;
 
 /// The attributes for `prefs` in `context`.
 pub fn attributes(prefs: &AppearanceSettings, context: &Context) -> Attributes {
-    // "system" is left to `@media (prefers-reduced-motion)`, as in the
-    // webview; the native app tells Blitz the OS's preference.
+    // "system" is left to `@media (prefers-reduced-motion)`; the native app
+    // tells Blitz the OS's preference.
     let motion = match prefs.motion.as_str() {
         "full" | "reduced" | "system" => prefs.motion.as_str(),
         _ => "system",
@@ -62,7 +61,7 @@ pub fn attributes(prefs: &AppearanceSettings, context: &Context) -> Attributes {
     ]
 }
 
-/// The UI scale token, clamped to 80–150 % as the webview does.
+/// The UI scale token, clamped to 80–150 %.
 pub fn ui_scale(prefs: &AppearanceSettings) -> String {
     let scale = f64::from(prefs.ui_scale.clamp(80, 150)) / 100.0;
     format!("{scale}")
@@ -70,7 +69,7 @@ pub fn ui_scale(prefs: &AppearanceSettings) -> String {
 
 /// The theme's opaque surfaces from its computed `--cs-color-surface-base`
 /// and `-raised` (a translucent raised surface is composited over the
-/// base), as the webview's `themeSurfaces`.
+/// base).
 pub fn surfaces(base: &str, raised: &str) -> Vec<Rgb> {
     let Some(base) = accent::parse_surface(base, [0.0; 3]) else {
         return Vec::new();
@@ -120,7 +119,7 @@ mod tests {
     }
 
     #[test]
-    fn the_settings_become_the_webviews_attributes() {
+    fn the_settings_become_root_attributes() {
         let mut prefs = AppearanceSettings::default();
         let context = Context {
             modes: modes(&["dark"]),
