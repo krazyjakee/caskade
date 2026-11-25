@@ -15,9 +15,6 @@ use caskade_ui_input::Action;
 use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use dioxus_native::prelude::*;
 
-/// Empty slots the grid keeps while a game has fewer screenshots.
-const RESERVED: usize = 4;
-
 /// One screenshot: its 320 px thumbnail and its original.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Shot {
@@ -41,42 +38,35 @@ pub fn shots(artwork: &[Artwork]) -> Vec<Shot> {
 #[component]
 pub fn Screenshots(title: String, shots: Vec<Shot>) -> Element {
     let mut open = use_signal(|| None::<usize>);
-    let none = shots.is_empty();
     rsx! {
         div { class: "relative mt-4",
-            ul {
-                "data-part": "screenshots",
-                "aria-label": t!("Screenshots"),
-                class: "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4",
-                for (index, shot) in shots.iter().enumerate() {
-                    li { key: "{shot.full}",
-                        button {
-                            r#type: "button",
-                            "data-part": "screenshot",
-                            "data-spatial": "focusable",
-                            class: "relative block w-full overflow-hidden rounded-control border border-border outline-none data-focus-visible:focus-ring-over hover:border-border-strong",
-                            onclick: move |_| open.set(Some(index)),
-                            img {
-                                src: "{shot.thumb}",
-                                alt: t!(note = "{title} is the game's title", "{title}, screenshot {number}", title = title.clone(), number = (index + 1).to_string()),
-                                class: "aspect-video w-full object-cover",
+            if shots.is_empty() {
+                p {
+                    "data-part": "screenshots-empty",
+                    class: "rounded-control border border-dashed border-border bg-surface-raised/40 px-4 py-6 text-center text-sm text-fg-muted",
+                    {t!("No screenshots")}
+                }
+            } else {
+                ul {
+                    "data-part": "screenshots",
+                    "aria-label": t!("Screenshots"),
+                    class: "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4",
+                    for (index, shot) in shots.iter().enumerate() {
+                        li { key: "{shot.full}",
+                            button {
+                                r#type: "button",
+                                "data-part": "screenshot",
+                                "data-spatial": "focusable",
+                                class: "relative block w-full overflow-hidden rounded-control border border-border outline-none data-focus-visible:focus-ring-over hover:border-border-strong",
+                                onclick: move |_| open.set(Some(index)),
+                                img {
+                                    src: "{shot.thumb}",
+                                    alt: t!(note = "{title} is the game's title", "{title}, screenshot {number}", title = title.clone(), number = (index + 1).to_string()),
+                                    class: "aspect-video w-full object-cover",
+                                }
                             }
                         }
                     }
-                }
-                for slot in 0..RESERVED.saturating_sub(shots.len()) {
-                    li {
-                        key: "slot-{slot}",
-                        "aria-hidden": "true",
-                        "data-part": "screenshot-slot",
-                        "data-status": "empty",
-                        class: "aspect-video w-full rounded-control border border-border bg-surface-raised",
-                    }
-                }
-            }
-            if none {
-                p { "data-part": "screenshots-empty", class: "pointer-events-none absolute inset-0 grid place-items-center text-sm text-fg-muted",
-                    {t!("No screenshots")}
                 }
             }
             if let Some(start) = open() {

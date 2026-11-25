@@ -272,9 +272,9 @@ fn CollectionPage(collection: CollectionSummary) -> Element {
                                     "data-focus-default": "true",
                                     disabled: total == 0 || random_busy(),
                                     on_press: play_random,
-                                    class: "chamfer relative flex items-center gap-2 bg-linear-to-r from-accent to-accent-strong px-6 py-2.5 font-display font-semibold tracking-wider text-accent-fg uppercase outline-none data-disabled:opacity-40 data-focus-visible:focus-ring-chamfer data-hovered:brightness-110",
+                                    class: "chamfer relative flex items-center gap-2 bg-linear-to-r from-accent to-accent-strong px-6 py-2.5 font-display font-semibold tracking-wide text-accent-fg outline-none data-disabled:opacity-40 data-focus-visible:focus-ring-chamfer data-hovered:brightness-110",
                                     Svg { icon: SHUFFLE, class: "size-4" }
-                                    {t!("Play Random")}
+                                    {t!("Play random")}
                                 }
                             }
                         }
@@ -288,11 +288,11 @@ fn CollectionPage(collection: CollectionSummary) -> Element {
                             if smart.is_some() {
                                 Svg { icon: icons::PENCIL, class: "size-4" }
                                 " "
-                                {t!("Edit Rules")}
+                                {t!("Edit rules")}
                             } else {
                                 Svg { icon: icons::PLUS, class: "size-4" }
                                 " "
-                                {t!("Add Games")}
+                                {t!("Add games")}
                             }
                         }
                         PlainButton {

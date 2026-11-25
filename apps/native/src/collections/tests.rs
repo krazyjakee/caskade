@@ -216,7 +216,7 @@ fn makes_a_manual_collection_and_adds_games_to_it() {
         window.find("data-part", "primary-action").is_some()
     });
     let primary = window.get("data-part", "primary-action");
-    let new = button(&window, Some(primary), "New Collection");
+    let new = button(&window, Some(primary), "New collection");
     window.click(new);
     window.settle_until("the collection dialog", |window| {
         window.find("data-cs", "collection-dialog").is_some()
@@ -239,7 +239,7 @@ fn makes_a_manual_collection_and_adds_games_to_it() {
     });
     assert!(page_text(&window).contains("Couch Co-op"));
 
-    let add = button(&window, window.find("data-view", "collection"), "Add Games");
+    let add = button(&window, window.find("data-view", "collection"), "Add games");
     window.click(add);
     window.settle_until("the picker", |window| {
         window.find("role", "dialog").is_some()
@@ -321,7 +321,7 @@ fn a_smart_collections_page_shows_its_rules_and_games() {
     let said = page_text(&window);
     assert!(said.contains("Sorted by title"), "{said}");
     assert!(said.contains("Live"), "{said}");
-    assert!(said.contains("Edit Rules"), "{said}");
+    assert!(said.contains("Edit rules"), "{said}");
 }
 
 #[test]
@@ -413,7 +413,7 @@ fn plays_a_random_installed_game_from_the_collection() {
         page_text(window).contains("Games (3)")
     });
     let play = window.get("data-part", "primary-action");
-    let play = button(&window, Some(play), "Play Random");
+    let play = button(&window, Some(play), "Play random");
     assert_eq!(
         window.attr(play, "data-focus-default").as_deref(),
         Some("true")

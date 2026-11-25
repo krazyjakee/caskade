@@ -32,7 +32,7 @@ const COUNT_FRAME: Duration = Duration::from_millis(33);
 /// Seconds without news before setup says so.
 const QUIET: u64 = 30;
 
-const OPEN: &str = "inline-flex h-12 items-center justify-center rounded-control bg-linear-to-r from-accent to-accent-strong px-10 font-display text-base font-semibold tracking-widest text-accent-fg uppercase transition-[filter,box-shadow,scale] duration-(--cs-motion-duration-fast) data-focus-visible:focus-ring data-hovered:shadow-[0_0_28px_-4px] data-hovered:shadow-glow data-hovered:brightness-115 data-pressed:scale-[0.97]";
+const OPEN: &str = "inline-flex h-12 items-center justify-center rounded-control bg-linear-to-r from-accent to-accent-strong px-10 font-display text-base font-semibold tracking-wide text-accent-fg transition-[filter,box-shadow,scale] duration-(--cs-motion-duration-fast) data-focus-visible:focus-ring data-hovered:shadow-[0_0_28px_-4px] data-hovered:shadow-glow data-hovered:brightness-115 data-pressed:scale-[0.97]";
 
 fn icon(state: TaskState) -> Icon {
     match state {

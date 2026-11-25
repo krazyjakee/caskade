@@ -484,7 +484,7 @@ fn Welcome(
                 id: "onboarding-start",
                 "data-part": "start",
                 "data-focus-default": "true",
-                class: "mt-12 h-12 animate-rise rounded-control bg-linear-to-r from-accent to-accent-strong px-10 font-display text-base font-semibold tracking-widest text-accent-fg uppercase [--i:8]",
+                class: "mt-12 h-12 animate-rise rounded-control bg-linear-to-r from-accent to-accent-strong px-10 font-display text-base font-semibold tracking-wide text-accent-fg [--i:8]",
                 on_press: move |_| on_start.call(()),
                 {t!(note = "First-run setup's welcome button", "Get started")}
             }

@@ -497,7 +497,7 @@ fn SectionList(
             "aria-orientation": "vertical",
             "data-cs": "settings-nav",
             "data-orientation": "vertical",
-            class: "flex min-h-0 flex-col gap-1 overflow-x-hidden overflow-y-auto overscroll-contain p-2",
+            class: "flex min-h-0 flex-col gap-1 overflow-x-hidden overflow-y-auto overscroll-contain py-2 pr-4 pl-2",
             onkeydown: keys,
             for (group, sections) in groups {
                 div {

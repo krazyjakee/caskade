@@ -166,9 +166,9 @@ pub fn CollectionsView(filter: CollectionFilter) -> Element {
                 div { "data-part": "primary-action", class: "animate-enter [--i:4]",
                     PlainButton {
                         on_press: move |_| creating.set(true),
-                        class: "chamfer relative flex items-center gap-2 bg-linear-to-r from-accent to-accent-strong px-6 py-2.5 font-display font-semibold tracking-wider text-accent-fg uppercase data-hovered:brightness-110 data-focus-visible:focus-ring-chamfer",
+                        class: "chamfer relative flex items-center gap-2 bg-linear-to-r from-accent to-accent-strong px-6 py-2.5 font-display font-semibold tracking-wide text-accent-fg data-hovered:brightness-110 data-focus-visible:focus-ring-chamfer",
                         Svg { icon: icons::PLUS, class: "size-4" }
-                        {t!("New Collection")}
+                        {t!("New collection")}
                     }
                 }
             }
@@ -214,7 +214,7 @@ pub fn CollectionsView(filter: CollectionFilter) -> Element {
                         style: "--i: {shown};",
                         class: "flex min-h-48 animate-enter flex-col items-center justify-center gap-2 rounded-card border border-dashed border-border-strong text-fg-subtle transition-colors duration-(--cs-motion-duration-fast) data-hovered:border-accent-alt/50 data-hovered:bg-surface-raised data-hovered:text-accent-alt data-focus-visible:focus-ring",
                         Svg { icon: icons::PLUS, class: "size-6" }
-                        span { class: "text-sm font-medium", {t!("New Collection")} }
+                        span { class: "text-sm font-medium", {t!("New collection")} }
                         span { class: "text-xs",
                             if first {
                                 {t!("Make your first one")}

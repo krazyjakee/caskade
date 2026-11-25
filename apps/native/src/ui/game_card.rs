@@ -393,7 +393,7 @@ pub fn GameCard(
                     "data-part": "favorite",
                     role: "img",
                     "aria-label": t!(note = "A heart on a favourite game's card", "Favorite"),
-                    class: "absolute top-3 right-3 text-accent-alt",
+                    class: "absolute top-2 right-2 grid size-7 place-items-center rounded-full border border-border/60 bg-surface-base/75 text-accent-alt",
                     Svg { icon: HEART, class: "size-3.5 fill-accent-alt" }
                 }
             }

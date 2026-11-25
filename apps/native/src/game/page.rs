@@ -364,7 +364,11 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
                     let open_menu = open_menu.clone();
                     move |event: MouseEvent| open_menu(None, event)
                 },
-                GameArt { part: "art", image: hero_art, class: "h-56 w-full" }
+                GameArt {
+                    part: "art",
+                    image: hero_art.clone(),
+                    class: if hero_art.is_some() { "h-56 w-full" } else { "h-20 w-full" },
+                }
                 div { "data-part": "content", class: "flex flex-wrap items-start gap-6 p-6",
                     div { class: "min-w-0 flex-[1_1_32rem]",
                         StatusBadge { part: "badge", status }

@@ -216,7 +216,7 @@ pub fn SettingsSearch(
     };
     let first = results.first().cloned();
     rsx! {
-        div { class: "flex min-h-0 flex-col gap-2 px-2 pt-2",
+        div { class: "flex min-h-0 flex-col gap-2 pt-2 pr-4 pl-2",
             SearchField {
                 value: query.clone(),
                 on_input: move |value: String| on_query.call(value),

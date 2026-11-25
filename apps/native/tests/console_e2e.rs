@@ -59,7 +59,7 @@ seek-section nav.left sidebar
 seek nav.up Home
 seek nav.down Collections
 press confirm
-wait-text New Collection
+wait-text New collection
 # B goes back a page.
 press back
 wait-text Welcome back
