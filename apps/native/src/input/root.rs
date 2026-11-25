@@ -108,6 +108,9 @@ struct Inner {
     /// Actions handled (after any wait for the layout).
     handled: Cell<u64>,
     frames: Cell<bool>,
+    /// Another action or `settle` arrived while the frame loop was running:
+    /// restart the settle window so it cannot end before the new render lands.
+    rearm: Cell<bool>,
     back: RefCell<Option<Rc<dyn Fn()>>>,
     details: RefCell<Option<OpenDetails>>,
     typing: RefCell<Option<StartSearch>>,
@@ -150,6 +153,7 @@ impl Input {
                 repeats: Cell::new(0),
                 handled: Cell::new(0),
                 frames: Cell::new(false),
+                rearm: Cell::new(false),
                 back: RefCell::new(None),
                 details: RefCell::new(None),
                 typing: RefCell::new(None),
@@ -680,6 +684,7 @@ impl Input {
     /// Checks frames for a while: a dialog an action opened has rendered
     /// after a frame or two, a view's data maybe later.
     fn frames(&self) {
+        self.inner.rearm.set(true);
         if self.inner.frames.replace(true) {
             return;
         }
@@ -691,8 +696,14 @@ impl Input {
             let mut frame = 0;
             loop {
                 crate::data::sleep(FRAME).await;
+                if input.inner.rearm.replace(false) {
+                    frame = 0;
+                }
                 input.run_frame();
                 frame += 1;
+                if input.inner.rearm.get() {
+                    continue;
+                }
                 let (pending, waiting) = {
                     let dispatcher = input.inner.dispatcher.borrow();
                     (dispatcher.pending(), dispatcher.waiting_for_view())

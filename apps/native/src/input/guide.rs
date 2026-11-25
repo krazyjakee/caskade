@@ -202,6 +202,7 @@ pub fn GuideMenu(guide: Guide) -> Element {
         return rsx! {};
     };
     let details = input.clone();
+    let mounted = input.clone();
     let line = match (confirming(), running.stream) {
         (true, true) => t!(
             "End the stream? The game stops on the other device, and progress it hasn't saved is lost."
@@ -228,7 +229,13 @@ pub fn GuideMenu(guide: Guide) -> Element {
             style: "position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;",
             aria_label: t!("Quick menu"),
             onmounted: move |event| {
-                me.set(event.data().downcast::<dioxus_native::NodeHandle>().map(|h| h.node_id()))
+                me.set(
+                    event
+                        .data()
+                        .downcast::<dioxus_native::NodeHandle>()
+                        .map(|h| h.node_id()),
+                );
+                mounted.settle();
             },
             h2 { "{running.title}" }
             p { "{line}" }

@@ -647,7 +647,14 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
             return;
         }
         match self.spatial.start_in(ui, within) {
-            Some(start) => self.focus(ui, start, false),
+            Some(start) => {
+                self.focus(ui, start, false);
+                // Blitz may expose the box before the node can take focus;
+                // retry on the next frame until focus lands.
+                if ui.focused() != Some(start) {
+                    self.entering = true;
+                }
+            }
             // Not laid out yet: the next frame tries again.
             None => self.entering = true,
         }
