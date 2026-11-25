@@ -195,7 +195,7 @@ msgstr "Uppdaterar tillägg"
 
 #: crates/caskade-core/src/cache_db.rs
 msgid "Could not open the local {cache} cache"
-msgstr ""
+msgstr "Kunde inte öppna den lokala {cache}-cachen"
 
 #: crates/caskade-core/src/db/accounts.rs
 msgid "the last admin can't be removed or made standard"
@@ -1102,7 +1102,7 @@ msgstr "Spelet körs, eller så pågår redan en annan flytt eller avinstallatio
 
 #: crates/caskade-core/src/error.rs
 msgid "{action} at “{path}”. {reason}"
-msgstr ""
+msgstr "{action} vid ”{path}”. {reason}"
 
 #: crates/caskade-core/src/error.rs
 msgid "The library database was written by a newer version of Caskade."
@@ -1114,7 +1114,7 @@ msgstr "kan inte avgöra programmets kataloger"
 
 #: crates/caskade-core/src/error.rs
 msgid "The database could not be opened. Check that its folder exists and is writable, with space for temporary journal files."
-msgstr ""
+msgstr "Databasen kunde inte öppnas. Kontrollera att dess mapp finns och är skrivbar samt att det finns utrymme för temporära journalfiler."
 
 #: crates/caskade-core/src/error.rs
 msgid "That can't be done as asked."
@@ -1158,7 +1158,7 @@ msgstr "En fil eller biblioteket används. Caskade fortsätter när det är ledi
 
 #: crates/caskade-core/src/error.rs
 msgid "Caskade's own work is keeping the library busy. It catches up by itself, so try again in a moment."
-msgstr ""
+msgstr "Caskades eget arbete håller biblioteket upptaget. Det hinner ikapp av sig självt, så försök igen om en stund."
 
 #: crates/caskade-core/src/error.rs
 msgid "A server can't be reached. Check the connection."
@@ -1451,7 +1451,7 @@ msgstr "{title} kör Wine utan något spel"
 
 #: crates/caskade-core/src/install/dropped.rs
 msgid "{title} is the Flatpak app {app_id}. Caskade finds Flatpak games with library discovery (Settings → Discovery)."
-msgstr ""
+msgstr "{title} är Flatpak-appen {app_id}. Caskade hittar Flatpak-spel via bibliotekssökning (Inställningar → Upptäckt)."
 
 #: crates/caskade-core/src/install/dropped.rs
 msgid "{path} doesn't exist any more"
@@ -1578,27 +1578,27 @@ msgstr "Nedladdningen misslyckades."
 #: crates/caskade-core/src/install/failure_text.rs
 msgctxt "install failure file"
 msgid "The file"
-msgstr ""
+msgstr "Filen"
 
 #: crates/caskade-core/src/install/failure_text.rs
 msgid "{file} has no game program Caskade recognises, so it wasn't installed. Choose the game's installer or the folder with its program."
-msgstr ""
+msgstr "{file} innehåller inget spelprogram som Caskade känner igen, så det installerades inte. Välj spelets installationsprogram eller mappen med dess program."
 
 #: crates/caskade-core/src/install/failure_text.rs
 msgid "{file} is made for another system, so it wasn't installed. Choose a version for this one."
-msgstr ""
+msgstr "{file} är gjort för ett annat system, så det installerades inte. Välj en version för det här systemet."
 
 #: crates/caskade-core/src/install/failure_text.rs
 msgid "{file} needs a program to run it that this device doesn't have, so it wasn't installed."
-msgstr ""
+msgstr "{file} kräver ett program för att köras som saknas på den här enheten, så det installerades inte."
 
 #: crates/caskade-core/src/install/failure_text.rs
 msgid "{file} has to run its installer, and running installers is turned off in Settings."
-msgstr ""
+msgstr "{file} måste köra sitt installationsprogram, och körning av installationsprogram är avstängd i Inställningar."
 
 #: crates/caskade-core/src/install/failure_text.rs
 msgid "{file} isn't a kind of installer, archive or game folder Caskade can install, so it wasn't installed."
-msgstr ""
+msgstr "{file} är inte en typ av installationsprogram, arkiv eller spelmapp som Caskade kan installera, så det installerades inte."
 
 #: crates/caskade-core/src/install/failure_text.rs
 msgid "The install stopped {stage}."
@@ -1928,7 +1928,7 @@ msgstr "Det här jobbet finns inte längre i Aktivitet."
 
 #: crates/caskade-core/src/install/mod.rs
 msgid "Cancel this job before removing it from Activity."
-msgstr ""
+msgstr "Avbryt det här jobbet innan du tar bort det från Aktivitet."
 
 #: crates/caskade-core/src/install/move_location.rs
 msgid "One game moved to {to}."
@@ -2059,11 +2059,11 @@ msgstr "den hanterade mappen hamnar utanför sin rot"
 
 #: crates/caskade-core/src/install/pause.rs
 msgid "Only a download can be paused; this job isn't downloading."
-msgstr ""
+msgstr "Endast en nedladdning kan pausas; det här jobbet laddar inte ned."
 
 #: crates/caskade-core/src/install/pause.rs
 msgid "Only a paused job can be resumed."
-msgstr ""
+msgstr "Endast ett pausat jobb kan återupptas."
 
 #: crates/caskade-core/src/install/peer.rs
 msgid "copies between devices aren't available"
@@ -2740,7 +2740,7 @@ msgstr "åtgärden har inget program"
 
 #: crates/caskade-core/src/model/validation.rs
 msgid "a Proton build is named by its folder's name, without a path"
-msgstr ""
+msgstr "en Proton-version anges med mappens namn, utan sökväg"
 
 #: crates/caskade-core/src/model/validation.rs
 msgid "too many process names"
@@ -2938,7 +2938,7 @@ msgstr "oväntat tokensvar"
 
 #: crates/caskade-core/src/romm/client.rs
 msgid "this device has no password or API token saved for this server"
-msgstr ""
+msgstr "den här enheten har inget sparat lösenord eller API-token för den här servern"
 
 #: crates/caskade-core/src/romm/client.rs
 msgid "unexpected response: {error}"
@@ -4165,7 +4165,7 @@ msgstr "det är inte ett webbspel"
 
 #: crates/caskade-core/src/transfer/web.rs
 msgid "it plays from its web page and has no offline copy there; save it for offline play on that device first"
-msgstr ""
+msgstr "det spelas från sin webbsida och har ingen offlinekopia där; spara det för offlinespel på den enheten först"
 
 #: crates/caskade-core/src/transfer/web.rs
 msgid "that isn't a web game's offline copy"
@@ -5148,6 +5148,14 @@ msgstr "den enheten har ingen kopia av spelet"
 msgid "the game isn't installed on this computer in a folder that can be copied"
 msgstr "spelet är inte installerat på den här datorn i en mapp som kan kopieras"
 
+#: crates/caskade-app/src/commands/diagnostics.rs
+msgid "Couldn't create the logs folder (“{folder}”)."
+msgstr "Kunde inte skapa loggmappen (”{folder}”)."
+
+#: crates/caskade-app/src/commands/diagnostics.rs
+msgid "The logs folder isn't available on this device."
+msgstr "Loggmappen är inte tillgänglig på den här enheten."
+
 #: crates/caskade-app/src/commands/emulation.rs
 msgid "This emulator no longer exists."
 msgstr "Den här emulatorn finns inte längre."
@@ -5248,11 +5256,11 @@ msgstr "Det här tillägget har inget att köra."
 
 #: crates/caskade-app/src/commands/plugins.rs
 msgid "This plugin has no UI to show."
-msgstr ""
+msgstr "Det här tillägget har inget gränssnitt att visa."
 
 #: crates/caskade-app/src/commands/plugins.rs
 msgid "This plugin's UI can't be shown. The details say why."
-msgstr ""
+msgstr "Det här tilläggets gränssnitt kan inte visas. Detaljerna förklarar varför."
 
 #: crates/caskade-app/src/commands/plugins.rs
 msgid "This plugin ran into a problem. The details say what."
@@ -5276,15 +5284,15 @@ msgstr "skriptet hör till en annan omfattning"
 
 #: crates/caskade-app/src/commands/settings.rs
 msgid "Could not read settings"
-msgstr ""
+msgstr "Kunde inte läsa inställningar"
 
 #: crates/caskade-app/src/commands/settings.rs
 msgid "Could not save settings"
-msgstr ""
+msgstr "Kunde inte spara inställningar"
 
 #: crates/caskade-app/src/commands/settings.rs
 msgid "{operation} at “{path}”. {reason}"
-msgstr ""
+msgstr "{operation} vid ”{path}”. {reason}"
 
 #: crates/caskade-app/src/commands/shares.rs
 msgid "the link is too long for a QR code"
@@ -5532,14 +5540,17 @@ msgid ""
 "\n"
 "Update Caskade to open it."
 msgstr ""
+"{summary}\n"
+"\n"
+"Uppdatera Caskade för att öppna det."
 
 #: crates/caskade-app/src/recovery.rs
 msgid "Update Caskade"
-msgstr ""
+msgstr "Uppdatera Caskade"
 
 #: crates/caskade-app/src/recovery.rs
 msgid "No released version of Caskade can open this library yet: a development build changed it."
-msgstr ""
+msgstr "Ingen utgiven version av Caskade kan öppna det här biblioteket ännu: en utvecklingsversion har ändrat det."
 
 #: crates/caskade-app/src/recovery.rs
 msgid "Try again"
@@ -5547,19 +5558,19 @@ msgstr "Försök igen"
 
 #: crates/caskade-app/src/self_update.rs
 msgid "The download is larger than expected."
-msgstr ""
+msgstr "Nedladdningen är större än förväntat."
 
 #: crates/caskade-app/src/self_update.rs
 msgid "The update feed isn't readable: {error}"
-msgstr ""
+msgstr "Uppdateringsflödet kan inte läsas: {error}"
 
 #: crates/caskade-app/src/self_update.rs
 msgid "The update feed's version isn't readable."
-msgstr ""
+msgstr "Versionen i uppdateringsflödet kan inte läsas."
 
 #: crates/caskade-app/src/self_update.rs
 msgid "The new version has no download for this system yet."
-msgstr ""
+msgstr "Den nya versionen har ingen nedladdning för det här systemet ännu."
 
 #: crates/caskade-app/src/self_update.rs
 msgid "Couldn't download the update: {error}"
@@ -5567,39 +5578,39 @@ msgstr "Det gick inte att ladda ner uppdateringen: {error}"
 
 #: crates/caskade-app/src/self_update.rs
 msgid "The update's signature doesn't match: {why}"
-msgstr ""
+msgstr "Uppdateringens signatur stämmer inte: {why}"
 
 #: crates/caskade-app/src/self_update.rs
 msgid "it names no version"
-msgstr ""
+msgstr "den anger ingen version"
 
 #: crates/caskade-app/src/self_update.rs
 msgid "This copy isn't an AppImage."
-msgstr ""
+msgstr "Den här kopian är inte en AppImage."
 
 #: crates/caskade-app/src/self_update.rs
 msgid "This copy can't install a deb."
-msgstr ""
+msgstr "Den här kopian kan inte installera ett deb-paket."
 
 #: crates/caskade-app/src/self_update.rs
 msgid "The update isn't an AppImage."
-msgstr ""
+msgstr "Uppdateringen är inte en AppImage."
 
 #: crates/caskade-app/src/self_update.rs
 msgid "The update isn't an installer."
-msgstr ""
+msgstr "Uppdateringen är inte ett installationsprogram."
 
 #: crates/caskade-app/src/self_update.rs
 msgid "This copy isn't in an app bundle."
-msgstr ""
+msgstr "Den här kopian ligger inte i ett app-paket."
 
 #: crates/caskade-app/src/self_update.rs
 msgid "The update has no app in it."
-msgstr ""
+msgstr "Uppdateringen innehåller ingen app."
 
 #: crates/caskade-app/src/self_update.rs
 msgid "This copy isn't a macOS app."
-msgstr ""
+msgstr "Den här kopian är inte en macOS-app."
 
 #: crates/caskade-app/src/torrent_links.rs
 msgid "Caskade's path isn't valid Unicode"
@@ -5684,16 +5695,16 @@ msgstr "Rad {line}: {problem}"
 #: crates/caskade-ui-data/src/jobs/requests.rs
 #: crates/caskade-ui-data/src/jobs.rs
 msgid "Storage service is unavailable"
-msgstr ""
+msgstr "Lagringstjänsten är inte tillgänglig"
 
 #: crates/caskade-ui-data/src/plugin_ui.rs
 #: crates/caskade-ui-data/src/plugins.rs
 msgid "Plugins are unavailable in this session."
-msgstr ""
+msgstr "Tillägg är inte tillgängliga i den här sessionen."
 
 #: crates/caskade-ui-data/src/storage.rs
 msgid "Storage is unavailable. Open the Caskade desktop app to manage locations."
-msgstr ""
+msgstr "Lagring är inte tillgänglig. Öppna Caskades skrivbordsapp för att hantera platser."
 
 #: apps/native/src/data/mod.rs
 msgid "Discovery isn't available here."
@@ -5711,6 +5722,14 @@ msgstr "Välj spel att installera"
 msgid "Choose game folder to install"
 msgstr "Välj spelmapp att installera"
 
+#: apps/native/src/dialogs.rs
+msgid "Open"
+msgstr "Öppna"
+
+#: apps/native/src/dialogs.rs
+msgid "Cancel"
+msgstr "Avbryt"
+
 #: apps/native/src/input/guide.rs
 msgid "the main window is gone"
 msgstr "huvudfönstret finns inte längre"
@@ -5720,12 +5739,64 @@ msgid "Caskade is starting"
 msgstr "Caskade startar"
 
 #: apps/native/src/tray.rs
+msgid "About Caskade"
+msgstr "Om Caskade"
+
+#: apps/native/src/tray.rs
+msgid "Services"
+msgstr "Tjänster"
+
+#: apps/native/src/tray.rs
+msgid "Hide Caskade"
+msgstr "Göm Caskade"
+
+#: apps/native/src/tray.rs
+msgid "Hide Others"
+msgstr "Göm övriga"
+
+#: apps/native/src/tray.rs
+msgid "Show All"
+msgstr "Visa alla"
+
+#: apps/native/src/tray.rs
 msgid "Edit"
 msgstr "Redigera"
 
 #: apps/native/src/tray.rs
+msgid "Undo"
+msgstr "Ångra"
+
+#: apps/native/src/tray.rs
+msgid "Redo"
+msgstr "Gör om"
+
+#: apps/native/src/tray.rs
+msgid "Cut"
+msgstr "Klipp ut"
+
+#: apps/native/src/tray.rs
+msgid "Copy"
+msgstr "Kopiera"
+
+#: apps/native/src/tray.rs
+msgid "Paste"
+msgstr "Klistra in"
+
+#: apps/native/src/tray.rs
+msgid "Select All"
+msgstr "Markera alla"
+
+#: apps/native/src/tray.rs
 msgid "Window"
 msgstr "Fönster"
+
+#: apps/native/src/tray.rs
+msgid "Minimize"
+msgstr "Minimera"
+
+#: apps/native/src/tray.rs
+msgid "Toggle Full Screen"
+msgstr "Helskärmsläge"
 
 #: apps/native/src/updater.rs
 msgid "This copy of Caskade can't update itself: download the new version instead."

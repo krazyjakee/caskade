@@ -60,8 +60,8 @@ msgstr[1] "# enheter inom räckhåll"
 #: apps/native/src/onboarding/setup.rs
 msgid "# discovery warning"
 msgid_plural "# discovery warnings"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "# upptäcktsvarning"
+msgstr[1] "# upptäcktsvarningar"
 
 #: apps/native/src/settings/emulation/detection.rs
 msgid "# emulator installation found"
@@ -660,10 +660,8 @@ msgid "Achievements"
 msgstr "Prestationer"
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "Achievements couldn't be read: {0}"
 msgid "Achievements couldn't be read: {error}"
-msgstr "Prestationerna kunde inte läsas: {0}"
+msgstr "Prestationerna kunde inte läsas: {error}"
 
 #: apps/native/src/settings/stores.rs
 msgid "Achievements last refreshed {0}."
@@ -709,10 +707,6 @@ msgstr "Aktivitet"
 #: apps/native/src/settings/streaming/stream_from.rs
 msgid "Add"
 msgstr "Lägg till"
-
-#: apps/native/src/collections/page.rs
-msgid "Add Games"
-msgstr "Lägg till spel"
 
 #: apps/native/src/settings/search/search_index.rs
 #: apps/native/src/settings/streaming/stream_from.rs
@@ -802,6 +796,10 @@ msgstr "Lägg till mapp"
 #: apps/native/src/flows/add_game.rs
 #: apps/native/src/flows/manual_game.rs
 msgid "Add game"
+msgstr "Lägg till spel"
+
+#: apps/native/src/collections/page.rs
+msgid "Add games"
 msgstr "Lägg till spel"
 
 #: apps/native/src/library/collection_dialog.rs
@@ -1310,11 +1308,9 @@ msgid "Automatic"
 msgstr "Automatiskt"
 
 #: apps/native/src/game/editor/action_form.rs
-#, fuzzy
-#| msgid "Automatic"
 msgctxt "Proton build"
 msgid "Automatic"
-msgstr "Automatiskt"
+msgstr "Automatisk"
 
 #: apps/native/src/game/editor/action_form.rs
 msgctxt "game tracking"
@@ -1332,10 +1328,8 @@ msgid "Automatic"
 msgstr "Automatiskt"
 
 #: apps/native/src/game/editor/action_form.rs
-#, fuzzy
-#| msgid "Automatic ({platform})"
 msgid "Automatic ({automatic})"
-msgstr "Automatiskt ({platform})"
+msgstr "Automatisk ({automatic})"
 
 #. The Caskade platform matched to a RomM platform
 #: apps/native/src/settings/emulation/romm_editor.rs
@@ -1367,7 +1361,7 @@ msgstr "Automatiskt öppnar konsolläge i Steam Decks spelläge (gamescope), ann
 
 #: apps/native/src/game/editor/action_form.rs
 msgid "Automatic runs the best Proton build installed each time the game starts. Choose a build to keep this action on it."
-msgstr ""
+msgstr "Automatisk kör den bästa installerade Proton-versionen varje gång spelet startas. Välj en version för att låsa den här åtgärden till den."
 
 #. A detected emulator's profile
 #. An emulator profile's status
@@ -1605,6 +1599,10 @@ msgstr "CD-konsol"
 msgid "CPU"
 msgstr "CPU"
 
+#: apps/native/src/settings/about.rs
+msgid "CPU ({backend})"
+msgstr "CPU ({backend})"
+
 #: apps/native/src/settings/search/search_index.rs
 #: apps/native/src/settings/statistics/cards.rs
 msgid "CPU usage"
@@ -1659,10 +1657,8 @@ msgstr "Kan inte ansluta"
 
 #. A RomM server's status: it refused the username and password or API token
 #: apps/native/src/settings/emulation/romm_editor.rs
-#, fuzzy
-#| msgid "Cancel sign-in"
 msgid "Can't sign in"
-msgstr "Avbryt inloggningen"
+msgstr "Kan inte logga in"
 
 #: apps/native/src/settings/emulation/setup.rs
 msgctxt "emulator install"
@@ -1986,16 +1982,12 @@ msgid "Change folder"
 msgstr "Byt mapp"
 
 #: apps/native/src/library/bulk_edit.rs
-#, fuzzy
-#| msgid "Change {label}"
 msgid "Change {0}"
-msgstr "Ändra {label}"
+msgstr "Ändra {0}"
 
 #: apps/native/src/game/editor/details.rs
-#, fuzzy
-#| msgid "Changed elsewhere since you opened the editor; it is now “{0}”."
 msgid "Changed elsewhere since you opened the editor; it is now “{theirs}”."
-msgstr "Ändrades någon annanstans sedan du öppnade redigeraren; nu är det ”{0}”."
+msgstr "Ändrades någon annanstans sedan du öppnade redigeraren; nu är det ”{theirs}”."
 
 #: apps/native/src/game/saves.rs
 msgctxt "save version"
@@ -2377,6 +2369,11 @@ msgstr "Kommandorad"
 msgid "Commands that run around every game's launch. Emulator profiles and games can add their own; see the order at launch below."
 msgstr "Kommandon som körs kring varje spels start. Emulatorprofiler och spel kan lägga till egna; se ordningen vid start nedan."
 
+#: apps/native/src/settings/about.rs
+msgctxt "git commit"
+msgid "Commit"
+msgstr "Commit"
+
 #. A link to a game's community page
 #: apps/native/src/store/game.rs
 msgid "Community"
@@ -2504,7 +2501,6 @@ msgstr "Konsoltillbehör"
 
 #: apps/native/src/frame/mod.rs
 #: apps/native/src/frame/topbar.rs
-#: apps/native/src/frame/window.rs
 #: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/addons/addon_details.rs
 #: apps/native/src/settings/general.rs
@@ -2553,6 +2549,7 @@ msgid "Controls"
 msgstr "Kontroller"
 
 #: apps/native/src/flows/share_game.rs
+#: apps/native/src/settings/about.rs
 msgid "Copied"
 msgstr "Kopierat"
 
@@ -2594,6 +2591,10 @@ msgstr "Kopiera länk"
 msgctxt "game action"
 msgid "Copy path"
 msgstr "Kopiera sökväg"
+
+#: apps/native/src/settings/about.rs
+msgid "Copy system info"
+msgstr "Kopiera systeminfo"
 
 #. A way to install a game, offered when there is more than one
 #: apps/native/src/activity/labels.rs
@@ -2643,15 +2644,15 @@ msgstr "Kunde inte läsa in liknande spel."
 
 #: apps/native/src/store/view.rs
 msgid "Could not load the game catalogue."
-msgstr ""
+msgstr "Kunde inte läsa in spelkatalogen."
 
 #: apps/native/src/store/view.rs
 msgid "Could not load the game catalogue: {error}"
-msgstr ""
+msgstr "Kunde inte läsa in spelkatalogen: {error}"
 
 #: apps/native/src/store/game.rs
 msgid "Could not load the game catalogue: {reason}"
-msgstr ""
+msgstr "Kunde inte läsa in spelkatalogen: {reason}"
 
 #: apps/native/src/collections/page.rs
 msgid "Could not load the games."
@@ -2834,8 +2835,6 @@ msgstr "Standard"
 
 #. The release the game's Play starts
 #: apps/native/src/game/page.rs
-#, fuzzy
-#| msgid "Default"
 msgctxt "release"
 msgid "Default"
 msgstr "Standard"
@@ -2897,10 +2896,8 @@ msgid "Delete “{0}”?"
 msgstr "Radera ”{0}”?"
 
 #: apps/native/src/game/editor/actions.rs
-#, fuzzy
-#| msgid "Delete “{0}”?"
 msgid "Delete “{name}”?"
-msgstr "Radera ”{0}”?"
+msgstr "Ta bort ”{name}”?"
 
 #: apps/native/src/collections/actions.rs
 #: apps/native/src/flows/scripts.rs
@@ -3121,7 +3118,7 @@ msgstr "Identifieringen är klar. Granska eventuella varningar nedan eller öppn
 
 #: apps/native/src/settings/discovery.rs
 msgid "Discovery is off, so the settings below don't apply until it's on."
-msgstr ""
+msgstr "Upptäckt är avstängd, så inställningarna nedan gäller inte förrän den slås på."
 
 #. The heading over a game's disc images
 #: apps/native/src/game/emulation.rs
@@ -3301,13 +3298,13 @@ msgid_plural "Edit # games"
 msgstr[0] "Redigera # spel"
 msgstr[1] "Redigera # spel"
 
-#: apps/native/src/collections/page.rs
-msgid "Edit Rules"
-msgstr "Redigera regler"
-
 #: apps/native/src/game/page.rs
 msgid "Edit details"
 msgstr "Redigera detaljer"
+
+#: apps/native/src/collections/page.rs
+msgid "Edit rules"
+msgstr "Redigera regler"
 
 #: apps/native/src/collections/actions.rs
 msgid "Edit rules…"
@@ -3494,10 +3491,8 @@ msgstr "Avsluta streamen? Spelet stoppas på den andra enheten, och framsteg som
 
 #. Opens a RomM server's editor at its API token
 #: apps/native/src/settings/emulation/romm.rs
-#, fuzzy
-#| msgid "API token"
 msgid "Enter API token"
-msgstr "API-token"
+msgstr "Ange API-token"
 
 #: apps/native/src/settings/schema.rs
 msgid "Enter a number."
@@ -3510,7 +3505,7 @@ msgstr "Enter för resultat · Esc för att avbryta · Backspace för att radera
 
 #: apps/native/src/settings/emulation/romm.rs
 msgid "Enter the API token for {server}"
-msgstr ""
+msgstr "Ange API-token för {server}"
 
 #: apps/native/src/flows/streaming.rs
 msgid "Enter the code {device} shows to let it play this device's games."
@@ -3744,7 +3739,7 @@ msgstr "Slutför"
 
 #: apps/native/src/onboarding/run.rs
 msgid "Finishing setup"
-msgstr ""
+msgstr "Slutför konfigurationen"
 
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search/search_index.rs
@@ -3934,6 +3929,14 @@ msgstr "Framtida genomsökningar hoppar över det"
 #: apps/native/src/settings/statistics/cards.rs
 msgid "GPU"
 msgstr "GPU"
+
+#: apps/native/src/settings/about.rs
+msgid "GPU ({backend})"
+msgstr "GPU ({backend})"
+
+#: apps/native/src/settings/about.rs
+msgid "GPU ({backend}) — {adapter}"
+msgstr "GPU ({backend}) — {adapter}"
 
 #. The IGDB game the library game is matched to
 #: apps/native/src/game/igdb.rs
@@ -4261,10 +4264,8 @@ msgid "Hardcore"
 msgstr "Hardcore"
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "Hardcore {0}"
 msgid "Hardcore {when}"
-msgstr "Hardcore {0}"
+msgstr "Hardcore {when}"
 
 #: apps/native/src/settings/about.rs
 msgid "Hashes and titles that identify games and ROMs come from Hasheous."
@@ -4351,7 +4352,7 @@ msgstr "Hur Caskade ser ut. Teman ändrar stilen på alla vyer via designtokens.
 
 #: apps/native/src/settings/launchers.rs
 msgid "How and when games are scanned: <0>Discovery</0>"
-msgstr ""
+msgstr "Hur och när spel skannas: <0>Upptäckt</0>"
 
 #: apps/native/src/onboarding/questions.rs
 msgid "How do you play?"
@@ -4693,10 +4694,8 @@ msgid "Install type"
 msgstr "Installationstyp"
 
 #: apps/native/src/game/elsewhere.rs
-#, fuzzy
-#| msgid "Install with {0}"
 msgid "Install with {launcher}"
-msgstr "Installera med {0}"
+msgstr "Installera med {launcher}"
 
 #: apps/native/src/settings/emulation/setup.rs
 msgid "Install {name}"
@@ -4977,7 +4976,7 @@ msgstr "Den gjordes på ett annat operativsystem: spel och lagringsplatser vars 
 
 #: apps/native/src/settings/plugins.rs
 msgid "Its UI was made for plugin API 0.1, which this app doesn't run. Its other parts still work; ask its author for an update."
-msgstr ""
+msgstr "Dess gränssnitt gjordes för tilläggs-API 0.1, som den här appen inte kör. Övriga delar fungerar fortfarande; be utvecklaren om en uppdatering."
 
 #: apps/native/src/settings/emulation/romm_editor.rs
 msgid "Its games leave your library, the ROMs downloaded from it are deleted and its sign-in is forgotten. Devices that sync RomM servers remove it too."
@@ -5166,17 +5165,13 @@ msgstr "Senast spelat"
 
 #. Home: a game's latest session was played on a device this one isn't paired with
 #: apps/native/src/home/mod.rs
-#, fuzzy
-#| msgid "Set up from another device"
 msgid "Last played on another device"
-msgstr "Ställ in från en annan enhet"
+msgstr "Senast spelat på en annan enhet"
 
 #. Home: the paired device a game's latest session was played on
 #: apps/native/src/home/mod.rs
-#, fuzzy
-#| msgid "Play on {device}"
 msgid "Last played on {device}"
-msgstr "Spela på {device}"
+msgstr "Senast spelat på {device}"
 
 #. ROM scanners table column
 #: apps/native/src/settings/emulation/scanners.rs
@@ -5711,7 +5706,7 @@ msgstr "Matchat via butiks-id"
 
 #: apps/native/src/game/igdb.rs
 msgid "Matched by title (IGDB)"
-msgstr ""
+msgstr "Matchat efter titel (IGDB)"
 
 #: apps/native/src/game/ports.rs
 msgid "Matched by title: check it's this game"
@@ -6016,10 +6011,6 @@ msgstr "Ta aldrig bort favoriter"
 msgid "Never synced"
 msgstr "Aldrig synkad"
 
-#: apps/native/src/collections/list.rs
-msgid "New Collection"
-msgstr "Ny samling"
-
 #: apps/native/src/settings/emulation/scanners/scanner_editor.rs
 msgid "New ROM scanner"
 msgstr "Ny ROM-skanner"
@@ -6029,6 +6020,7 @@ msgstr "Ny ROM-skanner"
 msgid "New Zealand"
 msgstr "Nya Zeeland"
 
+#: apps/native/src/collections/list.rs
 #: apps/native/src/game_menu/collections.rs
 #: apps/native/src/library/collection_dialog.rs
 msgid "New collection"
@@ -6296,10 +6288,8 @@ msgid "No release for this system"
 msgstr "Ingen utgåva för det här systemet"
 
 #: apps/native/src/game/editor/saves.rs
-#, fuzzy
-#| msgid "No save files or folders. Add them here, or drop them on this tab."
 msgid "No save files or folders. Add them here."
-msgstr "Inga sparfiler eller mappar. Lägg till dem här eller släpp dem på den här fliken."
+msgstr "Inga sparfiler eller mappar. Lägg till dem här."
 
 #: apps/native/src/game/saves.rs
 msgid "No saves kept yet. A version is kept each time you finish playing."
@@ -6331,7 +6321,7 @@ msgstr "Inga inställningar matchar ”{query}”."
 
 #: apps/native/src/settings/stores.rs
 msgid "No store can be connected in this version of Caskade yet. Games your launchers have installed are still found by Discovery."
-msgstr ""
+msgstr "Ingen butik kan anslutas i den här versionen av Caskade ännu. Spel som dina spelstartare har installerat hittas fortfarande via Upptäckt."
 
 #: apps/native/src/activity/card.rs
 msgid "No strategy details are available yet."
@@ -6788,7 +6778,7 @@ msgstr "Onlineuppslag"
 
 #: apps/native/src/game/igdb.rs
 msgid "Online lookups are off on this device, so Caskade doesn't match games with IGDB or fetch their details and artwork."
-msgstr ""
+msgstr "Onlineuppslag är avstängda på den här enheten, så Caskade matchar inte spel med IGDB och hämtar inte detaljer eller omslagsbilder."
 
 #: apps/native/src/flows/storage.rs
 msgid "Only Caskade-managed installations can be moved."
@@ -6864,6 +6854,10 @@ msgstr "Öppna installationsmappen"
 #: apps/native/src/frame/notifications.rs
 msgid "Open jobs"
 msgstr "Öppna jobb"
+
+#: apps/native/src/settings/about.rs
+msgid "Open logs folder"
+msgstr "Öppna loggmappen"
 
 #: apps/native/src/onboarding/setup.rs
 msgid "Open my library"
@@ -7128,12 +7122,12 @@ msgstr "Mönster"
 #. Stops a download for now, keeping what it downloaded
 #: apps/native/src/activity/card.rs
 msgid "Pause"
-msgstr ""
+msgstr "Pausa"
 
 #. A download the user paused; it goes on from where it stopped when resumed
 #: apps/native/src/activity/labels.rs
 msgid "Paused"
-msgstr ""
+msgstr "Pausad"
 
 #: apps/native/src/settings/mod.rs
 msgctxt "settings group"
@@ -7244,6 +7238,7 @@ msgstr "Plattformar: {platforms}"
 
 #. Button: starts the game
 #: apps/native/src/game/page.rs
+#: apps/native/src/home/mod.rs
 msgid "Play"
 msgstr "Spela"
 
@@ -7257,10 +7252,6 @@ msgstr "Spela"
 #: apps/native/src/game/editor/actions.rs
 msgid "Play (modded)"
 msgstr "Spela (moddat)"
-
-#: apps/native/src/collections/page.rs
-msgid "Play Random"
-msgstr "Spela slumpmässigt"
 
 #: apps/native/src/settings/devices/sync_choices.rs
 msgid "Play and utility actions you added. Their programs must be at the same place on each device."
@@ -7309,6 +7300,10 @@ msgstr "Spela på {device}"
 msgid "Play on {name}"
 msgstr "Spela på {name}"
 
+#: apps/native/src/collections/page.rs
+msgid "Play random"
+msgstr "Spela slumpmässigt"
+
 #: apps/native/src/settings/devices/this_device.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Play requests from my devices"
@@ -7330,10 +7325,8 @@ msgstr "Spela med den här sparfilen"
 
 #. Starts the game with one of its launch actions
 #: apps/native/src/game_menu/menu.rs
-#, fuzzy
-#| msgid "Pair with {name}"
 msgid "Play with {name}"
-msgstr "Parkoppla med {name}"
+msgstr "Spela med {name}"
 
 #. {name} is a game's video: Trailer, Gameplay video, …
 #: apps/native/src/game/media.rs
@@ -7620,7 +7613,7 @@ msgstr "Projektsida"
 
 #: apps/native/src/game/editor/action_form.rs
 msgid "Proton build"
-msgstr ""
+msgstr "Proton-version"
 
 #: apps/native/src/settings/plugins.rs
 msgid "Provides {providers}"
@@ -8008,8 +8001,6 @@ msgid "Release"
 msgstr "Utgåva"
 
 #: apps/native/src/game/editor/actions.rs
-#, fuzzy
-#| msgid "Release"
 msgctxt "Picks which release's actions to edit"
 msgid "Release"
 msgstr "Utgåva"
@@ -8174,10 +8165,8 @@ msgid "Remove {name}?"
 msgstr "Ta bort {name}?"
 
 #: apps/native/src/game/editor/saves.rs
-#, fuzzy
-#| msgid "Remove {0}"
 msgid "Remove {path}"
-msgstr "Ta bort {0}"
+msgstr "Ta bort {path}"
 
 #: apps/native/src/settings/emulation/emulators/profiles.rs
 msgid "Remove {profile}…"
@@ -8224,6 +8213,10 @@ msgstr "Ta bort…"
 #: apps/native/src/settings/pin.rs
 msgid "Removing…"
 msgstr "Tar bort…"
+
+#: apps/native/src/settings/about.rs
+msgid "Renderer"
+msgstr "Renderare"
 
 #: apps/native/src/settings/streaming/hosting.rs
 msgid "Repair"
@@ -8421,14 +8414,8 @@ msgstr "Resultat för ”{query}”"
 
 #. Goes on with a paused download from where it stopped
 #: apps/native/src/activity/card.rs
-#, fuzzy
-#| msgid "Results"
 msgid "Resume"
-msgstr "Resultat"
-
-#: apps/native/src/home/mod.rs
-msgid "Resume · View details"
-msgstr "Fortsätt · Visa detaljer"
+msgstr "Återuppta"
 
 #: apps/native/src/onboarding/questions.rs
 #: apps/native/src/onboarding/run.rs
@@ -8761,11 +8748,11 @@ msgstr "Om du sparar en annan emulator här tas den gamlas inbyggda profiler bor
 
 #: apps/native/src/onboarding/run.rs
 msgid "Saving artwork and game info choices"
-msgstr ""
+msgstr "Sparar val för omslagsbilder och spelinformation"
 
 #: apps/native/src/onboarding/run.rs
 msgid "Saving discovery choices"
-msgstr ""
+msgstr "Sparar val för upptäckt"
 
 #: apps/native/src/onboarding/setup.rs
 msgid "Saving is taking longer than expected. Continue with your current settings, or wait. You can run setup again from Settings → General."
@@ -8773,7 +8760,7 @@ msgstr "Det tar längre tid än väntat att spara. Fortsätt med dina nuvarande 
 
 #: apps/native/src/onboarding/run.rs
 msgid "Saving setup choices"
-msgstr ""
+msgstr "Sparar konfigurationsval"
 
 #: apps/native/src/onboarding/setup.rs
 msgid "Saving your choices before opening the library…"
@@ -8882,7 +8869,7 @@ msgstr[1] "Skannar… # filer"
 
 #: apps/native/src/game_menu/menu.rs
 msgid "Scans won't bring it back. Show it again in Settings → Discovery."
-msgstr ""
+msgstr "Skanningar tar inte tillbaka det. Visa det igen i Inställningar → Upptäckt."
 
 #: apps/native/src/settings/addons/addon_details.rs
 msgid "Screenshot"
@@ -9211,7 +9198,7 @@ msgstr "Konfiguration"
 
 #: apps/native/src/onboarding/setup.rs
 msgid "Setup could not save your choices"
-msgstr ""
+msgstr "Konfigurationen kunde inte spara dina val"
 
 #: apps/native/src/onboarding/setup.rs
 msgid "Setup needs attention"
@@ -9219,7 +9206,7 @@ msgstr "Konfigurationen behöver uppmärksamhet"
 
 #: apps/native/src/onboarding/run.rs
 msgid "Setup paused. Try again to continue."
-msgstr ""
+msgstr "Konfigurationen pausades. Försök igen för att fortsätta."
 
 #: apps/native/src/onboarding/setup.rs
 msgid "Setup will keep running in the background."
@@ -9343,10 +9330,8 @@ msgid "Show {title} again"
 msgstr "Visa {title} igen"
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "Showing achievements from {0}. The last refresh failed: {1}"
 msgid "Showing achievements from {when}. The last refresh failed: {reason}"
-msgstr "Visar prestationer från {0}. Den senaste uppdateringen misslyckades: {1}"
+msgstr "Visar prestationer från {when}. Den senaste uppdateringen misslyckades: {reason}"
 
 #: apps/native/src/store/view.rs
 msgid "Showing saved results: the metadata server can't be reached right now."
@@ -9366,10 +9351,8 @@ msgstr "Visar dina prestationer från {name} på spelen i ditt bibliotek."
 
 #. Opens a RomM server's editor at its password
 #: apps/native/src/settings/emulation/romm.rs
-#, fuzzy
-#| msgid "Sign in with"
 msgid "Sign in"
-msgstr "Logga in med"
+msgstr "Logga in"
 
 #: apps/native/src/settings/stores.rs
 msgid "Sign in on {name}'s page in your browser. Caskade continues when the page sends you back."
@@ -9392,10 +9375,8 @@ msgid "Sign in to {provider} as {name} again to see these achievements."
 msgstr "Logga in på {provider} som {name} igen för att se de här prestationerna."
 
 #: apps/native/src/settings/emulation/romm.rs
-#, fuzzy
-#| msgid "Sign in to {name}"
 msgid "Sign in to {server}"
-msgstr "Logga in på {name}"
+msgstr "Logga in på {server}"
 
 #. Followed by the ways to sign in to a RomM server
 #: apps/native/src/onboarding/questions.rs
@@ -9410,10 +9391,8 @@ msgstr "Inloggningen har gått ut"
 
 #. A RomM server's status: this device has no working password or API token for it
 #: apps/native/src/settings/emulation/romm.rs
-#, fuzzy
-#| msgid "Not found on this device"
 msgid "Sign-in needed on this device"
-msgstr "Hittades inte på den här enheten"
+msgstr "Inloggning krävs på den här enheten"
 
 #: apps/native/src/settings/stores.rs
 msgid "Sign-ins are kept in your system's keychain, never in Caskade's settings or backups. After restoring a backup or moving computer, reconnect each account."
@@ -9421,15 +9400,15 @@ msgstr "Inloggningar sparas i systemets nyckelring, aldrig i Caskades inställni
 
 #: apps/native/src/settings/emulation/romm.rs
 msgid "Sign-ins don't: each device signs in to a server on its own."
-msgstr ""
+msgstr "Inloggningar följer inte med: varje enhet loggar in på en server för sig."
 
 #: apps/native/src/settings/emulation/romm.rs
 msgid "Sign-ins stay on each device. Enter this server's API token here to import its games."
-msgstr ""
+msgstr "Inloggningar stannar på varje enhet. Ange den här serverns API-token här för att importera dess spel."
 
 #: apps/native/src/settings/emulation/romm.rs
 msgid "Sign-ins stay on each device. Sign in here to import this server's games."
-msgstr ""
+msgstr "Inloggningar stannar på varje enhet. Logga in här för att importera dess spel."
 
 #: apps/native/src/settings/accounts/profile.rs
 msgid "Signed in as {name}, a standard account."
@@ -9751,6 +9730,7 @@ msgstr "Stoppa"
 #: apps/native/src/game/page.rs
 #: apps/native/src/game_menu/menu.rs
 #: apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/home/mod.rs
 msgctxt "game action"
 msgid "Stop"
 msgstr "Stoppa"
@@ -9798,6 +9778,7 @@ msgstr "Stoppad: länken fungerar inte längre."
 
 #: apps/native/src/game/page.rs
 #: apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/home/mod.rs
 msgid "Stopping…"
 msgstr "Stoppar…"
 
@@ -9873,6 +9854,7 @@ msgstr "Butiksinloggningar (anslut varje enhet)"
 
 #. Button: streams the game from another device
 #: apps/native/src/game/page.rs
+#: apps/native/src/home/mod.rs
 msgid "Stream"
 msgstr "Streama"
 
@@ -9985,6 +9967,10 @@ msgstr "System ({systemName})"
 msgid "System follows your OS reduced-motion setting."
 msgstr "System följer operativsystemets inställning för minskad rörelse."
 
+#: apps/native/src/settings/about.rs
+msgid "System info copied."
+msgstr "Systeminfo kopierad."
+
 #. A release date that isn't known yet (to be determined)
 #: apps/native/src/store/card.rs
 #: apps/native/src/store/releases.rs
@@ -10045,10 +10031,8 @@ msgstr "Det fungerade inte"
 
 #: apps/native/src/data/mod.rs
 #: apps/native/src/flows/tool_request.rs
-#, fuzzy
-#| msgid "This store isn't available in this version of Caskade."
 msgid "That isn't available in this copy of Caskade."
-msgstr "Den här butiken är inte tillgänglig i den här versionen av Caskade."
+msgstr "Det är inte tillgängligt i den här versionen av Caskade."
 
 #: apps/native/src/settings/about.rs
 msgid "The Ludusavi manifest includes data compiled from PCGamingWiki, licensed under CC BY-NC-SA 3.0."
@@ -10175,10 +10159,8 @@ msgid "The last check failed: {lastError}"
 msgstr "Den senaste kontrollen misslyckades: {lastError}"
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "The last refresh failed: {0}"
 msgid "The last refresh failed: {reason}"
-msgstr "Den senaste uppdateringen misslyckades: {0}"
+msgstr "Den senaste uppdateringen misslyckades: {reason}"
 
 #: apps/native/src/onboarding/device.rs
 msgid "The last try didn't reach {name}. It tries again in a moment."
@@ -10237,10 +10219,8 @@ msgid "The ratings games show, and the steps age limits are picked from."
 msgstr "Klassificeringarna som spel visar, och stegen som åldersgränser väljs bland."
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "The refresh didn't finish: {0}"
 msgid "The refresh didn't finish: {error}"
-msgstr "Uppdateringen blev inte klar: {0}"
+msgstr "Uppdateringen blev inte klar: {error}"
 
 #: apps/native/src/settings/backup/restore.rs
 msgid "The restore of {0} was undone, and the library from before is back: {1}"
@@ -10279,10 +10259,8 @@ msgid "The store can't install games from Caskade."
 msgstr "Butiken kan inte installera spel från Caskade."
 
 #: apps/native/src/game/launch.rs
-#, fuzzy
-#| msgid "The scan didn't finish."
 msgid "The update didn't finish."
-msgstr "Skanningen blev inte klar."
+msgstr "Uppdateringen blev inte klar."
 
 #: apps/native/src/settings/general.rs
 msgid "The update failed."
@@ -10416,7 +10394,7 @@ msgstr "Den här enheten kan inte dela sina spel än."
 
 #: apps/native/src/game/editor/action_form.rs
 msgid "This device doesn't have it, so the best build installed runs instead."
-msgstr ""
+msgstr "Den här enheten har den inte, så den bästa installerade versionen körs i stället."
 
 #: apps/native/src/flows/shares_common.rs
 msgid "This device has an emulator for it."
@@ -10602,7 +10580,7 @@ msgstr "För att flytta till en annan dator kopierar du dit en säkerhetskopia, 
 #. A store's launcher (Steam, GOG Galaxy, the Epic Games Launcher) is installing a game
 #: apps/native/src/game/elsewhere.rs
 msgid "To pause or cancel it, use {launcher}: Caskade can't pause a store's own download."
-msgstr ""
+msgstr "Använd {launcher} för att pausa eller avbryta den: Caskade kan inte pausa en butiks egen nedladdning."
 
 #: apps/native/src/settings/appearance/custom_css.rs
 msgctxt "theming docs"
@@ -10657,10 +10635,8 @@ msgid "Turn on"
 msgstr "Slå på"
 
 #: apps/native/src/game/igdb.rs
-#, fuzzy
-#| msgid "Online lookups"
 msgid "Turn on online lookups"
-msgstr "Onlineuppslag"
+msgstr "Slå på onlineuppslag"
 
 #: apps/native/src/onboarding/questions.rs
 msgid "Turn on what you have. Everything can be changed later in Settings."
@@ -10769,10 +10745,8 @@ msgid "Unlocked"
 msgstr "Upplåst"
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "Unlocked {0}"
 msgid "Unlocked {when}"
-msgstr "Upplåst {0}"
+msgstr "Upplåst {when}"
 
 #. A RomM server without a name
 #: apps/native/src/settings/emulation/romm.rs
@@ -10989,10 +10963,8 @@ msgid "Use this theme"
 msgstr "Använd det här temat"
 
 #: apps/native/src/game/editor/artwork.rs
-#, fuzzy
-#| msgid "Use {name} {0} from {1}"
 msgid "Use {name} {0} from {source}"
-msgstr "Använd {name} {0} från {1}"
+msgstr "Använd {name} {0} från {source}"
 
 #: apps/native/src/game/igdb.rs
 msgid "Use {title}"
@@ -11124,6 +11096,10 @@ msgstr "Videor"
 msgid "View all"
 msgstr "Visa alla"
 
+#: apps/native/src/home/mod.rs
+msgid "View details"
+msgstr "Visa detaljer"
+
 #: apps/native/src/game_menu/quick_look.rs
 msgid "View more"
 msgstr "Visa mer"
@@ -11174,10 +11150,8 @@ msgid "Waiting for {device}…"
 msgstr "Väntar på {device}…"
 
 #: apps/native/src/game/elsewhere.rs
-#, fuzzy
-#| msgid "Waiting for {0} to finish installing it."
 msgid "Waiting for {launcher} to finish installing it."
-msgstr "Väntar på att {0} ska bli klar med installationen."
+msgstr "Väntar på att {launcher} ska bli klar med installationen."
 
 #: apps/native/src/flows/pairing.rs
 msgid "Waiting for {name} to confirm…"
@@ -12387,10 +12361,8 @@ msgid "update interval"
 msgstr "uppdateringsintervall"
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "Updated {when}"
 msgid "updated {when}"
-msgstr "Uppdaterad {when}"
+msgstr "uppdaterad {when}"
 
 #. Search words for Settings → Accounts, separated by commas
 #: apps/native/src/settings/search/search_index.rs
@@ -12499,10 +12471,8 @@ msgid "{count} configured"
 msgstr "{count} konfigurerade"
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "{0} in hardcore"
 msgid "{count} in hardcore"
-msgstr "{0} i hardcore"
+msgstr "{count} i hardcore"
 
 #: apps/native/src/settings/devices/sync_choices.rs
 msgid "{count} versions"
@@ -12587,10 +12557,8 @@ msgid "{duration} played"
 msgstr "{duration} spelat"
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "{used} of {total}"
 msgid "{earned} of {total} points"
-msgstr "{used} av {total}"
+msgstr "{earned} av {total} poäng"
 
 #. An emulator and its profile, whose files are missing
 #: apps/native/src/game/emulation.rs
@@ -12700,10 +12668,8 @@ msgid "{latestVersion} is out. Updating keeps your saves and settings."
 msgstr "{latestVersion} har släppts. Uppdateringen behåller dina sparfiler och inställningar."
 
 #: apps/native/src/game/elsewhere.rs
-#, fuzzy
-#| msgid "{0} isn't installed on this computer."
 msgid "{launcher} isn't installed on this computer."
-msgstr "{0} är inte installerat på den här datorn."
+msgstr "{launcher} är inte installerat på den här datorn."
 
 #: apps/native/src/settings/appearance/custom_css.rs
 msgid "{length} / {max} characters"
@@ -12731,10 +12697,8 @@ msgid "{missing} missing"
 msgstr "{missing} saknas"
 
 #: apps/native/src/game/editor/actions.rs
-#, fuzzy
-#| msgid "{0} (copy)"
 msgid "{name} (copy)"
-msgstr "{0} (kopia)"
+msgstr "{name} (kopia)"
 
 #. A language chosen earlier that this version of Caskade doesn't have
 #: apps/native/src/settings/general.rs
@@ -12833,14 +12797,12 @@ msgid "{neededText} chosen, {freeText} free here"
 msgstr "{neededText} valt, {freeText} ledigt här"
 
 #: apps/native/src/game/media.rs
-#, fuzzy
-#| msgid "{number} / {count}"
 msgid "{number} of {count}"
-msgstr "{number} / {count}"
+msgstr "{number} av {count}"
 
 #: apps/native/src/onboarding/run.rs
 msgid "{operation}: {reason}"
-msgstr ""
+msgstr "{operation}: {reason}"
 
 #: apps/native/src/settings/devices/paired.rs
 msgid "{os} · Not synced yet"
@@ -12873,10 +12835,8 @@ msgid "{percent}% confidence"
 msgstr "{percent} % säkerhet"
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "{0}% of players"
 msgid "{percent}% of players"
-msgstr "{0} % av spelarna"
+msgstr "{percent} % av spelarna"
 
 #. A gauge's reading at or above 90 %
 #: apps/native/src/settings/statistics/cards.rs
@@ -12899,20 +12859,16 @@ msgstr "Detaljer för {plugin}"
 
 #. A plugin's message: the plugin's name, then what it said
 #: apps/native/src/plugins/mod.rs
-#, fuzzy
-#| msgid "{plugin} details"
 msgid "{plugin}: {message}"
-msgstr "Detaljer för {plugin}"
+msgstr "{plugin}: {message}"
 
 #: apps/native/src/game/achievements.rs
 msgid "{provider} account {name}"
 msgstr "{provider}-kontot {name}"
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "{provider} asked Caskade to wait; refreshing works again after {0}."
 msgid "{provider} asked Caskade to wait; refreshing works again after {when}."
-msgstr "{provider} bad Caskade att vänta; uppdatering fungerar igen efter {0}."
+msgstr "{provider} bad Caskade att vänta; uppdatering fungerar igen efter {when}."
 
 #: apps/native/src/game/achievements.rs
 msgid "{provider} doesn't offer this game's achievements."
@@ -12923,16 +12879,12 @@ msgid "{provider} lists no achievements for this game."
 msgstr "{provider} listar inga prestationer för det här spelet."
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "{0} shows its description once it's unlocked."
 msgid "{provider} shows its description once it's unlocked."
-msgstr "{0} visar beskrivningen när den är upplåst."
+msgstr "{provider} visar beskrivningen när den är upplåst."
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "{provider} account {name}"
 msgid "{provider} · {name}"
-msgstr "{provider}-kontot {name}"
+msgstr "{provider} · {name}"
 
 #: apps/native/src/game/elsewhere.rs
 msgid "{provider}: {total}, read {read}"
@@ -12971,16 +12923,12 @@ msgid "{seconds} s"
 msgstr "{seconds} s"
 
 #: apps/native/src/flows/shares_common.rs
-#, fuzzy
-#| msgid "{sharer} shares a save of {0} with you."
 msgid "{sharer} shares a save of {game} with you."
-msgstr "{sharer} delar en sparfil från {0} med dig."
+msgstr "{sharer} delar en sparfil för {game} med dig."
 
 #: apps/native/src/flows/shares_common.rs
-#, fuzzy
-#| msgid "{sharer} shares the collection {0} with you."
 msgid "{sharer} shares the collection {name} with you."
-msgstr "{sharer} delar samlingen {0} med dig."
+msgstr "{sharer} delar samlingen {name} med dig."
 
 #: apps/native/src/flows/shares_common.rs
 msgid "{sharer} shares {title} with you."
@@ -13088,10 +13036,8 @@ msgid "{unlocked} of {total} achievements unlocked. Go to achievements"
 msgstr "{unlocked} av {total} prestationer upplåsta. Gå till prestationerna"
 
 #: apps/native/src/game/achievements.rs
-#, fuzzy
-#| msgid "{0} of {1} unlocked ({percent}%)"
 msgid "{unlocked} of {total} unlocked ({percent}%)"
-msgstr "{0} av {1} upplåsta ({percent} %)"
+msgstr "{unlocked} av {total} upplåsta ({percent} %)"
 
 #: apps/native/src/game/achievements.rs
 msgid "{unlocked}/{total} achievements"
@@ -13112,7 +13058,7 @@ msgstr "{used} använt av {total}, {free} ledigt"
 
 #: apps/native/src/game/editor/action_form.rs
 msgid "{value} (not installed here)"
-msgstr ""
+msgstr "{value} (inte installerad här)"
 
 #: apps/native/src/game/editor/details.rs
 #: apps/native/src/library/bulk_edit.rs
@@ -13141,15 +13087,28 @@ msgstr "{what}: din ändring sparades inte"
 
 #. A version, e.g. v1.2
 #: apps/native/src/game/entry_update.rs
-#, fuzzy
-#| msgid "Installed {installedVersion}"
 msgid "· you have {installedVersion}"
-msgstr "Installerad {installedVersion}"
+msgstr "· du har {installedVersion}"
 
 #. The title text a smart collection looks for, in quotes
 #: apps/native/src/collections/rules.rs
 msgid "“{text}”"
 msgstr "”{text}”"
+
+#~ msgid "Add Games"
+#~ msgstr "Lägg till spel"
+
+#~ msgid "Edit Rules"
+#~ msgstr "Redigera regler"
+
+#~ msgid "New Collection"
+#~ msgstr "Ny samling"
+
+#~ msgid "Play Random"
+#~ msgstr "Spela slumpmässigt"
+
+#~ msgid "Resume · View details"
+#~ msgstr "Fortsätt · Visa detaljer"
 
 #~ msgctxt "keyboard key"
 #~ msgid "Enter"

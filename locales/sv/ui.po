@@ -169,7 +169,7 @@ msgstr "Dölj detaljer"
 
 #: apps/native/src/ui/failure.rs
 msgid "If macOS is protecting this location, open System Settings, choose Privacy & Security, then Files and Folders, and allow Caskade to access it. For locations that require Full Disk Access, add Caskade there instead. Quit and reopen Caskade if macOS asks, then try again. Privacy access does not fix a read-only drive or folder ownership."
-msgstr ""
+msgstr "Om macOS skyddar den här platsen öppnar du Systeminställningar, väljer Integritet och säkerhet och sedan Filer och mappar, och tillåter att Caskade får åtkomst till den. För platser som kräver Full skivåtkomst lägger du i stället till Caskade där. Avsluta och öppna Caskade igen om macOS ber om det och försök sedan igen. Integritetsåtkomst löser inte en skrivskyddad enhet eller mappägarskap."
 
 #. A game of a shared collection, on this device
 #: apps/native/src/flows/shares_common.rs
@@ -288,6 +288,7 @@ msgstr "Rymdjaktplan"
 #: apps/native/src/game/ports.rs
 #: apps/native/src/game_menu/play.rs
 #: apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/home/mod.rs
 #: apps/native/src/library/web.rs
 #: apps/native/src/settings/addons/addon_details.rs
 #: apps/native/src/settings/backup.rs

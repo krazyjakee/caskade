@@ -282,6 +282,7 @@ msgstr ""
 #: apps/native/src/game/ports.rs
 #: apps/native/src/game_menu/play.rs
 #: apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/home/mod.rs
 #: apps/native/src/library/web.rs
 #: apps/native/src/settings/addons/addon_details.rs
 #: apps/native/src/settings/backup.rs

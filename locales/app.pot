@@ -702,10 +702,6 @@ msgstr ""
 msgid "Add"
 msgstr ""
 
-#: apps/native/src/collections/page.rs
-msgid "Add Games"
-msgstr ""
-
 #: apps/native/src/settings/search/search_index.rs
 #: apps/native/src/settings/streaming/stream_from.rs
 msgid "Add a device by its address"
@@ -794,6 +790,10 @@ msgstr ""
 #: apps/native/src/flows/add_game.rs
 #: apps/native/src/flows/manual_game.rs
 msgid "Add game"
+msgstr ""
+
+#: apps/native/src/collections/page.rs
+msgid "Add games"
 msgstr ""
 
 #: apps/native/src/library/collection_dialog.rs
@@ -1593,6 +1593,10 @@ msgstr ""
 msgid "CPU"
 msgstr ""
 
+#: apps/native/src/settings/about.rs
+msgid "CPU ({backend})"
+msgstr ""
+
 #: apps/native/src/settings/search/search_index.rs
 #: apps/native/src/settings/statistics/cards.rs
 msgid "CPU usage"
@@ -2359,6 +2363,11 @@ msgstr ""
 msgid "Commands that run around every game's launch. Emulator profiles and games can add their own; see the order at launch below."
 msgstr ""
 
+#: apps/native/src/settings/about.rs
+msgctxt "git commit"
+msgid "Commit"
+msgstr ""
+
 #. A link to a game's community page
 #: apps/native/src/store/game.rs
 msgid "Community"
@@ -2486,7 +2495,6 @@ msgstr ""
 
 #: apps/native/src/frame/mod.rs
 #: apps/native/src/frame/topbar.rs
-#: apps/native/src/frame/window.rs
 #: apps/native/src/onboarding/questions.rs
 #: apps/native/src/settings/addons/addon_details.rs
 #: apps/native/src/settings/general.rs
@@ -2535,6 +2543,7 @@ msgid "Controls"
 msgstr ""
 
 #: apps/native/src/flows/share_game.rs
+#: apps/native/src/settings/about.rs
 msgid "Copied"
 msgstr ""
 
@@ -2575,6 +2584,10 @@ msgstr ""
 #: apps/native/src/game_menu/menu.rs
 msgctxt "game action"
 msgid "Copy path"
+msgstr ""
+
+#: apps/native/src/settings/about.rs
+msgid "Copy system info"
 msgstr ""
 
 #. A way to install a game, offered when there is more than one
@@ -3279,12 +3292,12 @@ msgid_plural "Edit # games"
 msgstr[0] ""
 msgstr[1] ""
 
-#: apps/native/src/collections/page.rs
-msgid "Edit Rules"
-msgstr ""
-
 #: apps/native/src/game/page.rs
 msgid "Edit details"
+msgstr ""
+
+#: apps/native/src/collections/page.rs
+msgid "Edit rules"
 msgstr ""
 
 #: apps/native/src/collections/actions.rs
@@ -3909,6 +3922,14 @@ msgstr ""
 #. A graphics card from an unknown vendor
 #: apps/native/src/settings/statistics/cards.rs
 msgid "GPU"
+msgstr ""
+
+#: apps/native/src/settings/about.rs
+msgid "GPU ({backend})"
+msgstr ""
+
+#: apps/native/src/settings/about.rs
+msgid "GPU ({backend}) — {adapter}"
 msgstr ""
 
 #. The IGDB game the library game is matched to
@@ -5984,10 +6005,6 @@ msgstr ""
 msgid "Never synced"
 msgstr ""
 
-#: apps/native/src/collections/list.rs
-msgid "New Collection"
-msgstr ""
-
 #: apps/native/src/settings/emulation/scanners/scanner_editor.rs
 msgid "New ROM scanner"
 msgstr ""
@@ -5997,6 +6014,7 @@ msgstr ""
 msgid "New Zealand"
 msgstr ""
 
+#: apps/native/src/collections/list.rs
 #: apps/native/src/game_menu/collections.rs
 #: apps/native/src/library/collection_dialog.rs
 msgid "New collection"
@@ -6831,6 +6849,10 @@ msgstr ""
 msgid "Open jobs"
 msgstr ""
 
+#: apps/native/src/settings/about.rs
+msgid "Open logs folder"
+msgstr ""
+
 #: apps/native/src/onboarding/setup.rs
 msgid "Open my library"
 msgstr ""
@@ -7210,6 +7232,7 @@ msgstr ""
 
 #. Button: starts the game
 #: apps/native/src/game/page.rs
+#: apps/native/src/home/mod.rs
 msgid "Play"
 msgstr ""
 
@@ -7222,10 +7245,6 @@ msgstr ""
 
 #: apps/native/src/game/editor/actions.rs
 msgid "Play (modded)"
-msgstr ""
-
-#: apps/native/src/collections/page.rs
-msgid "Play Random"
 msgstr ""
 
 #: apps/native/src/settings/devices/sync_choices.rs
@@ -7273,6 +7292,10 @@ msgstr ""
 #. Starts the game on another of the user's devices
 #: apps/native/src/game_menu/menu.rs
 msgid "Play on {name}"
+msgstr ""
+
+#: apps/native/src/collections/page.rs
+msgid "Play random"
 msgstr ""
 
 #: apps/native/src/settings/devices/this_device.rs
@@ -8185,6 +8208,10 @@ msgstr ""
 msgid "Removing…"
 msgstr ""
 
+#: apps/native/src/settings/about.rs
+msgid "Renderer"
+msgstr ""
+
 #: apps/native/src/settings/streaming/hosting.rs
 msgid "Repair"
 msgstr ""
@@ -8382,10 +8409,6 @@ msgstr ""
 #. Goes on with a paused download from where it stopped
 #: apps/native/src/activity/card.rs
 msgid "Resume"
-msgstr ""
-
-#: apps/native/src/home/mod.rs
-msgid "Resume · View details"
 msgstr ""
 
 #: apps/native/src/onboarding/questions.rs
@@ -9701,6 +9724,7 @@ msgstr ""
 #: apps/native/src/game/page.rs
 #: apps/native/src/game_menu/menu.rs
 #: apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/home/mod.rs
 msgctxt "game action"
 msgid "Stop"
 msgstr ""
@@ -9748,6 +9772,7 @@ msgstr ""
 
 #: apps/native/src/game/page.rs
 #: apps/native/src/game_menu/quick_look.rs
+#: apps/native/src/home/mod.rs
 msgid "Stopping…"
 msgstr ""
 
@@ -9823,6 +9848,7 @@ msgstr ""
 
 #. Button: streams the game from another device
 #: apps/native/src/game/page.rs
+#: apps/native/src/home/mod.rs
 msgid "Stream"
 msgstr ""
 
@@ -9933,6 +9959,10 @@ msgstr ""
 
 #: apps/native/src/settings/appearance/mod.rs
 msgid "System follows your OS reduced-motion setting."
+msgstr ""
+
+#: apps/native/src/settings/about.rs
+msgid "System info copied."
 msgstr ""
 
 #. A release date that isn't known yet (to be determined)
@@ -11058,6 +11088,10 @@ msgstr ""
 #: apps/native/src/home/mod.rs
 #: apps/native/src/store/view.rs
 msgid "View all"
+msgstr ""
+
+#: apps/native/src/home/mod.rs
+msgid "View details"
 msgstr ""
 
 #: apps/native/src/game_menu/quick_look.rs

@@ -5146,6 +5146,14 @@ msgstr ""
 msgid "the game isn't installed on this computer in a folder that can be copied"
 msgstr ""
 
+#: crates/caskade-app/src/commands/diagnostics.rs
+msgid "Couldn't create the logs folder (“{folder}”)."
+msgstr ""
+
+#: crates/caskade-app/src/commands/diagnostics.rs
+msgid "The logs folder isn't available on this device."
+msgstr ""
+
 #: crates/caskade-app/src/commands/emulation.rs
 msgid "This emulator no longer exists."
 msgstr ""
@@ -5701,6 +5709,14 @@ msgstr ""
 msgid "Choose game folder to install"
 msgstr ""
 
+#: apps/native/src/dialogs.rs
+msgid "Open"
+msgstr ""
+
+#: apps/native/src/dialogs.rs
+msgid "Cancel"
+msgstr ""
+
 #: apps/native/src/input/guide.rs
 msgid "the main window is gone"
 msgstr ""
@@ -5710,11 +5726,63 @@ msgid "Caskade is starting"
 msgstr ""
 
 #: apps/native/src/tray.rs
+msgid "About Caskade"
+msgstr ""
+
+#: apps/native/src/tray.rs
+msgid "Services"
+msgstr ""
+
+#: apps/native/src/tray.rs
+msgid "Hide Caskade"
+msgstr ""
+
+#: apps/native/src/tray.rs
+msgid "Hide Others"
+msgstr ""
+
+#: apps/native/src/tray.rs
+msgid "Show All"
+msgstr ""
+
+#: apps/native/src/tray.rs
 msgid "Edit"
 msgstr ""
 
 #: apps/native/src/tray.rs
+msgid "Undo"
+msgstr ""
+
+#: apps/native/src/tray.rs
+msgid "Redo"
+msgstr ""
+
+#: apps/native/src/tray.rs
+msgid "Cut"
+msgstr ""
+
+#: apps/native/src/tray.rs
+msgid "Copy"
+msgstr ""
+
+#: apps/native/src/tray.rs
+msgid "Paste"
+msgstr ""
+
+#: apps/native/src/tray.rs
+msgid "Select All"
+msgstr ""
+
+#: apps/native/src/tray.rs
 msgid "Window"
+msgstr ""
+
+#: apps/native/src/tray.rs
+msgid "Minimize"
+msgstr ""
+
+#: apps/native/src/tray.rs
+msgid "Toggle Full Screen"
 msgstr ""
 
 #: apps/native/src/updater.rs
