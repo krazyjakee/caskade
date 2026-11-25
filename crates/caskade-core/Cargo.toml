@@ -32,7 +32,7 @@ base64 = { version = "0.22", optional = true }
 # Network interfaces: Wake-on-LAN addresses and broadcasts (#234).
 netdev = { version = "=0.46.3", default-features = false, optional = true }
 # Dev themes (#140) are watched like dev plugins (#131); same pin.
-notify = { version = "8", default-features = false, features = ["macos_kqueue"] }
+notify = { version = "9", default-features = false, features = ["macos_kqueue"] }
 thiserror = "2"
 tracing = "0.1"
 # sqlx takes its slow-statement log level as a `log` level (#77).
