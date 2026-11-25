@@ -72,9 +72,9 @@ for (const [index, language] of languages.entries()) {
     swedishPage: language === "en" ? "./sv/" : "./",
     englishCurrent: language === "en" ? "page" : "false",
     swedishCurrent: language === "sv" ? "page" : "false",
-    canonical: `https://krazyjakee.github.io/caskade/${language === "sv" ? "sv/" : ""}`,
-    english: "https://krazyjakee.github.io/caskade/",
-    swedish: "https://krazyjakee.github.io/caskade/sv/",
+    canonical: `https://caskade.app/${language === "sv" ? "sv/" : ""}`,
+    english: "https://caskade.app/",
+    swedish: "https://caskade.app/sv/",
   };
   const html = template.replace(/\{\{(\w+)\}\}/g, (_, key) => escapeHtml(values[key]));
   const page = new URL(language === "en" ? "index.html" : "sv/index.html", output);
