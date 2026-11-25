@@ -30,7 +30,7 @@ caskade-sync = { path = "../caskade-sync", optional = true }
 # Save files travel as base64 chunks on the sync session (#239).
 base64 = { version = "0.22", optional = true }
 # Network interfaces: Wake-on-LAN addresses and broadcasts (#234).
-netdev = { version = "=0.46.3", default-features = false, optional = true }
+netdev = { version = "=0.48.0", default-features = false, optional = true }
 # Dev themes (#140) are watched like dev plugins (#131); same pin.
 notify = { version = "8", default-features = false, features = ["macos_kqueue"] }
 thiserror = "2"

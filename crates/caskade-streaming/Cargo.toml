@@ -32,7 +32,7 @@ url = "2"
 uuid = { version = "1", features = ["v4", "v7", "serde"] }
 # Network interfaces for host discovery (`mdns`, `gamestream`).
 socket2 = { version = "0.6", optional = true }
-netdev = { version = "=0.46.3", default-features = false, optional = true }
+netdev = { version = "=0.48.0", default-features = false, optional = true }
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"], optional = true }
 # The streaming host's API, pinned to its own certificate (`api`);
 # reqwest's rustls, so it takes the configuration.
