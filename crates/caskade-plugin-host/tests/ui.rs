@@ -229,7 +229,7 @@ async fn a_backend_built_for_0_1_still_loads_and_draws_nothing() {
         "{unknown:?}"
     );
 
-    // Its UI is a JavaScript half's (the webview's); the host draws none.
+    // Its UI is a legacy 0.1 JavaScript half; the host draws none.
     let old_ui = host
         .ui_render(
             "dev.caskade.old",

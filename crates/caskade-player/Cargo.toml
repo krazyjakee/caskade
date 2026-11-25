@@ -12,7 +12,7 @@ caskade-app = { path = "../caskade-app" }
 caskade-input = { path = "../caskade-input" }
 # WebView2's process failures, for `recovery.rs` (#3); empty outside Windows.
 caskade-webview2 = { path = "../caskade-webview2" }
-# The windows: the tao and wry the Tauri app builds, with the same features.
+# The windows: tao and wry for web game and video windows.
 tao = { version = "0.37", default-features = false, features = ["rwh_06", "x11"] }
 wry = { version = "0.57", default-features = false, features = ["os-webview", "linux-body", "x11"] }
 url = "2"

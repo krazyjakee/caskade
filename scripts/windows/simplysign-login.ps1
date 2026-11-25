@@ -69,7 +69,6 @@ if (-not [string]::IsNullOrWhiteSpace($env:SIMPLYSIGN_TIMEOUT_SEC)) {
     [int]::TryParse($env:SIMPLYSIGN_TIMEOUT_SEC, [ref]$timeoutSec) | Out-Null
 }
 
-# --- TOTP ------------------------------------------------------------------
 # The enrolment QR code is a standard otpauth:// URI, so accept either the URI
 # (what you get by revealing the QR in a password manager) or the bare base32
 # secret. The URI is strongly preferred: Certum code-signing enrolments use
@@ -139,7 +138,6 @@ function Get-Totp([byte[]]$Secret, [string]$Algorithm = 'SHA1', [int]$Digits = 6
     return ($binary % [int][Math]::Pow(10, $Digits)).ToString().PadLeft($Digits, '0')
 }
 
-# --- SimplySign Desktop ----------------------------------------------------
 function Find-SimplySign {
     $roots = @(
         "${env:ProgramFiles(x86)}\Certum",

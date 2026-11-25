@@ -13,6 +13,11 @@ import tempfile
 import urllib.request
 import zipfile
 
+_XTASK = str(Path(__file__).resolve().parent)
+if _XTASK not in sys.path:
+    sys.path.insert(0, _XTASK)
+from fixture_common import WIX_NS, add_wix_payload_tree, tree, wix_node, wix_root
+
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURES = ROOT / 'crates/caskade-installer/tests/fixtures'
 SOURCE = FIXTURES / 'src/windows'
@@ -117,19 +122,6 @@ def payload(work, layout):
     return directory
 
 
-def tree(directory):
-    result = []
-    for path in sorted(directory.rglob('*')):
-        data = path.read_bytes() if path.is_file() else b''
-        entry = dict(path=path.relative_to(directory).as_posix(),
-                     kind='file' if path.is_file() else 'directory',
-                     size=len(data), executable=False)
-        if path.is_file():
-            entry['sha256'] = hashlib.sha256(data).hexdigest()
-        result.append(entry)
-    return sorted(result, key=lambda entry: entry['path'])
-
-
 def emit(id, layout, format, files, directory, builder, version, features=(), password=None,
          prefix='', native_generated=()):
     parts = []
@@ -232,10 +224,8 @@ def msi(work):
         # wixl's directory/component graph is generated deterministically from the
         # same real payload as every other family, never hand-crafted MSI bytes.
         import xml.etree.ElementTree as ET
-        ns = 'http://schemas.microsoft.com/wix/2006/wi'; ET.register_namespace('', ns)
-        def node(parent, tag, **attrs):
-            return ET.SubElement(parent, '{' + ns + '}' + tag, attrs)
-        root = ET.Element('{' + ns + '}Wix')
+        node = wix_node
+        root = wix_root()
         product_id = 'E8AEE435-3746-51E3-B090-78112E5A78A7' if custom else '*'
         product = node(root, 'Product', Id=product_id, Name='Caskade Fixture Game', Language='1033',
                        Version='1.0.0', Manufacturer='Caskade', UpgradeCode='C865996A-444F-4A46-BDDD-EA90118908F7')
@@ -244,16 +234,8 @@ def msi(work):
         node(product, 'Media', Id='1', Cabinet='fixture.cab', EmbedCab='yes' if embedded else 'no')
         target = node(product, 'Directory', Id='TARGETDIR', Name='SourceDir')
         install = node(node(target, 'Directory', Id='LocalAppDataFolder'), 'Directory', Id='INSTALLDIR', Name='CaskadeFixture')
-        dirs = {'.': install}; feature = node(product, 'Feature', Id='Main', Level='1')
-        for i, path in enumerate(sorted(directory.rglob('*'))):
-            relative = path.relative_to(directory)
-            parent = dirs[relative.parent.as_posix()]
-            if path.is_dir():
-                dirs[relative.as_posix()] = node(parent, 'Directory', Id=f'D{i}', Name=path.name)
-            else:
-                component = node(parent, 'Component', Id=f'C{i}', Guid='*')
-                node(component, 'File', Id=f'F{i}', Name=path.name, Source=str(path), KeyPath='yes')
-                node(feature, 'ComponentRef', Id=f'C{i}')
+        feature = node(product, 'Feature', Id='Main', Level='1')
+        add_wix_payload_tree(install, feature, directory)
         if custom:
             # This moving-test mini alone records its actual native path. The
             # other MSI fixtures keep their original x86/per-user authoring.
@@ -279,7 +261,7 @@ def msi(work):
         if not embedded:
             cabinet = job / 'cabinet'; cabinet.mkdir()
             names = []
-            for file_node in root.iter('{' + ns + '}File'):
+            for file_node in root.iter('{' + WIX_NS + '}File'):
                 name = file_node.attrib['Id']; names.append(name)
                 shutil.copyfile(file_node.attrib['Source'], cabinet / name)
             run([local / 'bin/gcab', '-c', '-z', job / 'fixture.cab', *names], cabinet, env)

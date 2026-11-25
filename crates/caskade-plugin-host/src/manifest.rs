@@ -14,8 +14,8 @@ use std::{
 /// `host.locale` (#219); 0.2.0 added the `ui` export and `host.message`
 /// and `host.plural` (#109), and plugins' UI moved from JavaScript halves
 /// to it. 0.1 plugins still load while they're deprecated: their backends
-/// link to the 0.1 world, and their JavaScript halves run in the webview
-/// only.
+/// link to the 0.1 world, while legacy JavaScript UI halves are no longer
+/// rendered in the native app.
 pub const HOST_API: semver::Version = semver::Version::new(0, 2, 0);
 
 /// [`HOST_API`] as the WIT package writes it.

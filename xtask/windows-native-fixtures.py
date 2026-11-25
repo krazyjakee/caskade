@@ -6,9 +6,15 @@ import json
 import os
 from pathlib import Path
 import shutil
+import sys
 import tempfile
 import uuid
 import xml.etree.ElementTree as ET
+
+_XTASK = str(Path(__file__).resolve().parent)
+if _XTASK not in sys.path:
+    sys.path.insert(0, _XTASK)
+from fixture_common import WIX_NS, add_wix_payload_tree, wix_node, wix_root
 
 spec = importlib.util.spec_from_file_location('windows_builders', Path(__file__).with_name('windows-fixtures.py'))
 b = importlib.util.module_from_spec(spec)
@@ -53,13 +59,8 @@ def emit(id, family, files, payload, layout, builder, version, generated, featur
 
 
 def msi(job, payload, id, embedded):
-    ns = 'http://schemas.microsoft.com/wix/2006/wi'
-    ET.register_namespace('', ns)
-
-    def node(parent, tag, **attrs):
-        return ET.SubElement(parent, '{' + ns + '}' + tag, attrs)
-
-    root = ET.Element('{' + ns + '}Wix')
+    node = wix_node
+    root = wix_root()
     product = node(root, 'Product', Id=guid(id), Name='Caskade T7 ' + id,
                    Language='1033', Version='1.0.0', Manufacturer='Caskade', UpgradeCode=guid(id + '/upgrade'))
     node(product, 'Package', InstallerVersion='200', Compressed='yes', InstallScope='perUser')
@@ -71,17 +72,8 @@ def msi(job, payload, id, embedded):
     target = node(product, 'Directory', Id='TARGETDIR', Name='SourceDir')
     node(target, 'Directory', Id='ProgramMenuFolder')
     install = node(node(target, 'Directory', Id='LocalAppDataFolder'), 'Directory', Id='INSTALLDIR', Name=id)
-    dirs = {'.': install}
     feature = node(product, 'Feature', Id='Main', Level='1')
-    for index, path in enumerate(sorted(payload.rglob('*'))):
-        relative = path.relative_to(payload)
-        parent = dirs[relative.parent.as_posix()]
-        if path.is_dir():
-            dirs[relative.as_posix()] = node(parent, 'Directory', Id=f'D{index}', Name=path.name)
-        else:
-            component = node(parent, 'Component', Id=f'C{index}', Guid=guid(id + '/' + relative.as_posix()))
-            node(component, 'File', Id=f'F{index}', Name=path.name, Source=str(path), KeyPath='yes')
-            node(feature, 'ComponentRef', Id=f'C{index}')
+    add_wix_payload_tree(install, feature, payload, lambda rel: guid(id + '/' + rel))
     component = node(install, 'Component', Id='Registry', Guid=guid(id + '/registry'))
     node(component, 'RegistryValue', Root='HKCU', Key=key, Name='InstallPath', Type='string', Value='[INSTALLDIR]', KeyPath='yes')
     node(feature, 'ComponentRef', Id='Registry')
@@ -107,7 +99,7 @@ def msi(job, payload, id, embedded):
         cabinet = job / 'cabinet'
         cabinet.mkdir()
         names = []
-        for file in root.iter('{' + ns + '}File'):
+        for file in root.iter('{' + WIX_NS + '}File'):
             names.append(file.attrib['Id'])
             shutil.copyfile(file.attrib['Source'], cabinet / file.attrib['Id'])
         b.run([local / 'bin/gcab', '-c', '-z', job / 'fixture.cab', *names], cabinet, env)

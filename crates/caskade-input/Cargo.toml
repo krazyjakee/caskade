@@ -1,7 +1,7 @@
 [package]
 name = "caskade-input"
 version = "0.1.0"
-description = "Gamepad input for console mode: gilrs pads normalized to UI actions (no Tauri dependency)"
+description = "Gamepad input for console mode: gilrs pads normalized to UI actions (no UI toolkit dependency)"
 edition.workspace = true
 rust-version.workspace = true
 

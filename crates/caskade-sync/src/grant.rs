@@ -25,7 +25,7 @@ pub const GRANT_BYTES: usize = 32;
 ///
 /// It serializes as 64 lowercase hex characters. That form is for the opening
 /// message and for the database row that remembers it; it must never reach
-/// logs, events or the webview.
+/// logs, events or the UI.
 #[derive(Clone, Copy, Eq)]
 pub struct Grant([u8; GRANT_BYTES]);
 

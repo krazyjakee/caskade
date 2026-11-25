@@ -1,7 +1,7 @@
 [package]
 name = "caskade-webview2"
 version = "0.1.0"
-description = "WebView2's process-failure events behind a safe API, for the desktop app's webview recovery (#3)"
+description = "WebView2's process-failure events behind a safe API, for caskade-player's webview recovery (#3)"
 edition.workspace = true
 rust-version.workspace = true
 publish = false

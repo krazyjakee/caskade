@@ -3,16 +3,20 @@
 import argparse
 import hashlib
 import json
-import os
 from pathlib import Path
 import platform
 import plistlib
 import shutil
-import stat
 import struct
 import subprocess
+import sys
 import tempfile
 from xml.etree import ElementTree as ET
+
+_XTASK = str(Path(__file__).resolve().parent)
+if _XTASK not in sys.path:
+    sys.path.insert(0, _XTASK)
+from fixture_common import tree as fixture_tree
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / 'crates/caskade-installer/tests/fixtures'
@@ -84,18 +88,7 @@ def source_check():
 
 
 def tree(root):
-    entries = []
-    for path in sorted(root.rglob('*')):
-        metadata = path.lstat(); name = path.relative_to(root).as_posix()
-        if stat.S_ISLNK(metadata.st_mode):
-            entry = dict(path=name, kind='symlink', size=0, executable=False, symlink_target=os.readlink(path))
-        elif path.is_dir():
-            entry = dict(path=name, kind='directory', size=0, executable=False)
-        else:
-            entry = dict(path=name, kind='file', size=metadata.st_size,
-                         executable=bool(metadata.st_mode & 0o111), sha256=hashlib.sha256(path.read_bytes()).hexdigest())
-        entries.append(entry)
-    return entries
+    return fixture_tree(root, symlinks=True, executable=True)
 
 
 def expectation(output, id, format, stage, delegate=False):

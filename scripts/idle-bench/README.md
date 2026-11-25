@@ -1,10 +1,11 @@
 # Idle RAM and CPU benchmark
 
 Measures what Caskade costs while it sits idle with a large library, counting
-**every** process the app runs: the main process and, for the webview UI, its
-WebKit web, network and GPU processes. It exists to compare the webview UI
-with the native UI (milestone "Native UI (Blitz + Dioxus)"); results are kept
-in the milestone's benchmark issue.
+**every** process the app runs: the main process and any child processes it
+spawns (such as a web game's or video's WebKit processes). It was introduced
+to compare the retired webview UI with the native UI (milestone "Native UI
+(Blitz + Dioxus)"); historical results are kept in the milestone's benchmark
+issue.
 
 `docs/manual-checks.md` L8 measures one installed build on your own library.
 This benchmark is the repeatable one: the same synthetic library, sandbox and
@@ -69,7 +70,7 @@ across builds you compare, and say so if you don't.
   drawing conclusions about CPU.
 - The window stays open on Home, the default start view. With `--hide`,
   `hide.py` closes it once it shows (WM_DELETE_WINDOW, as its close button
-  does), so the app idles in the tray: Xvfb has no tray host, but both apps
-  put their icon up anyway, and a close hides the window. `meta.json`'s
+  does), so the app idles in the tray: Xvfb has no tray host, but the app
+  puts its icon up anyway, and a close hides the window. `meta.json`'s
   `state` says which. The library grid isn't measured yet: "Open to" isn't
   wired up, so it can't be reached without clicking.

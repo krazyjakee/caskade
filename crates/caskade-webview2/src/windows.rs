@@ -13,15 +13,14 @@ use webview2_com::Microsoft::Web::WebView2::Win32::{
     COREWEBVIEW2_PROCESS_FAILED_REASON_OUT_OF_MEMORY,
     COREWEBVIEW2_PROCESS_FAILED_REASON_PROFILE_DELETED,
     COREWEBVIEW2_PROCESS_FAILED_REASON_TERMINATED, COREWEBVIEW2_PROCESS_FAILED_REASON_UNRESPONSIVE,
-    ICoreWebView2, ICoreWebView2Controller, ICoreWebView2ProcessFailedEventArgs,
-    ICoreWebView2ProcessFailedEventArgs2,
+    ICoreWebView2, ICoreWebView2ProcessFailedEventArgs, ICoreWebView2ProcessFailedEventArgs2,
 };
 use webview2_com::{ProcessFailedEventHandler, SourceChangedEventHandler, take_pwstr};
 use windows_core::{Interface, PWSTR};
 
 /// Calls `on_failure` on the webview's thread for each of its processes
 /// that fails, for as long as the webview lives. Call it on the webview's
-/// thread (Tauri's `with_webview`, or wry's event loop).
+/// thread (wry's event loop).
 pub fn watch(
     webview: &ICoreWebView2,
     on_failure: impl Fn(ProcessFailure) + 'static,
@@ -52,17 +51,6 @@ pub fn watch(
         webview.add_SourceChanged(&changed, &mut token)?;
         webview.add_ProcessFailed(&handler, &mut token)
     }
-}
-
-/// [`watch`] for the webview a controller hosts (Tauri's `PlatformWebview`).
-pub fn watch_controller(
-    controller: &ICoreWebView2Controller,
-    on_failure: impl Fn(ProcessFailure) + 'static,
-) -> windows_core::Result<()> {
-    // SAFETY: a live controller, on its webview's thread (as for `watch`).
-    #[allow(unsafe_code)]
-    let webview = unsafe { controller.CoreWebView2() }?;
-    watch(&webview, on_failure)
 }
 
 fn failure(args: &ICoreWebView2ProcessFailedEventArgs) -> ProcessFailure {

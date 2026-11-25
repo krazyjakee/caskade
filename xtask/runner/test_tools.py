@@ -15,6 +15,7 @@ def load(name, path):
     return module
 
 corpus = load('corpus', HERE / 'fuzz-corpus.py')
+fixture_common = load('fixture_common', HERE.parent / 'fixture_common.py')
 proton = load('proton', HERE / 'prepare-proton.py')
 scoreboard = load('scoreboard', HERE.parent / 'scoreboard/run.py')
 warm = load('warm', HERE / 'warm-proton.py')
@@ -167,5 +168,41 @@ class RunnerTools(unittest.TestCase):
             self.assertEqual(parsed['ok'],{'status':'passed','lifecycle_ms':1250})
             self.assertEqual(parsed['bad']['status'],'failed')
             self.assertEqual(parsed['skip']['status'],'not_run')
+
+    def test_fixture_common_tree_and_wix_payload_builder(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / 'sub').mkdir()
+            exe = root / 'sub/run.sh'
+            exe.write_bytes(b'hello')
+            exe.chmod(0o755)
+            (root / 'plain.txt').write_bytes(b'abc')
+            (root / 'plain.txt').chmod(0o644)
+
+            win_entries = fixture_common.tree(root)
+            self.assertEqual([e['path'] for e in win_entries], ['plain.txt', 'sub', 'sub/run.sh'])
+            self.assertFalse(any(e['executable'] for e in win_entries))
+            self.assertEqual(win_entries[0]['sha256'], hashlib.sha256(b'abc').hexdigest())
+
+            (root / 'link').symlink_to('plain.txt')
+            posix_entries = fixture_common.tree(root, symlinks=True, executable=True)
+            by_path = {e['path']: e for e in posix_entries}
+            self.assertEqual(by_path['link'], dict(path='link', kind='symlink', size=0, executable=False, symlink_target='plain.txt'))
+            self.assertTrue(by_path['sub/run.sh']['executable'])
+            self.assertFalse(by_path['plain.txt']['executable'])
+
+            (root / 'link').unlink()
+            wix = fixture_common.wix_root()
+            product = fixture_common.wix_node(wix, 'Product', Id='*')
+            install = fixture_common.wix_node(product, 'Directory', Id='INSTALLDIR', Name='Game')
+            feature = fixture_common.wix_node(product, 'Feature', Id='Main', Level='1')
+            fixture_common.add_wix_payload_tree(install, feature, root, lambda rel: f'GUID:{rel}')
+            ns = '{' + fixture_common.WIX_NS + '}'
+            files = [(el.attrib['Name'], el.attrib['KeyPath']) for el in wix.iter(ns + 'File')]
+            self.assertEqual(files, [('plain.txt', 'yes'), ('run.sh', 'yes')])
+            guids = [el.attrib['Guid'] for el in wix.iter(ns + 'Component')]
+            self.assertEqual(guids, ['GUID:plain.txt', 'GUID:sub/run.sh'])
+            refs = [el.attrib['Id'] for el in wix.iter(ns + 'ComponentRef')]
+            self.assertEqual(refs, [el.attrib['Id'] for el in wix.iter(ns + 'Component')])
 
 if __name__=='__main__': unittest.main()

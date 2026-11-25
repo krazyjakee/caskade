@@ -3,12 +3,11 @@
 //! starts (`commands/video.rs` opens it).
 //!
 //! YouTube's player refuses to play without a web page's address as the
-//! referrer (error 153), and the app's pages, at `tauri://localhost`, have
-//! none: so the player is the window's page, loaded with the app's own
-//! address (its identifier) as the `Referer`. Like the game window, it is
-//! plain tao + wry and the page can't reach the core: its one message,
-//! Escape's `close`, only closes the window. It leaves the YouTube player
-//! for nothing: links and new windows are refused.
+//! referrer (error 153), so the player is the window's page, loaded with
+//! the app's own address (its identifier) as the `Referer`. Like the game
+//! window, it is plain tao + wry and the page can't reach the core: its one
+//! message, Escape's `close`, only closes the window. It leaves the YouTube
+//! player for nothing: links and new windows are refused.
 //!
 //! A pad's B (or Guide) closes it and A pauses and plays while it has
 //! focus. It closes with the app too: the app holds its stdin, which ends
@@ -22,7 +21,7 @@ pub use caskade_app::commands::video::{TITLE_ARG, VIDEO_ARG, is_video_id};
 /// The player's own page; the id goes on the end.
 const EMBED: &str = "https://www.youtube-nocookie.com/embed/";
 /// Who is asking for the player: YouTube wants an `https` address that
-/// names the app. The app's identifier (`tauri.conf.json`).
+/// names the app. The app's identifier (`apps/native/Tauri.toml`).
 const REFERRER: &str = "https://dev.caskade.app/";
 
 /// Escape closes the window, except while YouTube's player is fullscreen

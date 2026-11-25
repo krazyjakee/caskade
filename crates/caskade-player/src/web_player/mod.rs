@@ -2,7 +2,7 @@
 //! web game in a window of its own, in a process of its own, before any of
 //! the app starts.
 //!
-//! It is plain tao + wry, the versions Tauri builds, with no IPC handler:
+//! It is plain tao + wry with no IPC handler:
 //! the page can't reach the core. Its webview keeps its data (saves,
 //! storage) in the folder the launch names, one per game. New windows and
 //! pop-ups are refused: a game's links never open anything.

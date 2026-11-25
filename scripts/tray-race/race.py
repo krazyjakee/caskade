@@ -1,10 +1,10 @@
 """A tray icon that leaves while the watcher still asks for its properties
-must not crash the watcher (#122, #88). Starts Caskade (the native app or the
-Tauri app) N times against the real xapp-sn-watcher (Cinnamon's) on a private
-bus, and quits it through its tray menu's Quit the moment its icon appears,
-which is when the watcher's GetAll is in flight. Passes when every start
-quit within the time limit, the watcher is still running and it never logged
-NoReply (its use-after-free's tell, memory notes of 4 Nov 2026).
+must not crash the watcher (#122, #88). Starts Caskade N times against the
+real xapp-sn-watcher (Cinnamon's) on a private bus, and quits it through its
+tray menu's Quit the moment its icon appears, which is when the watcher's
+GetAll is in flight. Passes when every start quit within the time limit, the
+watcher is still running and it never logged NoReply (its use-after-free's
+tell, memory notes of 4 Nov 2026).
 
 Run only on a private desktop: scripts/tray-race/run.sh starts one.
 

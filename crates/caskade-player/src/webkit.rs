@@ -9,13 +9,10 @@
 //! restarts itself with them set: same process id, same arguments.
 //!
 //! The GPU renderer doesn't work with every driver and WebKit (#72: the
-//! page froze on NVIDIA 580 with WebKit 2.50). When the main window's page
-//! crashes or hangs under Caskade's pick, [`record_gpu_failure`] notes the
-//! driver and WebKit, and the app restarts on WebKit's own renderer. It
-//! tries the GPU again once either changes.
-//!
-//! Where WebKit still paints on the CPU, the Tauri app tells its page
-//! (`data-paint="cpu"`), and ambient loops pause.
+//! page froze on NVIDIA 580 with WebKit 2.50). If a previous failure was
+//! recorded for the current driver and WebKit (`webkit-gpu-failed` in the
+//! cache directory), [`prefer_gpu`] falls back to WebKit's own renderer
+//! until either changes.
 
 use std::ffi::OsString;
 
@@ -185,31 +182,6 @@ pub fn prefer_gpu() {
 
 #[cfg(not(target_os = "linux"))]
 pub fn prefer_gpu() {}
-
-/// The main window's page crashed or hung. Where Caskade picked WebKit's
-/// GPU renderer, notes that it fails with this driver and WebKit, and
-/// returns true: the next start uses WebKit's own renderer, so the app
-/// should restart rather than reload.
-#[cfg(target_os = "linux")]
-pub fn record_gpu_failure() -> bool {
-    if std::env::var_os(OURS).is_none() {
-        return false;
-    }
-    let (Some(stack), Some(file)) = (gpu_stack(), failure_record()) else {
-        return false;
-    };
-    tracing::warn!(%stack, "the page failed on WebKit's GPU renderer");
-    if let Err(error) = std::fs::write(&file, format!("{stack}\n")) {
-        tracing::warn!(%error, "couldn't record the GPU renderer's failure");
-        return false;
-    }
-    true
-}
-
-#[cfg(not(target_os = "linux"))]
-pub fn record_gpu_failure() -> bool {
-    false
-}
 
 #[cfg(test)]
 mod tests {

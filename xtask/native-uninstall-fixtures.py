@@ -6,9 +6,15 @@ import json
 import os
 from pathlib import Path
 import shutil
+import sys
 import tempfile
 import uuid
 import xml.etree.ElementTree as ET
+
+_XTASK = str(Path(__file__).resolve().parent)
+if _XTASK not in sys.path:
+    sys.path.insert(0, _XTASK)
+from fixture_common import add_wix_payload_tree, wix_node, wix_root
 
 spec = importlib.util.spec_from_file_location('windows_builders', Path(__file__).with_name('windows-fixtures.py'))
 b = importlib.util.module_from_spec(spec); spec.loader.exec_module(b)
@@ -36,9 +42,8 @@ def emit(id, family, source, payload, builder, version, generated):
     print(id, out.stat().st_size, flush=True)
 
 def msi(job, payload):
-    ns = 'http://schemas.microsoft.com/wix/2006/wi'; ET.register_namespace('', ns)
-    def node(parent, tag, **attrs): return ET.SubElement(parent, '{' + ns + '}' + tag, attrs)
-    root = ET.Element('{' + ns + '}Wix')
+    node = wix_node
+    root = wix_root()
     product = node(root, 'Product', Id=PRODUCT_CODE, Name='Caskade Native MSI Fixture', Language='1033', Version='1.0.0', Manufacturer='Caskade', UpgradeCode='B81C3344-A3B1-4F76-9EE5-C0EC2F81A306')
     node(product, 'Package', InstallerVersion='200', Compressed='yes', InstallScope='perUser')
     node(product, 'Media', Id='1', Cabinet='fixture.cab', EmbedCab='yes')
@@ -47,14 +52,9 @@ def msi(job, payload):
     node(prop, 'RegistrySearch', Id='RememberInstallDir', Root='HKCU', Key='Software\\CaskadeNativeFixture\\msi', Name='InstallPath', Type='raw')
     target = node(product, 'Directory', Id='TARGETDIR', Name='SourceDir')
     install = node(node(target, 'Directory', Id='LocalAppDataFolder'), 'Directory', Id='INSTALLDIR', Name='CaskadeNativeMSIFixture')
-    dirs = {'.': install}; feature = node(product, 'Feature', Id='Main', Level='1')
-    for i, path in enumerate(sorted(payload.rglob('*'))):
-        relative = path.relative_to(payload); parent = dirs[relative.parent.as_posix()]
-        if path.is_dir(): dirs[relative.as_posix()] = node(parent, 'Directory', Id=f'D{i}', Name=path.name)
-        else:
-            component = node(parent, 'Component', Id=f'C{i}', Guid=str(uuid.uuid5(uuid.UUID('32b52ed7-2536-4897-8f40-cb662b805d70'), relative.as_posix())).upper())
-            node(component, 'File', Id=f'F{i}', Name=path.name, Source=str(path), KeyPath='yes')
-            node(feature, 'ComponentRef', Id=f'C{i}')
+    feature = node(product, 'Feature', Id='Main', Level='1')
+    namespace = uuid.UUID('32b52ed7-2536-4897-8f40-cb662b805d70')
+    add_wix_payload_tree(install, feature, payload, lambda rel: str(uuid.uuid5(namespace, rel)).upper())
     component = node(install, 'Component', Id='Registry', Guid='D83C58B2-DFFB-423B-BEC7-3C635F8971B7')
     node(component, 'RegistryValue', Root='HKCU', Key='Software\\CaskadeNativeFixture\\msi', Name='InstallPath', Type='string', Value='[INSTALLDIR]', KeyPath='yes')
     node(feature, 'ComponentRef', Id='Registry')

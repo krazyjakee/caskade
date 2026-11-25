@@ -1,7 +1,7 @@
 # Caskade website
 
 The public landing page at <https://krazyjakee.github.io/caskade/>. This is a
-static website hosted by GitHub Pages, separate from the desktop webview.
+static website hosted by GitHub Pages, separate from the desktop app.
 It needs Node 22 and Python 3 for building and checking; no package installation,
 network access, backend or external font service is required to build or check it.
 The page has no first-party runtime JavaScript; its embedded YouTube player loads
@@ -35,8 +35,8 @@ Swedish. The generated `dist/` directory is ignored by Git.
   licences, the same families the app bundles (`apps/native/assets/fonts`). Keep the
   licences when replacing font files.
 - `desktop-en.jpg`, `desktop-sv.jpg`, `console-en.jpg` and `console-sv.jpg` are
-  captures of the app's Home view (taken from the retired webview app's
-  browser preview before #143), using a sample library. The page crops the images with CSS and links to the complete captures.
+  captures of the native app's Home view (generated with `just website-shots`),
+  using a sample library. The page crops the images with CSS and links to the complete captures.
   The sample artwork comes from Steam's public artwork CDN; game artwork belongs
   to its respective owners. No personal library, account or device data is used.
 - Download buttons link directly to the published AppImage, Debian package,

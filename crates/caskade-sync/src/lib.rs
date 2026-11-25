@@ -1,7 +1,7 @@
 //! Connections between a household's Caskade devices.
 //!
 //! This crate is the floor of sync: an iroh endpoint with this device's
-//! identity, and the opening every connection starts with. It has no Tauri
+//! identity, and the opening every connection starts with. It has no UI
 //! dependency and no database; `caskade-core` keeps paired devices and
 //! decides who is admitted, through [`Admission`].
 //!

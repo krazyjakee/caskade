@@ -3,7 +3,7 @@
 //!
 //! The secret half lives in the OS keychain under [`KEYCHAIN_SERVICE`]
 //! (beside `dev.caskade.store-accounts`), and nowhere else: never the
-//! database, settings, logs, events, backups or the webview. [`Identity`] has
+//! database, settings, logs, events, backups or the UI. [`Identity`] has
 //! no `Serialize`, a `Debug` that prints only the public id, and hands the key
 //! only to the endpoint builder inside this crate.
 //!

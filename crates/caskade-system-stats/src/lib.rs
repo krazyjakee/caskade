@@ -33,8 +33,8 @@ use tokio::time::MissedTickBehavior;
 const INTERVAL: Duration = Duration::from_secs(1);
 /// Samples kept: a minute at [`INTERVAL`].
 pub const HISTORY: usize = 60;
-/// How long a watch lasts without being renewed. It covers a webview that
-/// reloads or crashes without giving its watch back.
+/// How long a watch lasts without being renewed. It covers a watcher that
+/// disconnects or crashes without giving its watch back.
 const LEASE: Duration = Duration::from_secs(30);
 
 /// The history so far and how it is sampled.

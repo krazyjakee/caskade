@@ -1,27 +1,22 @@
 #!/usr/bin/env python3
 """Build real ISO9660 PC/PS1-style discs using genisoimage; no copyrighted data."""
-import hashlib
 import json
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
+
+_XTASK = str(Path(__file__).resolve().parent)
+if _XTASK not in sys.path:
+    sys.path.insert(0, _XTASK)
+from fixture_common import tree
 
 ROOT = Path(__file__).resolve().parent.parent
 FIX = ROOT / 'crates/caskade-installer/tests/fixtures'
 SRC = FIX / 'src/disc'
 BIN = FIX / 'bin/disc'
 EXPECTED = FIX / 'expected/disc'
-
-def tree(directory):
-    entries = []
-    for p in sorted(directory.rglob('*')):
-        rel = p.relative_to(directory).as_posix()
-        entry = dict(path=rel, kind='directory' if p.is_dir() else 'file', size=0 if p.is_dir() else p.stat().st_size, executable=False)
-        if p.is_file():
-            entry['sha256'] = hashlib.sha256(p.read_bytes()).hexdigest()
-        entries.append(entry)
-    return entries
 
 def expected(name, platform, launch, parts, golden):
     hosts = '\n'.join(f'[host.{host}]\noutcome = "{outcome}"\nstrategy = "{strategy}"\nruntime = "{runtime}"\n' for host, outcome, strategy, runtime in (
