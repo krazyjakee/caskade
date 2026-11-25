@@ -17,6 +17,7 @@ pub mod clipboard;
 pub mod collections;
 pub mod console;
 pub mod copies;
+pub mod diagnostics;
 pub mod discovery;
 pub mod emulation;
 pub mod emulator_setup;

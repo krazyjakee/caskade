@@ -5,17 +5,22 @@
 //! they read offline. The documents stay in English as published; only
 //! their labels are translated.
 
+use caskade_ui_data::ErrorReport;
+use caskade_ui_data::diagnostics::{
+    Diagnostics, RendererMode, SystemInfo, detect_os_version, format_system_info,
+};
 use caskade_ui_i18n::{t, tn, tp};
 use dioxus_native::prelude::keyboard_types::NamedKey;
 use dioxus_native::prelude::*;
 use serde::Deserialize;
 
+use crate::data::{change, unavailable};
 use crate::router::use_router;
 use crate::ui::icons::{
-    ARROW_LEFT, BUG, CHEVRON_DOWN, CHEVRON_RIGHT, CIRCLE_ARROW_UP, EXTERNAL_LINK, FILE_TEXT,
-    GIT_BRANCH, PACKAGE_OPEN, SCALE, SHIELD_CHECK, TAG,
+    ARROW_LEFT, BUG, CHECK, CHEVRON_DOWN, CHEVRON_RIGHT, CIRCLE_ARROW_UP, COPY, EXTERNAL_LINK,
+    FILE_TEXT, FOLDER_OPEN, GIT_BRANCH, PACKAGE_OPEN, SCALE, SHIELD_CHECK, TAG,
 };
-use crate::ui::{Icon, Link, Svg};
+use crate::ui::{Button, ButtonSize, FailureNotice, Icon, Link, NoticeVariant, Svg, Toasts};
 
 const LICENSING: &str = include_str!("../../../../docs/legal/LICENSING.md");
 const TERMS: &str = include_str!("../../../../docs/legal/TERMS.md");
@@ -159,6 +164,45 @@ fn build_label() -> String {
     }
 }
 
+/// The short git commit SHA embedded by `build.rs`, when available.
+fn git_sha() -> Option<&'static str> {
+    option_env!("CASKADE_GIT_SHA").filter(|sha| !sha.is_empty())
+}
+
+/// The active renderer as About's build details list displays it (#176).
+fn renderer_label(mode: RendererMode, adapter: Option<&str>) -> String {
+    let backend = mode.backend();
+    if mode.is_cpu() {
+        t!("CPU ({backend})", backend = backend)
+    } else if let Some(adapter) = adapter.filter(|name| !name.trim().is_empty()) {
+        t!(
+            "GPU ({backend}) — {adapter}",
+            backend = backend,
+            adapter = adapter
+        )
+    } else {
+        t!("GPU ({backend})", backend = backend)
+    }
+}
+
+/// Privacy-safe diagnostics summary for Copy system info (#176).
+fn build_system_info(renderer: RendererMode, gpu_adapter: Option<String>) -> SystemInfo {
+    SystemInfo {
+        version: env!("CARGO_PKG_VERSION").to_owned(),
+        debug_build: cfg!(debug_assertions),
+        git_sha: git_sha().map(str::to_owned),
+        os: std::env::consts::OS.to_owned(),
+        os_version: detect_os_version(),
+        arch: std::env::consts::ARCH.to_owned(),
+        renderer,
+        gpu_adapter,
+    }
+}
+
+fn use_diagnostics() -> Option<Diagnostics> {
+    try_use_context::<Diagnostics>().or_else(|| crate::shell::services().map(Diagnostics::of))
+}
+
 const PANEL: &str = "rounded-panel border border-border bg-surface-raised p-5";
 const LINK: &str = "inline-flex items-center gap-1.5 rounded-sm text-accent-alt underline-offset-2 data-hovered:underline data-focus-visible:focus-ring";
 
@@ -166,6 +210,56 @@ const LINK: &str = "inline-flex items-center gap-1.5 rounded-sm text-accent-alt 
 #[component]
 fn AboutPage() -> Element {
     let router = use_router();
+    let cpu_paint = try_use_context::<crate::input::Input>()
+        .and_then(|input| {
+            input.read(|doc| {
+                doc.root_element()
+                    .attr(blitz_dom::LocalName::from("data-paint"))
+                    == Some("cpu")
+            })
+        })
+        .unwrap_or(false);
+    let (renderer, adapter) = crate::shell::renderer_info(cpu_paint);
+    let diagnostics = use_diagnostics();
+    let toasts = try_use_context::<Toasts>();
+    let mut opening_logs = use_signal(|| false);
+    let mut copied = use_signal(|| false);
+    let mut failure = use_signal(|| None::<ErrorReport>);
+    let open_logs = move |_| {
+        if opening_logs() {
+            return;
+        }
+        failure.set(None);
+        let Some(diagnostics) = diagnostics.clone() else {
+            failure.set(Some(unavailable()));
+            return;
+        };
+        opening_logs.set(true);
+        spawn(async move {
+            let result = change(async move { diagnostics.open_logs_folder().await }).await;
+            opening_logs.set(false);
+            if let Err(report) = result {
+                failure.set(Some(report));
+            }
+        });
+    };
+    let copy_adapter = adapter.clone();
+    let copy_system_info = move |_| {
+        failure.set(None);
+        let summary = format_system_info(&build_system_info(renderer, copy_adapter.clone()));
+        match crate::paste::copy_text(summary) {
+            Ok(()) => {
+                copied.set(true);
+                if let Some(toasts) = toasts {
+                    toasts.show(t!("System info copied."), false, None);
+                }
+            }
+            Err(reason) => {
+                copied.set(false);
+                failure.set(Some(ErrorReport::from(reason)));
+            }
+        }
+    };
     let projects = [
         (t!("Project page"), HOME, GIT_BRANCH),
         (t!("Report a problem"), ISSUES, BUG),
@@ -191,6 +285,12 @@ fn AboutPage() -> Element {
                     dd { class: "font-mono text-fg", {env!("CARGO_PKG_VERSION")} }
                     dt { class: "text-fg-subtle", {tp!("app build", "Build")} }
                     dd { class: "text-fg", {build_label()} }
+                    if let Some(sha) = git_sha() {
+                        dt { class: "text-fg-subtle", {tp!("git commit", "Commit")} }
+                        dd { class: "font-mono text-fg", "{sha}" }
+                    }
+                    dt { class: "text-fg-subtle", {t!("Renderer")} }
+                    dd { class: "text-fg", {renderer_label(renderer, adapter.as_deref())} }
                 }
                 ul { "data-part": "links", class: "mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm",
                     li {
@@ -213,6 +313,28 @@ fn AboutPage() -> Element {
                             }
                         }
                     }
+                }
+                div { class: "mt-4 flex flex-wrap items-center gap-2",
+                    if !crate::console::is_console() {
+                        Button {
+                            id: "about-open-logs",
+                            size: ButtonSize::Sm,
+                            icon: FOLDER_OPEN,
+                            pending: opening_logs(),
+                            on_press: open_logs,
+                            {t!("Open logs folder")}
+                        }
+                    }
+                    Button {
+                        id: "about-copy-system-info",
+                        size: ButtonSize::Sm,
+                        icon: if copied() { CHECK } else { COPY },
+                        on_press: copy_system_info,
+                        if copied() { {t!("Copied")} } else { {t!("Copy system info")} }
+                    }
+                }
+                if let Some(report) = failure() {
+                    FailureNotice { error: report, variant: NoticeVariant::Inline, class: "mt-3" }
                 }
             }
             ul { "data-part": "credits", "aria-label": t!("Credits"), class: "grid gap-4 sm:grid-cols-2",
@@ -813,5 +935,33 @@ mod tests {
         let notices = super::notices();
         assert!(!notices.groups.is_empty());
         assert!(!notices.seven_zip.licenses.is_empty());
+    }
+
+    #[test]
+    fn renderer_label_and_system_info_are_concise_and_privacy_safe() {
+        use caskade_ui_data::diagnostics::{RendererMode, format_system_info};
+        assert_eq!(
+            super::renderer_label(RendererMode::Gpu("vello_hybrid"), Some("AMD Radeon")),
+            "GPU (vello_hybrid) — AMD Radeon"
+        );
+        assert_eq!(
+            super::renderer_label(RendererMode::Gpu("vello_hybrid"), None),
+            "GPU (vello_hybrid)"
+        );
+        assert_eq!(
+            super::renderer_label(RendererMode::Cpu("vello_cpu"), Some("Ignored")),
+            "CPU (vello_cpu)"
+        );
+        let info = super::build_system_info(RendererMode::Gpu("vello_hybrid"), None);
+        let text = format_system_info(&info);
+        assert!(text.contains(env!("CARGO_PKG_VERSION")), "{text}");
+        assert!(text.contains("GPU (vello_hybrid)"), "{text}");
+        for var in ["HOME", "USERPROFILE", "LOGNAME"] {
+            if let Ok(value) = std::env::var(var)
+                && value.len() >= 4
+            {
+                assert!(!text.contains(&value), "leaked {var}: {text}");
+            }
+        }
     }
 }

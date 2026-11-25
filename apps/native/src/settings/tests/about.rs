@@ -35,6 +35,13 @@ fn about_shows_the_build_credits_and_opens_legal_in_place() {
     let version = window.text(window.get("data-part", "version"));
     assert!(version.contains(env!("CARGO_PKG_VERSION")), "{version}");
     assert!(version.contains("Debug build"), "{version}");
+    assert!(
+        version.contains("GPU (") || version.contains("CPU ("),
+        "renderer shown in build details: {version}"
+    );
+    if let Some(sha) = option_env!("CASKADE_GIT_SHA").filter(|sha| !sha.is_empty()) {
+        assert!(version.contains(sha), "git SHA shown: {version}");
+    }
     let credits = window.find_all("data-part", "credit");
     assert_eq!(credits.len(), 4);
     assert_eq!(
@@ -137,4 +144,70 @@ fn a_pad_alone_opens_legal_comes_back_and_goes_back() {
     });
     assert_eq!(window.href(), "/settings?tab=about");
     back_home(&mut window);
+}
+
+#[test]
+fn about_diagnostics_copies_system_info_and_hides_logs_folder_in_console_mode() {
+    use caskade_ui_input::Action;
+
+    struct ResetDesktop;
+    impl Drop for ResetDesktop {
+        fn drop(&mut self) {
+            let _ = caskade_app::runtime::block_on(
+                crate::frame::tests::source()
+                    .settings
+                    .remember_console(false),
+            );
+        }
+    }
+
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let _desktop = ResetDesktop;
+    let mut window = open("/settings?tab=about");
+    window.settle_until("About", |window| window.find("data-cs", "about").is_some());
+
+    // Desktop mode shows both Open logs folder and Copy system info.
+    let open_logs = window
+        .find("id", "about-open-logs")
+        .expect("Open logs folder button in desktop mode");
+    assert_eq!(window.text(open_logs).trim(), "Open logs folder");
+
+    let copy = window
+        .find("id", "about-copy-system-info")
+        .expect("Copy system info button");
+    assert_eq!(window.text(copy).trim(), "Copy system info");
+
+    // Pressing Copy system info gives inline "Copied" feedback and a toast.
+    press(&mut window, copy);
+    window.settle_until("copied feedback", |window| {
+        window
+            .find("id", "about-copy-system-info")
+            .is_some_and(|node| window.text(node).trim() == "Copied")
+    });
+    assert!(
+        window
+            .find_all("data-part", "toast")
+            .into_iter()
+            .any(|toast| window.text(toast).contains("System info copied.")),
+        "copy toast shown"
+    );
+
+    // Console mode hides Open logs folder while keeping Copy system info.
+    crate::console::request_console();
+    window.settle_until("console mode hides logs button", |window| {
+        window.find("data-mode", "console").is_some()
+            && window.find("id", "about-open-logs").is_none()
+    });
+    assert!(
+        window.find("id", "about-copy-system-info").is_some(),
+        "Copy system info stays available in console mode"
+    );
+
+    // Returning to desktop mode brings Open logs folder back.
+    window.pad(Action::View);
+    window.settle_until("desktop mode restores logs button", |window| {
+        window.find("data-mode", "desktop").is_some()
+            && window.find("id", "about-open-logs").is_some()
+    });
 }

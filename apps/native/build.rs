@@ -3,8 +3,47 @@
 //! TaskDialogIndirect, `dialogs.rs`, isn't in older comctl32: without it
 //! the exe doesn't start) and per-monitor DPI awareness.
 
+fn emit_git_sha() {
+    let manifest_dir =
+        std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
+    let git_dir = manifest_dir.join("../..").join(".git");
+    if git_dir.is_dir() {
+        let head = git_dir.join("HEAD");
+        if head.exists() {
+            println!("cargo:rerun-if-changed={}", head.display());
+            if let Ok(contents) = std::fs::read_to_string(&head)
+                && let Some(reference) = contents.trim().strip_prefix("ref:")
+            {
+                let ref_path = git_dir.join(reference.trim());
+                if ref_path.exists() {
+                    println!("cargo:rerun-if-changed={}", ref_path.display());
+                }
+            }
+        }
+        let packed = git_dir.join("packed-refs");
+        if packed.exists() {
+            println!("cargo:rerun-if-changed={}", packed.display());
+        }
+    }
+    let Ok(output) = std::process::Command::new("git")
+        .args(["rev-parse", "--short", "HEAD"])
+        .current_dir(&manifest_dir)
+        .output()
+    else {
+        return;
+    };
+    if !output.status.success() {
+        return;
+    }
+    let sha = String::from_utf8_lossy(&output.stdout).trim().to_owned();
+    if !sha.is_empty() && sha.len() <= 16 && sha.chars().all(|c| c.is_ascii_hexdigit()) {
+        println!("cargo:rustc-env=CASKADE_GIT_SHA={sha}");
+    }
+}
+
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    emit_git_sha();
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("windows") {
         return;
     }

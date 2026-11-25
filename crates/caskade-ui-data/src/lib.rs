@@ -21,6 +21,7 @@ pub mod accounts;
 pub mod addons;
 pub mod backups;
 pub mod devices;
+pub mod diagnostics;
 pub mod discovery;
 pub mod emulation;
 pub mod fixtures;

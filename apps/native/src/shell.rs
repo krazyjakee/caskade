@@ -247,3 +247,23 @@ pub fn video_window() -> &'static caskade_app::commands::video::VideoWindow {
     static VIDEO: OnceLock<caskade_app::commands::video::VideoWindow> = OnceLock::new();
     VIDEO.get_or_init(Default::default)
 }
+
+/// The active window renderer and, when available on a GPU, its adapter name
+/// (#176).
+pub fn renderer_info(
+    cpu_paint: bool,
+) -> (caskade_ui_data::diagnostics::RendererMode, Option<String>) {
+    use caskade_ui_data::diagnostics::{RendererMode, detect_gpu_adapter};
+    let is_cpu = cpu_paint || cfg!(feature = "cpu");
+    let mode = if is_cpu {
+        RendererMode::Cpu("vello_cpu")
+    } else if cfg!(feature = "skia") {
+        RendererMode::Gpu("skia")
+    } else if cfg!(feature = "gpu") {
+        RendererMode::Gpu("vello")
+    } else {
+        RendererMode::Gpu("vello_hybrid")
+    };
+    let adapter = (!is_cpu).then(detect_gpu_adapter).flatten();
+    (mode, adapter)
+}
