@@ -1,5 +1,4 @@
-//! Navigation between the app's pages (#96), in place of the webview's
-//! TanStack Router: a page is an href as the webview writes it
+//! Navigation between the app's pages (#96): a page is an href
 //! (`/library?filter=installed`), parsed into a [`Route`] with what the
 //! link left out filled in from what navigation remembers. History goes
 //! back and forward, focus comes back to where each page was left (the
@@ -16,10 +15,10 @@ pub mod route;
 mod tests;
 
 pub use remembered::{Memory, start_href};
-#[allow(unused_imports)]
+#[cfg(any(test, feature = "shots"))]
+pub use route::SETTINGS_TABS;
 pub use route::{
-    ActivityTab, CollectionFilter, LIBRARY_FILTERS, LibraryRoute, Route, SETTINGS_TABS, StoreRoute,
-    filter_name,
+    ActivityTab, CollectionFilter, LIBRARY_FILTERS, LibraryRoute, Route, StoreRoute, filter_name,
 };
 
 use std::rc::Rc;
@@ -365,7 +364,7 @@ async fn open_to(last: Option<String>) -> Option<String> {
 
 /// A link to an app page: `to` is its href. It shows as current while its
 /// page is (by path, or the whole page with `exact`, or as `current` says),
-/// with `aria-current` and TanStack's `data-status="active"`.
+/// with `aria-current` and `data-status="active"`.
 #[component]
 pub fn RouteLink(
     to: String,

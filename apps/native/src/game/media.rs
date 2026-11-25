@@ -1,8 +1,7 @@
-//! A game page's pictures and videos (#100, the webview's
-//! `views/game/Screenshots.tsx`, `Videos.tsx` and
-//! `components/AgeRatingLabel.tsx`): its screenshots in a grid, one at a
-//! time filling the window with a filmstrip; IGDB's videos, each playing
-//! in the video window; and its age rating, on the board an admin prefers.
+//! A game page's pictures and videos (#100): its screenshots in a grid,
+//! one at a time filling the window with a filmstrip; IGDB's videos, each
+//! playing in the video window; and its age rating, on the board an admin
+//! prefers.
 
 use super::data::{use_answer, use_page_data};
 use crate::data::use_settings_query;
@@ -260,8 +259,9 @@ pub fn Videos(title: String, videos: Vec<IgdbVideo>) -> Element {
     }
 }
 
-/// The board shown when none is preferred, and every known one in order.
-pub(crate) const DEFAULT_BOARD: &str = "pegi";
+pub(crate) use caskade_core::igdb::age::DEFAULT_BOARD;
+
+/// Every known rating board with its display name, in order.
 pub(crate) const BOARDS: &[(&str, &str)] = &[
     ("pegi", "PEGI"),
     ("esrb", "ESRB"),
@@ -287,11 +287,7 @@ pub(crate) fn rating_name(rating: &IgdbAgeRating) -> String {
 /// The rating to show: `board`'s, else PEGI's, else the first known
 /// board's, else the first.
 pub fn shown_rating<'a>(ratings: &'a [IgdbAgeRating], board: &str) -> Option<&'a IgdbAgeRating> {
-    std::iter::once(board)
-        .chain(std::iter::once(DEFAULT_BOARD))
-        .chain(BOARDS.iter().map(|(id, _)| *id))
-        .find_map(|wanted| ratings.iter().find(|rating| rating.board == wanted))
-        .or(ratings.first())
+    caskade_core::igdb::age::shown(ratings, Some(board))
 }
 
 /// The rating board an admin prefers (Settings → Accounts), else PEGI.
@@ -314,13 +310,12 @@ pub(crate) fn use_preferred_board() -> String {
         .unwrap_or_else(|| DEFAULT_BOARD.to_owned())
 }
 
-/// An age rating from IGDB's `ratings` (the webview's `AgeRatingLabel`):
-/// the board an admin prefers, every board's in its tooltip. Nothing when
-/// there are none.
+/// An age rating from IGDB's `ratings`: the board an admin prefers, with
+/// every board's in its tooltip. Nothing when there are none.
 #[component]
 pub fn AgeRatingLabel(ratings: Vec<IgdbAgeRating>) -> Element {
     let board = use_preferred_board();
-    let Some(shown) = shown_rating(&ratings, &board) else {
+    let Some(shown) = caskade_core::igdb::age::shown(&ratings, Some(&board)) else {
         return rsx! {};
     };
     let all = ratings
@@ -338,8 +333,8 @@ pub fn AgeRatingLabel(ratings: Vec<IgdbAgeRating>) -> Element {
     }
 }
 
-/// A library game's age rating, from its IGDB match (the webview's
-/// `GameAgeRating`), after a separator. Nothing for an unrated game.
+/// A library game's age rating, from its IGDB match, after a separator.
+/// Nothing for an unrated game.
 #[component]
 pub fn AgeRating(game_id: String) -> Element {
     let data = use_page_data();

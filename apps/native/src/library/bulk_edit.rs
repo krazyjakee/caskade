@@ -1,9 +1,8 @@
-//! One edit on the chosen games (#99, the webview's
-//! `components/gameSelection/BulkEditDialog.tsx`): each field changes only
-//! when its box is ticked, so values that differ between the games stay as
-//! they are; lists add, remove or replace values. A preview names each game
-//! and what changes before anything is saved; the result says exactly which
-//! games saved, which already had it and which failed. Cancelling before
+//! One edit on the chosen games (#99): each field changes only when its box
+//! is ticked, so values that differ between the games stay as they are;
+//! lists add, remove or replace values. A preview names each game and what
+//! changes before anything is saved; the result says exactly which games
+//! saved, which already had it and which failed. Cancelling before
 //! Apply saves nothing, and applying again changes only what is left.
 
 use crate::data::{change, use_library};
@@ -580,8 +579,7 @@ fn Results(results: Vec<BulkGameResult>, applied: bool) -> Element {
 }
 
 /// A list of values as chips, each with its own remove button, and a field
-/// that adds more: Enter or Add, and with `split` a comma between several
-/// (the webview's `gameEditor/fields.tsx`).
+/// that adds more: Enter or Add, and with `split` a comma between several.
 #[component]
 pub fn ListInput(
     label: String,

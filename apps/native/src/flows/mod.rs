@@ -1,6 +1,5 @@
-//! Dialogs and multi-step flows outside the main views (#108), as the
-//! webview's `components/{manualGame,pathBrowser,shares,sync,storage}`:
-//! each with the same steps and wording, over the native data layer.
+//! Dialogs and multi-step flows outside the main views (#108), over the
+//! native data layer.
 
 pub mod add_game;
 mod anatomy;
@@ -58,9 +57,9 @@ pub const ANATOMY: &[Entry] = &[
 ];
 
 /// The flows that come over any view: pairing (#226), games other devices
-/// ask to start here (#234) and devices asking to stream (#265), as the
-/// webview's shell mounts `PairingHost`, `RemotePlayHost` and
-/// `StreamPairingHost`. Each is absent where the app has no such service.
+/// ask to start here (#234) and devices asking to stream (#265), mounting
+/// `PairingHost`, `RemotePlayHost` and `StreamPairingHost`. Each is absent
+/// where the app has no such service.
 #[component]
 pub fn Hosts() -> Element {
     let pairing = pairing::use_pairing();

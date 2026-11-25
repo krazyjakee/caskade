@@ -1,6 +1,5 @@
-//! The editor's Details tab (the webview's `gameEditor/DetailsTab.tsx`):
-//! the game's descriptive fields and the user's own rating and notes, as a
-//! draft the editor saves in one patch.
+//! The editor's Details tab: the game's descriptive fields and the user's
+//! own rating and notes, as a draft the editor saves in one patch.
 
 use caskade_core::model::{FieldError, FieldProblem, GameEditState, GameField};
 use caskade_ui_i18n::t;
@@ -13,7 +12,7 @@ use crate::ui::icons::ROTATE_CCW;
 use crate::ui::{Button, ButtonSize, ButtonVariant, Checkbox, Slider, Svg, TextField};
 
 /// A field with its label, whether its value is the user's, Reset, and
-/// what went wrong (the webview's `FieldFrame`).
+/// what went wrong.
 #[component]
 fn FieldFrame(
     field: GameField,

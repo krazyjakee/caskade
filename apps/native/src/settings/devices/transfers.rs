@@ -1,5 +1,4 @@
-//! Games copying between devices, and shares (the webview's
-//! `CopiesAndShares`).
+//! Games copying between devices, and shares.
 
 use super::*;
 

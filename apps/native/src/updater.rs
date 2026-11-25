@@ -1,6 +1,5 @@
-//! Caskade's own updates in the native app (#88): the same feed, key and
-//! status as the Tauri app (`caskade_app::self_update`,
-//! `caskade_app::commands::app_update::AppUpdater`). While
+//! Caskade's own updates (#88), backed by `caskade_app::self_update` and
+//! `caskade_app::commands::app_update::AppUpdater`. While
 //! `core.appUpdates.check` is on, and once first-run setup is done, checks
 //! run shortly after startup and then every six hours; nothing downloads
 //! until the user asks, and the new version runs after a restart.
@@ -15,7 +14,7 @@ use caskade_app::events::Event;
 use caskade_app::self_update::{self, Bundle, Release};
 use caskade_core::settings::SettingsService;
 
-/// Why this copy can't replace itself, as the Tauri app says it.
+/// Why this copy can't replace itself.
 pub(crate) fn unavailable() -> Option<caskade_core::i18n::Message> {
     match Bundle::of_this_copy() {
         Some(_) if self_update::public_key().is_none() => Some(caskade_core::msg!(
@@ -182,9 +181,8 @@ pub(crate) async fn install_now() -> Result<Option<String>, String> {
     Ok(Some(found.version))
 }
 
-/// A test's stand-in for the release feed, as the webview's tests fake
-/// `AppUpdateApi`: a check finds 0.2.0, an install starts downloading, and
-/// the test moves the status on with [`fake::emit`].
+/// A test's stand-in for the release feed: a check finds 0.2.0, an install
+/// starts downloading, and the test moves the status on with [`fake::emit`].
 #[cfg(test)]
 pub(crate) mod fake {
     use super::*;

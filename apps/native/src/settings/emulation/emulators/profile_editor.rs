@@ -1,5 +1,5 @@
 //! Adding or editing a profile, with a live preview of the command it
-//! runs (the webview's `ProfileEditor`).
+//! runs.
 
 use super::*;
 

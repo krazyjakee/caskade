@@ -1,5 +1,5 @@
 //! The Emulated tab's breakdown by platform (#99), headless over the
-//! fixture library, as `PlatformGrid.test.tsx` has it.
+//! fixture library.
 
 use crate::frame::tests::{ONE, Window};
 use crate::router::Route;

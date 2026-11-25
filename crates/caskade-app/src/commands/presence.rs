@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::{CommandError, report};
 use crate::events::{Event, Events};
 
-/// A game running on another device, as the webview shows it.
+/// A game running on another device, as the UI shows it.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayingElsewhere {

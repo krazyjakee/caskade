@@ -1,7 +1,6 @@
 //! The words a failure notice shows besides the core's own summary: each
 //! recovery hint's label. This is their source (#139): the core's tests
-//! check every hint is labelled here. They are English message ids, the
-//! webview's word for word so their translations carry over; the UI
+//! check every hint is labelled here. They are English message ids; the UI
 //! translates them where it shows them (#91).
 //!
 //! An [`ErrorReport`](caskade_core::error::ErrorReport)'s code is for
@@ -59,8 +58,8 @@ mod tests {
         RecoveryHint::UpdateCaskade,
     ];
 
-    /// Every hint has its own label, a sentence, as the webview had them
-    /// (`hintLabels` in its `reply.ts`) so their translations carry over.
+    /// Every hint has its own label, a sentence, kept stable so
+    /// translations carry over.
     #[test]
     fn every_hint_has_its_own_sentence() {
         let labels: Vec<&str> = HINTS.into_iter().map(hint).collect();

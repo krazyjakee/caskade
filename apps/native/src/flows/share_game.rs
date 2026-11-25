@@ -1,7 +1,7 @@
-//! Share with someone… (#247), as the webview's `ShareGameDialog`: makes a
-//! link to one installed game (or something smaller, #248). Whoever opens
-//! it in their Caskade gets it straight from this computer (and from others
-//! it reached first), never through a relay. Stopping the share makes the
+//! Share with someone… (#247): makes a link to one installed game (or
+//! something smaller, #248). Whoever opens it in their Caskade gets it
+//! straight from this computer (and from others it reached first), never
+//! through a relay. Stopping the share makes the
 //! link fail at once; copies already received stay theirs. Console mode
 //! shows the link as a QR code, for a phone to pass on.
 

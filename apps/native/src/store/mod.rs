@@ -1,11 +1,11 @@
-//! The Store (#102, the webview's `StoreView` and `views/store`): a
-//! discovery catalogue of all of IGDB through the metadata server, not only
-//! the library's games. Browse searches it (or lists the past year's
-//! most-rated) with platform, genre and release-year filters; Recently
-//! released and Upcoming list releases; a catalogue game's page says what
-//! IGDB knows of it and where it is sold. Cards show the library's own
-//! status for games matched to the same IGDB game; store links never claim
-//! a price or that a game is on sale. The Store installs nothing itself.
+//! The Store (#102): a discovery catalogue of all of IGDB through the
+//! metadata server, not only the library's games. Browse searches it (or
+//! lists the past year's most-rated) with platform, genre and release-year
+//! filters; Recently released and Upcoming list releases; a catalogue
+//! game's page says what IGDB knows of it and where it is sold. Cards show
+//! the library's own status for games matched to the same IGDB game; store
+//! links never claim a price or that a game is on sale. The Store installs
+//! nothing itself.
 
 mod card;
 pub mod data;

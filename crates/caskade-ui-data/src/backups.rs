@@ -1,8 +1,7 @@
 //! Settings → Backup (#193, #243, #105): Back up now, what a backup would
 //! hold, checking and staging a restore, the backups paired devices keep,
 //! and whether a restart may apply a restore, through the app layer's
-//! commands as the webview's `api/backup.ts` does. The panel's settings are
-//! `core.backups`.
+//! commands. The panel's settings are `core.backups`.
 
 use caskade_app::commands::{backup, peer_backups};
 use caskade_backup::Backups as Service;

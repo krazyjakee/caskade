@@ -12,35 +12,6 @@ use caskade_core::{
 };
 
 #[tokio::test]
-async fn igdb_commands_take_string_ids() {
-    let dir = tempfile::tempdir().unwrap();
-    // Port 9 (discard) on loopback: any request fails.
-    let igdb = Igdb::with_base_url(dir.path(), "http://127.0.0.1:9");
-
-    // IGDB has no ids above i64::MAX, so these are answered without asking.
-    let beyond = 1u64 << 63;
-    let ids = [beyond.to_string(), beyond.to_string()];
-    for lookup in [
-        commands::igdb_games(&igdb, &ids).await.unwrap(),
-        commands::igdb_refresh(&igdb, &ids).await.unwrap(),
-    ] {
-        assert!(lookup.games.is_empty());
-        assert_eq!(lookup.not_found, [beyond]);
-        assert!(lookup.pending.is_empty());
-    }
-    let refused = commands::igdb_games(&igdb, &["1942".to_owned(), "witcher".to_owned()])
-        .await
-        .unwrap_err();
-    assert!(refused.contains("not an IGDB id"), "{refused}");
-    // A real id needs the server, which is not there.
-    assert!(
-        commands::igdb_games(&igdb, &["1942".to_owned()])
-            .await
-            .is_err()
-    );
-}
-
-#[tokio::test]
 async fn game_igdb_commands_answer_without_the_network() {
     let dir = tempfile::tempdir().unwrap();
     let store = LibraryStore::in_memory().await.unwrap();
@@ -74,11 +45,14 @@ async fn game_igdb_commands_answer_without_the_network() {
     let refused = commands::game_igdb_set(&metadata, &game.id, Some("portal".into()))
         .await
         .unwrap_err();
-    assert!(refused.contains("not an IGDB id"), "{refused}");
+    assert!(refused.summary.contains("not an IGDB id"), "{refused:?}");
     let missing = commands::game_igdb_set(&metadata, "nope", None)
         .await
         .unwrap_err();
-    assert!(missing.contains("no longer in the library"), "{missing}");
+    assert!(
+        missing.summary.contains("no longer in the library"),
+        "{missing:?}"
+    );
 
     // "No IGDB game" needs no server.
     let none = GameIgdb {

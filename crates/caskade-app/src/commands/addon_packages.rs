@@ -384,8 +384,8 @@ async fn install_plugin(
             )
         }
     };
-    // The webview loads and unloads UI halves on this: an update that waits
-    // for consent, or one rolled back, mustn't leave the old one running.
+    // Notify the UI of plugin state changes: an update waiting for consent,
+    // or one rolled back, mustn't leave stale plugin UI active.
     if let Some(bus) = app.bus {
         bus.emit(caskade_core::bus::Event::PluginsChanged {
             plugin: id.to_owned(),
@@ -471,11 +471,6 @@ fn install_theme(
 /// plugin install comes back for review unless `accept`; a release that
 /// failed a check that can't pass by retrying is refused again unless
 /// `retry`.
-/// Installs or updates `id` to the newest release that fits. A first
-/// plugin install comes back for review unless `accept`; a release that
-/// failed a check that can't pass by retrying is refused again unless
-/// `retry`.
-// Tauri states and the call's arguments.
 #[allow(clippy::too_many_arguments)]
 pub async fn addons_install(
     app: &AddonServices<'_>,

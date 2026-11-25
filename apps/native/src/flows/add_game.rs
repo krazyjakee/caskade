@@ -1,8 +1,8 @@
-//! The library's Add game button, as the webview's `AddGame`: a menu of
-//! the ways to add a game, each opening its own dialog. Installing from a
-//! file, a folder or a link asks where the install goes first
-//! (`InstallRootPicker`); adding by hand (#174) opens the manual dialog.
-//! Receiving a shared game joins with the shares flow (#108).
+//! The library's Add game button: a menu of the ways to add a game, each
+//! opening its own dialog. Installing from a file, a folder or a link asks
+//! where the install goes first (`InstallRootPicker`); adding by hand
+//! (#174) opens the manual dialog. Receiving a shared game joins with the
+//! shares flow (#108).
 
 use caskade_ui_data::storage::{MoveError, Storage};
 use caskade_ui_i18n::t;
@@ -21,8 +21,8 @@ use super::storage::{InstallRootPicker, use_storage};
 /// game added by hand, to open its page.
 #[component]
 pub fn AddGame(on_open_game: EventHandler<String>) -> Element {
-    // Adding by hand needs the library: not before the data source is
-    // ready, as the webview leaves the items out without its API.
+    // Adding by hand needs the library: leave those items out until the data
+    // source is ready.
     let manual = try_use_context::<DataSource>().is_some();
     let storage = use_storage().filter(Storage::can_install);
     let picker = use_path_picker();
@@ -129,7 +129,7 @@ pub fn AddGame(on_open_game: EventHandler<String>) -> Element {
                     .into_iter()
                     .collect()
             } else {
-                let picked = caskade_app::runtime::spawn(async move {
+                let picked = crate::data::change(async move {
                     let dialogs = crate::dialogs::install_picker();
                     match kind {
                         PickKind::File => {
@@ -142,12 +142,11 @@ pub fn AddGame(on_open_game: EventHandler<String>) -> Element {
                         }
                     }
                 })
-                .await
-                .unwrap_or_else(|error| Err(error.to_string()));
+                .await;
                 match picked {
                     Ok(paths) => paths,
-                    Err(message) => {
-                        error.set(Some(message));
+                    Err(report) => {
+                        error.set(Some(report.summary));
                         Vec::new()
                     }
                 }

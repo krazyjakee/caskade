@@ -1,5 +1,4 @@
-//! The dashboard and its cards (the webview's `StatisticsDashboard.tsx`
-//! and `Gauge.tsx`): CPU, memory, GPU, network and storage.
+//! The dashboard and its cards: CPU, memory, GPU, network and storage.
 
 use super::*;
 

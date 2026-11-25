@@ -1,7 +1,6 @@
-//! Settings → Discovery (#104), as the webview's
-//! `LibraryDiscoverySettings`, `ReviewList` and `HiddenGames`: turning
-//! discovery on, Scan now and its progress; results waiting for a decision
-//! (accept or ignore, several at once or one by a right click); when scans
+//! Settings → Discovery (#104): turning discovery on, Scan now and its
+//! progress; results waiting for a decision (accept or ignore, several at
+//! once or one by a right click); when scans
 //! run; the system's own records; deep scans and their folders; what each
 //! source last reported; hidden games shown again; ignored results allowed
 //! again. Launchers are their own section (`launchers.rs`), linked from
@@ -30,7 +29,7 @@ use crate::ui::{
     SettingRow, SettingsSection, Switch, TextField,
 };
 
-/// How many folders deep scans may search, as the webview's.
+/// How many folders deep scans may search.
 const MAX_FOLDERS: usize = 64;
 
 fn intervals() -> Vec<SelectOption> {

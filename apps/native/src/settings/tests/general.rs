@@ -1,7 +1,6 @@
-//! Settings → General (#104), ported from the webview's
-//! `AppUpdateSection` and `generalUpdates` tests: each field reads what's
-//! saved, changes by keyboard and pad, and resets; Caskade's updates check,
-//! download, install and restart; a link to them scrolls there; every
+//! Settings → General (#104): each field reads what's saved, changes by
+//! keyboard and pad, and resets; Caskade's updates check, download,
+//! install and restart; a link to them scrolls there; every
 //! control is named by its row for a screen reader.
 
 use super::{is_inside, label_of, open};

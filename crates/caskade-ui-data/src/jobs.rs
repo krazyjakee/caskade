@@ -1,9 +1,8 @@
 //! Jobs for Activity (#101): installs, downloads, moves, copies and the
 //! other background jobs, live from `JobChanged` (`Key::Jobs`): listing,
 //! cancelling, pausing and resuming downloads (#131), removing, retrying
-//! (as before or another way), answering a
-//! job's question and recovering a failed one; through the app layer's
-//! commands as the webview's `api/installNative.ts` does.
+//! (as before or another way), answering a job's question and recovering a
+//! failed one, through the app layer's commands.
 //!
 //! A [`JobQueue`] is the running app's install service ([`InstallQueue`])
 //! or, in fixtures and tests, [`FakeQueue`]: jobs a test puts there, with
@@ -55,25 +54,35 @@ impl JobQueue for InstallQueue {
         commands::jobs_list(&self.0)
     }
     fn cancel(&self, id: &str) -> Result<JobSnapshot> {
-        commands::job_cancel(&self.0, id.to_owned())
+        commands::job_cancel(&self.0, id.to_owned()).map_err(|error| error.summary)
     }
     async fn pause(&self, id: &str) -> Result<JobSnapshot> {
-        commands::job_pause(&self.0, id.to_owned()).await
+        commands::job_pause(&self.0, id.to_owned())
+            .await
+            .map_err(|error| error.summary)
     }
     async fn resume(&self, id: &str) -> Result<JobSnapshot> {
-        commands::job_resume(&self.0, id.to_owned()).await
+        commands::job_resume(&self.0, id.to_owned())
+            .await
+            .map_err(|error| error.summary)
     }
     fn remove(&self, id: &str) -> Result<()> {
-        commands::job_remove(&self.0, id.to_owned())
+        commands::job_remove(&self.0, id.to_owned()).map_err(|error| error.summary)
     }
     async fn retry(&self, id: &str, candidate: Option<u32>) -> Result<JobSnapshot> {
-        commands::job_retry(&self.0, id.to_owned(), candidate).await
+        commands::job_retry(&self.0, id.to_owned(), candidate)
+            .await
+            .map_err(|error| error.summary)
     }
     async fn answer(&self, id: &str, revision: u32, answer: JobAnswer) -> Result<JobSnapshot> {
-        commands::job_answer(&self.0, id.to_owned(), revision, answer).await
+        commands::job_answer(&self.0, id.to_owned(), revision, answer)
+            .await
+            .map_err(|error| error.summary)
     }
     async fn recover(&self, id: &str, recovery: Recovery) -> Result<JobSnapshot> {
-        commands::job_recover(&self.0, id.to_owned(), recovery).await
+        commands::job_recover(&self.0, id.to_owned(), recovery)
+            .await
+            .map_err(|error| error.summary)
     }
 }
 

@@ -1668,7 +1668,6 @@ dependencies = [
  "caskade-sources",
  "caskade-streaming",
  "caskade-sync",
- "caskade-system-stats",
  "flate2",
  "minisign",
  "minisign-verify",

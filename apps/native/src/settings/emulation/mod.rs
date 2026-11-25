@@ -1,5 +1,4 @@
-//! Settings → Emulation (#115, #116, #105), as the webview's
-//! `EmulatorSettings` and `emulators/`: the overview (counts, Detect
+//! Settings → Emulation (#115, #116, #105): the overview (counts, Detect
 //! emulators, Add emulator, Scan all), Playing (`core.emulation`), and one
 //! section at a time, kept in the address as `?section=`: the configured
 //! emulators and their profiles, Get emulators, platforms and their

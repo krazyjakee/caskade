@@ -1,5 +1,4 @@
-//! The native UI's input rules (#92), free of any UI toolkit, ported from the
-//! retired webview's input layer:
+//! The native UI's input rules, free of any UI toolkit:
 //!
 //! - [`tree`]: what the rules read of the UI, a tree of elements with
 //!   attributes and layout boxes ([`FocusTree`]). The native app reads Blitz's

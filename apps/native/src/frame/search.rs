@@ -1,7 +1,7 @@
-//! The top bar's search (`shell/SearchBox.tsx`): games suggested as you
-//! type. Enter, or "See all results", opens the library on the text;
-//! choosing a suggestion opens its game. Ctrl K (⌘ K) focuses it from
-//! anywhere, and the library's search shows in it.
+//! The top bar's search: games suggested as you type. Enter, or "See all
+//! results", opens the library on the text; choosing a suggestion opens its
+//! game. Ctrl K (⌘ K) focuses it from anywhere, and the library's search
+//! shows in it.
 
 use crate::data::sleep;
 use crate::data::use_library_search;

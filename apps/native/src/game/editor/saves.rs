@@ -1,6 +1,5 @@
-//! The editor's Saves tab (the webview's `gameEditor/SavesTab.tsx`): one
-//! release's save locations on this device, automatic or the user's own,
-//! and the manifest game it matches.
+//! The editor's Saves tab: one release's save locations on this device,
+//! automatic or the user's own, and the manifest game it matches.
 
 use caskade_core::model::GameDetails;
 use caskade_core::saves::{LocationKind, LocationSpec, SaveMatch, SavePreferences};
@@ -8,7 +7,7 @@ use caskade_ui_data::Key;
 use caskade_ui_i18n::{t, tn};
 use dioxus_native::prelude::*;
 
-use super::data::{EditData, SaveLocations};
+use super::data::{EditData, SaveLocationsState};
 use super::{FILE_PLUS, release_label};
 use crate::flows::paths::{PathRequest, PickKind, use_path_picker};
 use crate::game::data::use_answer;
@@ -124,7 +123,7 @@ fn Locations(
     let mut pending = use_signal(|| false);
     let mut error = use_signal(|| None::<String>);
     let loaded = query.read().clone();
-    let state: Option<SaveLocations> = match &loaded {
+    let state: Option<SaveLocationsState> = match &loaded {
         Some(Ok(state)) => Some(state.clone()),
         _ => None,
     };
@@ -282,7 +281,7 @@ fn Locations(
                         {
                             let row = found(&spec);
                             let kind = row.as_ref().map(|row| row.spec.kind).unwrap_or(spec.kind);
-                            let files = row.as_ref().map(|row| row.files).unwrap_or(0);
+                            let files = row.as_ref().map(|row| row.file_count).unwrap_or(0);
                             let remove = {
                                 let (mut change, preferences, specs, path) =
                                     (change.clone(), preferences.clone(), specs.clone(), spec.path.clone());

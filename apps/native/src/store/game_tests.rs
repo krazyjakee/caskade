@@ -1,10 +1,10 @@
 //! A catalogue game's page (#102) in the frame over a scripted catalogue,
-//! headless, as `StoreView.test.tsx` has it: opened from the results, its
-//! store links, releases, rating and library copy, similar games that go
-//! back to it and Back to the results; IGDB's screenshots in the gallery
-//! and its videos in the video window; and what it says without videos,
-//! stores or the game. Store and website links open the browser, so the
-//! tests read them and never press them.
+//! headless: opened from the results, its store links, releases, rating
+//! and library copy, similar games that go back to it and Back to the
+//! results; IGDB's screenshots in the gallery and its videos in the video
+//! window; and what it says without videos, stores or the game. Store and
+//! website links open the browser, so the tests read them and never press
+//! them.
 
 use super::{screenshots, similar_ids, website_label};
 use crate::frame::tests::{ONE, Window};
@@ -62,7 +62,7 @@ fn store_link(store: &str, name: &str, url: &str, platforms: &[&str]) -> IgdbSto
     }
 }
 
-/// The webview's fixture catalogue's Lantern Tide.
+/// The fixture catalogue's Lantern Tide.
 fn lantern() -> IgdbGame {
     let mut game = catalog_game(1001, "Lantern Tide");
     game.genres = vec!["Role-playing (RPG)".to_owned(), "Adventure".to_owned()];

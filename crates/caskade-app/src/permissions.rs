@@ -81,23 +81,17 @@ pub fn access(command: &str) -> Option<Access> {
         | "profile_preview"
         | "args_split"
         | "emulation_platforms"
-        | "emulation_detect_get"
         | "emulation_detect_latest"
         | "emulation_game"
         | "emulator_setup_installable"
         | "emulator_setup_missing"
         | "emulator_setup_jobs"
         | "plugins_list"
-        | "plugins_ui"
-        // Plugins' own UI from API 0.2 (#109): which draw, and drawing one.
-        | "plugins_drawn"
+        // Plugins' own UI from API 0.2 (#109): drawing one.
         | "plugin_ui_render"
-        | "plugin_messages"
         | "rom_scanners_list"
         | "rom_scan_jobs"
         | "rom_exclusions"
-        | "igdb_games"
-        | "igdb_refresh"
         | "igdb_search"
         | "igdb_catalog_search"
         | "igdb_catalog_recent"
@@ -142,18 +136,13 @@ pub fn access(command: &str) -> Option<Access> {
         | "game_ports"
         | "romm_overview"
         | "themes_list"
-        | "theme_stylesheet"
         | "theme_resolve"
         | "themes_reload"
         | "input_devices"
-        | "console_initial_mode"
         | "locale_current"
         | "browse_dir"
-        // The on-screen keyboard's Paste and the Copy buttons (#247): the
-        // user's own clipboard, like a key press.
-        | "clipboard_read_text"
+        // Copy buttons (#247): the user's own clipboard, like a key press.
         | "clipboard_write_text"
-        | "app_update_status"
         | "torrent_links_status" => Open,
         // The notification feed and its read state (#198): one feed every
         // account shares, and marking it read changes nothing else.
@@ -166,14 +155,8 @@ pub fn access(command: &str) -> Option<Access> {
         // The window's own state and pickers that only answer a path.
         "choose_install_files"
         | "choose_install_folder"
-        | "storage_choose_directory"
-        | "set_console_mode"
         | "close_hold"
-        | "guide_return_to_game"
-        | "plugin_view_opened"
-        // Settings → Statistics only reads the machine (#156).
-        | "system_stats_watch"
-        | "system_stats_unwatch" => Open,
+        | "plugin_view_opened" => Open,
         // Shared by every account. Collections check their owner in the core.
         "set_game_hidden"
         | "set_game_favorite"
@@ -208,8 +191,7 @@ pub fn access(command: &str) -> Option<Access> {
         | "game_achievements_cancel"
         | "game_age_approve"
         | "guide_stop_game"
-        | "plugin_request"
-        // A plugin's button or game action (#109), like `plugin_request`.
+        // A plugin's button or game action (#109).
         | "plugin_ui_act"
         | "game_igdb_set"
         | "game_igdb_rematch"
@@ -222,9 +204,7 @@ pub fn access(command: &str) -> Option<Access> {
         | "games_bulk_edit"
         | "games_refresh_start"
         | "games_refresh_cancel"
-        | "romm_cancel_download"
-        | "app_update_check"
-        | "app_update_restart" => SignedIn,
+        | "romm_cancel_download" => SignedIn,
         // Updates of installed games run for everyone, so Play still works.
         "game_update_check"
         | "game_update_before_play"
@@ -240,7 +220,6 @@ pub fn access(command: &str) -> Option<Access> {
         | "account_set_pin"
         | "account_verify_admin_pin" => Accounts,
         "settings_set" | "settings_reset" => Settings,
-        "app_update_install" => Section("general"),
         // Whether the OS opens magnet links and torrent files with Caskade.
         "torrent_links_set" | "torrent_links_choose" => Section("installer"),
         "discovery_scan" | "discovery_cancel" | "discovery_review" => Section("library-discovery"),
@@ -500,11 +479,9 @@ fn argument<'a>(args: &'a Value, name: &str) -> Option<&'a str> {
     args.get(name)?.as_str()
 }
 
-/// The native shell's gate (#106). The Tauri shell checks each command
-/// against the signed-in account before it runs it ([`check`]); the native
-/// app calls the command functions directly, so it installs this guard at
-/// start and every command function checks itself with [`enforce`]. Without
-/// a guard (the Tauri shell, tests, fixtures mode) commands don't check.
+/// The app's permission gate (#106). Installed once at startup so every
+/// checked command function enforces the signed-in account's permissions via
+/// [`enforce`]. Without a guard (tests, fixtures mode) commands don't check.
 static GUARD: std::sync::OnceLock<Guard> = std::sync::OnceLock::new();
 
 /// [`check`] over one app's accounts and, once they start, its installs
@@ -528,8 +505,8 @@ impl Guard {
         let _ = self.install.set(install);
     }
 
-    /// Whether the signed-in account may call `command` with `args`; the
-    /// refusal, as the Tauri shell answers it, when not.
+    /// Whether the signed-in account may call `command` with `args`; a
+    /// `Forbidden` command error when not.
     pub fn check(&self, command: &str, args: &Value) -> Result<(), crate::error::CommandError> {
         check(command, args, Some(&self.accounts), self.install.get()).map_err(|reason| {
             crate::error::CommandError::new(crate::error::ErrorCode::Forbidden, reason)

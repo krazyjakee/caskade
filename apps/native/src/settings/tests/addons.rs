@@ -1,5 +1,4 @@
-//! Settings → Plugins' catalogue (#104), ported from the webview's
-//! `catalogue` and `DeviceOffers` tests over the fixtures' catalogue
+//! Settings → Plugins' catalogue (#104), over the fixtures' catalogue
 //! service, given the add-ons crate's sample catalogue. Its address is one
 //! nothing answers, so refreshes and downloads fail at once and the tests
 //! never reach the internet.

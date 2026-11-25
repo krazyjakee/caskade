@@ -1,11 +1,12 @@
 //! Paired devices and the devices in reach to pair with.
 
 use super::*;
+use crate::ui::DeviceIcon;
 
 /// How long Pair a device looks before saying it found nobody (#60).
 pub(super) const NEARBY_PATIENCE: Duration = Duration::from_secs(30);
 
-/// How a device is reached, for people (`components/sync/common`).
+/// How a device is reached, for people.
 pub(super) fn link_label(link: DeviceLink) -> String {
     match link {
         DeviceLink::Lan => t!("Local network"),
@@ -24,15 +25,6 @@ pub(super) fn link_style(link: DeviceLink) -> (crate::ui::Icon, &'static str) {
     }
 }
 
-pub(super) fn link_name(link: DeviceLink) -> &'static str {
-    match link {
-        DeviceLink::Lan => "lan",
-        DeviceLink::Direct => "direct",
-        DeviceLink::Relay => "relay",
-        DeviceLink::Offline => "offline",
-    }
-}
-
 /// How a device is reached: the local network, the internet, a relay, or
 /// not at all.
 #[component]
@@ -41,28 +33,11 @@ pub(super) fn LinkBadge(link: DeviceLink) -> Element {
     rsx! {
         span {
             "data-cs": "peer-link",
-            "data-status": link_name(link),
+            "data-status": link.as_str(),
             class: "inline-flex items-center gap-1.5 text-xs whitespace-nowrap {tone}",
             Svg { icon, class: "size-3.5" }
             {link_label(link)}
         }
-    }
-}
-
-/// A device's kind, as an icon.
-#[component]
-pub(super) fn DeviceIcon(
-    kind: DeviceKind,
-    #[props(default = "size-5".to_owned())] class: String,
-) -> Element {
-    let icon = match kind {
-        DeviceKind::Desktop => MONITOR,
-        DeviceKind::Laptop => LAPTOP,
-        DeviceKind::Handheld => GAMEPAD_2,
-        DeviceKind::Tv => TV,
-    };
-    rsx! {
-        Svg { icon, class }
     }
 }
 
@@ -116,7 +91,7 @@ pub(super) fn DeviceRow(devices: DeviceSync, device: PairedDevice) -> Element {
     rsx! {
         li {
             "data-cs": "paired-device",
-            "data-status": link_name(device.link),
+            "data-status": device.link.as_str(),
             class: "flex flex-wrap items-center gap-4 rounded-control border border-border p-3",
             DeviceIcon { kind: device.kind, class: "size-6 shrink-0 text-fg-muted" }
             div { class: "flex min-w-0 flex-1 flex-col gap-1",

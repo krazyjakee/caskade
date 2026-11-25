@@ -42,7 +42,7 @@ fn a_title_already_in_the_library_asks_and_can_be_kept_apart() {
     window.choose(1);
     window.focus("#manual-title-input");
     window.type_text(&title);
-    // Enter in the title adds, as the webview's form submits.
+    // Enter in the title adds (form submit).
     window.key(Key::Named(NamedKey::Enter));
     window.until("the duplicates", |w| {
         w.find("[data-part=duplicates]").is_some()
@@ -82,7 +82,7 @@ fn a_uri_is_resolved_summarised_added_and_then_offered_to_join() {
     );
     window.focus("#manual-target-input");
     window.type_text(uri);
-    // Leaving the field resolves it, as the webview's blur does.
+    // Leaving the field resolves it on blur.
     window.key(Key::Named(NamedKey::Tab));
     window.until("the summary", |w| w.find("[data-part=summary]").is_some());
     let summary = window.text("[data-part=summary]");

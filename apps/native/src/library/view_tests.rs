@@ -1,8 +1,7 @@
 //! The library view's actions (#99) in the frame over the fixture library,
-//! headless, as `views/library/LibraryView.test.tsx` has them: sorting from
-//! the menu and from the list's column headers, grid or list, LB and RB
-//! through the filters, the search's chip, the alphabet bar, and what it
-//! says with nothing to show.
+//! headless: sorting from the menu and from the list's column headers, grid
+//! or list, LB and RB through the filters, the search's chip, the alphabet
+//! bar, and what it says with nothing to show.
 
 use crate::frame::tests::{ONE, Window};
 use crate::router::Route;
@@ -292,30 +291,69 @@ fn an_empty_filter_says_so_and_offers_every_game() {
     assert_eq!(shown.layout, crate::library::Layout::List);
 }
 
-/// The paths dropped files asked to install, in the order asked.
-static DROPPED: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
-
-/// Installs every dropped file but a `.bad` one, which it says it can't.
-pub(crate) fn fake_drop_install() -> super::DropInstall {
-    super::DropInstall(std::rc::Rc::new(|path: String| {
-        Box::pin(async move {
-            if path.ends_with(".bad") {
-                return Err(format!("can't add {path}"));
-            }
-            caskade_core::lock(&DROPPED).push(path);
-            Ok(())
-        })
-    }))
-}
-
 #[test]
 fn files_dropped_on_the_library_ask_to_install_and_say_why_not() {
     use crate::drops::{DropEvent, drops};
+    use caskade_app::commands::install_requests::{InputKind, InstallRequest};
+    use caskade_core::install::JobSnapshot;
+    use caskade_ui_data::jobs::requests::InstallInbox;
     use std::path::PathBuf;
+    use std::sync::{Arc, Mutex};
+
+    struct TestDropInbox {
+        dropped: Arc<Mutex<Vec<String>>>,
+    }
+
+    #[caskade_core::store_accounts::async_trait]
+    impl InstallInbox for TestDropInbox {
+        fn pending(&self) -> Vec<InstallRequest> {
+            Vec::new()
+        }
+        async fn request(&self, _value: String) -> Result<InstallRequest, String> {
+            unreachable!()
+        }
+        async fn dropped(&self, path: String) -> Result<InstallRequest, String> {
+            if path.ends_with(".bad") {
+                return Err(format!("can't add {path}"));
+            }
+            caskade_core::lock(&self.dropped).push(path.clone());
+            Ok(InstallRequest {
+                request_id: "drop-1".into(),
+                kind: InputKind::Path,
+                value: path,
+                plan: None,
+                peer: None,
+                share: None,
+            })
+        }
+        async fn confirm(
+            &self,
+            _id: &str,
+            _root_id: Option<String>,
+        ) -> Result<JobSnapshot, String> {
+            unreachable!()
+        }
+        async fn add_collection(&self, _id: &str) -> Result<(), String> {
+            unreachable!()
+        }
+        fn dismiss(&self, _id: &str) -> Result<(), String> {
+            unreachable!()
+        }
+    }
+
     let _one = caskade_core::lock(&ONE);
     let _runtime = caskade_app::runtime::handle().enter();
-    caskade_core::lock(&DROPPED).clear();
-    let mut window = open("/library?filter=all&sort=title&layout=grid");
+    let dropped = Arc::new(Mutex::new(Vec::new()));
+    let mut data = crate::frame::tests::source().clone();
+    data.jobs = data.jobs.with_requests(Arc::new(TestDropInbox {
+        dropped: dropped.clone(),
+    }));
+    let mut window = crate::frame::pad_tests::open_frame(data, || {});
+    window.go("/library?filter=all&sort=title&layout=grid");
+    window.settle_until("the library's games", |window| {
+        window.find("data-view", "library").is_some()
+            && !window.find_all("data-index", "0").is_empty()
+    });
     // Dragged over: the hint.
     let _ = drops().send(DropEvent::Over);
     window.settle_until("the hint", |window| {
@@ -341,7 +379,7 @@ fn files_dropped_on_the_library_ask_to_install_and_say_why_not() {
         window.find("data-part", "drop-error").is_some()
     });
     assert!(window.find("data-part", "drop-hint").is_none());
-    assert_eq!(*caskade_core::lock(&DROPPED), ["/games/Setup.exe"]);
+    assert_eq!(*caskade_core::lock(&dropped), ["/games/Setup.exe"]);
     let error = window.get("data-part", "drop-error");
     assert_eq!(window.attr(error, "role").as_deref(), Some("alert"));
     assert!(window.text(error).contains("can't add /games/broken.bad"));

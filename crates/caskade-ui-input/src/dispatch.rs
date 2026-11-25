@@ -1,6 +1,5 @@
 //! The action dispatcher: pad actions and the keyboard map feed one
-//! [`Dispatcher::dispatch`]. Ported from the webview's
-//! `input/InputProvider.tsx`.
+//! [`Dispatcher::dispatch`].
 //!
 //! Command bindings get each action first; otherwise directions move focus
 //! spatially, `confirm` presses the focused control, `back` closes the open
@@ -11,8 +10,10 @@
 use crate::bindings::{self, Bindings};
 use crate::keys::{Modifiers, is_slider, is_text_entry, key_action};
 use crate::osk::types_text;
-use crate::spatial::{self, Direction, FocusMark, Spatial, focusables, is_focusable, scope};
-use crate::tree::{FocusTree, closest, contains, descendants};
+use crate::spatial::{
+    self, Direction, FocusMark, Spatial, first_focusable, focusables, is_focusable, scope,
+};
+use crate::tree::{FocusTree, closest, contains, find_descendant};
 use crate::{Action, GlyphFamily, InputSource};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -62,9 +63,7 @@ fn controls<T: FocusTree + ?Sized>(tree: &T, node: T::Node, overlay: T::Node) ->
 }
 
 fn by_id<T: FocusTree + ?Sized>(tree: &T, id: &str) -> Option<T::Node> {
-    descendants(tree, tree.root())
-        .into_iter()
-        .find(|&node| tree.attr(node, "id") == Some(id))
+    find_descendant(tree, tree.root(), |node| tree.attr(node, "id") == Some(id))
 }
 
 /// An action on its way: the bindings to try, then the default.
@@ -453,11 +452,11 @@ impl<N: Copy + Eq + std::hash::Hash + std::fmt::Debug> Dispatcher<N> {
         if let Some(dialog) = self.dialog.take()
             && ui.focused() == Some(dialog)
         {
-            let start = descendants(ui, dialog)
-                .into_iter()
-                .find(|&node| ui.attr(node, "data-focus-default").is_some())
-                .filter(|&preferred| is_focusable(ui, preferred))
-                .or_else(|| focusables(ui, dialog).into_iter().next());
+            let start = find_descendant(ui, dialog, |node| {
+                ui.attr(node, "data-focus-default").is_some()
+            })
+            .filter(|&preferred| is_focusable(ui, preferred))
+            .or_else(|| first_focusable(ui, dialog));
             if let Some(start) = start {
                 self.focus(ui, start, false);
             }

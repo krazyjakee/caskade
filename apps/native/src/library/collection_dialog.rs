@@ -1,6 +1,6 @@
-//! Makes a collection, or edits one's name, description and rules (#99, the
-//! webview's `components/collections/CollectionDialog.tsx`). A new one may
-//! start from a preset: the library's view, saved as a smart collection.
+//! Makes a collection, or edits one's name, description and rules (#99).
+//! A new one may start from a preset: the library's view, saved as a smart
+//! collection.
 
 use super::platforms;
 use crate::data::{change, use_library, use_query};
@@ -18,8 +18,7 @@ use dioxus_native::prelude::*;
 /// "Any platform"'s option.
 const ANY_PLATFORM: &str = "any";
 
-/// The library filters, by id, with their names (`rules.ts`'s
-/// `filterMessages`).
+/// The library filters, by id, with their names.
 pub fn filters() -> [(GameFilter, &'static str, String); 7] {
     [
         (GameFilter::All, "all", tp!("library filter", "All games")),
@@ -68,33 +67,17 @@ pub fn filters() -> [(GameFilter, &'static str, String); 7] {
     ]
 }
 
-/// The library sorts, by id, with their names (`rules.ts`'s
-/// `sortMessages`).
+/// The library sorts, by id, with their names.
 pub fn sorts() -> [(GameSort, &'static str, String); 6] {
     [
-        (GameSort::Title, "title", tp!("library sort", "Title")),
-        (
-            GameSort::Recent,
-            "recent",
-            tp!("library sort", "Recently played"),
-        ),
-        (
-            GameSort::Playtime,
-            "playtime",
-            tp!("library sort", "Playtime"),
-        ),
-        (
-            GameSort::Added,
-            "added",
-            tp!("library sort", "Recently added"),
-        ),
-        (GameSort::Popular, "popular", tp!("library sort", "Popular")),
-        (
-            GameSort::Released,
-            "released",
-            tp!("library sort", "Release date"),
-        ),
+        GameSort::Title,
+        GameSort::Recent,
+        GameSort::Playtime,
+        GameSort::Added,
+        GameSort::Popular,
+        GameSort::Released,
     ]
+    .map(super::view::sort_entry)
 }
 
 /// The rules a smart collection starts with: the view's, without paging.

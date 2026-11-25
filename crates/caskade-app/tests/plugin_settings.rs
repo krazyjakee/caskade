@@ -2,7 +2,7 @@
 //! validated on save, read by its backend, and removed with the plugin.
 
 use crate::guest;
-use caskade_app::commands::{plugin_ui, plugins, settings as settings_commands};
+use caskade_app::commands::{plugins, settings as settings_commands};
 use caskade_core::settings::SettingsService;
 use caskade_plugin_host::{HostOptions, Limits, PluginHost, PluginServices};
 use serde_json::json;
@@ -82,9 +82,8 @@ async fn plugin_settings_save_validated_reach_the_backend_and_go_with_uninstall(
         .unwrap();
     assert_eq!(saved.revision, 1);
     // The backend's `settings-get` sees the saved value.
-    let read = plugin_ui::plugin_request(&host, ID.into(), "settings".into(), json!(null))
-        .await
-        .unwrap();
+    let read: serde_json::Value =
+        serde_json::from_str(&host.request(ID, "settings", "null").await.unwrap()).unwrap();
     assert_eq!(read, json!({"limit": 7}));
 
     plugins::plugin_uninstall(&host, ID.into()).await.unwrap();

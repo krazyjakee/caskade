@@ -1,8 +1,8 @@
 //! RomM servers in Settings → Emulation (#1, #105): the servers and their
 //! states, adding, changing, testing, syncing and removing one, the
-//! download cache and running downloads, through the app layer's commands
-//! as the webview's `api/romm.ts` does. Passwords and API tokens go
-//! straight to the OS keychain and never come back.
+//! download cache and running downloads, through the app layer's commands.
+//! Passwords and API tokens go straight to the OS keychain and never come
+//! back.
 
 use caskade_app::commands::romm as commands;
 use caskade_core::error::ErrorReport;

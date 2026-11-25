@@ -1,6 +1,6 @@
-//! A row of game cards that pages with LT/RT (the webview's
-//! `components/ShelfRow.tsx`): a focus section, so focus comes back to the
-//! card it left, scrolling sideways when there are more cards than fit.
+//! A row of game cards that pages with LT/RT: a focus section, so focus
+//! comes back to the card it left, scrolling sideways when there are more
+//! cards than fit.
 
 use blitz_dom::NodeId;
 use caskade_ui_input::Action;

@@ -1,5 +1,4 @@
-//! The app's async runtime: one runtime for the whole process, which the
-//! shell hands to its own toolkit (Tauri's `async_runtime::set`) so that
+//! The app's async runtime: one runtime for the whole process so that
 //! everything spawns onto the same workers. Work spawned from a thread
 //! outside the runtime (startup, a window's callbacks) goes through here.
 

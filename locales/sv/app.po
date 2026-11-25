@@ -292,7 +292,7 @@ msgid "(now part of {into})"
 msgstr "(nu en del av {into})"
 
 #. After the signed-in account's name
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "(you)"
 msgstr "(du)"
 
@@ -409,7 +409,7 @@ msgstr "En PIN består av 4 till 8 siffror."
 msgid "A PIN locks this account."
 msgstr "En PIN låser det här kontot."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "A PIN locks this account. Changes at once."
 msgstr "En PIN låser det här kontot. Gäller direkt."
 
@@ -607,7 +607,8 @@ msgstr "Om butikskonton"
 msgid "About {0} before compression. Never included: {1}."
 msgstr "Ungefär {0} före komprimering. Ingår aldrig: {1}."
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Accent colour"
 msgstr "Accentfärg"
@@ -631,7 +632,7 @@ msgstr "Godkänn valda ({count})"
 msgid "Accounts"
 msgstr "Konton"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Accounts"
@@ -642,7 +643,7 @@ msgstr "Konton"
 msgid "Accounts and PINs"
 msgstr "Konton och PIN-koder"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Accounts couldn't be loaded"
 msgstr "Konton kunde inte läsas in"
 
@@ -703,7 +704,7 @@ msgstr "Aktivitet"
 #. Add the exclusion pattern
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/web.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/emulation/scanners/exclusions.rs
 #: apps/native/src/settings/streaming/stream_from.rs
 msgid "Add"
@@ -750,11 +751,11 @@ msgstr "Lägg till en lagringsplats"
 msgid "Add a storage location in Settings → Storage."
 msgstr "Lägg till en lagringsplats i Inställningar → Lagring."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Add account"
 msgstr "Lägg till konto"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Add account…"
 msgstr "Lägg till konto…"
 
@@ -926,12 +927,13 @@ msgstr "Adress eller kod"
 msgid "Adds it to the library"
 msgstr "Lägger till det i biblioteket"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Adjust the theme to taste."
 msgstr "Anpassa temat efter tycke och smak."
 
 #: apps/native/src/accounts/menu.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "account role"
 msgid "Admin"
 msgstr "Administratör"
@@ -963,7 +965,7 @@ msgctxt "script phase"
 msgid "After the game starts"
 msgstr "Efter att spelet startat"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Age ratings"
 msgstr "Åldersgränser"
@@ -1052,7 +1054,7 @@ msgstr "Tillåt alltid det här spelet för det här kontot"
 msgid "Always use the default location"
 msgstr "Använd alltid standardplatsen"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Amber"
 msgstr "Bärnsten"
@@ -1070,7 +1072,7 @@ msgstr "En administratörs-PIN krävs för att spela {game}, klassat {rating}"
 msgid "An admin PIN is needed to play {game}, which is unrated"
 msgstr "En administratörs-PIN krävs för att spela {game}, som saknar åldersklassning"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "An admin changes everything, other accounts included."
 msgstr "En administratör kan ändra allt, även andra konton."
 
@@ -1109,7 +1111,7 @@ msgstr "Ett överlägg på spelkort"
 msgid "And {0} more."
 msgstr "Och {0} till."
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Animations"
 msgstr "Animationer"
@@ -1184,8 +1186,8 @@ msgstr "AppImage-fil"
 msgid "Appearance"
 msgstr "Utseende"
 
-#: apps/native/src/settings/accounts.rs
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Appearance"
@@ -1525,7 +1527,7 @@ msgstr "Programnamn"
 msgid "Bitrate"
 msgstr "Bithastighet"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Blue"
 msgstr "Blå"
@@ -1584,7 +1586,7 @@ msgstr "Bygge"
 msgid "Built from source on this system"
 msgstr "Byggd från källkod på det här systemet"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Buttons, selection and glows; kept readable on the theme."
 msgstr "Knappar, markering och glöd; hålls läsbart med temat."
 
@@ -1645,7 +1647,7 @@ msgctxt "streaming device"
 msgid "Can't be reached"
 msgstr "Kan inte nås"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "Can't be used:"
 msgstr "Kan inte användas:"
 
@@ -1743,7 +1745,7 @@ msgstr "Kan inte köra program här"
 msgid "Capacity"
 msgstr "Kapacitet"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Card size"
 msgstr "Kortstorlek"
@@ -2357,7 +2359,7 @@ msgstr "Samlingar"
 msgid "Collections for {title}"
 msgstr "Samlingar för {title}"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "density"
 msgid "Comfortable"
 msgstr "Bekväm"
@@ -2380,7 +2382,7 @@ msgstr "Kommandon som körs kring varje spels start. Emulatorprofiler och spel k
 msgid "Community"
 msgstr "Gemenskap"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "density"
 msgid "Compact"
 msgstr "Kompakt"
@@ -2751,16 +2753,17 @@ msgstr "Markör vänster"
 msgid "Cursor right"
 msgstr "Markör höger"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Custom CSS"
 msgstr "Anpassad CSS"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Custom CSS wasn't saved:"
 msgstr "Anpassad CSS sparades inte:"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgid "Custom accent colour"
 msgstr "Egen accentfärg"
 
@@ -2773,7 +2776,7 @@ msgstr "Egna mappar"
 msgid "Custom profile"
 msgstr "Egen profil"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Cyan"
 msgstr "Cyan"
@@ -2865,7 +2868,7 @@ msgid "Defaults apply to compatible games that use Platform default. BIOS folder
 msgstr "Standardvalen gäller för kompatibla spel som använder Plattformens standard. BIOS-mappar sparas per plattform."
 
 #: apps/native/src/collections/delete.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Delete"
 msgstr "Radera"
 
@@ -2880,12 +2883,12 @@ msgctxt "on-screen keyboard"
 msgid "Delete"
 msgstr "Radera"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Delete {name}"
 msgstr "Radera {name}"
 
 #: apps/native/src/collections/delete.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Delete {name}?"
 msgstr "Radera {name}?"
 
@@ -2902,12 +2905,12 @@ msgstr "Radera ”{0}”?"
 #: apps/native/src/collections/actions.rs
 #: apps/native/src/flows/scripts.rs
 #: apps/native/src/game/editor/actions.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Delete…"
 msgstr "Radera…"
 
 #: apps/native/src/collections/delete.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Deleting…"
 msgstr "Raderar…"
 
@@ -2916,7 +2919,7 @@ msgstr "Raderar…"
 msgid "Delisted"
 msgstr "Borttaget från butiken"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Density"
 msgstr "Täthet"
@@ -3017,7 +3020,7 @@ msgstr "Identifieringen avbröts · {found} hittades"
 msgid "Dev"
 msgstr "Utv"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgctxt "theme source"
 msgid "Dev folder"
 msgstr "Utvecklingsmapp"
@@ -3057,7 +3060,8 @@ msgstr "Enheter: öppna Inställningar → Enheter"
 msgid "Didn't start"
 msgstr "Startade inte"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Disable custom CSS"
 msgstr "Stäng av egen CSS"
@@ -3104,7 +3108,7 @@ msgstr "Att koppla från behåller kontots spel. Att ta bort det tar bort spelen
 msgid "Disconnect…"
 msgstr "Koppla från…"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
@@ -3212,7 +3216,6 @@ msgstr "Nedladdad metadata och bilder"
 
 #. A background job's phase
 #: apps/native/src/activity/labels.rs
-#: apps/native/src/frame/status_bar.rs
 msgid "Downloading"
 msgstr "Laddar ner"
 
@@ -3328,7 +3331,8 @@ msgid "Edit server"
 msgstr "Redigera server"
 
 #: apps/native/src/library/collection_dialog.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Edit {name}"
 msgstr "Redigera {name}"
 
@@ -3346,7 +3350,7 @@ msgstr "Redigerarens avsnitt"
 
 #: apps/native/src/collections/actions.rs
 #: apps/native/src/game_menu/menu.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Edit…"
 msgstr "Redigera…"
 
@@ -3374,7 +3378,7 @@ msgstr "Emulerade"
 msgid "Emulation"
 msgstr "Emulering"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Emulation"
@@ -3467,7 +3471,7 @@ msgstr "Emulatorerna kunde inte läsas in."
 msgid "Emulators to install"
 msgstr "Emulatorer att installera"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Emulators, ROM scanners, BIOS files and RomM servers."
 msgstr "Emulatorer, ROM-skannrar, BIOS-filer och RomM-servrar."
 
@@ -3813,7 +3817,7 @@ msgstr "I en vecka"
 msgid "For each game. The newest stay, and so does any save that isn't settled between devices yet."
 msgstr "För varje spel. De nyaste stannar kvar, och så gör alla sparfiler som enheterna inte har enats om än."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "For every account. Age limits are set on each account."
 msgstr "För alla konton. Åldersgränser ställs in för varje konto."
 
@@ -3872,7 +3876,7 @@ msgstr "Från"
 msgid "From Steam, Epic, GOG, Heroic, Lutris and more."
 msgstr "Från Steam, Epic, GOG, Heroic, Lutris med flera."
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgctxt "theme source"
 msgid "From a plugin"
 msgstr "Från ett tillägg"
@@ -3897,7 +3901,7 @@ msgstr "Från dina andra enheter"
 msgid "From your sources"
 msgstr "Från dina källor"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "animations setting"
 msgid "Full"
 msgstr "Fullständiga"
@@ -4087,7 +4091,7 @@ msgstr "Spel på den här datorn"
 msgid "Games owned by other launchers stay in their launcher locations."
 msgstr "Spel som tillhör andra startprogram stannar där deras startprogram har dem."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Games rated above it need an admin's PIN."
 msgstr "Spel med högre åldersgräns kräver en administratörs PIN."
 
@@ -4137,7 +4141,7 @@ msgstr "Spel, konton, samlingar och spelhistorik kom från {name}. Ställ nu in 
 msgid "Games, play time, collections, edits, launch actions, accounts and settings. Always included."
 msgstr "Spel, speltid, samlingar, ändringar, startåtgärder, konton och inställningar. Ingår alltid."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
@@ -4223,7 +4227,7 @@ msgstr "Hämtade {files} från RomM."
 msgid "Got {files}."
 msgstr "Hämtade {files}."
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Green"
 msgstr "Grön"
@@ -4341,7 +4345,7 @@ msgstr "Hemdator"
 msgid "How Caskade finds, installs and plays your games, and how it looks and syncs."
 msgstr "Hur Caskade hittar, installerar och spelar dina spel, och hur det ser ut och synkar."
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "How Caskade looks. Themes restyle every view through design tokens."
 msgstr "Hur Caskade ser ut. Teman ändrar stilen på alla vyer via designtokens."
 
@@ -4361,11 +4365,11 @@ msgstr "Hur emulerade spel öppnas."
 msgid "How far {name} got"
 msgstr "Hur långt {name} kom"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "How games are shown in grids."
 msgstr "Hur spel visas i rutnät."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "How games download and install, and torrent links."
 msgstr "Hur spel laddas ner och installeras, och torrentlänkar."
 
@@ -4653,7 +4657,7 @@ msgstr "Installera från länk"
 msgid "Install from link…"
 msgstr "Installera från länk…"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Install games"
 msgstr "Installera spel"
 
@@ -4706,7 +4710,7 @@ msgstr "Installera {repository}?"
 msgid "Install {title}?"
 msgstr "Installera {title}?"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Install, uninstall and move games. Updates run for everyone."
 msgstr "Installera, avinstallera och flytta spel. Uppdateringar körs för alla."
 
@@ -4745,7 +4749,7 @@ msgctxt "release state"
 msgid "Installed"
 msgstr "Installerad"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgctxt "theme source"
 msgid "Installed"
 msgstr "Installerat"
@@ -4801,7 +4805,7 @@ msgstr "Installerad: den finns under Spela från ditt bibliotek."
 msgid "Installer"
 msgstr "Installationsprogram"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Installer"
@@ -4811,7 +4815,6 @@ msgstr "Installationsprogram"
 #. A background job's phase
 #: apps/native/src/activity/card.rs
 #: apps/native/src/activity/labels.rs
-#: apps/native/src/frame/status_bar.rs
 msgid "Installing"
 msgstr "Installation"
 
@@ -4859,7 +4862,7 @@ msgctxt "library source"
 msgid "Installs"
 msgstr "Installationer"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Interface scale"
 msgstr "Gränssnittets skala"
@@ -5090,7 +5093,7 @@ msgstr "Behåll dem"
 msgid "Keep this device's emulator for {platform}"
 msgstr "Behåll den här enhetens emulator för {platform}"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Keeps your CSS but stops applying it, to recover from a broken look."
 msgstr "Behåller din CSS men slutar tillämpa den, så att du kan återställa ett trasigt utseende."
 
@@ -5135,7 +5138,7 @@ msgstr "Språk"
 msgid "Language & Region"
 msgstr "Språk och region"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Language, startup, closing and updates."
 msgstr "Språk, start, stängning och uppdateringar."
 
@@ -5219,7 +5222,7 @@ msgstr "Starta med"
 msgid "Launchers"
 msgstr "Startprogram"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/launchers.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
@@ -5283,7 +5286,7 @@ msgstr "Bokstäver"
 #: apps/native/src/frame/sidebar.rs
 #: apps/native/src/game/back.rs
 #: apps/native/src/library/view.rs
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/devices/sync_choices.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search/search_index.rs
@@ -5364,7 +5367,7 @@ msgstr "Live: uppdateras var {interval}, graferna visar de senaste {span}."
 msgid "Load more"
 msgstr "Läs in fler"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "Load theme folder…"
 msgstr "Läs in temamapp…"
 
@@ -5380,7 +5383,7 @@ msgstr "Läser in ROM-skannrar…"
 msgid "Loading RomM servers…"
 msgstr "Läser in RomM-servrar…"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Loading accounts…"
 msgstr "Läser in konton…"
 
@@ -5472,7 +5475,7 @@ msgstr "Läser in IGDB-matchningen…"
 msgid "Loading the catalogue…"
 msgstr "Läser in katalogen…"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/profile.rs
 msgid "Loading your profile…"
 msgstr "Läser in din profil…"
 
@@ -5480,7 +5483,7 @@ msgstr "Läser in din profil…"
 #: apps/native/src/game/editor/artwork.rs
 #: apps/native/src/game/editor/mod.rs
 #: apps/native/src/plugins/mod.rs
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 #: apps/native/src/store/view.rs
 msgid "Loading…"
 msgstr "Läser in…"
@@ -5545,7 +5548,7 @@ msgid "Look"
 msgstr "Visa"
 
 #. The appearance
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "settings section"
 msgid "Look"
 msgstr "Utseende"
@@ -5749,7 +5752,7 @@ msgctxt "window"
 msgid "Maximize"
 msgstr "Maximera"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Maximum age rating"
 msgstr "Högsta åldersgräns"
 
@@ -5795,7 +5798,7 @@ msgctxt "window"
 msgid "Minimize"
 msgstr "Minimera"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Minimum width of a game card."
 msgstr "Minsta bredd för ett spelkort."
 
@@ -5834,7 +5837,7 @@ msgstr "Lägen"
 msgid "More than one manifest game matches: {titles}. Enter the right one's name below."
 msgstr "Fler än ett spel i manifestet matchar: {titles}. Ange det rätta namnet nedan."
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "More themes in the plugin and theme catalogue"
 msgstr "Fler teman i katalogen med plugins och teman"
 
@@ -5847,7 +5850,7 @@ msgstr "Flest betyg"
 msgid "Most rated this past year"
 msgstr "Flest betyg det senaste året"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Motion & Effects"
 msgstr "Rörelse och effekter"
 
@@ -5911,7 +5914,6 @@ msgstr "Flytta upp"
 
 #. A background job's phase
 #: apps/native/src/activity/labels.rs
-#: apps/native/src/frame/status_bar.rs
 msgid "Moving"
 msgstr "Flyttar"
 
@@ -5920,7 +5922,7 @@ msgid "Moving…"
 msgstr "Flyttar…"
 
 #: apps/native/src/accounts/menu.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/profile.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "My profile"
@@ -5932,7 +5934,8 @@ msgid "Name"
 msgstr "Namn"
 
 #: apps/native/src/onboarding/account.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/profile.rs
 #: apps/native/src/settings/search/search_index.rs
 msgctxt "account"
 msgid "Name"
@@ -6118,7 +6121,7 @@ msgstr "Inga IGDB-spel matchar ”{searched}”."
 msgid "No PIN: anyone can sign in to it."
 msgstr "Ingen PIN: vem som helst kan logga in på det."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "No PIN: anyone can sign in to it. Changes at once."
 msgstr "Ingen PIN: vem som helst kan logga in på det. Ändras direkt."
 
@@ -6235,7 +6238,7 @@ msgstr "Inga jobb än. Installera ett spel från en fil, mapp eller URL."
 msgid "No limit"
 msgstr "Ingen gräns"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "age limit"
 msgid "No limit"
 msgstr "Ingen gräns"
@@ -6334,7 +6337,7 @@ msgstr ""
 msgid "No strategy details are available yet."
 msgstr "Det finns inga strategidetaljer än."
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "No themes found. Rescan themes looks for them again."
 msgstr "Inga teman hittades. Sök efter teman igen letar efter dem på nytt."
 
@@ -6955,7 +6958,7 @@ msgstr "Eller klistra in koden som sidan visar"
 msgid "Or use a pairing link"
 msgstr "Eller använd en parkopplingslänk"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Orange"
 msgstr "Orange"
@@ -6981,7 +6984,7 @@ msgstr "Andra namn"
 msgid "Output"
 msgstr "Utdata"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Overlay the game title on cover art."
 msgstr "Visa speltiteln ovanpå omslagsbilden."
 
@@ -6995,7 +6998,7 @@ msgstr "Ägs på {provider} ({account})"
 msgid "PIN"
 msgstr "PIN"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "account details"
 msgid "PIN"
 msgstr "PIN"
@@ -7154,7 +7157,7 @@ msgstr "Hämta nya och ändrade ROM:ar när Caskade öppnas."
 msgid "Pin to the top"
 msgstr "Fäst högst upp"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Pink"
 msgstr "Rosa"
@@ -7395,7 +7398,6 @@ msgctxt "library column"
 msgid "Playtime"
 msgstr "Speltid"
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Playtime"
@@ -7451,13 +7453,13 @@ msgctxt "game menu section"
 msgid "Plugins"
 msgstr "Tillägg"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Plugins"
 msgstr "Tillägg"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Plugins and add-on themes, and what they may do."
 msgstr "Tillägg och tilläggsteman, och vad de får göra."
 
@@ -7475,7 +7477,6 @@ msgctxt "catalog sort"
 msgid "Popular"
 msgstr "Populära"
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Popular"
@@ -7738,7 +7739,7 @@ msgstr "Fick slut på tid"
 msgid "Rated"
 msgstr "Betygsatt"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Rating board"
 msgstr "Klassificeringsorgan"
@@ -7850,13 +7851,11 @@ msgstr "Nyligen spelade"
 msgid "Recently Released"
 msgstr "Nyligen släppta"
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Recently added"
 msgstr "Nyligen tillagda"
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Recently played"
@@ -7880,17 +7879,17 @@ msgstr "Anslut igen"
 msgid "Reconnect the drive or network share."
 msgstr "Anslut hårddisken eller nätverksresursen igen."
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Red"
 msgstr "Röd"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Reduce effects"
 msgstr "Minska effekter"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "animations setting"
 msgid "Reduced"
 msgstr "Reducerade"
@@ -8023,7 +8022,6 @@ msgstr "Releasebygge"
 msgid "Release date"
 msgstr "Utgivningsdatum"
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Release date"
@@ -8277,7 +8275,7 @@ msgstr "Krävs"
 msgid "Requires: {path}"
 msgstr "Kräver: {path}"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "Rescan themes"
 msgstr "Sök efter teman igen"
 
@@ -8287,7 +8285,7 @@ msgstr "Sök efter teman igen"
 msgid "Reset"
 msgstr "Återställ"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Reset appearance settings"
 msgstr "Återställ utseendeinställningar"
 
@@ -8473,7 +8471,7 @@ msgstr "Visa"
 #: apps/native/src/flows/scripts.rs
 #: apps/native/src/game/editor/actions.rs
 #: apps/native/src/game/editor/saves.rs
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Revert"
 msgstr "Återgå"
 
@@ -8493,7 +8491,7 @@ msgstr "Granska möjliga spel"
 msgid "Review scan results"
 msgstr "Granska skanningsresultat"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgctxt "account"
 msgid "Role"
 msgstr "Roll"
@@ -8614,7 +8612,7 @@ msgstr "Körs vid starter"
 msgid "Rust crate"
 msgstr "Rust-crate"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Safe mode is on: your custom CSS isn't applied until Caskade starts normally."
 msgstr "Felsäkert läge är på: din anpassade CSS används inte förrän Caskade startar normalt."
 
@@ -8633,12 +8631,13 @@ msgstr "Exempel-ROM: {0}"
 #: apps/native/src/game/editor/mod.rs
 #: apps/native/src/game/emulation.rs
 #: apps/native/src/library/collection_dialog.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/profile.rs
 #: apps/native/src/settings/unsaved.rs
 msgid "Save"
 msgstr "Spara"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Save CSS"
 msgstr "Spara CSS"
 
@@ -8786,7 +8785,8 @@ msgstr "Sparar dina val innan biblioteket öppnas…"
 #: apps/native/src/game/editor/saves.rs
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/profile.rs
 #: apps/native/src/settings/devices/this_device.rs
 #: apps/native/src/settings/emulation/emulators/emulator_editor.rs
 #: apps/native/src/settings/emulation/emulators/profile_editor.rs
@@ -9063,7 +9063,7 @@ msgstr "Vald plats"
 msgid "Selecting…"
 msgstr "Väljer…"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgctxt "theming docs"
 msgid "Selectors"
 msgstr "Selektorer"
@@ -9200,7 +9200,7 @@ msgid "Settings sections"
 msgstr "Inställningsavsnitt"
 
 #. Over the Settings sections a standard account may change
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Settings sections it can change"
 msgstr "Inställningsavsnitt det kan ändra"
 
@@ -9329,7 +9329,7 @@ msgstr "Visa portar av spel"
 msgid "Show settings"
 msgstr "Visa inställningar"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Show titles on artwork"
 msgstr "Visa titlar på bilder"
@@ -9379,7 +9379,7 @@ msgstr "Logga in på {name}s sida i din webbläsare. Caskade fortsätter när si
 msgid "Sign in to an account that may do this."
 msgstr "Logga in på ett konto som får göra det här."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/profile.rs
 msgid "Sign in to change your profile."
 msgstr "Logga in för att ändra din profil."
 
@@ -9431,11 +9431,11 @@ msgstr ""
 msgid "Sign-ins stay on each device. Sign in here to import this server's games."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/profile.rs
 msgid "Signed in as {name}, a standard account."
 msgstr "Inloggad som {name}, ett standardkonto."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/profile.rs
 msgid "Signed in as {name}, an admin."
 msgstr "Inloggad som {name}, en administratör."
 
@@ -9608,7 +9608,8 @@ msgid "Split into arguments as a shell would, but no shell runs. Quote a value t
 msgstr "Delas upp i argument som i ett skal, men inget skal körs. Sätt citattecken runt ett värde som innehåller mellanslag."
 
 #: apps/native/src/accounts/menu.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "account role"
 msgid "Standard"
 msgstr "Standard"
@@ -9805,7 +9806,7 @@ msgstr "Stoppar…"
 msgid "Storage"
 msgstr "Lagring"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Storage"
@@ -9965,7 +9966,7 @@ msgid "Syncing…"
 msgstr "Synkar…"
 
 #. Follow the operating system's reduced-motion setting
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "animations setting"
 msgid "System"
 msgstr "System"
@@ -9980,7 +9981,7 @@ msgstr "System"
 msgid "System ({systemName})"
 msgstr "System ({systemName})"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "System follows your OS reduced-motion setting."
 msgstr "System följer operativsystemets inställning för minskad rörelse."
 
@@ -10042,12 +10043,8 @@ msgstr "Det blev inte klart: {0}. Det är säkert att försöka igen: det som sp
 msgid "That didn't work"
 msgstr "Det fungerade inte"
 
+#: apps/native/src/data/mod.rs
 #: apps/native/src/flows/tool_request.rs
-#: apps/native/src/game/data.rs
-#: apps/native/src/game/editor/data.rs
-#: apps/native/src/game/launch.rs
-#: apps/native/src/game_menu/actions.rs
-#: apps/native/src/store/data.rs
 #, fuzzy
 #| msgid "This store isn't available in this version of Caskade."
 msgid "That isn't available in this copy of Caskade."
@@ -10235,7 +10232,7 @@ msgstr "Utdata var lång; slutet visas."
 msgid "The profile decides which files match. Imported games launch with the choice below."
 msgstr "Profilen avgör vilka filer som matchar. Importerade spel startas med valet nedan."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "The ratings games show, and the steps age limits are picked from."
 msgstr "Klassificeringarna som spel visar, och stegen som åldersgränser väljs bland."
 
@@ -10308,16 +10305,17 @@ msgid "Their stores aren't available in this version of Caskade. Their games sta
 msgstr "Deras butiker är inte tillgängliga i den här versionen av Caskade. Deras spel stannar i ditt bibliotek."
 
 #: apps/native/src/settings/addons.rs
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
+#: apps/native/src/settings/appearance/themes.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Theme"
 msgstr "Tema"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgid "Theme accent"
 msgstr "Temats accentfärg"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "Theme folder"
 msgstr "Temamapp"
 
@@ -10325,7 +10323,7 @@ msgstr "Temamapp"
 msgid "Theme, accent and layout."
 msgstr "Tema, accentfärg och layout."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Theme, look, motion and custom CSS."
 msgstr "Tema, utseende, rörelse och egen CSS."
 
@@ -10334,11 +10332,11 @@ msgstr "Tema, utseende, rörelse och egen CSS."
 msgid "Themes"
 msgstr "Teman"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "Themes couldn't be loaded"
 msgstr "Teman kunde inte läsas in"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Theming guide"
 msgstr "Temaguide"
 
@@ -10578,7 +10576,6 @@ msgctxt "library column"
 msgid "Title"
 msgstr "Titel"
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Title"
@@ -10607,7 +10604,7 @@ msgstr "För att flytta till en annan dator kopierar du dit en säkerhetskopia, 
 msgid "To pause or cancel it, use {launcher}: Caskade can't pause a store's own download."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgctxt "theming docs"
 msgid "Tokens"
 msgstr "Token"
@@ -10651,7 +10648,7 @@ msgstr "Det kan fungera att försöka igen."
 msgid "Turn off"
 msgstr "Stäng av"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Turn off blur, glow, scanlines and the backdrop grid."
 msgstr "Stäng av oskärpa, glöd, scanlinjer och bakgrundsrutnätet."
 
@@ -10677,7 +10674,7 @@ msgstr "Stäng av ljud"
 msgid "Turn sounds on"
 msgstr "Slå på ljud"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Turn these down on slower machines."
 msgstr "Sänk dessa på långsammare datorer."
 
@@ -10700,7 +10697,7 @@ msgstr "Skriv en sökväg för att hoppa över mappen eller filen. Börja med > 
 msgid "USB, removable"
 msgstr "USB, flyttbar"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Under an age limit, games without a rating need an admin's PIN too."
 msgstr "Med en åldersgräns behöver även spel utan klassificering en administratörs PIN."
 
@@ -10812,7 +10809,7 @@ msgstr "Packar upp…"
 msgid "Unpin"
 msgstr "Lossa"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Unrated games need a PIN"
 msgstr "Spel utan klassificering kräver PIN"
 
@@ -10861,7 +10858,7 @@ msgid "Up to date."
 msgstr "Uppdaterad."
 
 #. An age limit no step of the chosen rating board matches: 'Up to 13+'
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Up to {age}+"
 msgstr "Upp till {age}+"
 
@@ -11135,7 +11132,7 @@ msgstr "Visa mer"
 msgid "View: {title}"
 msgstr "Vy: {title}"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Violet"
 msgstr "Violett"
@@ -11278,7 +11275,7 @@ msgid "What happens when Caskade opens."
 msgstr "Vad som händer när Caskade öppnas."
 
 #. Over a standard account's permissions
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "What it can do"
 msgstr "Vad kontot kan göra"
 
@@ -11294,7 +11291,7 @@ msgstr "Vad det kör"
 msgid "What it starts"
 msgstr "Vad det startar"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "What scans look for, their folders and ignored results."
 msgstr "Vad skanningar letar efter, deras mappar och ignorerade resultat."
 
@@ -11361,7 +11358,7 @@ msgstr "Var Caskade installerar spel och sparar sina data."
 msgid "Where games are installed"
 msgstr "Var spel installeras"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Where games install, and the default location."
 msgstr "Var spel installeras, och standardplatsen."
 
@@ -11405,7 +11402,7 @@ msgstr "Vilka startprogram som skannas"
 msgid "Which launchers are scanned: <0>Launchers</0>"
 msgstr "Vilka startprogram som skannas: <0>Startprogram</0>"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Which launchers' games join the library."
 msgstr "Vilka startprograms spel som läggs till i biblioteket."
 
@@ -11425,7 +11422,7 @@ msgstr "Vem är du?"
 msgid "Who plays here, their age limits and PINs. Wrong PIN attempts are counted on each device."
 msgstr "Vilka som spelar här, deras åldersgränser och PIN-koder. Felaktiga PIN-försök räknas på varje enhet."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Who uses Caskade here, and what each can change."
 msgstr "Vem som använder Caskade här, och vad var och en kan ändra."
 
@@ -11481,7 +11478,6 @@ msgstr "Wine, Proton, umu"
 
 #. A running job with no phase
 #: apps/native/src/activity/labels.rs
-#: apps/native/src/frame/status_bar.rs
 msgid "Working"
 msgstr "Arbetar"
 
@@ -11654,7 +11650,7 @@ msgstr "Dina andra enheter känner den under det här namnet. Enheter i samma n�
 msgid "Your other devices play these platforms with an emulator this device doesn't have. Install it to use it here too, or keep this device's."
 msgstr "Dina andra enheter spelar de här plattformarna med en emulator som den här enheten saknar. Installera den för att använda den här också, eller behåll den här enhetens."
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Your own rules, applied over the theme without a reload."
 msgstr "Dina egna regler, tillämpade över temat utan omladdning."
 
@@ -11662,7 +11658,7 @@ msgstr "Dina egna regler, tillämpade över temat utan omladdning."
 msgid "Your rating"
 msgstr "Ditt betyg"
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Your rules beat the theme and every component. Style through the contract:"
 msgstr "Dina regler går före temat och alla komponenter. Styla via kontraktet:"
 
@@ -11766,7 +11762,7 @@ msgid "bitrate, resolution, frame rate"
 msgstr "bithastighet, upplösning, bildfrekvens"
 
 #. A theme's author
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "by {0}"
 msgstr "av {0}"
 
@@ -12002,7 +11998,7 @@ msgctxt "plugin event"
 msgid "installs"
 msgstr "installationer"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "account details"
 msgid "installs games"
 msgstr "installerar spel"
@@ -12110,7 +12106,7 @@ msgstr "nätverk, internet, relä, server"
 msgid "no Caskade platform for {platforms}"
 msgstr "ingen Caskade-plattform för {platforms}"
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "account details"
 msgid "no PIN"
 msgstr "ingen PIN"
@@ -12344,7 +12340,7 @@ msgid "sync, theme"
 msgstr "synk, tema"
 
 #. Fills in for a new account's name: 'Choose a new PIN for the account'
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "the account"
 msgstr "kontot"
 
@@ -12709,7 +12705,7 @@ msgstr "{latestVersion} har släppts. Uppdateringen behåller dina sparfiler och
 msgid "{launcher} isn't installed on this computer."
 msgstr "{0} är inte installerat på den här datorn."
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "{length} / {max} characters"
 msgstr "{length} / {max} tecken"
 
@@ -12799,7 +12795,7 @@ msgstr "{name}s konto"
 msgid "{name}'s achievements are private on {provider}. Make your game details public there, then refresh."
 msgstr "{name}s prestationer är privata på {provider}. Gör dina speldetaljer offentliga där och uppdatera sedan."
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "{name}'s collections go with it. Games, installs and play history stay."
 msgstr "{name}s samlingar försvinner med kontot. Spel, installationer och spelhistorik finns kvar."
 

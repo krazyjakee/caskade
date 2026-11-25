@@ -71,7 +71,7 @@ pub fn Hero(
 ) -> Element {
     let (a, b) = game.art;
     // The genre, then the size (unless there's playtime), the playtime and
-    // when it was last played, as the webview lists them.
+    // when it was last played.
     let mut meta = vec![game.genre.clone()];
     if let Some(gb) = game.size_gb
         && game.playtime_hours.is_none_or(|hours| hours == 0.0)

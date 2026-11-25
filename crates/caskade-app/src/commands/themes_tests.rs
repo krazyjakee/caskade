@@ -1,8 +1,5 @@
 use super::*;
-use crate::{
-    error::ErrorCode,
-    events::{Emit, Event},
-};
+use crate::events::{Emit, Event};
 use caskade_core::{AppPaths, db::LibraryStore, themes::ThemeSource};
 use std::{
     sync::{Arc, Mutex},
@@ -134,13 +131,6 @@ async fn the_chosen_theme_survives_a_restart_and_a_removed_one_falls_back_with_a
             .unwrap()
             .contains("isn't installed any more")
     );
-    let gone = theme_stylesheet(&run.themes, url, "dev.example.neon").unwrap_err();
-    assert_eq!(gone.code, ErrorCode::Invalid, "{gone:?}");
-    assert!(
-        !gone.summary.contains("dev.example.neon"),
-        "{}",
-        gone.summary
-    );
     assert_eq!(run.chosen().await, "dev.example.neon");
 }
 
@@ -158,7 +148,10 @@ async fn safe_mode_starts_on_the_default_theme() {
     assert_eq!(active.id, "caskade.default");
     assert_eq!(active.requested, "dev.example.neon");
     assert!(active.safe_mode);
-    assert_eq!(active.notice.as_deref(), Some(SAFE_MODE_NOTICE));
+    assert_eq!(
+        active.notice.as_deref(),
+        Some("Safe mode: Caskade started with the default theme and without your custom CSS.")
+    );
 }
 
 #[test]

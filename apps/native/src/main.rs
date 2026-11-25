@@ -1,6 +1,5 @@
-//! Caskade's native app (#87): the main window rendered by Blitz, running
-//! the same application layer as the Tauri app (`caskade-app`). It ships
-//! as the default UI, with the legacy Tauri app retained temporarily.
+//! Caskade's native app (#87): the main window rendered by Blitz over
+//! `caskade-app`.
 //!
 //! One winit event loop (Blitz's shell) owns the main thread. Web games and
 //! videos open in windows of their own, in a process of their own: this
@@ -10,34 +9,23 @@
 // The default app must not open a console window on Windows.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-// What screen readers get, as text, for the tests (#83, #93).
 #[cfg(test)]
 mod a11y_snapshot;
 mod accounts;
-// Activity's jobs (#101).
 mod activity;
-// The anatomy catalogue (#90); the components (#93) add to it.
 mod anatomy;
-// The window's backdrop on the GPU (#149).
 mod backdrop;
-// Collections and a collection's page (#102).
 mod collections;
-// Console mode, for a TV and a pad (#107).
 mod console;
-// The data hooks (#89).
 mod data;
 mod dialogs;
-// Files dragged onto the window: the library installs them (#99).
 mod drops;
 mod flows;
 mod forwarded;
-// The frame around the views: sidebar, top bar, status bar (#96).
 mod frame;
 #[cfg(any(debug_assertions, feature = "gallery"))]
 mod gallery;
-// A game's page, and what Play asks before a game starts (#100).
 mod game;
-// Games' menus, quick looks and the dialogs they open (#99).
 mod game_menu;
 mod home;
 mod i18n;
@@ -46,9 +34,7 @@ mod launch;
 mod library;
 mod onboarding;
 mod paste;
-// Plugins' drawn UI (#109).
 mod plugins;
-// Navigation between the pages (#96), in place of the webview's router.
 mod router;
 mod settings;
 mod shell;
@@ -59,7 +45,6 @@ mod state_file;
 mod store;
 mod theme;
 mod tray;
-// The component library (#93).
 mod ui;
 mod updater;
 mod window_state;
@@ -68,7 +53,7 @@ use std::sync::{Arc, OnceLock};
 
 use dioxus_native::prelude::*;
 
-/// Most workers the app's async runtime starts, as the Tauri app.
+/// Most workers the app's async runtime starts.
 const ASYNC_WORKERS: usize = 4;
 
 /// The main window's state keeper, for the root component and the exit.
@@ -78,8 +63,7 @@ fn main() {
     // Before any thread exists, so none keeps a malloc arena of its own: by
     // default glibc gives every thread one (up to eight per core), and the
     // freed memory they hold made the tray-idle app on a real library
-    // several hundred MB larger (#111). The Tauri shell did this; the
-    // native app it started didn't.
+    // several hundred MB larger (#111).
     caskade_malloc::limit_arenas();
     caskade_malloc::trim_every(std::time::Duration::from_secs(60));
     // These entry points must run before the app's runtime or event loop.
@@ -120,9 +104,9 @@ fn main() {
         return;
     }
     // `caskade-native --web-game <url>` / `--video <id>`: a game's or a
-    // video's window, not the app. Their WebKitGTK first gets the renderer
-    // the Tauri app picks for its own (it may restart the process); Blitz's
-    // main window doesn't use WebKit.
+    // video's window, not the main app. Their WebKitGTK picks a GPU renderer
+    // first (which may restart the process); Blitz's main window doesn't use
+    // WebKit.
     if let Some(window) = caskade_player::Window::from_args(std::env::args_os()) {
         caskade_player::webkit::prefer_gpu();
         logging();
@@ -416,7 +400,7 @@ fn window_ready(window: Arc<dyn dioxus_native::winit::window::Window>) {
     });
 }
 
-/// Logs to stderr and the daily files, as the Tauri app does.
+/// Logs to stderr and the daily files.
 fn logging() {
     caskade_app::logging::init("Caskade (native)", env!("CARGO_PKG_VERSION"));
 }

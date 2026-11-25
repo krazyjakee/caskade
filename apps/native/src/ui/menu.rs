@@ -283,8 +283,7 @@ fn Item(
             onblur: move |_| interaction.blur(),
             onmouseenter: move |_| {
                 interaction.enter();
-                // The item under the pointer is the one keys act on, as in
-                // react-aria's menus (#159).
+                // The item under the pointer is the one keys act on (#159).
                 if !disabled && let Some(node) = me() {
                     input.focus(node);
                 }

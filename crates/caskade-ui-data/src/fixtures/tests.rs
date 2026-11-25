@@ -6,9 +6,8 @@ use caskade_core::{
 };
 use std::time::Duration;
 
-/// The fixture library, game by game (#139): what the webview's
-/// `fixtures.ts` showed, so fixtures mode keeps the library its screenshots,
-/// tests and docs were made on.
+/// The fixture library, game by game (#139), so fixtures mode keeps the
+/// library its screenshots, tests and docs were made on.
 const GAMES_JSON: &str = include_str!("games.json");
 
 fn all(limit: u32) -> ListGames {

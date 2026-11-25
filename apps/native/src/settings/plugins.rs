@@ -1,8 +1,7 @@
-//! Settings → Plugins (#104), as the webview's `PluginsSettings` and
-//! `pluginTerms.ts`: the installed plugins with their status, what they
-//! may do in a few words, turning them on and off, reviewing what one asks
-//! for before it's allowed or installed from a folder, its details, and
-//! uninstalling. A right click offers a row's buttons. The add-ons
+//! Settings → Plugins (#104): the installed plugins with their status, what
+//! they may do in a few words, turning them on and off, reviewing what one
+//! asks for before it's allowed or installed from a folder, its details,
+//! and uninstalling. A right click offers a row's buttons. The add-ons
 //! catalogue follows (`addons.rs`), then each enabled plugin's settings:
 //! its own `settings.pages`, drawn by its backend (#109), or the page made
 //! from its settings schema. A 0.1 plugin's JavaScript UI doesn't run here,
@@ -681,9 +680,9 @@ fn PluginRow(
     }
 }
 
-/// Each enabled plugin's settings, as the webview's `PluginSettingsPages`:
-/// its own `settings.pages` drawn by its backend (#109), or else the page
-/// made from its settings schema; nothing when none has any.
+/// Each enabled plugin's settings: its own `settings.pages` drawn by its
+/// backend (#109), or else the page made from its settings schema; nothing
+/// when none has any.
 #[component]
 fn PluginSettingsPages() -> Element {
     let list = use_plugins_query(|plugins| async move { plugins.list().await });

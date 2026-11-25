@@ -192,7 +192,7 @@ fn edit_state() -> caskade_core::model::GameEditState {
 /// go.
 #[test]
 fn every_control_in_the_game_editor_has_a_name() {
-    use crate::game::editor::data::{SaveLocationRow, SaveLocations};
+    use crate::game::editor::data::{SaveLocationView, SaveLocationsState};
     use crate::game::editor::tests::{EditScript, edit_script};
     use caskade_core::launch::ReleaseActions;
     use caskade_core::model::{
@@ -244,16 +244,18 @@ fn every_control_in_the_game_editor_has_a_name() {
             }],
             settings: EntryActionSettings::default(),
         }],
-        locations: Some(SaveLocations {
+        locations: Some(SaveLocationsState {
+            entry_id: "entry-1".to_owned(),
             revision: 1,
             preferences: SavePreferences::default(),
             matched: SaveMatch::Unknown,
-            automatic: vec![SaveLocationRow {
+            automatic: vec![SaveLocationView {
                 spec: LocationSpec {
                     kind: LocationKind::Folder,
                     path: "/saves/fixture".to_owned(),
                 },
-                files: 3,
+                tags: Vec::new(),
+                file_count: 3,
             }],
             locations: Vec::new(),
             warnings: Vec::new(),

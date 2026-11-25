@@ -1,7 +1,7 @@
-//! Settings → Statistics (#156, #105), as the webview's `statistics/`:
-//! this machine's CPU, GPUs, memory, network and storage, live. It watches
-//! the core's sampler only while it is shown and the window is visible
-//! (`useSystemStats`): a watch renewed every ten seconds, each sample as it
+//! Settings → Statistics (#156, #105): this machine's CPU, GPUs, memory,
+//! network and storage, live. It watches the core's sampler only while it
+//! is shown and the window is visible (`useSystemStats`): a watch renewed
+//! every ten seconds, each sample as it
 //! comes, staleness checked between samples.
 
 use crate::data::sleep;

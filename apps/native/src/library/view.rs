@@ -1,26 +1,28 @@
-//! The library view (#99, `views/library/LibraryView.tsx`): the toolbar
-//! (sort, grid or list, the platform it's narrowed to, the search it shows),
-//! the virtual grid or list of the route's games, the alphabet bar when it's
-//! sorted by title, and what it says when there are none or they didn't
-//! load. LB and RB step through the filters.
+//! The library view (#99): the toolbar (sort, grid or list, the platform
+//! it's narrowed to, the search it shows), the virtual grid or list of the
+//! route's games, the alphabet bar when it's sorted by title, and what it
+//! says when there are none or they didn't load. LB and RB step through the
+//! filters.
 
 use super::collection_dialog::{CollectionDialog, smart_preset};
-use super::platform_grid::{PlatformGrid, breakdown};
+use super::platform_grid::{self, PlatformGrid, breakdown};
 use super::selection::use_selection_provider;
 use super::selection_bar::{AllIdsProp, SelectionBar};
 use super::web::{AddWebGame, WebMosaic, use_web_games};
 use super::{Events, Layout, VirtualLibrary};
-use crate::data::{Query, use_library, use_library_page, use_query};
+use crate::data::{DataSource, Query, use_library, use_query};
 use crate::input::{Bind, use_input_action};
 use crate::router::{LIBRARY_FILTERS, LibraryRoute, Route, RouteLink, use_router};
 use crate::ui::{ErrorNotice, Select, SelectOption, Svg, Tooltip, icons};
 use caskade_core::devices::DevicesStatus;
+use caskade_core::error::ErrorReport;
 use caskade_core::model::TitleLetter;
 use caskade_core::model::{GameFilter, GameSort, ListGames};
-use caskade_ui_data::Key as DataKey;
+use caskade_ui_data::{Changed, Key as DataKey};
 use caskade_ui_i18n::{t, tp};
 use caskade_ui_input::Action;
 use dioxus_native::prelude::*;
+use tokio::sync::broadcast;
 
 /// The fewest games that get the alphabet bar.
 const ALPHABET_BAR_MIN_GAMES: u64 = 50;
@@ -29,32 +31,29 @@ const ALPHABET_BAR_MIN_GAMES: u64 = 50;
 #[derive(Clone, Copy)]
 pub(super) struct LibraryDevices(pub Query<Option<DevicesStatus>>);
 
+/// One library sort with its id and translated label.
+pub(super) fn sort_entry(sort: GameSort) -> (GameSort, &'static str, String) {
+    match sort {
+        GameSort::Recent => (sort, "recent", tp!("library sort", "Recently played")),
+        GameSort::Title => (sort, "title", tp!("library sort", "Title")),
+        GameSort::Popular => (sort, "popular", tp!("library sort", "Popular")),
+        GameSort::Playtime => (sort, "playtime", tp!("library sort", "Playtime")),
+        GameSort::Added => (sort, "added", tp!("library sort", "Recently added")),
+        GameSort::Released => (sort, "released", tp!("library sort", "Release date")),
+    }
+}
+
 /// The sorts, in the menu's order, with their names.
 fn sorts() -> [(GameSort, &'static str, String); 6] {
     [
-        (
-            GameSort::Recent,
-            "recent",
-            tp!("library sort", "Recently played"),
-        ),
-        (GameSort::Title, "title", tp!("library sort", "Title")),
-        (GameSort::Popular, "popular", tp!("library sort", "Popular")),
-        (
-            GameSort::Playtime,
-            "playtime",
-            tp!("library sort", "Playtime"),
-        ),
-        (
-            GameSort::Added,
-            "added",
-            tp!("library sort", "Recently added"),
-        ),
-        (
-            GameSort::Released,
-            "released",
-            tp!("library sort", "Release date"),
-        ),
+        GameSort::Recent,
+        GameSort::Title,
+        GameSort::Popular,
+        GameSort::Playtime,
+        GameSort::Added,
+        GameSort::Released,
     ]
+    .map(sort_entry)
 }
 
 /// The library's href with `change` made to `library`.
@@ -81,60 +80,25 @@ fn use_title_letters(query: ReadSignal<ListGames>) -> Query<Vec<TitleLetter>> {
     })
 }
 
-/// Installs a file dropped on the library: asks for its install, which
-/// opens the install confirmation, or says why it can't.
-pub type DropFuture = std::pin::Pin<Box<dyn std::future::Future<Output = Result<(), String>>>>;
-
-/// What installs dropped files: a test's, else the running app's install
-/// requests.
-#[derive(Clone)]
-pub struct DropInstall(pub std::rc::Rc<dyn Fn(String) -> DropFuture>);
-
-impl DropInstall {
-    /// The running app's; `None` where it can't install (no drop zone then,
-    /// as the webview has it).
-    fn of_app() -> Option<Self> {
-        crate::shell::services()?.install_requests.as_ref()?;
-        Some(Self(std::rc::Rc::new(|path: String| {
-            Box::pin(async move {
-                caskade_app::runtime::spawn(async move {
-                    let requests = crate::shell::services()
-                        .and_then(|services| services.install_requests.as_ref())
-                        .ok_or_else(|| t!("Could not add the dropped file."))?;
-                    caskade_app::commands::install_requests::request_dropped_install(
-                        &crate::shell::sink(),
-                        requests,
-                        path,
-                    )
-                    .await
-                    .map(drop)
-                })
-                .await
-                .unwrap_or_else(|_| Err(t!("Could not add the dropped file.")))
-            })
-        })))
-    }
-}
-
-/// Files dropped on the library install (`LibraryDrop.tsx`): a shortcut, a
-/// game's program or folder, an installer or an archive. The core works out
-/// what each installs and the install confirmation opens with it. Whether
-/// files are over the window now, and why the last drop failed.
+/// Files dropped on the library install: a shortcut, a game's program or
+/// folder, an installer or an archive. The core works out what each installs
+/// and the install confirmation opens with it. Whether files are over the
+/// window now, and why the last drop failed.
 fn use_library_drop() -> (Signal<bool>, Signal<Option<String>>) {
     let mut over = use_signal(|| false);
     let mut error = use_signal(|| None::<String>);
+    let jobs = use_context::<DataSource>().jobs;
     use_hook(move || {
-        let Some(install) = try_consume_context::<DropInstall>().or_else(DropInstall::of_app)
-        else {
+        if !jobs.takes_requests() {
             return;
-        };
+        }
         let mut drops = crate::drops::drops().subscribe();
         spawn(async move {
             loop {
                 let event = match drops.recv().await {
                     Ok(event) => event,
-                    Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
-                    Err(tokio::sync::broadcast::error::RecvError::Closed) => break,
+                    Err(broadcast::error::RecvError::Lagged(_)) => continue,
+                    Err(broadcast::error::RecvError::Closed) => break,
                 };
                 match event {
                     crate::drops::DropEvent::Over => over.set(true),
@@ -143,7 +107,14 @@ fn use_library_drop() -> (Signal<bool>, Signal<Option<String>>) {
                         over.set(false);
                         error.set(None);
                         for path in paths {
-                            if let Err(message) = (install.0)(path.display().to_string()).await {
+                            let jobs = jobs.clone();
+                            let path = path.display().to_string();
+                            let result = caskade_app::runtime::spawn(async move {
+                                jobs.request_dropped(path).await
+                            })
+                            .await
+                            .unwrap_or_else(|_| Err(t!("Could not add the dropped file.")));
+                            if let Err(message) = result {
                                 error.set(Some(message));
                             }
                         }
@@ -158,6 +129,7 @@ fn use_library_drop() -> (Signal<bool>, Signal<Option<String>>) {
 #[component]
 pub fn LibraryView(library: LibraryRoute) -> Element {
     let router = use_router();
+    let source = use_context::<DataSource>();
     let devices = crate::data::status::use_devices();
     use_context_provider(|| LibraryDevices(devices));
     let web = library.filter == GameFilter::Web;
@@ -169,29 +141,55 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
         platform: library.platform.clone(),
         ..ListGames::default()
     };
-    // How many games there are, and whether they load.
-    let count_query = ListGames {
-        limit: 1,
-        ..query.clone()
-    };
-    let mut counted = use_signal(|| count_query.clone());
-    if *counted.peek() != count_query {
-        counted.set(count_query);
+    let mut query_sig = use_signal(|| query.clone());
+    // Page-0 total or initial failure reported by `VirtualLibrary`.
+    let mut grid_status = use_signal(|| None::<Result<u64, ErrorReport>>);
+    if *query_sig.peek() != query {
+        query_sig.set(query.clone());
+        if grid_status.peek().is_some() {
+            grid_status.set(None);
+        }
     }
-    let count = use_library_page(counted.into());
-    let (total, error) = match &*count.read() {
-        Some(Ok(page)) => (Some(page.total), None),
-        Some(Err(error)) => (None, Some(error.clone())),
-        None => (None, None),
+    // When the grid is unmounted (empty or initial error), a library change
+    // remounts it so it loads again.
+    use_hook({
+        let mut events = source.events.subscribe();
+        move || {
+            spawn(async move {
+                loop {
+                    let stale = match events.recv().await {
+                        Ok(event) => Changed::from_event(&event).affects(&DataKey::Games),
+                        Err(broadcast::error::RecvError::Lagged(_)) => true,
+                        Err(broadcast::error::RecvError::Closed) => break,
+                    };
+                    if stale && matches!(&*grid_status.peek(), Some(Ok(0) | Err(_))) {
+                        grid_status.set(None);
+                    }
+                }
+            });
+        }
+    });
+    let letters = use_title_letters(query_sig.into());
+    // The Web tab shows its games as a mosaic, every one at once.
+    let mosaic_query = use_web_games(query_sig.into());
+    let (total, error) = if web {
+        match &*mosaic_query.read() {
+            Some(Ok(games)) => (Some(games.len() as u64), None),
+            Some(Err(error)) => (None, Some(error.clone())),
+            None => (None, None),
+        }
+    } else {
+        match &*grid_status.read() {
+            Some(Ok(total)) => (Some(*total), None),
+            Some(Err(error)) => (None, Some(error.clone())),
+            None => (None, None),
+        }
     };
     let alphabet = !web
         && library.sort == GameSort::Title
         && total.is_some_and(|total| total >= ALPHABET_BAR_MIN_GAMES);
-    let letters = use_title_letters(counted.into());
-    // The Web tab shows its games as a mosaic, every one at once.
-    let mosaic = use_web_games(counted.into());
     let mosaic = if web {
-        mosaic
+        mosaic_query
             .read()
             .as_ref()
             .and_then(|games| games.as_ref().ok().cloned())
@@ -200,8 +198,8 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
         None
     };
     // Emulated's games by platform, when they span several.
-    let platforms = use_query(DataKey::Summary, move |data| {
-        let query = counted();
+    let platforms_query = use_query(DataKey::Summary, move |data| {
+        let query = query_sig();
         async move {
             let wanted = query.filter == GameFilter::Emulated
                 && query.platform.is_none()
@@ -214,7 +212,8 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
             }
         }
     });
-    let platforms = platforms
+    let platforms_loading = platform_grid::wanted(&library) && platforms_query.read().is_none();
+    let platforms = platforms_query
         .read()
         .as_ref()
         .and_then(|list| list.as_ref().ok())
@@ -284,8 +283,8 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
     // Save as collection: the view's filter, sort, search and platform as
     // a smart collection's rules.
     let mut saving = use_signal(|| false);
-    // Choosing several games for one edit (the webview's #173). Changing
-    // the filter, sort or search keeps the games chosen.
+    // Choosing several games for one edit (#173). Changing the filter, sort
+    // or search keeps the games chosen.
     let mut selection = use_selection_provider();
     let selectable = !web && total.is_some_and(|total| total > 0);
     let choosing = selection.active();
@@ -444,7 +443,7 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                     }
                 }
             }
-            // A failed count with nothing shown says so; a refetch that
+            // A failed initial load with nothing shown says so; a refetch that
             // fails keeps the games already there.
             if let Some(error) = error {
                 ErrorNotice {
@@ -453,8 +452,12 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                     actions: rsx! {
                         crate::ui::Button {
                             on_press: move |_| {
-                                let mut count = count;
-                                count.restart();
+                                if web {
+                                    let mut mosaic_query = mosaic_query;
+                                    mosaic_query.restart();
+                                } else {
+                                    grid_status.set(None);
+                                }
                             },
                             {t!("Try again")}
                         }
@@ -464,7 +467,7 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                 WebMosaic { games }
             } else if let Some(platforms) = platforms {
                 PlatformGrid { platforms, library: library.clone() }
-            } else if let Some(total) = total.filter(|&total| total > 0 && !web) {
+            } else if !web && !platforms_loading && total != Some(0) {
                 VirtualLibrary {
                     query,
                     layout: library.layout,
@@ -473,8 +476,19 @@ pub fn LibraryView(library: LibraryRoute) -> Element {
                     events: Events {
                         open: Some(EventHandler::new(move |id: String| router.open_game(&id))),
                     },
+                    on_status: move |next: Result<u64, ErrorReport>| {
+                        let same = match (&*grid_status.peek(), &next) {
+                            (Some(Ok(a)), Ok(b)) => a == b,
+                            _ => false,
+                        };
+                        if !same {
+                            grid_status.set(Some(next));
+                        }
+                    },
                 }
-                SelectionBar { selection, total: total as usize, all_ids }
+                if let Some(total) = total.filter(|&total| total > 0) {
+                    SelectionBar { selection, total: total as usize, all_ids }
+                }
             } else if total == Some(0) {
                 Empty { library: library.clone() }
             }

@@ -1,9 +1,8 @@
-//! PIN entry (#207), as the webview's `components/accounts/PinPad`: a
-//! field for keys and a number pad for a controller. A pad's A types the
-//! focused digit, B deletes (or leaves when there's nothing to delete),
-//! Start confirms. Settings → Accounts uses it (#105); sign-in, the age
-//! gate and admin approval (#106) share it. The PIN lives only in this
-//! component until it goes to the core.
+//! PIN entry (#207): a field for keys and a number pad for a controller. A
+//! pad's A types the focused digit, B deletes (or leaves when there's
+//! nothing to delete), Start confirms. Settings → Accounts uses it (#105);
+//! sign-in, the age gate and admin approval (#106) share it. The PIN lives
+//! only in this component until it goes to the core.
 
 use crate::data::sleep;
 use std::future::Future;

@@ -1,7 +1,6 @@
-//! Settings → Store accounts (#104), as the webview's
-//! `StoreAccountsSettings` and `AchievementSettings`: connect a store, see
-//! each account's health, refresh, reconnect, disconnect and remove;
-//! background refreshes and play time; achievements; what accounts do.
+//! Settings → Store accounts (#104): connect a store, see each account's
+//! health, refresh, reconnect, disconnect and remove; background refreshes
+//! and play time; achievements; what accounts do.
 //! Admins only (the sections list hides it from others).
 
 use std::collections::BTreeMap;

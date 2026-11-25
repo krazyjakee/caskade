@@ -1,8 +1,7 @@
-//! The editor's Artwork tab (the webview's `gameEditor/ArtworkTab.tsx`):
-//! the game's cover, background and icon. Each can show one of the images
-//! automatic sources supplied, an image the user imports, or none, and
-//! goes back to automatic with Reset. Changes apply at once; refreshes
-//! never undo them.
+//! The editor's Artwork tab: the game's cover, background and icon. Each
+//! can show one of the images automatic sources supplied, an image the
+//! user imports, or none, and goes back to automatic with Reset. Changes
+//! apply at once; refreshes never undo them.
 
 use caskade_app::commands::game_edit::ArtworkChange;
 use caskade_core::model::{Artwork, ArtworkChoice, ArtworkKind, ArtworkSlot, USER_ARTWORK_SOURCE};

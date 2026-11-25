@@ -1,6 +1,6 @@
-//! The button-hint bar (#107; the webview's `HintBar.tsx` and `glyphs.ts`):
-//! what each button does where focus is now, in the glyphs of the
-//! last controller used, or a generic controller at startup, and the clock.
+//! The button-hint bar (#107): what each button does where focus is now, in
+//! the glyphs of the last controller used, or a generic controller at
+//! startup, and the clock.
 
 use caskade_ui_i18n::intl::Clock;
 use caskade_ui_i18n::{format, t};

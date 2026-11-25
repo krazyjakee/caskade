@@ -1,8 +1,7 @@
 //! Storage locations for flows (#108) and Settings → Storage (#104): the
 //! locations and their games, the "always use the default" preference,
 //! moving a game's files, and adding, editing, choosing the default and
-//! removing locations, through the app layer's commands as the webview's
-//! `api/storageNative.ts` does.
+//! removing locations, through the app layer's commands.
 
 use std::time::Duration;
 
@@ -109,7 +108,7 @@ impl Storage {
         let install = self.install.as_ref().ok_or(MoveError::Unavailable)?;
         install::install_start(install, input, root_id)
             .await
-            .map_err(MoveError::Failed)
+            .map_err(|error| MoveError::Failed(error.summary))
     }
 
     /// Moves an installation's files to another location, as a job in
@@ -123,7 +122,7 @@ impl Storage {
         let install = self.install.as_ref().ok_or(MoveError::Unavailable)?;
         let job = install::move_game(install, &self.storage, entry_id, target_root_id)
             .await
-            .map_err(MoveError::Failed)?;
+            .map_err(|error| MoveError::Failed(error.summary))?;
         complete(install, job).await
     }
 }
@@ -186,7 +185,7 @@ fn unavailable() -> ErrorReport {
     )
 }
 
-/// Waits for `job` to end, as the webview's `complete`.
+/// Waits for `job` to end.
 async fn complete(
     install: &InstallService,
     mut job: JobSnapshot,
@@ -208,7 +207,8 @@ async fn complete(
             _ => {}
         }
         tokio::time::sleep(Duration::from_millis(400)).await;
-        job = install::job_get(install, job.id.clone()).map_err(MoveError::Failed)?;
+        job = install::job_get(install, job.id.clone())
+            .map_err(|error| MoveError::Failed(error.summary))?;
     }
 }
 

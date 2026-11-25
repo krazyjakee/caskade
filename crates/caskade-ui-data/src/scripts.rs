@@ -1,7 +1,7 @@
 //! Lifecycle scripts (#179, #180, #105): one scope's scripts in their
 //! order, adding, changing, deleting and ordering them, a test run through
 //! the launch's own runner, and the order a launch takes across scopes,
-//! through the app layer's commands as the webview's `api/scripts.ts` does.
+//! through the app layer's commands.
 //! Who may change a scope is the adapter's rule, applied here too:
 //! `caskade_app::permissions::script_scope`.
 

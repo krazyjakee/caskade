@@ -1,8 +1,7 @@
-//! Settings → Statistics (#105), over a sampler reading a fake machine,
-//! as the webview's `statistics` tests: it goes live with the first
-//! readings, the gauges and facts say what was read, the graphs summarise
-//! it, the network counts physical interfaces only, a full drive warns;
-//! the watch ends when the panel goes.
+//! Settings → Statistics (#105), over a sampler reading a fake machine: it
+//! goes live with the first readings, the gauges and facts say what was
+//! read, the graphs summarise it, the network counts physical interfaces
+//! only, a full drive warns; the watch ends when the panel goes.
 
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};

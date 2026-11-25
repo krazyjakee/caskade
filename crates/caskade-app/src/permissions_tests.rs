@@ -112,7 +112,6 @@ fn each_group_is_allowed_for_admins_refused_without_it_and_allowed_once_granted(
                 ("settings_set", set("core.general")),
                 ("settings_reset", set("core.appUpdates")),
                 ("settings_reset", set("core.updates")),
-                ("app_update_install", json!({})),
             ],
         ),
         (
@@ -150,7 +149,13 @@ fn each_group_is_allowed_for_admins_refused_without_it_and_allowed_once_granted(
                 ("storage_move_and_remove", json!({})),
             ],
         ),
-        ("installer", vec![("settings_set", set("core.installer"))]),
+        (
+            "installer",
+            vec![
+                ("settings_set", set("core.installer")),
+                ("torrent_links_set", json!({})),
+            ],
+        ),
         (
             "plugins",
             vec![
@@ -353,8 +358,7 @@ fn the_native_guard_refuses_what_the_account_may_not_do_and_allows_it_once_grant
 }
 
 /// Every command function the table checks calls [`enforce`] with its own
-/// name first, so the native app, which calls them directly, holds the same
-/// rules as the Tauri shell (#106).
+/// name first, so every caller enforces the permission rules (#106).
 #[test]
 fn every_checked_command_function_enforces_its_permission() {
     let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src/commands");

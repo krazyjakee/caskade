@@ -1,7 +1,7 @@
-//! An account's PIN row (#208, #105), as the webview's `PinSetting` and
-//! `PinDialog`: set, change or remove it on the shared PIN pad, so a
-//! controller can too. An account changing its own PIN enters the current
-//! one first, then the new one twice; removing your own asks only for the
+//! An account's PIN row (#208, #105): set, change or remove it on the
+//! shared PIN pad, so a controller can too. An account changing its own
+//! PIN enters the current one first, then the new one twice; removing your
+//! own asks only for the
 //! current one, and another account's asks first. A PIN lives only in the
 //! dialog until it goes to the core.
 

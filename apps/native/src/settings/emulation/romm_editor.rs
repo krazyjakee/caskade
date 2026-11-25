@@ -1,7 +1,6 @@
-//! A RomM server's editor, as the webview's `romm/ServerEditor`: its
-//! address, sign-in, what it imports, how its platforms launch and how it
-//! syncs. The password or API token is typed here, sent only to save or
-//! test, and never shown back.
+//! A RomM server's editor: its address, sign-in, what it imports, how its
+//! platforms launch and how it syncs. The password or API token is typed
+//! here, sent only to save or test, and never shown back.
 
 use caskade_core::error::{ErrorCode, ErrorReport};
 use caskade_core::romm::RommPlatformMapping;

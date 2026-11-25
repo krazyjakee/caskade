@@ -1,7 +1,7 @@
-//! Settings → General (#104), as the webview's `GeneralSettings`: startup,
-//! the window while you play, where Caskade keeps things, language and
-//! time, Caskade's own updates (`AppUpdateSection`) beside game updates,
-//! what goes online, and first-run setup again. One reset covers every
+//! Settings → General (#104): startup, the window while you play, where
+//! Caskade keeps things, language and time, Caskade's own updates
+//! (`AppUpdateSection`) beside game updates, what goes online, and
+//! first-run setup again. One reset covers every
 //! preference here, from whichever section keeps it (#44).
 
 use blitz_dom::ScrollBehavior;
@@ -141,8 +141,7 @@ pub fn GeneralSettings(sub: Option<String>) -> Element {
     let wanted = sub.as_deref() == Some("updates");
 
     // Two columns only where the panel has room beside both navigation
-    // columns (the webview's container query at 72rem, plus the sidebar's
-    // and the section list's width).
+    // columns (72rem plus the sidebar's and the section list's width).
     rsx! {
         div { "data-settings": "general",
             div { class: "grid items-start gap-4 min-[102rem]:grid-cols-2",
@@ -310,10 +309,9 @@ pub fn GeneralSettings(sub: Option<String>) -> Element {
     }
 }
 
-/// The Language setting's choices, as the webview's `useLanguageOptions`:
-/// System, showing what it resolves to, then each language by its own
-/// name with how much of it is translated. `current` is kept when it isn't
-/// one of them.
+/// The Language setting's choices: System, showing what it resolves to,
+/// then each language by its own name with how much of it is translated.
+/// `current` is kept when it isn't one of them.
 pub fn language_options(current: &str) -> Vec<SelectOption> {
     let locale = caskade_app::commands::i18n::locale_current();
     let mut options = vec![SelectOption::new(
@@ -384,8 +382,8 @@ fn ConsoleStartRow() -> Element {
 const SCROLL_MARGIN: f64 = 16.0;
 
 /// Scrolls the nearest scrolling box around `node` so it starts at the
-/// top, as the webview's `scrollIntoView({ block: "start" })`: Blitz's own
-/// scrolls only the viewport, and Settings scrolls inside its panel.
+/// top (like `scrollIntoView({ block: "start" })`): Blitz's own scrolls
+/// only the viewport, and Settings scrolls inside its panel.
 fn scroll_to_start(doc: &mut blitz_dom::BaseDocument, node: blitz_dom::NodeId) {
     let scrolls = |doc: &blitz_dom::BaseDocument, id: blitz_dom::NodeId| {
         doc.get_node(id).is_some_and(|node| {

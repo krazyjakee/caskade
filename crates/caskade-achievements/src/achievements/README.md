@@ -71,7 +71,7 @@ always kept.
 an achievement provider:
 
 - **Connecting.** It takes a user name and web API key (`ApiKey` sign-in, checked with `API_GetUserProfile`) and has no library (`library: false`). The key lives in the keychain like any store sign-in, and Settings → Store accounts connects, reconnects and disconnects it.
-- **Linking** (`ReleaseLinker`). An emulated release is linked to a RetroAchievements game only by a verified hash:
+- **Linking** (`AchievementProvider::link_release`). An emulated release is linked to a RetroAchievements game only by a verified hash:
   - The release's ROMs are hashed by RetroAchievements' own rules (`retroachievements::hash`): the whole-file MD5, or without the NES/FDS, SNES, PC Engine, Lynx or 7800 header, an N64 ROM in big-endian order, or an arcade set's name.
   - Each hash must be one of exactly one game's hashes in `API_GetGameList` (`h=1`, cached a day per system), and all of a release's ROMs must be that same game.
   - Discs and other systems with other rules, compressed files, unknown hashes (another revision or region, a modified ROM), shared hashes and ROMs of different games stay `Unresolved`, with the reason. They are tried again after a week; a title is never used.
@@ -135,7 +135,7 @@ GOG publishes no achievement API of its own. `gog::GogAchievements` reads them t
 
 ## In the app (#190)
 
-A game page shows its sets in **Achievements** (`components/achievements/GameAchievements.tsx`, over `AchievementsApi` in `api/achievements.ts`; fixtures in `achievementsFixtures.ts`). The hero shows the counts across sets (`AchievementSummary`); pressing it moves to the panel.
+A game page shows its sets in **Achievements** (`apps/native/src/game/achievements.rs`, over `caskade-ui-data`). The hero shows the counts across sets; pressing it moves to the panel.
 
 - **Sets:** one at a time, chosen by service and account (`Steam · Ada`) when there are several. Nothing is joined: a game owned on two stores, or by two accounts, shows each set apart.
 - **Counts and attribution:** unlocked of total (and hardcore unlocks and points where the service has them), the account, and when the set was last fetched.

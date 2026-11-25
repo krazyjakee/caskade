@@ -1,7 +1,7 @@
-//! Settings → Devices → Copies and shares (#247), as the webview's
-//! `SharesList`: the games this device shared, with who received them,
-//! Copy link, Stop sharing and Forget; and the shares received here that
-//! arrive or help their other recipients, with the switch to keep helping.
+//! Settings → Devices → Copies and shares (#247): the games this device
+//! shared, with who received them, Copy link, Stop sharing and Forget; and
+//! the shares received here that arrive or help their other recipients,
+//! with the switch to keep helping.
 
 use caskade_core::error::ErrorReport;
 use caskade_ui_data::shares::{ReceivedShare, ShareRecord, ShareState, Shares};

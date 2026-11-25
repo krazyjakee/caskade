@@ -6,8 +6,7 @@
 //! - `preview`: the same library with genres for subtitles, which the
 //!   built-in themes' previews are rendered from (#125).
 //! - `library`: the shell's sidebar, top bar with search, status bar, the
-//!   backdrop and a grid of game cards with placeholder art, as the
-//!   webview's.
+//!   backdrop and a grid of game cards with placeholder art.
 //!
 //! Every text is in the bundled fonts, so a render doesn't depend on the
 //! machine's.

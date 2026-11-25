@@ -1,5 +1,4 @@
-//! Adding an emulator by hand, or changing one's install (the webview's
-//! `ConfiguredEmulators` form).
+//! Adding an emulator by hand, or changing one's install.
 
 use super::*;
 
@@ -21,16 +20,6 @@ pub(super) fn empty_install(kind: &str) -> EmulatorInstall {
             dir: Default::default(),
             executable: Default::default(),
         },
-    }
-}
-
-pub(super) fn install_kind(install: &EmulatorInstall) -> &'static str {
-    match install {
-        EmulatorInstall::Folder { .. } => "folder",
-        EmulatorInstall::Path { .. } => "path",
-        EmulatorInstall::Flatpak { .. } => "flatpak",
-        EmulatorInstall::AppImage { .. } => "app_image",
-        EmulatorInstall::AppBundle { .. } => "app_bundle",
     }
 }
 
@@ -197,7 +186,7 @@ pub(super) fn EmulatorForm(
                     id: "emulator-install-type",
                     label: t!("Install type"),
                     options: install_kinds(),
-                    value: Some(install_kind(&current.install).to_owned()),
+                    value: Some(current.install.kind_str().to_owned()),
                     on_change: move |kind: String| set_install(empty_install(&kind)),
                 }
                 match current.install.clone() {

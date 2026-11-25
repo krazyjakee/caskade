@@ -343,7 +343,7 @@ pub const ACCOUNT_LIST: Entry = Entry {
     contains: &["avatar", "button"],
     ..Entry::new(
         "account-list",
-        "AccountsSettings (apps/native/src/settings/accounts.rs)",
+        "AccountsSettings (apps/native/src/settings/accounts/mod.rs)",
         Source::App,
         "Settings → Accounts, for admins: every account, with Edit and Delete.",
     )
@@ -371,7 +371,7 @@ pub const ACCOUNT_EDITOR: Entry = Entry {
     ],
     ..Entry::new(
         "account-editor",
-        "AccountEditor (apps/native/src/settings/accounts.rs)",
+        "AccountEditor (apps/native/src/settings/accounts/editor.rs)",
         Source::App,
         "The dialog that adds or changes an account: its name, avatar, role and PIN, and for a standard account what it may change and its age limit.",
     )
@@ -391,7 +391,7 @@ pub const ACCOUNT_PROFILE: Entry = Entry {
     contains: &["text-field", "avatar-picker", "setting-row", "button"],
     ..Entry::new(
         "account-profile",
-        "ProfileSettings (apps/native/src/settings/accounts.rs)",
+        "ProfileSettings (apps/native/src/settings/accounts/profile.rs)",
         Source::App,
         "Settings → My profile: the signed-in account's own name, avatar and PIN.",
     )

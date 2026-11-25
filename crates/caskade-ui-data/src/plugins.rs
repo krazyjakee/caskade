@@ -1,8 +1,8 @@
 //! Plugins for Settings → Plugins (#104): the installed ones with their
 //! status, permissions and contributions; turning them on and off;
 //! previewing a folder before it's installed, installing and uninstalling;
-//! through the app layer's commands as the webview's `api/pluginManager.ts`
-//! does. Changes arrive as `PluginsChanged` (`Key::Plugins`).
+//! through the app layer's commands. Changes arrive as `PluginsChanged`
+//! (`Key::Plugins`).
 
 use caskade_app::commands::plugins as commands;
 use caskade_core::error::ErrorReport;

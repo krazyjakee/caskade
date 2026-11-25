@@ -10,24 +10,24 @@ use caskade_core::{
     },
 };
 /// The editor needs locations and counts, not saved file or registry contents.
-#[derive(serde::Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveLocationView {
-    spec: LocationSpec,
-    tags: Vec<String>,
-    file_count: usize,
+    pub spec: LocationSpec,
+    pub tags: Vec<String>,
+    pub file_count: usize,
 }
 
-#[derive(serde::Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SaveLocationsState {
-    entry_id: String,
-    revision: u32,
-    preferences: SavePreferences,
-    matched: SaveMatch,
-    automatic: Vec<SaveLocationView>,
-    locations: Vec<SaveLocationView>,
-    warnings: Vec<String>,
+    pub entry_id: String,
+    pub revision: u32,
+    pub preferences: SavePreferences,
+    pub matched: SaveMatch,
+    pub automatic: Vec<SaveLocationView>,
+    pub locations: Vec<SaveLocationView>,
+    pub warnings: Vec<String>,
 }
 
 impl From<SaveState> for SaveLocationsState {

@@ -1,8 +1,8 @@
-//! Storage flows, as the webview's `components/storage`: choosing where an
-//! install goes (`InstallRootPicker`), moving a game's files to another
-//! location (`MoveGameAction`/`MoveGameDialog`) and the default location's
-//! one-line summary (`StorageSummary`). The rules that block a location are
-//! `api/storage.ts`'s, word for word; the core checks them again.
+//! Storage flows: choosing where an install goes (`InstallRootPicker`),
+//! moving a game's files to another location
+//! (`MoveGameAction`/`MoveGameDialog`) and the default location's one-line
+//! summary (`StorageSummary`). The core checks the rules that block a
+//! location again on write.
 
 use caskade_core::storage::{RootStatus, RootSummary, StorageGame};
 use caskade_ui_data::storage::{MoveError, Storage};
@@ -95,9 +95,8 @@ pub fn use_storage() -> Option<Storage> {
     try_use_context::<Storage>().or_else(|| crate::shell::services().and_then(Storage::of))
 }
 
-/// Chooses where an install goes, as the webview's `InstallRootPicker`.
-/// It chooses by itself when there's one location, or installs always go
-/// to the default.
+/// Chooses where an install goes. It chooses by itself when there's one
+/// location, or installs always go to the default.
 #[component]
 pub fn InstallRootPicker(
     storage: Storage,
@@ -262,9 +261,8 @@ pub fn MoveGameAction(
     }
 }
 
-/// Moves a game's installed files to another location, as the webview's
-/// `MoveGameDialog`. Games owned by other launchers, delegated or running
-/// get the reason they can't.
+/// Moves a game's installed files to another location. Games owned by
+/// other launchers, delegated or running get the reason they can't.
 #[component]
 pub fn MoveGameDialog(
     storage: Storage,
@@ -467,8 +465,7 @@ pub fn MoveGameDialog(
     }
 }
 
-/// The default location and its state, in a line (the status bar's), as
-/// the webview's `StorageSummary`.
+/// The default location and its state, in a line (the status bar's).
 #[component]
 pub fn StorageSummary() -> Element {
     let storage = use_storage();

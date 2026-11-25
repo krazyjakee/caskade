@@ -299,8 +299,7 @@ async fn releases_link_only_by_a_verified_hash_and_can_be_linked_by_hand() {
         Bus::default(),
         Arc::new(Access(store.clone())),
     );
-    service.register_provider(ra.clone());
-    service.register_linker(ra.clone());
+    service.register_provider(ra);
     let cancel = CancellationToken::new();
 
     let (smb, _) = emulated(&store, "Super Mario Bros.", "nintendo_nes", &[known]).await;
@@ -403,8 +402,7 @@ async fn refreshing_the_account_links_the_library_and_fetches_its_sets() {
         Bus::default(),
         Arc::new(Access(store.clone())),
     );
-    service.register_provider(ra.clone());
-    service.register_linker(ra);
+    service.register_provider(ra);
     let (game, _) = emulated(&store, "Super Mario Bros.", "nintendo_nes", &[smb]).await;
     let (homebrew, _) = emulated(&store, "Homebrew", "nintendo_nes", &[unknown]).await;
     let cancel = CancellationToken::new();

@@ -1,7 +1,7 @@
-//! Console mode's file and folder picker, as the webview's `FolderBrowser`:
-//! native dialogs can't be driven with a pad, and Steam Deck's game mode
-//! has none. A pad moves through the entries, A opens a folder or picks a
-//! file, B cancels, LB/RB go to the previous and next place, LT/RT page
+//! Console mode's file and folder picker: native dialogs can't be driven
+//! with a pad, and Steam Deck's game mode has none. A pad moves through
+//! the entries, A opens a folder or picks a file, B cancels, LB/RB go to
+//! the previous and next place, LT/RT page
 //! through a long folder and Start picks the folder shown. Touch and the
 //! mouse work the same way.
 

@@ -1,9 +1,8 @@
-//! First-run setup (#97) on the frame's fixture library, as the webview's
-//! `onboarding.test.tsx`: setup shows in place of the app until it's done;
-//! Skip setup keeps the defaults and opens the library; a first run goes
-//! from the welcome through the questions to the work and the library, its
-//! choices saved. Each test has a fixture library of its own (setup's scan
-//! changes what discovery shows).
+//! First-run setup (#97) on the frame's fixture library: setup shows in
+//! place of the app until it's done; Skip setup keeps the defaults and opens
+//! the library; a first run goes from the welcome through the questions to
+//! the work and the library, its choices saved. Each test has a fixture
+//! library of its own (setup's scan changes what discovery shows).
 
 use crate::data::DataSource;
 use crate::frame::tests::{ONE, Window};
@@ -58,7 +57,6 @@ fn storage(dir: &std::path::Path) -> Storage {
 /// The frame as the app has it, with storage.
 fn app() -> Element {
     crate::data::use_data_source(source);
-    use_context_provider(crate::library::view_tests::fake_drop_install);
     use_context_provider(crate::game::launch_tests::fake_steps);
     use_context_provider(crate::game::page_tests::page_data_tests::fake_data);
     use_context_provider(crate::game::editor::tests::fake_edit_data);

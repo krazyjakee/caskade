@@ -1,8 +1,7 @@
 //! Themes for Settings → Appearance (#104): the installed ones with their
 //! problems and previews, the one applied for the setting (with why it
 //! isn't the one asked for), a rescan, and in development builds a theme
-//! folder loaded in place; through the app layer's commands, as the
-//! webview's `themes/api.ts` does.
+//! folder loaded in place, through the app layer's commands.
 
 use caskade_app::commands::themes::{self as commands, ResolvedTheme};
 use caskade_app::events::Events;

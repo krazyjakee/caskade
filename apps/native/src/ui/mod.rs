@@ -1,5 +1,5 @@
-//! The component library (#93): `@caskade/ui` and react-aria's behaviour in
-//! RSX, on the input layer (`crate::input`) and `caskade_ui_i18n`.
+//! The component library (#93): Caskade's UI components in RSX, on the input
+//! layer (`crate::input`) and `caskade_ui_i18n`.
 //!
 //! Every component renders its anatomy (`data-cs`, `data-part`, the state
 //! and interaction attributes themes select), declares its [`Entry`]
@@ -16,6 +16,7 @@ mod avatar;
 mod button;
 mod checkbox;
 mod combobox;
+mod device_icon;
 mod dialog;
 mod error_notice;
 mod failure;
@@ -50,6 +51,7 @@ pub use avatar::{Avatar, AvatarPicker, AvatarSize, DEFAULT_AVATAR, avatars};
 pub use button::{Button, ButtonSize, ButtonVariant};
 pub use checkbox::Checkbox;
 pub use combobox::use_active_option;
+pub use device_icon::DeviceIcon;
 pub use dialog::{ConfirmDialog, Dialog};
 pub use error_notice::{ErrorNotice, NoticeVariant};
 pub use failure::FailureNotice;
@@ -62,7 +64,7 @@ pub use link::Link;
 pub use menu::{Menu, MenuButton, MenuEntry, MenuItem};
 pub use popover::{Anchor, Popover};
 pub use progress::Progress;
-pub use radio::{RadioGroup, RadioOption};
+pub use radio::{RadioGroup, RadioItem, RadioOption};
 pub use segmented::{Segment, SegmentedControl};
 pub use select::{Select, SelectOption};
 pub use settings::{DotTone, Found, Pill, PillTone, SettingRow, SettingsSection, StatusDot, fold};
@@ -73,11 +75,12 @@ pub use switch::{Switch, SwitchSize};
 pub use tabs::{Tab, Tabs};
 pub use text_field::{SearchField, TextField};
 pub use toast::{ToastRegion, Toasts, use_toasts};
-// Only the gallery shows these.
+pub use tooltip::Tooltip;
+// Only the gallery and tests use these.
 #[cfg_attr(not(any(debug_assertions, feature = "gallery")), allow(unused_imports))]
 pub(crate) use {
     avatar::AvatarInfo, combobox::Combobox, game_card::CardVariant, hero::HeroGame,
-    interact::Forced, select::List as SelectList, tooltip::Tooltip,
+    interact::Forced, select::List as SelectList,
 };
 
 use caskade_ui_theme::anatomy::Entry;

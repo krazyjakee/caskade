@@ -1,7 +1,7 @@
-//! Every collection (the webview's `views/CollectionsView.tsx`): a header
-//! with their counts and New Collection, All · Smart · Manual tabs (LB and
-//! RB step through them), and a card per collection, pinned ones first,
-//! each with its menu at a right click, the menu key or a pad's Start.
+//! Every collection: a header with their counts and New Collection, All ·
+//! Smart · Manual tabs (LB and RB step through them), and a card per
+//! collection, pinned ones first, each with its menu at a right click, the
+//! menu key or a pad's Start.
 
 use super::actions::{CollectionActions, use_collection_actions};
 use super::card::CollectionCard;

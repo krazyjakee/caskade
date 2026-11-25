@@ -44,7 +44,8 @@ msgstr "Kan köpas"
 
 #. The picker of an account's picture
 #: apps/native/src/onboarding/account.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/profile.rs
 #: apps/native/src/settings/search/search_index.rs
 #: apps/native/src/ui/avatar.rs
 msgid "Avatar"
@@ -68,7 +69,7 @@ msgstr "Avatar"
 #: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/selection_bar.rs
 #: apps/native/src/library/web.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/backup/restore.rs
 #: apps/native/src/settings/backup.rs
 #: apps/native/src/settings/emulation/emulators/emulator_editor.rs

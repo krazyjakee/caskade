@@ -1,10 +1,8 @@
-//! The app's hrefs as the webview writes them: a path and a query string
-//! in TanStack Router's form, so links, "Open to → last" and the game
-//! pages' Back chain read the same either way.
-//!
-//! TanStack writes each value as JSON unless it's a string that wouldn't
-//! read back as JSON (`q=pines`, but `q=%22123%22` for the text "123", and
-//! `opening=true` for the boolean), and reads each the other way.
+//! The app's hrefs: a path and a query string with JSON-encoded values
+//! unless a value is a plain string that would not parse back as JSON
+//! (`q=pines`, `q=%22123%22` for the text "123", `opening=true` for the
+//! boolean), so links, "Open to → last" and the game pages' Back chain
+//! round-trip cleanly.
 
 use percent_encoding::{AsciiSet, NON_ALPHANUMERIC, percent_decode_str, utf8_percent_encode};
 
@@ -138,7 +136,7 @@ fn decode(text: &str) -> String {
         .into_owned()
 }
 
-/// A value as TanStack reads it: JSON where it parses, else the text.
+/// Parses a query value: JSON where it parses, else plain text.
 fn read(text: &str) -> Value {
     match serde_json::from_str::<serde_json::Value>(text) {
         Ok(serde_json::Value::Bool(value)) => Value::Bool(value),
@@ -150,7 +148,7 @@ fn read(text: &str) -> Value {
     }
 }
 
-/// A value as TanStack writes it.
+/// Formats a query value.
 fn write(value: &Value) -> String {
     match value {
         Value::Bool(value) => value.to_string(),
@@ -169,7 +167,7 @@ fn write(value: &Value) -> String {
     }
 }
 
-/// The games a Back chain keeps (`views/game/origin.ts`'s `MAX_GAMES`).
+/// The games a Back chain keeps.
 pub const MAX_GAMES: usize = 4;
 
 fn is_game(path: &str) -> bool {
@@ -247,10 +245,6 @@ pub fn valid_return(value: Option<&str>) -> Option<String> {
 
 /// Where game `id`'s page (under `base`, `/games` or `/store/games`) goes
 /// back to, given its `from`: never to itself.
-#[cfg_attr(
-    not(test),
-    allow(dead_code, reason = "the game pages (#100, #102) use it")
-)]
 pub fn back_target(id: &str, from: Option<&str>, base: &str) -> Option<String> {
     let own = format!("{base}/{}", segment(id));
     let mut pages = chain(from);

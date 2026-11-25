@@ -1,5 +1,5 @@
-//! RomM servers IPC (#1) over `caskade_core::romm::RommService`: servers
-//! (credentials go to the OS keychain, never back to the webview), sync,
+//! RomM servers (#1) over `caskade_core::romm::RommService`: servers
+//! (credentials go to the OS keychain, never back to the UI), sync,
 //! the download cache and download progress. Launching a RomM game needs
 //! no command of its own: the launch pipeline downloads it first.
 use crate::error::{CommandError, refused, report};

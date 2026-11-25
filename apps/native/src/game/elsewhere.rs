@@ -1,9 +1,7 @@
 //! What the game page says about the game elsewhere (#100): the stores
-//! that own it and installing it through their launchers (the webview's
-//! `OwnedReleases.tsx`), its copies on the user's other devices with Copy
-//! to this computer and Play there (`OtherDevices.tsx`), where its play
-//! time comes from (`PlaytimeSources.tsx`), and where it's running now
-//! (`PlayingElsewhere.tsx`'s `PlayingElsewhereLine`).
+//! that own it and installing it through their launchers, its copies on
+//! the user's other devices with Copy to this computer and Play there,
+//! where its play time comes from, and where it's running now.
 
 use super::data::{use_answer, use_page_data};
 use super::system_name;
@@ -252,16 +250,6 @@ pub fn OtherDevices(game_id: String, primary: bool) -> Element {
     }
 }
 
-/// A link's name, as `data-status` has it.
-fn link_name(link: DeviceLink) -> &'static str {
-    match link {
-        DeviceLink::Lan => "lan",
-        DeviceLink::Direct => "direct",
-        DeviceLink::Relay => "relay",
-        DeviceLink::Offline => "offline",
-    }
-}
-
 #[component]
 fn PeerRow(
     peer: PeerCopy,
@@ -287,7 +275,7 @@ fn PeerRow(
     rsx! {
         div {
             "data-part": "peer-copy",
-            "data-status": link_name(peer.link),
+            "data-status": peer.link.as_str(),
             class: "flex flex-col gap-1 rounded-control border border-border p-3",
             span { class: "flex items-center gap-2 text-sm",
                 span { class: "flex-1", {t!("On {device}", device = device.clone())} }

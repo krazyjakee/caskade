@@ -1,9 +1,8 @@
-//! How the Store shows IGDB release dates (the webview's
-//! `views/store/releases.ts`), honestly: only as much of a date as IGDB
-//! knows. A release's `date` is the UTC day IGDB files it under; for month,
-//! quarter and year precision it only stands in for the span, so the label
-//! shows the span. Days are shown as the UTC day, never shifted into the
-//! local time zone.
+//! How the Store shows IGDB release dates, honestly: only as much of a
+//! date as IGDB knows. A release's `date` is the UTC day IGDB files it
+//! under; for month, quarter and year precision it only stands in for the
+//! span, so the label shows the span. Days are shown as the UTC day, never
+//! shifted into the local time zone.
 
 use caskade_core::igdb::{IgdbCatalogPage, IgdbGame, IgdbReleaseDate, ReleasePrecision};
 use caskade_ui_i18n::t;
@@ -14,29 +13,6 @@ fn tbd() -> String {
         note = "A release date that isn't known yet (to be determined)",
         "TBD"
     )
-}
-
-/// `YYYY-MM-DD` as the language writes a day; the text as it came when it
-/// isn't one.
-pub fn day(date: &str) -> String {
-    let mut parts = date.splitn(3, '-').map(|part| part.parse::<u32>().ok());
-    match (
-        parts.next().flatten(),
-        parts.next().flatten(),
-        parts.next().flatten(),
-    ) {
-        (Some(year), Some(month @ 1..=12), Some(day @ 1..=31)) => {
-            caskade_ui_i18n::format::day(caskade_ui_i18n::intl::DateTime {
-                year: year as i32,
-                month: month as u8,
-                day: day as u8,
-                hour: 0,
-                minute: 0,
-                second: 0,
-            })
-        }
-        _ => date.to_owned(),
-    }
 }
 
 /// When the release is, in the app's language: "Mar 14, 2024", "Jun 2027",
@@ -50,7 +26,7 @@ pub fn release_when(release: &IgdbReleaseDate) -> String {
                 let parts: Vec<u32> = date.split('-').filter_map(|part| part.parse().ok()).collect();
                 matches!(parts.as_slice(), [year, month, day] if *year > 0 && *month > 0 && *day > 0)
             })
-            .map(day),
+            .map(caskade_ui_i18n::format::iso_day),
         ReleasePrecision::Month => match (release.year, release.month) {
             (Some(year), Some(month @ 1..=12)) => Some(caskade_ui_i18n::format::month(year, month)),
             _ => None,

@@ -1,8 +1,7 @@
 //! Caskade's own updates: the status a check and an install move through,
 //! which every shell shows, and installing a `.deb` with one polkit prompt.
 //! The release feed and its signing key are fixed at build time; finding,
-//! downloading and verifying a release is the shell's updater's (the Tauri
-//! plugin in the desktop app).
+//! downloading and verifying a release is [`crate::self_update`]'s.
 
 use std::sync::{Mutex, MutexGuard};
 use std::time::Duration;
@@ -92,8 +91,8 @@ struct Inner<P> {
 }
 
 /// The update status, and the release waiting to be installed. `P` is the
-/// release a shell's updater found (the Tauri plugin's `Update`), or
-/// anything in tests.
+/// release the updater found ([`crate::self_update::Release`]), or anything
+/// in tests.
 pub struct AppUpdater<P> {
     endpoint: String,
     /// Why this copy can't replace itself: the reason, not its text, so the

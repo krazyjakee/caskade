@@ -48,6 +48,17 @@ pub trait FocusTree {
     fn parent(&self, node: Self::Node) -> Option<Self::Node>;
     /// Element children, in document order (text is left out).
     fn children(&self, node: Self::Node) -> Vec<Self::Node>;
+    /// Calls `visit` on each element child of `node` in document order,
+    /// stopping early if `visit` returns `false`. Returns `false` if stopped
+    /// early, `true` otherwise.
+    fn visit_children(&self, node: Self::Node, visit: &mut dyn FnMut(Self::Node) -> bool) -> bool {
+        for child in self.children(node) {
+            if !visit(child) {
+                return false;
+            }
+        }
+        true
+    }
     /// The element's tag, lower case.
     fn tag(&self, node: Self::Node) -> &str;
     fn attr(&self, node: Self::Node, name: &str) -> Option<&str>;
@@ -85,14 +96,30 @@ pub fn closest<T: FocusTree + ?Sized>(
     None
 }
 
-/// `node`'s descendants in document order, `node` not included.
-pub fn descendants<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> Vec<T::Node> {
-    let mut found = Vec::new();
-    let mut stack: Vec<T::Node> = tree.children(node).into_iter().rev().collect();
-    while let Some(next) = stack.pop() {
-        found.push(next);
-        stack.extend(tree.children(next).into_iter().rev());
+/// The first descendant of `node` in document order that `test` accepts,
+/// `node` not included. Stops as soon as a match is found.
+pub fn find_descendant<T: FocusTree + ?Sized>(
+    tree: &T,
+    node: T::Node,
+    mut test: impl FnMut(T::Node) -> bool,
+) -> Option<T::Node> {
+    fn walk<T: FocusTree + ?Sized, F: FnMut(T::Node) -> bool>(
+        tree: &T,
+        node: T::Node,
+        test: &mut F,
+        found: &mut Option<T::Node>,
+    ) {
+        tree.visit_children(node, &mut |child| {
+            if test(child) {
+                *found = Some(child);
+                return false;
+            }
+            walk(tree, child, test, found);
+            found.is_none()
+        });
     }
+    let mut found = None;
+    walk(tree, node, &mut test, &mut found);
     found
 }
 
@@ -108,7 +135,7 @@ pub fn depth<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> usize {
 }
 
 /// A tree built by hand, for tests: elements with attributes and a box from
-/// `data-rect="x y w h"`, as the webview's tests give jsdom boxes.
+/// `data-rect="x y w h"`.
 #[cfg(test)]
 pub mod test_tree {
     use super::*;
@@ -215,6 +242,15 @@ pub mod test_tree {
             self.elements[node].children.clone()
         }
 
+        fn visit_children(&self, node: usize, visit: &mut dyn FnMut(usize) -> bool) -> bool {
+            for &child in &self.elements[node].children {
+                if !visit(child) {
+                    return false;
+                }
+            }
+            true
+        }
+
         fn tag(&self, node: usize) -> &str {
             &self.elements[node].tag
         }
@@ -229,7 +265,7 @@ pub mod test_tree {
 
         fn rect(&self, node: usize) -> Rect {
             let Some(spec) = self.attr(node, "data-rect") else {
-                // Overlays fill the screen, as in the webview's tests.
+                // Overlays fill the screen by default when no explicit `data-rect` is given.
                 let overlay = matches!(self.attr(node, "role"), Some("dialog" | "alertdialog"))
                     || self.attr(node, "data-placement").is_some();
                 return if overlay {

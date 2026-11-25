@@ -1,8 +1,8 @@
-//! Tabs, as react-aria's `Tabs`: a tab list (`role="tablist"`) with one tab
-//! stop, arrows (and Home, End) moving and selecting as the APG's automatic
-//! activation has it, a pad's LB/RB switching tabs anywhere inside, and
-//! the selected tab's panel (`role="tabpanel"`) below. No catalogued root:
-//! views style it (`data-part`).
+//! Tabs: a tab list (`role="tablist"`) with one tab stop, arrows (and Home,
+//! End) moving and selecting as the APG's automatic activation has it, a
+//! pad's LB/RB switching tabs anywhere inside, and the selected tab's panel
+//! (`role="tabpanel"`) below. No catalogued root: views style it
+//! (`data-part`).
 
 use blitz_dom::NodeId;
 use caskade_ui_input::Action;

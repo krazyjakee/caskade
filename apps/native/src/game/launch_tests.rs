@@ -1,8 +1,7 @@
 //! What Play asks before a game starts (#100), headless in the frame over
-//! the fixture library with the app's answers scripted, as `launch.test.tsx`
-//! has them: the update offer, the game running on another device, the
-//! saves (a conflict, one on its way), and stopping a streaming device's
-//! game.
+//! the fixture library with the app's answers scripted: the update offer,
+//! the game running on another device, the saves (a conflict, one on its
+//! way), and stopping a streaming device's game.
 
 use super::launch::{Answer, LaunchSteps};
 use crate::frame::tests::{ONE, Window};

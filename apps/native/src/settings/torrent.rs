@@ -1,7 +1,7 @@
-//! Settings → Installer's magnet links and torrent files (#159), as the
-//! webview's `TorrentLinksSettings`: how to add one, and whether the OS
-//! opens them with Caskade. Linux makes Caskade their default app; Windows
-//! only offers it, and the user chooses it in Default apps.
+//! Settings → Installer's magnet links and torrent files (#159): how to
+//! add one, and whether the OS opens them with Caskade. Linux makes
+//! Caskade their default app; Windows only offers it, and the user chooses
+//! it in Default apps.
 
 use caskade_app::torrent_links::{Support, TorrentLinks};
 use caskade_ui_data::ErrorReport;
@@ -142,8 +142,8 @@ pub fn TorrentLinksSettings() -> Element {
     }
 }
 
-/// A test's stand-in for the OS, as the webview's tests fake
-/// `TorrentLinksApi`: tests never change this machine's default apps.
+/// A test's stand-in for the OS: tests never change this machine's default
+/// apps.
 #[cfg(test)]
 pub(crate) mod fake {
     use super::*;

@@ -1,9 +1,8 @@
-//! A game at a glance (`components/gameMenu/QuickLook.tsx`): a column on
-//! the right that a click on a game opens, beside the view, with its art,
-//! status, platform, Play (or Stop) and View more, then its playtime, last
-//! play, size, release, genres and description. Choosing another game
-//! shows that one; Escape, Close or a page change closes it. A pad's X in
-//! it plays, so X then X plays a game.
+//! A game at a glance: a column on the right that a click on a game opens,
+//! beside the view, with its art, status, platform, Play (or Stop) and
+//! View more, then its playtime, last play, size, release, genres and
+//! description. Choosing another game shows that one; Escape, Close or a
+//! page change closes it. A pad's X in it plays, so X then X plays a game.
 
 use super::entries::{entries, playable};
 use super::{GameMenus, Target, actions, use_game_menus, use_sessions};

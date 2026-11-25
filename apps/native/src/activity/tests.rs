@@ -1,11 +1,10 @@
-//! Activity's jobs (#101), ported from the webview's `activity`,
-//! `JobRecovery` and `RefreshCard` tests over the fixtures' fake job queue
-//! and details refresh: jobs show live progress, pause and resume a
-//! download (#131), cancel, remove and retry (as before or another install
-//! way); a followed job's question is
-//! answered; a failed install says why and recovers; a link pasted
-//! outside a text field asks to install it (#132); the details refresh's
-//! card cancels, retries the failed games and continues the rest.
+//! Activity's jobs (#101) over the fixtures' fake job queue and details
+//! refresh: jobs show live progress, pause and resume a download (#131),
+//! cancel, remove and retry (as before or another install way); a followed
+//! job's question is answered; a failed install says why and recovers; a
+//! link pasted outside a text field asks to install it (#132); the details
+//! refresh's card cancels, retries the failed games and continues the
+//! rest.
 
 use crate::frame::tests::{ONE, START, Window, source};
 use caskade_core::install::JobSnapshot;

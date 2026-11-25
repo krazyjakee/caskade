@@ -1,8 +1,8 @@
-//! Caskade's own updates without Tauri (#88), for the native app: the same
-//! release feed (`latest.json` on GitHub releases, `app_update::ENDPOINT`)
-//! and the same minisign key the Tauri app's updater checks. A release is
-//! taken only when it's newer, its bundle's signature verifies against the
-//! key, and the version the signature carries is the announced one.
+//! Caskade's own updates (#88): the release feed (`latest.json` on GitHub
+//! releases, `app_update::ENDPOINT`) verified against the bundled minisign
+//! public key. A release is taken only when it's newer, its bundle's
+//! signature verifies against the key, and the version the signature carries
+//! is the announced one.
 //!
 //! What a copy installs depends on how it was installed ([`Bundle`]): an
 //! AppImage replaces itself, a deb goes over this one through one polkit
@@ -19,7 +19,7 @@ use base64::Engine as _;
 use serde::Deserialize;
 
 /// The release feed's own size limit: `latest.json` is a few lines.
-const FEED_LIMIT: u64 = 1024 * 1024;
+const FEED_LIMIT: usize = 1024 * 1024;
 /// A bundle's: Caskade is a few hundred megabytes at most.
 const BUNDLE_LIMIT: u64 = 2 * 1024 * 1024 * 1024;
 const CHECK_TIMEOUT: Duration = Duration::from_secs(30);
@@ -116,28 +116,7 @@ pub struct Release {
 }
 
 fn client() -> Result<reqwest::Client, String> {
-    reqwest::Client::builder()
-        .user_agent(concat!("Caskade/", env!("CARGO_PKG_VERSION")))
-        .build()
-        .map_err(|error| error.to_string())
-}
-
-async fn body(response: reqwest::Response, limit: u64) -> Result<Vec<u8>, String> {
-    if response
-        .content_length()
-        .is_some_and(|length| length > limit)
-    {
-        return Err(caskade_core::tr!("The download is larger than expected."));
-    }
-    let mut response = response;
-    let mut bytes = Vec::new();
-    while let Some(chunk) = response.chunk().await.map_err(|error| error.to_string())? {
-        if bytes.len() as u64 + chunk.len() as u64 > limit {
-            return Err(caskade_core::tr!("The download is larger than expected."));
-        }
-        bytes.extend_from_slice(&chunk);
-    }
-    Ok(bytes)
+    caskade_core::http::client().map_err(|error| error.to_string())
 }
 
 /// The release the feed at `endpoint` offers this bundle, when it's newer
@@ -147,17 +126,24 @@ pub async fn find(
     current: &str,
     bundle: Bundle,
 ) -> Result<Option<Release>, String> {
-    let response = client()?
+    let mut response = client()?
         .get(endpoint)
         .timeout(CHECK_TIMEOUT)
         .send()
         .await
         .and_then(reqwest::Response::error_for_status)
         .map_err(|error| caskade_core::tr!("Couldn't check for updates: {error}", error = error))?;
-    let feed: Feed =
-        serde_json::from_slice(&body(response, FEED_LIMIT).await?).map_err(|error| {
-            caskade_core::tr!("The update feed isn't readable: {error}", error = error)
+    let bytes = caskade_core::http::read_bounded(&mut response, FEED_LIMIT)
+        .await
+        .map_err(|error| match error {
+            caskade_core::http::ReadBodyError::Net(error) => error.to_string(),
+            caskade_core::http::ReadBodyError::TooLarge => {
+                caskade_core::tr!("The download is larger than expected.")
+            }
         })?;
+    let feed: Feed = serde_json::from_slice(&bytes).map_err(|error| {
+        caskade_core::tr!("The update feed isn't readable: {error}", error = error)
+    })?;
     let newer = match (
         semver::Version::parse(feed.version.trim_start_matches('v')),
         semver::Version::parse(current.trim_start_matches('v')),
@@ -235,7 +221,7 @@ fn base64_text(text: &str) -> Result<String, String> {
 }
 
 /// Whether `bytes` are what `signature` (the feed's, base64) signs with
-/// `public_key` (base64, as the Tauri config has it), for `version`.
+/// `public_key` (base64 of minisign's public key), for `version`.
 pub fn verify(
     bytes: &[u8],
     signature: &str,

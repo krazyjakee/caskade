@@ -72,7 +72,7 @@ fn Library(library: LibraryRoute) -> Element {
     let router = use_router();
     let stats = crate::data::use_browsing_stats();
     // With nothing played, the library opens on every game; choosing
-    // Recently Played by name keeps it (`router.tsx`).
+    // Recently Played by name keeps it.
     let nothing_recent = library.opening
         && library.filter == GameFilter::Recent
         && matches!(&*stats.read(), Some(Ok(stats)) if stats.recent == 0);

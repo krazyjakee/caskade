@@ -1,7 +1,6 @@
-//! The manual collections a game is in, from its menu
-//! (`components/collections/CollectionPicker.tsx`, #99): a checkbox per
-//! collection, and a new one with the game in it. Smart collections pick
-//! their own games, so they aren't listed.
+//! The manual collections a game is in, from its menu (#99): a checkbox
+//! per collection, and a new one with the game in it. Smart collections
+//! pick their own games, so they aren't listed.
 
 use crate::data::{Query, change, use_library, use_query};
 use crate::ui::{Button, ButtonVariant, Checkbox, Dialog, TextField, icons};

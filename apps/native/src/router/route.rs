@@ -1,6 +1,5 @@
-//! The app's pages, as the webview's router has them (`router.tsx`): each
-//! parses from its href, checking its search as the webview's
-//! `validateSearch` does, and writes the same href back.
+//! The app's pages: each parses from its href, validating its query
+//! parameters, and writes the same href back.
 
 use super::href::{self, Href, Value};
 use crate::library::Layout;
@@ -26,7 +25,7 @@ const SORTS: [GameSort; 6] = [
     GameSort::Popular,
 ];
 
-/// Settings' tabs (`views/SettingsView.tsx`).
+/// Settings' tabs.
 pub const SETTINGS_TABS: [&str; 17] = [
     "general",
     "appearance",
@@ -83,11 +82,12 @@ fn pick<T: Copy>(values: &[T], name: fn(T) -> &'static str, value: Option<&str>)
 
 /// The library's filter, sort and layout as the user last left them: a link
 /// to `/library` without them comes back to these.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct LibraryPrefs {
     pub filter: GameFilter,
     pub sort: GameSort,
     pub layout: Layout,
+    #[serde(default)]
     pub show_remote: bool,
 }
 
@@ -136,7 +136,7 @@ pub enum CollectionFilter {
     Manual,
 }
 
-/// The Store's view, as its href holds it (`validateStoreSearch`).
+/// The Store's view, as its href holds it.
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct StoreRoute {
     pub tab: &'static str,

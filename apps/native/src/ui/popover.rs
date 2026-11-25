@@ -3,8 +3,7 @@
 //! or its right edge when that would run off the window), with
 //! `data-placement` (which also makes it an overlay to the input layer:
 //! focus goes in when it opens and comes back to the trigger when it
-//! closes, as react-aria's focus scope does). It closes on Escape, a pad's
-//! Back and a click outside it.
+//! closes). It closes on Escape, a pad's Back and a click outside it.
 
 use std::cell::Cell;
 use std::rc::Rc;

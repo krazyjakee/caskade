@@ -1,5 +1,4 @@
-//! Settings → Store accounts (#104), ported from the webview's
-//! `StoreAccountsSettings` tests over the fixtures' in-memory store
+//! Settings → Store accounts (#104), over the fixtures' in-memory store
 //! accounts and a fake store that signs in with an API key: connecting
 //! shows the sign-in and adds the account, which reads its health;
 //! Disconnect asks first and keeps it; Remove says what leaves and takes

@@ -1,13 +1,11 @@
-//! Starting a game (#99, #100; the webview's `views/game/launch.tsx`,
-//! `GameMenuHost.tsx`'s `PlayRequest`, `components/LaunchChoiceDialog.tsx`):
-//! the entry Play starts, an admin's PIN when the account's age limit
-//! holds the game back (#106), then what Play asks before it starts
-//! (`crate::game::launch`: a newer release's offer, the game running on
-//! another device, the saves), the launch, a choice when the launch asks
-//! for one (a launch action, an emulator, a disc), stopping the game a
-//! streaming device plays, and why it didn't start when it didn't. A
-//! release streamed from another device skips the offer, the warning and
-//! the saves, which are that device's.
+//! Starting a game (#99, #100): the entry Play starts, an admin's PIN when
+//! the account's age limit holds the game back (#106), then what Play asks
+//! before it starts (`crate::game::launch`: a newer release's offer, the
+//! game running on another device, the saves), the launch, a choice when
+//! the launch asks for one (a launch action, an emulator, a disc),
+//! stopping the game a streaming device plays, and why it didn't start
+//! when it didn't. A release streamed from another device skips the offer,
+//! the warning and the saves, which are that device's.
 
 use crate::accounts::AgeGateDialog;
 use crate::data::{change, use_game};

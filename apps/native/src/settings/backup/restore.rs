@@ -1,5 +1,5 @@
-//! Restoring a backup: the archive to restore, what it holds, and this
-//! device's own backups (the webview's `DeviceBackups.tsx`).
+//! Restoring a backup: the archive to restore, what it holds, and paired
+//! devices' backups.
 
 use super::*;
 

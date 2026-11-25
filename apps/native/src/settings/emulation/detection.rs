@@ -1,6 +1,6 @@
-//! Detect emulators (#115), as the webview's `DetectionReview`: searching
-//! the usual places and an optional folder for installed emulators, and
-//! importing the ones chosen. Detection doesn't launch anything.
+//! Detect emulators (#115): searching the usual places and an optional
+//! folder for installed emulators, and importing the ones chosen.
+//! Detection doesn't launch anything.
 
 use std::collections::BTreeMap;
 

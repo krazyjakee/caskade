@@ -1,5 +1,5 @@
 //! Choosing several games in the library and editing them at once (#99),
-//! headless over the fixture library, as `selection.test.tsx` has it.
+//! headless over the fixture library.
 
 use crate::frame::tests::{ONE, Window, source};
 use crate::router::Route;

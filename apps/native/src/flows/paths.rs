@@ -1,7 +1,7 @@
-//! Choosing files and folders for a flow, as the webview's `PathPicker`:
-//! the OS's own dialog (#88) in desktop mode, the in-app `FolderBrowser`
-//! in console mode, where a pad has to drive it. A
-//! [`PathPickerProvider`] around the views says which; outside one, the
+//! Choosing files and folders for a flow: the OS's own dialog (#88) in
+//! desktop mode, the in-app `FolderBrowser` in console mode, where a pad
+//! has to drive it. A [`PathPickerProvider`] around the views says which;
+//! outside one, the
 //! OS's dialog.
 
 use dioxus_native::prelude::*;
@@ -154,8 +154,7 @@ pub fn PathPickerProvider(in_app: bool, children: Element) -> Element {
     }
 }
 
-/// A path as people write it: Windows' `\\?\` prefixes dropped, as the
-/// webview's `formatPath`.
+/// A path as people write it: Windows' `\\?\` prefixes dropped.
 pub fn format_path(path: &str) -> String {
     let unc = path
         .get(..8)

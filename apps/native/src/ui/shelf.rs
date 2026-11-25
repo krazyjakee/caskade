@@ -30,7 +30,7 @@ pub fn Shelf(
     title: String,
     icon: Icon,
     #[props(default)] subtitle: Option<String>,
-    /// What View All does; the webview's leaves it to the view.
+    /// What View All does; left to the caller.
     #[props(default)]
     on_view_all: Option<EventHandler<()>>,
     #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,

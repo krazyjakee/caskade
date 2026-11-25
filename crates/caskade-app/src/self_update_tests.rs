@@ -16,12 +16,12 @@ impl Signer {
         }
     }
 
-    /// The public key as the Tauri config has it: base64 of minisign's.
+    /// The public key in the bundled format: base64 of minisign's.
     fn public_key(&self) -> String {
         base64::engine::general_purpose::STANDARD.encode(self.key.pk.to_box().unwrap().to_string())
     }
 
-    /// `bytes`' signature as `tauri signer sign` writes it, for `version`.
+    /// `bytes`' signature in the release feed's format, for `version`.
     fn sign(&self, bytes: &[u8], version: &str) -> String {
         self.sign_with_comment(
             bytes,

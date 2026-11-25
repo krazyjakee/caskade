@@ -1,7 +1,7 @@
 //! The tray icon (#88): its menu shows the main window or quits, a left
 //! click shows it (except on macOS, where a click opens the menu), and the
 //! close button hides the window to it when `core.general.onClose` is
-//! `tray`. Its state is `caskade_app::tray`'s, as in the Tauri app.
+//! `tray`. Its state is managed by `caskade_app::tray`.
 //!
 //! - Linux: an AppIndicator, loaded at run time from libayatana-appindicator3
 //!   or libappindicator3, on a GTK main loop of its own thread (winit

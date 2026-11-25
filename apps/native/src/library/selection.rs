@@ -1,5 +1,4 @@
-//! Choosing several games in the library (#99), as the webview's
-//! `components/gameSelection/selection.tsx`: games are chosen by id, so
+//! Choosing several games in the library (#99): games are chosen by id, so
 //! one scrolled out of the grid stays chosen; Shift extends from the last
 //! game clicked over the games loaded between; the bar under the grid acts
 //! on them.

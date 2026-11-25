@@ -1,8 +1,7 @@
-//! The bar of a view in selection mode (#99, the webview's
-//! `components/gameSelection/SelectionBar.tsx`): how many games are
-//! chosen, choosing the loaded ones or every game the view finds (with how
-//! many that is), clearing, the bulk editor, refreshing details and leaving
-//! selection mode.
+//! The bar of a view in selection mode (#99): how many games are chosen,
+//! choosing the loaded ones or every game the view finds (with how many that
+//! is), clearing, the bulk editor, refreshing details and leaving selection
+//! mode.
 
 use super::bulk_edit::BulkEditDialog;
 use super::selection::GameSelection;
@@ -161,9 +160,9 @@ impl PartialEq for AllIdsProp {
 }
 
 /// Starts refreshing the chosen games' details and artwork from the
-/// built-in sources (the webview's `RefreshDialog.tsx`): missing details
-/// only, or the automatic ones fetched again. The user's own fields,
-/// artwork choices and "not on IGDB" are always kept.
+/// built-in sources: missing details only, or the automatic ones fetched
+/// again. The user's own fields, artwork choices and "not on IGDB" are
+/// always kept.
 #[component]
 fn RefreshDialog(game_ids: Vec<String>, on_close: EventHandler<()>) -> Element {
     // Where the app can refresh: a running app's metadata.

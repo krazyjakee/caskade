@@ -1,8 +1,7 @@
 //! Settings → Emulation (#115, #116, #105): the configured emulators and
 //! their profiles, platforms and their defaults, detecting installed
 //! emulators, ROM scanners and their scans, one-click installs and the
-//! emulators other devices use, through the app layer's commands as the
-//! webview's `api/emulationTransport.ts` and `api/emulatorSetup.ts` do.
+//! emulators other devices use, through the app layer's commands.
 //! Every check is the core's; a refusal comes back as its report.
 
 use caskade_app::commands::{addon_offers, emulation, emulator_setup, rom_scanners};

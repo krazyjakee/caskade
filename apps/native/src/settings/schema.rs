@@ -1,7 +1,6 @@
-//! A settings section rendered from its JSON Schema (#59, #128; the
-//! webview's `SchemaSettings.tsx`): controls, choices, labels and limits
-//! come from the core, which validates every save and translates the
-//! schema's titles and descriptions (#214).
+//! A settings section rendered from its JSON Schema (#59, #128): controls,
+//! choices, labels and limits come from the core, which validates every
+//! save and translates the schema's titles and descriptions (#214).
 
 use caskade_ui_i18n::t;
 use dioxus_native::prelude::*;

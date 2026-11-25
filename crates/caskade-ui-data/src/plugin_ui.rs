@@ -237,7 +237,7 @@ impl FakePluginUi {
         }
     }
 
-    /// Puts the plugins that draw, as `plugins_drawn` lists them, and says
+    /// Puts the plugins that draw, as `drawn_plugins` lists them, and says
     /// the list changed.
     pub fn set_plugins(&self, plugins: Vec<DrawnPlugin>) {
         let plugin = plugins

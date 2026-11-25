@@ -1,9 +1,9 @@
-//! A game's fan ports on its page (#100, the webview's
-//! `views/game/PortsPanel.tsx`): decompilations, recompilations and source
-//! ports that run it natively from the user's own copy, from Decomp Buddy's
-//! install plans, each with what it needs and Install when it has a release
-//! for this system (a confirmation, then an install job). Nothing shows
-//! while the catalogue is off, missing, or has none for the game.
+//! A game's fan ports on its page (#100): decompilations, recompilations
+//! and source ports that run it natively from the user's own copy, from
+//! Decomp Buddy's install plans, each with what it needs and Install when
+//! it has a release for this system (a confirmation, then an install job).
+//! Nothing shows while the catalogue is off, missing, or has none for the
+//! game.
 
 use super::data::{use_answer, use_page_data};
 use super::system_name;

@@ -1,7 +1,7 @@
-//! Add game → Receive a shared game… (#247), as the webview's
-//! `ReceiveShareDialog`: a link someone shared, pasted (a pad types or
-//! pastes it on the on-screen keyboard). Caskade asks the sharer what it
-//! shares first; nothing comes until Receive. The game then arrives as an
+//! Add game → Receive a shared game… (#247): a link someone shared, pasted
+//! (a pad types or pastes it on the on-screen keyboard). Caskade asks the
+//! sharer what it shares first; nothing comes until Receive. The game then
+//! arrives as an
 //! install in Activity; a collection joins the account's collections.
 
 use caskade_core::error::ErrorReport;

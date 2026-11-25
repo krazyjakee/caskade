@@ -16,8 +16,9 @@ use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use dioxus_native::prelude::*;
 
 use super::icons::{CHECK, Svg};
-use super::interact::{Keys, flag, use_interaction_where};
-use crate::input::{Bind, use_input, use_input_action};
+use super::interact::flag;
+use super::radio::RadioItem;
+use crate::input::{Bind, use_input_action};
 
 pub const ANATOMY: Entry = Entry {
     parts: &[
@@ -545,74 +546,22 @@ fn AvatarOption(
     previous: String,
     next: String,
 ) -> Element {
-    let interaction = use_interaction_where(stop);
-    let input = use_input();
     let id = option.id();
     let label = option.label();
-    let arrow = use_callback(move |forward: bool| {
-        if disabled {
-            return;
-        }
-        let target = if forward {
-            next.clone()
-        } else {
-            previous.clone()
-        };
-        on_check.call(target.clone());
-        if let Some((_, node)) = nodes.peek().iter().find(|(known, _)| *known == target) {
-            input.focus(*node);
-        }
-    });
-    let chosen = id.clone();
-    let check = use_callback(move |()| {
-        if !disabled && !checked {
-            on_check.call(chosen.clone());
-        }
-    });
-    let mount_id = id.clone();
     rsx! {
-        div {
-            role: "radio",
-            tabindex: if stop && !disabled { "0" } else { "-1" },
-            "aria-checked": if checked { "true" } else { "false" },
-            "aria-disabled": flag(disabled),
-            "aria-label": "{label}",
-            "data-part": "option",
-            "data-selected": flag(checked),
-            "data-disabled": flag(disabled),
-            "data-hovered": interaction.hovered(),
-            "data-focus-visible": interaction.ring(),
-            "data-pressed": interaction.pressed(),
+        RadioItem {
+            value: id.clone(),
+            checked,
+            stop,
+            disabled,
+            nodes,
+            previous: Some(previous),
+            next: Some(next),
+            on_check,
+            part: "option",
             class: "group relative grid cursor-default place-items-center rounded-full p-1 outline-none transition-[background-color,box-shadow] duration-(--cs-motion-duration-fast) data-focus-visible:focus-ring data-hovered:bg-surface-hover data-selected:bg-accent/25 data-selected:shadow-[inset_0_0_0_2px] data-selected:shadow-accent-alt",
-            onmounted: move |event| {
-                if let Some(node) = event.data().downcast::<NodeHandle>().map(NodeHandle::node_id) {
-                    let mut nodes = nodes;
-                    nodes.write().retain(|(known, _)| *known != mount_id);
-                    nodes.write().push((mount_id.clone(), node));
-                }
-            },
-            onmouseenter: move |_| interaction.enter(),
-            onmouseleave: move |_| interaction.leave(),
-            onmousedown: move |_| interaction.down(),
-            onmouseup: move |_| interaction.up(),
-            onblur: move |_| interaction.blur(),
-            onclick: move |_| check(()),
-            onkeydown: move |event| {
-                let forward = match event.key() {
-                    Key::Named(NamedKey::ArrowDown | NamedKey::ArrowRight) => Some(true),
-                    Key::Named(NamedKey::ArrowUp | NamedKey::ArrowLeft) => Some(false),
-                    _ => None,
-                };
-                if let Some(forward) = forward {
-                    event.prevent_default();
-                    event.stop_propagation();
-                    arrow(forward);
-                } else {
-                    interaction.key_down(&event, Keys::Space, || {});
-                }
-            },
-            onkeyup: move |event| interaction.key_up(&event, || check(())),
-            Avatar { avatar: Some(id.clone()), name: label.clone(), size }
+            "aria-label": "{label}",
+            Avatar { avatar: Some(id), name: label, size }
             span {
                 "data-part": "check",
                 "aria-hidden": "true",

@@ -1,7 +1,7 @@
-//! Settings → About (#162, #105), as the webview's `about/`: the app and
-//! its build first (#68), the data services Caskade credits, and the way
-//! into Legal, where `?section=` opens Caskade's licences, the open-source
-//! packages it ships, its terms or its privacy policy in place, bundled so
+//! Settings → About (#162, #105): the app and its build first (#68), the
+//! data services Caskade credits, and the way into Legal, where `?section=`
+//! opens Caskade's licences, the open-source packages it ships, its terms
+//! or its privacy policy in place, bundled so
 //! they read offline. The documents stay in English as published; only
 //! their labels are translated.
 

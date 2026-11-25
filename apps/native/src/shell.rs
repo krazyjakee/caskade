@@ -1,7 +1,7 @@
 //! The native shell's side of the app layer (#87): the services start
 //! (`caskade_app::start`) with what a winit window can answer, the main
 //! window follows games (`caskade_app::game_focus`), and its place and size
-//! are kept (`window_state`). Everything here runs without Tauri.
+//! are kept (`window_state`).
 
 use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{Duration, Instant};
@@ -78,8 +78,7 @@ static PLACEMENT: Mutex<Option<WindowPlacement>> = Mutex::new(None);
 /// Starts every other service on `core`, off the main thread so the window
 /// shows at once. `ready` runs with them once they're up.
 pub fn start(core: Core, ready: impl FnOnce(&'static Services) + Send + 'static) {
-    // Every command checks the signed-in account's permissions from here
-    // on, as the Tauri shell checks each one before it runs (#106).
+    // Every command checks the signed-in account's permissions from here on (#106).
     caskade_app::permissions::install_guard(caskade_app::permissions::Guard::new(
         core.accounts.clone(),
     ));

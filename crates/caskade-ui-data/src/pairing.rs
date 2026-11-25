@@ -1,7 +1,6 @@
 //! Pairing devices for flows (#226, #231, #108): the pairing in progress
 //! and its code, confirming or refusing it, and a `caskade://pair` link
-//! opened from outside, through the app layer's commands as the webview's
-//! `api/sync.ts` does.
+//! opened from outside, through the app layer's commands.
 
 use caskade_app::commands::sync::{self, OpenedPairingLink};
 use caskade_core::{

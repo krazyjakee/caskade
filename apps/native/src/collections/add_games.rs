@@ -1,6 +1,5 @@
-//! Picks a manual collection's games from the library (the webview's
-//! `components/collections/AddGamesDialog.tsx`): a search, and a checkbox
-//! per game that adds it or takes it out at once.
+//! Picks a manual collection's games from the library: a search, and a
+//! checkbox per game that adds it or takes it out at once.
 
 use crate::data::{change, use_library, use_query};
 use crate::ui::{Button, ButtonVariant, Checkbox, Dialog, TextField, icons};

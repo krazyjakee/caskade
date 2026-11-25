@@ -286,7 +286,7 @@ msgid "(now part of {into})"
 msgstr ""
 
 #. After the signed-in account's name
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "(you)"
 msgstr ""
 
@@ -403,7 +403,7 @@ msgstr ""
 msgid "A PIN locks this account."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "A PIN locks this account. Changes at once."
 msgstr ""
 
@@ -601,7 +601,8 @@ msgstr ""
 msgid "About {0} before compression. Never included: {1}."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Accent colour"
 msgstr ""
@@ -625,7 +626,7 @@ msgstr ""
 msgid "Accounts"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Accounts"
@@ -636,7 +637,7 @@ msgstr ""
 msgid "Accounts and PINs"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Accounts couldn't be loaded"
 msgstr ""
 
@@ -695,7 +696,7 @@ msgstr ""
 #. Add the exclusion pattern
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/web.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/emulation/scanners/exclusions.rs
 #: apps/native/src/settings/streaming/stream_from.rs
 msgid "Add"
@@ -742,11 +743,11 @@ msgstr ""
 msgid "Add a storage location in Settings → Storage."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Add account"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Add account…"
 msgstr ""
 
@@ -918,12 +919,13 @@ msgstr ""
 msgid "Adds it to the library"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Adjust the theme to taste."
 msgstr ""
 
 #: apps/native/src/accounts/menu.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "account role"
 msgid "Admin"
 msgstr ""
@@ -955,7 +957,7 @@ msgctxt "script phase"
 msgid "After the game starts"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Age ratings"
 msgstr ""
@@ -1044,7 +1046,7 @@ msgstr ""
 msgid "Always use the default location"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Amber"
 msgstr ""
@@ -1062,7 +1064,7 @@ msgstr ""
 msgid "An admin PIN is needed to play {game}, which is unrated"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "An admin changes everything, other accounts included."
 msgstr ""
 
@@ -1101,7 +1103,7 @@ msgstr ""
 msgid "And {0} more."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Animations"
 msgstr ""
@@ -1176,8 +1178,8 @@ msgstr ""
 msgid "Appearance"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Appearance"
@@ -1513,7 +1515,7 @@ msgstr ""
 msgid "Bitrate"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Blue"
 msgstr ""
@@ -1572,7 +1574,7 @@ msgstr ""
 msgid "Built from source on this system"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Buttons, selection and glows; kept readable on the theme."
 msgstr ""
 
@@ -1633,7 +1635,7 @@ msgctxt "streaming device"
 msgid "Can't be reached"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "Can't be used:"
 msgstr ""
 
@@ -1729,7 +1731,7 @@ msgstr ""
 msgid "Capacity"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Card size"
 msgstr ""
@@ -2339,7 +2341,7 @@ msgstr ""
 msgid "Collections for {title}"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "density"
 msgid "Comfortable"
 msgstr ""
@@ -2362,7 +2364,7 @@ msgstr ""
 msgid "Community"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "density"
 msgid "Compact"
 msgstr ""
@@ -2733,16 +2735,17 @@ msgstr ""
 msgid "Cursor right"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Custom CSS"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Custom CSS wasn't saved:"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgid "Custom accent colour"
 msgstr ""
 
@@ -2755,7 +2758,7 @@ msgstr ""
 msgid "Custom profile"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Cyan"
 msgstr ""
@@ -2845,7 +2848,7 @@ msgid "Defaults apply to compatible games that use Platform default. BIOS folder
 msgstr ""
 
 #: apps/native/src/collections/delete.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Delete"
 msgstr ""
 
@@ -2860,12 +2863,12 @@ msgctxt "on-screen keyboard"
 msgid "Delete"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Delete {name}"
 msgstr ""
 
 #: apps/native/src/collections/delete.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Delete {name}?"
 msgstr ""
 
@@ -2880,12 +2883,12 @@ msgstr ""
 #: apps/native/src/collections/actions.rs
 #: apps/native/src/flows/scripts.rs
 #: apps/native/src/game/editor/actions.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Delete…"
 msgstr ""
 
 #: apps/native/src/collections/delete.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Deleting…"
 msgstr ""
 
@@ -2894,7 +2897,7 @@ msgstr ""
 msgid "Delisted"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Density"
 msgstr ""
@@ -2995,7 +2998,7 @@ msgstr ""
 msgid "Dev"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgctxt "theme source"
 msgid "Dev folder"
 msgstr ""
@@ -3035,7 +3038,8 @@ msgstr ""
 msgid "Didn't start"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Disable custom CSS"
 msgstr ""
@@ -3082,7 +3086,7 @@ msgstr ""
 msgid "Disconnect…"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/discovery.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
@@ -3190,7 +3194,6 @@ msgstr ""
 
 #. A background job's phase
 #: apps/native/src/activity/labels.rs
-#: apps/native/src/frame/status_bar.rs
 msgid "Downloading"
 msgstr ""
 
@@ -3306,7 +3309,8 @@ msgid "Edit server"
 msgstr ""
 
 #: apps/native/src/library/collection_dialog.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Edit {name}"
 msgstr ""
 
@@ -3324,7 +3328,7 @@ msgstr ""
 
 #: apps/native/src/collections/actions.rs
 #: apps/native/src/game_menu/menu.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Edit…"
 msgstr ""
 
@@ -3352,7 +3356,7 @@ msgstr ""
 msgid "Emulation"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Emulation"
@@ -3445,7 +3449,7 @@ msgstr ""
 msgid "Emulators to install"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Emulators, ROM scanners, BIOS files and RomM servers."
 msgstr ""
 
@@ -3789,7 +3793,7 @@ msgstr ""
 msgid "For each game. The newest stay, and so does any save that isn't settled between devices yet."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "For every account. Age limits are set on each account."
 msgstr ""
 
@@ -3848,7 +3852,7 @@ msgstr ""
 msgid "From Steam, Epic, GOG, Heroic, Lutris and more."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgctxt "theme source"
 msgid "From a plugin"
 msgstr ""
@@ -3873,7 +3877,7 @@ msgstr ""
 msgid "From your sources"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "animations setting"
 msgid "Full"
 msgstr ""
@@ -4063,7 +4067,7 @@ msgstr ""
 msgid "Games owned by other launchers stay in their launcher locations."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Games rated above it need an admin's PIN."
 msgstr ""
 
@@ -4113,7 +4117,7 @@ msgstr ""
 msgid "Games, play time, collections, edits, launch actions, accounts and settings. Always included."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
@@ -4199,7 +4203,7 @@ msgstr ""
 msgid "Got {files}."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Green"
 msgstr ""
@@ -4315,7 +4319,7 @@ msgstr ""
 msgid "How Caskade finds, installs and plays your games, and how it looks and syncs."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "How Caskade looks. Themes restyle every view through design tokens."
 msgstr ""
 
@@ -4335,11 +4339,11 @@ msgstr ""
 msgid "How far {name} got"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "How games are shown in grids."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "How games download and install, and torrent links."
 msgstr ""
 
@@ -4627,7 +4631,7 @@ msgstr ""
 msgid "Install from link…"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Install games"
 msgstr ""
 
@@ -4678,7 +4682,7 @@ msgstr ""
 msgid "Install {title}?"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Install, uninstall and move games. Updates run for everyone."
 msgstr ""
 
@@ -4717,7 +4721,7 @@ msgctxt "release state"
 msgid "Installed"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgctxt "theme source"
 msgid "Installed"
 msgstr ""
@@ -4773,7 +4777,7 @@ msgstr ""
 msgid "Installer"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Installer"
@@ -4783,7 +4787,6 @@ msgstr ""
 #. A background job's phase
 #: apps/native/src/activity/card.rs
 #: apps/native/src/activity/labels.rs
-#: apps/native/src/frame/status_bar.rs
 msgid "Installing"
 msgstr ""
 
@@ -4831,7 +4834,7 @@ msgctxt "library source"
 msgid "Installs"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Interface scale"
 msgstr ""
@@ -5062,7 +5065,7 @@ msgstr ""
 msgid "Keep this device's emulator for {platform}"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Keeps your CSS but stops applying it, to recover from a broken look."
 msgstr ""
 
@@ -5107,7 +5110,7 @@ msgstr ""
 msgid "Language & Region"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Language, startup, closing and updates."
 msgstr ""
 
@@ -5187,7 +5190,7 @@ msgstr ""
 msgid "Launchers"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/launchers.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
@@ -5251,7 +5254,7 @@ msgstr ""
 #: apps/native/src/frame/sidebar.rs
 #: apps/native/src/game/back.rs
 #: apps/native/src/library/view.rs
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/devices/sync_choices.rs
 #: apps/native/src/settings/general.rs
 #: apps/native/src/settings/search/search_index.rs
@@ -5332,7 +5335,7 @@ msgstr ""
 msgid "Load more"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "Load theme folder…"
 msgstr ""
 
@@ -5348,7 +5351,7 @@ msgstr ""
 msgid "Loading RomM servers…"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Loading accounts…"
 msgstr ""
 
@@ -5440,7 +5443,7 @@ msgstr ""
 msgid "Loading the catalogue…"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/profile.rs
 msgid "Loading your profile…"
 msgstr ""
 
@@ -5448,7 +5451,7 @@ msgstr ""
 #: apps/native/src/game/editor/artwork.rs
 #: apps/native/src/game/editor/mod.rs
 #: apps/native/src/plugins/mod.rs
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 #: apps/native/src/store/view.rs
 msgid "Loading…"
 msgstr ""
@@ -5513,7 +5516,7 @@ msgid "Look"
 msgstr ""
 
 #. The appearance
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "settings section"
 msgid "Look"
 msgstr ""
@@ -5717,7 +5720,7 @@ msgctxt "window"
 msgid "Maximize"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Maximum age rating"
 msgstr ""
 
@@ -5763,7 +5766,7 @@ msgctxt "window"
 msgid "Minimize"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Minimum width of a game card."
 msgstr ""
 
@@ -5802,7 +5805,7 @@ msgstr ""
 msgid "More than one manifest game matches: {titles}. Enter the right one's name below."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "More themes in the plugin and theme catalogue"
 msgstr ""
 
@@ -5815,7 +5818,7 @@ msgstr ""
 msgid "Most rated this past year"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Motion & Effects"
 msgstr ""
 
@@ -5879,7 +5882,6 @@ msgstr ""
 
 #. A background job's phase
 #: apps/native/src/activity/labels.rs
-#: apps/native/src/frame/status_bar.rs
 msgid "Moving"
 msgstr ""
 
@@ -5888,7 +5890,7 @@ msgid "Moving…"
 msgstr ""
 
 #: apps/native/src/accounts/menu.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/profile.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "My profile"
@@ -5900,7 +5902,8 @@ msgid "Name"
 msgstr ""
 
 #: apps/native/src/onboarding/account.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/profile.rs
 #: apps/native/src/settings/search/search_index.rs
 msgctxt "account"
 msgid "Name"
@@ -6086,7 +6089,7 @@ msgstr ""
 msgid "No PIN: anyone can sign in to it."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "No PIN: anyone can sign in to it. Changes at once."
 msgstr ""
 
@@ -6203,7 +6206,7 @@ msgstr ""
 msgid "No limit"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "age limit"
 msgid "No limit"
 msgstr ""
@@ -6300,7 +6303,7 @@ msgstr ""
 msgid "No strategy details are available yet."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "No themes found. Rescan themes looks for them again."
 msgstr ""
 
@@ -6921,7 +6924,7 @@ msgstr ""
 msgid "Or use a pairing link"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Orange"
 msgstr ""
@@ -6947,7 +6950,7 @@ msgstr ""
 msgid "Output"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Overlay the game title on cover art."
 msgstr ""
 
@@ -6961,7 +6964,7 @@ msgstr ""
 msgid "PIN"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "account details"
 msgid "PIN"
 msgstr ""
@@ -7120,7 +7123,7 @@ msgstr ""
 msgid "Pin to the top"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Pink"
 msgstr ""
@@ -7359,7 +7362,6 @@ msgctxt "library column"
 msgid "Playtime"
 msgstr ""
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Playtime"
@@ -7415,13 +7417,13 @@ msgctxt "game menu section"
 msgid "Plugins"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Plugins"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Plugins and add-on themes, and what they may do."
 msgstr ""
 
@@ -7439,7 +7441,6 @@ msgctxt "catalog sort"
 msgid "Popular"
 msgstr ""
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Popular"
@@ -7702,7 +7703,7 @@ msgstr ""
 msgid "Rated"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Rating board"
 msgstr ""
@@ -7814,13 +7815,11 @@ msgstr ""
 msgid "Recently Released"
 msgstr ""
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Recently added"
 msgstr ""
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Recently played"
@@ -7844,17 +7843,17 @@ msgstr ""
 msgid "Reconnect the drive or network share."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Red"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Reduce effects"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "animations setting"
 msgid "Reduced"
 msgstr ""
@@ -7985,7 +7984,6 @@ msgstr ""
 msgid "Release date"
 msgstr ""
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Release date"
@@ -8237,7 +8235,7 @@ msgstr ""
 msgid "Requires: {path}"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "Rescan themes"
 msgstr ""
 
@@ -8247,7 +8245,7 @@ msgstr ""
 msgid "Reset"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Reset appearance settings"
 msgstr ""
 
@@ -8431,7 +8429,7 @@ msgstr ""
 #: apps/native/src/flows/scripts.rs
 #: apps/native/src/game/editor/actions.rs
 #: apps/native/src/game/editor/saves.rs
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Revert"
 msgstr ""
 
@@ -8451,7 +8449,7 @@ msgstr ""
 msgid "Review scan results"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgctxt "account"
 msgid "Role"
 msgstr ""
@@ -8572,7 +8570,7 @@ msgstr ""
 msgid "Rust crate"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Safe mode is on: your custom CSS isn't applied until Caskade starts normally."
 msgstr ""
 
@@ -8591,12 +8589,13 @@ msgstr ""
 #: apps/native/src/game/editor/mod.rs
 #: apps/native/src/game/emulation.rs
 #: apps/native/src/library/collection_dialog.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/profile.rs
 #: apps/native/src/settings/unsaved.rs
 msgid "Save"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Save CSS"
 msgstr ""
 
@@ -8744,7 +8743,8 @@ msgstr ""
 #: apps/native/src/game/editor/saves.rs
 #: apps/native/src/library/bulk_edit.rs
 #: apps/native/src/library/collection_dialog.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/profile.rs
 #: apps/native/src/settings/devices/this_device.rs
 #: apps/native/src/settings/emulation/emulators/emulator_editor.rs
 #: apps/native/src/settings/emulation/emulators/profile_editor.rs
@@ -9021,7 +9021,7 @@ msgstr ""
 msgid "Selecting…"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgctxt "theming docs"
 msgid "Selectors"
 msgstr ""
@@ -9158,7 +9158,7 @@ msgid "Settings sections"
 msgstr ""
 
 #. Over the Settings sections a standard account may change
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Settings sections it can change"
 msgstr ""
 
@@ -9287,7 +9287,7 @@ msgstr ""
 msgid "Show settings"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Show titles on artwork"
 msgstr ""
@@ -9333,7 +9333,7 @@ msgstr ""
 msgid "Sign in to an account that may do this."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/profile.rs
 msgid "Sign in to change your profile."
 msgstr ""
 
@@ -9381,11 +9381,11 @@ msgstr ""
 msgid "Sign-ins stay on each device. Sign in here to import this server's games."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/profile.rs
 msgid "Signed in as {name}, a standard account."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/profile.rs
 msgid "Signed in as {name}, an admin."
 msgstr ""
 
@@ -9558,7 +9558,8 @@ msgid "Split into arguments as a shell would, but no shell runs. Quote a value t
 msgstr ""
 
 #: apps/native/src/accounts/menu.rs
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "account role"
 msgid "Standard"
 msgstr ""
@@ -9755,7 +9756,7 @@ msgstr ""
 msgid "Storage"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 #: apps/native/src/settings/mod.rs
 msgctxt "settings tab"
 msgid "Storage"
@@ -9915,7 +9916,7 @@ msgid "Syncing…"
 msgstr ""
 
 #. Follow the operating system's reduced-motion setting
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgctxt "animations setting"
 msgid "System"
 msgstr ""
@@ -9930,7 +9931,7 @@ msgstr ""
 msgid "System ({systemName})"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "System follows your OS reduced-motion setting."
 msgstr ""
 
@@ -9992,12 +9993,8 @@ msgstr ""
 msgid "That didn't work"
 msgstr ""
 
+#: apps/native/src/data/mod.rs
 #: apps/native/src/flows/tool_request.rs
-#: apps/native/src/game/data.rs
-#: apps/native/src/game/editor/data.rs
-#: apps/native/src/game/launch.rs
-#: apps/native/src/game_menu/actions.rs
-#: apps/native/src/store/data.rs
 msgid "That isn't available in this copy of Caskade."
 msgstr ""
 
@@ -10181,7 +10178,7 @@ msgstr ""
 msgid "The profile decides which files match. Imported games launch with the choice below."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "The ratings games show, and the steps age limits are picked from."
 msgstr ""
 
@@ -10250,16 +10247,17 @@ msgid "Their stores aren't available in this version of Caskade. Their games sta
 msgstr ""
 
 #: apps/native/src/settings/addons.rs
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
+#: apps/native/src/settings/appearance/themes.rs
 #: apps/native/src/settings/search/search_index.rs
 msgid "Theme"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgid "Theme accent"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "Theme folder"
 msgstr ""
 
@@ -10267,7 +10265,7 @@ msgstr ""
 msgid "Theme, accent and layout."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Theme, look, motion and custom CSS."
 msgstr ""
 
@@ -10276,11 +10274,11 @@ msgstr ""
 msgid "Themes"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "Themes couldn't be loaded"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Theming guide"
 msgstr ""
 
@@ -10520,7 +10518,6 @@ msgctxt "library column"
 msgid "Title"
 msgstr ""
 
-#: apps/native/src/library/collection_dialog.rs
 #: apps/native/src/library/view.rs
 msgctxt "library sort"
 msgid "Title"
@@ -10549,7 +10546,7 @@ msgstr ""
 msgid "To pause or cancel it, use {launcher}: Caskade can't pause a store's own download."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgctxt "theming docs"
 msgid "Tokens"
 msgstr ""
@@ -10593,7 +10590,7 @@ msgstr ""
 msgid "Turn off"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Turn off blur, glow, scanlines and the backdrop grid."
 msgstr ""
 
@@ -10617,7 +10614,7 @@ msgstr ""
 msgid "Turn sounds on"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Turn these down on slower machines."
 msgstr ""
 
@@ -10640,7 +10637,7 @@ msgstr ""
 msgid "USB, removable"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Under an age limit, games without a rating need an admin's PIN too."
 msgstr ""
 
@@ -10750,7 +10747,7 @@ msgstr ""
 msgid "Unpin"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Unrated games need a PIN"
 msgstr ""
 
@@ -10799,7 +10796,7 @@ msgid "Up to date."
 msgstr ""
 
 #. An age limit no step of the chosen rating board matches: 'Up to 13+'
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Up to {age}+"
 msgstr ""
 
@@ -11071,7 +11068,7 @@ msgstr ""
 msgid "View: {title}"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/accent.rs
 msgctxt "accent colour"
 msgid "Violet"
 msgstr ""
@@ -11212,7 +11209,7 @@ msgid "What happens when Caskade opens."
 msgstr ""
 
 #. Over a standard account's permissions
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "What it can do"
 msgstr ""
 
@@ -11228,7 +11225,7 @@ msgstr ""
 msgid "What it starts"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "What scans look for, their folders and ignored results."
 msgstr ""
 
@@ -11295,7 +11292,7 @@ msgstr ""
 msgid "Where games are installed"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Where games install, and the default location."
 msgstr ""
 
@@ -11339,7 +11336,7 @@ msgstr ""
 msgid "Which launchers are scanned: <0>Launchers</0>"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "Which launchers' games join the library."
 msgstr ""
 
@@ -11359,7 +11356,7 @@ msgstr ""
 msgid "Who plays here, their age limits and PINs. Wrong PIN attempts are counted on each device."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "Who uses Caskade here, and what each can change."
 msgstr ""
 
@@ -11415,7 +11412,6 @@ msgstr ""
 
 #. A running job with no phase
 #: apps/native/src/activity/labels.rs
-#: apps/native/src/frame/status_bar.rs
 msgid "Working"
 msgstr ""
 
@@ -11588,7 +11584,7 @@ msgstr ""
 msgid "Your other devices play these platforms with an emulator this device doesn't have. Install it to use it here too, or keep this device's."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/mod.rs
 msgid "Your own rules, applied over the theme without a reload."
 msgstr ""
 
@@ -11596,7 +11592,7 @@ msgstr ""
 msgid "Your rating"
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "Your rules beat the theme and every component. Style through the contract:"
 msgstr ""
 
@@ -11700,7 +11696,7 @@ msgid "bitrate, resolution, frame rate"
 msgstr ""
 
 #. A theme's author
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/themes.rs
 msgid "by {0}"
 msgstr ""
 
@@ -11936,7 +11932,7 @@ msgctxt "plugin event"
 msgid "installs"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "account details"
 msgid "installs games"
 msgstr ""
@@ -12044,7 +12040,7 @@ msgstr ""
 msgid "no Caskade platform for {platforms}"
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgctxt "account details"
 msgid "no PIN"
 msgstr ""
@@ -12278,7 +12274,7 @@ msgid "sync, theme"
 msgstr ""
 
 #. Fills in for a new account's name: 'Choose a new PIN for the account'
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/editor.rs
 msgid "the account"
 msgstr ""
 
@@ -12635,7 +12631,7 @@ msgstr ""
 msgid "{launcher} isn't installed on this computer."
 msgstr ""
 
-#: apps/native/src/settings/appearance.rs
+#: apps/native/src/settings/appearance/custom_css.rs
 msgid "{length} / {max} characters"
 msgstr ""
 
@@ -12723,7 +12719,7 @@ msgstr ""
 msgid "{name}'s achievements are private on {provider}. Make your game details public there, then refresh."
 msgstr ""
 
-#: apps/native/src/settings/accounts.rs
+#: apps/native/src/settings/accounts/mod.rs
 msgid "{name}'s collections go with it. Games, installs and play history stay."
 msgstr ""
 

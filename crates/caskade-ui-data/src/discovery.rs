@@ -1,8 +1,8 @@
 //! Library discovery for Settings → Launchers and Library Discovery (#104):
 //! the controller's snapshot (launchers found, the scan's phase, results
 //! waiting for review), detection, scans and reviews, through the app
-//! layer's commands as the webview's `api/discovery.ts` does. Every change
-//! arrives as `DiscoveryChanged` (`Key::Discovery`).
+//! layer's commands. Every change arrives as `DiscoveryChanged`
+//! (`Key::Discovery`).
 
 use caskade_app::commands::discovery as commands;
 use caskade_app::discovery::{DiscoveryController, DiscoverySnapshot};

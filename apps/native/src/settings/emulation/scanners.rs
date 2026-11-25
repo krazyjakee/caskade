@@ -1,7 +1,7 @@
-//! Settings → Emulation → ROM scanners (#115, #116), as the webview's
-//! `emulators/ScannersSection` and `ScanReview`: the saved scanners and
-//! what each found last, one scanner's editor, its latest scan (progress,
-//! the manual scan's review list, or its outcome) and the exclusions every
+//! Settings → Emulation → ROM scanners (#115, #116): the saved scanners
+//! and what each found last, one scanner's editor, its latest scan
+//! (progress, the manual scan's review list, or its outcome) and the
+//! exclusions every
 //! scanner applies.
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -146,7 +146,7 @@ fn empty_scanner(snapshot: &Snapshot, name: String) -> RomScanner {
 pub fn ScannersSection(snapshot: Snapshot) -> Element {
     let emulation = use_emulation();
     let live = use_live();
-    // Bumped where the webview invalidates its emulation queries.
+    // Bumped to re-read emulation state after a mutation.
     let mut reload = use_signal(|| 0u64);
     // A finished scan changes its scanner's games and last scan.
     let finished = use_memo(move || {

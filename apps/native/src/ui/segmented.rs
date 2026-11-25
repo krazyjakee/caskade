@@ -1,7 +1,6 @@
-//! One choice from a few options side by side, as `@caskade/ui`'s
-//! `SegmentedControl` (react-aria's single-select `ToggleButtonGroup`):
-//! each segment is a toggle button (`aria-pressed`); a click, Enter, Space
-//! or a pad's A picks one, and a pad moves between them spatially.
+//! One choice from a few options side by side ([`SegmentedControl`]): each
+//! segment is a toggle button (`aria-pressed`); a click, Enter, Space or a
+//! pad's A picks one, and a pad moves between them spatially.
 
 use caskade_ui_theme::anatomy::{Entry, Source};
 use dioxus_native::prelude::*;

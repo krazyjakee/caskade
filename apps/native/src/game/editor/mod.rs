@@ -1,8 +1,7 @@
-//! A game's editor (the webview's `gameEditor/GameEditor.tsx`): its details
-//! in one draft saved as a patch, and tabs that save on their own (artwork,
-//! launch actions, scripts, save locations). Closing with unsaved work
-//! anywhere asks first. Opened by the game page's Edit details and the game
-//! menu's Edit….
+//! A game's editor: its details in one draft saved as a patch, and tabs
+//! that save on their own (artwork, launch actions, scripts, save
+//! locations). Closing with unsaved work anywhere asks first. Opened by
+//! the game page's Edit details and the game menu's Edit….
 
 mod action_form;
 mod actions;

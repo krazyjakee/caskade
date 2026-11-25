@@ -1,10 +1,10 @@
-//! Games' menus, quick looks and the dialogs they open (#99,
-//! `components/gameMenu/GameMenuHost.tsx`): one host around the views, so a
-//! card, a row, a search suggestion or a game's page opens the same menu.
-//! A right click, the menu key, Shift F10 or a pad's Start opens a game's
-//! menu; a click opens its quick look beside the view (a pad's X, too);
-//! a double click plays it. Only one menu is open at a time, and a game
-//! starting shows as starting until it runs or doesn't.
+//! Games' menus, quick looks and the dialogs they open (#99): one host
+//! around the views, so a card, a row, a search suggestion or a game's
+//! page opens the same menu. A right click, the menu key, Shift F10 or a
+//! pad's Start opens a game's menu; a click opens its quick look beside
+//! the view (a pad's X, too); a double click plays it. Only one menu is
+//! open at a time, and a game starting shows as starting until it runs or
+//! doesn't.
 
 pub mod actions;
 mod anatomy;

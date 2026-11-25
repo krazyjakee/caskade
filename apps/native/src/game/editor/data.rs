@@ -4,59 +4,21 @@
 //! (`use_context_provider`). Fixtures mode has neither, so it has no
 //! editor.
 
-use crate::data::change;
+use crate::data::{change, require_services};
 use crate::game::launch::Answer;
 use caskade_app::commands::game_edit::ArtworkChange;
-use caskade_core::error::ErrorReport;
+#[cfg(test)]
+pub use caskade_app::commands::saves::SaveLocationView;
+pub use caskade_app::commands::saves::SaveLocationsState;
 use caskade_core::install::ProtonBuilds;
 use caskade_core::launch::ReleaseActions;
 use caskade_core::model::{
     ArtworkKind, ArtworkSlot, EntryActionSettings, Game, GameAction, GameEdit, GameEditOutcome,
     GameEditState,
 };
-use caskade_core::saves::{LocationSpec, SaveMatch, SavePreferences, SaveState, Saves};
+use caskade_core::saves::SavePreferences;
 use dioxus_native::prelude::*;
 use std::rc::Rc;
-
-/// A save location and how many files the core found there.
-#[derive(Debug, Clone, PartialEq)]
-pub struct SaveLocationRow {
-    pub spec: LocationSpec,
-    pub files: usize,
-}
-
-/// One release's save locations on this device.
-#[derive(Debug, Clone, PartialEq)]
-pub struct SaveLocations {
-    /// The edit's starting point: a change made elsewhere since is refused.
-    pub revision: u32,
-    pub preferences: SavePreferences,
-    pub matched: SaveMatch,
-    pub automatic: Vec<SaveLocationRow>,
-    pub locations: Vec<SaveLocationRow>,
-    pub warnings: Vec<String>,
-}
-
-impl From<SaveState> for SaveLocations {
-    fn from(state: SaveState) -> Self {
-        let rows = |list: Vec<caskade_core::saves::SaveLocation>| {
-            list.into_iter()
-                .map(|location| SaveLocationRow {
-                    spec: location.spec,
-                    files: location.files.len(),
-                })
-                .collect()
-        };
-        Self {
-            revision: state.revision,
-            preferences: state.preferences,
-            matched: state.matched,
-            automatic: rows(state.automatic),
-            locations: rows(state.locations),
-            warnings: state.warnings,
-        }
-    }
-}
 
 #[derive(Clone)]
 pub struct EditData {
@@ -82,9 +44,9 @@ pub struct EditData {
     /// The Proton builds an action can choose.
     pub proton: Rc<dyn Fn() -> Answer<ProtonBuilds>>,
     /// Entry `0`'s save locations.
-    pub saves: Rc<dyn Fn(String) -> Answer<SaveLocations>>,
+    pub saves: Rc<dyn Fn(String) -> Answer<SaveLocationsState>>,
     /// Saves entry `0`'s save locations, from revision `2`.
-    pub edit_saves: Rc<dyn Fn(String, SavePreferences, u32) -> Answer<SaveLocations>>,
+    pub edit_saves: Rc<dyn Fn(String, SavePreferences, u32) -> Answer<SaveLocationsState>>,
 }
 
 impl PartialEq for EditData {
@@ -93,27 +55,14 @@ impl PartialEq for EditData {
     }
 }
 
-fn services() -> Result<&'static caskade_app::start::Services, ErrorReport> {
-    crate::shell::services().ok_or_else(|| {
-        ErrorReport::from(caskade_ui_i18n::t!(
-            "That isn't available in this copy of Caskade."
-        ))
-    })
-}
-
-fn saves_of(services: &caskade_app::start::Services) -> Saves {
-    Saves::new(services.store.clone(), services.ludusavi.clone())
-        .with_catalog(services.emulation.catalog())
-}
-
 impl EditData {
     /// The running app's.
     pub fn of_app() -> Self {
-        use caskade_app::commands::{actions, game_edit};
+        use caskade_app::commands::{actions, game_edit, saves};
         Self {
             state: Rc::new(|game_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(
                         async move { game_edit::game_edit_state(&services.store, game_id).await },
                     )
@@ -122,7 +71,7 @@ impl EditData {
             }),
             save: Rc::new(|game_id, edit, base| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         game_edit::game_edit(&services.store, &services.bus, game_id, edit, base)
                             .await
@@ -132,14 +81,14 @@ impl EditData {
             }),
             artwork: Rc::new(|game_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move { game_edit::game_artwork(&services.store, game_id).await })
                         .await
                 })
             }),
             set_artwork: Rc::new(|game_id, kind, artwork| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         game_edit::game_artwork_set(
                             &services.store,
@@ -156,14 +105,14 @@ impl EditData {
             }),
             actions: Rc::new(|game_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move { actions::game_actions(&services.store, &game_id).await })
                         .await
                 })
             }),
             save_action: Rc::new(|game_id, action| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         actions::game_action_save(&services.store, &services.bus, &game_id, action)
                             .await
@@ -173,7 +122,7 @@ impl EditData {
             }),
             delete_action: Rc::new(|game_id, id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         actions::game_action_delete(&services.store, &services.bus, &game_id, &id)
                             .await
@@ -183,7 +132,7 @@ impl EditData {
             }),
             order_actions: Rc::new(|game_id, entry_id, ids| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         actions::game_actions_order(
                             &services.store,
@@ -199,7 +148,7 @@ impl EditData {
             }),
             action_settings: Rc::new(|game_id, entry_id, settings| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         actions::game_action_settings_save(
                             &services.store,
@@ -215,34 +164,40 @@ impl EditData {
             }),
             proton: Rc::new(|| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move { actions::proton_builds(&services.settings).await }).await
                 })
             }),
             saves: Rc::new(|entry_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
-                        saves_of(services)
-                            .state(&entry_id)
-                            .await
-                            .map_err(|error| ErrorReport::from_error(&error))
+                        saves::game_saves_state(
+                            &services.store,
+                            &services.ludusavi,
+                            &services.emulation,
+                            entry_id,
+                        )
+                        .await
                     })
                     .await
-                    .map(SaveLocations::from)
                 })
             }),
             edit_saves: Rc::new(|entry_id, preferences, revision| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
-                        saves_of(services)
-                            .edit(&entry_id, preferences, revision)
-                            .await
-                            .map_err(|error| ErrorReport::from_error(&error))
+                        saves::game_saves_edit(
+                            &services.store,
+                            &services.ludusavi,
+                            &services.emulation,
+                            entry_id,
+                            preferences,
+                            revision,
+                        )
+                        .await
                     })
                     .await
-                    .map(SaveLocations::from)
                 })
             }),
         }

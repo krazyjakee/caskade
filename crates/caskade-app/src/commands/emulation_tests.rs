@@ -330,7 +330,7 @@ requires = ["{cores}/snes9x_libretro{lib}"]
     let id = started["id"].as_str().unwrap().to_owned();
     let deadline = Instant::now() + Duration::from_secs(10);
     let job = loop {
-        let job = to_json(emulation_detect_get(&service, &id).unwrap());
+        let job = to_json(service.detect_get(&id).unwrap());
         if job["status"] != "running" || Instant::now() > deadline {
             break job;
         }
@@ -375,8 +375,6 @@ requires = ["{cores}/snes9x_libretro{lib}"]
     );
     let gone = emulation_detect_cancel(&service, "det-1").unwrap_err();
     assert_report(&gone, ErrorCode::Invalid, &["det-1"]);
-    let gone = emulation_detect_get(&service, "det-1").unwrap_err();
-    assert_report(&gone, ErrorCode::Conflict, &["det-1"]);
 
     // The UI saw the job start, finish and get marked configured.
     let jobs = || {

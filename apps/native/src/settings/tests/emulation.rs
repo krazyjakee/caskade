@@ -1,10 +1,9 @@
 //! Settings → Emulation (#105), over a fixture library with Caskade's
-//! shipped emulator definitions and a temporary app folder, as the
-//! webview's `emulation.test.tsx`, `scanners.test.tsx` and
-//! `RommPanel.test.tsx`: an emulator added by hand is listed and removed
-//! after asking; a custom profile previews its command line and saves; a
-//! platform's default emulator saves; a ROM scanner's scan is reviewed and
-//! imported; and a RomM server is added with its password kept out of
+//! shipped emulator definitions and a temporary app folder: an emulator
+//! added by hand is listed and removed after asking; a custom profile
+//! previews its command line and saves; a platform's default emulator
+//! saves; a ROM scanner's scan is reviewed and imported; and a RomM server
+//! is added with its password kept out of
 //! everything but the keychain.
 
 use std::sync::{Arc, Mutex};

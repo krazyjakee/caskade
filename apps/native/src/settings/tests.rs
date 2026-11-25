@@ -1,6 +1,5 @@
 //! Settings (#103): its sections, search, schema-driven panels, drafts,
-//! reset and unsaved-changes guard; ported from the webview's
-//! `sectionNav`, `settingsSearch` and `searchCoverage` tests.
+//! reset and unsaved-changes guard.
 
 use super::search::{INDEX, matches, search_settings, section_words};
 use super::*;
@@ -26,8 +25,7 @@ fn the_sections_are_the_routers_in_the_lists_order() {
 }
 
 /// Every entry of the search index sits in a section the router knows,
-/// with a label, once. (It began as the webview's `searchIndex.ts`, entry
-/// for entry, so its labels keep their translations.)
+/// with a label, once.
 #[test]
 fn the_search_index_names_known_sections_once() {
     let mut seen = std::collections::BTreeSet::new();

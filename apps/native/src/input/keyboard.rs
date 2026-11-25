@@ -1,9 +1,9 @@
-//! The on-screen keyboard: how a pad types (the webview's
-//! `OnScreenKeyboard.tsx`, over `caskade_ui_input::osk`). It opens on a text
-//! field (A on the field, a tap in console mode) and types into it while
-//! focus stays there. The d-pad moves between keys, A types, B closes, X
-//! deletes, Y is a space, LB/RB switch between letters and symbols, LT/RT
-//! move the cursor, Start is Done. Keys also take clicks and taps, which
+//! The on-screen keyboard: how a pad types (over `caskade_ui_input::osk`).
+//! It opens on a text field (A on the field, a tap in console mode) and
+//! types into it while focus stays there. The d-pad moves between keys, A
+//! types, B closes, X deletes, Y is a space, LB/RB switch between letters
+//! and symbols, LT/RT move the cursor, Start is Done. Keys also take clicks
+//! and taps, which
 //! leave focus in the field.
 
 use super::root::{Bind, Input, use_input, use_input_action};

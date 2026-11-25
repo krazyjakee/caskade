@@ -1,7 +1,7 @@
-//! Failures in place of a view or the whole shell (`shell/ErrorFallback.tsx`):
-//! a view that fails shows its error where it was, with the sidebar, top
-//! bar and status bar still working; the shell failing replaces the window,
-//! keeping its controls. (A panic in the UI restarts Caskade, #87.)
+//! Failures in place of a view or the whole shell: a view that fails shows
+//! its error where it was, with the sidebar, top bar and status bar still
+//! working; the shell failing replaces the window, keeping its controls. (A
+//! panic in the UI restarts Caskade, #87.)
 
 use crate::router::use_router;
 use crate::ui::{Button, ButtonVariant};

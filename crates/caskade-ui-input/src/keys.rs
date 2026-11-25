@@ -1,5 +1,4 @@
-//! The keyboard map: keys produce the same actions pads send. Ported from
-//! the webview's `input/actions.ts`.
+//! The keyboard map: keys produce the same actions pads send.
 
 use crate::Action;
 use crate::tree::{FocusTree, closest};
@@ -92,8 +91,7 @@ pub fn key_action<T: FocusTree + ?Sized>(
 /// Whether `key` pressed on `target` starts a search, and the text it
 /// starts with: a printable character typed outside a text field, a menu, a
 /// popover or a dialog; `/` starts an empty one. Keys the keyboard map turns
-/// into actions are handled before this is asked (the webview's
-/// `startsTyping`).
+/// into actions are handled before this is asked.
 pub fn starts_typing<T: FocusTree + ?Sized>(
     tree: &T,
     target: Option<T::Node>,

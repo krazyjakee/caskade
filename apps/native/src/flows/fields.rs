@@ -1,7 +1,6 @@
-//! Fields several flows share, as the webview's `gameActions/ActionForm`:
-//! a path typed or picked ([`PathField`]), and a list of values each in a
-//! field of its own ([`ListField`]). Lifecycle scripts (#105) and the game
-//! editor (#100) use them.
+//! Fields several flows share: a path typed or picked ([`PathField`]), and
+//! a list of values each in a field of its own ([`ListField`]). Lifecycle
+//! scripts (#105) and the game editor (#100) use them.
 
 use caskade_ui_i18n::t;
 use dioxus_native::prelude::*;

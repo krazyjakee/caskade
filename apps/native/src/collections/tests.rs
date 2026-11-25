@@ -1,9 +1,8 @@
-//! Collections (#102) in the frame over the fixture library, headless, as
-//! `collections.test.tsx` has them: the list, pinned first, its tabs and a
-//! collection's page with its games; making one and adding games; a
-//! smart one's rules; pinning and deleting from the menus; Play Random.
-//! Putting a game in a collection from its menu is the game menu's
-//! (`game_menu::collections`).
+//! Collections (#102) in the frame over the fixture library, headless: the
+//! list, pinned first, its tabs and a collection's page with its games;
+//! making one and adding games; a smart one's rules; pinning and deleting
+//! from the menus; Play Random. Putting a game in a collection from its menu
+//! is the game menu's (`game_menu::collections`).
 //!
 //! The fixture library is every test's: what a test makes, it deletes.
 

@@ -1,7 +1,7 @@
 //! Library data for views: pages, search, details, totals and sessions,
 //! and the changes a view makes. Every call goes through the app layer's
-//! commands (`caskade_app::commands`), so the rules, the signed-in account
-//! and the bus events are the same as the webview's.
+//! commands (`caskade_app::commands`), so permissions, the signed-in account
+//! and the bus events come from the core.
 
 use caskade_app::commands::{collections, game_edit, library};
 use caskade_core::{

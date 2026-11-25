@@ -1,30 +1,13 @@
 //! Plugins' UI. From API 0.2 (#109) the backend draws it: which plugins
-//! draw contributions ([`plugins_drawn`]), drawing one
+//! draw contributions ([`drawn_plugins`]), drawing one
 //! ([`plugin_ui_render`]) and what the user did with it
-//! ([`plugin_ui_act`]). A 0.1 plugin's JavaScript UI half (#127), which the
-//! webview loads until the cutover: which modules to load, and calls from
-//! it to its backend. Names and titles come in the language in use, from
+//! ([`plugin_ui_act`]). Names and titles come in the language in use, from
 //! the plugin's own catalog (#219).
-use caskade_plugin_host::{PluginHost, PluginMessages, PluginStatus};
+use caskade_plugin_host::{PluginHost, PluginStatus};
 /// What a drawn contribution is drawn with (#109): its context, the tree it
 /// draws, and what an action answers.
 pub use caskade_plugin_ui::{Context as UiContext, Node as UiNode, Outcome as UiOutcome};
 use serde::Serialize;
-/// An enabled plugin with a UI half.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct UiPlugin {
-    pub id: String,
-    pub name: String,
-    pub version: String,
-    /// The `ui` module's `caskade-plugin://` URL.
-    pub entry: String,
-    /// `<ui stem>.css` next to the module, when there is one.
-    pub style: Option<String>,
-    /// Slots, views and commands from the manifest; the UI may only
-    /// register these.
-    pub contributes: Vec<UiContribution>,
-}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -35,51 +18,6 @@ pub struct UiContribution {
     /// Where it shows (#152): `desktop`, `console`, or empty for the
     /// slot's default.
     pub modes: Vec<String>,
-}
-
-/// Enabled plugins whose UI half the webview should load. No plugin code
-/// runs here.
-/// `url` is where the shell serves a plugin's file (its id, the file's path
-/// in the plugin).
-pub async fn plugins_ui(
-    state: &PluginHost,
-    url: impl Fn(&str, &std::path::Path) -> String,
-) -> Result<Vec<UiPlugin>, String> {
-    Ok(ui_plugins(state, url).await)
-}
-
-pub async fn ui_plugins(
-    host: &PluginHost,
-    url: impl Fn(&str, &std::path::Path) -> String,
-) -> Vec<UiPlugin> {
-    let mut plugins = Vec::new();
-    for summary in host.list().await {
-        if !matches!(summary.status, PluginStatus::Enabled | PluginStatus::Active) {
-            continue;
-        }
-        let (Some(manifest), Some(folder)) = (
-            host.translated_manifest(&summary.id),
-            host.folder(&summary.id),
-        ) else {
-            continue;
-        };
-        let Some(ui) = &manifest.ui else {
-            continue;
-        };
-        let style = ui.with_extension("css");
-        plugins.push(UiPlugin {
-            entry: url(&manifest.id, ui),
-            style: folder
-                .join(&style)
-                .is_file()
-                .then(|| url(&manifest.id, &style)),
-            contributes: contributions(&manifest),
-            id: manifest.id,
-            name: manifest.name,
-            version: manifest.version.to_string(),
-        });
-    }
-    plugins
 }
 
 /// The slots, views and commands `manifest` declares.
@@ -122,10 +60,6 @@ pub struct DrawnPlugin {
 
 /// Enabled plugins whose backends draw their UI, with what they draw.
 /// Nothing runs: a contribution is drawn when it shows.
-pub async fn plugins_drawn(state: &PluginHost) -> Result<Vec<DrawnPlugin>, String> {
-    Ok(drawn_plugins(state).await)
-}
-
 pub async fn drawn_plugins(host: &PluginHost) -> Vec<DrawnPlugin> {
     let mut plugins = Vec::new();
     for summary in host.list().await {
@@ -184,18 +118,6 @@ pub async fn plugin_ui_act(
         .map_err(super::plugins::failure)
 }
 
-/// The plugin's own catalog for the language in use (#219), for `t` and
-/// `<Trans>` in its UI half; no messages (English) without one. The webview
-/// asks again after `LocaleChanged`.
-pub async fn plugin_messages(
-    state: &PluginHost,
-    plugin_id: String,
-) -> Result<PluginMessages, String> {
-    state
-        .messages(&plugin_id)
-        .map_err(|error| error.to_string())
-}
-
 /// The UI opened one of the plugin's views: starts its backend when the
 /// manifest lists `onView:<view>` (#125).
 pub async fn plugin_view_opened(
@@ -205,21 +127,4 @@ pub async fn plugin_view_opened(
 ) -> Result<(), String> {
     hooks.view_opened(&plugin_id, &view_id).await;
     Ok(())
-}
-
-/// `ctx.backend.call(method, payload)`: the plugin's `handle-request`
-/// export, activating its backend on first use. Payloads cross as JSON.
-pub async fn plugin_request(
-    state: &PluginHost,
-    plugin_id: String,
-    method: String,
-    payload: serde_json::Value,
-) -> Result<serde_json::Value, String> {
-    crate::permissions::enforce("plugin_request", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
-    let answer = state
-        .request(&plugin_id, &method, &payload.to_string())
-        .await
-        .map_err(|error| error.to_string())?;
-    Ok(serde_json::from_str(&answer).unwrap_or(serde_json::Value::String(answer)))
 }

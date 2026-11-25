@@ -1,5 +1,4 @@
-//! The on-screen keyboard's model: how a pad types. Ported from the
-//! webview's `input/OnScreenKeyboard.tsx`; the native app draws it.
+//! The on-screen keyboard's model: how a pad types; the native app draws it.
 //!
 //! It opens on a text field (A on the field, Y for the search, a tap in
 //! console mode) and types into it while focus stays there. The d-pad moves
@@ -23,7 +22,7 @@ pub enum Special {
 }
 
 impl Special {
-    /// Its `data-key` name, as the webview's.
+    /// Its `data-key` attribute name.
     pub fn name(self) -> &'static str {
         match self {
             Self::Shift => "shift",

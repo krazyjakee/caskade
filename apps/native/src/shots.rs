@@ -35,6 +35,7 @@ use blitz_dom::{BaseDocument, DocumentConfig};
 use blitz_traits::shell::{ColorScheme, Viewport};
 use caskade_core::settings::AppearanceSettings;
 use caskade_core::themes::ThemeService;
+use caskade_theme::DEFAULT_THEME;
 use dioxus_native::prelude::VirtualDom;
 
 /// The window size every screen is rendered at, in CSS pixels at scale 1.
@@ -141,9 +142,6 @@ pub fn run(out: &Path, themes_folder: Option<&Path>) -> Result<(), String> {
     }
     Ok(())
 }
-
-/// The theme the screens shown in one theme only are in.
-const DEFAULT_THEME: &str = "caskade.default";
 
 /// How a screen is shown, besides its theme.
 #[derive(Clone, Copy, PartialEq)]
@@ -257,7 +255,7 @@ fn write_website(out: &Path, themes: &ThemeService) -> Result<(), String> {
         for (mode, root, width, height, kept) in WEBSITE {
             let (document, _) = settled(
                 themes,
-                "caskade.default",
+                DEFAULT_THEME,
                 mode,
                 root,
                 Some(&crate::frame::shot::website_ready),

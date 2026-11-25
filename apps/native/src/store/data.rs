@@ -4,10 +4,9 @@
 //! Without the app's services (fixtures mode) every read says the catalogue
 //! isn't available.
 
-use crate::data::change;
+use crate::data::{change, require_services};
 use crate::game::launch::Answer;
 use caskade_core::db::IgdbOwned;
-use caskade_core::error::ErrorReport;
 use caskade_core::igdb::{
     CatalogReleases, CatalogSearch, IgdbCatalogFilters, IgdbCatalogPage, IgdbLookup,
 };
@@ -47,14 +46,6 @@ impl PartialEq for StoreData {
     }
 }
 
-fn services() -> Result<&'static caskade_app::start::Services, ErrorReport> {
-    crate::shell::services().ok_or_else(|| {
-        ErrorReport::from(caskade_ui_i18n::t!(
-            "That isn't available in this copy of Caskade."
-        ))
-    })
-}
-
 impl StoreData {
     /// The running app's.
     pub fn of_app() -> Self {
@@ -62,57 +53,40 @@ impl StoreData {
         Self {
             search: Rc::new(|search| {
                 Box::pin(async move {
-                    let services = services()?;
-                    change(async move {
-                        igdb::igdb_catalog_search(&services.igdb, &search)
-                            .await
-                            .map_err(ErrorReport::from)
-                    })
-                    .await
+                    let services = require_services()?;
+                    change(async move { igdb::igdb_catalog_search(&services.igdb, &search).await })
+                        .await
                 })
             }),
             recent: Rc::new(|releases| {
                 Box::pin(async move {
-                    let services = services()?;
-                    change(async move {
-                        igdb::igdb_catalog_recent(&services.igdb, &releases)
-                            .await
-                            .map_err(ErrorReport::from)
-                    })
+                    let services = require_services()?;
+                    change(
+                        async move { igdb::igdb_catalog_recent(&services.igdb, &releases).await },
+                    )
                     .await
                 })
             }),
             upcoming: Rc::new(|releases| {
                 Box::pin(async move {
-                    let services = services()?;
-                    change(async move {
-                        igdb::igdb_catalog_upcoming(&services.igdb, &releases)
-                            .await
-                            .map_err(ErrorReport::from)
-                    })
+                    let services = require_services()?;
+                    change(
+                        async move { igdb::igdb_catalog_upcoming(&services.igdb, &releases).await },
+                    )
                     .await
                 })
             }),
             filters: Rc::new(|| {
                 Box::pin(async move {
-                    let services = services()?;
-                    change(async move {
-                        igdb::igdb_catalog_filters(&services.igdb)
-                            .await
-                            .map_err(ErrorReport::from)
-                    })
-                    .await
+                    let services = require_services()?;
+                    change(async move { igdb::igdb_catalog_filters(&services.igdb).await }).await
                 })
             }),
             games: Rc::new(|ids| {
                 Box::pin(async move {
-                    let services = services()?;
-                    change(async move {
-                        igdb::igdb_catalog_games(&services.igdb, &ids)
-                            .await
-                            .map_err(ErrorReport::from)
-                    })
-                    .await
+                    let services = require_services()?;
+                    change(async move { igdb::igdb_catalog_games(&services.igdb, &ids).await })
+                        .await
                 })
             }),
             owned: Rc::new(|ids| {
@@ -120,12 +94,7 @@ impl StoreData {
                     let Some(services) = crate::shell::services() else {
                         return Ok(Vec::new());
                     };
-                    change(async move {
-                        igdb::igdb_owned(&services.store, &ids)
-                            .await
-                            .map_err(ErrorReport::from)
-                    })
-                    .await
+                    change(async move { igdb::igdb_owned(&services.store, &ids).await }).await
                 })
             }),
         }

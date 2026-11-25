@@ -1,5 +1,4 @@
-//! Command bindings: who handles an action. Ported from the webview's
-//! `input/bindings.ts`.
+//! Command bindings: who handles an action.
 //!
 //! A binding belongs to an element (a section, a view) or to nobody (the
 //! route or the app). The innermost binding around the focused element wins;
@@ -7,6 +6,7 @@
 
 use crate::Action;
 use crate::tree::{FocusTree, contains, depth};
+use std::collections::HashMap;
 use std::rc::Rc;
 
 /// What a binding does; it returns false to let the next binding (or the
@@ -65,9 +65,17 @@ pub struct ActiveBinding {
     pub label: String,
 }
 
-/// The bindings in force, oldest first.
+struct Entry<N> {
+    /// Monotonic registration sequence, so tie-breaking is deterministic
+    /// regardless of map iteration order.
+    order: u64,
+    binding: Binding<N>,
+}
+
+/// The bindings in force, indexed by [`BindingId`] for O(1) updates and
+/// removals while preserving registration order for tie-breaking.
 pub struct Bindings<N> {
-    list: Vec<(BindingId, Binding<N>)>,
+    entries: HashMap<BindingId, Entry<N>>,
     next: u64,
     /// Counts changes, so hints know when to look again.
     revision: u64,
@@ -76,7 +84,7 @@ pub struct Bindings<N> {
 impl<N> Default for Bindings<N> {
     fn default() -> Self {
         Self {
-            list: Vec::new(),
+            entries: HashMap::new(),
             next: 0,
             revision: 0,
         }
@@ -85,44 +93,58 @@ impl<N> Default for Bindings<N> {
 
 impl<N: Copy + Eq> Bindings<N> {
     pub fn add(&mut self, binding: Binding<N>) -> BindingId {
-        let id = BindingId(self.next);
+        let order = self.next;
+        let id = BindingId(order);
         self.next += 1;
-        self.list.push((id, binding));
+        self.entries.insert(id, Entry { order, binding });
         self.revision += 1;
         id
     }
 
     pub fn remove(&mut self, id: BindingId) {
-        self.list.retain(|(other, _)| *other != id);
-        self.revision += 1;
+        if self.entries.remove(&id).is_some() {
+            self.revision += 1;
+        }
+    }
+
+    /// Updates a binding's owner, label and global flag together; returns
+    /// whether any field changed.
+    pub fn update(
+        &mut self,
+        id: BindingId,
+        owner: Option<N>,
+        label: Option<String>,
+        global: bool,
+    ) -> bool {
+        let Some(entry) = self.entries.get_mut(&id) else {
+            return false;
+        };
+        let binding = &mut entry.binding;
+        let mut changed = false;
+        if binding.owner != owner {
+            binding.owner = owner;
+            changed = true;
+        }
+        if binding.label != label {
+            binding.label = label;
+            changed = true;
+        }
+        if binding.global != global {
+            binding.global = global;
+            changed = true;
+        }
+        if changed {
+            self.revision += 1;
+        }
+        changed
     }
 
     /// Moves a binding to another element, as when its owner renders again.
     pub fn set_owner(&mut self, id: BindingId, owner: Option<N>) {
-        if let Some((_, binding)) = self.list.iter_mut().find(|(other, _)| *other == id)
-            && binding.owner != owner
+        if let Some(entry) = self.entries.get_mut(&id)
+            && entry.binding.owner != owner
         {
-            binding.owner = owner;
-            self.revision += 1;
-        }
-    }
-
-    /// Changes a binding's hint label.
-    pub fn set_label(&mut self, id: BindingId, label: Option<String>) {
-        if let Some((_, binding)) = self.list.iter_mut().find(|(other, _)| *other == id)
-            && binding.label != label
-        {
-            binding.label = label;
-            self.revision += 1;
-        }
-    }
-
-    /// Makes a binding apply inside overlays too, or not.
-    pub fn set_global(&mut self, id: BindingId, global: bool) {
-        if let Some((_, binding)) = self.list.iter_mut().find(|(other, _)| *other == id)
-            && binding.global != global
-        {
-            binding.global = global;
+            entry.binding.owner = owner;
             self.revision += 1;
         }
     }
@@ -157,12 +179,11 @@ impl<N: Copy + Eq> Bindings<N> {
             }
             Some(depth(tree, owner) + 1)
         };
-        let mut found: Vec<(usize, usize, &Binding<N>)> = self
-            .list
-            .iter()
-            .enumerate()
-            .filter(|(_, (_, binding))| action.is_none_or(|action| binding.action == action))
-            .filter_map(|(index, (_, binding))| Some((level(binding)?, index, binding)))
+        let mut found: Vec<(usize, u64, &Binding<N>)> = self
+            .entries
+            .values()
+            .filter(|entry| action.is_none_or(|action| entry.binding.action == action))
+            .filter_map(|entry| Some((level(&entry.binding)?, entry.order, &entry.binding)))
             .collect();
         found.sort_by(|a, b| b.0.cmp(&a.0).then(b.1.cmp(&a.1)));
         found.into_iter().map(|(_, _, binding)| binding).collect()

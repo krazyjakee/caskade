@@ -1,6 +1,6 @@
-//! The library's games broken down by platform (#99, the webview's
-//! `views/library/platforms/PlatformGrid.tsx`), for a filter whose games span
-//! several (Emulated): a card per platform, which opens the filter on it.
+//! The library's games broken down by platform (#99), for a filter whose
+//! games span several (Emulated): a card per platform, which opens the
+//! filter on it.
 
 use super::platforms::{self, is_pc};
 use super::view::library_href;

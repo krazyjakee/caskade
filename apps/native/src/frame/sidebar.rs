@@ -1,6 +1,5 @@
-//! The sidebar (`shell/Sidebar.tsx`, `LibraryNav.tsx`, `nav.ts`): the brand,
-//! the pages, the library's filters with their counts while the library is
-//! open, and Settings below the divider.
+//! The sidebar: the brand, the pages, the library's filters with their counts
+//! while the library is open, and Settings below the divider.
 
 use crate::router::{LIBRARY_FILTERS, Route, RouteLink, filter_name, href::Href, use_router};
 use crate::ui::{Icon, Svg, icons};

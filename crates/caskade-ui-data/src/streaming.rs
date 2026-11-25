@@ -1,8 +1,7 @@
 //! Devices asking to stream games from this one (#265, #108): whether it
 //! hosts, the requests waiting, and entering a request's code or declining
-//! it, through the app layer's commands as the webview's
-//! `api/streaming.ts` does. The host behind it is a trait, so flows' tests
-//! answer for it without a streaming server.
+//! it, through the app layer's commands. The host behind it is a trait, so
+//! flows' tests answer for it without a streaming server.
 
 use std::future::Future;
 use std::pin::Pin;

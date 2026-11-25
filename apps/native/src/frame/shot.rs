@@ -317,7 +317,7 @@ fn refused<T: 'static>() -> crate::game::launch::Answer<T> {
 /// The editor's data for its screen: `fixture-1` as the fixtures have it,
 /// no artwork, actions or save locations to show, and every change refused.
 fn still_edit_data() -> crate::game::editor::data::EditData {
-    use crate::game::editor::data::{EditData, SaveLocations};
+    use crate::game::editor::data::{EditData, SaveLocationsState};
     use std::rc::Rc;
     EditData {
         state: Rc::new(|_| {
@@ -339,7 +339,8 @@ fn still_edit_data() -> crate::game::editor::data::EditData {
         action_settings: Rc::new(|_, _, _| refused()),
         proton: Rc::new(|| answer(Default::default())),
         saves: Rc::new(|_| {
-            answer(SaveLocations {
+            answer(SaveLocationsState {
+                entry_id: String::new(),
                 revision: 0,
                 preferences: caskade_core::saves::SavePreferences::default(),
                 matched: caskade_core::saves::SaveMatch::Unknown,

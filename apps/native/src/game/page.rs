@@ -1,10 +1,9 @@
-//! A game's page (#100, the webview's `views/game/GameView.tsx`): the way
-//! back, the hero (art, status, title, what it is, playtime, description,
-//! tags, its site), Play or Stop with the release Play starts, the game's
-//! releases, each with its own Play when there are several, and its
-//! session history. Right clicks on the hero and on a release open the
-//! game's menu. Play goes through `game_menu::play::PlayRequest`, so it
-//! asks what every Play asks first.
+//! A game's page (#100): the way back, the hero (art, status, title, what
+//! it is, playtime, description, tags, its site), Play or Stop with the
+//! release Play starts, the game's releases, each with its own Play when
+//! there are several, and its session history. Right clicks on the hero
+//! and on a release open the game's menu. Play goes through
+//! `game_menu::play::PlayRequest`, so it asks what every Play asks first.
 
 use super::back::GameBackLink;
 use super::present;

@@ -70,6 +70,23 @@ pub trait AchievementProvider: Send + Sync {
         product: &str,
         cancel: &CancellationToken,
     ) -> Result<Fetched, FetchError>;
+    /// Whether this service can link `entry` without a store id (for example,
+    /// RetroAchievements by ROM hash).
+    fn can_link(&self, _entry: &caskade_core::model::GameEntry) -> bool {
+        false
+    }
+    /// Finds a release's game at a service that its store ids don't give
+    /// (RetroAchievements, by ROM hash).
+    async fn link_release(
+        &self,
+        _store: &caskade_core::db::LibraryStore,
+        _entry: &caskade_core::model::GameEntry,
+        _account: &StoreAccount,
+        _credentials: Option<&StoreCredentials>,
+        _cancel: &CancellationToken,
+    ) -> Result<Option<LinkOutcome>, FetchError> {
+        Ok(None)
+    }
 }
 
 /// What linking a release found.
@@ -79,24 +96,6 @@ pub enum LinkOutcome {
     Linked { product: String, hash: String },
     /// No game could be verified; the text says why, for people.
     Unresolved(String),
-}
-
-/// Finds a release's game at a service that its store ids don't give
-/// (RetroAchievements, by ROM hash).
-#[async_trait]
-pub trait ReleaseLinker: Send + Sync {
-    /// The store provider whose accounts it uses.
-    fn provider(&self) -> String;
-    /// Whether it could link `entry` at all (an emulated game).
-    fn applies(&self, entry: &caskade_core::model::GameEntry) -> bool;
-    async fn link(
-        &self,
-        store: &caskade_core::db::LibraryStore,
-        entry: &caskade_core::model::GameEntry,
-        account: &StoreAccount,
-        credentials: Option<&StoreCredentials>,
-        cancel: &CancellationToken,
-    ) -> Result<LinkOutcome, FetchError>;
 }
 
 /// The store accounts achievements are read for, and their sign-ins.

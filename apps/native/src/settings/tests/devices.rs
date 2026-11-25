@@ -1,8 +1,8 @@
 //! Settings → Devices (#105), over a real devices service on loopback
-//! (as the flows' share tests run one), as the webview's `devices` tests:
-//! this device renamed on Enter, its kind set; the connection switches
-//! saved in `core.sync`; nobody paired yet, so Pair a device comes first
-//! and What syncs waits behind its button; a pairing link made and shown;
+//! (as the flows' share tests run one): this device renamed on Enter, its
+//! kind set; the connection switches saved in `core.sync`; nobody paired
+//! yet, so Pair a device comes first and What syncs waits behind its
+//! button; a pairing link made and shown;
 //! the versions of saves to keep.
 
 use std::sync::{Arc, Mutex};

@@ -1,8 +1,8 @@
-//! The Store (#102) in the frame over a scripted catalogue, headless, as
-//! `StoreView.test.tsx` has it: Browse's most-rated beside the release
-//! shelves a page at a time, search once typing stops, what the lists say
-//! when nothing matches or the server is away, the library's games marked,
-//! upcoming dates as precise as known, and LB/RB through the tabs.
+//! The Store (#102) in the frame over a scripted catalogue, headless:
+//! Browse's most-rated beside the release shelves a page at a time, search
+//! once typing stops, what the lists say when nothing matches or the
+//! server is away, the library's games marked, upcoming dates as precise
+//! as known, and LB/RB through the tabs.
 
 use super::harness::{StoreScript, catalog_game, page, store, store_script};
 use crate::frame::tests::{ONE, Window};

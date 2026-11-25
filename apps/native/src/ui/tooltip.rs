@@ -1,8 +1,8 @@
 //! A tooltip: a short hint over its trigger while a pointer rests on it
-//! (after a moment) or keyboard focus is on it, gone on Escape, as
-//! react-aria's `TooltipTrigger`. The trigger is described by it
-//! (`aria-describedby`), so screen readers read it too. Tooltips never hold
-//! anything to act on: pads see their trigger's label and hints instead.
+//! (after a moment) or keyboard focus is on it, gone on Escape. The trigger
+//! is described by it (`aria-describedby`), so screen readers read it too.
+//! Tooltips never hold anything to act on: pads see their trigger's label
+//! and hints instead.
 
 use std::time::Duration;
 

@@ -1,8 +1,8 @@
-//! Modal dialogs, as react-aria's `ModalOverlay`/`Modal`/`Dialog` and the
-//! webview's `ConfirmDialog`: the page behind is covered, focus goes in (to
-//! `data-focus-default`, else the first control) and back to where it was
-//! when the dialog closes (the input layer's overlay scope), and Escape or a
-//! pad's Back closes it unless it's busy. A dialog is named by its heading.
+//! Modal dialogs and [`ConfirmDialog`]: the page behind is covered, focus
+//! goes in (to `data-focus-default`, else the first control) and back to
+//! where it was when the dialog closes (the input layer's overlay scope),
+//! and Escape or a pad's Back closes it unless it's busy. A dialog is named
+//! by its heading.
 
 use blitz_dom::NodeId;
 use dioxus_native::NodeHandle;

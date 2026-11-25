@@ -1,7 +1,7 @@
 //! The tray icon's state (#88), the same in every shell: whether it's up,
 //! whether a close of the main window hides to it, quits, or waits for the
 //! UI's answer (unsaved edits, #58), and the menu's labels. The icon itself
-//! is each shell's (`tray.rs` in the Tauri app and the native app).
+//! is the shell's (`apps/native/src/tray.rs`).
 
 use caskade_core::settings::{GeneralSettings, SettingsService};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -15,9 +15,9 @@ pub struct Tray {
     close_to_tray: AtomicBool,
     /// Something asked to quit: closes go through from now on.
     quitting: AtomicBool,
-    /// The webview asks before a close that would quit goes through.
+    /// The UI asks before a close that would quit goes through.
     held: AtomicBool,
-    /// Closes held so far, and the last of them the webview heard.
+    /// Closes held so far, and the last of them the UI heard.
     held_closes: AtomicU64,
     heard: AtomicU64,
 }
@@ -29,7 +29,7 @@ pub enum Close {
     Go,
     /// The window hides to the tray.
     Hide,
-    /// It waits for the webview; the number names it to [`Tray::unanswered`].
+    /// It waits for the UI; the number names it to [`Tray::unanswered`].
     Held(u64),
 }
 
@@ -47,7 +47,7 @@ impl Tray {
             && !console
     }
 
-    /// Whether the webview holds closes.
+    /// Whether the UI holds closes.
     pub fn held(&self) -> bool {
         self.held.load(Ordering::Relaxed)
     }
@@ -63,9 +63,9 @@ impl Tray {
         }
     }
 
-    /// The webview's `close_hold`. `true` while it holds says it heard the
+    /// The UI's `close_hold`. `true` while it holds says it heard the
     /// closes so far. `true` after `false` is a fresh hold, which forgets
-    /// a quit: that's the answer Stay. `false` keeps it, so the webview's
+    /// a quit: that's the answer Stay. `false` keeps it, so the UI's
     /// next close goes through.
     pub fn hold(&self, held: bool) {
         let was = self.held.swap(held, Ordering::Relaxed);
@@ -79,7 +79,7 @@ impl Tray {
             .store(self.held_closes.load(Ordering::Relaxed), Ordering::Relaxed);
     }
 
-    /// Whether held close number `close` still has no word from the webview.
+    /// Whether held close number `close` still has no word from the UI.
     pub fn unanswered(&self, close: u64) -> bool {
         self.held() && self.heard.load(Ordering::Relaxed) < close
     }
@@ -170,7 +170,7 @@ mod tests {
     fn a_held_close_waits_but_hiding_to_the_tray_does_not() {
         let tray = tray(true, "tray");
         tray.hold(true);
-        // The webview and its draft stay in the tray.
+        // The UI and its draft stay in the tray.
         assert_eq!(tray.close(false), Close::Hide);
         // A close that would quit waits, in console mode too.
         assert_eq!(tray.close(true), Close::Held(1));
@@ -190,7 +190,7 @@ mod tests {
     }
 
     #[test]
-    fn only_a_webview_that_answers_keeps_a_held_close_waiting() {
+    fn only_a_ui_that_answers_keeps_a_held_close_waiting() {
         let tray = tray(false, "quit");
         tray.hold(true);
         let Close::Held(first) = tray.close(false) else {
@@ -201,7 +201,7 @@ mod tests {
         tray.hold(true);
         assert!(!tray.unanswered(first));
         // Another close, say a second Quit, needs an answer of its own, so
-        // a webview that stopped since can't strand it.
+        // a UI that stopped since can't strand it.
         let Close::Held(second) = tray.close(false) else {
             panic!("not held");
         };

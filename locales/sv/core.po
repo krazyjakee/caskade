@@ -530,10 +530,6 @@ msgstr "Caskade känner inte till den här emulatorn."
 msgid "{emulator} no longer has this profile."
 msgstr "{emulator} har inte längre den här profilen."
 
-#: crates/caskade-core/src/emulation/catalog.rs
-msgid "the ROM file name {file} starts with `-`, which the emulator would read as an option; rename the file"
-msgstr "ROM-filnamnet {file} börjar med `-`, vilket emulatorn skulle läsa som ett alternativ; byt namn på filen"
-
 #: crates/caskade-core/src/emulation/config.rs
 msgid "the game's ROM scanner no longer exists"
 msgstr "spelets ROM-skanner finns inte längre"
@@ -711,7 +707,6 @@ msgid "Detecting emulators"
 msgstr "Identifierar emulatorer"
 
 #: crates/caskade-core/src/emulation/service/detection.rs
-#: crates/caskade-app/src/commands/emulation.rs
 msgid "This detection is no longer available. Run it again."
 msgstr "Den här identifieringen är inte längre tillgänglig. Kör den igen."
 
@@ -1026,6 +1021,10 @@ msgid "exclusion"
 msgstr "undantag"
 
 #: crates/caskade-core/src/emulation/vars.rs
+msgid "the ROM file name {file} starts with `-`, which the emulator would read as an option; rename the file"
+msgstr "ROM-filnamnet {file} börjar med `-`, vilket emulatorn skulle läsa som ett alternativ; byt namn på filen"
+
+#: crates/caskade-core/src/emulation/vars.rs
 msgid "Save variable {variable} is unavailable for this release."
 msgstr "Sparvariabeln {variable} är inte tillgänglig för den här utgåvan."
 
@@ -1198,6 +1197,10 @@ msgstr "Caskade stötte på ett oväntat problem."
 #: crates/caskade-core/src/error.rs
 msgid "Caskade couldn't finish this; the details say why."
 msgstr "Caskade kunde inte slutföra detta; detaljerna förklarar varför."
+
+#: crates/caskade-core/src/fs.rs
+msgid "no free folder name for it"
+msgstr "det finns inget ledigt mappnamn för den"
 
 #: crates/caskade-core/src/hasheous/download.rs
 msgid "Hasheous listing exceeds 8 MiB"
@@ -2852,27 +2855,27 @@ msgstr "väckningsmeddelandet kunde inte skickas"
 msgid "artwork: {status}"
 msgstr "bilder: {status}"
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "{checksum} for {file}"
 msgstr "{checksum} för {file}"
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "size for {file} ({actual} bytes, expected {size})"
 msgstr "storlek för {file} ({actual} byte, förväntat {size})"
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "too many files"
 msgstr "för många filer"
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "the download has no files"
 msgstr "nedladdningen har inga filer"
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "the ROM has no file name"
 msgstr "ROM-filen har inget filnamn"
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "file list ({file} is missing)"
 msgstr "fillista ({file} saknas)"
 
@@ -4099,10 +4102,6 @@ msgstr "Bara ett relä når {device}: kopian väntar på en direkt anslutning"
 #: crates/caskade-core/src/transfer/receive.rs
 msgid "{device} can't be reached directly yet: the copy waits for a direct connection"
 msgstr "{device} går inte att nå direkt än: kopian väntar på en direkt anslutning"
-
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "no free folder name for it"
-msgstr "det finns inget ledigt mappnamn för den"
 
 #: crates/caskade-core/src/transfer/rom.rs
 msgid "that game isn't on this device"

@@ -1,14 +1,11 @@
-//! First-run setup's questions (#97), as the webview's `LanguageStep.tsx`
-//! and `Questions.tsx`: the language, where games go, what to look for,
-//! and how the user plays.
+//! First-run setup's questions (#97): the language, where games go, what
+//! to look for, and how the user plays.
 
 use blitz_dom::NodeId;
 use caskade_core::error::ErrorReport;
 use caskade_ui_data::romm::{ConnectionReport, RommAuth};
 use caskade_ui_data::storage::Storage;
 use caskade_ui_i18n::{format, t, tp};
-use dioxus_native::NodeHandle;
-use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use dioxus_native::prelude::*;
 use serde_json::Value;
 
@@ -20,16 +17,14 @@ use crate::settings::{SettingsFeedback, use_settings_section};
 use crate::ui::icons::{
     CHECK, FOLDER_OPEN, GAMEPAD_2, HARD_DRIVE, IMAGE, Icon, MONITOR, MONITOR_PLAY, SERVER, TV,
 };
-use crate::ui::interact::{Keys, flag, use_interaction_where};
-use crate::ui::{Button, Segment, SegmentedControl, Svg, Switch, TextField};
+use crate::ui::interact::flag;
+use crate::ui::{Button, RadioItem, Segment, SegmentedControl, Svg, Switch, TextField};
 
 /// The Language setting's value for the OS's language.
 const SYSTEM: &str = "system";
 
 /// RomM's name, a product name.
 const ROMM: &str = "RomM";
-
-// ---------------------------------------------------------------- language
 
 /// The first question (#213): the language, System (the OS's) to start
 /// with. A choice saves `core.general.language`, and the app switches at
@@ -94,8 +89,6 @@ pub fn LanguageStep(on_next: EventHandler<()>) -> Element {
         }
     }
 }
-
-// ------------------------------------------------------------------ folder
 
 /// Where new games go: the default storage location, and choosing another.
 #[component]
@@ -238,8 +231,6 @@ pub fn FolderStep(on_next: EventHandler<()>) -> Element {
 fn unavailable() -> ErrorReport {
     ErrorReport::from(t!("Storage is unavailable."))
 }
-
-// ----------------------------------------------------------------- sources
 
 /// One thing to look for: a switch, and what it needs (`more`) once it's
 /// on.
@@ -523,8 +514,6 @@ pub fn SourcesStep(
     }
 }
 
-// -------------------------------------------------------------------- mode
-
 /// How the user plays: the choice switches the window at once (#107) and
 /// is remembered for the next start.
 /// `last`: setup starts from here; otherwise the account question follows.
@@ -629,8 +618,6 @@ pub fn ModeStep(on_next: EventHandler<()>, last: bool) -> Element {
     }
 }
 
-// ------------------------------------------------------------ card radios
-
 /// The radios before and after the one at `at`, wrapping: where arrows go.
 fn neighbours(values: &[String], at: usize) -> (Option<String>, Option<String>) {
     let count = values.len();
@@ -654,10 +641,9 @@ fn stops(values: &[String], value: &str, disabled: bool) -> Vec<bool> {
         .collect()
 }
 
-/// A radio drawn as a card, as react-aria's `Radio` with the webview's
-/// classes: a click, Space or a pad's A checks it; arrows check the next
-/// one and move there, as in `ui::RadioGroup`. `children` are its content;
-/// one of them carries `{control_id}-label`, which names it.
+/// A radio drawn as a card: a click, Space or a pad's A checks it; arrows
+/// check the next one and move there, as in `ui::RadioGroup`. `children` are
+/// its content; one of them carries `{control_id}-label`, which names it.
 #[component]
 fn CardRadio(
     value: String,
@@ -676,75 +662,21 @@ fn CardRadio(
     class: &'static str,
     children: Element,
 ) -> Element {
-    let interaction = use_interaction_where(stop);
-    let input = crate::input::use_input();
-    let arrow = use_callback(move |forward: bool| {
-        let target = if forward {
-            next.clone()
-        } else {
-            previous.clone()
-        };
-        if let Some(target) = target {
-            on_check.call(target.clone());
-            if let Some((_, node)) = nodes.peek().iter().find(|(known, _)| *known == target) {
-                input.focus(*node);
-            }
-        }
-    });
-    let picked = value.clone();
-    let check = use_callback(move |()| {
-        if !disabled && !checked {
-            on_check.call(picked.clone());
-        }
-    });
-    let mount_value = value.clone();
     rsx! {
-        div {
+        RadioItem {
             id: "{control_id}",
-            role: "radio",
-            tabindex: if stop { "0" } else { "-1" },
-            "aria-checked": if checked { "true" } else { "false" },
-            "aria-disabled": flag(disabled),
-            "aria-labelledby": "{control_id}-label",
-            "data-part": part,
-            "data-selected": flag(checked),
-            "data-disabled": flag(disabled),
-            "data-hovered": interaction.hovered(),
-            "data-focus-visible": interaction.ring(),
-            "data-pressed": interaction.pressed(),
-            style: rise.map(|at| format!("--i: {at}")),
+            value,
+            checked,
+            stop,
+            disabled,
+            nodes,
+            previous,
+            next,
+            on_check,
+            part,
+            inline_style: rise.map(|at| format!("--i: {at}")),
             class,
-            onmounted: move |event| {
-                if let Some(node) = event.data().downcast::<NodeHandle>().map(NodeHandle::node_id) {
-                    let mut nodes = nodes;
-                    nodes.write().retain(|(known, _)| *known != mount_value);
-                    nodes.write().push((mount_value.clone(), node));
-                }
-            },
-            onmouseenter: move |_| interaction.enter(),
-            onmouseleave: move |_| interaction.leave(),
-            onmousedown: move |_| interaction.down(),
-            onmouseup: move |_| interaction.up(),
-            onblur: move |_| interaction.blur(),
-            onclick: move |_| check(()),
-            onkeydown: move |event| {
-                let forward = match event.key() {
-                    Key::Named(NamedKey::ArrowDown | NamedKey::ArrowRight) => Some(true),
-                    Key::Named(NamedKey::ArrowUp | NamedKey::ArrowLeft) => Some(false),
-                    _ => None,
-                };
-                if disabled {
-                    return;
-                }
-                if let Some(forward) = forward {
-                    event.prevent_default();
-                    event.stop_propagation();
-                    arrow(forward);
-                } else {
-                    interaction.key_down(&event, Keys::Space, || {});
-                }
-            },
-            onkeyup: move |event| interaction.key_up(&event, || check(())),
+            "aria-labelledby": "{control_id}-label",
             {children}
         }
     }

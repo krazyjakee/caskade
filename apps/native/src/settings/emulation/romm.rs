@@ -1,7 +1,7 @@
-//! Settings → Emulation → RomM server (#1, #105), as the webview's `romm/`
-//! `RommPanel`, `CacheSection` and `useRomm`: the servers with their state,
-//! the selected server's editor (`romm_editor`), the downloads Play started
-//! with their live progress, and the download cache. Passwords and API
+//! Settings → Emulation → RomM server (#1, #105): the servers with their
+//! state, the selected server's editor (`romm_editor`), the downloads Play
+//! started with their live progress, and the download cache. Passwords and
+//! API
 //! tokens go straight to the keychain and never come back.
 
 use std::collections::BTreeMap;
@@ -55,7 +55,7 @@ pub(super) async fn refresh(romm: Romm, mut shown: Shown) {
 }
 
 /// Newest state per game; finished downloads leave the list, failed ones
-/// stay (the webview's `mergeDownload`).
+/// stay.
 pub(super) fn merge_download(list: &mut Vec<DownloadProgress>, next: DownloadProgress) {
     list.retain(|download| download.entry_id != next.entry_id);
     if !matches!(next.phase, DownloadPhase::Done | DownloadPhase::Cancelled) {
@@ -63,8 +63,7 @@ pub(super) fn merge_download(list: &mut Vec<DownloadProgress>, next: DownloadPro
     }
 }
 
-/// A server id the core accepts: lowercase letters, digits and dashes
-/// (the webview's `serverId`).
+/// A server id the core accepts: lowercase letters, digits and dashes.
 pub(crate) fn server_id(name: &str, taken: &[String]) -> String {
     let mut slug = String::new();
     let mut dash = false;
@@ -246,9 +245,8 @@ fn last_sync(status: Option<&ServerStatus>) -> String {
     }
 }
 
-/// Settings → Emulation → RomM server: remote ROM libraries. Where RomM
-/// didn't start this session, what the webview shows when its commands
-/// aren't there.
+/// Settings → Emulation → RomM server: remote ROM libraries. Shows a
+/// notice when RomM didn't start this session.
 #[component]
 pub fn RommPanel(snapshot: super::Snapshot) -> Element {
     match super::use_romm() {

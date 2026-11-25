@@ -2,8 +2,8 @@
 //! from #108): the curated add-ons with what each means here, the records
 //! (skipped and rejected releases, the update preference), installing,
 //! updating and removing through the shared package service, screenshots
-//! from the artwork cache, and what the user's other devices have; through
-//! the app layer's commands as the webview's `api/addons.ts` does.
+//! from the artwork cache, and what the user's other devices have, through
+//! the app layer's commands.
 //! Changes arrive as `AddonsChanged`-style events (`Key::Addons`).
 
 use std::sync::Arc;

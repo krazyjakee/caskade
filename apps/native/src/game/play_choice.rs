@@ -1,7 +1,7 @@
-//! The game page's launch actions for the release Play starts (#100, the
-//! webview's `components/gameActions/PlayChoice.tsx`): which play action
-//! Play starts, or that it asks each time, and the release's tools.
-//! Nothing shows while the release has one play action and no tools.
+//! The game page's launch actions for the release Play starts (#100):
+//! which play action Play starts, or that it asks each time, and the
+//! release's tools. Nothing shows while the release has one play action
+//! and no tools.
 
 use super::data::{use_answer, use_page_data};
 use crate::game_menu::{MenuDialog, Target, use_game_menus};

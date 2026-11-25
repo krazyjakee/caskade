@@ -1,9 +1,9 @@
-//! A combobox, as react-aria's `ComboBox`: a text field that filters a list
-//! of options as you type (`role="combobox"`, `aria-autocomplete="list"`).
-//! Focus stays in the field; ArrowDown/ArrowUp (or a pad's down and up)
-//! move the active option (`aria-activedescendant`), Enter or A chooses it,
-//! Escape or Back closes the list. No catalogued root (the webview's search
-//! box, `search`, is the app shell's, #96).
+//! A combobox: a text field that filters a list of options as you type
+//! (`role="combobox"`, `aria-autocomplete="list"`). Focus stays in the field;
+//! ArrowDown/ArrowUp (or a pad's down and up) move the active option
+//! (`aria-activedescendant`), Enter or A chooses it, Escape or Back closes
+//! the list. No catalogued root (the top bar's search box, `search`, is the
+//! app shell's, #96).
 
 use blitz_dom::NodeId;
 use caskade_ui_input::Action;

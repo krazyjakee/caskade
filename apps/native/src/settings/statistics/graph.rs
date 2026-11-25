@@ -1,5 +1,4 @@
-//! The rate graphs (the webview's `Graph.tsx`): series, their lines and
-//! areas, and a round top.
+//! The rate graphs: series, their lines and areas, and a round top.
 
 use super::*;
 

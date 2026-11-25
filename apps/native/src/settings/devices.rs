@@ -1,8 +1,8 @@
-//! Settings → Devices (#231, #105), as the webview's `devices/`: this
-//! device, the devices paired with it, Caskade on this network to pair,
-//! what syncs, saves, and copies and shares under way. Devices find each
-//! other on the local network and sync without the internet; elsewhere
-//! they connect directly, or through a relay unless that is turned off.
+//! Settings → Devices (#231, #105): this device, the devices paired with
+//! it, Caskade on this network to pair, what syncs, saves, and copies and
+//! shares under way. Devices find each other on the local network and sync
+//! without the internet; elsewhere they connect directly, or through a
+//! relay unless that is turned off.
 //!
 //! Every account sees the list; only an admin pairs, forgets, renames this
 //! device or changes what syncs (the core refuses the rest whatever this
@@ -25,9 +25,9 @@ use super::state::{SectionState, SettingsStatus, use_settings_section};
 use crate::data::change;
 use crate::flows::devices::os_name;
 use crate::ui::icons::{
-    ARROW_DOWN_TO_LINE, ARROW_UP_FROM_LINE, CHEVRON_DOWN, CHEVRON_RIGHT, DOWNLOAD, GAMEPAD_2,
-    GLOBE, HARD_DRIVE, KEY_ROUND, LAPTOP, LINK_2, MONITOR, MONITOR_SMARTPHONE, MOON, NETWORK, PLAY,
-    RADAR, RADIO_TOWER, REFRESH_CCW, REFRESH_CW, SAVE, SHARE_2, SHIELD_CHECK, TRASH, TV,
+    ARROW_DOWN_TO_LINE, ARROW_UP_FROM_LINE, CHEVRON_DOWN, CHEVRON_RIGHT, DOWNLOAD, GLOBE,
+    HARD_DRIVE, KEY_ROUND, LINK_2, MONITOR, MONITOR_SMARTPHONE, MOON, NETWORK, PLAY, RADAR,
+    RADIO_TOWER, REFRESH_CCW, REFRESH_CW, SAVE, SHARE_2, SHIELD_CHECK, TRASH,
 };
 use crate::ui::{
     Button, ButtonSize, ButtonVariant, FailureNotice, NoticeVariant, Progress, Segment,
@@ -128,8 +128,8 @@ fn DevicesPanel(devices: DeviceSync) -> Element {
             });
         });
     }
-    // An action reads the status at once, as the webview invalidates it;
-    // the watch above reads it on opening (#111).
+    // An action reads the status at once; the watch above reads it on
+    // opening (#111).
     {
         let devices = devices.clone();
         use_effect(move || {

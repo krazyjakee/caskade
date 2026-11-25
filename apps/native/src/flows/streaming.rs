@@ -1,5 +1,4 @@
-//! Streaming's dialogs (#264, #265), as the webview's
-//! `components/streaming`:
+//! Streaming's dialogs (#264, #265):
 //! - [`StreamPairingHost`]: a device asking to pair with this one to play
 //!   its games, a prompt over any view while this device lets others play,
 //!   for an admin to enter the code that device shows. Settings →
@@ -24,8 +23,7 @@ use crate::router::{Route, Router};
 use crate::ui::icons::{CHECK, X};
 use crate::ui::{Button, ButtonVariant, Dialog, FailureNotice, NoticeVariant, TextField};
 
-/// How often the prompt asks the host for requests, as the webview's
-/// `usePairRequests`; and whether it hosts, as `useHostStatus`.
+/// How often the prompt asks the host for requests, and whether it hosts.
 const REQUESTS_EVERY: Duration = Duration::from_secs(3);
 const HOSTING_EVERY: Duration = Duration::from_secs(5);
 
@@ -273,7 +271,7 @@ pub struct HostBusy {
     pub playing: Option<String>,
 }
 
-/// The question, in the webview's words for each case.
+/// The question to show for each busy-host case.
 fn stop_question(busy: &HostBusy, title: Option<&str>) -> String {
     let device = busy.device.clone();
     match (title, busy.playing.as_deref()) {

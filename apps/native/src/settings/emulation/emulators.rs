@@ -1,7 +1,7 @@
-//! Settings → Emulation → Emulators (#115, #116), as the webview's
-//! `ConfiguredEmulators` and `ProfileEditor`: the configured emulators, one
-//! chosen at a time with its install, its profiles (whether each can play,
-//! the files it needs, its command line) and Remove; adding one by hand;
+//! Settings → Emulation → Emulators (#115, #116): the configured
+//! emulators, one chosen at a time with its install, its profiles (whether
+//! each can play, the files it needs, its command line) and Remove; adding
+//! one by hand;
 //! adding a built-in or custom profile and editing one, with a live preview
 //! of the command it runs and its own scripts. Every change is checked by
 //! the core when it's saved; nothing here starts an emulator. A right click

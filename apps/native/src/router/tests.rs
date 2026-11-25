@@ -1,6 +1,4 @@
-//! The router's hrefs, Back chain and history, against the webview's own
-//! cases (`router.tsx`, `views/game/origin.test.tsx`,
-//! `shell/startView.test.ts`).
+//! The router's hrefs, Back chain, history, and start-view resolution.
 
 use super::href::{self, Href, MAX_GAMES, Value};
 use super::route::{LibraryPrefs, Remembered};

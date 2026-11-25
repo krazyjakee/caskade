@@ -1,8 +1,8 @@
 //! Settings → Devices (#231, #105): this device, the paired ones, pairing
 //! nearby or by link, syncing now, forgetting, the sync key, and the
-//! copies under way, through the app layer's commands as the webview's
-//! `api/sync.ts` does. The core refuses what the signed-in account may not
-//! do; the panel shows only an admin the controls.
+//! copies under way, through the app layer's commands. The core refuses
+//! what the signed-in account may not do; the panel shows only an admin
+//! the controls.
 
 use caskade_app::commands::{copies, sync};
 use caskade_core::accounts::{AccountRole, AccountService};

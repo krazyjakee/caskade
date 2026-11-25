@@ -1,10 +1,9 @@
-//! Settings layout and small labels, as `@caskade/ui`'s
-//! `form/SettingsSection.tsx`: a titled group of settings
+//! Settings layout and small labels: a titled group of settings
 //! ([`SettingsSection`]), one setting with its controls ([`SettingRow`]),
 //! a coloured dot with a label ([`StatusDot`]) and a bordered chip
-//! ([`Pill`]). A row names and describes its controls, as react-aria's
-//! contexts do in the webview: a switch, select, text field, slider or
-//! segmented control in it without a label of its own takes the row's.
+//! ([`Pill`]). A row names and describes its controls via context: a switch,
+//! select, text field, slider or segmented control in it without a label of
+//! its own takes the row's.
 
 use std::time::Duration;
 

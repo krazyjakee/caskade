@@ -281,7 +281,7 @@ fn a_link_is_looked_at_and_the_game_received_from_it() {
     assert_eq!(window.text("[role=dialog] h2"), "Receive a shared game");
     window.focus("#share-link-input");
     window.type_text(&link);
-    // Enter in the field looks, as the webview's form submits.
+    // Enter in the field looks up the link (form submit).
     window.key(Key::Named(NamedKey::Enter));
     window.until_for("what it shares", 30, |w| {
         w.find("[data-cs=share-info]").is_some()

@@ -1,7 +1,7 @@
-//! Emulation's shared fields, as the webview's `EmulationFields` and
-//! `StackedTable`: a path field with Browse…, a platform's BIOS files, the
-//! command line a profile resolves to, and rows that are cards with their
-//! cells labelled (#61), so a narrow window doesn't scroll sideways.
+//! Emulation's shared fields: a path field with Browse…, a platform's BIOS
+//! files, the command line a profile resolves to, and rows that are cards
+//! with their cells labelled (#61), so a narrow window doesn't scroll
+//! sideways.
 
 use caskade_core::emulation::{ArgvPreview, BiosEntry, BiosState};
 use caskade_ui_i18n::t;
@@ -200,8 +200,8 @@ pub fn PreviewTokens(
     }
 }
 
-/// Rows of cards, each cell labelled with its column (the webview's
-/// `StackedTable`, always in its narrow layout).
+/// Rows of cards, each cell labelled with its column (always in its narrow
+/// layout).
 #[component]
 pub fn StackedTable(
     #[props(default)] class: String,

@@ -1,5 +1,4 @@
-//! Activity's frame and its notification feed (`views/activity/
-//! ActivityView.tsx`, `NotificationFeed.tsx`, #96): the header, the Jobs
+//! Activity's frame and its notification feed (#96): the header, the Jobs
 //! and Notifications tabs, and the feed; the jobs panel is `crate::activity`.
 //!
 //! Showing the feed marks nothing read: an item is read once it's opened,

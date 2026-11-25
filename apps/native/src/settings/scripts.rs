@@ -1,7 +1,7 @@
-//! Settings → Scripts (#180, #105), as the webview's `ScriptsSettings`:
-//! the global lifecycle scripts, which run with every game's launches.
-//! Admins only, as the core requires; the panel is `flows::scripts`'s,
-//! which an emulator profile and the game editor (#100) share.
+//! Settings → Scripts (#180, #105): the global lifecycle scripts, which
+//! run with every game's launches. Admins only, as the core requires; the
+//! panel is `flows::scripts`'s, which an emulator profile and the game
+//! editor (#100) share.
 
 use caskade_ui_data::scripts::ScriptScope;
 use caskade_ui_i18n::t;

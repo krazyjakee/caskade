@@ -1,7 +1,6 @@
-//! What a game's menu asks before it deletes anything
-//! (`components/gameMenu/UninstallDialog.tsx`, `RemoveGameDialog.tsx`):
-//! uninstalling an install's files, and removing a game Caskade added from
-//! the library. Each runs as a job in Activity.
+//! What a game's menu asks before it deletes anything: uninstalling an
+//! install's files, and removing a game Caskade added from the library.
+//! Each runs as a job in Activity.
 
 use super::actions;
 use crate::router::use_router;

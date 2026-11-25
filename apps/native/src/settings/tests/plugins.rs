@@ -1,7 +1,7 @@
-//! Settings → Plugins (#104), ported from the webview's `PluginsSettings`
-//! tests over the fixtures' plugin host and its own folder: a plugin is
-//! listed with its status and access; one that asks for more is reviewed
-//! and allowed; it turns off and on, shows its details and uninstalls; an
+//! Settings → Plugins (#104), over the fixtures' plugin host and its own
+//! folder: a plugin is listed with its status and access; one that asks
+//! for more is reviewed and allowed; it turns off and on, shows its
+//! details and uninstalls; an
 //! invalid one says why; hooks and permissions read as words.
 
 use super::{is_inside, open};

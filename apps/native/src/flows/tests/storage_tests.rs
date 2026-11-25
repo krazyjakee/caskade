@@ -303,7 +303,7 @@ fn a_running_game_isnt_moved() {
             running: true,
         },
     );
-    // The button itself is off while the game runs, as in the webview.
+    // The button itself is disabled while the game runs.
     assert_eq!(
         window.attr("#move-game", "aria-disabled").as_deref(),
         Some("true")

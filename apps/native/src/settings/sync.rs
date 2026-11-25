@@ -1,7 +1,6 @@
 //! A settings section that syncs, kept on this device instead (#244):
-//! `core.sync.sections`, as the webview's `SectionSync`. Shown in the
-//! section itself once this device has paired devices; only an admin
-//! changes it, as with what syncs.
+//! `core.sync.sections`. Shown in the section itself once this device has
+//! paired devices; only an admin changes it, as with what syncs.
 
 use caskade_ui_i18n::t;
 use dioxus_native::prelude::*;

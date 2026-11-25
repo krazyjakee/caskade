@@ -2,7 +2,7 @@
 //! changing and resetting one, and which sections the signed-in account may
 //! change. Every call goes through the app layer's commands
 //! (`caskade_app::commands::settings`), so validation, revisions and change
-//! events are the core's, as in the webview.
+//! events come from the core.
 
 use caskade_app::commands::settings;
 use caskade_core::{

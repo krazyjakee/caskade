@@ -1,8 +1,7 @@
-//! A game's saves on its page (#100, the webview's
-//! `views/game/SavesPanel.tsx`): the versions Caskade kept (newest first,
-//! the one in use marked), Restore, choosing between devices' saves when
-//! both played, where the saves are on this device with Show in folder, and
-//! sharing a version with someone (#108's `ShareGameDialog`).
+//! A game's saves on its page (#100): the versions Caskade kept (newest
+//! first, the one in use marked), Restore, choosing between devices' saves
+//! when both played, where the saves are on this device with Show in
+//! folder, and sharing a version with someone (#108's `ShareGameDialog`).
 
 use super::data::{use_answer, use_page_data};
 use super::launch::{SaveConflictDialog, use_save_device_name};

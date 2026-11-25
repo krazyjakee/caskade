@@ -1,6 +1,6 @@
 //! Games' menus and quick looks (#99) in the frame over the fixture
-//! library, headless, as `menus.test.tsx` and `quickLook.test.tsx` have
-//! them, and the menu's items worked out from what a game has.
+//! library, headless, and the menu's items worked out from what a game
+//! has.
 
 use super::entries::{EntryView, added_by_caskade, located, playable};
 use super::menu::{Facts, Target, items};
@@ -79,7 +79,7 @@ fn an_entry_rows_menu_offers_play_its_folder_move_and_uninstall() {
         storage: true,
         ..Facts::default()
     };
-    // The webview's `menus.test.tsx`: exactly these for a row.
+    // Exactly these items for a managed entry row.
     assert_eq!(
         labels(&items(&target(Some("managed")), &facts)),
         [

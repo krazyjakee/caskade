@@ -1,7 +1,7 @@
-//! Settings → Storage (#104), as the webview's `StorageSettings` and
-//! `StoragePanel`: where Caskade installs games. Each location as a card
-//! with its status, space and games (a right click offers its actions);
-//! adding one (the path picker, or typed); the selected one's label and
+//! Settings → Storage (#104): where Caskade installs games. Each location
+//! as a card with its status, space and games (a right click offers its
+//! actions); adding one (the path picker, or typed); the selected one's
+//! label and
 //! folder template, made the default, or removed, keeping its files or
 //! moving its games to another location first (one job in Activity, #64);
 //! and "always use the default". Over engineer 2's `Storage` handle (#108),

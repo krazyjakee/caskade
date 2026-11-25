@@ -1,30 +1,19 @@
-//! What navigation remembers across starts, as the webview keeps it in
-//! local storage: the library's filter, sort and layout (a link to
-//! `/library` without them comes back to these) and the page open last (for
-//! "Open to → Last view", #114). Kept in `native-views.json` beside the
-//! window's place; Settings' tab is remembered for the run only.
+//! What navigation remembers across starts: the library's filter, sort and
+//! layout (a link to `/library` without them comes back to these) and the
+//! page open last (for "Open to → Last view", #114). Kept in
+//! `native-views.json` beside the window's place; Settings' tab is
+//! remembered for the run only.
 
 use super::href::{self, Href};
 use super::route::{LibraryPrefs, Remembered, Route};
-use crate::library::Layout;
-use caskade_core::model::{GameFilter, GameSort};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 struct Saved {
-    library: Option<SavedLibrary>,
+    library: Option<LibraryPrefs>,
     last_view: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct SavedLibrary {
-    filter: GameFilter,
-    sort: GameSort,
-    layout: String,
-    #[serde(default)]
-    show_remote: bool,
 }
 
 /// Where navigation's memory is kept: a file, or nowhere (fixtures mode,
@@ -43,19 +32,10 @@ impl Memory {
             .as_deref()
             .and_then(crate::state_file::load)
             .unwrap_or_default();
-        let library = saved
-            .library
-            .map(|library| LibraryPrefs {
-                filter: library.filter,
-                sort: library.sort,
-                layout: Layout::parse(&library.layout),
-                show_remote: library.show_remote,
-            })
-            .unwrap_or_default();
         Self {
             file,
             remembered: Remembered {
-                library,
+                library: saved.library.unwrap_or_default(),
                 settings_tab: None,
             },
             last_view: saved.last_view.as_deref().and_then(openable),
@@ -119,14 +99,8 @@ impl Memory {
         let Some(file) = &self.file else {
             return;
         };
-        let library = self.remembered.library;
         let saved = Saved {
-            library: Some(SavedLibrary {
-                filter: library.filter,
-                sort: library.sort,
-                layout: library.layout.name().into(),
-                show_remote: library.show_remote,
-            }),
+            library: Some(self.remembered.library),
             last_view: self.last_view.clone(),
         };
         crate::state_file::save(file, &saved);
@@ -139,7 +113,7 @@ pub fn file(paths: Option<&caskade_core::AppPaths>) -> Option<PathBuf> {
 }
 
 /// The pages "Last view" can open: those a game can go back to, and
-/// Settings (`shell/startView.ts`).
+/// Settings.
 pub fn openable(href: &str) -> Option<String> {
     if let Some(parsed) = Href::parse(href)
         && parsed.path == "/settings"

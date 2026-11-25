@@ -1,5 +1,5 @@
 //! Saving the library's view as a smart collection (#99), headless over the
-//! fixture library, as `LibraryView.test.tsx` has it.
+//! fixture library.
 
 use crate::frame::tests::{ONE, Window, source};
 use crate::router::Route;

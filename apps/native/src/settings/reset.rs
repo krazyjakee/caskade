@@ -1,8 +1,8 @@
-//! A settings page's Reset to defaults (#44; the webview's
-//! `ResetDefaults.tsx`): it names the group it resets, lists the settings
-//! that would change (or says it can't tell, for a section the core has no
-//! defaults for), and changes nothing until confirmed. Only the fields a
-//! page lists go back to their defaults, so a page showing one setting of
+//! A settings page's Reset to defaults (#44): it names the group it
+//! resets, lists the settings that would change (or says it can't tell,
+//! for a section the core has no defaults for), and changes nothing until
+//! confirmed. Only the fields a page lists go back to their defaults, so a
+//! page showing one setting of
 //! another section resets that one and leaves the rest of the section
 //! alone.
 

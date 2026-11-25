@@ -1,7 +1,7 @@
-//! Settings → Discovery (#104), ported from the webview's
-//! `discovery` tests: the preferences read and save (on, schedule,
-//! watching, play history, the system's checks, deep scans and their
-//! folders), off dims them and stops Scan now, the status says the phase,
+//! Settings → Discovery (#104): the preferences read and save (on,
+//! schedule, watching, play history, the system's checks, deep scans and
+//! their folders), off dims them and stops Scan now, the status says the
+//! phase,
 //! sources have names, ignored results are allowed again, hidden games are
 //! shown again, and the review list accepts or ignores several results or
 //! one by a right click. No test scans: a scan would import the fixture

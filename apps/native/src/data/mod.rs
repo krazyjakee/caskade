@@ -103,14 +103,14 @@ impl DataSource {
 }
 
 /// Whether the UI runs on the fixture library: `CASKADE_FIXTURES=1`, in
-/// debug builds (and the `bench` feature's) only (the webview's `VITE_CASKADE_FIXTURES`).
+/// debug builds (and the `bench` feature's) only.
 pub fn fixtures_mode() -> bool {
     cfg!(any(debug_assertions, feature = "bench"))
         && std::env::var("CASKADE_FIXTURES").is_ok_and(|value| value == "1")
 }
 
-/// How many plain games fixtures mode makes: `CASKADE_FIXTURE_COUNT`, or the
-/// webview's 24.
+/// How many plain games fixtures mode makes: `CASKADE_FIXTURE_COUNT`, or
+/// the default 24.
 pub fn fixture_count() -> usize {
     std::env::var("CASKADE_FIXTURE_COUNT")
         .ok()
@@ -177,6 +177,19 @@ pub async fn sleep(time: std::time::Duration) {
 mod probe;
 // The shell's status bar and Activity button (#96).
 pub mod status;
+
+/// The report shown when an action asks for an app service that isn't
+/// running (fixtures mode, or before services start).
+pub fn unavailable() -> ErrorReport {
+    ErrorReport::from(caskade_ui_i18n::t!(
+        "That isn't available in this copy of Caskade."
+    ))
+}
+
+/// The running app's services, or [`unavailable`].
+pub fn require_services() -> Result<&'static caskade_app::start::Services, ErrorReport> {
+    crate::shell::services().ok_or_else(unavailable)
+}
 
 /// The library, for a view's changes: run them through [`change`].
 pub fn use_library() -> Library {

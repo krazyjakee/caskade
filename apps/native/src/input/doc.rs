@@ -187,6 +187,18 @@ impl FocusTree for BlitzUi<'_> {
         })
     }
 
+    fn visit_children(&self, node: NodeId, visit: &mut dyn FnMut(NodeId) -> bool) -> bool {
+        let Some(node) = self.doc.get_node(node) else {
+            return true;
+        };
+        for &child in &node.children {
+            if self.is_element(child) && !visit(child) {
+                return false;
+            }
+        }
+        true
+    }
+
     fn tag(&self, node: NodeId) -> &str {
         self.doc
             .get_node(node)
@@ -302,9 +314,9 @@ impl Ui for BlitzUi<'_> {
             }
             at = self.parent(here);
         }
-        caskade_ui_input::tree::descendants(self, self.body)
-            .into_iter()
-            .find(|&node| self.attr(node, "data-cs") == Some("view"))
+        caskade_ui_input::tree::find_descendant(self, self.body, |node| {
+            self.attr(node, "data-cs") == Some("view")
+        })
     }
 
     fn scroll_by(&mut self, node: NodeId, by: f32) {

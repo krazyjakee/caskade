@@ -1,8 +1,8 @@
 //! Settings → Streaming (#105), over a fake streaming host and client
-//! (no streaming server runs in tests), as the webview's panel behaves:
-//! hosting switched on with its states, a waiting device paired by its
-//! code, paired devices forgotten after asking in their row; devices to
-//! stream from listed with their reach, paired through the dialog's code
+//! (no streaming server runs in tests): hosting switched on with its
+//! states, a waiting device paired by its code, paired devices forgotten
+//! after asking in their row; devices to stream from listed with their
+//! reach, paired through the dialog's code
 //! and added by address; the stream quality saved; programs updated.
 
 use std::sync::{Arc, Mutex};

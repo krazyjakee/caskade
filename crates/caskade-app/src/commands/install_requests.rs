@@ -3,6 +3,7 @@
 use caskade_core::install::{InstallService, JobSnapshot, dropped::DropPlan};
 use serde::{Deserialize, Serialize};
 
+use crate::error::{CommandError, ErrorCode, conflict, internal, refused, report};
 use crate::events::{Event, Events};
 use std::{
     collections::BTreeMap,
@@ -111,10 +112,10 @@ impl Drop for Claim {
 }
 
 /// [`validate`] on the blocking pool.
-async fn validated(value: String) -> Result<(InputKind, String), String> {
+async fn validated(value: String) -> Result<(InputKind, String), CommandError> {
     crate::runtime::spawn_blocking(move || validate(value))
         .await
-        .map_err(|e| e.to_string())?
+        .map_err(internal)?
 }
 
 /// Whether `value` is a UNC (`\\host\share`), verbatim (`\\?\`) or device
@@ -145,9 +146,11 @@ pub fn pending_install_requests(state: &InstallRequests) -> Vec<InstallRequest> 
     state.pending()
 }
 
-pub fn dismiss_install_request(state: &InstallRequests, request_id: String) -> Result<(), String> {
-    crate::permissions::enforce("dismiss_install_request", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
+pub fn dismiss_install_request(
+    state: &InstallRequests,
+    request_id: String,
+) -> Result<(), CommandError> {
+    crate::permissions::enforce("dismiss_install_request", serde_json::Value::default)?;
     state.dismiss(&request_id)
 }
 
@@ -156,9 +159,8 @@ pub async fn confirm_install_request(
     service: &InstallService,
     request_id: String,
     root_id: Option<String>,
-) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("confirm_install_request", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
+) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("confirm_install_request", serde_json::Value::default)?;
     state.confirm(&request_id, root_id, service).await
 }
 
@@ -179,7 +181,7 @@ impl InstallRequests {
         kind: InputKind,
         value: String,
         plan: Option<DropPlan>,
-    ) -> Result<InstallRequest, String> {
+    ) -> Result<InstallRequest, CommandError> {
         let mut pending = self.live();
         if let Some(existing) = pending
             .values()
@@ -188,9 +190,9 @@ impl InstallRequests {
             return Ok(existing.request.clone());
         }
         if pending.len() >= 32 {
-            return Err(caskade_core::tr!(
+            return Err(refused(caskade_core::tr!(
                 "too many pending install requests; dismiss one first"
-            ));
+            )));
         }
         let request = InstallRequest {
             request_id: caskade_core::model::new_id(),
@@ -218,25 +220,27 @@ impl InstallRequests {
             .map(|p| p.request.clone())
             .collect()
     }
-    pub fn dismiss(&self, id: &str) -> Result<(), String> {
+    pub fn dismiss(&self, id: &str) -> Result<(), CommandError> {
         let mut pending = caskade_core::lock(&self.pending);
         if pending.get(id).is_some_and(|p| p.claimed) {
-            return Err(caskade_core::tr!("request is already being confirmed"));
+            return Err(conflict(caskade_core::tr!(
+                "request is already being confirmed"
+            )));
         }
         pending
             .remove(id)
             .map(|_| ())
-            .ok_or_else(|| caskade_core::tr!("unknown or expired request"))
+            .ok_or_else(|| conflict(caskade_core::tr!("unknown or expired request")))
     }
-    fn claim(&self, id: &str) -> Result<Claim, String> {
+    fn claim(&self, id: &str) -> Result<Claim, CommandError> {
         let mut pending = caskade_core::lock(&self.pending);
         let p = pending
             .get_mut(id)
-            .ok_or_else(|| caskade_core::tr!("unknown or expired request"))?;
+            .ok_or_else(|| conflict(caskade_core::tr!("unknown or expired request")))?;
         if p.claimed || p.created.elapsed() >= EXPIRY {
-            return Err(caskade_core::tr!(
+            return Err(conflict(caskade_core::tr!(
                 "request is expired or already being confirmed"
-            ));
+            )));
         }
         p.claimed = true;
         Ok(Claim {
@@ -251,16 +255,16 @@ impl InstallRequests {
         id: &str,
         root_id: Option<String>,
         service: &InstallService,
-    ) -> Result<JobSnapshot, String> {
+    ) -> Result<JobSnapshot, CommandError> {
         let mut claim = self.claim(id)?;
         if let Some(link) = claim.link.clone() {
             // Nothing was fetched until now (#246).
             let shares = self.shares.get().cloned();
             let job = shares
-                .ok_or_else(|| caskade_core::tr!("receiving shares isn't available"))?
+                .ok_or_else(|| refused(caskade_core::tr!("receiving shares isn't available")))?
                 .receive(&link, root_id)
                 .await
-                .map_err(|e| e.to_string())?;
+                .map_err(report)?;
             caskade_core::lock(&self.pending).remove(id);
             claim.complete = true;
             return Ok(job);
@@ -270,7 +274,7 @@ impl InstallRequests {
             let job = service
                 .copy_from_device(peer.target(), root_id)
                 .await
-                .map_err(|e| e.to_string())?;
+                .map_err(report)?;
             caskade_core::lock(&self.pending).remove(id);
             claim.complete = true;
             return Ok(job);
@@ -284,7 +288,7 @@ impl InstallRequests {
         let job = service
             .install_with(claim.request.value.clone(), root_id, hints)
             .await
-            .map_err(|e| e.to_string())?;
+            .map_err(report)?;
         caskade_core::lock(&self.pending).remove(id);
         claim.complete = true;
         Ok(job)
@@ -295,21 +299,21 @@ impl InstallRequests {
         &self,
         id: &str,
         account: &str,
-    ) -> Result<caskade_core::model::Collection, String> {
+    ) -> Result<caskade_core::model::Collection, CommandError> {
         let mut claim = self.claim(id)?;
         let link = claim
             .link
             .clone()
-            .ok_or_else(|| caskade_core::tr!("that request isn't a share"))?;
+            .ok_or_else(|| refused(caskade_core::tr!("that request isn't a share")))?;
         let shares = self
             .shares
             .get()
             .cloned()
-            .ok_or_else(|| caskade_core::tr!("receiving shares isn't available"))?;
+            .ok_or_else(|| refused(caskade_core::tr!("receiving shares isn't available")))?;
         let collection = shares
             .receive_collection(&link, account)
             .await
-            .map_err(|e| e.to_string())?;
+            .map_err(report)?;
         caskade_core::lock(&self.pending).remove(id);
         claim.complete = true;
         Ok(collection)
@@ -321,7 +325,7 @@ impl InstallRequests {
         &self,
         events: &Events,
         value: String,
-    ) -> Result<InstallRequest, String> {
+    ) -> Result<InstallRequest, CommandError> {
         let (kind, value) = validated(value).await?;
         self.queue_and_emit(events, kind, value, None)
     }
@@ -332,7 +336,7 @@ impl InstallRequests {
         events: &Events,
         link: String,
         info: caskade_share::ShareInfo,
-    ) -> Result<InstallRequest, String> {
+    ) -> Result<InstallRequest, CommandError> {
         let request = {
             let mut pending = self.live();
             if let Some(existing) = pending
@@ -342,9 +346,9 @@ impl InstallRequests {
                 existing.request.clone()
             } else {
                 if pending.len() >= 32 {
-                    return Err(caskade_core::tr!(
+                    return Err(refused(caskade_core::tr!(
                         "too many pending install requests; dismiss one first"
-                    ));
+                    )));
                 }
                 let request = InstallRequest {
                     request_id: caskade_core::model::new_id(),
@@ -366,11 +370,17 @@ impl InstallRequests {
                 request
             }
         };
-        events.emit(Event::InstallRequested(InstallRequested(request.clone())))?;
+        events
+            .emit(Event::InstallRequested(InstallRequested(request.clone())))
+            .map_err(CommandError::from)?;
         Ok(request)
     }
     /// Queues a game another device sends here, to be confirmed (#235).
-    pub fn queue_peer(&self, events: &Events, peer: PeerSend) -> Result<InstallRequest, String> {
+    pub fn queue_peer(
+        &self,
+        events: &Events,
+        peer: PeerSend,
+    ) -> Result<InstallRequest, CommandError> {
         let request = {
             let mut pending = self.live();
             if let Some(existing) = pending
@@ -380,9 +390,9 @@ impl InstallRequests {
                 existing.request.clone()
             } else {
                 if pending.len() >= 32 {
-                    return Err(caskade_core::tr!(
+                    return Err(refused(caskade_core::tr!(
                         "too many pending install requests; dismiss one first"
-                    ));
+                    )));
                 }
                 let request = InstallRequest {
                     request_id: caskade_core::model::new_id(),
@@ -404,32 +414,38 @@ impl InstallRequests {
                 request
             }
         };
-        events.emit(Event::InstallRequested(InstallRequested(request.clone())))?;
+        events
+            .emit(Event::InstallRequested(InstallRequested(request.clone())))
+            .map_err(CommandError::from)?;
         Ok(request)
     }
-    pub fn queue_and_emit(
+    fn queue_and_emit(
         &self,
         events: &Events,
         kind: InputKind,
         value: String,
         plan: Option<DropPlan>,
-    ) -> Result<InstallRequest, String> {
+    ) -> Result<InstallRequest, CommandError> {
         let request = self.queue(kind, value, plan)?;
-        events.emit(Event::InstallRequested(InstallRequested(request.clone())))?;
+        events
+            .emit(Event::InstallRequested(InstallRequested(request.clone())))
+            .map_err(CommandError::from)?;
         Ok(request)
     }
 }
 
-fn validate(value: String) -> Result<(InputKind, String), String> {
+fn validate(value: String) -> Result<(InputKind, String), CommandError> {
     let value = value.trim();
     if value.is_empty() || value.len() > 32_768 || value.chars().any(char::is_control) {
-        return Err(caskade_core::tr!("input must be one path or HTTP(S) URL"));
+        return Err(refused(caskade_core::tr!(
+            "input must be one path or HTTP(S) URL"
+        )));
     }
     if let Ok(url) = url::Url::parse(value)
         && matches!(url.scheme(), "http" | "https")
     {
         if url.host_str().is_none() || !url.username().is_empty() || url.password().is_some() {
-            return Err(caskade_core::tr!("invalid download URL"));
+            return Err(refused(caskade_core::tr!("invalid download URL")));
         }
         return Ok((InputKind::Url, url.to_string()));
     }
@@ -441,9 +457,9 @@ fn validate(value: String) -> Result<(InputKind, String), String> {
             .query_pairs()
             .any(|(key, value)| key == "xt" && value.starts_with("urn:btih:"))
         {
-            return Err(caskade_core::tr!(
+            return Err(refused(caskade_core::tr!(
                 "a magnet link needs a BitTorrent info hash (xt=urn:btih:…)"
-            ));
+            )));
         }
         return Ok((InputKind::Url, url.to_string()));
     }
@@ -451,25 +467,25 @@ fn validate(value: String) -> Result<(InputKind, String), String> {
     // Checked before anything touches the filesystem: on Windows, statting
     // `\\host\share` connects to that host over SMB.
     if is_network_or_device_path(value) {
-        return Err(caskade_core::tr!(
+        return Err(refused(caskade_core::tr!(
             "choose a local path, not a network or device path"
-        ));
+        )));
     }
     if !path.is_absolute() {
-        return Err(caskade_core::tr!(
+        return Err(refused(caskade_core::tr!(
             "choose an absolute local path or HTTP(S) URL"
-        ));
+        )));
     }
-    let path = std::fs::canonicalize(path).map_err(|e| e.to_string())?;
-    let metadata = std::fs::metadata(&path).map_err(|e| e.to_string())?;
+    let path = std::fs::canonicalize(path).map_err(report)?;
+    let metadata = std::fs::metadata(&path).map_err(report)?;
     if !metadata.is_file() && !metadata.is_dir() {
-        return Err(caskade_core::tr!("input is not a file or folder"));
+        return Err(refused(caskade_core::tr!("input is not a file or folder")));
     }
     Ok((
         InputKind::Path,
         path.into_os_string()
             .into_string()
-            .map_err(|_| caskade_core::tr!("path is not UTF-8"))?,
+            .map_err(|_| refused(caskade_core::tr!("path is not UTF-8")))?,
     ))
 }
 
@@ -483,12 +499,13 @@ pub async fn request_install_input(
     accounts: Option<&caskade_core::accounts::AccountService>,
     shares: Option<&caskade_share::Shares>,
     value: String,
-) -> Result<InstallRequest, String> {
-    crate::permissions::enforce("request_install_input", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
+) -> Result<InstallRequest, CommandError> {
+    crate::permissions::enforce("request_install_input", serde_json::Value::default)?;
     if caskade_share::is_link(&value) {
-        crate::permissions::require(accounts, caskade_core::accounts::Permission::Install)?;
-        let shares = shares.ok_or_else(|| caskade_core::tr!("receiving shares isn't available"))?;
+        crate::permissions::require(accounts, caskade_core::accounts::Permission::Install)
+            .map_err(|reason| CommandError::new(ErrorCode::Forbidden, reason))?;
+        let shares =
+            shares.ok_or_else(|| refused(caskade_core::tr!("receiving shares isn't available")))?;
         return super::shares::queue_share_link(events, shares, state, value).await;
     }
     state.request_and_emit(events, value).await
@@ -501,22 +518,21 @@ pub async fn request_dropped_install(
     events: &Events,
     state: &InstallRequests,
     path: String,
-) -> Result<InstallRequest, String> {
-    crate::permissions::enforce("request_dropped_install", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
+) -> Result<InstallRequest, CommandError> {
+    crate::permissions::enforce("request_dropped_install", serde_json::Value::default)?;
     if is_network_or_device_path(&path) {
-        return Err(caskade_core::tr!(
+        return Err(refused(caskade_core::tr!(
             "choose a local path, not a network or device path"
-        ));
+        )));
     }
     let (plan, (kind, value)) = crate::runtime::spawn_blocking(move || {
-        let plan = caskade_core::install::dropped::plan(std::path::Path::new(&path))
-            .map_err(|e| e.to_string())?;
+        let plan =
+            caskade_core::install::dropped::plan(std::path::Path::new(&path)).map_err(report)?;
         let input = validate(plan.input.clone())?;
-        Ok::<_, String>((plan, input))
+        Ok::<_, CommandError>((plan, input))
     })
     .await
-    .map_err(|e| e.to_string())??;
+    .map_err(internal)??;
     state.queue_and_emit(events, kind, value, Some(plan))
 }
 
@@ -524,7 +540,7 @@ pub async fn request_dropped_install(
 mod tests {
     use super::*;
     impl InstallRequests {
-        fn request(&self, value: String) -> Result<InstallRequest, String> {
+        fn request(&self, value: String) -> Result<InstallRequest, CommandError> {
             let (kind, value) = validate(value)?;
             self.queue(kind, value, None)
         }
@@ -585,7 +601,10 @@ mod tests {
         ] {
             assert!(is_network_or_device_path(value), "{value}");
             let error = validate(value.into()).unwrap_err();
-            assert!(error.contains("network or device"), "{value}: {error}");
+            assert!(
+                error.summary.contains("network or device"),
+                "{value}: {error:?}"
+            );
         }
         for value in [
             "/tmp/game.zip",

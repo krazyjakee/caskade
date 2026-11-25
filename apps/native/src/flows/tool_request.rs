@@ -1,7 +1,7 @@
-//! Runs one of a release's tools once (#178), as the webview's
-//! `gameActions/ToolRequest`: the game menu's tool items start it, and it
-//! says why when the tool couldn't start. A tool has no play session, so
-//! nothing follows once it started. When the age limit holds the game
+//! Runs one of a release's tools once (#178): the game menu's tool items
+//! start it, and it says why when the tool couldn't start. A tool has no
+//! play session, so nothing follows once it started. When the age limit
+//! holds the game
 //! back, an admin's PIN first (#106), then the tool runs.
 
 use caskade_app::commands::actions::{ToolOutcome, game_tool_run};

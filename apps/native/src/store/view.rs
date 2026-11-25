@@ -1,6 +1,5 @@
-//! The Store's page (the webview's `StoreView.tsx`): Browse, Recently
-//! released and Upcoming as tabs, every view's state in the route, so Back
-//! from a game's page comes back to it.
+//! The Store's page: Browse, Recently released and Upcoming as tabs, every
+//! view's state in the route, so Back from a game's page comes back to it.
 
 use std::time::Duration;
 
@@ -72,7 +71,7 @@ fn ids(id: Option<&str>) -> Vec<u64> {
     id.and_then(|id| id.parse().ok()).into_iter().collect()
 }
 
-/// Browse's search for `store`, as the webview's `useCatalogSearch` asks.
+/// Browse's catalogue search query for `store`.
 pub fn search_for(store: &StoreRoute) -> CatalogSearch {
     let narrowed = store.q.is_some()
         || store.platform.is_some()

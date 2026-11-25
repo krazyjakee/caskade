@@ -1,7 +1,5 @@
 //! What the app tells its UI (#86): typed [`Event`]s, sent through the
-//! shell's [`Emit`] sink. The Tauri shell forwards each one to the webview
-//! under its event name; a native shell reads them directly. [`bridge`]
-//! turns the core bus's events into these.
+//! shell's [`Emit`] sink. [`bridge`] turns the core bus's events into these.
 
 // The commands' own events.
 pub use crate::commands::addon_packages::AddonProgress;
@@ -22,7 +20,6 @@ pub use crate::commands::store_accounts::StoreAccountsChanged;
 pub use crate::commands::streaming::StreamingPairingFinished;
 pub use crate::commands::sync::DevicesChanged;
 pub use crate::commands::sync::PairingLinkOpened;
-pub use crate::commands::system_stats::SystemStatsSampled;
 pub use crate::commands::themes::ThemeReloaded;
 pub use crate::discovery::DiscoveryChanged;
 use caskade_core::bus::{Event as BusEvent, GameSession};
@@ -177,7 +174,6 @@ pub enum Event {
     InstallRefused(InstallRefused),
     StreamingPairingFinished(StreamingPairingFinished),
     LocaleChanged(LocaleChanged),
-    SystemStatsSampled(SystemStatsSampled),
     AppUpdateChanged(AppUpdateChanged),
     InputActionEvent(InputActionEvent),
     GamesRefreshChanged(GamesRefreshChanged),
@@ -255,7 +251,6 @@ impl Event {
             Self::InstallRefused(_) => "install.refused",
             Self::StreamingPairingFinished(_) => "streaming.pairing.finished",
             Self::LocaleChanged(_) => "locale.changed",
-            Self::SystemStatsSampled(_) => "system.stats.sampled",
             Self::AppUpdateChanged(_) => "app_update.changed",
             Self::InputActionEvent(_) => "input.action",
             Self::GamesRefreshChanged(_) => "games.refresh.changed",

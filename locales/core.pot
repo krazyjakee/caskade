@@ -529,10 +529,6 @@ msgstr ""
 msgid "{emulator} no longer has this profile."
 msgstr ""
 
-#: crates/caskade-core/src/emulation/catalog.rs
-msgid "the ROM file name {file} starts with `-`, which the emulator would read as an option; rename the file"
-msgstr ""
-
 #: crates/caskade-core/src/emulation/config.rs
 msgid "the game's ROM scanner no longer exists"
 msgstr ""
@@ -710,7 +706,6 @@ msgid "Detecting emulators"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/service/detection.rs
-#: crates/caskade-app/src/commands/emulation.rs
 msgid "This detection is no longer available. Run it again."
 msgstr ""
 
@@ -1024,6 +1019,10 @@ msgid "exclusion"
 msgstr ""
 
 #: crates/caskade-core/src/emulation/vars.rs
+msgid "the ROM file name {file} starts with `-`, which the emulator would read as an option; rename the file"
+msgstr ""
+
+#: crates/caskade-core/src/emulation/vars.rs
 msgid "Save variable {variable} is unavailable for this release."
 msgstr ""
 
@@ -1195,6 +1194,10 @@ msgstr ""
 
 #: crates/caskade-core/src/error.rs
 msgid "Caskade couldn't finish this; the details say why."
+msgstr ""
+
+#: crates/caskade-core/src/fs.rs
+msgid "no free folder name for it"
 msgstr ""
 
 #: crates/caskade-core/src/hasheous/download.rs
@@ -2850,27 +2853,27 @@ msgstr ""
 msgid "artwork: {status}"
 msgstr ""
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "{checksum} for {file}"
 msgstr ""
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "size for {file} ({actual} bytes, expected {size})"
 msgstr ""
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "too many files"
 msgstr ""
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "the download has no files"
 msgstr ""
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "the ROM has no file name"
 msgstr ""
 
-#: crates/caskade-core/src/romm/cache.rs
+#: crates/caskade-core/src/romm/assemble.rs
 msgid "file list ({file} is missing)"
 msgstr ""
 
@@ -4096,10 +4099,6 @@ msgstr ""
 
 #: crates/caskade-core/src/transfer/receive.rs
 msgid "{device} can't be reached directly yet: the copy waits for a direct connection"
-msgstr ""
-
-#: crates/caskade-core/src/transfer/rom.rs
-msgid "no free folder name for it"
 msgstr ""
 
 #: crates/caskade-core/src/transfer/rom.rs

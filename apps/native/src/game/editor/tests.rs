@@ -1,11 +1,9 @@
-//! The game editor (#100) in the frame over the fixture library, headless,
-//! as `GameEditor.test.tsx`, `ArtworkTab.test.tsx`, `ActionsTab.test.tsx`
-//! and `SavesTab.test.tsx` have it: opened from the page's Edit details and
-//! the menu's Edit…, the details saved as one patch, a field saved
-//! elsewhere kept as a conflict, the question before unsaved work goes, and
-//! each tab's own changes.
+//! The game editor (#100) in the frame over the fixture library, headless:
+//! opened from the page's Edit details and the menu's Edit…, the details
+//! saved as one patch, a field saved elsewhere kept as a conflict, the
+//! question before unsaved work goes, and each tab's own changes.
 
-use super::data::{EditData, SaveLocationRow, SaveLocations};
+use super::data::{EditData, SaveLocationView, SaveLocationsState};
 use crate::frame::tests::{ONE, Window};
 use caskade_app::commands::game_edit::ArtworkChange;
 use caskade_core::launch::ReleaseActions;
@@ -33,7 +31,7 @@ pub(crate) struct EditScript {
     pub(crate) releases: Vec<ReleaseActions>,
     pub(crate) saved_actions: Vec<GameAction>,
     pub(crate) deleted: Vec<String>,
-    pub(crate) locations: Option<SaveLocations>,
+    pub(crate) locations: Option<SaveLocationsState>,
     pub(crate) location_edits: Vec<(SavePreferences, u32)>,
 }
 
@@ -132,16 +130,20 @@ pub(crate) fn fake_edit_data() -> EditData {
         order_actions: Rc::new(|_, _, _| answer(())),
         action_settings: Rc::new(|_, _, settings| answer(settings)),
         proton: Rc::new(|| answer(Default::default())),
-        saves: Rc::new(|_| {
+        saves: Rc::new(|entry_id| {
             answer(edit(|script| {
-                script.locations.clone().unwrap_or_else(|| SaveLocations {
-                    revision: 0,
-                    preferences: SavePreferences::default(),
-                    matched: SaveMatch::Unknown,
-                    automatic: Vec::new(),
-                    locations: Vec::new(),
-                    warnings: Vec::new(),
-                })
+                script
+                    .locations
+                    .clone()
+                    .unwrap_or_else(|| SaveLocationsState {
+                        entry_id,
+                        revision: 0,
+                        preferences: SavePreferences::default(),
+                        matched: SaveMatch::Unknown,
+                        automatic: Vec::new(),
+                        locations: Vec::new(),
+                        warnings: Vec::new(),
+                    })
             }))
         }),
         edit_saves: Rc::new(|_, preferences, revision| {
@@ -607,13 +609,15 @@ fn saves_change_a_releases_locations_from_their_revision() {
     };
     let _script = edit_script(EditScript {
         state: Some(state()),
-        locations: Some(SaveLocations {
+        locations: Some(SaveLocationsState {
+            entry_id: "entry-1".to_owned(),
             revision: 4,
             preferences: SavePreferences::default(),
             matched: SaveMatch::Unknown,
-            automatic: vec![SaveLocationRow {
+            automatic: vec![SaveLocationView {
                 spec: folder,
-                files: 3,
+                tags: Vec::new(),
+                file_count: 3,
             }],
             locations: Vec::new(),
             warnings: Vec::new(),

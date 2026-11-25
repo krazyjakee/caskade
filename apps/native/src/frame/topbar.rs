@@ -1,7 +1,7 @@
-//! The top bar (`shell/Topbar.tsx`, `ActivityLink.tsx`): the search, the
-//! Activity button, the account menu (#106) and, where Caskade draws its own title bar, the window's
-//! controls. Dragging anywhere but a control moves the window, and a double
-//! click maximizes it (`window.rs`).
+//! The top bar: the search, the Activity button, the account menu (#106) and,
+//! where Caskade draws its own title bar, the window's controls. Dragging
+//! anywhere but a control moves the window, and a double click maximizes it
+//! (`window.rs`).
 
 use crate::activity::labels::is_active;
 use crate::data::status::use_unread_notifications;

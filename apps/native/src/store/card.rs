@@ -1,10 +1,9 @@
-//! A catalogue game in the Store (the webview's `views/store/CatalogCard`):
-//! its cover, title and platforms, the release that listed it (recent and
-//! upcoming) and, apart from those, its place in the library when it has
-//! one. Its `data-status` is the library's: absent for a game the library
-//! doesn't have, because a store link says nothing of what it costs or
-//! whether it is on sale. One focus stop (`role="link"`): a click, Enter or
-//! a pad's A opens its page.
+//! A catalogue game in the Store: its cover, title and platforms, the
+//! release that listed it (recent and upcoming) and, apart from those, its
+//! place in the library when it has one. Its `data-status` is the
+//! library's: absent for a game the library doesn't have, because a store
+//! link says nothing of what it costs or whether it is on sale. One focus
+//! stop (`role="link"`): a click, Enter or a pad's A opens its page.
 
 use caskade_core::db::IgdbOwned;
 use caskade_core::igdb::{IgdbGame, IgdbReleaseDate};

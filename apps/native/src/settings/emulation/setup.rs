@@ -1,9 +1,7 @@
-//! One-click emulator installs (#115), as the webview's
-//! `emulators/EmulatorSetup.tsx`, `emulators/FromDevices.tsx` and
-//! `api/emulatorSetup.ts`: platforms with games and no emulator, every
-//! emulator Caskade can install here, the emulators other devices use
-//! (#275), a Caskade-installed emulator's updates, and BIOS files from
-//! RomM. Installs run in the core; their progress comes from
+//! One-click emulator installs (#115): platforms with games and no
+//! emulator, every emulator Caskade can install here, the emulators other
+//! devices use (#275), a Caskade-installed emulator's updates, and BIOS
+//! files from RomM. Installs run in the core; their progress comes from
 //! `super::use_live().installs`.
 
 use caskade_core::emulation::SetupStatus;

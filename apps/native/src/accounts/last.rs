@@ -1,7 +1,6 @@
 //! The account that signed in last on this device, so the picker starts on
-//! it (the webview keeps it in local storage). Kept in
-//! `native-accounts.json` in the config folder; for the run only without
-//! one (fixtures mode, tests). An account id is no secret.
+//! it. Kept in `native-accounts.json` in the config folder; for the run
+//! only without one (fixtures mode, tests). An account id is no secret.
 
 use std::path::PathBuf;
 use std::sync::Mutex;

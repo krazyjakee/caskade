@@ -1,6 +1,5 @@
-//! The work the choices start (#97), as the webview's
-//! `onboarding/SetupStep.tsx`: each task's progress, the library's count
-//! climbing and covers arriving behind it. Then the way in.
+//! The work the choices start (#97): each task's progress, the library's
+//! count climbing and covers arriving behind it. Then the way in.
 
 use crate::data::sleep;
 use std::cell::Cell;

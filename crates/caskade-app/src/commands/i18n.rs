@@ -1,7 +1,7 @@
 //! The app's language (#213). The core owns it: it follows the Language
 //! setting (`core.general.language`, `system` by default) and resolves it
-//! to a language it ships, else English. The webview asks for it before
-//! its first render ([`locale_current`]) and follows [`LocaleChanged`], so
+//! to a language it ships, else English. The UI asks for it before its
+//! first render ([`locale_current`]) and follows [`LocaleChanged`], so
 //! the two never disagree; the tray follows the core by itself.
 
 use caskade_core::i18n;
@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::watch;
 
 use crate::events::{Event, Events};
-/// The core's language changed: the webview loads its catalogs.
+/// The core's language changed: the UI reloads its catalogs.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LocaleChanged {
@@ -32,7 +32,7 @@ pub struct LocaleInfo {
 }
 
 /// The language in use, what System means here, and the languages there
-/// are (the webview's first render).
+/// are (the UI's first render).
 pub fn locale_current() -> LocaleInfo {
     LocaleInfo {
         locale: i18n::locale(),

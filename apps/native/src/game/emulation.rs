@@ -1,7 +1,7 @@
-//! An emulated release on the game page (#100, the webview's
-//! `views/game/EmulatedEntry.tsx`): its platform and whether it can start,
-//! what to set up when it can't (with Configure), the emulator and profile
-//! it launches with, extra arguments, and its discs and BIOS files.
+//! An emulated release on the game page (#100): its platform and whether
+//! it can start, what to set up when it can't (with Configure), the
+//! emulator and profile it launches with, extra arguments, and its discs
+//! and BIOS files.
 
 use super::data::{use_answer, use_page_data};
 use crate::router::{Route, RouteLink};

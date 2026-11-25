@@ -1,4 +1,4 @@
-//! Explicit-save forms in Settings (#43; the webview's `unsavedChanges.tsx`).
+//! Explicit-save forms in Settings (#43).
 //! Most settings save as they change; a form with a Save button holds its
 //! edits until it's pressed, and a section's panel is replaced when another
 //! opens. Such a form registers here while it has edits
@@ -36,7 +36,6 @@ struct Forms(Signal<BTreeMap<usize, CopyValue<UnsavedForm>>>);
 
 /// What the edits would be lost to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[allow(dead_code, reason = "account and mode switches (#104) leave with them")]
 pub enum Leaving {
     Section,
     Account,
@@ -75,7 +74,6 @@ thread_local! {
 /// guard: runs `proceed` straight away when no form has edits or Settings
 /// isn't open, otherwise once the question is answered with Save or
 /// Discard.
-#[allow(dead_code, reason = "account and mode switches (#104) call it")]
 pub fn after_unsaved_changes(leaving: Leaving, proceed: impl Fn() + 'static) {
     let ask = ASK.with(|ask| ask.borrow().clone());
     match ask {

@@ -1,8 +1,9 @@
-//! The app's frame around every view (#96, `shell/AppShell.tsx`): the
-//! sidebar, the top bar with the search, the page the router shows, the
-//! status bar, toasts, the type-to-search overlay and the window's own
-//! title bar; a view that fails shows its error in place. Console mode's
-//! shell is #107, first-run setup `crate::onboarding` (#97), the account gate and menu `crate::accounts` (#106), plugins' links and slots #109.
+//! The app's frame around every view (#96): the sidebar, the top bar with
+//! the search, the page the router shows, the status bar, toasts, the
+//! type-to-search overlay and the window's own title bar; a view that fails
+//! shows its error in place. Console mode's shell is #107, first-run setup
+//! `crate::onboarding` (#97), the account gate and menu `crate::accounts`
+//! (#106), plugins' links and slots #109.
 
 mod anatomy;
 mod console;
@@ -42,8 +43,7 @@ pub fn Frame(
     #[props(default)]
     start: Option<String>,
 ) -> Element {
-    // Until the library opens (`DataRoot` mounts it again then), as the
-    // webview renders once its data's there.
+    // Until the library opens (`DataRoot` mounts it again then).
     if try_consume_context::<crate::data::DataSource>().is_none() {
         return rsx! {};
     }

@@ -1,6 +1,6 @@
-//! Progress, as react-aria's `ProgressBar`: a bar with its value
-//! (`role="progressbar"`), or busy with no value yet (indeterminate). No
-//! catalogued root: views place and name it (`data-part`).
+//! Progress: a bar with its value (`role="progressbar"`), or busy with no
+//! value yet (indeterminate). No catalogued root: views place and name it
+//! (`data-part`).
 
 use dioxus_native::prelude::*;
 

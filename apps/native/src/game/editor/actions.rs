@@ -1,8 +1,7 @@
-//! The editor's Actions tab (the webview's `gameEditor/ActionsTab.tsx`):
-//! each release's launch actions. Its own launch first, then the play
-//! actions and tools the user added. Add, duplicate, reorder, rename and
-//! delete them, choose what Play starts or have it ask, and save one action
-//! at a time.
+//! The editor's Actions tab: each release's launch actions. Its own launch
+//! first, then the play actions and tools the user added. Add, duplicate,
+//! reorder, rename and delete them, choose what Play starts or have it ask,
+//! and save one action at a time.
 
 use caskade_core::launch::ReleaseActions;
 use caskade_core::model::{
@@ -34,14 +33,7 @@ fn runs_windows_program(action: &GameAction) -> bool {
         return true;
     }
     match &action.target {
-        LaunchSpec::Executable { path, .. } => path
-            .extension()
-            .and_then(|ext| ext.to_str())
-            .is_some_and(|ext| {
-                ["exe", "bat", "cmd", "com", "lnk", "msi"]
-                    .iter()
-                    .any(|known| ext.eq_ignore_ascii_case(known))
-            }),
+        LaunchSpec::Executable { path, .. } => caskade_core::launch::is_windows_program(path),
         _ => false,
     }
 }

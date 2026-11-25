@@ -1,6 +1,6 @@
 //! Games added by hand (#174, #108): what a program, shortcut or URI
 //! starts, games that may be the same, and adding the record, through the
-//! app layer's commands as the webview's `api/manualGames.ts` does.
+//! app layer's commands.
 
 use caskade_app::commands::manual_games;
 use caskade_core::{

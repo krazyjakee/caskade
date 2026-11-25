@@ -1,7 +1,7 @@
-//! Settings → Plugins' catalogue (#104, moved from #108), as the webview's
-//! `AddonCatalogue`, `AddonDetails` and `DeviceOffers`: curated plugins and
-//! themes with what each means here, searchable and by kind, read offline
-//! from the last fetch; each opens its details, where it installs, updates,
+//! Settings → Plugins' catalogue (#104, moved from #108): curated plugins
+//! and themes with what each means here, searchable and by kind, read
+//! offline from the last fetch; each opens its details, where it installs,
+//! updates,
 //! is skipped or removed through the shared package service. A first
 //! plugin install goes through the plugin review; an installed theme can
 //! be put to use. The catalogue is the window's mode's: console mode's

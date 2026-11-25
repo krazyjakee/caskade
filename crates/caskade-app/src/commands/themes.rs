@@ -114,10 +114,6 @@ pub struct ResolvedTheme {
     pub safe_mode: bool,
 }
 
-/// The notice a theme carries in safe mode, in English.
-pub const SAFE_MODE_NOTICE: &str =
-    "Safe mode: Caskade started with the default theme and without your custom CSS.";
-
 async fn selected(settings: Option<&SettingsService>) -> String {
     match settings {
         Some(settings) => {
@@ -182,16 +178,6 @@ pub async fn themes_list(
 ) -> Result<Vec<ThemeInfo>, CommandError> {
     sync_plugins(plugins, themes).await;
     Ok(with_urls(themes.list(), url))
-}
-
-/// The URL of a theme's compiled stylesheet, once it compiles.
-pub fn theme_stylesheet(
-    themes: &ThemeService,
-    url: impl Fn(&str, &str) -> String,
-    id: &str,
-) -> Result<String, CommandError> {
-    themes.stylesheet(id).map_err(report)?;
-    Ok(url(id, "theme.css"))
 }
 
 /// Reads every theme folder again, e.g. after installing or editing one.

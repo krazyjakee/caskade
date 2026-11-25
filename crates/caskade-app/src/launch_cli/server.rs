@@ -124,7 +124,7 @@ pub async fn handle(services: &Services, stream: channel::Stream) {
 }
 
 /// Resolves once the caller has closed its end.
-async fn closed<R: tokio::io::AsyncRead + Unpin>(reader: &mut BufReader<R>) {
+async fn closed(reader: &mut BufReader<tokio::io::ReadHalf<channel::Stream>>) {
     let mut buffer = [0_u8; 256];
     loop {
         match reader.read(&mut buffer).await {

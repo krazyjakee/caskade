@@ -1,7 +1,7 @@
-//! Settings (#103; the webview's `SettingsView.tsx` and `views/settings`):
-//! the sections in groups down the side, the settings search above them,
-//! and the open section's panel. A section opens in place (Back leaves
-//! Settings), LB/RB move between sections, and a section the signed-in
+//! Settings (#103): the sections in groups down the side, the settings
+//! search above them, and the open section's panel. A section opens in
+//! place (Back leaves Settings), LB/RB move between sections, and a
+//! section the signed-in
 //! account may not change isn't listed.
 //!
 //! The framework the panels build on: [`schema::SchemaSettings`] renders a
@@ -356,8 +356,7 @@ fn SettingsContent(asked: &'static str, sub: Option<String>) -> Element {
     );
     let searching = !query().trim().is_empty();
     // LB/RB move between the sections, in place; focus follows to the new
-    // section's tab when it was on a tab (the webview's `useScreenTabs`),
-    // whenever the panel comes.
+    // section's tab when it was on a tab, whenever the panel comes.
     let tabs = use_signal(Vec::<(&'static str, blitz_dom::NodeId)>::new);
     let tab_input = use_input();
     let order = shown.clone();

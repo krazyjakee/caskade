@@ -1,6 +1,5 @@
-//! A collection's card, and the pieces its page shares with it (the
-//! webview's `components/CollectionCard.tsx`): the smart or manual badge,
-//! the mosaic of its first covers, and when it last changed.
+//! A collection's card, and the pieces its page shares with it: the smart or
+//! manual badge, the mosaic of its first covers, and when it last changed.
 
 use super::PIN;
 use crate::router::{Route, use_router};

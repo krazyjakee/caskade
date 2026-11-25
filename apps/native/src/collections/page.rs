@@ -1,8 +1,7 @@
-//! One collection (the webview's `views/CollectionView.tsx`): its mosaic,
-//! badge, name, description and numbers, a smart one's rules, Play Random,
-//! Add Games (or Edit Rules) and its menu; then its games in the library's
-//! virtual grid, which can choose several for one edit as the library
-//! does.
+//! One collection: its mosaic, badge, name, description and numbers, a smart
+//! one's rules, Play Random, Add Games (or Edit Rules) and its menu; then its
+//! games in the library's virtual grid, which can choose several for one edit
+//! as the library does.
 
 use super::actions::{Open, use_collection_actions};
 use super::card::{CollectionMosaic, KindBadge, collection_updated, cover_urls};

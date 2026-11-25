@@ -1,5 +1,4 @@
-//! Console mode (#107), ported from the webview's `console.test.tsx` and
-//! `GameCurtain.test.tsx`: View switches between the shells and back, the
+//! Console mode (#107): View switches between the shells and back, the
 //! console shell has its sidebar, top bar and hints in the glyphs of the
 //! controller in hand, and the curtain comes down over a running game and
 //! lifts on back and when the last game exits.

@@ -1,7 +1,7 @@
-//! Settings → Streaming (#265, #105), as the webview's `StreamingSettings`
-//! and `PairDialog`: letting other devices stream games from this one
-//! (admins), the devices paired with it and the ones waiting to pair; the
-//! devices this one can stream from, pairing with them and adding one by
+//! Settings → Streaming (#265, #105): letting other devices stream games
+//! from this one (admins), the devices paired with it and the ones waiting
+//! to pair; the devices this one can stream from, pairing with them and
+//! adding one by
 //! its address; the stream quality; and the streaming programs' updates.
 //!
 //! Every account sees the tab, can pair this device with another to stream
@@ -36,7 +36,7 @@ use hosting::HostingSection;
 use stream_from::StreamFromSection;
 
 /// How often hosting, the waiting devices and the devices to stream from
-/// are read again, as the webview's queries refetch them.
+/// are polled again.
 const TICK: Duration = Duration::from_secs(1);
 const STATUS_EVERY: u32 = 5;
 const REQUESTS_EVERY: u32 = 3;
@@ -67,8 +67,7 @@ struct Shown {
 }
 
 impl Shown {
-    /// Reads everything again, as the webview invalidates its queries after
-    /// an action.
+    /// Reads everything again after an action.
     async fn refresh(mut self, streaming: Streaming) {
         let read = streaming.clone();
         let admin = change(async move { Ok(read.is_admin().await) })

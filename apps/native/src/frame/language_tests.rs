@@ -27,7 +27,6 @@ use std::time::{Duration, Instant};
 fn app() -> Element {
     crate::i18n::use_language();
     use_data_source(|| source().clone());
-    use_context_provider(crate::library::view_tests::fake_drop_install);
     use_context_provider(crate::game::launch_tests::fake_steps);
     use_context_provider(crate::game::page_tests::page_data_tests::fake_data);
     use_context_provider(crate::game::editor::tests::fake_edit_data);

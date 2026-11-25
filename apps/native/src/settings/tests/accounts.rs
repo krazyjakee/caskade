@@ -1,8 +1,8 @@
 //! Settings → Accounts and My profile (#105), over a fixture library whose
-//! one admin is signed in, as the webview's `accounts.test.tsx`: adding a
-//! standard account is refused with the core's reason until the admin has a
-//! PIN, then made; an account's access saves; deleting asks first and
-//! takes it away; the rating board labels age limits. My profile saves its
+//! one admin is signed in: adding a standard account is refused with the
+//! core's reason until the admin has a PIN, then made; an account's access
+//! saves; deleting asks first and takes it away; the rating board labels
+//! age limits. My profile saves its
 //! name, and its PIN is set on the pad, entered twice, and a wrong current
 //! PIN is refused.
 

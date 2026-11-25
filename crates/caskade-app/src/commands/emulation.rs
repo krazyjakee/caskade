@@ -94,18 +94,6 @@ pub async fn emulation_detect_start(
     emulation.detect_start(folder).await.map_err(report)
 }
 
-/// A detection, while it's kept.
-pub fn emulation_detect_get(
-    emulation: &EmulationService,
-    id: &str,
-) -> Result<DetectJob, CommandError> {
-    emulation.detect_get(id).ok_or_else(|| {
-        conflict(caskade_core::tr!(
-            "This detection is no longer available. Run it again."
-        ))
-    })
-}
-
 /// The most recent detection, e.g. the one the last library scan ran.
 pub fn emulation_detect_latest(emulation: &EmulationService) -> Option<DetectJob> {
     emulation.detect_latest()

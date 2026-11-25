@@ -1,9 +1,9 @@
 //! Settings → Backup (#105), over a fixture library with its own settings
 //! (`core.backups` registered, as the app does) and a backup folder in a
-//! temporary directory, as the webview's `BackupSettings` tests: the parts
-//! to back up and what a backup leaves out; Back up now writes a backup,
-//! checked, and says so; a folder that isn't there blocks it with why;
-//! choosing the backup shows what it holds and what restoring keeps; the
+//! temporary directory: the parts to back up and what a backup leaves out;
+//! Back up now writes a backup, checked, and says so; a folder that isn't
+//! there blocks it with why; choosing the backup shows what it holds and
+//! what restoring keeps; the
 //! schedule saves.
 
 use std::sync::Mutex;

@@ -1,8 +1,7 @@
 //! A game on the user's other devices (#232, #234, #235), for the game
-//! menu's Your devices section: the handle, the systems' names
-//! (`components/sync/common.tsx`'s `osNames`) and what to say about a copy
-//! there (`views/game/OtherDevices.tsx`'s `usePeerNote`), which the game
-//! page's Other devices (#100) shares.
+//! menu's Your devices section: the handle, the systems' names and what to
+//! say about a copy there, which the game page's Other devices (#100)
+//! shares.
 
 use caskade_ui_data::devices::{CopyBlocked, DeviceLink, DeviceOs, OtherDevices, PeerCopy};
 use caskade_ui_i18n::t;

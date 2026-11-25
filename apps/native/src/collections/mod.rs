@@ -1,6 +1,5 @@
-//! Collections (#102, the webview's `views/CollectionsView.tsx` and
-//! `views/CollectionView.tsx`): every collection as a card under All, Smart
-//! and Manual tabs, with its menu at a right click, the menu key or a pad's
+//! Collections (#102): every collection as a card under All, Smart and
+//! Manual tabs, with its menu at a right click, the menu key or a pad's
 //! Start; and one collection's page, with its rules, Play Random, Add Games
 //! or Edit Rules, its menu, and its games in the library's virtual grid.
 //! Making and editing one is the library's `CollectionDialog`; a game's
@@ -26,8 +25,7 @@ use crate::ui::interact::{Keys, flag, use_interaction};
 use dioxus_native::prelude::*;
 
 /// Bumped whenever this UI changes a collection. The core sends no event
-/// for collections (the webview refetches every collection query after its
-/// own changes), so the collection queries here read it and load again.
+/// for collections, so the collection queries here read it and load again.
 static REVISION: GlobalSignal<u64> = Signal::global(|| 0);
 
 /// A collection changed here (made, edited, pinned, deleted, its games):
@@ -65,10 +63,9 @@ const SHUFFLE: Icon = Icon(&[
     "M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45",
 ]);
 
-/// A button styled wholly by the view, as the webview's plain buttons and
-/// react-aria `Button`s are (New Collection, Play Random, More): no
-/// `data-cs`, the interaction attributes react-aria gives, and Enter,
-/// Space, a click or a pad's A to press it.
+/// A button styled wholly by the view (New Collection, Play Random, More):
+/// no `data-cs`, standard interaction data attributes, and Enter, Space, a
+/// click or a pad's A to press it.
 #[component]
 fn PlainButton(
     #[props(default)] disabled: bool,

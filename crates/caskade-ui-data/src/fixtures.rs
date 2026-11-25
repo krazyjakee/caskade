@@ -1,9 +1,7 @@
 //! Fixtures mode (#89): the real core and app layer over an in-memory
-//! library of synthetic games, for UI development and tests. It replaced
-//! the webview's `VITE_CASKADE_FIXTURES` and keeps the games its
-//! `fixtures.ts` showed; `fixtures/games.json` lists them game by game and
-//! a test holds [`library_games`] to it (#139). No contributor's library is
-//! copied.
+//! library of synthetic games, for UI development and tests.
+//! `fixtures/games.json` lists them game by game and a test holds
+//! [`library_games`] to it (#139). No contributor's library is copied.
 //!
 //! Filters, sorts and search are the core's own here, not a
 //! re-implementation, so fixtures mode answers as the app does.

@@ -1,8 +1,7 @@
-//! Fields that keep what's being edited (the webview's `DraftField.tsx` and
-//! `DraftSlider.tsx`): saving every keystroke and showing the stored value
-//! lost characters typed faster than a save round trip, and a slider that
-//! saved every step rescaled the page under the pointer (the interface
-//! scale, #55).
+//! Fields that keep what's being edited: saving every keystroke and
+//! showing the stored value lost characters typed faster than a save round
+//! trip, and a slider that saved every step rescaled the page under the
+//! pointer (the interface scale, #55).
 
 use std::time::Duration;
 

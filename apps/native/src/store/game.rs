@@ -1,8 +1,7 @@
-//! A catalogue game's page in the Store (#102, the webview's
-//! `views/store/StoreGameView.tsx` and `WhereToBuy.tsx`): what IGDB knows
-//! of it, where it is sold, its releases on each platform and region, and
-//! similar games. Opening it creates no library entry. A game the library
-//! has (the same IGDB match) links to its library page.
+//! A catalogue game's page in the Store (#102): what IGDB knows of it,
+//! where it is sold, its releases on each platform and region, and similar
+//! games. Opening it creates no library entry. A game the library has (the
+//! same IGDB match) links to its library page.
 
 use std::collections::HashSet;
 

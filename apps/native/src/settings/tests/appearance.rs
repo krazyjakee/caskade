@@ -1,7 +1,6 @@
-//! Settings → Appearance (#104), ported from the webview's
-//! `AppearanceThemes`, `AppearanceAccent` and `ThemePicker` tests: every
-//! installed theme is listed and picked by arrows, one that can't be used
-//! says why, a rescan finds new ones; the look, cards and motion read and
+//! Settings → Appearance (#104): every installed theme is listed and picked
+//! by arrows, one that can't be used says why, a rescan finds new ones;
+//! the look, cards and motion read and
 //! save; accents are kept readable; custom CSS waits for Save CSS, refuses
 //! what can't apply and holds a navigation while unsaved; one reset puts
 //! the page back; every control is named.

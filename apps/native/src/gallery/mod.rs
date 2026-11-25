@@ -1,5 +1,5 @@
 //! The component gallery (#93): every component in `ui` in every state,
-//! under any theme, as Storybook shows the webview's `@caskade/ui`.
+//! under any theme.
 //! `caskade-native --gallery [--themes <folder>]` (debug builds, or the
 //! `gallery` feature) opens it in a window with a theme switcher (the
 //! built-in themes and those in `--themes`). Its pages are also screens of

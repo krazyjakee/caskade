@@ -18,9 +18,7 @@ pub use model::*;
 mod provider;
 /// For implementing [`AchievementProvider`] outside the core.
 pub use async_trait::async_trait;
-pub use provider::{
-    AccountAccess, AchievementProvider, FetchError, Fetched, LinkOutcome, ReleaseLinker,
-};
+pub use provider::{AccountAccess, AchievementProvider, FetchError, Fetched, LinkOutcome};
 #[cfg(feature = "net")]
 pub mod epic;
 #[cfg(feature = "net")]
@@ -101,7 +99,6 @@ struct Inner {
     bus: Bus,
     accounts: Arc<dyn AccountAccess>,
     providers: RwLock<BTreeMap<String, Arc<dyn AchievementProvider>>>,
-    linkers: RwLock<Vec<Arc<dyn ReleaseLinker>>>,
     /// One fetch per set at a time.
     flights: Mutex<HashMap<String, Arc<tokio::sync::Mutex<()>>>>,
     /// Refreshes asked for by a game's page, by game: what Stop cancels.
@@ -174,7 +171,6 @@ impl Achievements {
                 bus,
                 accounts,
                 providers: RwLock::default(),
-                linkers: RwLock::default(),
                 flights: Mutex::default(),
                 asked: Mutex::default(),
                 settings: std::sync::OnceLock::new(),
@@ -184,11 +180,6 @@ impl Achievements {
 
     pub fn register_provider(&self, provider: Arc<dyn AchievementProvider>) {
         caskade_core::write(&self.inner.providers).insert(provider.id(), provider);
-    }
-
-    /// Links releases to `linker`'s service before their sets are fetched.
-    pub fn register_linker(&self, linker: Arc<dyn ReleaseLinker>) {
-        caskade_core::write(&self.inner.linkers).push(linker);
     }
 
     fn provider(&self, id: &str) -> Option<Arc<dyn AchievementProvider>> {
@@ -368,7 +359,7 @@ impl Achievements {
         Arc::new(Refresher(Arc::downgrade(&self.inner)))
     }
 
-    /// Links `game_id`'s releases that a linker applies to and that have no
+    /// Links `game_id`'s releases that a provider can link and that have no
     /// link yet, or an unresolved one older than a week, with the first
     /// connected account of its service `viewer` sees. A link the user set
     /// is never replaced. A failure (offline, signed out) links nothing now
@@ -380,15 +371,19 @@ impl Achievements {
         viewer: Option<&str>,
         cancel: &CancellationToken,
     ) -> Result<Option<FetchError>> {
-        let linkers = caskade_core::read(&self.inner.linkers).clone();
-        if linkers.is_empty() {
+        let providers: Vec<Arc<dyn AchievementProvider>> =
+            caskade_core::read(&self.inner.providers)
+                .values()
+                .cloned()
+                .collect();
+        if providers.is_empty() {
             return Ok(None);
         }
         let store = &self.inner.store;
         let Releases { entries, links } = releases;
         let now = caskade_core::now_ms();
-        for linker in linkers {
-            let provider = linker.provider();
+        for linker in providers {
+            let provider = linker.id();
             let Some(account) = accounts.iter().find(|account| {
                 account.provider == provider
                     && account.enabled
@@ -401,7 +396,7 @@ impl Achievements {
             }) else {
                 continue;
             };
-            for entry in entries.iter().filter(|entry| linker.applies(entry)) {
+            for entry in entries.iter().filter(|entry| linker.can_link(entry)) {
                 let current = links
                     .iter()
                     .find(|link| link.entry_id == entry.id && link.provider == provider);
@@ -419,8 +414,8 @@ impl Achievements {
                     Ok(credentials) => credentials,
                     Err(error) => return Ok(Some(error.into())),
                 };
-                let outcome = match linker
-                    .link(store, entry, account, credentials.as_ref(), cancel)
+                let Some(outcome) = (match linker
+                    .link_release(store, entry, account, credentials.as_ref(), cancel)
                     .await
                 {
                     Ok(outcome) => outcome,
@@ -428,6 +423,8 @@ impl Achievements {
                         tracing::info!(%error, "release not linked now");
                         return Ok(Some(error));
                     }
+                }) else {
+                    continue;
                 };
                 let (product_id, method) = match outcome {
                     LinkOutcome::Linked { product, hash } => (product, LinkMethod::Hash { hash }),

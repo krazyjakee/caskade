@@ -1,7 +1,6 @@
-//! Settings → Emulation → Platforms, as the webview's
-//! `emulators/ConfiguredPlatforms.tsx`: each platform with ROMs, a default
-//! or a compatible profile, its default emulator, BIOS files and folder,
-//! and the file extensions it takes.
+//! Settings → Emulation → Platforms: each platform with ROMs, a default or
+//! a compatible profile, its default emulator, BIOS files and folder, and
+//! the file extensions it takes.
 
 use std::collections::HashMap;
 use std::path::PathBuf;

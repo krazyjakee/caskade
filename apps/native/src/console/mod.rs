@@ -1,9 +1,9 @@
-//! Console mode (#107; the webview's `shell/console/mode.tsx`): the same app
-//! and data with a different shell, for a TV and a pad. Caskade starts in
-//! it with `--console`, `CASKADE_CONSOLE=1`, inside gamescope (a Steam Deck
-//! in game mode) or by the `core.console` setting
-//! (`caskade_app::commands::console`). The mode is `data-mode` on the
-//! frame's root, so the `mode-console` token set (TV text sizes) applies;
+//! Console mode (#107): the same app and data with a different shell, for a
+//! TV and a pad. Caskade starts in it with `--console`, `CASKADE_CONSOLE=1`,
+//! inside gamescope (a Steam Deck in game mode) or by the `core.console`
+//! setting (`caskade_app::commands::console`). The mode is `data-mode` on
+//! the frame's root, so the `mode-console` token set (TV text sizes)
+//! applies;
 //! console mode makes the window fullscreen, and leaving it puts the
 //! desktop window back. The toggle remembers the choice; a second
 //! `caskade --console` switches without remembering.

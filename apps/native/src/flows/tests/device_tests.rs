@@ -51,7 +51,7 @@ fn share_with_someone_is_in_the_menu_for_a_copy_here() {
     assert_eq!(share(&target(Some("e1")), &facts("manual", true)), None);
 }
 
-/// Your devices, as GameMenu.tsx lists it: Play on each device that has
+/// Your devices, as the game menu lists it: Play on each device that has
 /// it (waking one out of reach that can be woken; not one playing it
 /// now), Copy to each paired device reached directly that hasn't it, then
 /// Share, then the copies there with what to know about each.

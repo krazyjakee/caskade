@@ -1,8 +1,7 @@
-//! An install's updates on the game page (#100, the webview's
-//! `views/game/EntryUpdate.tsx`): the release installed, a newer one when
-//! there is, and Update, Skip this version (or Offer it again), Check now,
-//! What's new or Releases, and Prereleases. Nothing for installs no update
-//! provider follows.
+//! An install's updates on the game page (#100): the release installed, a
+//! newer one when there is, and Update, Skip this version (or Offer it
+//! again), Check now, What's new or Releases, and Prereleases. Nothing for
+//! installs no update provider follows.
 
 use super::data::{UpdateChange, use_page_data};
 use super::launch::version_label;

@@ -1,6 +1,5 @@
 //! Spatial navigation over the UI's layout boxes: the next focusable in a
-//! direction, by geometry. Ported from the webview's `input/spatial.ts`,
-//! rule for rule, so a pad moves the same way in both.
+//! direction, by geometry.
 //!
 //! Every control is a focusable element, so nothing registers itself.
 //! `data-focus-section` groups focusables; a section remembers where focus
@@ -8,7 +7,7 @@
 //! the scope, so focus never leaves an overlay.
 
 use crate::Action;
-use crate::tree::{FocusTree, Rect, closest, contains, descendants};
+use crate::tree::{FocusTree, Rect, closest, contains, find_descendant};
 use std::collections::HashMap;
 use std::hash::Hash;
 
@@ -99,21 +98,38 @@ fn outer_section<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> Option<T::No
     tree.parent(node).and_then(|parent| section(tree, parent))
 }
 
+/// Whether `node` hides its entire subtree from overlays (`hidden` or `inert`).
+fn is_inert_subtree<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> bool {
+    flag(tree, node, "hidden") || flag(tree, node, "inert")
+}
+
+/// Whether `node` hides its entire subtree from focus (`hidden`, `inert`, or
+/// `aria-hidden="true"`).
+fn is_hidden_subtree<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> bool {
+    is_inert_subtree(tree, node) || tree.attr(node, "aria-hidden") == Some("true")
+}
+
 /// Where focus may go now: the topmost overlay, else the document.
 pub fn scope<T: FocusTree + ?Sized>(tree: &T) -> T::Node {
     let root = tree.root();
-    descendants(tree, root)
-        .into_iter()
-        .filter(|&node| {
-            is_overlay(tree, node)
-                && closest(tree, node, |at| {
-                    flag(tree, at, "hidden") || flag(tree, at, "inert")
-                })
-                .is_none()
-                && has_box(tree, node)
-        })
-        .last()
-        .unwrap_or(root)
+    if closest(tree, root, |at| is_inert_subtree(tree, at)).is_some() {
+        return root;
+    }
+    fn walk<T: FocusTree + ?Sized>(tree: &T, node: T::Node, last: &mut T::Node) {
+        tree.visit_children(node, &mut |child| {
+            if is_inert_subtree(tree, child) {
+                return true;
+            }
+            if is_overlay(tree, child) && has_box(tree, child) {
+                *last = child;
+            }
+            walk(tree, child, last);
+            true
+        });
+    }
+    let mut last = root;
+    walk(tree, root, &mut last);
+    last
 }
 
 /// Whether a dialog or popover is open.
@@ -121,21 +137,14 @@ pub fn has_overlay<T: FocusTree + ?Sized>(tree: &T) -> bool {
     scope(tree) != tree.root()
 }
 
-/// Whether focus can stop on `node`.
-pub fn is_focusable<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> bool {
-    if !contains(tree, tree.root(), node) || !takes_focus(tree, node) {
+/// Node-local focusability checks (everything except document membership,
+/// ancestor visibility and layout box).
+fn is_focusable_local<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> bool {
+    if !takes_focus(tree, node) {
         return false;
     }
     // A Tab stop that isn't a place to go by direction (a scroll box).
     if tree.attr(node, "data-spatial") == Some("skip") {
-        return false;
-    }
-    let hidden = closest(tree, node, |at| {
-        flag(tree, at, "hidden")
-            || flag(tree, at, "inert")
-            || tree.attr(at, "aria-hidden") == Some("true")
-    });
-    if hidden.is_some() {
         return false;
     }
     if flag(tree, node, "disabled") || tree.attr(node, "aria-disabled") == Some("true") {
@@ -144,6 +153,17 @@ pub fn is_focusable<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> bool {
     // Programmatic-only targets (dialogs, scroll boxes) aren't stops; a
     // visually hidden input is, when it is the control.
     if tree.attr(node, "tabindex") == Some("-1") && !is_item(tree, node) {
+        return false;
+    }
+    true
+}
+
+/// Whether focus can stop on `node`.
+pub fn is_focusable<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> bool {
+    if !contains(tree, tree.root(), node) || !is_focusable_local(tree, node) {
+        return false;
+    }
+    if closest(tree, node, |at| is_hidden_subtree(tree, at)).is_some() {
         return false;
     }
     // Hidden inputs count by the box that stands for them.
@@ -171,12 +191,62 @@ pub fn stand_in<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> T::Node {
     node
 }
 
+/// Visits focusables inside `within` in document order, pruning `hidden`,
+/// `inert` and `aria-hidden="true"` subtrees on descent. Stops early if
+/// `visit` returns `false`.
+fn visit_focusables<T: FocusTree + ?Sized>(
+    tree: &T,
+    within: T::Node,
+    mut visit: impl FnMut(T::Node) -> bool,
+) {
+    if !contains(tree, tree.root(), within)
+        || closest(tree, within, |at| is_hidden_subtree(tree, at)).is_some()
+    {
+        return;
+    }
+    fn walk<T: FocusTree + ?Sized, F: FnMut(T::Node) -> bool>(
+        tree: &T,
+        node: T::Node,
+        visit: &mut F,
+        keep_going: &mut bool,
+    ) {
+        tree.visit_children(node, &mut |child| {
+            if is_hidden_subtree(tree, child) {
+                return true;
+            }
+            if is_focusable_local(tree, child)
+                && has_box(tree, stand_in(tree, child))
+                && !visit(child)
+            {
+                *keep_going = false;
+                return false;
+            }
+            walk(tree, child, visit, keep_going);
+            *keep_going
+        });
+    }
+    let mut keep_going = true;
+    walk(tree, within, &mut visit, &mut keep_going);
+}
+
 /// The focusables inside `within`, in document order.
 pub fn focusables<T: FocusTree + ?Sized>(tree: &T, within: T::Node) -> Vec<T::Node> {
-    descendants(tree, within)
-        .into_iter()
-        .filter(|&node| is_focusable(tree, node))
-        .collect()
+    let mut found = Vec::new();
+    visit_focusables(tree, within, |node| {
+        found.push(node);
+        true
+    });
+    found
+}
+
+/// The first focusable inside `within`, in document order.
+pub fn first_focusable<T: FocusTree + ?Sized>(tree: &T, within: T::Node) -> Option<T::Node> {
+    let mut found = None;
+    visit_focusables(tree, within, |node| {
+        found = Some(node);
+        false
+    });
+    found
 }
 
 /// `node`'s box, by its stand-in.
@@ -364,9 +434,7 @@ fn outermost<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> Option<T::Node> 
 
 /// The first of `within`'s descendants with `name`.
 fn first_with<T: FocusTree + ?Sized>(tree: &T, within: T::Node, name: &str) -> Option<T::Node> {
-    descendants(tree, within)
-        .into_iter()
-        .find(|&node| tree.attr(node, name).is_some())
+    find_descendant(tree, within, |node| tree.attr(node, name).is_some())
 }
 
 /// The first of `within`'s descendants whose `name` is `value`.
@@ -376,9 +444,7 @@ fn first_where<T: FocusTree + ?Sized>(
     name: &str,
     value: &str,
 ) -> Option<T::Node> {
-    descendants(tree, within)
-        .into_iter()
-        .find(|&node| tree.attr(node, name) == Some(value))
+    find_descendant(tree, within, |node| tree.attr(node, name) == Some(value))
 }
 
 /// Section memory: where focus last was in each section.
@@ -517,7 +583,7 @@ impl<N: Copy + Eq + Hash> Spatial<N> {
                 first_with(tree, within, "data-focus-default")
                     .filter(|&preferred| is_focusable(tree, preferred))
             })
-            .or_else(|| focusables(tree, within).into_iter().next())
+            .or_else(|| first_focusable(tree, within))
     }
 }
 
@@ -536,13 +602,22 @@ pub fn mark<T: FocusTree + ?Sized>(tree: &T, node: T::Node) -> FocusMark {
         .and_then(|keyed| tree.attr(keyed, "data-focus-key"))
         .map(str::to_owned);
     let around = section(tree, node);
-    let list = focusables(tree, around.unwrap_or(tree.root()));
+    let mut count = 0;
+    let mut index = None;
+    visit_focusables(tree, around.unwrap_or(tree.root()), |at| {
+        if at == node {
+            index = Some(count);
+            return false;
+        }
+        count += 1;
+        true
+    });
     FocusMark {
         key,
         section: around
             .and_then(|around| tree.attr(around, "data-focus-section"))
             .map(str::to_owned),
-        index: list.iter().position(|&at| at == node),
+        index,
     }
 }
 
@@ -554,7 +629,7 @@ pub fn find<T: FocusTree + ?Sized>(tree: &T, at: &FocusMark) -> Option<T::Node> 
         let found = if is_focusable(tree, keyed) {
             Some(keyed)
         } else {
-            focusables(tree, keyed).into_iter().next()
+            first_focusable(tree, keyed)
         };
         if found.is_some() {
             return found;
@@ -564,5 +639,16 @@ pub fn find<T: FocusTree + ?Sized>(tree: &T, at: &FocusMark) -> Option<T::Node> 
         Some(name) => first_where(tree, root, "data-focus-section", name)?,
         None => root,
     };
-    focusables(tree, around).get(at.index?).copied()
+    let target = at.index?;
+    let mut count = 0;
+    let mut found = None;
+    visit_focusables(tree, around, |node| {
+        if count == target {
+            found = Some(node);
+            return false;
+        }
+        count += 1;
+        true
+    });
+    found
 }

@@ -1,5 +1,4 @@
-//! A scan's results to review before they're added (the webview's
-//! `ScanReview`).
+//! A scan's results to review before they're added.
 
 use super::*;
 use std::rc::Rc;

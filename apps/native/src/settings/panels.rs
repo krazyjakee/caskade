@@ -1,5 +1,5 @@
-//! Each section's panel; Installer's is its schema (`core.installer`), as
-//! the webview's `InstallerSettings`.
+//! Each section's panel; Installer's is driven by its schema
+//! (`core.installer`).
 
 use caskade_ui_i18n::t;
 use dioxus_native::prelude::*;

@@ -33,7 +33,6 @@ mod tests;
 
 #[cfg(feature = "shots")]
 pub use art::use_cache as use_art_cache;
-#[allow(unused_imports)]
 pub use art::{SCHEME as ART_SCHEME, fetch as fetch_art, fetch_remote as fetch_remote_art};
 
 /// A game's art for a small place (a search suggestion): the 96 px
@@ -76,17 +75,14 @@ pub fn art_url_card(art: Option<&caskade_core::model::Artwork>) -> Option<String
 pub use anatomy::ANATOMY;
 pub(crate) use bulk_edit::{ListInput, TextAreaField, field_label};
 pub(crate) use grid::Game as LibraryCard;
-#[allow(unused_imports)]
 pub use grid::{Events, VirtualLibrary};
 pub(crate) use selection::use_selection_provider;
 pub(crate) use selection_bar::{AllIds, AllIdsProp, SelectionBar};
-#[allow(unused_imports)]
-pub use view::{DropInstall, LibraryView};
+pub use view::LibraryView;
 pub use window::Layout;
 pub(crate) use window::{GRID_GAP, GRID_ROW, MIN_CARD};
 
-/// A Unix time in milliseconds, as the webview's `formatDateTime` writes
-/// it.
+/// A Unix time in milliseconds, formatted in the active locale.
 pub fn date_time(ms: i64) -> String {
     caskade_ui_i18n::format::date_time(local_date_time(ms))
 }

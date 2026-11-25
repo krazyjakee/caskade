@@ -1,7 +1,6 @@
-//! One scope's lifecycle scripts (#180), as the webview's
-//! `components/scripts/ScriptsPanel`: in Settings → Scripts (global), an
-//! emulator profile and the game editor (#100). Their order and what each
-//! runs, a deliberate Test through the launch's own runner with its
+//! One scope's lifecycle scripts (#180): in Settings → Scripts (global),
+//! an emulator profile and the game editor (#100). Their order and what
+//! each runs, a deliberate Test through the launch's own runner with its
 //! output, and the order a launch takes across every scope.
 
 use caskade_core::error::ErrorReport;

@@ -214,8 +214,7 @@ async fn each_account_s_progress_shows_with_its_states_through_the_app() {
     .await;
     let achievements = Achievements::new(store.clone(), bus.clone(), Arc::new(stores.clone()));
     achievements.register_provider(Arc::new(SteamAchievements::with_base(base(&steam))));
-    achievements.register_provider(ra.clone());
-    achievements.register_linker(ra);
+    achievements.register_provider(ra);
     // The library: three Steam games and an emulated NES game.
     let mut games = vec![];
     for (title, app) in [("Portal 2", 620u32), ("Private", 10), ("No Stats", 30)] {

@@ -1,7 +1,7 @@
 //! The add-on catalogue (#181): its entries with what each means here
 //! (installed, update, compatible), its status, a refresh, and its images
-//! through the artwork cache, so nothing in the catalogue runs in the
-//! webview. Plugins and themes only.
+//! through the artwork cache, so nothing in the catalogue runs outside the
+//! sandbox. Plugins and themes only.
 use crate::error::{CommandError, report};
 use caskade_addons::{
     AddonKind, AddonOs, AppMode, CatalogueItem, CatalogueService, CatalogueStatus, HostFacts,

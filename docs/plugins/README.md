@@ -181,7 +181,7 @@ empty or fuzzy shows its English.
   view and command titles (`game.actions` included) and the settings
   schema's `title`s and `description`s in the plugin's catalog. Settings →
   Plugins, the plugin's settings page (`settings_sections`) and
-  `plugins_ui` get them translated; the manifest itself, ids and the
+  `drawn_plugins` get them translated; the manifest itself, ids and the
   stored values stay as written.
 - **Backend.** From 0.2, `host.message` and `host.plural` look text up in
   the plugin's catalog in the language in use (Rust SDK: `i18n::t`,

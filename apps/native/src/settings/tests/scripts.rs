@@ -1,7 +1,7 @@
-//! Settings → Scripts (#105), over a library in memory, as the webview's
-//! `scripts` tests: a script added, named and saved shows in the list and
-//! in the order at launch; a duplicate starts off; the order changes with
-//! Move down; Delete asks first; Test runs it through the launch's runner
+//! Settings → Scripts (#105), over a library in memory: a script added,
+//! named and saved shows in the list and in the order at launch; a
+//! duplicate starts off; the order changes with Move down; Delete asks
+//! first; Test runs it through the launch's runner
 //! and shows its output; an account that isn't an admin is refused.
 
 use crate::data::use_data_source;

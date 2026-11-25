@@ -1,7 +1,7 @@
-//! The guide quick menu (the webview's `GuideMenu.tsx`): a pad's guide
-//! button raises Caskade (`start_pads`); while a game runs, this menu then
-//! offers going back to it, stopping it, or its details. A stream from
-//! another device ends instead, and its game stops there.
+//! The guide quick menu: a pad's guide button raises Caskade (`start_pads`);
+//! while a game runs, this menu then offers going back to it, stopping it,
+//! or its details. A stream from another device ends instead, and its game
+//! stops there.
 
 use super::root::{Bind, use_input, use_input_action};
 use blitz_dom::NodeId;

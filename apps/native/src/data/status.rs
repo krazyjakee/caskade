@@ -113,7 +113,7 @@ pub fn use_notification_members(id: String, limit: ReadSignal<u32>) -> Query<Opt
     })
 }
 
-/// The feed's page size (`api/notifications.ts`'s `NOTIFICATION_PAGE`).
+/// The notification feed's page size.
 pub const NOTIFICATION_PAGE: u32 = 20;
 
 /// A change to the feed's read state.

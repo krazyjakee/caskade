@@ -4,10 +4,9 @@
 //! default; a test provides one of its own (`use_context_provider`).
 
 use super::launch::Answer;
-use crate::data::change;
+use crate::data::{change, require_services, unavailable};
 use caskade_core::db::PlaytimeBreakdown;
 use caskade_core::emulation::{ArgsOverride, EmulatorTarget, GameEmulation};
-use caskade_core::error::ErrorReport;
 use caskade_core::launch::ReleaseActions;
 use caskade_core::model::EntryActionSettings;
 use caskade_core::store_accounts::OwnedRelease;
@@ -134,16 +133,6 @@ impl PartialEq for PageData {
     }
 }
 
-fn unavailable() -> ErrorReport {
-    ErrorReport::from(caskade_ui_i18n::t!(
-        "That isn't available in this copy of Caskade."
-    ))
-}
-
-fn services() -> Result<&'static caskade_app::start::Services, ErrorReport> {
-    crate::shell::services().ok_or_else(unavailable)
-}
-
 impl PageData {
     /// The running app's; without its services, nothing is followed, no
     /// release has actions, and changes say they aren't available.
@@ -164,7 +153,10 @@ impl PageData {
             }),
             change_update: Rc::new(|entry_id, update| {
                 Box::pin(async move {
-                    let updates = services()?.updates.as_ref().ok_or_else(unavailable)?;
+                    let updates = require_services()?
+                        .updates
+                        .as_ref()
+                        .ok_or_else(unavailable)?;
                     change(async move {
                         use caskade_app::commands::updates as commands;
                         match update {
@@ -184,7 +176,7 @@ impl PageData {
             }),
             install_update: Rc::new(|entry_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     let updates = services.updates.as_ref().ok_or_else(unavailable)?;
                     change(async move {
                         caskade_app::commands::updates::game_update_install(
@@ -212,7 +204,7 @@ impl PageData {
             }),
             save_action_settings: Rc::new(|game_id, entry_id, settings| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::actions::game_action_settings_save(
                             &services.store,
@@ -228,21 +220,20 @@ impl PageData {
             }),
             separate: Rc::new(|entry_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::igdb::game_separate_entry(
                             &services.metadata,
                             &entry_id,
                         )
                         .await
-                        .map_err(ErrorReport::from)
                     })
                     .await
                 })
             }),
             emulation: Rc::new(|entry_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::emulation::emulation_game(
                             &services.emulation,
@@ -255,7 +246,7 @@ impl PageData {
             }),
             set_emulation: Rc::new(|entry_id, target, args| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::emulation::emulation_game_set(
                             &services.emulation,
@@ -289,7 +280,7 @@ impl PageData {
             }),
             owned_install: Rc::new(|entry_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::store_accounts::owned_install(
                             &services.store_accounts,
@@ -304,7 +295,7 @@ impl PageData {
             }),
             owned_cancel: Rc::new(|entry_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     caskade_app::commands::store_accounts::owned_install_cancel(
                         &services.store_accounts,
                         &entry_id,
@@ -314,7 +305,7 @@ impl PageData {
             }),
             playtime: Rc::new(|game_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::store_accounts::game_playtime(
                             &services.store,
@@ -337,7 +328,7 @@ impl PageData {
             }),
             copy_here: Rc::new(|game_id, device_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     let install = services.install.as_ref().ok_or_else(unavailable)?;
                     change(async move {
                         caskade_app::commands::copies::game_copy_here(
@@ -364,18 +355,16 @@ impl PageData {
             }),
             igdb: Rc::new(|game_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
-                        caskade_app::commands::igdb::game_igdb(&services.metadata, &game_id)
-                            .await
-                            .map_err(ErrorReport::from)
+                        caskade_app::commands::igdb::game_igdb(&services.metadata, &game_id).await
                     })
                     .await
                 })
             }),
             igdb_change: Rc::new(|game_id, what| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         use caskade_app::commands::igdb as commands;
                         let metadata = &services.metadata;
@@ -390,18 +379,15 @@ impl PageData {
                                 commands::game_igdb_refresh(metadata, &game_id).await
                             }
                         }
-                        .map_err(ErrorReport::from)
                     })
                     .await
                 })
             }),
             igdb_search: Rc::new(|query| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
-                        caskade_app::commands::igdb::igdb_search(&services.igdb, &query, 12)
-                            .await
-                            .map_err(ErrorReport::from)
+                        caskade_app::commands::igdb::igdb_search(&services.igdb, &query, 12).await
                     })
                     .await
                 })
@@ -417,7 +403,6 @@ impl PageData {
                             .map(|ratings| {
                                 ratings.map(|ratings| ratings.ratings).unwrap_or_default()
                             })
-                            .map_err(ErrorReport::from)
                     })
                     .await
                 })
@@ -452,12 +437,12 @@ impl PageData {
                         return Ok(Vec::new());
                     };
                     change(async move {
-                        caskade_core::saves::Saves::new(
-                            services.store.clone(),
-                            services.ludusavi.clone(),
+                        caskade_app::commands::saves::game_saves_state(
+                            &services.store,
+                            &services.ludusavi,
+                            &services.emulation,
+                            entry_id,
                         )
-                        .with_catalog(services.emulation.catalog())
-                        .state(&entry_id)
                         .await
                         .map(|state| {
                             state
@@ -466,14 +451,13 @@ impl PageData {
                                 .map(|location| location.spec.path)
                                 .collect()
                         })
-                        .map_err(|error| ErrorReport::from_error(&error))
                     })
                     .await
                 })
             }),
             save_restore: Rc::new(|entry_id, version_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::saves::game_saves_restore(
                             &services.save_versions,
@@ -488,7 +472,7 @@ impl PageData {
             }),
             save_choose: Rc::new(|entry_id, version_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::saves::game_saves_choose(
                             &services.save_versions,
@@ -503,7 +487,7 @@ impl PageData {
             }),
             save_reveal: Rc::new(|entry_id, location| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::saves::game_saves_reveal(
                             &services.save_versions,
@@ -551,7 +535,7 @@ impl PageData {
             }),
             achievements_refresh: Rc::new(|game_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::achievements::game_achievements_refresh(
                             &services.achievements,
@@ -565,7 +549,7 @@ impl PageData {
             }),
             achievements_cancel: Rc::new(|game_id| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::achievements::game_achievements_cancel(
                             &services.achievements,
@@ -621,7 +605,7 @@ impl PageData {
             }),
             install_port: Rc::new(|game_id, project| {
                 Box::pin(async move {
-                    let services = services()?;
+                    let services = require_services()?;
                     let install = services.install.as_ref().ok_or_else(unavailable)?;
                     change(async move {
                         caskade_app::commands::ports::game_port_install(

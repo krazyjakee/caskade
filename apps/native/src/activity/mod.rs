@@ -1,9 +1,9 @@
-//! Activity's jobs (#101), as the webview's `views/activity/`: the details
-//! refresh's card (`RefreshCard`), then every job, newest first, live from
-//! the job queue, each with its progress and what can be done with it; a
-//! followed job's questions over whatever view is open; and installing
-//! from a link, a path or a dropped file (`ingress.rs`). Notifications are
-//! the frame's (`frame/notifications.rs`).
+//! Activity's jobs (#101): the details refresh's card (`RefreshCard`),
+//! then every job, newest first, live from the job queue, each with its
+//! progress and what can be done with it; a followed job's questions over
+//! whatever view is open; and installing from a link, a path or a dropped
+//! file (`ingress.rs`). Notifications are the frame's
+//! (`frame/notifications.rs`).
 
 mod anatomy;
 mod card;

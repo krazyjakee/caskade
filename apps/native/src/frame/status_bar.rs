@@ -1,27 +1,16 @@
-//! The status bar (`shell/StatusBar.tsx`, `SyncStatusLink.tsx`,
-//! `AppUpdateLink.tsx`): what runs in the background, paired devices in
-//! reach, a new Caskade, and the version. The spinner turns in eight steps
-//! a turn (`animate-worker`), which keeps it under 2% of a core (#82).
+//! The status bar: what runs in the background, paired devices in reach, a
+//! new Caskade, and the version. The spinner turns in eight steps a turn
+//! (`animate-worker`), which keeps it under 2% of a core (#82).
 
-use crate::activity::labels::is_running;
+use crate::activity::labels::{self, is_running};
 use crate::data::status::{use_app_update, use_background, use_devices};
 use crate::router::RouteLink;
 use crate::ui::{Svg, Tooltip, icons};
 use caskade_app::commands::app_update::AppUpdatePhase;
 use caskade_core::devices::{DeviceLink, PairedDevice};
-use caskade_core::install::{JobPhase, JobSnapshot, JobStatus};
+use caskade_core::install::{JobSnapshot, JobStatus};
 use caskade_ui_i18n::{t, tn};
 use dioxus_native::prelude::*;
-
-/// A job's phase as the UI names it (`jobLabels.ts`'s `jobPhase`).
-pub fn job_phase(phase: Option<JobPhase>) -> String {
-    match phase {
-        Some(JobPhase::Download) => t!(note = "A background job's phase", "Downloading"),
-        Some(JobPhase::Install) => t!(note = "A background job's phase", "Installing"),
-        Some(JobPhase::Move) => t!(note = "A background job's phase", "Moving"),
-        None => t!(note = "A running job with no phase", "Working"),
-    }
-}
 
 /// What the status bar says, from the background tasks, the jobs and
 /// whether the background status could be read.
@@ -57,7 +46,7 @@ pub fn activity_label(
                 let phase = if job.status == JobStatus::Queued {
                     t!(note = "A job waiting for its turn", "Queued")
                 } else {
-                    job_phase(job.phase)
+                    labels::phase(job.phase)
                 };
                 t!(
                     note = "The status bar's running job: its phase, then the game",
@@ -149,7 +138,7 @@ pub fn StatusBar() -> Element {
                     Svg {
                         icon: icons::LOADER_CIRCLE,
                         part: "spinner",
-                        // Paused with ambient motion, as the webview's.
+                        // Paused with ambient motion.
                         class: "size-3.5 shrink-0 animate-worker text-accent-alt [animation-play-state:var(--cs-motion-ambient,running)] motion-reduce:animate-none",
                     }
                 }
@@ -164,7 +153,7 @@ pub fn StatusBar() -> Element {
     }
 }
 
-/// Paired devices in reach, best link first (`api/sync.ts`'s `reachable`).
+/// Paired devices in reach, best link first.
 pub fn reachable(devices: &[PairedDevice]) -> Vec<&PairedDevice> {
     let rank = |link: DeviceLink| match link {
         DeviceLink::Lan => 0,
@@ -178,15 +167,6 @@ pub fn reachable(devices: &[PairedDevice]) -> Vec<&PairedDevice> {
         .collect();
     reached.sort_by_key(|device| rank(device.link));
     reached
-}
-
-fn link_name(link: DeviceLink) -> &'static str {
-    match link {
-        DeviceLink::Lan => "lan",
-        DeviceLink::Direct => "direct",
-        DeviceLink::Relay => "relay",
-        DeviceLink::Offline => "offline",
-    }
 }
 
 /// With paired devices (#231): how many are in reach and the best way one
@@ -225,7 +205,7 @@ fn SyncStatusLink(count: usize, best: DeviceLink, syncing: bool) -> Element {
                 // Its own `data-status` says how devices are reached.
                 current: false,
                 "data-part": "sync",
-                "data-status": if syncing { "syncing" } else { link_name(best) },
+                "data-status": if syncing { "syncing" } else { best.as_str() },
                 "aria-label": label,
                 class: "flex min-w-6 shrink-0 items-center justify-center gap-1.5 rounded-sm hover:text-fg data-focus-visible:focus-ring",
                 if syncing {

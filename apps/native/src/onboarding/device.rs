@@ -1,32 +1,33 @@
-//! Set up from another device (#242, #276), as the webview's
-//! `onboarding/DeviceStep.tsx` and `GamesStep.tsx`: pair with a Caskade on
-//! this network (or by a pairing link), then bring its library over in the
-//! first sync: games, accounts with their PINs, collections, play history
-//! and the settings that sync. This device's own folders, emulators and
-//! hardware settings are asked for next, as on any first start. Nothing
-//! here needs the internet. After the folder question, the games that
-//! device has installed and that run here can be copied over the local
-//! network: nothing copies until chosen, each chosen game becomes a copy
-//! job in Activity (#233), and setup goes on while they arrive.
+//! Set up from another device (#242, #276): pair with a Caskade on this
+//! network (or by a pairing link), then bring its library over in the first
+//! sync: games, accounts with their PINs, collections, play history and the
+//! settings that sync. This device's own folders, emulators and hardware
+//! settings are asked for next, as on any first start. Nothing here needs
+//! the internet. After the folder question, the games that device has
+//! installed and that run here can be copied over the local network:
+//! nothing copies until chosen, each chosen game becomes a copy job in
+//! Activity (#233), and setup goes on while they arrive.
 
 use caskade_core::error::ErrorReport;
 use caskade_core::storage::RootSummary;
 use caskade_core::sync::offers::DeviceGame;
-use caskade_ui_data::sync::{DeviceKind, DeviceSync, DevicesStatus, IdentityStatus, PairedDevice};
+use caskade_ui_data::sync::{DeviceSync, DevicesStatus, IdentityStatus, PairedDevice};
 use caskade_ui_i18n::{format, t, tn};
 use dioxus_native::prelude::*;
 
 use super::{Continue, StepHeading};
 use crate::data::change;
 use crate::settings::use_device_sync;
-use crate::ui::icons::{CIRCLE_CHECK, GAMEPAD_2, HARD_DRIVE, LAPTOP, LINK_2, MONITOR, TV};
-use crate::ui::{Button, ButtonVariant, Checkbox, FailureNotice, NoticeVariant, Svg, TextField};
+use crate::ui::icons::{CIRCLE_CHECK, HARD_DRIVE, LINK_2};
+use crate::ui::{
+    Button, ButtonVariant, Checkbox, DeviceIcon, FailureNotice, NoticeVariant, Svg, TextField,
+};
 
 /// What a pairing link looks like, as the field's hint.
 const LINK_PLACEHOLDER: &str = "caskade://pair?…";
 
 /// The devices' status, read again on every change to them; `None` until
-/// it's read (or when it can't be), as the webview's query data.
+/// it's read (or when it can't be).
 fn use_devices_status(devices: Option<DeviceSync>) -> Signal<Option<DevicesStatus>> {
     let status = use_signal(|| None::<DevicesStatus>);
     use_hook(move || {
@@ -52,19 +53,6 @@ async fn reread(devices: &DeviceSync, mut status: Signal<Option<DevicesStatus>>)
     }
 }
 
-#[component]
-fn DeviceIcon(kind: DeviceKind, #[props(default = "size-5".to_owned())] class: String) -> Element {
-    let icon = match kind {
-        DeviceKind::Desktop => MONITOR,
-        DeviceKind::Laptop => LAPTOP,
-        DeviceKind::Handheld => GAMEPAD_2,
-        DeviceKind::Tv => TV,
-    };
-    rsx! {
-        Svg { icon, class }
-    }
-}
-
 /// Pairs with the other device and waits for its library; the pairing's
 /// codes come up in the pairing host beside it.
 #[component]
@@ -76,8 +64,7 @@ pub fn DeviceStep(on_next: EventHandler<()>) -> Element {
         if let Some(devices) = devices {
             FromDevice { devices, status, on_next }
         }
-        // The codes to compare, as the webview mounts `PairingHost` here:
-        // the app's own host isn't shown during setup.
+        // The codes to compare: the app's own host isn't shown during setup.
         if let Some(pairing) = pairing {
             crate::flows::pairing::PairingHost { pairing }
         }
@@ -354,10 +341,10 @@ pub fn GamesStep(on_next: EventHandler<()>) -> Element {
         .map(|source| source.name.clone())
         .unwrap_or_default();
     let loaded_for = games.read().as_ref().map(|(id, _)| id.clone());
-    // Before the status is read too: the webview has it from the last step.
+    // Wait until the device status is loaded before deciding whether games exist.
     let pending =
         status.read().is_none() || (source_id.is_some() && loaded_for.as_ref() != Some(&source_id));
-    // A list that can't be read shows as none, as in the webview.
+    // A list that can't be read shows as empty.
     let list: Vec<DeviceGame> = match &*games.read() {
         Some((_, Ok(list))) => list.clone(),
         _ => Vec::new(),
@@ -438,8 +425,7 @@ pub fn GamesStep(on_next: EventHandler<()>) -> Element {
             copy_error.set(None);
             spawn(async move {
                 let result = change(async move {
-                    // Without the app's services there's nothing to copy with,
-                    // as the webview without its API.
+                    // Without the app's services there's nothing to copy with.
                     let Some(services) = crate::shell::services() else {
                         return Ok(());
                     };

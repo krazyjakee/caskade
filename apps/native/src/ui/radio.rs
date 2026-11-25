@@ -1,8 +1,7 @@
-//! A radio group, as react-aria's `RadioGroup`: one tab stop (the checked
-//! radio, else the first); arrows move and check the next radio, as the
-//! APG has it; a click, Space or a pad's A checks one, and a pad moves
-//! between them spatially. No catalogued root: the view around it styles
-//! it (`data-part`).
+//! A radio group: one tab stop (the checked radio, else the first); arrows
+//! move and check the next radio, as the APG has it; a click, Space or a
+//! pad's A checks one, and a pad moves between them spatially. No catalogued
+//! root: the view around it styles it (`data-part`).
 
 use blitz_dom::NodeId;
 use dioxus_native::NodeHandle;
@@ -99,20 +98,33 @@ pub fn RadioGroup(
     }
 }
 
+/// A single roving-tabindex radio option (`role="radio"`): registers its node
+/// for arrow-key focus movement, manages hover/press/focus-visible states, and
+/// handles click, Space, and arrow keys. Callers provide visual classes,
+/// `data-part`, any extra attributes (`id`, `aria-label`, `aria-labelledby`),
+/// and inner content.
 #[component]
-fn Radio(
-    option: RadioOption,
+pub fn RadioItem(
+    value: String,
     checked: bool,
     stop: bool,
+    #[props(default)] disabled: bool,
     nodes: Signal<Vec<(String, NodeId)>>,
-    on_check: EventHandler<String>,
-    /// Where the arrows go: the enabled radios before and after.
     previous: Option<String>,
     next: Option<String>,
+    on_check: EventHandler<String>,
+    part: &'static str,
+    #[props(default)] inline_style: Option<String>,
+    class: &'static str,
+    #[props(extends = GlobalAttributes)] attributes: Vec<Attribute>,
+    children: Element,
 ) -> Element {
     let interaction = use_interaction_where(stop);
     let input = use_input();
     let arrow = use_callback(move |forward: bool| {
+        if disabled {
+            return;
+        }
         let target = if forward {
             next.clone()
         } else {
@@ -125,29 +137,27 @@ fn Radio(
             }
         }
     });
-    let label_id = use_id("radio");
-    let value = option.value.clone();
-    let disabled = option.disabled;
+    let picked = value.clone();
     let check = use_callback(move |()| {
         if !disabled && !checked {
-            on_check.call(value.clone());
+            on_check.call(picked.clone());
         }
     });
-    let mount_value = option.value.clone();
+    let mount_value = value;
     rsx! {
         div {
             role: "radio",
-            tabindex: if stop { "0" } else { "-1" },
+            tabindex: if stop && !disabled { "0" } else { "-1" },
             "aria-checked": if checked { "true" } else { "false" },
             "aria-disabled": flag(disabled),
-            "aria-labelledby": "{label_id}",
-            "data-part": "radio",
+            "data-part": part,
             "data-selected": flag(checked),
             "data-disabled": flag(disabled),
             "data-hovered": interaction.hovered(),
             "data-focus-visible": interaction.ring(),
             "data-pressed": interaction.pressed(),
-            class: "group flex items-start gap-3 text-sm data-disabled:opacity-40",
+            style: inline_style,
+            class,
             onmounted: move |event| {
                 if let Some(node) = event.data().downcast::<NodeHandle>().map(NodeHandle::node_id) {
                     let mut nodes = nodes;
@@ -162,6 +172,9 @@ fn Radio(
             onblur: move |_| interaction.blur(),
             onclick: move |_| check(()),
             onkeydown: move |event| {
+                if disabled {
+                    return;
+                }
                 let forward = match event.key() {
                     Key::Named(NamedKey::ArrowDown | NamedKey::ArrowRight) => Some(true),
                     Key::Named(NamedKey::ArrowUp | NamedKey::ArrowLeft) => Some(false),
@@ -176,6 +189,37 @@ fn Radio(
                 }
             },
             onkeyup: move |event| interaction.key_up(&event, || check(())),
+            ..attributes,
+            {children}
+        }
+    }
+}
+
+#[component]
+fn Radio(
+    option: RadioOption,
+    checked: bool,
+    stop: bool,
+    nodes: Signal<Vec<(String, NodeId)>>,
+    on_check: EventHandler<String>,
+    /// Where the arrows go: the enabled radios before and after.
+    previous: Option<String>,
+    next: Option<String>,
+) -> Element {
+    let label_id = use_id("radio");
+    rsx! {
+        RadioItem {
+            value: option.value,
+            checked,
+            stop,
+            disabled: option.disabled,
+            nodes,
+            previous,
+            next,
+            on_check,
+            part: "radio",
+            class: "group flex items-start gap-3 text-sm data-disabled:opacity-40",
+            "aria-labelledby": "{label_id}",
             span {
                 "data-part": "circle",
                 class: "mt-0.5 grid size-4.5 shrink-0 place-items-center rounded-full border border-border-strong bg-surface-base/60 transition-[border-color] duration-(--cs-motion-duration-fast) group-data-hovered:border-accent-alt/50 group-data-focus-visible:focus-ring group-data-selected:border-accent-alt",

@@ -1572,7 +1572,7 @@ State on the root:
 
 ## `account-list`
 
-Settings → Accounts, for admins: every account, with Edit and Delete. Rendered by AccountsSettings (apps/native/src/settings/accounts.rs).
+Settings → Accounts, for admins: every account, with Edit and Delete. Rendered by AccountsSettings (apps/native/src/settings/accounts/mod.rs).
 
 Root: `[data-cs="account-list"]`
 
@@ -1589,7 +1589,7 @@ Contains: [`avatar`](#avatar), [`button`](#button)
 
 ## `account-editor`
 
-The dialog that adds or changes an account: its name, avatar, role and PIN, and for a standard account what it may change and its age limit. Rendered by AccountEditor (apps/native/src/settings/accounts.rs).
+The dialog that adds or changes an account: its name, avatar, role and PIN, and for a standard account what it may change and its age limit. Rendered by AccountEditor (apps/native/src/settings/accounts/editor.rs).
 
 Root: `[data-cs="account-editor"]`
 
@@ -1602,7 +1602,7 @@ Contains: [`text-field`](#text-field), [`avatar-picker`](#avatar-picker), [`sett
 
 ## `account-profile`
 
-Settings → My profile: the signed-in account's own name, avatar and PIN. Rendered by ProfileSettings (apps/native/src/settings/accounts.rs).
+Settings → My profile: the signed-in account's own name, avatar and PIN. Rendered by ProfileSettings (apps/native/src/settings/accounts/profile.rs).
 
 Root: `[data-cs="account-profile"]`
 

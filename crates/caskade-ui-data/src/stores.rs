@@ -1,8 +1,8 @@
 //! Store accounts for Settings → Store accounts (#104): the stores that
 //! can be connected, the accounts and their health, sign-ins under way;
 //! connecting, refreshing, disconnecting and removing, through the app
-//! layer's commands as the webview's `api/storeAccounts.ts` does. Changes
-//! arrive as `StoreAccountsChanged` (`Key::Stores`).
+//! layer's commands. Changes arrive as `StoreAccountsChanged`
+//! (`Key::Stores`).
 
 use caskade_app::commands::store_accounts as commands;
 use caskade_core::{

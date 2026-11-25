@@ -1,8 +1,8 @@
-//! One launch action's fields (the webview's `gameActions/ActionForm.tsx`):
-//! its name, whether it plays the game or is a tool, what it starts, its
-//! arguments, working folder and environment, the Proton build a Windows
-//! program runs with, and how a play action's game is tracked. Nothing is
-//! typed as a command line: each argument is its own field.
+//! One launch action's fields: its name, whether it plays the game or is a
+//! tool, what it starts, its arguments, working folder and environment,
+//! the Proton build a Windows program runs with, and how a play action's
+//! game is tracked. Nothing is typed as a command line: each argument is
+//! its own field.
 
 use caskade_core::install::ProtonBuilds;
 use caskade_core::model::{ActionKind, ActionTracking, GameAction, LaunchSpec};

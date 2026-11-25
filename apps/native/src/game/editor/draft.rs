@@ -1,7 +1,6 @@
 //! The editor's unsaved changes to a game's details, field by field, and
-//! the patch they make (the webview's `gameEditor/draft.ts`). Only changed
-//! fields go in the patch, so a refresh meanwhile keeps whatever it wrote
-//! to the others.
+//! the patch they make. Only changed fields go in the patch, so a refresh
+//! meanwhile keeps whatever it wrote to the others.
 
 use caskade_core::model::{
     DateEdit, Game, GameEdit, GameEditState, GameField, ListEdit, NotesEdit, RatingEdit, TextEdit,

@@ -24,7 +24,7 @@ pub mod hash;
 
 use super::{
     AchievementCapabilities, AchievementDefinition, AchievementProvider, AchievementState,
-    FetchError, Fetched, HardcoreUnlock, LinkOutcome, ReleaseLinker, net::iso_ms,
+    FetchError, Fetched, HardcoreUnlock, LinkOutcome, net::iso_ms,
 };
 use async_trait::async_trait;
 use caskade_core::{
@@ -382,67 +382,60 @@ impl AchievementProvider for RetroAchievements {
         }
         Ok(fetched)
     }
-}
 
-#[async_trait]
-impl ReleaseLinker for RetroAchievements {
-    fn provider(&self) -> String {
-        ID.into()
-    }
-
-    fn applies(&self, entry: &GameEntry) -> bool {
+    fn can_link(&self, entry: &GameEntry) -> bool {
         matches!(&entry.launch, Some(LaunchSpec::Emulator { roms, .. }) if !roms.is_empty())
     }
 
-    async fn link(
+    async fn link_release(
         &self,
         store: &LibraryStore,
         entry: &GameEntry,
         _account: &StoreAccount,
         credentials: Option<&StoreCredentials>,
         cancel: &CancellationToken,
-    ) -> Result<LinkOutcome, FetchError> {
+    ) -> Result<Option<LinkOutcome>, FetchError> {
         let Some(LaunchSpec::Emulator {
             platform_id, roms, ..
         }) = &entry.launch
         else {
-            return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
+            return Ok(Some(LinkOutcome::Unresolved(caskade_core::tr!(
                 "not an emulated game"
-            )));
+            ))));
         };
         let Some((console, rule)) = hash::console(platform_id) else {
-            return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
+            return Ok(Some(LinkOutcome::Unresolved(caskade_core::tr!(
                 "RetroAchievements doesn't cover this system"
-            )));
+            ))));
         };
         let mut hashes = vec![];
         for rom in roms {
             let path = match rom.path(store).await {
                 Ok(path) => path,
-                Err(error) => return Ok(LinkOutcome::Unresolved(error.to_string())),
+                Err(error) => return Ok(Some(LinkOutcome::Unresolved(error.to_string()))),
             };
             match hash::hash_file(&path, rule).await {
                 Ok(hash) => hashes.push(hash),
                 Err(hash::HashError::UnsupportedSystem) => {
-                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
+                    return Ok(Some(LinkOutcome::Unresolved(caskade_core::tr!(
                         "RetroAchievements identifies this system's games by a hash Caskade doesn't compute: link the game by hand"
-                    )));
+                    ))));
                 }
                 Err(hash::HashError::Archive) => {
-                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
+                    return Ok(Some(LinkOutcome::Unresolved(caskade_core::tr!(
                         "the ROM is compressed; RetroAchievements identifies what is inside: link the game by hand"
-                    )));
+                    ))));
                 }
                 Err(hash::HashError::TooLarge) => {
-                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
+                    return Ok(Some(LinkOutcome::Unresolved(caskade_core::tr!(
                         "the ROM is too large to be a cartridge: link the game by hand"
-                    )));
+                    ))));
                 }
                 Err(hash::HashError::Read(why)) => {
-                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
+                    return Ok(Some(LinkOutcome::Unresolved(caskade_core::tr!(
                         "the ROM couldn't be read: {why}",
                         why = why
-                    )));
+                    ))));
                 }
             }
         }
@@ -466,29 +459,29 @@ impl ReleaseLinker for RetroAchievements {
                 .collect();
             match owners.as_slice() {
                 [] => {
-                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
+                    return Ok(Some(LinkOutcome::Unresolved(caskade_core::tr!(
                         "RetroAchievements doesn't know this ROM (hash {hash}): another revision, region or a modified copy",
                         hash = hash
-                    )));
+                    ))));
                 }
                 [one] => {
                     found.insert(*one);
                 }
                 _ => {
-                    return Ok(LinkOutcome::Unresolved(caskade_core::tr!(
+                    return Ok(Some(LinkOutcome::Unresolved(caskade_core::tr!(
                         "this ROM's hash belongs to more than one RetroAchievements game: link it by hand"
-                    )));
+                    ))));
                 }
             }
         }
         match found.into_iter().collect::<Vec<_>>().as_slice() {
-            [game] => Ok(LinkOutcome::Linked {
+            [game] => Ok(Some(LinkOutcome::Linked {
                 product: game.to_string(),
                 hash: hashes.join(","),
-            }),
-            _ => Ok(LinkOutcome::Unresolved(caskade_core::tr!(
+            })),
+            _ => Ok(Some(LinkOutcome::Unresolved(caskade_core::tr!(
                 "the release's ROMs are different RetroAchievements games: link it by hand"
-            ))),
+            )))),
         }
     }
 }

@@ -1,9 +1,8 @@
-//! Age limits on play (#209), as the webview's `views/game/AgeGate.tsx`: a
-//! game above the signed-in account's age limit starts only after an
-//! admin's PIN. The core decides and checks every launch; Play and a
-//! release's tool ask it first, and a launch it still refuses asks again.
-//! An approval covers one start or stays for this account and game; the
-//! core keeps it, and the PIN never stays here.
+//! Age limits on play (#209): a game above the signed-in account's age limit
+//! starts only after an admin's PIN. The core decides and checks every
+//! launch; Play and a release's tool ask it first, and a launch it still
+//! refuses asks again. An approval covers one start or stays for this
+//! account and game; the core keeps it, and the PIN never stays here.
 
 use caskade_core::igdb::IgdbAgeRating;
 use caskade_ui_data::accounts::AgeRestriction;

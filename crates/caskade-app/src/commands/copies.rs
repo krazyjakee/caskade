@@ -225,7 +225,7 @@ pub fn take_sends(
             if let Some(requests) = &requests
                 && let Err(error) = requests.queue_peer(&events, send)
             {
-                tracing::warn!(%error, "a copy from another device wasn't queued");
+                tracing::warn!(error = %error.summary, "a copy from another device wasn't queued");
             }
         });
     });

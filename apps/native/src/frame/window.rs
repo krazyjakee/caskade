@@ -1,10 +1,9 @@
-//! The window's own title bar (`shell/WindowControls.tsx`,
-//! `useWindowDrag.ts`, moved here from #87): on Windows and Linux the
-//! window has no native frame, so the top bar, the sidebar's brand and the
-//! status bar move it (a press on them, not on a control, then 4 px of
-//! travel), a double click there maximizes it, the edges resize it, and the
-//! top bar holds minimize, maximize and close. macOS keeps its traffic
-//! lights, over the top of the sidebar.
+//! The window's own title bar: on Windows and Linux the window has no native
+//! frame, so the top bar, the sidebar's brand and the status bar move it (a
+//! press on them, not on a control, then 4 px of travel), a double click
+//! there maximizes it, the edges resize it, and the top bar holds minimize,
+//! maximize and close. macOS keeps its traffic lights, over the top of the
+//! sidebar.
 
 use crate::ui::{Svg, icons};
 use blitz_dom::{BaseDocument, LocalName, NodeId};

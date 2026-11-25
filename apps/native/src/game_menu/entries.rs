@@ -1,7 +1,5 @@
-//! A game's entries as its menu and quick look read them, as the webview
-//! maps them (`api/mapping.ts`'s `mapGame`, `GameMenu.tsx`'s derived
-//! values): where each lives, whether it can launch, and which the menu's
-//! Play starts.
+//! A game's entries as its menu and quick look read them: where each
+//! lives, whether it can launch, and which the menu's Play starts.
 
 use caskade_core::model::{GameDetails, GameEntry, InstallLocation, LaunchSpec};
 use caskade_ui_i18n::t;

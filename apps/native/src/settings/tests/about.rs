@@ -1,7 +1,7 @@
-//! Settings → About (#105), as the webview's `about` tests: the app's
-//! version and build, the four credits and the way into Legal, whose
-//! sections open in place with their documents; the packages grouped by
-//! licence, a group opening on its packages and licence text; Back to
+//! Settings → About (#105): the app's version and build, the four credits
+//! and the way into Legal, whose sections open in place with their
+//! documents; the packages grouped by licence, a group opening on its
+//! packages and licence text; Back to
 //! About.
 
 use super::open;

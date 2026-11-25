@@ -1,7 +1,6 @@
-//! A game's IGDB match on its page (#100, the webview's
-//! `views/game/IgdbPanel.tsx`): what IGDB says about it, how it was
-//! matched, and the controls to refresh it, choose another IGDB game (by
-//! title or IGDB id), mark it not on IGDB, or match it again.
+//! A game's IGDB match on its page (#100): what IGDB says about it, how it
+//! was matched, and the controls to refresh it, choose another IGDB game
+//! (by title or IGDB id), mark it not on IGDB, or match it again.
 
 use super::data::{IgdbChange, use_answer, use_page_data};
 use crate::ui::{Button, ButtonSize, ButtonVariant, TextField, icons};
@@ -42,29 +41,6 @@ fn describe(game: &IgdbGame) -> String {
         .flatten()
         .collect::<Vec<_>>()
         .join(" · ")
-}
-
-/// A `YYYY-MM-DD` release date as a calendar day, without a time zone;
-/// anything else as it is.
-fn release_date(date: &str) -> String {
-    let mut parts = date.splitn(3, '-').map(|part| part.parse::<u32>().ok());
-    match (
-        parts.next().flatten(),
-        parts.next().flatten(),
-        parts.next().flatten(),
-    ) {
-        (Some(year), Some(month), Some(day)) => {
-            caskade_ui_i18n::format::day(caskade_ui_i18n::intl::DateTime {
-                year: year as i32,
-                month: month as u8,
-                day: day as u8,
-                hour: 0,
-                minute: 0,
-                second: 0,
-            })
-        }
-        _ => date.to_owned(),
-    }
 }
 
 /// Whether `text` is an IGDB id.
@@ -366,7 +342,7 @@ fn Facts(current: GameIgdb) -> Element {
             }
             if let Some(date) = game.release_date.clone() {
                 dt { class: "text-fg-subtle", {t!("Released")} }
-                dd { {release_date(&date)} }
+                dd { {caskade_ui_i18n::format::iso_day(&date)} }
             }
             if let Some(rating) = game.total_rating {
                 dt { class: "text-fg-subtle", {t!("IGDB rating")} }

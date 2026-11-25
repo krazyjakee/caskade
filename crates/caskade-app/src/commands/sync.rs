@@ -4,7 +4,7 @@
 //!
 //! Every change is admin-only in the core (`caskade_core::devices`), and the
 //! permission table here says the same. No grant or device key crosses into
-//! the webview; a `caskade://pair` link opened from outside stays here too,
+//! the UI; a `caskade://pair` link opened from outside stays here too,
 //! and pairs only when an admin accepts it in the app
 //! ([`devices_accept_opened_link`]): a web page can open such a link, so
 //! opening one must not pair by itself.

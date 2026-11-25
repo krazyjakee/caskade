@@ -1,7 +1,7 @@
-//! Pairing over any view (#226, #231), as the webview's `PairingHost`: the
-//! code of a pairing this device started or another device started, for
-//! both users to compare and confirm; and a `caskade://pair` link opened
-//! from outside, which pairs only when an admin says so here (a web page
+//! Pairing over any view (#226, #231): the code of a pairing this device
+//! started or another device started, for both users to compare and
+//! confirm; and a `caskade://pair` link opened from outside, which pairs
+//! only when an admin says so here (a web page
 //! can open such a link). Mounted in the shell, inside the input root, so a
 //! pad reaches every control; in console mode the code is large enough to
 //! read from a sofa.

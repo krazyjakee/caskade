@@ -1,6 +1,6 @@
-//! What Activity says about a job (#101), as the webview's `jobLabels.ts`
-//! and `installMapping.ts`: its kind, phase and status in words, the
-//! install ways the installer weighed, and its question with the choices.
+//! What Activity says about a job (#101): its kind, phase and status in
+//! words, the install ways the installer weighed, and its question with
+//! the choices.
 
 use caskade_core::install::{JobKind, JobPhase, JobSnapshot, JobStatus};
 use caskade_installer::{Candidate, Fidelity, Question, Strategy};
@@ -72,7 +72,7 @@ pub fn status(status: JobStatus) -> String {
     }
 }
 
-/// The webview's status names, for `data-status`.
+/// Status names for `data-status`.
 pub fn status_name(status: JobStatus) -> &'static str {
     match status {
         JobStatus::Queued => "queued",
@@ -85,15 +85,13 @@ pub fn status_name(status: JobStatus) -> &'static str {
     }
 }
 
-/// Whether `job` is under way: downloading or installing (the webview's
-/// `running`).
+/// Whether `job` is under way: downloading or installing.
 pub fn is_running(job: &JobSnapshot) -> bool {
     matches!(job.status, JobStatus::Downloading | JobStatus::Installing)
 }
 
 /// Running, queued, paused or waiting for the user: it can be cancelled,
-/// and it counts on the Activity button (`api/install.ts`'s
-/// `isActiveJob`).
+/// and it counts on the Activity button.
 pub fn is_active(job: &JobSnapshot) -> bool {
     is_running(job)
         || matches!(

@@ -1,6 +1,6 @@
 //! The notification feed (#198): pages of it, the unread count and read
 //! state. The feed lives in the core (`caskade_achievements::notifications`);
-//! `NotificationsChanged` tells the webview to read it again.
+//! `NotificationsChanged` tells the UI to read it again.
 use caskade_achievements::notifications::{MemberPage, NotificationPage, Notifications};
 use serde::{Deserialize, Serialize};
 
@@ -73,7 +73,7 @@ pub async fn notification_members(
         .map_err(|error| error.to_string())
 }
 
-/// Marks an item read up to the `version` the webview showed: a change
+/// Marks an item read up to the `version` the UI showed: a change
 /// since leaves it unread.
 pub async fn notification_mark_read(
     notifications: &Notifications,

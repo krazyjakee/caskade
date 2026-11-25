@@ -229,15 +229,11 @@ async fn install_requests_need_the_install_permission() {
     // refusals come back as the command's error.
     let pasted = || async {
         guard.check("request_install_input", &json!({"value": paste}))?;
-        request_install_input(&events, &queue, Some(&accounts), None, paste.clone())
-            .await
-            .map_err(|reason| CommandError::new(ErrorCode::Invalid, reason))
+        request_install_input(&events, &queue, Some(&accounts), None, paste.clone()).await
     };
     let dropped = || async {
         guard.check("request_dropped_install", &json!({"path": path}))?;
-        request_dropped_install(&events, &queue, path.clone())
-            .await
-            .map_err(|reason| CommandError::new(ErrorCode::Invalid, reason))
+        request_dropped_install(&events, &queue, path.clone()).await
     };
     let opened = || {
         caskade_app::deep_link::queue(

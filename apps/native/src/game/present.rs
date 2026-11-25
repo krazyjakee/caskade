@@ -1,5 +1,4 @@
-//! How a game page names a release's source and install state (the
-//! webview's `api/presentation.ts`, `formatSource` and `formatInstallState`).
+//! How a game page names a release's source and install state.
 
 use caskade_core::model::InstallState;
 use caskade_ui_i18n::{t, tp};

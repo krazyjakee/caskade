@@ -1,10 +1,9 @@
-//! A job in Activity (#101), as the webview's `JobCard`, `ProgressLine` and
-//! `JobRecovery`: its kind, phase, status and progress; Review choices,
-//! Pause and Resume a download (#131), Cancel job, Retry (as before or
-//! another install way) and Remove; why a
-//! failed install stopped and what can be done; verification results,
-//! warnings, dependencies and the install ways the installer weighed. A
-//! right click offers the card's buttons.
+//! A job in Activity (#101): its kind, phase, status and progress; Review
+//! choices, Pause and Resume a download (#131), Cancel job, Retry (as
+//! before or another install way) and Remove; why a failed install stopped
+//! and what can be done; verification results, warnings, dependencies and
+//! the install ways the installer weighed. A right click offers the card's
+//! buttons.
 
 use caskade_core::install::{JobSnapshot, JobStatus, Recovery};
 use caskade_installer::failure::{Failure, FailureStage, RecoveryAction};

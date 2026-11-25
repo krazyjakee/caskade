@@ -1,7 +1,7 @@
 [package]
 name = "caskade-app"
 version = "0.1.0"
-description = "Caskade's application layer: state, permissions, events and recovery, shared by every app shell and free of Tauri"
+description = "Caskade's application layer: state, permissions, events and recovery, shared by every app shell and free of UI toolkits"
 edition.workspace = true
 rust-version.workspace = true
 # Integration tests are declared below, not discovered from tests/.
@@ -22,8 +22,6 @@ caskade-discovery = { path = "../caskade-discovery" }
 caskade-addons = { path = "../caskade-addons" }
 # Game streaming: the managed host and client, and pairing.
 caskade-streaming = { path = "../caskade-streaming" }
-# Settings → Statistics' sampler.
-caskade-system-stats = { path = "../caskade-system-stats" }
 # The clipboard, for the on-screen keyboard's Paste and the Copy buttons a
 # pad presses: text only, and X11's clipboard on Linux.
 arboard = { version = "3.6", default-features = false }
@@ -41,8 +39,8 @@ tracing = "0.1"
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 url = "2"
-# Caskade's own updates without Tauri (`self_update.rs`): the core's HTTP
-# client settings (rustls on ring), and the release key's signatures.
+# Caskade's own updates (`self_update.rs`): the core's HTTP client settings
+# (rustls on ring), and the release key's signatures.
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream"] }
 minisign-verify = "0.3"
 base64 = "0.22"

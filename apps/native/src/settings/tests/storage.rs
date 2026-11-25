@@ -1,7 +1,7 @@
-//! Settings → Storage (#104), ported from the webview's `StoragePanel`
-//! tests, over a real storage service on a temporary folder: the locations
-//! list with their status and default; a card selects one; its label and
-//! folder template save; a folder is added; another location becomes the
+//! Settings → Storage (#104), over a real storage service on a temporary
+//! folder: the locations list with their status and default; a card
+//! selects one; its label and folder template save; a folder is added;
+//! another location becomes the
 //! default, by its button or a right click's menu; one is removed keeping
 //! its files; "always use the default" saves.
 

@@ -1,9 +1,9 @@
-//! A settings section as a view reads and changes it (the webview's
-//! `useSettings.tsx`): its value, loaded again when a SettingsChanged event
-//! names it; changes that go through the core from the latest value, so a
-//! quick second change never writes back an older snapshot; and what the
-//! section says while it loads, saves or fails ([`SettingsFeedback`],
-//! [`SettingsLoading`], [`SettingsStatus`]).
+//! A settings section as a view reads and changes it: its value, loaded
+//! again when a SettingsChanged event names it; changes that go through
+//! the core from the latest value, so a quick second change never writes
+//! back an older snapshot; and what the section says while it loads, saves
+//! or fails ([`SettingsFeedback`], [`SettingsLoading`],
+//! [`SettingsStatus`]).
 
 use std::sync::Arc;
 
@@ -90,7 +90,7 @@ impl SectionState {
         let change: Change = Arc::new(change);
         let mut last = self.last;
         last.set(Some(change.clone()));
-        self.write(Some(change));
+        self.write(change);
     }
 
     /// One field of an object section.
@@ -104,23 +104,15 @@ impl SectionState {
         });
     }
 
-    /// Puts the whole section back to its defaults.
-    #[allow(dead_code, reason = "the panels of #104 and #105 call it")]
-    pub fn reset(&self) {
-        self.write(None);
-    }
-
     /// Sends the last change again, after a failed write.
-    #[allow(dead_code, reason = "the panels of #104 and #105 call it")]
     pub fn retry(&self) {
-        let last = self.last.peek().clone();
-        if last.is_some() {
+        if let Some(last) = self.last.peek().clone() {
             self.write(last);
         }
     }
 
-    /// A change (`None`: a reset), saved in the background.
-    fn write(&self, change_to: Option<Change>) {
+    /// A change, saved in the background.
+    fn write(&self, change_to: Change) {
         let settings = self.settings.read().clone();
         let namespace = self.namespace.peek().clone();
         let mut saving = self.saving;
@@ -128,13 +120,9 @@ impl SectionState {
         let mut query = self.query;
         saving.set(true);
         spawn(async move {
-            let result = change(async move {
-                match change_to {
-                    Some(change_to) => settings.update(&namespace, |value| change_to(value)).await,
-                    None => settings.reset(&namespace).await,
-                }
-            })
-            .await;
+            let result =
+                change(async move { settings.update(&namespace, |value| change_to(value)).await })
+                    .await;
             saving.set(false);
             match result {
                 Ok(_) => save_error.set(None),

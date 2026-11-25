@@ -137,8 +137,8 @@ pub async fn queue_share_link(
     shares: &Shares,
     requests: &super::install_requests::InstallRequests,
     link: String,
-) -> Result<super::install_requests::InstallRequest, String> {
-    let info = shares.inspect(&link).await.map_err(|e| e.to_string())?;
+) -> Result<super::install_requests::InstallRequest, CommandError> {
+    let info = shares.inspect(&link).await.map_err(report)?;
     requests.queue_share(events, link, info)
 }
 
@@ -156,10 +156,7 @@ pub async fn confirm_share_collection(
 ) -> Result<caskade_core::model::Collection, CommandError> {
     crate::permissions::enforce("confirm_share_collection", serde_json::Value::default)?;
     let account = accounts.require_active().map_err(report)?;
-    requests
-        .confirm_collection(request_id, &account)
-        .await
-        .map_err(|reason| report(caskade_core::Error::Invalid(reason)))
+    requests.confirm_collection(request_id, &account).await
 }
 
 #[cfg(test)]

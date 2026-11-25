@@ -1,5 +1,4 @@
-//! What syncs between devices, and saves (the webview's `SyncChoices` and
-//! `SavesSection`).
+//! What syncs between devices, and saves.
 
 use super::*;
 

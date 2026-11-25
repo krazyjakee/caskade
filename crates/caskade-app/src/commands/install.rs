@@ -1,5 +1,6 @@
 //! Stored jobs and native input selection. Execution stays in caskade-core.
 pub use super::install_picker::InstallPicker;
+use crate::error::{CommandError, conflict, refused, report};
 use caskade_core::{
     install::{InstallService, JobAnswer, JobSnapshot},
     launch::LaunchService,
@@ -9,62 +10,56 @@ pub async fn install_start(
     state: &InstallService,
     input: String,
     root_id: Option<String>,
-) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("install_start", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
+) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("install_start", serde_json::Value::default)?;
     if input.trim().is_empty() || input.len() > 32_768 || input.contains('\0') {
-        return Err(caskade_core::tr!("input must be a nonempty path or URL"));
+        return Err(refused(caskade_core::tr!(
+            "input must be a nonempty path or URL"
+        )));
     }
-    state
-        .install(input, root_id)
-        .await
-        .map_err(|error| error.to_string())
+    state.install(input, root_id).await.map_err(report)
 }
 
 pub fn jobs_list(state: &InstallService) -> Vec<JobSnapshot> {
     state.jobs()
 }
 
-pub fn job_get(state: &InstallService, id: String) -> Result<JobSnapshot, String> {
+pub fn job_get(state: &InstallService, id: String) -> Result<JobSnapshot, CommandError> {
     state
         .job(&id)
-        .ok_or_else(|| caskade_core::tr!("This job is no longer in Activity."))
+        .ok_or_else(|| conflict(caskade_core::tr!("This job is no longer in Activity.")))
 }
 
-pub fn job_cancel(state: &InstallService, id: String) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("job_cancel", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
-    state.cancel(&id).map_err(|error| error.to_string())
+pub fn job_cancel(state: &InstallService, id: String) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("job_cancel", serde_json::Value::default)?;
+    state.cancel(&id).map_err(report)
 }
 
 /// Pauses an install or update while it downloads: it stops, keeps what
 /// it downloaded, and stays paused across restarts until resumed (#131).
-pub async fn job_pause(state: &InstallService, id: String) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("job_pause", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
-    state.pause(&id).await.map_err(|error| error.to_string())
+pub async fn job_pause(state: &InstallService, id: String) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("job_pause", serde_json::Value::default)?;
+    state.pause(&id).await.map_err(report)
 }
 
 /// Resumes a paused job from where its download stopped.
-pub async fn job_resume(state: &InstallService, id: String) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("job_resume", || serde_json::json!({ "id": id }))
-        .map_err(|refusal| refusal.summary)?;
-    state.resume(&id).await.map_err(|error| error.to_string())
+pub async fn job_resume(state: &InstallService, id: String) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("job_resume", || serde_json::json!({ "id": id }))?;
+    state.resume(&id).await.map_err(report)
 }
 
 /// Takes a finished job out of Activity. Its files stay.
-pub fn job_remove(state: &InstallService, id: String) -> Result<(), String> {
-    crate::permissions::enforce("job_remove", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
-    state.remove(&id).map_err(|error| error.to_string())
+pub fn job_remove(state: &InstallService, id: String) -> Result<(), CommandError> {
+    crate::permissions::enforce("job_remove", serde_json::Value::default)?;
+    state.remove(&id).map_err(report)
 }
 
-pub async fn choose_install_files(picker: &InstallPicker) -> Result<Vec<String>, String> {
-    (picker.files)().await
+pub async fn choose_install_files(picker: &InstallPicker) -> Result<Vec<String>, CommandError> {
+    (picker.files)().await.map_err(CommandError::from)
 }
 
-pub async fn choose_install_folder(picker: &InstallPicker) -> Result<Option<String>, String> {
-    (picker.folder)().await
+pub async fn choose_install_folder(picker: &InstallPicker) -> Result<Option<String>, CommandError> {
+    (picker.folder)().await.map_err(CommandError::from)
 }
 
 pub async fn job_answer(
@@ -72,13 +67,9 @@ pub async fn job_answer(
     id: String,
     revision: u32,
     answer: JobAnswer,
-) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("job_answer", || serde_json::json!({ "id": id }))
-        .map_err(|refusal| refusal.summary)?;
-    state
-        .answer(&id, revision, answer)
-        .await
-        .map_err(|e| e.to_string())
+) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("job_answer", || serde_json::json!({ "id": id }))?;
+    state.answer(&id, revision, answer).await.map_err(report)
 }
 
 /// Runs a stopped job again: with the alternative at `candidate_index`, or
@@ -87,13 +78,9 @@ pub async fn job_retry(
     state: &InstallService,
     id: String,
     candidate_index: Option<u32>,
-) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("job_retry", || serde_json::json!({ "id": id }))
-        .map_err(|refusal| refusal.summary)?;
-    state
-        .retry(&id, candidate_index)
-        .await
-        .map_err(|e| e.to_string())
+) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("job_retry", || serde_json::json!({ "id": id }))?;
+    state.retry(&id, candidate_index).await.map_err(report)
 }
 
 /// Recovers a failed or cancelled install or update (#158): run it again,
@@ -102,26 +89,21 @@ pub async fn job_recover(
     state: &InstallService,
     id: String,
     recovery: caskade_core::install::Recovery,
-) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("job_recover", || serde_json::json!({ "id": id }))
-        .map_err(|refusal| refusal.summary)?;
-    state
-        .recover(&id, recovery)
-        .await
-        .map_err(|e| e.to_string())
+) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("job_recover", || serde_json::json!({ "id": id }))?;
+    state.recover(&id, recovery).await.map_err(report)
 }
 
 pub async fn uninstall_game(
     state: &InstallService,
     launch: &LaunchService,
     entry_id: String,
-) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("uninstall_game", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
+) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("uninstall_game", serde_json::Value::default)?;
     state
         .uninstall(entry_id, launch.clone())
         .await
-        .map_err(|e| e.to_string())
+        .map_err(report)
 }
 
 /// Removes a game Caskade installed or handed off from the library for
@@ -131,12 +113,12 @@ pub async fn remove_game(
     state: &InstallService,
     launch: &LaunchService,
     game_id: String,
-) -> Result<Option<JobSnapshot>, crate::error::CommandError> {
+) -> Result<Option<JobSnapshot>, CommandError> {
     crate::permissions::enforce("remove_game", serde_json::Value::default)?;
     state
         .remove_game(&game_id, launch.clone())
         .await
-        .map_err(crate::error::report)
+        .map_err(report)
 }
 
 pub async fn move_game(
@@ -144,13 +126,12 @@ pub async fn move_game(
     storage: &StorageService,
     entry_id: String,
     target_root_id: String,
-) -> Result<JobSnapshot, String> {
-    crate::permissions::enforce("move_game", serde_json::Value::default)
-        .map_err(|refusal| refusal.summary)?;
+) -> Result<JobSnapshot, CommandError> {
+    crate::permissions::enforce("move_game", serde_json::Value::default)?;
     state
         .move_game(entry_id, target_root_id, storage.clone())
         .await
-        .map_err(|e| e.to_string())
+        .map_err(report)
 }
 
 /// The 7-Zip sidecar next to Caskade's executable.

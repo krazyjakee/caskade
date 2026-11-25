@@ -1,5 +1,4 @@
-//! Settings → Launchers and Installer's torrent links (#104), ported from
-//! the webview's `launchers` and `TorrentLinksSettings` tests: the
+//! Settings → Launchers and Installer's torrent links (#104): the
 //! launchers discovery finds on the fixture machine come first with where
 //! they are, each switch turns all of a launcher's sources off and on,
 //! Look again detects again, and the reset puts every launcher back; the

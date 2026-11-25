@@ -1,6 +1,6 @@
 //! One-off shares for flows (#247, #108): making a link to a game,
 //! stopping it, what a link shares, and receiving it, through the app
-//! layer's commands as the webview's `api/shares.ts` does.
+//! layer's commands.
 
 use caskade_app::commands::share_items;
 use caskade_app::commands::shares::{self, ShareCreated};

@@ -459,9 +459,9 @@ impl Input {
                 let labelled = ui.attr(node, "aria-labelledby").map(|ids| {
                     ids.split_whitespace()
                         .filter_map(|id| {
-                            caskade_ui_input::tree::descendants(ui, ui.root())
-                                .into_iter()
-                                .find(|&at| ui.attr(at, "id") == Some(id))
+                            caskade_ui_input::tree::find_descendant(ui, ui.root(), |at| {
+                                ui.attr(at, "id") == Some(id)
+                            })
                         })
                         .map(|at| ui.text(at))
                         .collect::<Vec<_>>()
@@ -799,12 +799,9 @@ pub fn use_input_action(
             slot.try_borrow_mut().is_ok_and(|mut run| run())
         }))
     });
-    {
-        let mut bindings = bindings.borrow_mut();
-        bindings.set_owner(id, bind.owner);
-        bindings.set_label(id, bind.label);
-        bindings.set_global(id, bind.global);
-    }
+    bindings
+        .borrow_mut()
+        .update(id, bind.owner, bind.label, bind.global);
     use_drop(move || bindings.borrow_mut().remove(id));
     id
 }

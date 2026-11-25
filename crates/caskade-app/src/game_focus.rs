@@ -1,7 +1,7 @@
 //! Making way for a game. When a game starts, the
 //! main window does what `core.general.onLaunch` says (stay, minimize or
 //! hide to the tray), so the window manager focuses the game. Console mode
-//! leaves the window where it is: the webview fades to black
+//! leaves the window where it is: the UI fades to black
 //! (`GameCurtain`), and the window manager gives the new game window focus
 //! over it. When the last game exits, Caskade takes focus back.
 //!

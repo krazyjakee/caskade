@@ -1,7 +1,7 @@
-//! Settings → Backup (#193, #243, #105), as the webview's `backup/`: Back
-//! up now, automatic backups, restoring a backup (one chosen here, or one a
-//! paired device keeps), and what backups hold. Admins only: a backup holds
-//! every account's data, and a restore replaces it.
+//! Settings → Backup (#193, #243, #105): Back up now, automatic backups,
+//! restoring a backup (one chosen here, or one a paired device keeps), and
+//! what backups hold. Admins only: a backup holds every account's data,
+//! and a restore replaces it.
 
 use caskade_core::error::ErrorReport;
 use caskade_ui_data::backups::{

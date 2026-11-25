@@ -1,7 +1,7 @@
-//! A game's menu items (`components/gameMenu/GameMenu.tsx`), worked out
-//! from what the game has, without a window: [`items`] lists them in the
-//! webview's order, with its conditions and wording; the host
-//! (`super::GameMenuHost`) runs the one chosen by its id.
+//! A game's menu items, worked out from what the game has, without a
+//! window: [`items`] lists them in order, with their conditions and
+//! wording; the host (`super::GameMenuHost`) runs the one chosen by its
+//! id.
 
 use super::entries::{EntryView, located, playable};
 use crate::ui::{MenuEntry, MenuItem, icons};
@@ -48,8 +48,7 @@ pub struct Facts<'a> {
 }
 
 /// The release a share link would carry: installed here, with files here,
-/// and not another device's or a store's copy (`GameMenu.tsx`'s
-/// `copyable`).
+/// and not another device's or a store's copy.
 pub fn copyable(entries: &[EntryView]) -> Option<&EntryView> {
     entries.iter().find(|entry| {
         !["peer:", "store:", "stream:"]

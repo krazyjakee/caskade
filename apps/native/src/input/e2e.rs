@@ -1,13 +1,12 @@
-//! The end-to-end harness's driver for the native app (#92, the Tauri
-//! app's `e2e.rs` ported): debug builds and the `e2e` feature only.
-//! `CASKADE_E2E_SCRIPT` names a script of controller presses; the driver
-//! feeds them to the input service as a synthetic Xbox pad (the same path
-//! real pads take: normalizer, app event, input root, bindings) and never
-//! sends a key or a pointer event. Between presses it reads the window, so
-//! a script can wait for what a player would wait for. It writes a report to
-//! `CASKADE_E2E_REPORT` and quits.
+//! The end-to-end harness's driver (#92): debug builds and the `e2e`
+//! feature only. `CASKADE_E2E_SCRIPT` names a script of controller presses;
+//! the driver feeds them to the input service as a synthetic Xbox pad (the
+//! same path real pads take: normalizer, app event, input root, bindings)
+//! and never sends a key or a pointer event. Between presses it reads the
+//! window, so a script can wait for what a player would wait for. It writes
+//! a report to `CASKADE_E2E_REPORT` and quits.
 //!
-//! Script lines (`#` starts a comment), as the Tauri harness's:
+//! Script lines (`#` starts a comment):
 //!
 //! - `press <action> [times]`: a pad button, by its action (`confirm`,
 //!   `nav.down`, `tab.next`, `guide`, …).

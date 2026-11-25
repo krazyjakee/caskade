@@ -1,6 +1,6 @@
 //! Game artwork for the grid and list: the cached thumbnails (320 px for a
 //! card, 96 px for a list row), never the full-size original, served from
-//! the artwork cache through `caskade-asset://` as the webview's are.
+//! the artwork cache through `caskade-asset://`.
 
 use blitz_traits::net::{NetHandler, Request};
 use caskade_core::artwork::ArtworkCache;
@@ -8,7 +8,7 @@ use caskade_core::model::Artwork;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
-/// The scheme, as the Tauri app registers it (`asset.rs`).
+/// The custom URI scheme for cached artwork and bundled platform renders.
 pub const SCHEME: &str = "caskade-asset";
 
 /// Which thumbnail a place shows.
@@ -76,8 +76,8 @@ pub fn fetch(request: &Request, handler: Box<dyn NetHandler>) -> Result<(), Box<
     Ok(())
 }
 
-/// The image hosts the webview's CSP lets it show (`tauri.conf.json`'s
-/// `img-src`): IGDB's covers and screenshots, and YouTube's thumbnails.
+/// The remote image hosts allowed to load through the artwork cache: IGDB's
+/// covers and screenshots, and YouTube's thumbnails.
 pub const REMOTE_IMAGE_HOSTS: [&str; 2] = ["images.igdb.com", "i.ytimg.com"];
 
 /// Serves an image from [`REMOTE_IMAGE_HOSTS`] through the artwork cache

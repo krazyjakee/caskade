@@ -1,7 +1,6 @@
-//! Games another device asks to start here (#234), as the webview's
-//! `RemotePlayHost`: each is played as Play would ([`PlayRequest`]), with
-//! this device's own account, so a launch's questions ask here. How it
-//! went goes back to the device that asked.
+//! Games another device asks to start here (#234): each is played as Play
+//! would ([`PlayRequest`]), with this device's own account, so a launch's
+//! questions ask here. How it went goes back to the device that asked.
 
 use std::sync::Arc;
 

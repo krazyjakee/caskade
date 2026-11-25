@@ -1,8 +1,7 @@
-//! A collection's commands (the webview's
-//! `components/collections/useCollectionActions.tsx`): edit, add games,
-//! pin, share and delete, as menu items, and the dialogs they open. A view
-//! takes them from [`use_collection_actions`] and renders
-//! [`CollectionActions::dialogs`] once.
+//! A collection's commands: edit, add games, pin, share and delete, as menu
+//! items, and the dialogs they open. A view takes them from
+//! [`use_collection_actions`] and renders [`CollectionActions::dialogs`]
+//! once.
 
 use super::add_games::AddGamesDialog;
 use super::delete::DeleteCollectionDialog;

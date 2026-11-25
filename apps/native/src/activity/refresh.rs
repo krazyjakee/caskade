@@ -1,7 +1,7 @@
-//! The refresh of chosen games' details in Activity (#176, moved from #99),
-//! as the webview's `RefreshCard`: how far it is, what it changed, Cancel
-//! while it runs, and retrying the games that failed or continuing a
-//! cancelled one. The library's Refresh details… starts it.
+//! The refresh of chosen games' details in Activity (#176, moved from
+//! #99): how far it is, what it changed, Cancel while it runs, and
+//! retrying the games that failed or continuing a cancelled one. The
+//! library's Refresh details… starts it.
 
 use caskade_ui_data::ErrorReport;
 use caskade_ui_i18n::{t, tn};

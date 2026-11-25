@@ -1,8 +1,7 @@
-//! Install requests (#101), as the webview's `api/installRequests.ts`: a
-//! link, path or magnet link pasted or dropped, a file dropped, a deep
-//! link, a share link or a game another device sends all wait, inert, for
-//! the user to confirm or dismiss. Nothing resolves, downloads or runs
-//! before then. New ones arrive as `InstallRequested` (`Key::Jobs`).
+//! Install requests (#101): a link, path or magnet link pasted or dropped,
+//! a file dropped, a deep link, a share link or a game another device sends
+//! all wait, inert, for the user to confirm or dismiss. Nothing resolves,
+//! downloads or runs before then. New ones arrive as `InstallRequested`.
 //!
 //! An [`InstallInbox`] is the running app's requests ([`AppInbox`]) or, in
 //! fixtures and tests, [`FakeInbox`].
@@ -74,16 +73,21 @@ impl InstallInbox for AppInbox {
             value,
         )
         .await
+        .map_err(|error| error.summary)
     }
     async fn dropped(&self, path: String) -> Result<InstallRequest> {
-        commands::request_dropped_install(&self.events, &self.requests, path).await
+        commands::request_dropped_install(&self.events, &self.requests, path)
+            .await
+            .map_err(|error| error.summary)
     }
     async fn confirm(&self, id: &str, root_id: Option<String>) -> Result<JobSnapshot> {
         let install = self
             .install
             .as_ref()
             .ok_or_else(|| caskade_core::tr!("Storage service is unavailable"))?;
-        commands::confirm_install_request(&self.requests, install, id.to_owned(), root_id).await
+        commands::confirm_install_request(&self.requests, install, id.to_owned(), root_id)
+            .await
+            .map_err(|error| error.summary)
     }
     async fn add_collection(&self, id: &str) -> Result<()> {
         caskade_app::commands::shares::confirm_share_collection(&self.requests, &self.accounts, id)
@@ -93,6 +97,7 @@ impl InstallInbox for AppInbox {
     }
     fn dismiss(&self, id: &str) -> Result<()> {
         commands::dismiss_install_request(&self.requests, id.to_owned())
+            .map_err(|error| error.summary)
     }
 }
 

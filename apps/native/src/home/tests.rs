@@ -1,7 +1,7 @@
-//! Home (#98) in the frame over the fixture library, headless, as
-//! `HomeView.test.tsx` has it: the hero is the game played last and leaves
-//! Recently Played, Resume · View details opens its page, the new games'
-//! shelves and their View all, and where a game was last played.
+//! Home (#98) in the frame over the fixture library, headless: the hero is
+//! the game played last and leaves Recently Played, Resume · View details
+//! opens its page, the new games' shelves and their View all, and where a
+//! game was last played.
 
 use super::{played_on_label, released};
 use crate::frame::tests::{ONE, Window};

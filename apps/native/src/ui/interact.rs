@@ -1,8 +1,8 @@
-//! Pointer and key state, as react-aria gives the webview's components and
-//! themes select it: `data-hovered` while a pointer is over the control,
-//! `data-pressed` while it's held (a pointer, or Space), and activation by
-//! click, Enter and Space as the WAI-ARIA APG has it. A pad's A reaches a
-//! control as a click (the input layer's), so `onclick` covers it.
+//! Pointer and key state selected by themes: `data-hovered` while a pointer
+//! is over the control, `data-pressed` while it's held (a pointer, or Space),
+//! and activation by click, Enter and Space as the WAI-ARIA APG has it. A
+//! pad's A reaches a control as a click (the input layer's), so `onclick`
+//! covers it.
 
 use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use dioxus_native::prelude::*;
@@ -36,8 +36,8 @@ pub fn use_forced() -> Forced {
     use_hook(|| try_consume_context::<Forced>().unwrap_or_default())
 }
 
-/// The attribute value for a flag: present when on, absent when off, as
-/// react-aria sets its `data-*` states.
+/// The attribute value for a flag: present (`"true"`) when on, absent when
+/// off, for `data-*` state selectors.
 pub fn flag(on: bool) -> Option<&'static str> {
     on.then_some("true")
 }

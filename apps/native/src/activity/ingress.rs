@@ -1,11 +1,11 @@
-//! Install requests (#101), as the webview's `InstallIngress` and
-//! `InstallConfirmation`: a deep link, a file dropped outside the library,
-//! a share link or a game another device sends waits, inert, until the
-//! user confirms it here; closing dismisses it and never starts a download.
-//! A confirmed install asks where it goes, then its job is followed, so a
-//! choice it needs opens where the user is. A link, magnet link or path
-//! pasted outside a text field asks the same way (#132, `crate::paste`). Dropped on the library, a file
-//! is the library's (`library/view.rs`); it still confirms here.
+//! Install requests (#101): a deep link, a file dropped outside the
+//! library, a share link or a game another device sends waits, inert,
+//! until the user confirms it here; closing dismisses it and never starts
+//! a download. A confirmed install asks where it goes, then its job is
+//! followed, so a choice it needs opens where the user is. A link, magnet
+//! link or path pasted outside a text field asks the same way (#132,
+//! `crate::paste`). Dropped on the library, a file is the library's
+//! (`library/view.rs`); it still confirms here.
 
 use caskade_app::commands::install_requests::{InputKind, InstallRequest, PeerSend};
 use caskade_core::install::dropped::{DropKind, DropPlan};

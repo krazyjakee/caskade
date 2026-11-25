@@ -1,7 +1,6 @@
 //! A game on the user's other devices (#232, #234, #235, #108): its copies
 //! there, the paired devices a copy can go to, playing it there and
-//! sending it there, through the app layer's commands as the webview's
-//! `api/sync.ts` does.
+//! sending it there, through the app layer's commands.
 
 use caskade_app::commands::{copies, remote_play, sync};
 use caskade_core::db::LibraryStore;

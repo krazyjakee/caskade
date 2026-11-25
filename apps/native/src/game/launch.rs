@@ -1,15 +1,12 @@
-//! What Play asks before a game starts (#100, the webview's
-//! `views/game/launch.tsx`, `UpdateBeforePlay.tsx`, `PlayingElsewhere.tsx`,
-//! `SavesBeforePlay.tsx`, `components/saves/SaveConflictDialog.tsx`): a
-//! newer release's offer, a warning when it's running on another device,
-//! the saves (a newer one from another device, or which to use when both
-//! played), then the launch. `game_menu::play::PlayRequest` runs them in
-//! that order for every Play: the game page's, a game's menu and card, and
-//! another device's request. [`LaunchSteps`] is what they ask the app,
-//! which a test replaces.
+//! What Play asks before a game starts (#100): a newer release's offer,
+//! a warning when it's running on another device, the saves (a newer one
+//! from another device, or which to use when both played), then the launch.
+//! `game_menu::play::PlayRequest` runs them in that order for every Play:
+//! the game page's, a game's menu and card, and another device's request.
+//! [`LaunchSteps`] is what they ask the app, which a test replaces.
 
-use crate::data::change;
 use crate::data::status::use_devices;
+use crate::data::{change, require_services, unavailable};
 use crate::ui::{Button, ButtonVariant, Dialog, RadioGroup, RadioOption};
 use caskade_app::commands::launch::LaunchOutcome;
 use caskade_app::commands::presence::PlayingElsewhere;
@@ -55,10 +52,6 @@ impl PartialEq for LaunchSteps {
     }
 }
 
-fn unavailable() -> ErrorReport {
-    ErrorReport::from(t!("That isn't available in this copy of Caskade."))
-}
-
 impl LaunchSteps {
     /// The running app's. Without its services (fixtures mode) there's
     /// nothing to offer, nobody else playing and no saves to check, and a
@@ -98,7 +91,7 @@ impl LaunchSteps {
             }),
             install_update: Rc::new(|entry_id| {
                 Box::pin(async move {
-                    let services = crate::shell::services().ok_or_else(unavailable)?;
+                    let services = require_services()?;
                     let updates = services.updates.as_ref().ok_or_else(unavailable)?;
                     change(async move {
                         caskade_app::commands::updates::game_update_install(
@@ -149,7 +142,7 @@ impl LaunchSteps {
             }),
             choose_save: Rc::new(|entry_id, version_id| {
                 Box::pin(async move {
-                    let services = crate::shell::services().ok_or_else(unavailable)?;
+                    let services = require_services()?;
                     change(async move {
                         caskade_app::commands::saves::game_saves_choose(
                             &services.save_versions,
@@ -184,8 +177,7 @@ pub fn use_launch_steps() -> LaunchSteps {
     use_hook(move || provided.unwrap_or_else(LaunchSteps::of_app))
 }
 
-/// A version, as the webview's `formatVersion`: `v1.2` for `1.2`, a tag as
-/// it is.
+/// A version label: `v1.2` for `1.2`, a non-numeric tag as it is.
 pub fn version_label(version: &str) -> String {
     if version.chars().next().is_some_and(|c| c.is_ascii_digit()) {
         format!("v{version}")

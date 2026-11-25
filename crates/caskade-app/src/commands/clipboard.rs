@@ -1,7 +1,4 @@
-//! The clipboard, for what a pad presses (#247): the on-screen keyboard's
-//! Paste and the Copy buttons. A webview reads and writes the clipboard only
-//! in answer to a click or a key, and a pad's press reaches the page as an
-//! event from the core, so these go through `arboard` (text only).
+//! The clipboard, for Copy buttons (#247): text only, through `arboard`.
 
 use std::sync::{Mutex, OnceLock};
 /// One clipboard for the app's lifetime: on X11 and Wayland, text written
@@ -9,16 +6,6 @@ use std::sync::{Mutex, OnceLock};
 fn clipboard() -> &'static Mutex<Option<arboard::Clipboard>> {
     static CLIPBOARD: OnceLock<Mutex<Option<arboard::Clipboard>>> = OnceLock::new();
     CLIPBOARD.get_or_init(|| Mutex::new(arboard::Clipboard::new().ok()))
-}
-
-/// The clipboard's text; empty when it holds none or can't be read.
-pub fn clipboard_read_text() -> String {
-    clipboard()
-        .lock()
-        .unwrap_or_else(|e| e.into_inner())
-        .as_mut()
-        .and_then(|clipboard| clipboard.get_text().ok())
-        .unwrap_or_default()
 }
 
 /// Puts `text` on the clipboard.

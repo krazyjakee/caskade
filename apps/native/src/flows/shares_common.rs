@@ -1,6 +1,5 @@
-//! Pieces the share flows share, as the webview's `components/shares`
-//! `common.tsx` and `ShareInfoDetails.tsx`: who received a share and how far
-//! each got, what a share is doing, and what a link shares.
+//! Pieces the share flows share: who received a share and how far each
+//! got, what a share is doing, and what a link shares.
 
 use caskade_ui_data::shares::{
     GameHere, ShareContents, ShareInfo, ShareReach, ShareRecipient, ShareRecord, ShareState,

@@ -1,6 +1,6 @@
 //! A game's page (#100) in the frame over the fixture library, headless,
-//! per kind of game, as `GameView.test.tsx` has them: an installed game,
-//! one that isn't, and an emulated one; the way back; and what isn't there.
+//! per kind of game: an installed game, one that isn't, and an emulated
+//! one; the way back; and what isn't there.
 
 use super::launch_tests::{Script, launches, script, started};
 use crate::frame::tests::{ONE, Window};

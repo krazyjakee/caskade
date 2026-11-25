@@ -1,9 +1,8 @@
 //! Local accounts (#202, #105): the list and who is signed in, adding,
 //! changing and deleting accounts, PINs and checking them, through the app
-//! layer's commands as the webview's `api/accounts.ts` does. Every rule is
-//! the core's; changes are made as the active account the app holds.
-//! Settings → Accounts and My profile read it; sign-in and the age gate
-//! (#106) can too.
+//! layer's commands. Every rule is the core's; changes are made as the
+//! active account the app holds. Settings → Accounts and My profile read
+//! it; sign-in and the age gate (#106) can too.
 
 use caskade_app::commands::accounts as commands;
 use caskade_core::accounts::AccountService;

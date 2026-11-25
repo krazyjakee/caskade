@@ -1,6 +1,4 @@
-//! Asks before deleting a collection (the webview's
-//! `components/collections/DeleteCollectionDialog.tsx`); its games stay in
-//! the library.
+//! Asks before deleting a collection; its games stay in the library.
 
 use crate::data::{change, use_library};
 use crate::ui::ConfirmDialog;

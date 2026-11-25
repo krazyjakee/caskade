@@ -1,6 +1,5 @@
-//! A game's achievements on its page (#100, the webview's
-//! `components/achievements/GameAchievements.tsx`): one store account's set
-//! at a time, its counts and how its last fetch went, Refresh (or Stop
+//! A game's achievements on its page (#100): one store account's set at a
+//! time, its counts and how its last fetch went, Refresh (or Stop
 //! refreshing), and every achievement with its state, progress, unlock
 //! time, hardcore unlock, rarity and points where the service gives them.
 //! Hidden achievements stay concealed until unlocked or revealed. Icons

@@ -70,7 +70,10 @@ pub async fn queue(
     let mut queued = Vec::new();
     for input in inputs {
         let result = match input {
-            Ok(input) => requests.request_and_emit(events, input).await,
+            Ok(input) => requests
+                .request_and_emit(events, input)
+                .await
+                .map_err(|error| error.summary),
             Err(error) => Err(error),
         };
         // The link may carry tokens: log the outcome, never the link.
@@ -144,7 +147,8 @@ pub async fn open(services: LinkServices<'_>, links: Vec<Url>) -> bool {
                         link.to_string(),
                     )
                     .await
-                    .map(|_| ()),
+                    .map(|_| ())
+                    .map_err(|error| error.summary),
                     Err(error) => Err(error),
                 }
             }

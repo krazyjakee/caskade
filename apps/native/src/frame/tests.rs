@@ -78,8 +78,6 @@ pub(crate) static START: std::sync::Mutex<&str> = std::sync::Mutex::new("/");
 
 fn app() -> Element {
     use_data_source(|| SOURCE.get().expect("the fixture library").clone());
-    // Files dropped on the library go to a fake install.
-    use_context_provider(crate::library::view_tests::fake_drop_install);
     // Play asks scripted steps, not the app's services.
     use_context_provider(crate::game::launch_tests::fake_steps);
     // The game page's data, scripted.

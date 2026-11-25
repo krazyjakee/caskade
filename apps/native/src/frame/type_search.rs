@@ -1,9 +1,9 @@
-//! Search from a real keyboard, RetroArch style (`shell/TypeSearch.tsx`):
-//! typing outside a text field, or `/`, opens a centred overlay that shows
-//! only the text and how many games match. In the library the games filter
-//! as it changes (within its filter and platform); anywhere else Enter
-//! opens the library on the results. Escape puts the earlier search back,
-//! and Backspace on an empty line closes it.
+//! Search from a real keyboard, RetroArch style: typing outside a text field,
+//! or `/`, opens a centred overlay that shows only the text and how many
+//! games match. In the library the games filter as it changes (within its
+//! filter and platform); anywhere else Enter opens the library on the
+//! results. Escape puts the earlier search back, and Backspace on an empty
+//! line closes it.
 
 use crate::data::use_library_page;
 use crate::input::{Bind, use_input, use_input_action};

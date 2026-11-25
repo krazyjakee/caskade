@@ -1,8 +1,8 @@
-//! A job's question (#101), as the webview's `QuestionDialog` and
-//! `JobQuestionHost`: the choices it offers, picked as a radio group, and
-//! Continue; Not now leaves the job waiting in Activity. A job the user
-//! follows (Review choices, a retry) has its questions open over whatever
-//! view is shown, each in turn, until it ends or the user puts it off.
+//! A job's question (#101): the choices it offers, picked as a radio
+//! group, and Continue; Not now leaves the job waiting in Activity. A job
+//! the user follows (Review choices, a retry) has its questions open over
+//! whatever view is shown, each in turn, until it ends or the user puts it
+//! off.
 
 use caskade_core::install::{JobAnswer, JobSnapshot, JobStatus};
 use caskade_ui_data::ErrorReport;

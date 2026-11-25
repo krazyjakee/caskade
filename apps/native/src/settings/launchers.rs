@@ -1,7 +1,6 @@
-//! Settings → Launchers (#104), as the webview's `LaunchersSettings` and
-//! `launchers.ts`: the launchers discovery looks for on this device,
-//! whether it found each, and a switch for scanning it (#48). The one
-//! place `core.launchers` changes; Discovery links here.
+//! Settings → Launchers (#104): the launchers discovery looks for on this
+//! device, whether it found each, and a switch for scanning it (#48). The
+//! one place `core.launchers` changes; Discovery links here.
 
 use caskade_app::discovery::DiscoverySnapshot;
 use caskade_ui_data::discovery::LauncherStatus;

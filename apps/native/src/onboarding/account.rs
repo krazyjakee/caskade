@@ -1,7 +1,6 @@
-//! First-run setup's last question (#207), as the webview's
-//! `AccountStep.tsx`: the admin's name, avatar and an optional PIN. The PIN
-//! can stay empty while the admin is the only account; it goes straight to
-//! the core and is never kept here.
+//! First-run setup's last question (#207): the admin's name, avatar and an
+//! optional PIN. The PIN can stay empty while the admin is the only account;
+//! it goes straight to the core and is never kept here.
 
 use caskade_core::error::ErrorReport;
 use caskade_ui_data::accounts::{Account, AccountUpdate};

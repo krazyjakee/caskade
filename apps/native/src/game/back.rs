@@ -1,5 +1,4 @@
-//! A game page's way back (#195, the webview's `views/game/BackLink.tsx`
-//! and `origin.ts`'s `returnPlace`): to the page the game was opened from,
+//! A game page's way back (#195): to the page the game was opened from,
 //! named after it ("Back to Library", a collection's, a game's or a Store
 //! game's name), or to the Library (the Store, for a Store game's page).
 
@@ -75,7 +74,7 @@ pub fn GameBackLink(
                 // A step back when the page before is the one it was
                 // opened from, so it comes back as it was left; else the
                 // page, in this one's place, so Back and the page never
-                // bounce between each other (`origin.ts`'s `useGoBack`).
+                // bounce between each other.
                 let wanted = Route::parse(&href, &Remembered::default()).href();
                 if router.previous().is_some_and(|previous| previous.href() == wanted) {
                     router.back();

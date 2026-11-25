@@ -1,7 +1,7 @@
-//! Adds a game by hand (#174), as the webview's `ManualGameDialog`: a game
-//! already on disk or behind a URI, started where it is (nothing is copied,
-//! installed or run), or a title-only record of a game Caskade can't start
-//! (a cartridge, a disc on a shelf). A game that may already be in the
+//! Adds a game by hand (#174): a game already on disk or behind a URI,
+//! started where it is (nothing is copied, installed or run), or a
+//! title-only record of a game Caskade can't start (a cartridge, a disc on
+//! a shelf). A game that may already be in the
 //! library offers to add the target to it, or to keep the new one apart.
 
 use caskade_core::manual::{DuplicateGame, DuplicateReason, ManualGame, ManualTarget};
@@ -227,8 +227,8 @@ pub fn ManualGameDialog(
                         "data-part": "target",
                         "aria-label": t!("What it starts"),
                         class: "flex flex-col gap-3 rounded-panel border border-dashed border-border-strong p-4",
-                        // As the webview's field resolves on blur: when focus
-                        // leaves the field (to Browse or the title).
+                        // Resolves on blur, when focus leaves the field
+                        // (to Browse or the title).
                         onfocusout: move |_| {
                             let value = input.peek().clone();
                             if !value.trim().is_empty() && target.peek().is_none() && !*checking.peek() {

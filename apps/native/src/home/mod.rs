@@ -1,7 +1,6 @@
-//! Home (#98, the webview's `views/home/HomeView.tsx`): the game played
-//! last as a hero with Resume · View details, then Recently Played,
-//! Recently Added and Recently Released as shelves of the library's cards,
-//! and the plugins' sections.
+//! Home (#98): the game played last as a hero with Resume · View details,
+//! then Recently Played, Recently Added and Recently Released as shelves of
+//! the library's cards, and the plugins' sections.
 
 mod anatomy;
 mod shelf_row;
@@ -124,7 +123,7 @@ fn use_games(filter: GameFilter, sort: GameSort, limit: u32) -> Query<GamePage> 
 }
 
 /// The library opened on a filter and, given one, a sort; the rest as
-/// the user left them (the webview's links).
+/// the user left them.
 fn library_href(filter: &str, sort: Option<&str>) -> String {
     match sort {
         Some(sort) => format!("/library?filter={filter}&sort={sort}"),
@@ -226,7 +225,7 @@ pub fn HomeView() -> Element {
                             }
                         }
                     },
-                    for (index, game) in shelf.into_iter().enumerate() {
+                    for (index, game) in shelf.into_iter().map(std::rc::Rc::new).enumerate() {
                         LibraryCard { key: "{game.id}", game, index, show_played_on: true, focus_first: false }
                     }
                 }
@@ -406,7 +405,7 @@ fn NewGamesShelf(
                     p { role: "alert", class: "text-fg-muted", {t!("Could not load these games.")} }
                 }
             },
-            for (index, game) in games.into_iter().enumerate() {
+            for (index, game) in games.into_iter().map(std::rc::Rc::new).enumerate() {
                 LibraryCard { key: "{game.id}", game, index, focus_first: false }
             }
         }
