@@ -777,7 +777,7 @@
         },
         {
           "name": "cookie",
-          "version": "0.18.2",
+          "version": "0.18.3",
           "ecosystem": "rust",
           "repository": "https://github.com/SergioBenitez/cookie-rs",
           "copyright": [

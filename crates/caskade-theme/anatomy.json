@@ -176,6 +176,7 @@
         "stores",
         "owned",
         "favorite",
+        "remote-device",
         "storage-availability",
         "plugins",
         "select",
@@ -199,6 +200,10 @@
         "data-storage-status": [
           "unavailable"
         ],
+        "data-device-status": [
+          "remote",
+          "offline"
+        ],
         "data-tile": [
           "small",
           "large",
@@ -215,6 +220,7 @@
         "icon",
         "title",
         "favorite",
+        "remote-device",
         "storage-availability",
         "plugins",
         "badge",
@@ -233,6 +239,10 @@
         ],
         "data-storage-status": [
           "unavailable"
+        ],
+        "data-device-status": [
+          "remote",
+          "offline"
         ],
         "data-selected": [
           "true"
@@ -1337,6 +1347,14 @@
       "states": {},
       "interaction": []
     },
+    "library-view": {
+      "parts": [
+        "toolbar",
+        "this-machine-only"
+      ],
+      "states": {},
+      "interaction": []
+    },
     "selection-bar": {
       "parts": [
         "count",
@@ -1751,6 +1769,7 @@
     "data-color-scheme",
     "data-cs",
     "data-density",
+    "data-device-status",
     "data-disabled",
     "data-dragging",
     "data-effects",
