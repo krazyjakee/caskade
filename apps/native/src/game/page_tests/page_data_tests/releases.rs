@@ -64,6 +64,14 @@ fn a_followed_install_offers_its_newer_release_and_skips_it() {
         said.contains("v1.1 is out") && said.contains("you have v1.0"),
         "{said}"
     );
+    let view = window.get("data-cs", "view");
+    window
+        .doc
+        .inner
+        .borrow_mut()
+        .scroll_to(view, 0.0, 240.0, blitz_dom::ScrollBehavior::Instant);
+    window.settle();
+    let panel = window.get("data-part", "update");
     let skip = window
         .find_in(panel, "data-part", "skip")
         .expect("Skip this version");

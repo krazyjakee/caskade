@@ -183,6 +183,13 @@ fn achievements_show_the_counts_and_hidden_ones_stay_concealed_until_revealed() 
     window.settle_until("the heading focused", |window| {
         window.focused() == window.find("id", "achievements-heading")
     });
+    let view = window.get("data-cs", "view");
+    window
+        .doc
+        .inner
+        .borrow_mut()
+        .scroll_to(view, 0.0, 240.0, blitz_dom::ScrollBehavior::Instant);
+    window.settle();
     let refresh = window.get("data-part", "refresh");
     window.click(refresh);
     window.settle_until("refreshed", |_| {
