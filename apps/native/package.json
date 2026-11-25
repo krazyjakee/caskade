@@ -9,7 +9,7 @@
     "@caskade/tokens": "workspace:*",
     "@tailwindcss/node": "^4.3.3",
     "@tailwindcss/oxide": "^4.3.3",
-    "@tauri-apps/cli": "2.12.4",
+    "@tauri-apps/cli": "2.12.6",
     "tailwindcss": "^4.3.3"
   }
 }
