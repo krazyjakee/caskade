@@ -135,7 +135,7 @@ pub fn SearchBox() -> Element {
     let active = use_active_option(
         options,
         open().is_some(),
-        field.peek().as_ref().map(NodeHandle::node_id),
+        field.read().as_ref().map(NodeHandle::node_id),
         move || show(()),
         move |index| choose.call(index),
         move || open.set(None),

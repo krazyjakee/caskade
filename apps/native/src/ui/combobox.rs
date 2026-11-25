@@ -27,9 +27,9 @@ use crate::input::{Bind, use_input_action};
 #[derive(Clone, Copy)]
 pub struct ActiveOption {
     active: Signal<usize>,
-    /// The options shown now and whether the list is open, as of the last
-    /// render (the pad's bindings outlive a render).
-    shown: CopyValue<(usize, bool)>,
+    /// The options shown now, whether the list is open, and whether the field
+    /// has mounted, as of the last render (the pad's bindings outlive a render).
+    shown: CopyValue<(usize, bool, bool)>,
     on_open: Callback<()>,
     on_choose: Callback<usize>,
     on_close: Callback<()>,
@@ -48,8 +48,8 @@ pub fn use_active_option(
     mut on_close: impl FnMut() + 'static,
 ) -> ActiveOption {
     let active = use_signal(|| 0usize);
-    let mut shown = use_hook(|| CopyValue::new((count, open)));
-    shown.set((count, open));
+    let mut shown = use_hook(|| CopyValue::new((count, open, field.is_some())));
+    shown.set((count, open, field.is_some()));
     let options = ActiveOption {
         active,
         shown,
@@ -67,6 +67,9 @@ pub fn use_active_option(
                 ..Bind::default()
             },
             move || {
+                if !(options.shown)().2 {
+                    return false;
+                }
                 options.step(forward);
                 true
             },
@@ -79,7 +82,7 @@ pub fn use_active_option(
             global: true,
             ..Bind::default()
         },
-        move || options.choose(),
+        move || (options.shown)().2 && options.choose(),
     );
     options
 }
@@ -87,7 +90,7 @@ pub fn use_active_option(
 impl ActiveOption {
     /// The active option's index, while there is one.
     pub fn index(&self) -> Option<usize> {
-        let (count, open) = (self.shown)();
+        let (count, open, _) = (self.shown)();
         (open && count > 0).then(|| (self.active)().min(count - 1))
     }
 
@@ -103,7 +106,7 @@ impl ActiveOption {
 
     /// Opens the list on its first option, or moves the active one.
     pub fn step(mut self, forward: bool) {
-        let (count, open) = (self.shown)();
+        let (count, open, _) = (self.shown)();
         if !open {
             self.active.set(0);
             self.on_open.call(());
@@ -194,7 +197,7 @@ pub fn Combobox(
     let active = use_active_option(
         matches.len(),
         open().is_some(),
-        field.peek().as_ref().map(NodeHandle::node_id),
+        field.read().as_ref().map(NodeHandle::node_id),
         show,
         move |index| {
             if let Some((value, label)) = chosen.get(index) {

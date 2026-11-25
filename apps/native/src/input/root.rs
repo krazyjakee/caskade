@@ -901,7 +901,11 @@ pub fn InputRoot(
         input
     });
     use_resized(&input);
-    if input.inner.dispatcher.borrow().console != console {
+    // Only push prop changes: ModeRoot (a child) calls `set_console` directly
+    // while `InputRoot`'s own prop stays `false`, so re-rendering `InputRoot`
+    // when `input.active()` flips must not clobber console mode back off.
+    let prop_console = use_hook(|| Cell::new(console));
+    if prop_console.replace(console) != console {
         input.set_console(console);
     }
     let on_key = input.clone();

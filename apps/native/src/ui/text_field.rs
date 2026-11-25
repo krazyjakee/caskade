@@ -107,7 +107,7 @@ pub fn TextField(
             menu.set(Some(anchor));
         }
     };
-    let node = field.peek().as_ref().map(NodeHandle::node_id);
+    let node = field.read().as_ref().map(NodeHandle::node_id);
     use_input_action(
         Action::Menu,
         Bind {

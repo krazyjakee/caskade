@@ -264,3 +264,23 @@ fn home_is_driven_by_keys_alone() {
         matches!(window.route(), Route::Library(_))
     });
 }
+
+#[test]
+fn pad_down_from_hero_play_reaches_recently_played_view_all() {
+    use caskade_ui_input::Action;
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = home();
+    let hero = window.get("data-cs", "hero");
+    let play = window.find_in(hero, "data-part", "primary-action").unwrap();
+    window.focus(play);
+    assert_eq!(window.focused(), Some(play));
+    window.pad(Action::NavDown);
+    let focused = window.focused().expect("something focused after NavDown");
+    assert_eq!(
+        window.text(focused).trim(),
+        "View all",
+        "focused was {:?}",
+        window.text(focused)
+    );
+}

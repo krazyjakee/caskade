@@ -673,3 +673,33 @@ fn focus_handed_back_to_a_control_that_went_does_nothing() {
     ui.focus(card, true);
     assert_eq!(ui.focused(), before, "focus stays where it was");
 }
+
+fn child_console_app() -> Element {
+    rsx! {
+        InputRoot { ChildConsole {} }
+    }
+}
+
+#[component]
+fn ChildConsole() -> Element {
+    let input = use_input();
+    use_effect(move || input.set_console(true));
+    rsx! {
+        div { "data-focus-section": "main",
+            button {
+                "data-focus-default": "true",
+                style: at(0, 0, 140, 40),
+                "Play"
+            }
+        }
+    }
+}
+
+#[test]
+fn child_set_console_survives_input_root_rerender() {
+    let _one = caskade_core::lock(&ONE_WINDOW);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let mut window = Window::open_with(child_console_app);
+    window.settle();
+    assert_eq!(window.focused(), "Play");
+}
