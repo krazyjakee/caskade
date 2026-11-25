@@ -170,19 +170,26 @@ jobs:
           else
             prerelease=false
             [[ "$VERSION" == *-* ]] && prerelease=true
-            body=$(cat <<'BODY'
-          Which file to download:
+            notes=$(python3 scripts/changelog-notes.py --allow-unreleased "$VERSION")
+            downloads=$(cat <<'BODY'
+          ## Downloads
 
           - Windows: `Caskade_@VERSION@_x64-setup.exe`
           - macOS: `Caskade_@VERSION@_aarch64.dmg` (Apple silicon) or `Caskade_@VERSION@_x64.dmg` (Intel)
           - Linux: `Caskade_@VERSION@_amd64.AppImage`, or `Caskade_@VERSION@_amd64.deb` for Debian and Ubuntu
+          - Checksums: `SHA256SUMS`
 
           The Windows install, the macOS app, the AppImage and the .deb update themselves from inside Caskade (the .deb asks for your password once). A .deb of 0.1.1 or earlier doesn't: install this .deb over it once.
 
           The macOS app is signed and notarized by Apple. The Windows installer and the Caskade it installs are code-signed.
           BODY
             )
-            body=${body//@VERSION@/$VERSION}
+            downloads=${downloads//@VERSION@/$VERSION}
+            if [ -n "$notes" ]; then
+              body=$(printf '%s\n\n%s\n' "$notes" "$downloads")
+            else
+              body="$downloads"
+            fi
             id=$(gh api "repos/$REPO/releases" \
               -f tag_name="$TAG" -f name="Caskade $VERSION" -f body="$body" \
               -F draft=true -F prerelease="$prerelease" --jq .id)
@@ -354,6 +361,18 @@ jobs:
             echo "Signed $file"
           done
 
+      - name: Write SHA256SUMS
+        working-directory: ${{ runner.temp }}/release
+        run: |
+          shopt -s nullglob
+          files=(*.AppImage *.deb *-setup.exe *.dmg *.app.tar.gz)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error title=SHA256SUMS::No release bundles found to hash."
+            exit 1
+          fi
+          LC_ALL=C printf '%s\n' "${files[@]}" | sort | xargs sha256sum > SHA256SUMS
+          cat SHA256SUMS
+
       # The plain platform key, which the updater falls back to, and one per
       # bundle type (self_update.rs, Bundle::platforms). Windows prefers NSIS.
       - name: Write latest.json
@@ -361,9 +380,11 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           VERSION: ${{ needs.prepare.outputs.version }}
+          CHANGELOG: ${{ github.workspace }}/CHANGELOG.md
+          NOTES_SCRIPT: ${{ github.workspace }}/scripts/changelog-notes.py
         run: |
           python3 - <<'PY'
-          import glob, json, os, sys
+          import glob, json, os, subprocess, sys
           from datetime import datetime, timezone
           from urllib.parse import quote
 
@@ -383,11 +404,23 @@ jobs:
                   "url": f"https://github.com/{repo}/releases/download/{tag}/{quote(name)}",
               }
 
+          notes = subprocess.check_output(
+              [
+                  sys.executable,
+                  os.environ["NOTES_SCRIPT"],
+                  "--changelog",
+                  os.environ["CHANGELOG"],
+                  "--allow-unreleased",
+                  "--plain",
+                  version,
+              ],
+              text=True,
+          ).strip()
           appimage, deb, nsis = entry("*.AppImage"), entry("*.deb"), entry("*-setup.exe")
           mac_arm, mac_x64 = entry("*_aarch64.app.tar.gz"), entry("*_x64.app.tar.gz")
           manifest = {
               "version": version,
-              "notes": "",
+              "notes": notes,
               "pub_date": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
               "platforms": {
                   "linux-x86_64": appimage,
@@ -503,6 +536,30 @@ jobs:
           mac = [platforms[p]["url"] for p in ("darwin-aarch64", "darwin-x86_64") if p in platforms]
           if len(mac) == 2 and mac[0] == mac[1]:
               errors.append("darwin-aarch64 and darwin-x86_64 point at the same file")
+          expected_notes = subprocess.check_output(
+              [sys.executable, "scripts/changelog-notes.py", "--allow-unreleased", "--plain", version],
+              text=True,
+          ).strip()
+          if expected_notes and not str(manifest.get("notes", "")).strip():
+              errors.append("latest.json has empty notes even though CHANGELOG.md has an entry for this version")
+          if "SHA256SUMS" not in assets:
+              errors.append("SHA256SUMS is missing from the draft release")
+          else:
+              sums = {}
+              for line in download("SHA256SUMS").decode().splitlines():
+                  line = line.strip()
+                  if not line:
+                      continue
+                  parts = line.split(None, 1)
+                  if len(parts) != 2 or len(parts[0]) != 64:
+                      errors.append(f"SHA256SUMS has malformed line: {line}")
+                      continue
+                  sums[parts[1].lstrip("*")] = parts[0]
+              bundle_suffixes = (".AppImage", ".deb", "-setup.exe", ".dmg", ".app.tar.gz")
+              expected_hashed = {name for name in assets if name.endswith(bundle_suffixes)}
+              missing_sums = sorted(expected_hashed - set(sums))
+              if missing_sums:
+                  errors.append(f"SHA256SUMS is missing: {', '.join(missing_sums)}")
           for error in errors:
               print(f"::error title=latest.json::{error}")
           html = json.loads(gh(f"repos/{repo}/releases/{release}"))["html_url"]

@@ -47,13 +47,15 @@ The jobs, in order:
   with a silent install (below). Only this job and `prepare` see the
   SimplySign secrets; it builds nothing and installs no project dependencies.
 - `sign` downloads the artifacts, takes the notarized macOS files and the
-  signed Windows installer in place of the build legs' unsigned ones, and signs the updater bundles with
-  `tauri signer sign` from the Tauri CLI version in `pnpm-lock.yaml`. It runs
-  no project code. It writes `latest.json` and uploads everything to the
-  draft. Only this job and `prepare` see the key.
-- `verify` reads the draft back and checks `latest.json` against it: every
-  platform's file, and that its signature is the committed key's and carries
-  the release's version.
+  signed Windows installer in place of the build legs' unsigned ones, signs the
+  updater bundles with `tauri signer sign` from the Tauri CLI version in
+  `pnpm-lock.yaml`, generates `SHA256SUMS` over all downloadable bundles,
+  writes `latest.json` (populating `notes` from `CHANGELOG.md` via
+  `scripts/changelog-notes.py`), and uploads everything to the draft. It runs
+  no project code. Only this job and `prepare` see the key.
+- `verify` reads the draft back and checks `latest.json` and `SHA256SUMS`
+  against it: every platform's file, its checksum entry, updater notes, and
+  that each signature is the committed key's and carries the release's version.
 
 To check the bundles of any commit before tagging, run the `bundles`
 workflow (Actions → bundles → Run workflow, or
@@ -293,7 +295,13 @@ Things to know:
 
 ## Cutting a release
 
-1. Set the new version in `apps/native/Cargo.toml` (`[package] version`),
+1. Move the relevant entries in `CHANGELOG.md` from `## [Unreleased]` under a
+   new `## [<version>] - YYYY-MM-DD` heading. `release.yml` extracts that
+   section via `scripts/changelog-notes.py` for both the GitHub Release body
+   and `latest.json`'s `notes` field (prerelease tags fall back to
+   `[Unreleased]` if no exact section exists).
+
+2. Set the new version in `apps/native/Cargo.toml` (`[package] version`),
    then run
    `flock /tmp/caskade-heavy.lock cargo metadata --format-version 1 > /dev/null`
    to update its entry in `Cargo.lock` (the release build uses `--locked`).
@@ -301,32 +309,32 @@ Things to know:
 
    Run `python3 scripts/check-release-metadata.py <version>` to check both
    version entries, the bundle identity and the updater key, then commit them
-   to `master`.
+   (with `CHANGELOG.md`) to `master`.
 
-2. Push `master`, then tag it:
+3. Push `master`, then tag it:
 
    ```sh
    git push origin master
-   git tag -a v0.2.0 -m "Caskade 0.2.0"
-   git push origin v0.2.0
+   git tag -a v0.2.3 -m "Caskade 0.2.3"
+   git push origin v0.2.3
    ```
 
-   A version with a suffix (`v0.2.0-beta.1`) becomes a prerelease, which the
+   A version with a suffix (`v0.2.3-beta.1`) becomes a prerelease, which the
    updater never offers.
 
-3. Watch the `release` run on GitHub. The `prepare` job fails within a minute
+4. Watch the `release` run on GitHub. The `prepare` job fails within a minute
    or two on a tag that doesn't match the version, on missing secrets or on
    a wrong key. When it's done, the run's summary links the draft.
 
-4. Review the draft: the files (`.deb`, `.AppImage`, `-setup.exe`, two
-   `.dmg`, two `.app.tar.gz`, their `.sig` files and `latest.json`), and the
-   release notes. Test the update if the release changes anything about
-   installing or starting (below).
+5. Review the draft: the files (`.deb`, `.AppImage`, `-setup.exe`, two
+   `.dmg`, two `.app.tar.gz`, their `.sig` files, `SHA256SUMS` and
+   `latest.json`), and the populated release notes. Test the update if the
+   release changes anything about installing or starting (below).
 
-5. Publish it on the release page, or:
+6. Publish it on the release page, or:
 
    ```sh
-   gh release edit v0.2.0 --repo krazyjakee/caskade --draft=false
+   gh release edit v0.2.3 --repo krazyjakee/caskade --draft=false
    ```
 
    Installed copies find it at their next check: shortly after they start,
@@ -378,10 +386,37 @@ separate from OS code signing and is always checked.
 Every bundle carries `caskade` (the native app) and `7zz`, and Windows's
 `7z.dll`, with 7-Zip's license under `licenses/`. No developer tool is
 packaged: the bundler takes only the staged executable and what
-`Tauri.toml` lists. Release builds strip debuginfo but keep symbol names, so
-panic backtraces in users' logs still name functions. That saves about 8 MB
-(`caskade-native` 222.6 → 214.6 MB on Linux); a full strip would save about
-64 MB but lose those names.
+`Tauri.toml` lists.
+
+### Binary size and release profile tradeoffs
+
+Release builds currently set `[profile.release] strip = "debuginfo"` in the
+root `Cargo.toml`, which drops DWARF debug info while keeping the `.symtab`
+symbol table so panic backtraces in users' logs still name Rust functions.
+
+- **Current baseline (`strip = "debuginfo"`, default `lto = false`, `codegen-units = 16`):**
+  drops ~8 MB compared to unstripped (`caskade-native` 222.6 → 214.6 MB on
+  Linux) while preserving readable backtraces and keeping 4-target CI release
+  link times fast (~2–4 min link step per target). Compressed installers
+  (AppImage / `.deb` / NSIS / `.dmg`) shrink the ELF/PE/Mach-O by ~65–70%.
+- **Full symbol stripping (`strip = "symbols"`):** saves ~64 MB uncompressed on
+  Linux (~150 MB binary), but removes symbol names from in-app panic logs unless
+  external split-debuginfo symbolication (`.dwp`/`.pdb`/`.dSYM` archived per
+  release + offline symbolication workflow) is maintained. Because Caskade has
+  no crash-reporting telemetry service and relies on user-shared local logs
+  (**Settings → About → Open logs folder**), keeping symbol names inline is
+  currently preferred over a crash-symbol server.
+- **Thin LTO (`lto = "thin"`):** eliminates dead generic instantiations across
+  `stylo`, `wasmtime`, `iroh`, and `vello` (typically 15–25% smaller text
+  sections with modest ~1.3–1.8× link-time overhead and good runtime speed).
+  **Fat LTO + `codegen-units = 1`** squeezes slightly further (~5–10% beyond
+  thin LTO) at the cost of much higher CI runner RAM and multi-minute single-threaded
+  linking, which risks OOM or timeouts on macOS/Windows GitHub runners.
+- **Recommendation:** keep `strip = "debuginfo"` until an external
+  symbolication workflow is warranted; evaluate enabling `lto = "thin"` on
+  a dedicated release-profile PR measured across all four CI legs (Linux,
+  Windows, macOS arm64/x64) to verify runner RAM and link times before changing
+  the release profile.
 
 ## Testing an update before publishing
 
