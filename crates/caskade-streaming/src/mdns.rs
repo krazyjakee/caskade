@@ -99,7 +99,7 @@ pub async fn browse(target: SocketAddr, wait: Duration) -> Result<Vec<Found>> {
     let from = if target.ip().is_loopback() {
         vec![Ipv4Addr::LOCALHOST]
     } else {
-        networks()
+        networks().await
     };
     browse_from(target, &from, wait).await
 }
@@ -111,15 +111,20 @@ const NETWORKS_FOR: Duration = Duration::from_secs(30);
 
 /// This machine's addresses on the networks a question can leave by, as
 /// listed at most [`NETWORKS_FOR`] ago.
-fn networks() -> Vec<Ipv4Addr> {
+async fn networks() -> Vec<Ipv4Addr> {
     static LISTED: std::sync::Mutex<Option<(Instant, Vec<Ipv4Addr>)>> = std::sync::Mutex::new(None);
-    let mut listed = LISTED.lock().unwrap_or_else(|e| e.into_inner());
-    if let Some((at, addresses)) = listed.as_ref()
-        && at.elapsed() < NETWORKS_FOR
     {
-        return addresses.clone();
+        let listed = LISTED.lock().unwrap_or_else(|e| e.into_inner());
+        if let Some((at, addresses)) = listed.as_ref()
+            && at.elapsed() < NETWORKS_FOR
+        {
+            return addresses.clone();
+        }
     }
-    let addresses = list_networks();
+    let addresses = tokio::task::spawn_blocking(list_networks)
+        .await
+        .unwrap_or_default();
+    let mut listed = LISTED.lock().unwrap_or_else(|e| e.into_inner());
     *listed = Some((Instant::now(), addresses.clone()));
     addresses
 }
@@ -222,8 +227,8 @@ mod tests {
         assert!(browse_from(target, &[unusable], wait).await.is_err());
     }
 
-    #[test]
-    fn networks_leave_out_loopback() {
-        assert!(!networks().contains(&Ipv4Addr::LOCALHOST));
+    #[tokio::test]
+    async fn networks_leave_out_loopback() {
+        assert!(!networks().await.contains(&Ipv4Addr::LOCALHOST));
     }
 }

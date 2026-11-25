@@ -8,20 +8,33 @@ use icu_collator::{
 use icu_locale_core::Locale;
 use icu_normalizer::DecomposingNormalizerBorrowed;
 use std::{
+    cell::RefCell,
     cmp::Ordering,
     collections::HashMap,
-    sync::{Arc, LazyLock, RwLock},
+    sync::{
+        Arc, LazyLock, RwLock,
+        atomic::{AtomicU64, Ordering as AtomicOrdering},
+    },
 };
 use tokio::sync::watch;
 
 /// The collation's name in SQL: `ORDER BY g.sort_title COLLATE caskade_title`.
 pub(super) const TITLE: &str = "caskade_title";
 
+static NEXT_ORDER_ID: AtomicU64 = AtomicU64::new(1);
+
+thread_local! {
+    /// Per-thread cache of the most recently used `(order_id, language_gen, collators)`
+    /// so SQLite's comparison callback avoids watch/RwLock/Arc churn on every comparison.
+    static COLLATOR_CACHE: RefCell<Option<(u64, u64, Arc<Collators>)>> = const { RefCell::new(None) };
+}
+
 /// The order of titles in the core's language (`i18n::subscribe`), or in
 /// a fixed one (tests). In Swedish Å, Ä and Ö come after Z; in German Ä
 /// goes with A. Nothing indexes the collation, so a language switch
 /// changes the next query's order and nothing stored.
 pub(super) struct TitleOrder {
+    id: u64,
     fixed: Option<String>,
     language: watch::Receiver<String>,
     collators: RwLock<Arc<Collators>>,
@@ -41,6 +54,7 @@ impl TitleOrder {
         let receiver = crate::i18n::subscribe();
         let current = language.map_or_else(|| receiver.borrow().clone(), str::to_owned);
         Self {
+            id: NEXT_ORDER_ID.fetch_add(1, AtomicOrdering::Relaxed),
             fixed: language.map(str::to_owned),
             language: receiver,
             collators: RwLock::new(Arc::new(Collators::new(&current))),
@@ -71,7 +85,21 @@ impl TitleOrder {
 
     /// The collation SQLite calls.
     pub(super) fn compare(&self, a: &str, b: &str) -> Ordering {
-        self.current().order.compare(a, b)
+        let generation = if self.fixed.is_some() {
+            0
+        } else {
+            crate::i18n::generation()
+        };
+        COLLATOR_CACHE.with(|cell| {
+            let mut slot = cell.borrow_mut();
+            let hit = slot
+                .as_ref()
+                .is_some_and(|(id, cached_gen, _)| *id == self.id && *cached_gen == generation);
+            if !hit {
+                *slot = Some((self.id, generation, self.current()));
+            }
+            slot.as_ref().unwrap().2.order.compare(a, b)
+        })
     }
 }
 

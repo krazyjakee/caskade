@@ -40,6 +40,14 @@ pub trait AchievementStore {
     async fn save_achievement_sync(&self, set_id: &str, sync: &SetSync) -> Result<()>;
     /// A set's achievements in the service's order.
     async fn achievements(&self, set_id: &str) -> Result<Vec<Achievement>>;
+    /// One achievement's definition for a store account and product, without
+    /// loading the entire set.
+    async fn achievement_definition(
+        &self,
+        store_account_id: &str,
+        product_id: &str,
+        achievement_id: &str,
+    ) -> Result<Option<AchievementDefinition>>;
     /// Records a fetch, in one transaction. Definitions are replaced in the
     /// service's order. An unlock already known stays unlocked whatever the
     /// answer says. Only a `complete` answer drops achievements it doesn't
@@ -126,6 +134,25 @@ impl AchievementStore for LibraryStore {
             })
         })
         .collect()
+    }
+
+    async fn achievement_definition(
+        &self,
+        store_account_id: &str,
+        product_id: &str,
+        achievement_id: &str,
+    ) -> Result<Option<AchievementDefinition>> {
+        let row: Option<String> = sqlx::query_scalar(
+            "SELECT i.definition_json FROM achievement_items i \
+             JOIN achievement_sets s ON s.id=i.set_id \
+             WHERE s.store_account_id=? AND s.product_id=? AND i.achievement_id=? LIMIT 1",
+        )
+        .bind(store_account_id)
+        .bind(product_id)
+        .bind(achievement_id)
+        .fetch_optional(&self.pool)
+        .await?;
+        row.map(decode).transpose()
     }
 
     async fn apply_achievements(

@@ -32,33 +32,21 @@ pub async fn game_achievement_icon(
     let Some(cache) = &icons.0 else {
         return Ok(None);
     };
-    let sets = achievements
-        .sets(game_id, accounts.active_id().as_deref())
+    let Some(url) = achievements
+        .icon_url(
+            game_id,
+            accounts.active_id().as_deref(),
+            store_account_id,
+            product_id,
+            achievement_id,
+            locked,
+        )
         .await
-        .map_err(report)?;
-    let Some(definition) = sets
-        .iter()
-        .filter(|set| {
-            set.account.store_account_id == store_account_id && set.product_id == product_id
-        })
-        .flat_map(|set| &set.achievements)
-        .find(|achievement| achievement.definition.id == achievement_id)
-        .map(|achievement| &achievement.definition)
+        .map_err(report)?
     else {
         return Ok(None);
     };
-    let url = if locked {
-        definition
-            .locked_icon_url
-            .as_ref()
-            .or(definition.icon_url.as_ref())
-    } else {
-        definition.icon_url.as_ref()
-    };
-    let Some(url) = url else {
-        return Ok(None);
-    };
-    match cache.download_metadata(url).await {
+    match cache.download_metadata(&url).await {
         Ok(cached) => Ok(Some(cached)),
         Err(error) => {
             tracing::debug!(%error, game = %game_id, "achievement icon not loaded");

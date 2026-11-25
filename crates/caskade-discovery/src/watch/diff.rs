@@ -2,15 +2,7 @@
 //! share an entry (same source and key).
 
 use crate::types::GameGroup;
-use std::collections::BTreeSet;
-
-fn entry_keys(group: &GameGroup) -> BTreeSet<(&str, &str)> {
-    group
-        .entries
-        .iter()
-        .map(|entry| (entry.source.as_str(), entry.key.as_str()))
-        .collect()
-}
+use std::collections::HashMap;
 
 /// `(added, updated, removed)` going from `old` to `new`. Each old group
 /// matches at most one new group (the first that shares an entry); a new
@@ -20,16 +12,30 @@ pub fn diff(
     old: &[GameGroup],
     new: &[GameGroup],
 ) -> (Vec<GameGroup>, Vec<GameGroup>, Vec<GameGroup>) {
-    let old_keys: Vec<_> = old.iter().map(entry_keys).collect();
+    // Map each `(source, key)` to the indices of `old` groups containing it,
+    // preserving the exact lowest-index match order in O(N) instead of O(N^2).
+    let mut by_key: HashMap<(&str, &str), Vec<usize>> = HashMap::with_capacity(old.len());
+    for (index, group) in old.iter().enumerate() {
+        for entry in &group.entries {
+            by_key
+                .entry((entry.source.as_str(), entry.key.as_str()))
+                .or_default()
+                .push(index);
+        }
+    }
     let mut matched = vec![false; old.len()];
     let (mut added, mut updated) = (Vec::new(), Vec::new());
     for group in new {
-        let keys = entry_keys(group);
-        let partner = old_keys
-            .iter()
-            .enumerate()
-            .find(|(index, old)| !matched[*index] && !old.is_disjoint(&keys))
-            .map(|(index, _)| index);
+        let mut partner: Option<usize> = None;
+        for entry in &group.entries {
+            if let Some(indices) = by_key.get(&(entry.source.as_str(), entry.key.as_str())) {
+                for &index in indices {
+                    if !matched[index] && partner.is_none_or(|best| index < best) {
+                        partner = Some(index);
+                    }
+                }
+            }
+        }
         match partner {
             Some(index) => {
                 matched[index] = true;

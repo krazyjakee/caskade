@@ -19,11 +19,38 @@ use super::LibraryStore;
 /// every capture call for another.
 const UNCOUNTED: &[&str] = &["sync_changes", "sync_fields", "sync_peers", "sync_seen"];
 
+/// Tables whose mutations can change `sync_snapshot()` (excluding
+/// `play_sessions`, which gets 5-second open-session heartbeats and marks
+/// synced writes explicitly on completion/import/delete).
+const SYNCED_TABLES: &[&str] = &[
+    "games",
+    "game_entries",
+    "igdb_matches",
+    "sync_game_ids",
+    "kept_apart",
+    "artwork_choices",
+    "collections",
+    "collection_members",
+    "accounts",
+    "account_game_approvals",
+    "artwork",
+    "lifecycle_scripts",
+    "game_actions",
+    "entry_action_settings",
+    "achievement_links",
+    "plugins",
+    "settings",
+    "platform_settings",
+    "emulators",
+    "save_versions",
+];
+
 /// How many rows have changed in the library's tables since it opened:
-/// other than [`UNCOUNTED`] ones, and in all of them.
+/// other than [`UNCOUNTED`] ones, synced tables only, and all tables.
 #[derive(Debug, Default)]
 pub(crate) struct Writes {
     counted: AtomicU64,
+    synced: AtomicU64,
     all: AtomicU64,
 }
 
@@ -36,6 +63,13 @@ impl Writes {
         if !UNCOUNTED.contains(&change.table) {
             self.counted.fetch_add(1, Ordering::Relaxed);
         }
+        if SYNCED_TABLES.contains(&change.table) {
+            self.synced.fetch_add(1, Ordering::Relaxed);
+        }
+    }
+
+    pub(crate) fn mark_synced(&self) {
+        self.synced.fetch_add(1, Ordering::Relaxed);
     }
 }
 
@@ -68,6 +102,12 @@ impl LibraryStore {
     /// [`writes`](Self::writes), sync's bookkeeping included.
     pub fn all_writes(&self) -> u64 {
         self.writes.all.load(Ordering::Relaxed)
+    }
+
+    /// Writes to tables that feed `sync_snapshot()`, excluding open-session
+    /// heartbeats and local-only tables (notifications, caches, popularity, …).
+    pub fn synced_writes(&self) -> u64 {
+        self.writes.synced.load(Ordering::Relaxed)
     }
 }
 

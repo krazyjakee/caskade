@@ -111,12 +111,24 @@ impl LibraryStore {
     /// Every collection of `account`'s as its card shows it: pinned ones
     /// first, then by name.
     pub async fn collection_summaries(&self, account: &str) -> Result<Vec<CollectionSummary>> {
-        let mut out = Vec::new();
-        for collection in self.collection_list(account).await? {
+        let collections = self.collection_list(account).await?;
+        if collections.is_empty() {
+            return Ok(Vec::new());
+        }
+        let age_account = self.age_limited_account(Some(account)).await?;
+        let mut out = Vec::with_capacity(collections.len());
+        let mut tx = self.pool.begin().await?;
+        for collection in collections {
             let (request, members) = collection_query(&collection, 0, 4);
-            let (page, playtime_ms) = self
-                .list_with_collection(&request, members, false, Some(account), true)
-                .await?;
+            let (page, playtime_ms) = list_with_collection_in(
+                &mut tx,
+                &request,
+                members,
+                false,
+                age_account.as_deref(),
+                true,
+            )
+            .await?;
             out.push(CollectionSummary {
                 id: collection.id,
                 name: collection.name,
@@ -133,7 +145,23 @@ impl LibraryStore {
                     .collect(),
             });
         }
+        tx.commit().await?;
         Ok(out)
+    }
+    /// Returns `account` only if it is a standard account with an age limit
+    /// (`max_age IS NOT NULL`). Admin and unrestricted accounts skip the
+    /// per-row `EXISTS(SELECT 1 FROM accounts ...)` check completely.
+    async fn age_limited_account(&self, account: Option<&str>) -> Result<Option<String>> {
+        let Some(account) = account else {
+            return Ok(None);
+        };
+        let limited: Option<bool> = sqlx::query_scalar(
+            "SELECT role='standard' AND max_age IS NOT NULL FROM accounts WHERE id=?",
+        )
+        .bind(account)
+        .fetch_optional(&self.pool)
+        .await?;
+        Ok(limited.unwrap_or(false).then(|| account.to_owned()))
     }
     /// A page of games, and with `playtime` their total playtime (0
     /// without). A collection is its account's, so it browses as the
@@ -147,137 +175,19 @@ impl LibraryStore {
         account: Option<&str>,
         playtime: bool,
     ) -> Result<(GamePage, u64)> {
-        request.validate()?;
+        let age_account = self.age_limited_account(account).await?;
         let mut tx = self.pool.begin().await?;
-        let mut count = QueryBuilder::<Sqlite>::new("SELECT count(*),");
-        if playtime {
-            count.push("coalesce(sum(").push(PLAYTIME).push("),0)");
-        } else {
-            count.push("0");
-        }
-        count
-            .push(" FROM games g WHERE g.hidden=")
-            .push_bind(hidden);
-        filters(&mut count, request, collection, hidden);
-        age_visibility(&mut count, request, account);
-        let (total, playtime_ms): (i64, i64) = count.build_query_as().fetch_one(&mut *tx).await?;
-        // The page's ids come first, sorted by their key alone, so the full
-        // rows and their artwork are read for the page only, not for every
-        // game the offset skips (deep pages of 8,000 games: 100 ms -> 10 ms).
-        // Titles sort in the language's alphabet (#218).
-        let (key, order) = match request.sort {
-            GameSort::Popular => (
-                "(SELECT p.value FROM igdb_matches m JOIN igdb_popularity p ON p.igdb_id=m.igdb_id WHERE m.game_id=g.id)",
-                BY_KEY_THEN_TITLE,
-            ),
-            GameSort::Title => ("NULL", BY_TITLE),
-            GameSort::Recent => (RECENT, BY_KEY_THEN_TITLE),
-            GameSort::Playtime => (PLAYTIME, BY_KEY_THEN_TITLE),
-            GameSort::Added => (ADDED, " ORDER BY k DESC,g.id"),
-            GameSort::Released => (RELEASED, BY_KEY_THEN_TITLE),
-        };
-        let mut query = QueryBuilder::<Sqlite>::new("SELECT ");
-        age_blocked(&mut query, account);
-        query.push(" AS admin_pin_needed,g.record_json,");
-        query
-            .push(INSTALLED)
-            .push(" AS installed,(SELECT json_group_array(DISTINCT substr(pe.source_id,6))")
-            .push(PEER_ENTRIES)
-            .push(") AS remote_device_ids,");
-        query.push(PLAYTIME).push(" AS playtime_ms,").push(RECENT).push(" AS last_played_at_ms,").push(played_on()).push(" AS played_on,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='cover' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.id LIMIT 1) AS cover,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='icon' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.record_json->>'$.source' LIKE 'igdb:%' DESC,a.id LIMIT 1) AS icon FROM (SELECT g.id,");
-        query.push(key).push(" AS k FROM games g WHERE g.hidden=");
-        query.push_bind(hidden);
-        filters(&mut query, request, collection, hidden);
-        age_visibility(&mut query, request, account);
-        query
-            .push(order)
-            .push(" LIMIT ")
-            .push_bind(request.limit)
-            .push(" OFFSET ")
-            .push_bind(request.offset)
-            .push(") p JOIN games g ON g.id=p.id")
-            .push(order);
-        let rows = query
-            .build_query_as::<(
-                bool,
-                String,
-                bool,
-                sqlx::types::Json<Vec<String>>,
-                i64,
-                Option<i64>,
-                Option<String>,
-                Option<String>,
-                Option<String>,
-            )>()
-            .fetch_all(&mut *tx)
-            .await?;
+        let result = list_with_collection_in(
+            &mut tx,
+            request,
+            collection,
+            hidden,
+            age_account.as_deref(),
+            playtime,
+        )
+        .await?;
         tx.commit().await?;
-        // An unreadable record leaves its game out of the page, and an
-        // unreadable image leaves the game without it, rather than failing
-        // the whole library (#160).
-        let image = |text: Option<String>| {
-            text.and_then(|text| {
-                decode(text)
-                    .inspect_err(|error| tracing::warn!(%error, "library image record unreadable"))
-                    .ok()
-            })
-        };
-        let items = rows
-            .into_iter()
-            .filter_map(
-                |(
-                    admin_pin_needed,
-                    record,
-                    installed,
-                    remote_devices,
-                    duration,
-                    last,
-                    played_on,
-                    cover,
-                    icon,
-                )| {
-                    let game: Game = decode(record)
-                        .inspect_err(
-                            |error| tracing::warn!(%error, "game record unreadable; left out"),
-                        )
-                        .ok()?;
-                    Some(GameSummary {
-                        admin_pin_needed,
-                        id: game.id,
-                        title: game.title,
-                        sort_title: game.sort_title,
-                        description: game.description,
-                        genres: game.genres,
-                        tags: game.tags,
-                        release_date: game.release_date,
-                        platforms: game.platforms,
-                        favorite: game.favorite,
-                        hidden: game.hidden,
-                        rating: game.rating,
-                        cover: image(cover),
-                        icon: image(icon),
-                        installed,
-                        remote_device_ids: remote_devices.0,
-                        playtime_ms: duration as u64,
-                        last_played_at_ms: last,
-                        last_played_on: played_on.and_then(|text| {
-                            decode(text)
-                                .inspect_err(
-                                    |error| tracing::warn!(%error, "played-on device unreadable"),
-                                )
-                                .ok()
-                        }),
-                    })
-                },
-            )
-            .collect::<Vec<_>>();
-        Ok((
-            GamePage {
-                items,
-                total: total as u64,
-            },
-            playtime_ms as u64,
-        ))
+        Ok(result)
     }
     /// The platforms of the visible games in `filter`, by name, each with its
     /// games' count, playtime and last play. A game on two platforms counts
@@ -299,19 +209,31 @@ impl LibraryStore {
         account: Option<&str>,
         local_only: bool,
     ) -> Result<Vec<PlatformSummary>> {
+        let age_account = self.age_limited_account(account).await?;
         let request = ListGames {
             filter,
             local_only,
             ..Default::default()
         };
-        let mut query = QueryBuilder::<Sqlite>::new("SELECT p.value,count(*),coalesce(sum(");
-        query
-            .push(PLAYTIME)
-            .push("),0),max(")
-            .push(RECENT)
-            .push(") FROM games g, json_each(g.record_json,'$.platforms') p WHERE p.type='text' AND g.hidden=0");
+        // Aggregate per-game playtime and recency once before expanding multi-platform JSON arrays.
+        let mut query = QueryBuilder::<Sqlite>::new(
+            "WITH sess AS (SELECT game_id,sum(duration_ms) AS dur,max(started_at_ms) AS last_at \
+             FROM play_sessions GROUP BY game_id), \
+             rem AS (SELECT re.game_id,sum(r.counted_ms) AS dur,max(r.last_played_ms) AS last_at \
+             FROM remote_playtime r JOIN game_entries re ON re.id=r.entry_id GROUP BY re.game_id) \
+             SELECT p.value,count(*),coalesce(sum(coalesce(sess.dur,0)+coalesce(rem.dur,0)),0),\
+             max(CASE WHEN sess.last_at IS NULL THEN rem.last_at \
+                      WHEN rem.last_at IS NULL THEN sess.last_at \
+                      WHEN sess.last_at>=rem.last_at THEN sess.last_at \
+                      ELSE rem.last_at END) \
+             FROM games g \
+             LEFT JOIN sess ON sess.game_id=g.id \
+             LEFT JOIN rem ON rem.game_id=g.id, \
+             json_each(g.record_json,'$.platforms') p \
+             WHERE p.type='text' AND g.hidden=0",
+        );
         filters(&mut query, &request, None, false);
-        age_visibility(&mut query, &request, account);
+        age_visibility(&mut query, &request, age_account.as_deref());
         query.push(" GROUP BY p.value ORDER BY p.value COLLATE NOCASE");
         let rows = query
             .build_query_as::<(String, i64, i64, Option<i64>)>()
@@ -340,10 +262,11 @@ impl LibraryStore {
         request: &ListGames,
         account: Option<&str>,
     ) -> Result<Vec<TitleLetter>> {
+        let age_account = self.age_limited_account(account).await?;
         let mut query =
             QueryBuilder::<Sqlite>::new("SELECT g.sort_title FROM games g WHERE g.hidden=0");
         filters(&mut query, request, None, false);
-        age_visibility(&mut query, request, account);
+        age_visibility(&mut query, request, age_account.as_deref());
         query.push(BY_TITLE);
         let titles: Vec<String> = query.build_query_scalar().fetch_all(&self.pool).await?;
         Ok(self
@@ -354,6 +277,17 @@ impl LibraryStore {
             .map(|(letter, offset)| TitleLetter { letter, offset })
             .collect())
     }
+    /// IDs of games that have at least one installed non-plugin launchable release.
+    pub async fn playable_game_ids(&self) -> Result<std::collections::HashSet<String>> {
+        let rows: Vec<String> = sqlx::query_scalar(
+            "SELECT DISTINCT game_id FROM game_entries \
+             WHERE state_kind='installed' AND launch_kind IS NOT NULL AND launch_kind<>'plugin'",
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        Ok(rows.into_iter().collect())
+    }
+
     pub async fn library_stats(&self) -> Result<LibraryStats> {
         self.library_stats_for_account(None).await
     }
@@ -367,14 +301,69 @@ impl LibraryStore {
     ) -> Result<LibraryStats> {
         // Each tab's count; play time is the whole library's. Ready to
         // Install counts other devices' copies that can come here (#232).
-        let copyable = super::sync_copies::copyable_here_sql();
-        let query = format!(
-            "SELECT coalesce(sum(n),0),coalesce(sum(n AND {INSTALLED}),0),coalesce(sum(n AND g.favorite),0),coalesce(sum(n AND {RECENT} IS NOT NULL),0),coalesce(sum(n AND {EMULATED}),0),coalesce(sum({WEB}),0),coalesce(sum({PLAYTIME}),0),coalesce(sum(n AND ({OWNED} OR {copyable}) AND NOT {INSTALLED}),0) FROM (SELECT g.*,{NOT_WEB_ONLY} AS n FROM games g WHERE g.hidden=0"
+        // Pre-aggregate entries, sessions, remote playtime, entitlements and
+        // copyable peer copies once per statement instead of running 10+
+        // correlated subqueries per game.
+        let age_account = self.age_limited_account(account).await?;
+        let copyable_set = super::sync_copies::copyable_games_cte_sql();
+        let sql = format!(
+            "WITH ent AS (\
+                SELECT game_id,\
+                       max(state_kind IN ('installed','updating','broken')) AS has_installed,\
+                       max(launch_kind='web') AS has_web,\
+                       max(launch_kind IS NOT 'web') AS has_non_web,\
+                       max(launch_kind='emulator') AS has_emulated,\
+                       max(source_id LIKE 'peer:%') AS has_peer \
+                FROM game_entries GROUP BY game_id\
+             ), \
+             sess AS (\
+                SELECT game_id,sum(duration_ms) AS dur,max(started_at_ms) AS last_at \
+                FROM play_sessions GROUP BY game_id\
+             ), \
+             rem AS (\
+                SELECT re.game_id,sum(r.counted_ms) AS dur,max(r.last_played_ms) AS last_at \
+                FROM remote_playtime r JOIN game_entries re ON re.id=r.entry_id GROUP BY re.game_id\
+             ), \
+             own AS (\
+                SELECT DISTINCT oe.game_id \
+                FROM game_entries oe JOIN account_entitlements ae ON ae.entry_id=oe.id \
+                WHERE ae.lost_at_ms IS NULL\
+             ), \
+             cpy AS ({copyable_set}) \
+             SELECT \
+                coalesce(sum(n),0),\
+                coalesce(sum(n AND inst),0),\
+                coalesce(sum(n AND fav),0),\
+                coalesce(sum(n AND rec),0),\
+                coalesce(sum(n AND emu),0),\
+                coalesce(sum(web),0),\
+                coalesce(sum(pt),0),\
+                coalesce(sum(n AND (is_own OR is_cpy) AND NOT inst),0) \
+             FROM (\
+                SELECT \
+                    g.favorite AS fav,\
+                    (coalesce(ent.has_web,0)=0 OR coalesce(ent.has_non_web,0)=1) AS n,\
+                    coalesce(ent.has_installed,0) AS inst,\
+                    (sess.last_at IS NOT NULL OR rem.last_at IS NOT NULL) AS rec,\
+                    coalesce(ent.has_emulated,0) AS emu,\
+                    coalesce(ent.has_web,0) AS web,\
+                    (coalesce(sess.dur,0)+coalesce(rem.dur,0)) AS pt,\
+                    (own.game_id IS NOT NULL) AS is_own,\
+                    (cpy.game_id IS NOT NULL) AS is_cpy \
+                FROM games g \
+                LEFT JOIN ent ON ent.game_id=g.id \
+                LEFT JOIN sess ON sess.game_id=g.id \
+                LEFT JOIN rem ON rem.game_id=g.id \
+                LEFT JOIN own ON own.game_id=g.id \
+                LEFT JOIN cpy ON cpy.game_id=g.id \
+                WHERE g.hidden=0"
         );
-        let mut query = QueryBuilder::<Sqlite>::new(query);
-        local_games(&mut query, local_only);
-        age_visibility(&mut query, &ListGames::default(), account);
-        query.push(") g");
+        let mut query = QueryBuilder::<Sqlite>::new(sql);
+        if local_only {
+            query.push(" AND (coalesce(ent.has_installed,0)=1 OR coalesce(ent.has_peer,0)=0)");
+        }
+        age_visibility(&mut query, &ListGames::default(), age_account.as_deref());
+        query.push(")");
         let (total, installed, favorites, recent, emulated, web, playtime, owned): (
             i64,
             i64,
@@ -396,6 +385,143 @@ impl LibraryStore {
             playtime_ms: playtime as u64,
         })
     }
+}
+
+async fn list_with_collection_in(
+    tx: &mut sqlx::Transaction<'_, Sqlite>,
+    request: &ListGames,
+    collection: Option<&str>,
+    hidden: bool,
+    age_account: Option<&str>,
+    playtime: bool,
+) -> Result<(GamePage, u64)> {
+    request.validate()?;
+    let mut count = QueryBuilder::<Sqlite>::new("SELECT count(*),");
+    if playtime {
+        count.push("coalesce(sum(").push(PLAYTIME).push("),0)");
+    } else {
+        count.push("0");
+    }
+    count
+        .push(" FROM games g WHERE g.hidden=")
+        .push_bind(hidden);
+    filters(&mut count, request, collection, hidden);
+    age_visibility(&mut count, request, age_account);
+    let (total, playtime_ms): (i64, i64) = count.build_query_as().fetch_one(&mut **tx).await?;
+    // The page's ids come first, sorted by their key alone, so the full
+    // rows and their artwork are read for the page only, not for every
+    // game the offset skips (deep pages of 8,000 games: 100 ms -> 10 ms).
+    // Titles sort in the language's alphabet (#218).
+    let (key, order) = match request.sort {
+        GameSort::Popular => (
+            "(SELECT p.value FROM igdb_matches m JOIN igdb_popularity p ON p.igdb_id=m.igdb_id WHERE m.game_id=g.id)",
+            BY_KEY_THEN_TITLE,
+        ),
+        GameSort::Title => ("NULL", BY_TITLE),
+        GameSort::Recent => (RECENT, BY_KEY_THEN_TITLE),
+        GameSort::Playtime => (PLAYTIME, BY_KEY_THEN_TITLE),
+        GameSort::Added => (ADDED, " ORDER BY k DESC,g.id"),
+        GameSort::Released => (RELEASED, BY_KEY_THEN_TITLE),
+    };
+    let mut query = QueryBuilder::<Sqlite>::new("SELECT ");
+    age_blocked(&mut query, age_account);
+    query.push(" AS admin_pin_needed,g.record_json,");
+    query
+        .push(INSTALLED)
+        .push(" AS installed,(SELECT json_group_array(DISTINCT substr(pe.source_id,6))")
+        .push(PEER_ENTRIES)
+        .push(") AS remote_device_ids,");
+    query.push(PLAYTIME).push(" AS playtime_ms,").push(RECENT).push(" AS last_played_at_ms,").push(played_on()).push(" AS played_on,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='cover' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.id LIMIT 1) AS cover,(SELECT a.record_json FROM artwork a WHERE a.game_id=g.id AND a.kind='icon' AND ").push(super::artwork_choice::SHOWN).push(" ORDER BY a.record_json->>'$.source' LIKE 'igdb:%' DESC,a.id LIMIT 1) AS icon FROM (SELECT g.id,");
+    query.push(key).push(" AS k FROM games g WHERE g.hidden=");
+    query.push_bind(hidden);
+    filters(&mut query, request, collection, hidden);
+    age_visibility(&mut query, request, age_account);
+    query
+        .push(order)
+        .push(" LIMIT ")
+        .push_bind(request.limit)
+        .push(" OFFSET ")
+        .push_bind(request.offset)
+        .push(") p JOIN games g ON g.id=p.id")
+        .push(order);
+    let rows = query
+        .build_query_as::<(
+            bool,
+            String,
+            bool,
+            sqlx::types::Json<Vec<String>>,
+            i64,
+            Option<i64>,
+            Option<String>,
+            Option<String>,
+            Option<String>,
+        )>()
+        .fetch_all(&mut **tx)
+        .await?;
+    // An unreadable record leaves its game out of the page, and an
+    // unreadable image leaves the game without it, rather than failing
+    // the whole library (#160).
+    let image = |text: Option<String>| {
+        text.and_then(|text| {
+            decode(text)
+                .inspect_err(|error| tracing::warn!(%error, "library image record unreadable"))
+                .ok()
+        })
+    };
+    let items = rows
+        .into_iter()
+        .filter_map(
+            |(
+                admin_pin_needed,
+                record,
+                installed,
+                remote_devices,
+                duration,
+                last,
+                played_on,
+                cover,
+                icon,
+            )| {
+                let game: Game = decode(record)
+                    .inspect_err(|error| tracing::warn!(%error, "game record unreadable; left out"))
+                    .ok()?;
+                Some(GameSummary {
+                    admin_pin_needed,
+                    id: game.id,
+                    title: game.title,
+                    sort_title: game.sort_title,
+                    description: game.description,
+                    genres: game.genres,
+                    tags: game.tags,
+                    release_date: game.release_date,
+                    platforms: game.platforms,
+                    favorite: game.favorite,
+                    hidden: game.hidden,
+                    rating: game.rating,
+                    cover: image(cover),
+                    icon: image(icon),
+                    installed,
+                    remote_device_ids: remote_devices.0,
+                    playtime_ms: duration as u64,
+                    last_played_at_ms: last,
+                    last_played_on: played_on.and_then(|text| {
+                        decode(text)
+                            .inspect_err(
+                                |error| tracing::warn!(%error, "played-on device unreadable"),
+                            )
+                            .ok()
+                    }),
+                })
+            },
+        )
+        .collect::<Vec<_>>();
+    Ok((
+        GamePage {
+            items,
+            total: total as u64,
+        },
+        playtime_ms as u64,
+    ))
 }
 
 /// The library query that lists a collection's games: a smart one's own,

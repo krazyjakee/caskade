@@ -25,8 +25,13 @@
 
 use crate::settings::{GeneralSettings, SettingsService};
 use caskade_i18n::Translations;
-use std::sync::LazyLock;
+use std::sync::{
+    LazyLock,
+    atomic::{AtomicU64, Ordering},
+};
 use tokio::sync::watch;
+
+static GENERATION: AtomicU64 = AtomicU64::new(1);
 
 pub use caskade_i18n::format;
 pub use caskade_i18n::locale::SOURCE;
@@ -73,6 +78,7 @@ impl Language {
                 return false;
             }
             current.clone_from(&resolved);
+            GENERATION.fetch_add(1, Ordering::Release);
             true
         });
         resolved
@@ -160,6 +166,13 @@ pub fn available() -> Vec<&'static str> {
 /// The language in use now and after each change.
 pub fn subscribe() -> watch::Receiver<String> {
     CORE.changes.subscribe()
+}
+
+/// Monotonic counter bumped whenever the active core language changes,
+/// allowing hot-path consumers (such as SQLite's title collation) to validate
+/// a thread-local cache without taking a lock.
+pub(crate) fn generation() -> u64 {
+    GENERATION.load(Ordering::Acquire)
 }
 
 /// `id` in the language in use. Prefer [`tr!`](crate::tr), which

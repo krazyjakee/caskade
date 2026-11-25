@@ -10,10 +10,7 @@ use crate::{
     read, write,
 };
 use std::{
-    sync::{
-        Arc,
-        atomic::{AtomicBool, Ordering},
-    },
+    sync::{Arc, atomic::Ordering},
     time::Duration,
 };
 use wasmtime::{
@@ -145,31 +142,79 @@ pub enum CallError {
 /// How often the engine's epoch advances; time boxes are counted in it.
 const TICK: Duration = Duration::from_millis(10);
 
-/// Advances the engine's epoch until dropped.
+struct TickerState {
+    active: usize,
+    stop: bool,
+}
+
+/// Advances the engine's epoch while at least one plugin call is in flight,
+/// and parks on a condvar with zero wakeups while idle.
 struct Ticker {
-    stop: Arc<AtomicBool>,
+    state: Arc<(std::sync::Mutex<TickerState>, std::sync::Condvar)>,
+}
+
+struct TickGuard {
+    state: Arc<(std::sync::Mutex<TickerState>, std::sync::Condvar)>,
+}
+
+impl Drop for TickGuard {
+    fn drop(&mut self) {
+        let mut guard = self.state.0.lock().unwrap_or_else(|e| e.into_inner());
+        guard.active = guard.active.saturating_sub(1);
+    }
 }
 
 impl Ticker {
     fn start(engine: Engine) -> Self {
-        let stop = Arc::new(AtomicBool::new(false));
-        let running = stop.clone();
+        let state = Arc::new((
+            std::sync::Mutex::new(TickerState {
+                active: 0,
+                stop: false,
+            }),
+            std::sync::Condvar::new(),
+        ));
+        let shared = state.clone();
         std::thread::Builder::new()
             .name("caskade-plugin-epoch".into())
             .spawn(move || {
-                while !running.load(Ordering::Relaxed) {
+                let (lock, condvar) = &*shared;
+                loop {
+                    {
+                        let mut guard = lock.lock().unwrap_or_else(|e| e.into_inner());
+                        while guard.active == 0 && !guard.stop {
+                            guard = condvar.wait(guard).unwrap_or_else(|e| e.into_inner());
+                        }
+                        if guard.stop {
+                            break;
+                        }
+                    }
                     std::thread::sleep(TICK);
                     engine.increment_epoch();
                 }
             })
             .expect("start the plugin epoch thread");
-        Self { stop }
+        Self { state }
+    }
+
+    fn enter(&self) -> TickGuard {
+        let (lock, condvar) = &*self.state;
+        let mut guard = lock.lock().unwrap_or_else(|e| e.into_inner());
+        guard.active += 1;
+        if guard.active == 1 {
+            condvar.notify_one();
+        }
+        TickGuard {
+            state: self.state.clone(),
+        }
     }
 }
 
 impl Drop for Ticker {
     fn drop(&mut self) {
-        self.stop.store(true, Ordering::Relaxed);
+        let (lock, condvar) = &*self.state;
+        let mut guard = lock.lock().unwrap_or_else(|e| e.into_inner());
+        guard.stop = true;
+        condvar.notify_all();
     }
 }
 
@@ -181,14 +226,14 @@ pub struct CompileCounts {
     pub compiled: u32,
 }
 
-/// The engine and linker shared by every plugin.
+/// The engine and linker shared by every plugin, initialized lazily on first
+/// plugin compile or instantiation so apps without plugins avoid Wasmtime
+/// startup overhead and baseline Cranelift memory.
 pub struct Runtime {
-    engine: Engine,
-    linker: Linker<State>,
+    vm: std::sync::OnceLock<(Engine, Linker<State>)>,
     limits: Limits,
-    /// Started by the first instance: with no plugin running, nothing has
-    /// to wake 100 times a second.
-    ticker: std::sync::OnceLock<Ticker>,
+    /// Started by the first instance and parked when no call is in flight.
+    ticker: std::sync::OnceLock<Arc<Ticker>>,
     cache: std::sync::RwLock<Option<caskade_component_cache::ComponentCache>>,
     cached: std::sync::atomic::AtomicU32,
     compiled: std::sync::atomic::AtomicU32,
@@ -196,6 +241,20 @@ pub struct Runtime {
 
 impl Runtime {
     pub fn new(limits: Limits) -> Result<Self, CallError> {
+        Ok(Self {
+            vm: std::sync::OnceLock::new(),
+            ticker: std::sync::OnceLock::new(),
+            limits,
+            cache: std::sync::RwLock::default(),
+            cached: Default::default(),
+            compiled: Default::default(),
+        })
+    }
+
+    fn vm(&self) -> Result<&(Engine, Linker<State>), CallError> {
+        if let Some(vm) = self.vm.get() {
+            return Ok(vm);
+        }
         let mut config = Config::new();
         config
             .wasm_component_model(true)
@@ -215,16 +274,8 @@ impl Runtime {
             )?;
             Ok((engine, linker))
         };
-        let (engine, linker) = link().map_err(|e| CallError::Instantiate(e.to_string()))?;
-        Ok(Self {
-            ticker: std::sync::OnceLock::new(),
-            engine,
-            linker,
-            limits,
-            cache: std::sync::RwLock::default(),
-            cached: Default::default(),
-            compiled: Default::default(),
-        })
+        let built = link().map_err(|e| CallError::Instantiate(e.to_string()))?;
+        Ok(self.vm.get_or_init(|| built))
     }
 
     /// Keeps compiled components in a verified on-disk cache from now on.
@@ -242,16 +293,15 @@ impl Runtime {
     /// Compiles a backend component, or loads it from the cache when one is
     /// set and holds a verified entry; compile errors name what's wrong.
     pub fn compile(&self, bytes: &[u8]) -> Result<Component, CallError> {
+        let (engine, _) = self.vm()?;
         let cache = read(&self.cache).clone();
         let (component, hit) = match cache {
-            Some(cache) => {
-                cache
-                    .load_or_compile(&self.engine, bytes)
-                    .map(|(component, outcome)| {
-                        (component, outcome == caskade_component_cache::Outcome::Hit)
-                    })
-            }
-            None => Component::new(&self.engine, bytes).map(|component| (component, false)),
+            Some(cache) => cache
+                .load_or_compile(engine, bytes)
+                .map(|(component, outcome)| {
+                    (component, outcome == caskade_component_cache::Outcome::Hit)
+                }),
+            None => Component::new(engine, bytes).map(|component| (component, false)),
         }
         .map_err(|e| CallError::Instantiate(format!("{e:#}")))?;
         let counter = if hit { &self.cached } else { &self.compiled };
@@ -266,6 +316,7 @@ impl Runtime {
         services: Arc<PluginServices>,
         sandbox: Sandbox,
     ) -> Result<Instance, CallError> {
+        let (engine, linker) = self.vm()?;
         // No sockets ever: network access is wasi:http through the allowlist.
         let mut wasi = WasiCtx::builder();
         wasi.allow_tcp(false)
@@ -300,14 +351,17 @@ impl Runtime {
             language: sandbox.language,
             locales: sandbox.locales,
         };
-        self.ticker
-            .get_or_init(|| Ticker::start(self.engine.clone()));
-        let mut store = Store::new(&self.engine, state);
+        let ticker = self
+            .ticker
+            .get_or_init(|| Arc::new(Ticker::start(engine.clone())))
+            .clone();
+        let _tick_guard = ticker.enter();
+        let mut store = Store::new(engine, state);
         store.limiter(|state| &mut state.limits);
         store.set_epoch_deadline(deadline);
         store.epoch_deadline_trap();
         // A 0.2 backend, or else a 0.1 one.
-        let started = match self.linker.instantiate_async(&mut store, component).await {
+        let started = match linker.instantiate_async(&mut store, component).await {
             Ok(instance) => match Plugin::new(&mut store, &instance) {
                 Ok(bindings) => Ok((
                     instance,
@@ -334,6 +388,7 @@ impl Runtime {
             version,
             timeout,
             deadline,
+            ticker,
         })
     }
 }
@@ -405,6 +460,7 @@ pub struct Instance {
     version: &'static str,
     timeout: Duration,
     deadline: u64,
+    ticker: Arc<Ticker>,
 }
 
 impl Instance {
@@ -413,6 +469,7 @@ impl Instance {
         &mut self,
         call: impl AsyncFnOnce(&Bindings, &mut Store<State>) -> wasmtime::Result<T>,
     ) -> Result<T, CallError> {
+        let _tick_guard = self.ticker.enter();
         self.store.set_epoch_deadline(self.deadline);
         // The epoch stops guest code; the outer timeout covers host awaits.
         let slack = self.timeout + Duration::from_millis(500);

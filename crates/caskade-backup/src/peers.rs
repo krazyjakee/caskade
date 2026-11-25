@@ -519,10 +519,18 @@ struct Receiving {
 #[async_trait]
 impl BlobWriter for Receiving {
     async fn write(&mut self, chunk: &[u8]) -> Result<()> {
-        match self.incoming.as_mut() {
-            Some(incoming) => incoming.write(chunk),
-            None => Ok(()),
-        }
+        let Some(mut incoming) = self.incoming.take() else {
+            return Ok(());
+        };
+        let chunk = chunk.to_vec();
+        let (incoming, result) = tokio::task::spawn_blocking(move || {
+            let result = incoming.write(&chunk);
+            (incoming, result)
+        })
+        .await
+        .map_err(|error| Error::Io(std::io::Error::other(error)))?;
+        self.incoming = Some(incoming);
+        result
     }
 
     async fn finish(mut self: Box<Self>) -> Result<bool> {

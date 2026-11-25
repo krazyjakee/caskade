@@ -9,8 +9,24 @@ impl LibraryStore {
     /// doesn't count, so one comes beneath it for Reset (#175).
     pub async fn games_without_icon(&self) -> Result<Vec<String>> {
         Ok(sqlx::query_scalar(
-            "SELECT g.id FROM games g WHERE NOT EXISTS(SELECT 1 FROM artwork a \
-             WHERE a.game_id=g.id AND a.kind='icon' AND a.record_json->>'$.source'<>'user') ORDER BY g.sort_title COLLATE NOCASE,g.id",
+            "SELECT g.id FROM games g \
+             WHERE NOT EXISTS(SELECT 1 FROM artwork a \
+               WHERE a.game_id=g.id AND a.kind='icon' AND a.record_json->>'$.source'<>'user') \
+             ORDER BY g.sort_title COLLATE NOCASE,g.id",
+        )
+        .fetch_all(&self.pool)
+        .await?)
+    }
+
+    /// Installed games with no automatic icon artwork, by title. Excludes
+    /// uninstalled/owned-only games that have no local executable to extract.
+    pub async fn installed_games_without_icon(&self) -> Result<Vec<String>> {
+        Ok(sqlx::query_scalar(
+            "SELECT g.id FROM games g \
+             WHERE EXISTS(SELECT 1 FROM game_entries e WHERE e.game_id=g.id AND e.state_kind='installed') \
+               AND NOT EXISTS(SELECT 1 FROM artwork a \
+                 WHERE a.game_id=g.id AND a.kind='icon' AND a.record_json->>'$.source'<>'user') \
+             ORDER BY g.sort_title COLLATE NOCASE,g.id",
         )
         .fetch_all(&self.pool)
         .await?)

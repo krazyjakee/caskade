@@ -315,8 +315,8 @@ pub(super) async fn merge_in(
         )));
     }
     let target = merge_layers((target, target_overrides), (donor, donor_overrides), tx).await?;
+    sqlx::query("UPDATE romm_roms SET record_json=json_set(record_json,'$.gameId',?) WHERE entry_id IN (SELECT id FROM game_entries WHERE game_id=?)").bind(keep).bind(remove).execute(&mut **tx).await?;
     sqlx::query("UPDATE game_entries SET game_id=?,record_json=json_set(record_json,'$.gameId',?) WHERE game_id=?").bind(keep).bind(keep).bind(remove).execute(&mut **tx).await?;
-    sqlx::query("UPDATE romm_roms SET record_json=json_set(record_json,'$.gameId',?) WHERE record_json->>'$.gameId'=?").bind(keep).bind(remove).execute(&mut **tx).await?;
     // Session game IDs follow the composite entry FK's ON UPDATE CASCADE.
     // The kept game's artwork choices stand; the donor's join where it has
     // none (#175).

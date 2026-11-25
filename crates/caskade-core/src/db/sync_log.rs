@@ -467,9 +467,39 @@ impl LibraryStore {
                     .is_some_and(|clock| *clock >= stamp.clock)
             })
         };
-        let winners = self.sync_fields().await?;
-        let rows = sqlx::query_as::<_, (String, i64, i64, String, String, Option<String>, String, Option<String>)>(
-            "SELECT origin,wall,counter,entity,key,target,field,value_json FROM sync_changes WHERE applied=1",
+        // Only stamps are needed for compaction; skip reading and parsing every `value_json`.
+        let winner_rows = sqlx::query_as::<_, (String, String, String, String, i64, i64)>(
+            "SELECT entity,key,field,origin,wall,counter FROM sync_fields",
+        )
+        .fetch_all(&self.pool)
+        .await?;
+        let mut winners: HashMap<FieldKey, Stamp> = HashMap::with_capacity(winner_rows.len());
+        for (entity, key, field, origin, wall, counter) in winner_rows {
+            if let Some(entity) = Entity::parse(&entity) {
+                winners.insert(
+                    (entity, key, field),
+                    Stamp {
+                        clock: Hlc::new(wall, counter),
+                        origin,
+                    },
+                );
+            }
+        }
+        let rows = sqlx::query_as::<
+            _,
+            (
+                String,
+                i64,
+                i64,
+                String,
+                String,
+                Option<String>,
+                String,
+                bool,
+            ),
+        >(
+            "SELECT origin,wall,counter,entity,key,target,field,value_json IS NULL \
+             FROM sync_changes WHERE applied=1",
         )
         .fetch_all(&self.pool)
         .await?;
@@ -487,7 +517,7 @@ impl LibraryStore {
             }
         }
         let mut drop = Vec::new();
-        for (origin, wall, counter, entity_name, key, target, field, value) in rows {
+        for (origin, wall, counter, entity_name, key, target, field, is_tombstone) in rows {
             let stamp = Stamp {
                 clock: Hlc::new(wall, counter),
                 origin,
@@ -508,9 +538,9 @@ impl LibraryStore {
                     .and_then(|target| winners.get(&(entity, target.clone(), field.clone())));
                 match winner {
                     // Replaced: once the replacement reached everyone.
-                    Some(winner) if winner.stamp != stamp => seen_by_all(&winner.stamp),
+                    Some(winner_stamp) if *winner_stamp != stamp => seen_by_all(winner_stamp),
                     // A live tombstone: once everyone has deleted.
-                    Some(_) => value.is_none() && seen_by_all(&stamp),
+                    Some(_) => is_tombstone && seen_by_all(&stamp),
                     // Superseded without a target (a game since removed here).
                     None => seen_by_all(&stamp),
                 }
@@ -518,6 +548,9 @@ impl LibraryStore {
             if gone {
                 drop.push(stamp);
             }
+        }
+        if drop.is_empty() {
+            return Ok(0);
         }
         let mut tx = self.begin_write().await?;
         let mut removed = 0;

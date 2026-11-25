@@ -2,7 +2,7 @@
 //! identity (IGDB id, store ids, title, platforms and year), and the games
 //! sync makes or separates when nothing here matches.
 
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
 
 use serde_json::{Value, json};
 
@@ -12,7 +12,162 @@ use super::games::write_game;
 use crate::Result;
 use crate::model::Game;
 
+/// Preloaded in-memory index of local games for `sync::engine::apply_pending`,
+/// replacing O(N) full-table scans of `igdb_matches`, `game_entries`, and `games`
+/// per incoming unmapped game with O(1) lookups.
+type TitleCandidate = (String, Option<i64>, Vec<String>);
+
+pub(crate) struct SyncGameIndex {
+    igdb: HashMap<i64, String>,
+    stores: HashMap<String, String>,
+    titles: HashMap<String, Vec<TitleCandidate>>,
+}
+
+impl SyncGameIndex {
+    pub(crate) fn find(&self, identity: &Value) -> Option<(String, &'static str)> {
+        if let Some(igdb) = identity.get("igdb").and_then(Value::as_i64)
+            && let Some(found) = self.igdb.get(&igdb)
+        {
+            return Some((found.clone(), "igdb"));
+        }
+        let wanted: HashSet<&str> = identity
+            .get("stores")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .collect();
+        if !wanted.is_empty() {
+            // Preserve `ORDER BY e.game_id` determinism by taking the smallest matching game_id.
+            let mut best: Option<&str> = None;
+            for key in &wanted {
+                if let Some(game) = self.stores.get(*key)
+                    && best.is_none_or(|b| game.as_str() < b)
+                {
+                    best = Some(game.as_str());
+                }
+            }
+            if let Some(found) = best {
+                return Some((found.to_owned(), "store"));
+            }
+        }
+        let title = identity
+            .get("title")
+            .and_then(Value::as_str)
+            .map(normal_title);
+        let title = title.filter(|title| !title.is_empty())?;
+        let candidates = self.titles.get(&title)?;
+        let platforms: HashSet<&str> = identity
+            .get("platforms")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .collect();
+        let year = identity.get("year").and_then(Value::as_i64);
+        for (id, base_year, base_platforms) in candidates {
+            if year.is_some() && base_year.is_some() && year != *base_year {
+                continue;
+            }
+            let shares_platform = platforms.is_empty()
+                || base_platforms.is_empty()
+                || base_platforms
+                    .iter()
+                    .any(|p| platforms.contains(p.as_str()));
+            if shares_platform {
+                return Some((id.clone(), "title"));
+            }
+        }
+        None
+    }
+
+    pub(crate) fn record_created(&mut self, id: String, identity: &Value) {
+        let title = identity
+            .get("title")
+            .and_then(Value::as_str)
+            .filter(|title| !title.trim().is_empty())
+            .unwrap_or("Untitled")
+            .trim();
+        let key = normal_title(title);
+        if key.is_empty() {
+            return;
+        }
+        let platforms: Vec<String> = identity
+            .get("platforms")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .map(str::to_owned)
+            .collect();
+        let year = identity.get("year").and_then(Value::as_i64);
+        let list = self.titles.entry(key).or_default();
+        let pos = list.partition_point(|(existing_id, _, _)| existing_id < &id);
+        list.insert(pos, (id, year, platforms));
+    }
+}
+
 impl LibraryStore {
+    /// Builds a [`SyncGameIndex`] once for a batch of incoming remote games.
+    pub(crate) async fn sync_game_index(&self) -> Result<SyncGameIndex> {
+        let mut conn = self.pool.acquire().await?;
+        let mut igdb = HashMap::new();
+        for (id, game_id) in sqlx::query_as::<_, (i64, String)>(
+            "SELECT igdb_id,game_id FROM igdb_matches \
+             WHERE igdb_id IS NOT NULL AND source<>'none' ORDER BY game_id",
+        )
+        .fetch_all(&mut *conn)
+        .await?
+        {
+            igdb.entry(id).or_insert(game_id);
+        }
+        let mut stores = HashMap::new();
+        for (game, id) in sqlx::query_as::<_, (String, String)>(
+            "SELECT e.game_id,json(j.value) FROM game_entries e, json_each(e.record_json,'$.ids') j \
+             WHERE e.source_id<>'manual' ORDER BY e.game_id",
+        )
+        .fetch_all(&mut *conn)
+        .await?
+        {
+            if let Some(key) = store_key(&id) {
+                stores.entry(key).or_insert(game);
+            }
+        }
+        let mut titles: HashMap<String, Vec<TitleCandidate>> = HashMap::new();
+        for (id, record, overrides) in sqlx::query_as::<_, (String, String, String)>(
+            "SELECT id,record_json,overrides_json FROM games ORDER BY id",
+        )
+        .fetch_all(&mut *conn)
+        .await?
+        {
+            let (Ok(shown), Ok(overrides)) = (
+                serde_json::from_str::<Game>(&record),
+                serde_json::from_str::<Overrides>(&overrides),
+            ) else {
+                continue;
+            };
+            let (title, release_date, platforms) = if overrides.is_empty() {
+                (shown.title, shown.release_date, shown.platforms)
+            } else {
+                let base = automatic(&shown, &overrides)?;
+                (base.title, base.release_date, base.platforms)
+            };
+            let key = normal_title(&title);
+            if key.is_empty() {
+                continue;
+            }
+            let year = release_date
+                .as_deref()
+                .and_then(|date| date.get(..4))
+                .and_then(|year| year.parse::<i64>().ok());
+            titles.entry(key).or_default().push((id, year, platforms));
+        }
+        Ok(SyncGameIndex {
+            igdb,
+            stores,
+            titles,
+        })
+    }
     /// The local game another device's game is, by an earlier match.
     pub async fn sync_mapped_game(&self, origin: &str, origin_id: &str) -> Result<Option<String>> {
         Ok(sqlx::query_scalar(
@@ -223,24 +378,28 @@ impl LibraryStore {
         &self,
         game: &str,
     ) -> Result<Vec<(String, BTreeSet<String>)>> {
-        let ids: Vec<String> =
-            sqlx::query_scalar("SELECT id FROM game_entries WHERE game_id=? ORDER BY id")
-                .bind(game)
-                .fetch_all(&self.pool)
-                .await?;
-        let mut out = Vec::new();
-        for id in ids {
-            let keys = sqlx::query_scalar::<_, String>(
-                "SELECT json(j.value) FROM game_entries e, json_each(e.record_json,'$.ids') j \
-                 WHERE e.id=? AND e.source_id<>'manual'",
-            )
-            .bind(&id)
-            .fetch_all(&self.pool)
-            .await?
-            .iter()
-            .filter_map(|id| store_key(id))
-            .collect();
-            out.push((id, keys));
+        let rows: Vec<(String, Option<String>)> = sqlx::query_as(
+            "SELECT e.id, CASE WHEN e.source_id<>'manual' AND j.value IS NOT NULL THEN json(j.value) END \
+             FROM game_entries e \
+             LEFT JOIN json_each(e.record_json,'$.ids') j ON e.source_id<>'manual' \
+             WHERE e.game_id=? \
+             ORDER BY e.id",
+        )
+        .bind(game)
+        .fetch_all(&self.pool)
+        .await?;
+        let mut out: Vec<(String, BTreeSet<String>)> = Vec::new();
+        for (id, value) in rows {
+            let keys = match out.last_mut() {
+                Some((last_id, keys)) if last_id == &id => keys,
+                _ => {
+                    out.push((id, BTreeSet::new()));
+                    &mut out.last_mut().expect("just pushed").1
+                }
+            };
+            if let Some(key) = value.as_deref().and_then(store_key) {
+                keys.insert(key);
+            }
         }
         Ok(out)
     }

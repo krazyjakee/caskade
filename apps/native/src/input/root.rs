@@ -60,7 +60,11 @@ const STALE_WAIT: Duration = Duration::from_millis(250);
 #[derive(Clone)]
 pub struct Input {
     inner: Rc<Inner>,
-    /// Bumped after each action, so hints read again.
+    /// Whether spatial navigation and the keyboard map are on.
+    active_sig: Signal<bool>,
+    /// The glyph family of the pad used last, for hints.
+    glyphs_sig: Signal<GlyphFamily>,
+    /// Bumped only when input state affecting hints or source actually changes.
     changed: Signal<u64>,
     /// The field the on-screen keyboard types into.
     keyboard: Signal<Option<NodeId>>,
@@ -76,6 +80,8 @@ pub struct Input {
 type OpenDetails = Rc<dyn Fn(String)>;
 /// What typing outside a field does: the search, with what was typed.
 type StartSearch = Rc<dyn Fn(String)>;
+/// Snapshot of input notice state `(active, glyphs, source, focused, bindings_revision)`.
+type NoticeSnapshot = (bool, GlyphFamily, Option<InputSource>, Option<NodeId>, u64);
 
 struct Inner {
     /// The input root owns its checks, even when a child starts them.
@@ -86,6 +92,9 @@ struct Inner {
     jobs: mpsc::UnboundedSender<Job>,
     /// The focus the dispatcher last heard of.
     seen: Cell<Option<NodeId>>,
+    /// Last noticed `(active, glyphs, source, focused, bindings_revision)` so
+    /// settle ticks that change nothing do not force UI re-renders.
+    last_notice: Cell<NoticeSnapshot>,
     /// The input layer is running listeners itself: the root's own click
     /// listener isn't hearing a click from the user.
     synthetic: Cell<bool>,
@@ -121,13 +130,19 @@ fn no_data() -> Rc<dyn Any> {
 
 impl Input {
     fn new(console: bool, jobs: mpsc::UnboundedSender<Job>) -> Self {
+        let dispatcher = Dispatcher::new(console);
+        let active = dispatcher.active();
+        let glyphs = dispatcher.glyphs();
+        let source = dispatcher.source();
+        let rev = dispatcher.bindings().borrow().revision();
         Self {
             inner: Rc::new(Inner {
                 scope: Runtime::current().current_scope_id(),
-                dispatcher: RefCell::new(Dispatcher::new(console)),
+                dispatcher: RefCell::new(dispatcher),
                 root: RefCell::new(None),
                 jobs,
                 seen: Cell::new(None),
+                last_notice: Cell::new((active, glyphs, source, None, rev)),
                 synthetic: Cell::new(false),
                 keys: Cell::new(0),
                 pointers: Cell::new(0),
@@ -141,6 +156,8 @@ impl Input {
                 search_key: RefCell::new(None),
                 paste_key: RefCell::new(None),
             }),
+            active_sig: Signal::new(active),
+            glyphs_sig: Signal::new(glyphs),
             changed: Signal::new(0),
             keyboard: Signal::new(None),
             scrolled: Signal::new(0),
@@ -272,20 +289,19 @@ impl Input {
     /// Console mode: navigation is always on.
     pub fn set_console(&self, console: bool) {
         self.inner.dispatcher.borrow_mut().set_console(console);
+        self.notice();
         // Its focus goes in over the next frames.
         self.frames();
     }
 
     /// Whether spatial navigation and the keyboard map are on.
     pub fn active(&self) -> bool {
-        self.changed.read();
-        self.inner.dispatcher.borrow().active()
+        (self.active_sig)()
     }
 
     /// The labels of the pad used last, for hints.
     pub fn glyphs(&self) -> GlyphFamily {
-        self.changed.read();
-        self.inner.dispatcher.borrow().glyphs()
+        (self.glyphs_sig)()
     }
 
     /// What sent the last action.
@@ -637,8 +653,28 @@ impl Input {
         {
             self.close_keyboard();
         }
-        let mut changed = self.changed;
-        changed += 1;
+        let (active, glyphs, source, rev) = {
+            let dispatcher = self.inner.dispatcher.borrow();
+            (
+                dispatcher.active(),
+                dispatcher.glyphs(),
+                dispatcher.source(),
+                dispatcher.bindings().borrow().revision(),
+            )
+        };
+        if *self.active_sig.peek() != active {
+            let mut sig = self.active_sig;
+            sig.set(active);
+        }
+        if *self.glyphs_sig.peek() != glyphs {
+            let mut sig = self.glyphs_sig;
+            sig.set(glyphs);
+        }
+        let snapshot = (active, glyphs, source, now.flatten(), rev);
+        if self.inner.last_notice.replace(snapshot) != snapshot {
+            let mut changed = self.changed;
+            changed += 1;
+        }
     }
 
     /// Checks frames for a while: a dialog an action opened has rendered
@@ -743,7 +779,11 @@ pub struct Bind {
 /// Handles `action` while the component is mounted: `run` returns false to
 /// let the next binding (or the default) have it. The innermost binding
 /// around focus wins; among equals, the newest.
-pub fn use_input_action(action: Action, bind: Bind, run: impl FnMut() -> bool + 'static) {
+pub fn use_input_action(
+    action: Action,
+    bind: Bind,
+    run: impl FnMut() -> bool + 'static,
+) -> BindingId {
     let input = use_input();
     let slot: Rc<RefCell<Box<dyn FnMut() -> bool>>> =
         use_hook(|| Rc::new(RefCell::new(Box::new(|| false) as Box<dyn FnMut() -> bool>)));
@@ -766,6 +806,7 @@ pub fn use_input_action(action: Action, bind: Bind, run: impl FnMut() -> bool + 
         bindings.set_global(id, bind.global);
     }
     use_drop(move || bindings.borrow_mut().remove(id));
+    id
 }
 
 /// Puts focus back where it was when the view at `key` comes back, or on
@@ -971,8 +1012,7 @@ fn use_resized(input: &Input) {
 }
 
 /// Text the user edits, which a paste belongs to: a field, a select, an
-/// editable element, a text box or combo box (the webview's
-/// `editableTarget`).
+/// editable element, a text box or combo box.
 fn editable(ui: &BlitzUi<'_>, node: NodeId) -> bool {
     use caskade_ui_input::FocusTree;
     caskade_ui_input::keys::is_text_entry(ui, node)

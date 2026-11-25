@@ -260,7 +260,7 @@ impl Default for HostTiming {
         Self {
             listen: Duration::from_millis(1500),
             answer: Duration::from_secs(2),
-            every: Duration::from_secs(5),
+            every: Duration::from_secs(30),
             apps_every: Duration::from_secs(10 * 60),
         }
     }
@@ -268,6 +268,13 @@ impl Default for HostTiming {
 
 /// A host's apps, and the device it is on.
 type MadeFrom = (Vec<StreamApp>, Option<String>);
+
+/// Cached contents of Moonlight's settings file, keyed by path and mtime.
+struct CachedSettings {
+    path: std::path::PathBuf,
+    modified: Option<std::time::SystemTime>,
+    contents: Option<String>,
+}
 
 struct Inner {
     store: LibraryStore,
@@ -283,8 +290,11 @@ struct Inner {
     /// What each host last said it offers, asked directly.
     apps: Mutex<HashMap<String, Vec<StreamApp>>>,
     /// What each host's releases were last made from (its apps, and the
-    /// device it is on): the library is written again only when it changes.
-    synced: Mutex<HashMap<String, MadeFrom>>,
+    /// device it is on) and the library's write count when verified: the
+    /// library is queried/written again only when inputs or writes change.
+    synced: Mutex<HashMap<String, (MadeFrom, u64)>>,
+    /// Cached Moonlight settings file so idle ticks avoid re-reading disk.
+    client_ini: Mutex<Option<CachedSettings>>,
     /// The client's state folder, when a test gives one.
     state: Option<std::path::PathBuf>,
     refreshing: tokio::sync::Mutex<()>,
@@ -349,6 +359,7 @@ impl StreamHosts {
                 apps_at: Mutex::default(),
                 apps: Mutex::default(),
                 synced: Mutex::default(),
+                client_ini: Mutex::default(),
                 state: None,
                 refreshing: tokio::sync::Mutex::new(()),
                 devices: std::sync::OnceLock::new(),
@@ -454,13 +465,41 @@ impl StreamHosts {
         ask_server_info_with(&self.inner.http, address, port).await
     }
 
-    /// The client's state file, when it is installed.
+    /// The client's state file, when it is installed (cached by mtime, read off the async runtime).
     async fn client_settings(&self) -> Option<String> {
         let state = match &self.inner.state {
             Some(state) => state.clone(),
             None => self.inner.client.state().await.ok()??,
         };
-        std::fs::read_to_string(state.join(SETTINGS_DIR).join(SETTINGS_FILE)).ok()
+        let path = state.join(SETTINGS_DIR).join(SETTINGS_FILE);
+        let cached = {
+            let guard = caskade_core::lock(&self.inner.client_ini);
+            guard
+                .as_ref()
+                .filter(|c| c.path == path)
+                .map(|c| (c.modified, c.contents.clone()))
+        };
+        let path_for_io = path.clone();
+        let (modified, contents) = tokio::task::spawn_blocking(move || {
+            let modified = std::fs::metadata(&path_for_io)
+                .ok()
+                .and_then(|meta| meta.modified().ok());
+            if let Some((prev_mod, prev_contents)) = cached
+                && prev_mod == modified
+            {
+                return (modified, prev_contents);
+            }
+            let contents = std::fs::read_to_string(&path_for_io).ok();
+            (modified, contents)
+        })
+        .await
+        .ok()?;
+        *caskade_core::lock(&self.inner.client_ini) = Some(CachedSettings {
+            path,
+            modified,
+            contents: contents.clone(),
+        });
+        contents
     }
 
     /// The paired hosts in the client's state file `settings`.
@@ -705,10 +744,23 @@ impl StreamHosts {
             }
             let device = self.device_at(&addresses).await;
             let made_from = (self.apps_of(host), device);
-            if caskade_core::lock(&self.inner.synced).get(&host.id) == Some(&made_from)
-                && self.releases_kept(&host.id, &made_from.0).await
-            {
-                continue;
+            let writes = self.inner.store.writes();
+            let already_synced = {
+                let synced = caskade_core::lock(&self.inner.synced);
+                synced
+                    .get(&host.id)
+                    .map(|(prev, prev_writes)| (*prev == made_from, *prev_writes))
+            };
+            if let Some((true, prev_writes)) = already_synced {
+                if prev_writes == writes {
+                    continue;
+                }
+                if self.releases_kept(&host.id, &made_from.0).await {
+                    if let Some((_, w)) = caskade_core::lock(&self.inner.synced).get_mut(&host.id) {
+                        *w = writes;
+                    }
+                    continue;
+                }
             }
             let (apps, device) = &made_from;
             let sync = self
@@ -716,7 +768,9 @@ impl StreamHosts {
                 .store
                 .sync_stream_apps_from(&host.id, apps, device.as_deref())
                 .await?;
-            caskade_core::lock(&self.inner.synced).insert(host.id.clone(), made_from);
+            let after_writes = self.inner.store.writes();
+            caskade_core::lock(&self.inner.synced)
+                .insert(host.id.clone(), (made_from, after_writes));
             for game_id in sync.added {
                 self.inner.bus.emit(Event::LibraryGameAdded { game_id });
             }

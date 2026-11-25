@@ -84,14 +84,32 @@ fn supervise_online_every(
 ) {
     crate::runtime::spawn(async move {
         let mut changes = settings.subscribe();
-        let mut running: Vec<JoinHandle<()>> = Vec::new();
+        let mut running: tokio::task::JoinSet<()> = tokio::task::JoinSet::new();
+        let mut handles: Vec<tokio::task::AbortHandle> = Vec::new();
+        let stop_all = |handles: &mut Vec<tokio::task::AbortHandle>,
+                        running: &mut tokio::task::JoinSet<()>| {
+            for handle in handles.drain(..) {
+                handle.abort();
+            }
+            running.abort_all();
+        };
         loop {
             let wanted = online(&settings).await;
             if wanted && running.is_empty() {
-                running = start();
+                for task in start() {
+                    handles.push(task.abort_handle());
+                    running.spawn(async move {
+                        if let Err(error) = task.await
+                            && error.is_panic()
+                        {
+                            std::panic::resume_unwind(error.into_panic());
+                        }
+                    });
+                }
                 tracing::info!("online lookups started");
             } else if !wanted && !running.is_empty() {
-                running.drain(..).for_each(|task| task.abort());
+                stop_all(&mut handles, &mut running);
+                while running.join_next().await.is_some() {}
                 tracing::info!("online lookups stopped");
             }
             loop {
@@ -104,10 +122,21 @@ fn supervise_online_every(
                         }
                         Ok(_) => {}
                         Err(RecvError::Lagged(_)) => break,
-                        Err(RecvError::Closed) => return,
+                        Err(RecvError::Closed) => {
+                            stop_all(&mut handles, &mut running);
+                            return;
+                        }
                     },
-                    () = tokio::time::sleep(check), if !running.is_empty() => {
-                        if reap(&mut running).await {
+                    Some(done) = running.join_next(), if !running.is_empty() => {
+                        if let Err(error) = done && error.is_panic() {
+                            let panic = error.into_panic();
+                            tracing::error!(
+                                panic = crate::background::panic_message(&*panic),
+                                "an online lookup panicked; restarting them"
+                            );
+                            stop_all(&mut handles, &mut running);
+                            while running.join_next().await.is_some() {}
+                            tokio::time::sleep(check).await;
                             break;
                         }
                     }
@@ -115,30 +144,6 @@ fn supervise_online_every(
             }
         }
     });
-}
-
-/// Takes finished tasks out of `running`. When one of them panicked, stops
-/// the rest too and returns true, so that they all start again.
-async fn reap(running: &mut Vec<JoinHandle<()>>) -> bool {
-    let (finished, alive): (Vec<_>, Vec<_>) = running.drain(..).partition(JoinHandle::is_finished);
-    *running = alive;
-    let mut panicked = false;
-    for task in finished {
-        if let Err(error) = task.await
-            && error.is_panic()
-        {
-            let panic = error.into_panic();
-            tracing::error!(
-                panic = crate::background::panic_message(&*panic),
-                "an online lookup panicked; restarting them"
-            );
-            panicked = true;
-        }
-    }
-    if panicked {
-        running.drain(..).for_each(|task| task.abort());
-    }
-    panicked
 }
 
 /// Images a game page downloads when it opens may come from IGDB.

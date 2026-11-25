@@ -23,9 +23,8 @@ pub type Clock = Arc<dyn Fn() -> i64 + Send + Sync>;
 /// How long after a library event the journal is read: one pass covers a
 /// burst of additions.
 const SETTLE: Duration = Duration::from_secs(2);
-/// How often the journal and the updates are read without an event, for
-/// additions that came without one and games that waited for entries.
-const TICK: Duration = Duration::from_secs(60);
+/// How often old read notifications are pruned when idle (retention is days/weeks).
+const PRUNE_EVERY: Duration = Duration::from_secs(6 * 60 * 60);
 /// Additions read per transaction.
 const CHUNK: u32 = 500;
 const UPDATES_KEY: &str = "updates.available";
@@ -78,11 +77,12 @@ impl Notifications {
         changed
     }
 
-    /// Folds every unseen game addition into its batch. Whether the feed
-    /// changed.
-    pub async fn ingest_additions(&self) -> Result<bool> {
+    /// Folds every unseen game addition into its batch. Returns `(changed, has_waiting)`
+    /// where `has_waiting` means at least one addition is still within `ENTRY_GRACE_MS`.
+    async fn ingest_additions_checked(&self) -> Result<(bool, bool)> {
         let _writing = self.inner.writing.lock().await;
         let mut changed = false;
+        let mut has_waiting = false;
         loop {
             let done = self
                 .inner
@@ -90,6 +90,7 @@ impl Notifications {
                 .ingest_game_additions(self.now(), ENTRY_GRACE_MS, CHUNK)
                 .await?;
             changed |= done.added > 0;
+            has_waiting |= done.waiting > 0;
             // A full chunk of games still waiting for entries ends the pass:
             // the next one picks them up.
             if done.added + done.skipped == 0
@@ -98,7 +99,13 @@ impl Notifications {
                 break;
             }
         }
-        Ok(self.changed(changed))
+        Ok((self.changed(changed), has_waiting))
+    }
+
+    /// Folds every unseen game addition into its batch. Whether the feed
+    /// changed.
+    pub async fn ingest_additions(&self) -> Result<bool> {
+        Ok(self.ingest_additions_checked().await?.0)
     }
 
     /// Makes the "Updates available" item list exactly the installed games
@@ -452,39 +459,75 @@ impl Notifications {
     }
 
     /// Follows the bus until it closes: a refresh at once, after library
-    /// events (once a burst settles) and every minute; failures and plugin
-    /// notices as they come.
+    /// events (once a burst settles), once more after `ENTRY_GRACE_MS` only
+    /// when newly added games were still waiting for entries, and a periodic
+    /// prune every few hours; failures and plugin notices as they come.
     pub fn watch(&self, bus: &Bus) -> tokio::task::JoinHandle<()> {
         use tokio::sync::broadcast::error::{RecvError, TryRecvError};
         let this = self.clone();
         let mut events = bus.stream();
         tokio::spawn(async move {
-            let mut tick = tokio::time::interval(TICK);
-            tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+            let mut grace_due: Option<tokio::time::Instant> = None;
+            let mut next_prune = tokio::time::Instant::now() + PRUNE_EVERY;
+            // Initial startup pass (ingests additions, syncs updates, prunes).
+            let mut initial = true;
             loop {
-                let due = tokio::select! {
-                    _ = tick.tick() => true,
-                    received = events.recv() => match received {
-                        Ok(event) => this.on_event(&event).await,
-                        Err(RecvError::Lagged(_)) => true,
-                        Err(RecvError::Closed) => return,
-                    },
-                };
-                if !due {
-                    continue;
-                }
-                tokio::time::sleep(SETTLE).await;
-                loop {
-                    match events.try_recv() {
-                        Ok(event) => {
-                            this.on_event(&event).await;
+                let mut do_refresh = initial;
+                let mut do_prune = initial;
+                initial = false;
+                if !do_refresh {
+                    tokio::select! {
+                        _ = async {
+                            match grace_due {
+                                Some(at) => tokio::time::sleep_until(at).await,
+                                None => std::future::pending().await,
+                            }
+                        } => {
+                            grace_due = None;
+                            do_refresh = true;
                         }
-                        Err(TryRecvError::Lagged(_)) => {}
-                        Err(TryRecvError::Empty) => break,
-                        Err(TryRecvError::Closed) => return,
+                        _ = tokio::time::sleep_until(next_prune) => {
+                            next_prune = tokio::time::Instant::now() + PRUNE_EVERY;
+                            do_prune = true;
+                        }
+                        received = events.recv() => match received {
+                            Ok(event) => do_refresh = this.on_event(&event).await,
+                            Err(RecvError::Lagged(_)) => do_refresh = true,
+                            Err(RecvError::Closed) => return,
+                        },
                     }
                 }
-                this.refresh().await;
+                if do_refresh {
+                    tokio::time::sleep(SETTLE).await;
+                    loop {
+                        match events.try_recv() {
+                            Ok(event) => {
+                                this.on_event(&event).await;
+                            }
+                            Err(TryRecvError::Lagged(_)) => {}
+                            Err(TryRecvError::Empty) => break,
+                            Err(TryRecvError::Closed) => return,
+                        }
+                    }
+                    match this.ingest_additions_checked().await {
+                        Ok((_, true)) => {
+                            let wait = Duration::from_millis(
+                                u64::try_from(ENTRY_GRACE_MS).unwrap_or(5000),
+                            ) + Duration::from_millis(500);
+                            grace_due = Some(tokio::time::Instant::now() + wait);
+                        }
+                        Ok((_, false)) => grace_due = None,
+                        Err(error) => {
+                            tracing::warn!(%error, "game additions not read; the next pass retries");
+                        }
+                    }
+                    if let Err(error) = this.sync_updates().await {
+                        tracing::warn!(%error, "updates not read");
+                    }
+                }
+                if do_prune && let Err(error) = this.prune().await {
+                    tracing::warn!(%error, "old notifications not cleaned up");
+                }
             }
         })
     }

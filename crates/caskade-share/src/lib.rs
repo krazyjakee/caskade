@@ -509,12 +509,21 @@ impl Shares {
             };
             let this = self.clone();
             let reporter = prepared.clone();
+            let last_notified = std::sync::Mutex::new(
+                std::time::Instant::now()
+                    .checked_sub(std::time::Duration::from_secs(1))
+                    .unwrap_or_else(std::time::Instant::now),
+            );
             let offered = self
                 .inner
                 .transfers
                 .offer_folder(&folder, &share_tag(&row.id), move |done, total| {
                     reporter.send_replace(Prepared::Reading { done, total });
-                    let _ = this.inner.changed.send(());
+                    let mut last = last_notified.lock().unwrap_or_else(|e| e.into_inner());
+                    if done >= total || last.elapsed() >= std::time::Duration::from_millis(200) {
+                        *last = std::time::Instant::now();
+                        let _ = this.inner.changed.send(());
+                    }
                 })
                 .await?;
             self.inner

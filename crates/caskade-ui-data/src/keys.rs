@@ -19,6 +19,10 @@ pub enum Key {
     Collections,
     /// Install, download and other jobs (Activity).
     Jobs,
+    /// Metadata details refresh progress (Activity).
+    GamesRefresh,
+    /// Pending install confirmation requests (deep links, drops, shares).
+    InstallRequests,
     /// The notification feed and its unread count.
     Notifications,
     /// Paired devices and how they're reached.
@@ -74,11 +78,9 @@ impl Changed {
             // The library is the signed-in account's: favourites, hidden
             // games, collections and age limits all follow it.
             Event::AccountChanged(_) => Self::Everything,
-            // The details refresh's card and the install requests waiting
-            // for the user sit with the jobs (#101).
-            Event::JobChanged(_) | Event::GamesRefreshChanged(_) | Event::InstallRequested(_) => {
-                Self::only(Key::Jobs)
-            }
+            Event::JobChanged(_) => Self::only(Key::Jobs),
+            Event::GamesRefreshChanged(_) => Self::only(Key::GamesRefresh),
+            Event::InstallRequested(_) => Self::only(Key::InstallRequests),
             Event::NotificationsChanged(_) => Self::only(Key::Notifications),
             Event::DevicesChanged(_) => Self::only(Key::Devices),
             Event::AppUpdateChanged(_) => Self::only(Key::AppUpdate),

@@ -232,7 +232,7 @@ impl Links {
         let id = connection.stable_id();
         let mut events = connection.path_events();
         let mut heard = RelayHeard::default();
-        self.follow(&connection, &mut heard);
+        let mut is_relay = self.follow(&connection, &mut heard) == Link::Relay;
         tokio::spawn(async move {
             let mut check = tokio::time::interval(RELAY_CHECK);
             loop {
@@ -241,10 +241,10 @@ impl Links {
                         Some(PathEvent::Lagged { .. }) | Some(_) => {}
                         None => break,
                     },
-                    _ = check.tick() => {}
+                    _ = check.tick(), if is_relay => {}
                     _ = connection.closed() => break,
                 }
-                links.follow(&connection, &mut heard);
+                is_relay = links.follow(&connection, &mut heard) == Link::Relay;
             }
             links.set(peer, id, None);
         });
@@ -252,7 +252,7 @@ impl Links {
 
     /// Records `connection`'s link as it stands. A relay gone quiet leaves
     /// nothing behind to call the device reachable through it.
-    fn follow(&self, connection: &Connection, heard: &mut RelayHeard) {
+    fn follow(&self, connection: &Connection, heard: &mut RelayHeard) -> Link {
         let peer = connection.remote_id();
         let selected = self.of(connection);
         let link = heard.link(selected, relay_received(connection), Instant::now());
@@ -261,6 +261,7 @@ impl Links {
             last.remove(&peer);
         }
         self.set(peer, connection.stable_id(), Some(link));
+        link
     }
 
     fn set(&self, peer: EndpointId, connection: usize, link: Option<Link>) {

@@ -225,6 +225,43 @@ impl Achievements {
         Ok(sets)
     }
 
+    /// The icon URL of one achievement in `game_id`'s set for `viewer`,
+    /// reading only that achievement row instead of loading every set's items.
+    pub async fn icon_url(
+        &self,
+        game_id: &str,
+        viewer: Option<&str>,
+        store_account_id: &str,
+        product_id: &str,
+        achievement_id: &str,
+        locked: bool,
+    ) -> Result<Option<String>> {
+        let accounts = self.inner.accounts.accounts().await?;
+        let releases = self.releases(game_id).await?;
+        let visible = self
+            .candidates(&releases, &accounts, viewer)
+            .into_iter()
+            .any(|candidate| {
+                candidate.account.id == store_account_id && candidate.product == product_id
+            });
+        if !visible {
+            return Ok(None);
+        }
+        let Some(definition) = self
+            .inner
+            .store
+            .achievement_definition(store_account_id, product_id, achievement_id)
+            .await?
+        else {
+            return Ok(None);
+        };
+        Ok(if locked {
+            definition.locked_icon_url.or(definition.icon_url)
+        } else {
+            definition.icon_url
+        })
+    }
+
     /// Fetches every set of `game_id` that `viewer` sees, then answers them.
     /// One that can't be fetched keeps what was known and says why.
     pub async fn refresh_game(

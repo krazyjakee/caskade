@@ -121,21 +121,26 @@ impl ArtworkCache {
         }
         let image = decode(bytes)?;
         let mut thumbnails = Vec::with_capacity(THUMBNAIL_SIZES.len());
-        write_image(&directory, "original.webp", &image)?;
+        let original_bytes = encode_webp(&image)?;
+        atomic_write(&directory, "original.webp", &original_bytes)?;
         for size in THUMBNAIL_SIZES {
-            // Never upscale a small icon to a cover-sized allocation.
-            let thumbnail = if image.width().max(image.height()) <= size {
-                image.clone()
-            } else {
-                image.thumbnail(size, size)
-            };
             let file = format!("thumb-{size}.webp");
-            write_image(&directory, &file, &thumbnail)?;
+            // Never upscale a small icon to a cover-sized allocation, and reuse
+            // the already-encoded original WebP bytes without re-encoding.
+            let (width, height) = if image.width().max(image.height()) <= size {
+                atomic_write(&directory, &file, &original_bytes)?;
+                (image.width(), image.height())
+            } else {
+                let thumbnail = image.thumbnail(size, size);
+                let bytes = encode_webp(&thumbnail)?;
+                atomic_write(&directory, &file, &bytes)?;
+                (thumbnail.width(), thumbnail.height())
+            };
             thumbnails.push(CachedThumbnail {
                 size,
                 path: format!("{hash}/{file}"),
-                width: thumbnail.width(),
-                height: thumbnail.height(),
+                width,
+                height,
             });
         }
         let artwork = CachedArtwork {
@@ -259,7 +264,9 @@ pub(super) fn atomic_write(directory: &Dir, name: &str, bytes: &[u8]) -> Result<
         candidate.ok_or(ArtworkError::Invalid("artwork temp namespace exhausted"))?;
     let result = (|| {
         file.write_all(bytes)?;
-        file.sync_all()?;
+        // Disposable cache files are published atomically via rename (with
+        // entry.json written last); skipping per-file fsync avoids 5 disk
+        // barriers per downloaded cover.
         drop(file);
         // A previous interrupted generation may have published this file.
         if directory.try_exists(name)? {
@@ -303,11 +310,11 @@ fn decode(bytes: &[u8]) -> Result<DynamicImage> {
     Ok(DynamicImage::ImageRgba8(reader.decode()?.to_rgba8()))
 }
 
-fn write_image(directory: &Dir, name: &str, image: &DynamicImage) -> Result<()> {
+fn encode_webp(image: &DynamicImage) -> Result<Vec<u8>> {
     let mut encoded = Cursor::new(Vec::new());
     image.write_to(&mut encoded, ImageFormat::WebP)?;
     if encoded.get_ref().len() as u64 > MAX_ASSET_BYTES {
         return Err(ArtworkError::Limit("encoded cache image exceeds budget"));
     }
-    atomic_write(directory, name, encoded.get_ref())
+    Ok(encoded.into_inner())
 }

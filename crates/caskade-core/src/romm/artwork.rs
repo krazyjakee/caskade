@@ -5,6 +5,15 @@
 use super::{Result, RommRom, RommService, keyed, source_id};
 use crate::{bus::Event, model::ArtworkKind};
 
+/// Whether `record`'s cover failed recently enough that sync should not ask again yet.
+#[cfg(feature = "net")]
+pub(super) fn cover_waiting(record: &RommRom) -> bool {
+    record.cover_unavailable.as_ref().is_some_and(|failed| {
+        record.rom.cover() == Some(failed.location.as_str())
+            && crate::now_ms().saturating_sub(failed.at_ms) < super::COVER_RETRY.as_millis() as i64
+    })
+}
+
 impl RommService {
     /// Whether the game lacks some of the ROM's `kind` artwork (its cover
     /// or screenshots): not imported yet, or an earlier import failed.
@@ -24,14 +33,7 @@ impl RommService {
             .count();
         let rom = &record.rom;
         Ok(match kind {
-            ArtworkKind::Cover => {
-                let waiting = record.cover_unavailable.as_ref().is_some_and(|failed| {
-                    rom.cover() == Some(failed.location.as_str())
-                        && crate::now_ms().saturating_sub(failed.at_ms)
-                            < super::COVER_RETRY.as_millis() as i64
-                });
-                rom.cover().is_some() && ours == 0 && !waiting
-            }
+            ArtworkKind::Cover => rom.cover().is_some() && ours == 0 && !cover_waiting(record),
             _ => ours < rom.screenshots().count(),
         })
     }
@@ -80,11 +82,15 @@ impl RommService {
     }
 
     /// The ROM's cover (on the server, or its IGDB URL) as the game's
-    /// cover; a failure only logs.
+    /// cover; a failure only logs. Returns whether the cover was saved.
     #[cfg(feature = "net")]
-    pub(super) async fn import_cover(&self, client: &super::client::Client, record: &RommRom) {
+    pub(super) async fn import_cover(
+        &self,
+        client: &super::client::Client,
+        record: &RommRom,
+    ) -> bool {
         let (Some(artwork), Some(location)) = (&self.inner.artwork, record.rom.cover()) else {
-            return;
+            return false;
         };
         let rom = record.rom.id;
         let cached = match fetch(client, artwork, location).await {
@@ -95,7 +101,7 @@ impl RommService {
                 if error.lasting {
                     self.mark_cover(record, Some(location)).await;
                 }
-                return;
+                return false;
             }
         };
         if let Err(error) = self
@@ -103,9 +109,12 @@ impl RommService {
             .await
         {
             tracing::warn!(rom, %error, "RomM cover not saved");
-        } else if record.cover_unavailable.is_some() {
+            return false;
+        }
+        if record.cover_unavailable.is_some() {
             self.mark_cover(record, None).await;
         }
+        true
     }
 
     /// Records `location` as the cover the server couldn't give, or none.

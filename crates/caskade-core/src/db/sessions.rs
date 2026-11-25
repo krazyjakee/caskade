@@ -71,6 +71,7 @@ impl LibraryStore {
         sqlx::query(concat!("INSERT INTO play_sessions(id,game_id,entry_id,started_at_ms,ended_at_ms,duration_ms,heartbeat_at_ms,tracking_json,device_id) VALUES(?,?,?,?,?,?,?,?,", this_device!(), ") ON CONFLICT(id) DO UPDATE SET game_id=excluded.game_id,entry_id=excluded.entry_id,started_at_ms=excluded.started_at_ms,ended_at_ms=excluded.ended_at_ms,duration_ms=excluded.duration_ms,heartbeat_at_ms=excluded.heartbeat_at_ms,tracking_json=excluded.tracking_json"))
             .bind(&record.id).bind(&record.game_id).bind(&record.entry_id).bind(record.started_at_ms).bind(record.ended_at_ms).bind(v::integer(record.duration_ms)?).bind(record.heartbeat_at_ms).bind(record.tracking.as_ref().map(v::json).transpose()?).execute(&mut *tx).await?;
         tx.commit().await?;
+        self.writes.mark_synced();
         Ok(record.clone())
     }
     pub async fn activate_session(
@@ -119,7 +120,10 @@ impl LibraryStore {
         ended_at_ms: i64,
         duration_ms: u64,
     ) -> Result<PlaySession> {
-        sqlx::query("UPDATE play_sessions SET ended_at_ms=?,heartbeat_at_ms=?,duration_ms=max(duration_ms,?) WHERE id=? AND ended_at_ms IS NULL").bind(ended_at_ms).bind(ended_at_ms).bind(v::integer(duration_ms)?).bind(id).execute(&self.pool).await?;
+        let affected = sqlx::query("UPDATE play_sessions SET ended_at_ms=?,heartbeat_at_ms=?,duration_ms=max(duration_ms,?) WHERE id=? AND ended_at_ms IS NULL").bind(ended_at_ms).bind(ended_at_ms).bind(v::integer(duration_ms)?).bind(id).execute(&self.pool).await?.rows_affected();
+        if affected > 0 {
+            self.writes.mark_synced();
+        }
         self.get_session(id)
             .await?
             .ok_or_else(|| missing("session", id))

@@ -260,6 +260,20 @@ impl RommService {
             .collect();
         let known = existing.len();
         let mut entries = self.entries(&config.id).await?;
+        let mut covered_games: std::collections::HashSet<String> = if self.inner.artwork.is_some() {
+            sqlx::query_scalar(
+                "SELECT DISTINCT game_id FROM artwork \
+                 WHERE kind='cover' AND record_json->>'$.source'=?",
+            )
+            .bind(source_id(&config.id).as_str())
+            .fetch_all(&self.inner.store.pool)
+            .await
+            .unwrap_or_default()
+            .into_iter()
+            .collect()
+        } else {
+            std::collections::HashSet::new()
+        };
         let cache_root = self.cache_root().await?;
         let mut report = RommSyncReport {
             server_id: config.id.clone(),
@@ -331,6 +345,7 @@ impl RommService {
                         &target,
                         rom,
                         previous,
+                        &mut covered_games,
                     )
                     .await;
                 match change {
@@ -427,6 +442,7 @@ impl RommService {
         target: &EmulatorTarget,
         rom: super::RemoteRom,
         previous: Option<(RommRom, GameEntry)>,
+        covered_games: &mut std::collections::HashSet<String>,
     ) -> Result<Change> {
         let store = &self.inner.store;
         let source = source_id(&config.id);
@@ -501,10 +517,20 @@ impl RommService {
             } else {
                 current_target
             };
-            let cached = record
-                .cache
-                .as_ref()
-                .filter(|cache| cache.roms.iter().all(|rom| rom.is_file()));
+            let cache_present = match record.cache.as_ref() {
+                Some(cache) => {
+                    let mut present = true;
+                    for rom in &cache.roms {
+                        if !tokio::fs::try_exists(rom).await.unwrap_or(false) {
+                            present = false;
+                            break;
+                        }
+                    }
+                    present
+                }
+                None => false,
+            };
+            let cached = record.cache.as_ref().filter(|_| cache_present);
             let (dir, roms, entry_size) = match cached {
                 Some(cache) => (
                     cache.dir.clone(),
@@ -551,8 +577,12 @@ impl RommService {
             if record_changed {
                 store.save_romm_rom(&record).await?;
             }
-            if cover_changed || self.missing(&record, ArtworkKind::Cover).await? {
-                self.import_cover(client, &record).await;
+            let cover_missing = self.inner.artwork.is_some()
+                && record.rom.cover().is_some()
+                && !covered_games.contains(&record.game_id)
+                && !super::artwork::cover_waiting(&record);
+            if (cover_changed || cover_missing) && self.import_cover(client, &record).await {
+                covered_games.insert(record.game_id.clone());
             }
             // The game's page downloads the new ones.
             if screenshots_changed
@@ -628,7 +658,9 @@ impl RommService {
             cover_unavailable: None,
         };
         store.save_romm_rom(&record).await?;
-        self.import_cover(client, &record).await;
+        if self.import_cover(client, &record).await {
+            covered_games.insert(record.game_id.clone());
+        }
         self.inner.bus.emit(if saved.created {
             Event::LibraryGameAdded {
                 game_id: saved.game_id,

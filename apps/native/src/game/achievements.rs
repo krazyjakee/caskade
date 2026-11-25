@@ -595,6 +595,9 @@ fn use_near() -> (Signal<bool>, Signal<Option<NodeHandle>>) {
     let mut near = use_signal(|| false);
     let row = use_signal(|| None::<NodeHandle>);
     use_effect(move || {
+        if *near.peek() {
+            return;
+        }
         let _ = input.scrolled();
         let _ = input.resized();
         if let Some(moved) = moved {
@@ -603,9 +606,6 @@ fn use_near() -> (Signal<bool>, Signal<Option<NodeHandle>>) {
         let Some(handle) = row.read().clone() else {
             return;
         };
-        if *near.peek() {
-            return;
-        }
         let doc = handle.doc();
         let viewport = doc.viewport();
         let height = f64::from(viewport.window_size.1) / viewport.scale_f64();

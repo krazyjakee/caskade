@@ -259,7 +259,9 @@ impl LibraryStore {
         .into_iter()
         .map(decode::<GameEntry>)
         .collect::<Result<Vec<_>>>()?;
-        let mut changes: Vec<SourceRemoval> = Vec::new();
+        let mut changes: Vec<Option<SourceRemoval>> = Vec::new();
+        let mut seen_games: std::collections::HashMap<String, usize> =
+            std::collections::HashMap::new();
         for entry in entries {
             if matches!(entry.location, Some(InstallLocation::Managed { .. })) {
                 continue;
@@ -305,11 +307,14 @@ impl LibraryStore {
                 }
             };
             // A game left with no entries replaces its earlier update.
-            changes.retain(|c| c.game_id() != change.game_id());
-            changes.push(change);
+            let game_id = change.game_id().to_owned();
+            if let Some(prev) = seen_games.insert(game_id, changes.len()) {
+                changes[prev] = None;
+            }
+            changes.push(Some(change));
         }
         tx.commit().await?;
-        Ok(changes)
+        Ok(changes.into_iter().flatten().collect())
     }
 
     pub async fn entries_for_source(&self, source: &str) -> Result<Vec<GameEntry>> {

@@ -451,9 +451,10 @@ impl SaveVersions {
         let kept = manifest.clone();
         tokio::task::spawn_blocking(move || {
             for (source, index) in sources {
-                let (hash, _) = blobs.put_file(&source)?;
+                let expected = &kept.files[index].hash;
+                let hash = blobs.verify_or_put_file(&source, expected)?;
                 // Changed while it was read: the list says what was kept.
-                if hash != kept.files[index].hash {
+                if hash != *expected {
                     return Err(Error::Invalid(crate::tr!(
                         "A save file changed while it was being kept. Try again once the game has closed."
                     )));
@@ -701,16 +702,32 @@ impl SaveVersions {
         } else {
             Vec::new()
         };
-        let versions = self
-            .versions(game_id)
-            .await?
-            .into_iter()
-            .map(|version| VersionState {
-                current: head.as_ref().is_some_and(|(id, _)| *id == version.id),
-                complete: self.complete(&version),
-                version,
-            })
-            .collect();
+        let raw_versions = self.versions(game_id).await?;
+        let blobs = self.inner.blobs.clone();
+        let head_id = head.map(|(id, _)| id);
+        let versions = tokio::task::spawn_blocking(move || {
+            let mut has_cache: HashMap<String, bool> = HashMap::new();
+            raw_versions
+                .into_iter()
+                .map(|version| {
+                    let complete =
+                        manifest(&blobs, &version.content_hash).is_some_and(|manifest| {
+                            manifest.files.iter().all(|file| {
+                                *has_cache
+                                    .entry(file.hash.clone())
+                                    .or_insert_with(|| blobs.has(&file.hash))
+                            })
+                        });
+                    VersionState {
+                        current: head_id.as_deref() == Some(version.id.as_str()),
+                        complete,
+                        version,
+                    }
+                })
+                .collect()
+        })
+        .await
+        .map_err(|error| Error::Io(std::io::Error::other(error)))?;
         Ok(SaveHistory {
             account_id: account,
             versions,

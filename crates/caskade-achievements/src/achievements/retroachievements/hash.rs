@@ -140,11 +140,95 @@ pub async fn hash_file(path: &Path, rule: Rule) -> Result<String, HashError> {
     }
     let path = path.to_path_buf();
     caskade_jobs::blocking("Hashing a ROM", move || {
-        let bytes = std::fs::read(path).map_err(|error| HashError::Read(error.to_string()))?;
-        hash_bytes(&bytes, rule)
+        hash_file_streaming(&path, size, rule)
     })
     .await
     .map_err(|error| HashError::Read(error.to_string()))?
+}
+
+/// Streams a ROM file in 64 KiB chunks into MD5 instead of reading up to 256–512 MiB
+/// into RAM at once.
+fn hash_file_streaming(path: &Path, size: u64, rule: Rule) -> Result<String, HashError> {
+    use std::io::{Read, Seek, SeekFrom};
+    if matches!(rule, Rule::Arcade | Rule::Unsupported) {
+        return Err(HashError::UnsupportedSystem);
+    }
+    let mut file = std::fs::File::open(path).map_err(|error| HashError::Read(error.to_string()))?;
+    let mut head = [0u8; 16];
+    let head_len = file
+        .read(&mut head)
+        .map_err(|error| HashError::Read(error.to_string()))?;
+    let head = &head[..head_len];
+    let skip: u64 = match rule {
+        Rule::Whole | Rule::N64 => 0,
+        Rule::Nes if head.starts_with(b"NES\x1a") || head.starts_with(b"FDS\x1a") => 16,
+        Rule::Nes => 0,
+        Rule::Snes => {
+            if size % 0x2000 == 512 {
+                512
+            } else {
+                0
+            }
+        }
+        Rule::PcEngine => {
+            if size % 0x20000 == 512 {
+                512
+            } else {
+                0
+            }
+        }
+        Rule::Lynx if head.starts_with(b"LYNX\0") => 64,
+        Rule::Lynx => 0,
+        Rule::Atari7800 if head.get(1..10) == Some(b"ATARI7800") => 128,
+        Rule::Atari7800 => 0,
+        Rule::Arcade | Rule::Unsupported => return Err(HashError::UnsupportedSystem),
+    };
+    let n64_swap = if rule == Rule::N64 {
+        match head.get(..4) {
+            Some([0x37, 0x80, 0x40, 0x12]) => 2usize,
+            Some([0x40, 0x12, 0x37, 0x80]) => 4usize,
+            _ => 0usize,
+        }
+    } else {
+        0usize
+    };
+    file.seek(SeekFrom::Start(skip.min(size)))
+        .map_err(|error| HashError::Read(error.to_string()))?;
+    let mut hasher = Md5::new();
+    let mut buf = [0u8; 64 * 1024];
+    let mut carry = [0u8; 4];
+    let mut carry_len = 0usize;
+    loop {
+        let read = file
+            .read(&mut buf[carry_len..])
+            .map_err(|error| HashError::Read(error.to_string()))?;
+        if read == 0 {
+            if carry_len > 0 {
+                if n64_swap > 0 {
+                    carry[..carry_len].reverse();
+                }
+                hasher.update(&carry[..carry_len]);
+            }
+            break;
+        }
+        if carry_len > 0 {
+            buf[..carry_len].copy_from_slice(&carry[..carry_len]);
+        }
+        let total = carry_len + read;
+        if n64_swap > 0 {
+            let aligned = total - (total % n64_swap);
+            for chunk in buf[..aligned].chunks_exact_mut(n64_swap) {
+                chunk.reverse();
+            }
+            hasher.update(&buf[..aligned]);
+            carry_len = total - aligned;
+            carry[..carry_len].copy_from_slice(&buf[aligned..total]);
+        } else {
+            hasher.update(&buf[..total]);
+            carry_len = 0;
+        }
+    }
+    Ok(format!("{:x}", hasher.finalize()))
 }
 
 /// The RetroAchievements hash of a ROM's bytes under `rule`.

@@ -185,9 +185,16 @@ pub(crate) fn Brand(#[props(default = "size-9".to_owned())] class: String) -> El
 pub(super) fn LibraryNav(#[props(default)] console: bool) -> Element {
     let router = use_router();
     let route = router.route();
-    let Route::Library(library) = &route else {
+    let Route::Library(library) = route else {
         return rsx! {};
     };
+    rsx! {
+        LibraryNavOpen { library, console }
+    }
+}
+
+#[component]
+fn LibraryNavOpen(library: crate::router::LibraryRoute, console: bool) -> Element {
     let stats = crate::data::use_browsing_stats();
     let stats = stats
         .read()

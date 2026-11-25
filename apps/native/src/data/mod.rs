@@ -364,12 +364,12 @@ pub fn use_refresh_query() -> Query<Option<caskade_core::metadata::RefreshStatus
         let jobs = jobs.clone();
         change(async move { Ok(jobs.refresh_status()) })
     });
-    reload_on(&source, DataKey::Jobs, resource);
+    reload_on(&source, DataKey::GamesRefresh, resource);
     resource
 }
 
 /// The install requests waiting for the user, oldest first: loaded again
-/// as one arrives (`InstallRequested`) or a job changes.
+/// as one arrives (`InstallRequested`).
 pub fn use_install_requests_query()
 -> Query<Vec<caskade_app::commands::install_requests::InstallRequest>> {
     let source = use_context::<DataSource>();
@@ -378,7 +378,7 @@ pub fn use_install_requests_query()
         let jobs = jobs.clone();
         change(async move { Ok(jobs.pending_requests()) })
     });
-    reload_on(&source, DataKey::Jobs, resource);
+    reload_on(&source, DataKey::InstallRequests, resource);
     resource
 }
 
@@ -433,19 +433,30 @@ pub fn use_settings() -> Settings {
 }
 
 /// Loads `resource` again whenever an app event makes `key` stale, or when
-/// events were missed.
+/// events were missed, draining already-queued burst events before restarting.
 pub(crate) fn reload_on<T: 'static>(source: &DataSource, key: DataKey, mut resource: Query<T>) {
     let events = source.events.clone();
     use_hook(move || {
         let mut events = events.subscribe();
         spawn(async move {
             loop {
-                match events.recv().await {
-                    Ok(event) if Changed::from_event(&event).affects(&key) => resource.restart(),
-                    Ok(_) => {}
-                    Err(broadcast::error::RecvError::Lagged(_)) => resource.restart(),
+                let stale = match events.recv().await {
+                    Ok(event) => Changed::from_event(&event).affects(&key),
+                    Err(broadcast::error::RecvError::Lagged(_)) => true,
                     Err(broadcast::error::RecvError::Closed) => break,
+                };
+                if !stale {
+                    continue;
                 }
+                // Drain any queued events from the same burst so one restart covers them all.
+                loop {
+                    match events.try_recv() {
+                        Ok(_) | Err(broadcast::error::TryRecvError::Lagged(_)) => {}
+                        Err(broadcast::error::TryRecvError::Empty) => break,
+                        Err(broadcast::error::TryRecvError::Closed) => return,
+                    }
+                }
+                resource.restart();
             }
         });
     });

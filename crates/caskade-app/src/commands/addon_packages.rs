@@ -264,14 +264,14 @@ async fn stage(
     let root = match root {
         Ok(root) => root,
         Err(error) => {
-            let _ = std::fs::remove_dir_all(&staging);
+            let _ = tokio::fs::remove_dir_all(&staging).await;
             // A malformed archive won't unpack next time either.
-            let _ = std::fs::remove_file(&archive);
+            let _ = tokio::fs::remove_file(&archive).await;
             return Err(error);
         }
     };
     if let Err(error) = package::check_identity(&prepared.entry, &prepared.release, &root) {
-        let _ = std::fs::remove_dir_all(&staging);
+        let _ = tokio::fs::remove_dir_all(&staging).await;
         return Err(error);
     }
     Ok((root, staging))

@@ -77,8 +77,15 @@ impl Library {
     }
 
     /// The top bar's search: the best [`SEARCH_LIMIT`] matches for `text`
-    /// across the whole library.
+    /// across the whole library. Empty/whitespace queries short-circuit without
+    /// hitting SQLite.
     pub async fn search(&self, text: &str) -> Result<GamePage> {
+        if text.trim().is_empty() {
+            return Ok(GamePage {
+                items: Vec::new(),
+                total: 0,
+            });
+        }
         let query = ListGames {
             query: Some(text.to_owned()),
             limit: SEARCH_LIMIT,

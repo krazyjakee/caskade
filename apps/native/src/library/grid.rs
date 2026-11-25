@@ -52,7 +52,7 @@ struct Pages {
 
 /// A page of games, and the [`Pages::epoch`] it was asked for at.
 struct Page {
-    games: Rc<Vec<GameSummary>>,
+    games: Vec<Rc<GameSummary>>,
     epoch: u64,
 }
 
@@ -92,18 +92,24 @@ pub fn VirtualLibrary(
     /// collection's members): the shown pages load again.
     #[props(default)]
     reload: u64,
+    /// Reports the query's total count (or initial page-0 failure) to the
+    /// host view so it does not need a separate count query.
+    #[props(default)]
+    on_status: Option<EventHandler<Result<u64, caskade_core::error::ErrorReport>>>,
 ) -> Element {
     let input = use_input();
     let source = use_context::<DataSource>();
     let pages: Rc<RefCell<Pages>> = use_hook(Rc::default);
     // The view's selection reads the games loaded (Shift ranges, "Select
-    // loaded").
+    // loaded"). Hold a Weak reference so unmounting `VirtualLibrary` never
+    // retains cached `Pages` inside `LibraryView`'s selection context.
     {
-        let pages = pages.clone();
+        let pages = Rc::downgrade(&pages);
         let selection = super::selection::use_selection();
         use_hook(move || {
             if let Some(selection) = selection {
                 selection.set_game_at(move |index| {
+                    let pages = pages.upgrade()?;
                     let state = pages.borrow();
                     let page = state.pages.get(&(index / PAGE))?;
                     page.games.get(index % PAGE).map(|game| game.id.clone())
@@ -120,6 +126,10 @@ pub fn VirtualLibrary(
     let mut moved = use_signal(|| 0u64);
     // The columns and the first game shown, as last rendered.
     let shown: Rc<std::cell::Cell<Option<(usize, usize)>>> = use_hook(Rc::default);
+    // The last rendered `(mounted_rows, current_letter)` so pixel-level scroll
+    // events that don't cross a row or alphabet-letter boundary skip re-rendering.
+    type WindowSnapshot = (Vec<usize>, Option<String>);
+    let rendered_window: Rc<RefCell<Option<WindowSnapshot>>> = use_hook(Rc::default);
     // A game to focus once its card is mounted.
     let pending_focus: Rc<RefCell<Option<usize>>> = use_hook(Rc::default);
     // Renders spent waiting for it to mount.
@@ -138,6 +148,14 @@ pub fn VirtualLibrary(
                         Err(broadcast::error::RecvError::Closed) => break,
                     };
                     if stale {
+                        // Drain queued burst events so one reload covers them all.
+                        loop {
+                            match events.try_recv() {
+                                Ok(_) | Err(broadcast::error::TryRecvError::Lagged(_)) => {}
+                                Err(broadcast::error::TryRecvError::Empty) => break,
+                                Err(broadcast::error::TryRecvError::Closed) => return,
+                            }
+                        }
                         pages.borrow_mut().stale();
                         loaded += 1;
                     }
@@ -247,14 +265,16 @@ pub fn VirtualLibrary(
     // The pages the mounted rows need (the first one to learn the total);
     // the far ones are let go.
     {
-        let mut wanted = frame.needed_pages(focus);
-        if total().is_none() {
-            wanted = vec![0];
-        }
+        let needed = frame.needed_pages(focus);
+        let wanted = if total().is_none() {
+            vec![0]
+        } else {
+            needed.clone()
+        };
         let mut state = pages.borrow_mut();
         state
             .pages
-            .retain(|&page, _| frame.keeps(page, focus) || wanted.contains(&page));
+            .retain(|&page, _| frame.keeps_with(page, &needed) || wanted.contains(&page));
         for page in wanted {
             let fresh = state
                 .pages
@@ -293,16 +313,27 @@ pub fn VirtualLibrary(
                 state.pending.remove(&page);
                 match result {
                     Ok(got) => {
-                        let games = Rc::new(got.items);
+                        let games = got.items.into_iter().map(Rc::new).collect();
                         state.pages.insert(page, Page { games, epoch });
                         drop(state);
                         let count = usize::try_from(got.total).unwrap_or(usize::MAX);
                         if *total.peek() != Some(count) {
                             total.set(Some(count));
                         }
+                        if let Some(on_status) = on_status {
+                            on_status.call(Ok(got.total));
+                        }
                         loaded += 1;
                     }
-                    Err(error) => tracing::warn!(page, %error, "a library page didn't load"),
+                    Err(error) => {
+                        tracing::warn!(page, %error, "a library page didn't load");
+                        if page == 0
+                            && total.peek().is_none()
+                            && let Some(on_status) = on_status
+                        {
+                            on_status.call(Err(error));
+                        }
+                    }
                 }
             });
         }
@@ -414,7 +445,7 @@ pub fn VirtualLibrary(
     );
 
     let state = pages.borrow();
-    let game_at = |index: usize| -> Option<GameSummary> {
+    let game_at = |index: usize| -> Option<Rc<GameSummary>> {
         let page = state.pages.get(&(index / PAGE))?;
         page.games.get(index % PAGE).cloned()
     };
@@ -427,6 +458,9 @@ pub fn VirtualLibrary(
         .rev()
         .find(|letter| letter.offset as usize <= first_shown)
         .map(|letter| letter.letter.clone());
+    *rendered_window.borrow_mut() = Some((rows.clone(), current_letter.clone()));
+    let scroll_window = rendered_window.clone();
+    let scroll_letters = letters.clone();
     let jump_pending = pending_focus.clone();
     let list = layout == Layout::List;
     let content_height = frame.content_height();
@@ -471,7 +505,31 @@ pub fn VirtualLibrary(
                         });
                     }
                 },
-                onscroll: move |_| moved += 1,
+                onscroll: move |_| {
+                    let changed = scroller
+                        .peek()
+                        .as_ref()
+                        .and_then(|handle| current_frame(handle, layout, *total.peek()))
+                        .is_none_or(|next| {
+                            let next_rows = next.mounted(*focused.peek());
+                            let next_first = next.first_shown();
+                            let next_letter = scroll_letters
+                                .iter()
+                                .rev()
+                                .find(|letter| letter.offset as usize <= next_first)
+                                .map(|letter| letter.letter.as_str());
+                            match scroll_window.borrow().as_ref() {
+                                Some((prev_rows, prev_letter)) => {
+                                    *prev_rows != next_rows
+                                        || prev_letter.as_deref() != next_letter
+                                }
+                                None => true,
+                            }
+                        });
+                    if changed {
+                        moved += 1;
+                    }
+                },
                 if list {
                     div {
                         "data-part": "table-header",
@@ -679,17 +737,15 @@ pub(super) fn remote_copy(device_ids: &[String], devices: Option<&[PairedDevice]
     RemoteCopy { label, offline }
 }
 
-/// The list's columns (`LibraryRow.tsx`'s `listColumns`): title, status,
-/// last played, playtime, size and actions, its header's; the rows' cells
-/// are as wide.
+/// The list's columns: title, status, last played, playtime, size and actions,
+/// its header's; the rows' cells are as wide.
 pub const LIST_COLUMNS: &str = crate::ui::TABLE_COLUMNS;
 
 /// One game: a card in the grid, a row in the list (`ui::GameCard`,
-/// `ui::GameRow`, #93), and the card on Home's shelves (the webview's
-/// `LibraryCard`, everywhere).
+/// `ui::GameRow`, #93), and the card on Home's shelves.
 #[component]
 pub(crate) fn Game(
-    game: GameSummary,
+    #[props(into)] game: Rc<GameSummary>,
     index: usize,
     #[props(default)] list: bool,
     /// The grid's focused game, kept as focus moves.
@@ -704,19 +760,31 @@ pub(crate) fn Game(
     #[props(default = true)]
     focus_first: bool,
 ) -> Element {
+    let input = use_input();
     let menus = crate::game_menu::use_game_menus();
     let target = crate::game_menu::Target {
         game_id: game.id.clone(),
         title: game.title.clone(),
         entry_id: None,
     };
-    let mut wrapper = use_signal(|| None::<NodeHandle>);
+    // Non-reactive wrapper handle: updating binding owners directly in
+    // `onmounted` avoids immediately double-rendering every newly mounted card.
+    let wrapper: Rc<RefCell<Option<NodeHandle>>> = use_hook(Rc::default);
     // Selection mode: a click chooses it, Shift+click the games between.
+    // Per-card memo keeps toggling one card from re-rendering every mounted card.
     let selection = super::selection::use_selection();
-    let selected = selection.and_then(|selection| selection.state(&game.id));
+    let mut game_id_sig = use_signal(|| game.id.clone());
+    if *game_id_sig.peek() != game.id {
+        game_id_sig.set(game.id.clone());
+    }
+    let selected_memo = use_memo(move || {
+        let id = game_id_sig();
+        selection.and_then(|selection| selection.state(&id))
+    });
+    let selected = selected_memo();
     let mut shift = use_signal(|| false);
-    // A click, Enter or a pad's A: its quick look beside the view (the
-    // webview's desktop mode); without the host, `open`.
+    // A click, Enter or a pad's A opens its quick look beside the view;
+    // without the host, `open`.
     let on_open = {
         let target = target.clone();
         move |_| {
@@ -750,17 +818,19 @@ pub(crate) fn Game(
     // look.
     let open_menu = {
         let target = target.clone();
+        let wrapper = wrapper.clone();
         use_callback(move |anchor: Option<crate::ui::Anchor>| {
             let Some(menus) = menus else { return };
-            let anchor = anchor.or_else(|| wrapper.peek().as_ref().and_then(crate::ui::Anchor::of));
+            let anchor =
+                anchor.or_else(|| wrapper.borrow().as_ref().and_then(crate::ui::Anchor::of));
             if let Some(anchor) = anchor {
                 menus.open(target.clone(), anchor);
             }
         })
     };
-    let owner = wrapper.read().as_ref().map(NodeHandle::node_id);
+    let owner = wrapper.borrow().as_ref().map(NodeHandle::node_id);
     let choosing = selected.is_some();
-    use_input_action(
+    let menu_binding = use_input_action(
         Action::Menu,
         Bind {
             owner,
@@ -785,7 +855,7 @@ pub(crate) fn Game(
             true
         },
     );
-    {
+    let details_binding = {
         let target = target.clone();
         use_input_action(
             Action::Details,
@@ -803,8 +873,8 @@ pub(crate) fn Game(
                 }
                 true
             },
-        );
-    }
+        )
+    };
     let starting = menus.is_some_and(|menus| menus.starting(&game.id));
     let focus_key = format!("game-{}", game.id);
     // A pad starts on the first game.
@@ -875,10 +945,20 @@ pub(crate) fn Game(
             }
         }
     };
+    let mount_wrapper = wrapper.clone();
+    let ctx_wrapper = wrapper;
     rsx! {
         div {
             style: if list { "height: 100%;" } else { "display: flex; flex-direction: column; min-width: 0;" },
-            onmounted: move |event: Event<MountedData>| wrapper.set(event.data().downcast::<NodeHandle>().cloned()),
+            onmounted: move |event: Event<MountedData>| {
+                let handle = event.data().downcast::<NodeHandle>().cloned();
+                let owner = handle.as_ref().map(NodeHandle::node_id);
+                *mount_wrapper.borrow_mut() = handle;
+                let bindings = input.bindings();
+                let mut bindings = bindings.borrow_mut();
+                bindings.set_owner(menu_binding, owner);
+                bindings.set_owner(details_binding, owner);
+            },
             // A double click plays it, as its menu's Play does.
             onmousedown: move |event: MouseEvent| shift.set(event.modifiers().shift()),
             ondoubleclick: {
@@ -894,7 +974,7 @@ pub(crate) fn Game(
             },
             oncontextmenu: move |event: MouseEvent| {
                 event.stop_propagation();
-                open_menu.call(Some(crate::frame::pointer_anchor(wrapper.peek().as_ref(), &event)));
+                open_menu.call(Some(crate::frame::pointer_anchor(ctx_wrapper.borrow().as_ref(), &event)));
             },
             onkeydown: move |event: KeyboardEvent| {
                 let shift_f10 = event.key() == Key::Named(NamedKey::F10) && event.modifiers().shift();

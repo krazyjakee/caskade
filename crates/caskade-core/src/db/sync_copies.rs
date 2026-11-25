@@ -99,16 +99,17 @@ fn announce(entry: &GameEntry, release: Option<String>) -> Option<AnnouncedCopy>
     })
 }
 
-/// This device's installed copies, keyed `game|entry` (the engine puts the
-/// device in front, as for add-ons).
+/// This device's installed copies, keyed `game|entry` (or `device|game|entry`
+/// when `device` is given).
 pub(super) async fn snapshot(
     conn: &mut SqliteConnection,
     values: &mut HashMap<FieldKey, Value>,
+    precomputed_releases: &[(String, String, Option<String>)],
+    device: Option<&str>,
 ) -> Result<()> {
-    let releases: HashMap<String, Option<String>> = super::sync_carried::releases(conn, None)
-        .await?
-        .into_iter()
-        .map(|(entry, _, key)| (entry, key))
+    let releases: HashMap<&str, Option<&str>> = precomputed_releases
+        .iter()
+        .map(|(entry, _, key)| (entry.as_str(), key.as_deref()))
         .collect();
     for record in sqlx::query_scalar::<_, String>(
         "SELECT record_json FROM game_entries WHERE location_kind<>'none' \
@@ -121,16 +122,16 @@ pub(super) async fn snapshot(
             continue;
         };
         // Only this device's releases: not other devices', accounts' or hosts'.
-        let Some(release) = releases.get(&entry.id) else {
+        let Some(&release) = releases.get(entry.id.as_str()) else {
             continue;
         };
-        if let Some(copy) = announce(&entry, release.clone()) {
+        if let Some(copy) = announce(&entry, release.map(str::to_owned)) {
+            let key = match device {
+                Some(device) => format!("{device}|{}|{}", entry.game_id, entry.id),
+                None => format!("{}|{}", entry.game_id, entry.id),
+            };
             values.insert(
-                (
-                    Entity::Copy,
-                    format!("{}|{}", entry.game_id, entry.id),
-                    EXISTS.to_owned(),
-                ),
+                (Entity::Copy, key, EXISTS.to_owned()),
                 serde_json::to_value(copy)?,
             );
         }
@@ -199,22 +200,55 @@ impl LibraryStore {
         .bind(game)
         .fetch_all(&self.pool)
         .await?;
+        if entries.is_empty() {
+            return Ok(Vec::new());
+        }
+        type LatestEntry = ((i64, i64), Option<String>);
+        let mut latest: HashMap<(String, String), LatestEntry> = HashMap::new();
+        for chunk in entries.chunks(500) {
+            let mut qb = sqlx::QueryBuilder::<sqlx::Sqlite>::new(
+                "SELECT key, value_json, wall, counter FROM sync_fields WHERE entity = ",
+            );
+            qb.push_bind(Entity::Copy.as_str());
+            qb.push(" AND field = ");
+            qb.push_bind(EXISTS);
+            qb.push(" AND (");
+            for (idx, (source, entry)) in chunk.iter().enumerate() {
+                if idx > 0 {
+                    qb.push(" OR ");
+                }
+                let device = source.trim_start_matches(PEER_PREFIX);
+                qb.push("key GLOB ");
+                qb.push_bind(format!("{device}|*|{entry}"));
+            }
+            qb.push(")");
+            let rows: Vec<(String, Option<String>, i64, i64)> =
+                qb.build_query_as().fetch_all(&self.pool).await?;
+            for (key, value_json, wall, counter) in rows {
+                let [device, _, entry] = key_parts(&key)[..] else {
+                    continue;
+                };
+                let pair = (device.to_owned(), entry.to_owned());
+                let stamp = (wall, counter);
+                match latest.entry(pair) {
+                    std::collections::hash_map::Entry::Occupied(mut slot) => {
+                        if stamp > slot.get().0 {
+                            slot.insert((stamp, value_json));
+                        }
+                    }
+                    std::collections::hash_map::Entry::Vacant(slot) => {
+                        slot.insert((stamp, value_json));
+                    }
+                }
+            }
+        }
         let mut copies = Vec::new();
         for (source, entry) in entries {
             let device = source.trim_start_matches(PEER_PREFIX).to_owned();
-            let value: Option<String> = sqlx::query_scalar(
-                "SELECT value_json FROM sync_fields WHERE entity=? AND field=? AND key LIKE ? \
-                 ORDER BY wall DESC,counter DESC LIMIT 1",
-            )
-            .bind(Entity::Copy.as_str())
-            .bind(EXISTS)
-            .bind(format!("{device}|%|{entry}"))
-            .fetch_optional(&self.pool)
-            .await?
-            .flatten();
-            let Some(copy) = value
-                .and_then(|text| serde_json::from_str::<Value>(&text).ok())
-                .and_then(|value| serde_json::from_value::<AnnouncedCopy>(value).ok())
+            let Some(copy) = latest
+                .remove(&(device.clone(), entry.clone()))
+                .and_then(|(_, value)| value)
+                .and_then(|text| serde_json::from_str::<AnnouncedCopy>(&text).ok())
             else {
                 continue;
             };
@@ -262,5 +296,24 @@ pub fn copyable_here_sql() -> String {
          SELECT substr(pf.key,1,instr(pf.key,'|')-1),substr({rest},instr({rest},'|')+1) \
          FROM sync_fields pf WHERE pf.entity='copy' AND pf.field='' \
          AND pf.value_json->>'$.copyable' AND pf.value_json->>'$.os' IN ({systems})))"
+    )
+}
+
+/// CTE query returning the distinct `game_id`s that have a copyable peer entry
+/// for this OS, used by `library_stats_for_scope` to evaluate once per statement.
+pub(super) fn copyable_games_cte_sql() -> String {
+    let systems = match this_os() {
+        "linux" => "'linux','windows'",
+        "windows" => "'windows'",
+        _ => "'mac'",
+    };
+    let rest = "substr(pf.key,instr(pf.key,'|')+1)";
+    format!(
+        "SELECT DISTINCT pe.game_id FROM game_entries pe \
+         WHERE pe.source_id LIKE 'peer:%' \
+         AND (substr(pe.source_id,6),pe.external_id) IN (\
+         SELECT substr(pf.key,1,instr(pf.key,'|')-1),substr({rest},instr({rest},'|')+1) \
+         FROM sync_fields pf WHERE pf.entity='copy' AND pf.field='' \
+         AND pf.value_json->>'$.copyable' AND pf.value_json->>'$.os' IN ({systems}))"
     )
 }

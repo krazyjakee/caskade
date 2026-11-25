@@ -338,6 +338,7 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
         .and_then(|entry| state_of(&entry.id))
         .is_some_and(|state| state == InstallState::Updating);
 
+    let wheel_pending: std::rc::Rc<std::cell::Cell<bool>> = use_hook(std::rc::Rc::default);
     rsx! {
         article {
             "data-view": "game",
@@ -345,11 +346,15 @@ fn Page(game: GameDetails, from: Option<String>) -> Element {
             class: "mt-4",
             onwheel: move |_| {
                 moved += 1;
-                // A wheel's step glides (#160): look again once it's there.
-                spawn(async move {
-                    crate::data::sleep(std::time::Duration::from_millis(200)).await;
-                    moved += 1;
-                });
+                // A wheel's step glides (#160): coalesce rapid ticks into one follow-up check.
+                if !wheel_pending.replace(true) {
+                    let wheel_pending = wheel_pending.clone();
+                    spawn(async move {
+                        crate::data::sleep(std::time::Duration::from_millis(200)).await;
+                        wheel_pending.set(false);
+                        moved += 1;
+                    });
+                }
             },
             GameBackLink { game_id: game.game.id.clone(), from: from.clone(), class: "text-sm text-fg-muted" }
             section {

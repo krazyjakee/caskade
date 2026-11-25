@@ -413,8 +413,9 @@ impl Backups {
                     None => std::future::pending().await,
                 }
             };
+            let scheduled = self.settings().await.schedule != Schedule::Off;
             tokio::select! {
-                () = tokio::time::sleep(TICK) => {}
+                () = tokio::time::sleep(TICK), if scheduled => {}
                 () = changed => self.publish().await,
             }
         }

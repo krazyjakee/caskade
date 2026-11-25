@@ -75,6 +75,7 @@ pub use sync_accounts::is_marker as is_stand_in_marker;
 pub use sync_artwork::SyncedArtwork;
 pub use sync_copies::{AnnouncedCopy, CopyLocation, PeerCopyRecord, this_os};
 pub use sync_data::Applied;
+pub(crate) use sync_identity::SyncGameIndex;
 pub use sync_log::{FieldKey, FieldState, Seen};
 pub use sync_snapshot::Snapshot;
 mod popularity;

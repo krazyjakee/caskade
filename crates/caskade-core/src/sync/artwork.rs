@@ -37,21 +37,38 @@ impl BlobKind for ArtworkBlobs {
     }
 
     async fn wanted(&self) -> Result<Vec<String>> {
-        let mut wanted = Vec::new();
-        for hash in self.store.sync_wanted_artwork().await? {
-            if !matches!(self.cache.cached(&hash), Ok(Some(_))) {
-                wanted.push(hash);
-            }
+        let hashes = self.store.sync_wanted_artwork().await?;
+        if hashes.is_empty() {
+            return Ok(Vec::new());
         }
-        Ok(wanted)
+        let cache = self.cache.clone();
+        tokio::task::spawn_blocking(move || {
+            let mut wanted = Vec::new();
+            for hash in hashes {
+                if !matches!(cache.cached(&hash), Ok(Some(_))) {
+                    wanted.push(hash);
+                }
+            }
+            wanted
+        })
+        .await
+        .map_err(|error| Error::Io(std::io::Error::other(error)))
     }
 
     async fn has(&self, hash: &str) -> bool {
-        self.store
+        if !self
+            .store
             .sync_has_user_artwork(hash)
             .await
             .unwrap_or(false)
-            && matches!(self.cache.cached(hash), Ok(Some(_)))
+        {
+            return false;
+        }
+        let cache = self.cache.clone();
+        let hash = hash.to_owned();
+        tokio::task::spawn_blocking(move || matches!(cache.cached(&hash), Ok(Some(_))))
+            .await
+            .unwrap_or(false)
     }
 
     async fn read(&self, hash: &str, offset: u64, len: usize) -> Result<Vec<u8>> {

@@ -21,13 +21,15 @@ use super::{
     StreamingHost,
     api::{App, HostApi},
 };
+#[cfg(test)]
+use caskade_core::model::{InstallState, LaunchSpec};
 use caskade_core::{
     Result,
     accounts::AccountService,
     artwork::ArtworkCache,
     bus::{Bus, Event},
     db::LibraryStore,
-    model::{ArtworkKind, GameEntry, GameFilter, InstallState, LaunchSpec, ListGames},
+    model::{ArtworkKind, GameFilter, ListGames},
 };
 use std::{
     collections::HashSet,
@@ -247,51 +249,63 @@ pub async fn sync_whole(
     caskade: &Caskade,
     offers: &[Offer],
 ) -> Result<Published> {
-    let mut file = std::fs::read(list)
-        .ok()
-        .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok())
-        .filter(serde_json::Value::is_object)
-        .unwrap_or_else(|| serde_json::json!({ "env": {} }));
-    let listed: Vec<Option<Offer>> = file
-        .get("apps")
-        .and_then(serde_json::Value::as_array)
-        .map(|apps| {
-            apps.iter()
-                .map(|app| {
-                    serde_json::from_value::<App>(app.clone())
-                        .ok()
-                        .and_then(|app| caskade.owns(&app))
-                })
-                .collect()
-        })
-        .unwrap_or_default();
-    let published = difference(&listed, offers);
-    if published == Published::default() {
-        return Ok(published);
+    enum Step {
+        Unchanged(Published),
+        WithdrawAll,
+        AddLast(Published, Box<App>),
     }
-    let mut apps: Vec<App> = offers.iter().map(|offer| caskade.app(offer)).collect();
-    let Some(last) = apps.pop() else {
-        // Nothing to add makes the host read the file: one at a time.
-        return sync(api, caskade, offers).await;
-    };
-    file["apps"] = serde_json::to_value(&apps)?;
-    crate::util::write_atomically(list, serde_json::to_vec_pretty(&file)?)?;
-    api.add_app(&last).await?;
-    Ok(published)
+    let list = list.to_path_buf();
+    let caskade_owned = caskade.clone();
+    let offers_owned = offers.to_vec();
+    let step = tokio::task::spawn_blocking(move || -> Result<Step> {
+        let mut file = std::fs::read(&list)
+            .ok()
+            .and_then(|bytes| serde_json::from_slice::<serde_json::Value>(&bytes).ok())
+            .filter(serde_json::Value::is_object)
+            .unwrap_or_else(|| serde_json::json!({ "env": {} }));
+        let listed: Vec<Option<Offer>> = file
+            .get("apps")
+            .and_then(serde_json::Value::as_array)
+            .map(|apps| {
+                apps.iter()
+                    .map(|app| {
+                        serde_json::from_value::<App>(app.clone())
+                            .ok()
+                            .and_then(|app| caskade_owned.owns(&app))
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        let published = difference(&listed, &offers_owned);
+        if published == Published::default() {
+            return Ok(Step::Unchanged(published));
+        }
+        let mut apps: Vec<App> = offers_owned
+            .iter()
+            .map(|offer| caskade_owned.app(offer))
+            .collect();
+        let Some(last) = apps.pop() else {
+            return Ok(Step::WithdrawAll);
+        };
+        file["apps"] = serde_json::to_value(&apps)?;
+        crate::util::write_atomically(&list, serde_json::to_vec_pretty(&file)?)?;
+        Ok(Step::AddLast(published, Box::new(last)))
+    })
+    .await
+    .map_err(|error| caskade_core::Error::Io(std::io::Error::other(error)))??;
+    match step {
+        Step::Unchanged(published) => Ok(published),
+        Step::WithdrawAll => sync(api, caskade, offers).await,
+        Step::AddLast(published, last) => {
+            api.add_app(&last).await?;
+            Ok(published)
+        }
+    }
 }
 
 /// Removes every one of Caskade's apps, and only those.
 pub async fn withdraw(api: &HostApi, caskade: &Caskade) -> Result<usize> {
     Ok(sync(api, caskade, &[]).await?.removed)
-}
-
-/// Whether `entry` is a release Caskade starts on this device.
-fn playable(entry: &GameEntry) -> bool {
-    entry.state == InstallState::Installed
-        && entry
-            .launch
-            .as_ref()
-            .is_some_and(|launch| !matches!(launch, LaunchSpec::Plugin { .. }))
 }
 
 /// Where the publisher's apps go.
@@ -402,6 +416,14 @@ impl Publisher {
 
     /// Every game to offer now, by title, then the console app.
     pub async fn offers(&self) -> Result<Vec<Offer>> {
+        // Pre-fetch the set of games with at least one playable installed entry
+        // in one query instead of running `entries_for_game` per installed game.
+        let playable_games = self.inner.store.playable_game_ids().await?;
+        let active_account = self
+            .inner
+            .accounts
+            .as_ref()
+            .and_then(|accounts| accounts.active_id());
         let mut offers = Vec::new();
         let mut request = ListGames {
             filter: GameFilter::Installed,
@@ -410,17 +432,14 @@ impl Publisher {
             ..Default::default()
         };
         loop {
-            let page = self.inner.store.list_games(&request).await?;
+            let page = self
+                .inner
+                .store
+                .list_games_for_account(&request, active_account.as_deref())
+                .await?;
             let count = page.items.len();
             for game in page.items {
-                let entries = self.inner.store.entries_for_game(&game.id).await?;
-                if !entries.iter().any(playable) {
-                    continue;
-                }
-                // The host's active account may play it (#209).
-                if let Some(accounts) = &self.inner.accounts
-                    && accounts.age_restriction(&game.id).await?.is_some()
-                {
+                if !playable_games.contains(&game.id) {
                     continue;
                 }
                 let image = self.cover(&game.id).await;
@@ -443,7 +462,7 @@ impl Publisher {
     async fn cover(&self, game_id: &str) -> Option<PathBuf> {
         let cache = self.inner.artwork.as_ref()?;
         let path = self.inner.covers.join(format!("{game_id}.png"));
-        if path.is_file() {
+        if tokio::fs::try_exists(&path).await.unwrap_or(false) {
             return Some(path);
         }
         let artwork = self.inner.store.shown_artwork(game_id).await.ok()?;
@@ -505,27 +524,49 @@ impl Publisher {
         tokio::spawn(async move {
             let mut was_ready = false;
             let mut dirty = true;
+            let mut fail_delay: Option<Duration> = None;
             loop {
                 let ready = this.inner.target.ready();
                 if ready && !was_ready {
                     dirty = true;
+                    fail_delay = None;
                 }
                 was_ready = ready;
                 if dirty && ready {
+                    let wait = fail_delay.unwrap_or(this.inner.batch);
                     // Everything that arrives meanwhile joins this batch.
-                    tokio::time::sleep(this.inner.batch).await;
+                    tokio::time::sleep(wait).await;
                     while events.try_recv().is_ok() {}
                     dirty = false;
-                    if let Err(error) = this.publish().await {
-                        tracing::warn!(%error, "games not published to the streaming host");
-                        dirty = true;
+                    match this.publish().await {
+                        Ok(_) => {
+                            fail_delay = None;
+                        }
+                        Err(error) => {
+                            tracing::warn!(%error, "games not published to the streaming host");
+                            dirty = true;
+                            fail_delay = Some(
+                                fail_delay
+                                    .map_or(this.inner.batch.max(Duration::from_secs(2)), |d| {
+                                        (d * 2).min(Duration::from_secs(5 * 60))
+                                    }),
+                            );
+                        }
                     }
                     continue;
                 }
                 use tokio::sync::broadcast::error::RecvError;
                 match tokio::time::timeout(Duration::from_secs(5), events.recv()).await {
-                    Ok(Ok(event)) => dirty |= relevant(&event),
-                    Ok(Err(RecvError::Lagged(_))) => dirty = true,
+                    Ok(Ok(event)) => {
+                        if relevant(&event) {
+                            dirty = true;
+                            fail_delay = None;
+                        }
+                    }
+                    Ok(Err(RecvError::Lagged(_))) => {
+                        dirty = true;
+                        fail_delay = None;
+                    }
                     Ok(Err(RecvError::Closed)) => return,
                     Err(_) => {}
                 }

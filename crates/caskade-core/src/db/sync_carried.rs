@@ -55,13 +55,28 @@ pub(super) async fn releases(
     conn: &mut SqliteConnection,
     game: Option<&str>,
 ) -> Result<Vec<(String, String, Option<String>)>> {
-    let rows: Vec<(String, String, String, String, Option<String>)> = sqlx::query_as(
-        "SELECT id,game_id,source_id,external_id,record_json->'$.ids' FROM game_entries \
-         WHERE ?1 IS NULL OR game_id=?1",
-    )
-    .bind(game)
-    .fetch_all(&mut *conn)
-    .await?;
+    let rows: Vec<(String, String, String, String, Option<String>)> =
+        match game {
+            Some(game) => sqlx::query_as(
+                "SELECT id,game_id,source_id,external_id,record_json->'$.ids' FROM game_entries \
+                 WHERE game_id=?",
+            )
+            .bind(game)
+            .fetch_all(&mut *conn)
+            .await?,
+            None => sqlx::query_as(
+                "SELECT id,game_id,source_id,external_id,record_json->'$.ids' FROM game_entries",
+            )
+            .fetch_all(&mut *conn)
+            .await?,
+        };
+    Ok(compute_releases(rows))
+}
+
+/// Computes release keys from `(id, game_id, source_id, external_id, ids_json)` rows.
+pub(super) fn compute_releases(
+    rows: Vec<(String, String, String, String, Option<String>)>,
+) -> Vec<(String, String, Option<String>)> {
     let mut found: Vec<(String, String, Option<String>)> = Vec::new();
     let mut per_game: HashMap<String, usize> = HashMap::new();
     for (entry, game, source, external, ids) in rows {
@@ -90,7 +105,7 @@ pub(super) async fn releases(
             *key = Some(ONLY.to_owned());
         }
     }
-    Ok(found)
+    found
 }
 
 /// The release of `game` here that `key` names.
@@ -115,6 +130,7 @@ fn mode_of(value: &Value) -> Option<TrackingMode> {
 pub(super) async fn snapshot(
     conn: &mut SqliteConnection,
     values: &mut HashMap<FieldKey, Value>,
+    precomputed_releases: &[(String, String, Option<String>)],
 ) -> Result<()> {
     let mut put = |entity: Entity, key: String, field: &str, value: Value| {
         values.insert((entity, key, field.to_owned()), value);
@@ -150,18 +166,32 @@ pub(super) async fn snapshot(
         );
     }
 
-    let keys: HashMap<String, (String, String)> = releases(conn, None)
-        .await?
-        .into_iter()
-        .filter_map(|(entry, game, key)| Some((entry, (game, key?))))
-        .collect();
-    for (id, entry, position, record) in sqlx::query_as::<_, (String, String, i64, String)>(
+    let actions = sqlx::query_as::<_, (String, String, i64, String)>(
         "SELECT id,entry_id,position,record_json FROM game_actions",
     )
     .fetch_all(&mut *conn)
-    .await?
-    {
-        let (Some((game, release)), Ok(action)) = (keys.get(&entry), decode::<GameAction>(record))
+    .await?;
+    let action_settings_rows = sqlx::query_as::<_, (String, String)>(
+        "SELECT entry_id,record_json FROM entry_action_settings",
+    )
+    .fetch_all(&mut *conn)
+    .await?;
+    let manual_links = sqlx::query_as::<_, (String, String, String)>(
+        "SELECT entry_id,provider,record_json FROM achievement_links \
+         WHERE record_json->>'$.method.type'='manual'",
+    )
+    .fetch_all(&mut *conn)
+    .await?;
+    if actions.is_empty() && action_settings_rows.is_empty() && manual_links.is_empty() {
+        return Ok(());
+    }
+    let keys: HashMap<&str, (&str, &str)> = precomputed_releases
+        .iter()
+        .filter_map(|(entry, game, key)| Some((entry.as_str(), (game.as_str(), key.as_deref()?))))
+        .collect();
+    for (id, entry, position, record) in actions {
+        let (Some(&(game, release)), Ok(action)) =
+            (keys.get(entry.as_str()), decode::<GameAction>(record))
         else {
             continue;
         };
@@ -186,15 +216,11 @@ pub(super) async fn snapshot(
             }),
         );
     }
-    for (entry, record) in sqlx::query_as::<_, (String, String)>(
-        "SELECT entry_id,record_json FROM entry_action_settings",
-    )
-    .fetch_all(&mut *conn)
-    .await?
-    {
-        let (Some((game, release)), Ok(settings)) =
-            (keys.get(&entry), decode::<EntryActionSettings>(record))
-        else {
+    for (entry, record) in action_settings_rows {
+        let (Some(&(game, release)), Ok(settings)) = (
+            keys.get(entry.as_str()),
+            decode::<EntryActionSettings>(record),
+        ) else {
             continue;
         };
         let key = join_key(&[game, release]);
@@ -226,15 +252,9 @@ pub(super) async fn snapshot(
             );
         }
     }
-    for (entry, provider, record) in sqlx::query_as::<_, (String, String, String)>(
-        "SELECT entry_id,provider,record_json FROM achievement_links \
-         WHERE record_json->>'$.method.type'='manual'",
-    )
-    .fetch_all(&mut *conn)
-    .await?
-    {
-        let (Some((game, release)), Ok(link)) =
-            (keys.get(&entry), decode::<AchievementLink>(record))
+    for (entry, provider, record) in manual_links {
+        let (Some(&(game, release)), Ok(link)) =
+            (keys.get(entry.as_str()), decode::<AchievementLink>(record))
         else {
             continue;
         };
@@ -305,14 +325,22 @@ pub(super) async fn write(
 pub(super) async fn snapshot_device(
     conn: &mut SqliteConnection,
     values: &mut HashMap<FieldKey, Value>,
+    device: Option<&str>,
 ) -> Result<()> {
+    let addon_key = |id: &str| match device {
+        Some(device) => join_key(&[device, id]),
+        None => id.to_owned(),
+    };
     let mut addons: HashMap<String, Value> = HashMap::new();
     for (id, enabled) in sqlx::query_as::<_, (String, bool)>("SELECT id,enabled FROM plugins")
         .fetch_all(&mut *conn)
         .await?
     {
         addons.insert(id.clone(), json!({ "kind": "plugin" }));
-        values.insert((Entity::Addon, id, "enabled".to_owned()), json!(enabled));
+        values.insert(
+            (Entity::Addon, addon_key(&id), "enabled".to_owned()),
+            json!(enabled),
+        );
     }
     let records: Option<String> =
         sqlx::query_scalar("SELECT value_json FROM settings WHERE key='addons.records'")
@@ -332,7 +360,7 @@ pub(super) async fn snapshot_device(
         }
     }
     for (id, value) in addons {
-        values.insert((Entity::Addon, id, EXISTS.to_owned()), value);
+        values.insert((Entity::Addon, addon_key(&id), EXISTS.to_owned()), value);
     }
     for (platform, definition) in sqlx::query_as::<_, (String, String)>(
         "SELECT p.platform_id,e.definition_id FROM platform_settings p \

@@ -41,17 +41,48 @@ static APP: LazyLock<Translations> =
 static UI: LazyLock<Translations> =
     LazyLock::new(|| Translations::new(UI_CATALOGS.iter().copied()));
 
-/// The language in use.
+/// The language in use, with its precomputed formatting locale so every
+/// `t!()` and `format::*()` call avoids querying `sys_locale::get_locales()`.
 #[derive(Debug, Clone)]
 struct State {
     /// The language as asked for (`sv`, `en-GB`, `en-XA`).
     language: String,
+    /// Resolved formatting locale (`en-GB`, `sv-SE`, …).
+    format_locale: String,
     pseudo: bool,
 }
 
-static STATE: RwLock<State> = RwLock::new(State {
-    language: String::new(),
-    pseudo: false,
+static SYSTEM_LOCALES: LazyLock<Vec<String>> = LazyLock::new(locale::system);
+
+fn resolve_format_locale(language: &str, pseudo: bool) -> String {
+    let lang = if language.is_empty() {
+        locale::SOURCE
+    } else {
+        language
+    };
+    if pseudo || is_pseudo(lang) {
+        return "en".to_owned();
+    }
+    if lang.contains('-') {
+        return lang.to_owned();
+    }
+    SYSTEM_LOCALES
+        .iter()
+        .find(|tag| {
+            tag.split(['-', '_'])
+                .next()
+                .is_some_and(|first| first.eq_ignore_ascii_case(lang))
+        })
+        .cloned()
+        .unwrap_or_else(|| lang.to_owned())
+}
+
+static STATE: LazyLock<RwLock<State>> = LazyLock::new(|| {
+    RwLock::new(State {
+        language: String::new(),
+        format_locale: resolve_format_locale(locale::SOURCE, false),
+        pseudo: false,
+    })
 });
 
 static OBSERVER: OnceLock<fn()> = OnceLock::new();
@@ -68,13 +99,6 @@ fn observe() {
     }
 }
 
-fn state() -> State {
-    STATE
-        .read()
-        .unwrap_or_else(|poisoned| poisoned.into_inner())
-        .clone()
-}
-
 /// Whether `language` is the pseudo-locale, which debug builds offer.
 pub fn is_pseudo(language: &str) -> bool {
     cfg!(debug_assertions) && language.eq_ignore_ascii_case(pseudo::LOCALE)
@@ -88,10 +112,12 @@ pub fn set_language(language: &str) -> String {
     let catalogs = if pseudo { "en" } else { language };
     let resolved = APP.set_locale([catalogs]);
     UI.set_locale([catalogs]);
+    let format_locale = resolve_format_locale(language, pseudo);
     *STATE
         .write()
         .unwrap_or_else(|poisoned| poisoned.into_inner()) = State {
         language: language.to_owned(),
+        format_locale,
         pseudo,
     };
     if pseudo {
@@ -122,48 +148,46 @@ pub fn language_name(tag: &str) -> String {
 /// The language in use, as asked for.
 pub fn language() -> String {
     observe();
-    let state = state();
-    if state.language.is_empty() {
+    let guard = STATE
+        .read()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    if guard.language.is_empty() {
         locale::SOURCE.to_owned()
     } else {
-        state.language
+        guard.language.clone()
     }
 }
 
 /// The language numbers and dates follow: the language's, in the OS's
 /// region when the OS speaks it (English in the UK has the UK's dates).
 pub fn format_locale() -> String {
-    let language = language();
-    if is_pseudo(&language) {
-        return "en".to_owned();
-    }
-    if language.contains('-') {
-        return language;
-    }
-    locale::system()
-        .into_iter()
-        .find(|tag| {
-            tag.split(['-', '_'])
-                .next()
-                .is_some_and(|first| first.eq_ignore_ascii_case(&language))
-        })
-        .unwrap_or(language)
+    observe();
+    STATE
+        .read()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+        .format_locale
+        .clone()
 }
 
-struct Numbers(String);
+struct Numbers<'a>(&'a str);
 
-impl message::Locale for Numbers {
+impl message::Locale for Numbers<'_> {
     fn category(&self, n: f64) -> &'static str {
-        intl::plural_category(&self.0, n)
+        intl::plural_category(self.0, n)
     }
 
     fn number(&self, n: f64) -> String {
-        intl::count(&self.0, n)
+        intl::count(self.0, n)
     }
 }
 
 fn render(tokens: &[message::Token], args: &[(&str, &dyn Value)], count: Option<f64>) -> String {
-    let pseudo = state().pseudo;
+    let (pseudo, fmt_locale) = {
+        let guard = STATE
+            .read()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        (guard.pseudo, guard.format_locale.clone())
+    };
     let piece = |text: &str| {
         if pseudo {
             pseudo::localize(text)
@@ -171,7 +195,7 @@ fn render(tokens: &[message::Token], args: &[(&str, &dyn Value)], count: Option<
             text.to_owned()
         }
     };
-    message::render(tokens, args, count, &Numbers(format_locale()), &piece)
+    message::render(tokens, args, count, &Numbers(&fmt_locale), &piece)
 }
 
 /// The translation of `id` (in `context`): the `app` domain's, else the
@@ -186,7 +210,19 @@ fn lookup(context: Option<&str>, id: &str) -> String {
 /// finds.
 pub fn text(context: Option<&str>, id: &str, args: &[(&str, &dyn Value)]) -> String {
     observe();
-    render(&message::parse(&lookup(context, id)), args, None)
+    let translated = lookup(context, id);
+    if args.is_empty() && !translated.contains(['{', '\'']) {
+        let pseudo = STATE
+            .read()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .pseudo;
+        return if pseudo {
+            pseudo::localize(&translated)
+        } else {
+            translated
+        };
+    }
+    render(&message::parse(&translated), args, None)
 }
 
 /// A gettext plural's form for `n`, filled in (`#` is `n`). Prefer [`tn!`]

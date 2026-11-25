@@ -183,9 +183,15 @@ impl Inner {
             let mut now_due: Vec<String> = Vec::new();
             tokio::select! {
                 _ = capture.tick() => {
+                    let paired = self.paired().await;
+                    if paired.is_empty() {
+                        continue;
+                    }
                     let Some(engine) = self.engine() else { continue };
                     // Read before capturing: a write during it is caught next time.
-                    let writes = engine.store().writes();
+                    // Only writes to synced tables (excluding open-session heartbeats
+                    // and local-only caches/notifications) trigger a capture.
+                    let writes = engine.store().synced_writes();
                     if captured.as_ref().is_some_and(|(at_engine, at_writes, at)| {
                         std::ptr::eq(at_engine.as_ptr(), Arc::as_ptr(&engine))
                             && *at_writes == writes
@@ -198,12 +204,12 @@ impl Inner {
                             captured = Some((Arc::downgrade(&engine), writes, Instant::now()));
                             // This device changed something: tell everyone.
                             if count > 0 {
-                                now_due.extend(self.paired().await);
+                                now_due.extend(paired.iter().cloned());
                             }
                         }
                         Err(error) => tracing::warn!(%error, "sync capture failed"),
                     }
-                    for device in self.paired().await {
+                    for device in paired {
                         next.entry(device).or_insert_with(Instant::now);
                     }
                 }

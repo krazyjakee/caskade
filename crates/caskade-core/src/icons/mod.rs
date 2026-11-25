@@ -15,6 +15,7 @@ use crate::{
 };
 use caskade_discovery::InstallState;
 use std::{
+    collections::HashMap,
     path::{Path, PathBuf},
     sync::Arc,
     time::Duration,
@@ -57,13 +58,25 @@ impl ExeIcons {
     /// Returns how many got one.
     pub async fn run(&self) -> Result<usize> {
         let store = &self.inner.store;
-        let roots = store.roots().await?;
+        let game_ids = store.installed_games_without_icon().await?;
+        if game_ids.is_empty() {
+            return Ok(0);
+        }
+        let roots = Arc::new(store.roots().await?);
+        let mut entries_by_game = fetch_installed_entries(store, &game_ids).await?;
+        let checks_by_game = fetch_icon_checks(store, &game_ids).await?;
         let mut added = 0;
-        for game_id in store.games_without_icon().await? {
-            let entries = store.entries_for_game(&game_id).await?;
-            let candidates = candidates(&entries, &roots);
-            let signature = signature(&candidates);
-            if store.icon_check(&game_id).await?.as_deref() == Some(signature.as_str()) {
+        for game_id in game_ids {
+            let entries = entries_by_game.remove(&game_id).unwrap_or_default();
+            let roots = roots.clone();
+            let (candidates, signature) = tokio::task::spawn_blocking(move || {
+                let candidates = candidates(&entries, &roots);
+                let signature = signature(&candidates);
+                (candidates, signature)
+            })
+            .await
+            .map_err(|error| crate::Error::Io(std::io::Error::other(error)))?;
+            if checks_by_game.get(&game_id).map(String::as_str) == Some(signature.as_str()) {
                 continue;
             }
             if self.extract(&game_id, candidates).await? {
@@ -147,6 +160,54 @@ impl ExeIcons {
             }
         })
     }
+}
+
+/// Batch-loads installed entries for `game_ids`, preserving `entries_for_game` order.
+async fn fetch_installed_entries(
+    store: &LibraryStore,
+    game_ids: &[String],
+) -> Result<HashMap<String, Vec<GameEntry>>> {
+    let mut out: HashMap<String, Vec<GameEntry>> = HashMap::new();
+    for chunk in game_ids.chunks(500) {
+        let mut qb = sqlx::QueryBuilder::<sqlx::Sqlite>::new(
+            "SELECT game_id, record_json FROM game_entries \
+             WHERE state_kind='installed' AND game_id IN (",
+        );
+        let mut separated = qb.separated(", ");
+        for id in chunk {
+            separated.push_bind(id.as_str());
+        }
+        qb.push(") ORDER BY source_id, external_id, id");
+        let rows: Vec<(String, String)> = qb.build_query_as().fetch_all(&store.pool).await?;
+        for (game_id, record) in rows {
+            let entry: GameEntry = serde_json::from_str(&record)?;
+            out.entry(game_id).or_default().push(entry);
+        }
+    }
+    Ok(out)
+}
+
+/// Batch-loads saved icon check signatures for `game_ids`.
+async fn fetch_icon_checks(
+    store: &LibraryStore,
+    game_ids: &[String],
+) -> Result<HashMap<String, String>> {
+    let mut out = HashMap::new();
+    for chunk in game_ids.chunks(500) {
+        let mut qb = sqlx::QueryBuilder::<sqlx::Sqlite>::new(
+            "SELECT game_id, signature FROM icon_checks WHERE game_id IN (",
+        );
+        let mut separated = qb.separated(", ");
+        for id in chunk {
+            separated.push_bind(id.as_str());
+        }
+        qb.push(")");
+        let rows: Vec<(String, String)> = qb.build_query_as().fetch_all(&store.pool).await?;
+        for (game_id, signature) in rows {
+            out.insert(game_id, signature);
+        }
+    }
+    Ok(out)
 }
 
 /// Events that can bring a game an executable.

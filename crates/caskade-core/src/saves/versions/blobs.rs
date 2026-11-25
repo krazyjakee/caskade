@@ -125,6 +125,26 @@ impl BlobStore {
         }
     }
 
+    /// If `expected_hash` is already stored, verifies `source` still hashes to
+    /// `expected_hash` without copying or fsyncing a duplicate temp file;
+    /// otherwise copies `source` into the store as [`put_file`](Self::put_file).
+    pub fn verify_or_put_file(&self, source: &Path, expected_hash: &str) -> Result<String> {
+        if self.has(expected_hash) {
+            let mut input = fs::File::open(source)?;
+            let mut hasher = Sha256::new();
+            let mut buffer = [0u8; 64 * 1024];
+            loop {
+                let read = input.read(&mut buffer)?;
+                if read == 0 {
+                    break;
+                }
+                hasher.update(&buffer[..read]);
+            }
+            return Ok(format!("{SCHEME}{:x}", hasher.finalize()));
+        }
+        Ok(self.put_file(source)?.0)
+    }
+
     /// Keeps `bytes` and returns their hash. Blocking.
     pub fn put_bytes(&self, bytes: &[u8]) -> Result<String> {
         let hash = hash_bytes(bytes);

@@ -195,11 +195,15 @@ pub fn StatisticsSettings() -> Element {
                         fresh = true;
                         stats.unwatch(&watcher);
                     }
-                    let tick = Duration::from_millis(state.peek().interval_ms.max(250) as u64);
-                    sleep(tick).await;
-                    since_renew += tick;
-                    // Re-checks staleness between samples.
-                    now.set(caskade_core::now_ms());
+                    if shown {
+                        let tick = Duration::from_millis(state.peek().interval_ms.max(250) as u64);
+                        sleep(tick).await;
+                        since_renew += tick;
+                        // Re-checks staleness between samples.
+                        now.set(caskade_core::now_ms());
+                    } else {
+                        sleep(Duration::from_secs(2)).await;
+                    }
                 }
             });
         });

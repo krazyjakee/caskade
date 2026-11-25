@@ -40,6 +40,36 @@ pub fn mode() -> Mode {
     }
 }
 
+/// Registers LB/RB tab bindings only when a plugin view actually has a
+/// segmented control, avoiding unused bindings on card badges/overlays.
+#[component]
+fn PluginViewTabs(
+    segmented: (String, String, Vec<String>),
+    on_act: Callback<(String, Value)>,
+) -> Element {
+    let step = move |segmented: &(String, String, Vec<String>), by: usize| {
+        let (action, value, options) = segmented;
+        if options.len() < 2 {
+            return false;
+        }
+        let at = options
+            .iter()
+            .position(|option| option == value)
+            .unwrap_or(0);
+        let next = options[(at + by) % options.len()].clone();
+        on_act.call((action.clone(), Value::String(next)));
+        true
+    };
+    crate::input::use_input_action(Action::TabPrev, crate::input::Bind::default(), {
+        let segmented = segmented.clone();
+        move || step(&segmented, segmented.2.len().saturating_sub(1))
+    });
+    crate::input::use_input_action(Action::TabNext, crate::input::Bind::default(), {
+        move || step(&segmented, 1)
+    });
+    rsx! {}
+}
+
 /// What enabled plugins draw, loaded once for the whole frame.
 #[derive(Clone, Copy)]
 struct Contributions(crate::data::Query<Vec<Contribution>>);
@@ -53,13 +83,7 @@ pub fn PluginRoot(children: Element) -> Element {
     children
 }
 
-/// Every contribution enabled plugins draw; none outside [`PluginRoot`]
-/// (the component gallery) or while they load.
-pub fn use_contributions() -> Vec<Contribution> {
-    use_loaded().unwrap_or_default()
-}
-
-/// [`use_contributions`], `None` while they first load.
+/// Every contribution enabled plugins draw, `None` while they first load.
 fn use_loaded() -> Option<Vec<Contribution>> {
     let Contributions(query) = try_use_context::<Contributions>()?;
     match &*query.read() {
@@ -69,11 +93,20 @@ fn use_loaded() -> Option<Vec<Contribution>> {
     }
 }
 
-/// The contributions to `slot` that show in this mode.
+/// The contributions to `slot` that show in this mode, filtering in place
+/// so empty slots (like card badges/overlays with no plugins) allocate nothing.
 pub fn use_slot(slot: &'static str) -> Vec<Contribution> {
-    use_contributions()
-        .into_iter()
-        .filter(|item| item.slot == slot && item.shown_in(mode()))
+    let Some(Contributions(query)) = try_use_context::<Contributions>() else {
+        return Vec::new();
+    };
+    let read = query.read();
+    let Some(Ok(all)) = &*read else {
+        return Vec::new();
+    };
+    let current_mode = mode();
+    all.iter()
+        .filter(|item| item.slot == slot && item.shown_in(current_mode))
+        .cloned()
         .collect()
 }
 
@@ -256,38 +289,11 @@ fn DrawnOne(contribution: Contribution, game_id: Option<String>) -> Element {
         })
     };
     // In a view, a pad's LB and RB move its first segmented control (#152).
+    // Only bind them for view slots, not for card badges/overlays.
     let segmented = match &*tree.read() {
         Some(Ok(nodes)) if contribution.slot == "views" => tree::first_segmented(nodes),
         _ => None,
     };
-    let step = move |segmented: &Option<(String, String, Vec<String>)>, by: usize| {
-        let Some((action, value, options)) = segmented else {
-            return false;
-        };
-        if options.len() < 2 {
-            return false;
-        }
-        let at = options
-            .iter()
-            .position(|option| option == value)
-            .unwrap_or(0);
-        let next = options[(at + by) % options.len()].clone();
-        act((action.clone(), Value::String(next)));
-        true
-    };
-    crate::input::use_input_action(Action::TabPrev, crate::input::Bind::default(), {
-        let segmented = segmented.clone();
-        move || {
-            step(
-                &segmented,
-                segmented.as_ref().map_or(0, |(_, _, all)| all.len() - 1),
-            )
-        }
-    });
-    crate::input::use_input_action(Action::TabNext, crate::input::Bind::default(), {
-        let segmented = segmented.clone();
-        move || step(&segmented, 1)
-    });
     let read: Option<Result<Vec<Node>, ErrorReport>> = tree.read().clone();
     match read {
         None => rsx! {
@@ -300,6 +306,9 @@ fn DrawnOne(contribution: Contribution, game_id: Option<String>) -> Element {
         },
         Some(Ok(nodes)) => rsx! {
             div { "data-plugin": "{contribution.plugin}", class: "contents",
+                if let Some(segmented) = segmented {
+                    PluginViewTabs { segmented, on_act: act }
+                }
                 PluginTree { nodes, busy: busy(), on_act: act }
             }
         },

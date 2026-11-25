@@ -15,7 +15,7 @@ use crate::{
 };
 use caskade_discovery::ExternalId;
 use sqlx::SqliteConnection;
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
 /// What applying a snapshot changed in the library.
 #[derive(Debug, Default)]
@@ -240,29 +240,53 @@ impl LibraryStore {
             products.insert(product.product_id.clone(), product);
         }
         let mut applied = Applied::default();
+        // Pre-read existing entitlements before taking the write lock so repeat
+        // refreshes don't hold BEGIN IMMEDIATE while scanning game_entries.
+        let pre_known: HashMap<String, (Option<String>, Option<i64>, String)> =
+            sqlx::query_as::<_, (String, Option<String>, Option<i64>, String)>(
+                "SELECT product_id,entry_id,lost_at_ms,record_json FROM account_entitlements \
+             WHERE store_account_id=?",
+            )
+            .bind(&account.id)
+            .fetch_all(&self.pool)
+            .await?
+            .into_iter()
+            .map(|(product, entry, lost, record)| (product, (entry, lost, record)))
+            .collect();
+        let has_new = products
+            .keys()
+            .any(|product_id| !pre_known.contains_key(product_id));
         // Reads before it writes: IMMEDIATE waits for another writer
         // where a deferred transaction would fail as busy.
         let mut tx = self.pool.begin_with("BEGIN IMMEDIATE").await?;
-        let known: HashMap<String, (Option<String>, Option<i64>)> = sqlx::query_as::<
-            _,
-            (String, Option<String>, Option<i64>),
-        >(
-            "SELECT product_id,entry_id,lost_at_ms FROM account_entitlements WHERE store_account_id=?",
-        )
-        .bind(&account.id)
-        .fetch_all(&mut *tx)
-        .await?
-        .into_iter()
-        .map(|(product, entry, lost)| (product, (entry, lost)))
-        .collect();
-        let mut by_id = StoreIds::load(&mut tx).await?;
+        let known: HashMap<String, (Option<String>, Option<i64>, String)> =
+            sqlx::query_as::<_, (String, Option<String>, Option<i64>, String)>(
+                "SELECT product_id,entry_id,lost_at_ms,record_json FROM account_entitlements \
+             WHERE store_account_id=?",
+            )
+            .bind(&account.id)
+            .fetch_all(&mut *tx)
+            .await?
+            .into_iter()
+            .map(|(product, entry, lost, record)| (product, (entry, lost, record)))
+            .collect();
+        let mut by_id = if has_new
+            || products
+                .keys()
+                .any(|product_id| !known.contains_key(product_id))
+        {
+            Some(StoreIds::load(&mut tx).await?)
+        } else {
+            None
+        };
         for product in products.values() {
             let record = serde_json::to_string(product)?;
             match known.get(&product.product_id) {
-                Some((entry_id, lost)) => {
+                Some((entry_id, lost, old_record)) => {
                     if lost.is_some() {
                         applied.outcome.regained += 1;
                     }
+                    let record_changed = *old_record != record;
                     sqlx::query(
                         "UPDATE account_entitlements SET record_json=?,last_seen_ms=?,\
                          lost_at_ms=NULL WHERE store_account_id=? AND product_id=?",
@@ -273,14 +297,24 @@ impl LibraryStore {
                     .bind(&product.product_id)
                     .execute(&mut *tx)
                     .await?;
-                    if let Some(entry_id) = entry_id
-                        && let Some(game_id) = add_ids(&mut tx, entry_id, product).await?
-                    {
-                        applied.outcome.updated += 1;
-                        applied.updated.insert(game_id);
+                    if record_changed && let Some(entry_id) = entry_id {
+                        let already_has_ids = match by_id.as_ref() {
+                            Some(ids) => ids.entry_has_all(entry_id, product)?,
+                            None => false,
+                        };
+                        if !already_has_ids
+                            && let Some(game_id) = add_ids(&mut tx, entry_id, product).await?
+                        {
+                            if let Some(ids) = by_id.as_mut() {
+                                ids.record_entry_ids(entry_id, &game_id, product)?;
+                            }
+                            applied.outcome.updated += 1;
+                            applied.updated.insert(game_id);
+                        }
                     }
                 }
                 None => {
+                    let by_id = by_id.as_mut().expect("loaded when any product is new");
                     let game_id = match by_id.game(product)? {
                         Some(game_id) => {
                             applied.updated.insert(game_id.clone());
@@ -317,7 +351,7 @@ impl LibraryStore {
             }
         }
         if snapshot.complete {
-            for (product_id, (_, lost)) in &known {
+            for (product_id, (_, lost, _)) in &known {
                 if lost.is_none() && !products.contains_key(product_id) {
                     sqlx::query(
                         "UPDATE account_entitlements SET lost_at_ms=? \
@@ -489,40 +523,90 @@ fn key_text(json: &str) -> Option<String> {
 /// by discovery (an installed copy) wins over another account's. Keys are
 /// the ids' JSON, as serde writes them and SQLite's `json()` reads them
 /// back (compact, fields in order).
-struct StoreIds(HashMap<String, (bool, String)>);
+struct StoreIds {
+    by_id: HashMap<String, (bool, String)>,
+    entry_ids: HashMap<String, HashSet<String>>,
+}
 
 impl StoreIds {
     async fn load(connection: &mut SqliteConnection) -> Result<Self> {
-        let rows: Vec<(String, bool, String)> = sqlx::query_as(
-            "SELECT e.game_id,e.source_id LIKE 'store:%',json(j.value) FROM game_entries e \
+        let rows: Vec<(String, String, bool, String)> = sqlx::query_as(
+            "SELECT e.id,e.game_id,e.source_id LIKE 'store:%',json(j.value) FROM game_entries e \
              JOIN games g ON g.id=e.game_id, json_each(e.record_json,'$.ids') j ORDER BY g.rowid",
         )
         .fetch_all(&mut *connection)
         .await?;
-        let mut ids = Self(HashMap::new());
-        for (game_id, store, id) in rows {
-            if let Some(id) = key_text(&id) {
-                ids.insert(id, store, game_id);
+        let mut ids = Self {
+            by_id: HashMap::new(),
+            entry_ids: HashMap::new(),
+        };
+        for (entry_id, game_id, store, raw) in rows {
+            if let Ok(ext_id) = serde_json::from_str::<ExternalId>(&raw) {
+                if let Ok(exact) = serde_json::to_string(&ext_id) {
+                    ids.entry_ids.entry(entry_id).or_default().insert(exact);
+                }
+                if let Ok(Some(id)) = key(&ext_id) {
+                    ids.insert(id, store, game_id);
+                }
             }
         }
         Ok(ids)
     }
 
     fn insert(&mut self, id: String, store: bool, game_id: String) {
-        match self.0.get(&id) {
+        match self.by_id.get(&id) {
             // Keep the oldest; a discovered copy beats an account's.
             Some((false, _)) => {}
             Some((true, _)) if store => {}
             _ => {
-                self.0.insert(id, (store, game_id));
+                self.by_id.insert(id, (store, game_id));
             }
         }
     }
 
     fn add(&mut self, entry: &GameEntry, store: bool) -> Result<()> {
         for id in &entry.ids {
+            self.entry_ids
+                .entry(entry.id.clone())
+                .or_default()
+                .insert(serde_json::to_string(id)?);
             if let Some(key) = key(id)? {
                 self.insert(key, store, entry.game_id.clone());
+            }
+        }
+        Ok(())
+    }
+
+    /// Whether `entry_id` already carries every id in `product.ids`.
+    fn entry_has_all(&self, entry_id: &str, product: &OwnedProduct) -> Result<bool> {
+        if product.ids.is_empty() {
+            return Ok(true);
+        }
+        let Some(existing) = self.entry_ids.get(entry_id) else {
+            return Ok(false);
+        };
+        for id in &product.ids {
+            if !existing.contains(&serde_json::to_string(id)?) {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    }
+
+    /// Records `product.ids` on `entry_id` after `add_ids` persisted them.
+    fn record_entry_ids(
+        &mut self,
+        entry_id: &str,
+        game_id: &str,
+        product: &OwnedProduct,
+    ) -> Result<()> {
+        for id in &product.ids {
+            self.entry_ids
+                .entry(entry_id.to_owned())
+                .or_default()
+                .insert(serde_json::to_string(id)?);
+            if let Some(key) = key(id)? {
+                self.insert(key, true, game_id.to_owned());
             }
         }
         Ok(())
@@ -531,7 +615,7 @@ impl StoreIds {
     /// The game one of `product`'s store ids belongs to.
     fn game(&self, product: &OwnedProduct) -> Result<Option<String>> {
         for id in &product.ids {
-            if let Some((_, game_id)) = key(id)?.and_then(|key| self.0.get(&key)) {
+            if let Some((_, game_id)) = key(id)?.and_then(|key| self.by_id.get(&key)) {
                 return Ok(Some(game_id.clone()));
             }
         }

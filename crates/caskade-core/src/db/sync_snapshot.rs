@@ -9,7 +9,6 @@ use sqlx::SqliteConnection;
 use super::LibraryStore;
 use super::game_edit::{Overrides, automatic};
 use super::sync_data::{is_list, record_map};
-use super::sync_identity::store_key;
 use super::sync_log::FieldKey;
 use crate::Result;
 use crate::model::{Game, GameField};
@@ -34,18 +33,50 @@ impl Snapshot {
 impl LibraryStore {
     /// Every synced field here, keyed by this device's ids.
     pub async fn sync_snapshot(&self) -> Result<Snapshot> {
+        self.sync_snapshot_for_device(None).await
+    }
+
+    /// Every synced field here, prefixing device-owned `Addon` and `Copy` keys
+    /// with `device` when supplied so the sync engine doesn't have to rebuild
+    /// the snapshot map.
+    pub(crate) async fn sync_snapshot_for_device(&self, device: Option<&str>) -> Result<Snapshot> {
         let mut snapshot = Snapshot::default();
         let mut conn = self.pool.acquire().await?;
-        games(&mut conn, &mut snapshot).await?;
+        // Read `game_entries` once to compute both per-game store keys and
+        // per-entry release keys instead of scanning `game_entries` three times.
+        let entry_rows: Vec<(String, String, String, String, Option<String>)> = sqlx::query_as(
+            "SELECT id,game_id,source_id,external_id,record_json->'$.ids' FROM game_entries",
+        )
+        .fetch_all(&mut *conn)
+        .await?;
+        let mut stores: HashMap<String, BTreeSet<String>> = HashMap::new();
+        for (_, game, source, _, ids) in &entry_rows {
+            if source == "manual" {
+                continue;
+            }
+            if let Some(ids) = ids
+                && let Ok(parsed) = serde_json::from_str::<Vec<crate::model::ExternalId>>(ids)
+            {
+                for id in &parsed {
+                    if !matches!(id, crate::model::ExternalId::SteamShortcut { .. })
+                        && let Ok(Some(key)) = super::store_accounts::key(id)
+                    {
+                        stores.entry(game.clone()).or_default().insert(key);
+                    }
+                }
+            }
+        }
+        let releases = super::sync_carried::compute_releases(entry_rows);
+        games(&mut conn, &mut snapshot, &stores).await?;
         collections(&mut conn, &mut snapshot).await?;
         sessions(&mut conn, &mut snapshot).await?;
         accounts(&mut conn, &mut snapshot).await?;
         // The user's own artwork, and what releases carry (#273).
         super::sync_artwork::snapshot(&mut conn, &mut snapshot.values).await?;
-        super::sync_carried::snapshot(&mut conn, &mut snapshot.values).await?;
-        super::sync_carried::snapshot_device(&mut conn, &mut snapshot.values).await?;
+        super::sync_carried::snapshot(&mut conn, &mut snapshot.values, &releases).await?;
+        super::sync_carried::snapshot_device(&mut conn, &mut snapshot.values, device).await?;
         // This device's installed copies (#232).
-        super::sync_copies::snapshot(&mut conn, &mut snapshot.values).await?;
+        super::sync_copies::snapshot(&mut conn, &mut snapshot.values, &releases, device).await?;
 
         // Save versions made here (#239).
         crate::saves::versions::sync_snapshot(&mut conn, &mut snapshot.values).await?;
@@ -55,19 +86,11 @@ impl LibraryStore {
 
 /// Games: identity, favourite, hidden and the user's values; kept-apart
 /// games, hand-set IGDB matches and artwork choices.
-async fn games(conn: &mut SqliteConnection, snapshot: &mut Snapshot) -> Result<()> {
-    let mut stores: HashMap<String, BTreeSet<String>> = HashMap::new();
-    for (game, id) in sqlx::query_as::<_, (String, String)>(
-        "SELECT e.game_id,json(j.value) FROM game_entries e, json_each(e.record_json,'$.ids') j \
-         WHERE e.source_id<>'manual'",
-    )
-    .fetch_all(&mut *conn)
-    .await?
-    {
-        if let Some(key) = store_key(&id) {
-            stores.entry(game).or_default().insert(key);
-        }
-    }
+async fn games(
+    conn: &mut SqliteConnection,
+    snapshot: &mut Snapshot,
+    stores: &HashMap<String, BTreeSet<String>>,
+) -> Result<()> {
     let igdb: HashMap<String, i64> = sqlx::query_as(
         "SELECT game_id,igdb_id FROM igdb_matches WHERE igdb_id IS NOT NULL AND source<>'none'",
     )
@@ -86,12 +109,13 @@ async fn games(conn: &mut SqliteConnection, snapshot: &mut Snapshot) -> Result<(
             .or_default()
             .insert(join_key(&[&origin, &origin_id]));
     }
-    for (id, record, overrides) in sqlx::query_as::<_, (String, String, String)>(
+    let game_rows = sqlx::query_as::<_, (String, String, String)>(
         "SELECT id,record_json,overrides_json FROM games",
     )
     .fetch_all(&mut *conn)
-    .await?
-    {
+    .await?;
+    snapshot.games.reserve(game_rows.len());
+    for (id, record, overrides) in game_rows {
         let (Ok(shown), Ok(overrides)) = (
             serde_json::from_str::<Game>(&record),
             serde_json::from_str::<Overrides>(&overrides),
@@ -99,23 +123,33 @@ async fn games(conn: &mut SqliteConnection, snapshot: &mut Snapshot) -> Result<(
             continue;
         };
         snapshot.games.insert(id.clone());
-        let base = automatic(&shown, &overrides)?;
-        let year = base
-            .release_date
-            .as_deref()
+        let (identity_title, identity_platforms, identity_release_date);
+        let base_owned;
+        if overrides.is_empty() {
+            identity_title = shown.title.as_str();
+            identity_platforms = shown.platforms.as_slice();
+            identity_release_date = shown.release_date.as_deref();
+        } else {
+            base_owned = automatic(&shown, &overrides)?;
+            identity_title = base_owned.title.as_str();
+            identity_platforms = base_owned.platforms.as_slice();
+            identity_release_date = base_owned.release_date.as_deref();
+        }
+        let year = identity_release_date
             .and_then(|date| date.get(..4))
             .and_then(|year| year.parse::<i64>().ok());
+        let empty_set = BTreeSet::<String>::new();
         snapshot.put(
             Entity::Game,
             id.clone(),
             "identity",
             json!({
-                "title": base.title,
-                "platforms": base.platforms,
+                "title": identity_title,
+                "platforms": identity_platforms,
                 "year": year,
                 "igdb": igdb.get(&id),
-                "stores": stores.get(&id).cloned().unwrap_or_default(),
-                "same": same.get(&id).cloned().unwrap_or_default(),
+                "stores": stores.get(&id).unwrap_or(&empty_set),
+                "same": same.get(&id).unwrap_or(&empty_set),
             }),
         );
         if shown.favorite {
@@ -124,32 +158,53 @@ async fn games(conn: &mut SqliteConnection, snapshot: &mut Snapshot) -> Result<(
         if shown.hidden {
             snapshot.put(Entity::Game, id.clone(), "hidden", json!(true));
         }
-        let map = record_map(&shown)?;
-        for field in GameField::ALL {
-            let key = field.key();
-            let value = map.get(key).cloned().unwrap_or(Value::Null);
-            if field.automatic() {
-                if !overrides.contains_key(key) {
-                    continue;
-                }
-                if is_list(field) {
-                    snapshot.put(Entity::Game, id.clone(), key, json!(true));
-                    for item in value.as_array().into_iter().flatten() {
-                        if let Some(item) = item.as_str() {
-                            snapshot.put(
-                                Entity::Game,
-                                id.clone(),
-                                format!("{key}/{item}"),
-                                json!(true),
-                            );
-                        }
+        if overrides.is_empty() {
+            // Fast path (~99% of games): no automatic overrides; only non-automatic
+            // user fields (rating, notes) can be present, avoiding `record_map()`.
+            if let Some(rating) = shown.rating {
+                snapshot.put(
+                    Entity::Game,
+                    id.clone(),
+                    GameField::Rating.key(),
+                    json!({ "v": rating }),
+                );
+            }
+            if !shown.notes.is_empty() {
+                snapshot.put(
+                    Entity::Game,
+                    id.clone(),
+                    GameField::Notes.key(),
+                    json!({ "v": &shown.notes }),
+                );
+            }
+        } else {
+            let map = record_map(&shown)?;
+            for field in GameField::ALL {
+                let key = field.key();
+                let value = map.get(key).cloned().unwrap_or(Value::Null);
+                if field.automatic() {
+                    if !overrides.contains_key(key) {
+                        continue;
                     }
-                } else {
+                    if is_list(field) {
+                        snapshot.put(Entity::Game, id.clone(), key, json!(true));
+                        for item in value.as_array().into_iter().flatten() {
+                            if let Some(item) = item.as_str() {
+                                snapshot.put(
+                                    Entity::Game,
+                                    id.clone(),
+                                    format!("{key}/{item}"),
+                                    json!(true),
+                                );
+                            }
+                        }
+                    } else {
+                        snapshot.put(Entity::Game, id.clone(), key, json!({ "v": value }));
+                    }
+                } else if !(value.is_null() || value.as_str() == Some("")) {
+                    // Rating and notes have no automatic layer.
                     snapshot.put(Entity::Game, id.clone(), key, json!({ "v": value }));
                 }
-            } else if !(value.is_null() || value.as_str() == Some("")) {
-                // Rating and notes have no automatic layer.
-                snapshot.put(Entity::Game, id.clone(), key, json!({ "v": value }));
             }
         }
     }

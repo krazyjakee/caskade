@@ -13,11 +13,7 @@ use caskade_core::{Result, tracking::ProcessIdentity};
 use std::{
     ffi::OsString,
     path::{Path, PathBuf},
-    sync::{
-        Arc, Mutex,
-        atomic::{AtomicBool, Ordering},
-        mpsc,
-    },
+    sync::{Arc, Mutex, mpsc},
     time::{Duration, Instant},
 };
 
@@ -62,7 +58,10 @@ pub struct ChildRunner {
 }
 
 struct Running {
-    exited: Arc<AtomicBool>,
+    #[cfg(unix)]
+    pid: u32,
+    exited: Arc<(Mutex<bool>, std::sync::Condvar)>,
+    #[cfg(not(unix))]
     stop: mpsc::Sender<()>,
     thread: std::thread::JoinHandle<()>,
 }
@@ -139,9 +138,10 @@ impl HostRunner for ChildRunner {
     fn start(&self, launch: &HostLaunch) -> Result<()> {
         self.stop()?;
         self.stop_left_behind();
-        let (started, pid) = mpsc::channel();
+        let (started, pid_rx) = mpsc::channel();
+        #[cfg(not(unix))]
         let (stop, stopping) = mpsc::channel::<()>();
-        let exited = Arc::new(AtomicBool::new(false));
+        let exited = Arc::new((Mutex::new(false), std::sync::Condvar::new()));
         let record = self.record.clone();
         let mut command = command(launch);
         let thread = std::thread::Builder::new()
@@ -149,11 +149,16 @@ impl HostRunner for ChildRunner {
             .spawn({
                 let exited = exited.clone();
                 move || {
+                    let mark_exited = || {
+                        let (lock, condvar) = &*exited;
+                        *caskade_core::lock(lock) = true;
+                        condvar.notify_all();
+                    };
                     let mut child = match command.spawn() {
                         Ok(child) => child,
                         Err(error) => {
                             let _ = started.send(Err(error));
-                            exited.store(true, Ordering::SeqCst);
+                            mark_exited();
                             return;
                         }
                     };
@@ -166,24 +171,26 @@ impl HostRunner for ChildRunner {
                         );
                     }
                     let _ = started.send(Ok(pid));
+                    #[cfg(unix)]
+                    {
+                        // Block directly on child exit with zero polling; `stop()`
+                        // signals the process group to wake and terminate it.
+                        let _ = child.wait();
+                    }
+                    #[cfg(not(unix))]
                     loop {
                         if let Ok(Some(_)) = child.try_wait() {
                             break;
                         }
                         match stopping.recv_timeout(Duration::from_millis(200)) {
                             Err(mpsc::RecvTimeoutError::Timeout) => continue,
-                            // Asked to stop, or the runner is gone.
                             _ => {
-                                #[cfg(unix)]
-                                signal_group(pid, "TERM");
                                 let deadline = Instant::now() + STOP_GRACE;
                                 while !matches!(child.try_wait(), Ok(Some(_)))
                                     && Instant::now() < deadline
                                 {
                                     std::thread::sleep(Duration::from_millis(50));
                                 }
-                                #[cfg(unix)]
-                                signal_group(pid, "KILL");
                                 let _ = child.kill();
                                 let _ = child.wait();
                                 break;
@@ -191,15 +198,18 @@ impl HostRunner for ChildRunner {
                         }
                     }
                     let _ = std::fs::remove_file(&record);
-                    exited.store(true, Ordering::SeqCst);
+                    mark_exited();
                 }
             })?;
-        let pid = pid.recv().map_err(|_| {
+        let pid = pid_rx.recv().map_err(|_| {
             caskade_core::Error::Invalid(caskade_core::tr!("the streaming host didn't start"))
         })??;
         tracing::info!(pid, "streaming host started");
         *caskade_core::lock(&self.running) = Some(Running {
+            #[cfg(unix)]
+            pid,
             exited,
+            #[cfg(not(unix))]
             stop,
             thread,
         });
@@ -209,7 +219,35 @@ impl HostRunner for ChildRunner {
     fn stop(&self) -> Result<()> {
         let running = caskade_core::lock(&self.running).take();
         if let Some(running) = running {
-            let _ = running.stop.send(());
+            #[cfg(unix)]
+            {
+                let (lock, condvar) = &*running.exited;
+                let mut guard = caskade_core::lock(lock);
+                if !*guard {
+                    signal_group(running.pid, "TERM");
+                    let deadline = Instant::now() + STOP_GRACE;
+                    while !*guard {
+                        let Some(remaining) = deadline.checked_duration_since(Instant::now())
+                        else {
+                            break;
+                        };
+                        let (next, timeout) = condvar
+                            .wait_timeout(guard, remaining)
+                            .unwrap_or_else(|e| e.into_inner());
+                        guard = next;
+                        if timeout.timed_out() {
+                            break;
+                        }
+                    }
+                    if !*guard {
+                        signal_group(running.pid, "KILL");
+                    }
+                }
+            }
+            #[cfg(not(unix))]
+            {
+                let _ = running.stop.send(());
+            }
             let _ = running.thread.join();
             tracing::info!("streaming host stopped");
         }
@@ -219,7 +257,7 @@ impl HostRunner for ChildRunner {
     fn running(&self) -> bool {
         caskade_core::lock(&self.running)
             .as_ref()
-            .is_some_and(|running| !running.exited.load(Ordering::SeqCst))
+            .is_some_and(|running| !*caskade_core::lock(&running.exited.0))
     }
 }
 

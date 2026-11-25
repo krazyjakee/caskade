@@ -34,7 +34,7 @@ pub(super) const SEARCH_TTL: Duration = Duration::from_secs(5 * 60);
 pub(super) const RELEASES_TTL: Duration = Duration::from_secs(30 * 60);
 pub(super) const FILTERS_TTL: Duration = Duration::from_secs(24 * 60 * 60);
 /// Pages kept for stale answers; the oldest go first.
-const MAX_PAGES: usize = 128;
+const MAX_PAGES: usize = 32;
 /// The server's limits.
 const MAX_LIMIT: u32 = 50;
 const DEFAULT_LIMIT: u32 = 20;

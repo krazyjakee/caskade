@@ -111,11 +111,15 @@ pub struct SyncEngine {
     arrived: std::sync::atomic::AtomicBool,
 }
 
+type EntityFields = HashMap<Box<str>, Vec<(Box<str>, Winner)>>;
+
 #[derive(Default)]
 struct State {
     loaded: bool,
     clock: Clock,
-    fields: HashMap<FieldKey, Winner>,
+    /// Two-level map `(entity, key) -> [(field, winner)]` so lookups borrow `&str`
+    /// without cloning ~58,000 `(key, field)` strings per capture.
+    fields: HashMap<Entity, EntityFields>,
     /// Each origin once, shared by its fields.
     origins: HashSet<Arc<str>>,
     /// The categories last seen turned on, to notice one turned back on.
@@ -134,13 +138,22 @@ struct Winner {
 }
 
 impl State {
+    fn get(&self, entity: Entity, key: &str, field: &str) -> Option<&Winner> {
+        self.fields
+            .get(&entity)?
+            .get(key)?
+            .iter()
+            .find(|(f, _)| f.as_ref() == field)
+            .map(|(_, winner)| winner)
+    }
+
     /// Records `key`'s winner.
     fn set(&mut self, key: FieldKey, value: Option<&Value>, stamp: &Stamp) {
         self.set_text(key, value.map(Value::to_string), stamp);
     }
 
     /// Records `key`'s winner, its value already as `serde_json`'s text.
-    fn set_text(&mut self, key: FieldKey, value: Option<String>, stamp: &Stamp) {
+    fn set_text(&mut self, (entity, key, field): FieldKey, value: Option<String>, stamp: &Stamp) {
         let origin = match self.origins.get(stamp.origin.as_str()) {
             Some(origin) => origin.clone(),
             None => {
@@ -149,15 +162,21 @@ impl State {
                 origin
             }
         };
-        let value = value.map(String::into_boxed_str);
-        self.fields.insert(
-            key,
-            Winner {
-                value,
-                clock: stamp.clock,
-                origin,
-            },
-        );
+        let winner = Winner {
+            value: value.map(String::into_boxed_str),
+            clock: stamp.clock,
+            origin,
+        };
+        let by_key = self.fields.entry(entity).or_default();
+        let entries = match by_key.get_mut(key.as_str()) {
+            Some(entries) => entries,
+            None => by_key.entry(key.into_boxed_str()).or_default(),
+        };
+        if let Some((_, slot)) = entries.iter_mut().find(|(f, _)| f.as_ref() == field) {
+            *slot = winner;
+        } else {
+            entries.push((field.into_boxed_str(), winner));
+        }
     }
 }
 
@@ -329,80 +348,87 @@ impl SyncEngine {
                     .collect(),
             );
         }
-        let mut snapshot = self.store.sync_snapshot().await?;
-        // Add-ons and installed copies are each device's own: keyed by it.
-        snapshot.values = std::mem::take(&mut snapshot.values)
-            .into_iter()
-            .map(|((entity, key, field), value)| match entity {
-                Entity::Addon | Entity::Copy => {
-                    ((entity, join_key(&[&self.device, &key]), field), value)
-                }
-                _ => ((entity, key, field), value),
-            })
-            .collect();
+        let mut snapshot = self
+            .store
+            .sync_snapshot_for_device(Some(&self.device))
+            .await?;
         self.settings_snapshot(&mut snapshot.values).await;
+        // Build a borrowed lookup index of snapshot keys so the tombstone loop
+        // checks membership without cloning ~29,000 `(key, field)` strings.
+        let mut present: HashMap<Entity, HashMap<&str, Vec<&str>>> = HashMap::new();
         let mut changes = Vec::new();
         for ((entity, key, field), value) in &snapshot.values {
+            present
+                .entry(*entity)
+                .or_default()
+                .entry(key.as_str())
+                .or_default()
+                .push(field.as_str());
             let current = state
-                .fields
-                .get(&(*entity, key.clone(), field.clone()))
+                .get(*entity, key, field)
                 .and_then(|winner| winner.value.as_deref());
             if current.is_none_or(|current| !is_text_of(current, value)) {
                 changes.push(self.draft(*entity, key, field, Some(value.clone())));
             }
         }
-        for ((entity, key, field), current) in &state.fields {
-            if current.value.is_none()
-                || snapshot
-                    .values
-                    .contains_key(&(*entity, key.clone(), field.clone()))
-            {
-                continue;
+        let has_snapshot_field = |entity: Entity, key: &str, field: &str| {
+            present
+                .get(&entity)
+                .and_then(|by_key| by_key.get(key))
+                .is_some_and(|fields| fields.contains(&field))
+        };
+        for (&entity, by_key) in &state.fields {
+            for (key, entries) in by_key {
+                let key = key.as_ref();
+                for (field, current) in entries {
+                    let field = field.as_ref();
+                    if current.value.is_none() || has_snapshot_field(entity, key, field) {
+                        continue;
+                    }
+                    // Sessions and save versions are a union: one that's gone here
+                    // (pruned, #239) stays elsewhere.
+                    if matches!(entity, Entity::Session | Entity::SaveVersion) {
+                        continue;
+                    }
+                    // A stand-in's marker isn't an account to delete: it joined one,
+                    // or it's another device's.
+                    if entity == Entity::Account
+                        && field == EXISTS
+                        && current
+                            .value
+                            .as_deref()
+                            .and_then(|text| serde_json::from_str::<Value>(text).ok())
+                            .is_some_and(|value| crate::db::is_stand_in_marker(&value))
+                    {
+                        continue;
+                    }
+                    // Another device's add-ons and copies are that device's to remove.
+                    if matches!(entity, Entity::Addon | Entity::Copy)
+                        && key_parts(key).first() != Some(&self.device.as_str())
+                    {
+                        continue;
+                    }
+                    // A game removed here isn't a game deleted everywhere: its
+                    // values stay as they are on other devices.
+                    let parts = key_parts(key);
+                    let game_gone = entity.game_parts().iter().any(|&part| {
+                        parts
+                            .get(part)
+                            .is_some_and(|game| !snapshot.games.contains(*game))
+                    });
+                    if game_gone {
+                        continue;
+                    }
+                    // A row's fields go with it: its tombstone says so.
+                    if entity.has_rows()
+                        && field != EXISTS
+                        && !has_snapshot_field(entity, key, EXISTS)
+                    {
+                        continue;
+                    }
+                    changes.push(self.draft(entity, key, field, None));
+                }
             }
-            // Sessions and save versions are a union: one that's gone here
-            // (pruned, #239) stays elsewhere.
-            if matches!(*entity, Entity::Session | Entity::SaveVersion) {
-                continue;
-            }
-            // A stand-in's marker isn't an account to delete: it joined one,
-            // or it's another device's.
-            if *entity == Entity::Account
-                && field == EXISTS
-                && current
-                    .value
-                    .as_deref()
-                    .and_then(|text| serde_json::from_str::<Value>(text).ok())
-                    .is_some_and(|value| crate::db::is_stand_in_marker(&value))
-            {
-                continue;
-            }
-            // Another device's add-ons and copies are that device's to remove.
-            if matches!(*entity, Entity::Addon | Entity::Copy)
-                && key_parts(key).first() != Some(&self.device.as_str())
-            {
-                continue;
-            }
-            // A game removed here isn't a game deleted everywhere: its
-            // values stay as they are on other devices.
-            let parts = key_parts(key);
-            let game_gone = entity.game_parts().iter().any(|&part| {
-                parts
-                    .get(part)
-                    .is_some_and(|game| !snapshot.games.contains(*game))
-            });
-            if game_gone {
-                continue;
-            }
-            // A row's fields go with it: its tombstone says so.
-            if entity.has_rows()
-                && field != EXISTS
-                && !snapshot
-                    .values
-                    .contains_key(&(*entity, key.clone(), EXISTS.to_owned()))
-            {
-                continue;
-            }
-            changes.push(self.draft(*entity, key, field, None));
         }
         changes.sort_by(|a, b| {
             entity_rank(a.entity)
@@ -496,6 +522,7 @@ impl SyncEngine {
         self.load(&mut state).await?;
         let categories = self.categories().await;
         let mut applied = 0;
+        let mut game_index: Option<crate::db::SyncGameIndex> = None;
         loop {
             let pending = self.store.sync_pending(1_000_000).await?;
             let mut progress = false;
@@ -505,7 +532,10 @@ impl SyncEngine {
                 }
                 state.clock.observe(change.clock);
                 let creates = categories.allows(Category::Library);
-                match self.map(change, creates).await? {
+                match self
+                    .map_with_index(change, creates, &mut game_index)
+                    .await?
+                {
                     Mapped::Wait => {}
                     Mapped::Done(target) => {
                         self.store.sync_mark_applied(change, Some(&target)).await?;
@@ -536,11 +566,15 @@ impl SyncEngine {
                             .and_then(crate::db::SyncedArtwork::from_value)
                         {
                             Some(synced) => {
-                                match self
-                                    .hooks
-                                    .artwork
-                                    .get()
-                                    .and_then(|cache| cache.cached(&synced.hash).ok().flatten())
+                                let Some(cache) = self.hooks.artwork.get().cloned() else {
+                                    continue;
+                                };
+                                let hash = synced.hash;
+                                match tokio::task::spawn_blocking(move || cache.cached(&hash))
+                                    .await
+                                    .ok()
+                                    .and_then(|r| r.ok())
+                                    .flatten()
                                 {
                                     Some(cached) => Some(cached),
                                     None => continue,
@@ -634,13 +668,21 @@ impl SyncEngine {
     }
 
     /// A change's key and value in this device's ids.
-    async fn map(&self, change: &Change, creates: bool) -> Result<Mapped> {
+    async fn map_with_index(
+        &self,
+        change: &Change,
+        creates: bool,
+        index: &mut Option<crate::db::SyncGameIndex>,
+    ) -> Result<Mapped> {
         if change.origin == self.device {
             return Ok(Mapped::To(change.key.clone(), change.value.clone()));
         }
         if change.entity == Entity::Game && change.field == "identity" {
             return Ok(
-                match self.game(&change.origin, &change.key, creates).await? {
+                match self
+                    .game_with_index(&change.origin, &change.key, creates, index)
+                    .await?
+                {
                     Some(game) => Mapped::Done(game),
                     None => Mapped::Wait,
                 },
@@ -654,7 +696,10 @@ impl SyncEngine {
             let Some(origin_game) = parts.get(part).cloned() else {
                 return Ok(Mapped::Wait);
             };
-            match self.game(&change.origin, &origin_game, creates).await? {
+            match self
+                .game_with_index(&change.origin, &origin_game, creates, index)
+                .await?
+            {
                 Some(game) => parts[part] = game,
                 None => return Ok(Mapped::Wait),
             }
@@ -690,7 +735,10 @@ impl SyncEngine {
                 .and_then(Value::as_str)
                 .unwrap_or_default()
                 .to_owned();
-            match self.game(&change.origin, &origin_game, creates).await? {
+            match self
+                .game_with_index(&change.origin, &origin_game, creates, index)
+                .await?
+            {
                 Some(game) => record["game"] = Value::String(game),
                 None => return Ok(Mapped::Wait),
             }
@@ -702,6 +750,9 @@ impl SyncEngine {
                 .keep_apart(&change.origin, &change.key, &parts[0])
                 .await?
         {
+            // Separating changes entries/games; drop any cached index so subsequent
+            // lookups reflect the separated game cleanly.
+            *index = None;
             parts[0] = separated;
         }
         let refs: Vec<&str> = parts.iter().map(String::as_str).collect();
@@ -713,6 +764,16 @@ impl SyncEngine {
     /// then title; a title-only game when nothing matches and `creates`.
     /// `None` until the game's identity has arrived.
     pub async fn game(&self, origin: &str, id: &str, creates: bool) -> Result<Option<String>> {
+        self.game_with_index(origin, id, creates, &mut None).await
+    }
+
+    async fn game_with_index(
+        &self,
+        origin: &str,
+        id: &str,
+        creates: bool,
+        index: &mut Option<crate::db::SyncGameIndex>,
+    ) -> Result<Option<String>> {
         if origin == self.device {
             return Ok(self
                 .store
@@ -751,7 +812,15 @@ impl SyncEngine {
                 return Ok(Some(game));
             }
         }
-        if let Some((game, method)) = self.store.sync_find_game(&identity).await? {
+        let found = if let Some(cached) = index.as_ref() {
+            cached.find(&identity)
+        } else {
+            let built = self.store.sync_game_index().await?;
+            let found = built.find(&identity);
+            *index = Some(built);
+            found
+        };
+        if let Some((game, method)) = found {
             self.store
                 .set_sync_mapped_game(origin, id, &game, method)
                 .await?;
@@ -761,6 +830,9 @@ impl SyncEngine {
             return Ok(None);
         }
         let game = self.store.sync_create_game(&identity).await?;
+        if let Some(cached) = index.as_mut() {
+            cached.record_created(game.clone(), &identity);
+        }
         self.store
             .set_sync_mapped_game(origin, id, &game, "created")
             .await?;
@@ -926,13 +998,10 @@ impl SyncEngine {
     /// The field's winner here, for tests and status.
     pub async fn winner(&self, entity: Entity, key: &str, field: &str) -> Option<Stamp> {
         let state = self.state.lock().await;
-        state
-            .fields
-            .get(&(entity, key.to_owned(), field.to_owned()))
-            .map(|winner| Stamp {
-                clock: winner.clock,
-                origin: winner.origin.to_string(),
-            })
+        state.get(entity, key, field).map(|winner| Stamp {
+            clock: winner.clock,
+            origin: winner.origin.to_string(),
+        })
     }
 }
 

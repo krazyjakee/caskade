@@ -28,8 +28,8 @@
 use super::{LibraryStore, decode};
 use crate::{Result, model::GameEntry};
 use serde::{Deserialize, Serialize};
-use sqlx::SqliteConnection;
-use std::collections::{BTreeMap, BTreeSet};
+use sqlx::{QueryBuilder, Sqlite, SqliteConnection};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
 /// Whether store totals are imported (`core.storeAccounts.playtimeImport`).
 #[derive(
@@ -119,32 +119,61 @@ impl LibraryStore {
         observed_at_ms: i64,
         mode: PlaytimeImport,
     ) -> Result<Vec<String>> {
-        // Reads before it writes: IMMEDIATE waits for another writer
-        // where a deferred transaction would fail as busy.
-        let mut tx = self.pool.begin_with("BEGIN IMMEDIATE").await?;
-        let mut games = BTreeSet::new();
-        for total in totals {
-            let Some(game_id): Option<String> =
-                sqlx::query_scalar("SELECT game_id FROM game_entries WHERE id=?")
-                    .bind(&total.entry_id)
-                    .fetch_optional(&mut *tx)
-                    .await?
-            else {
-                continue;
-            };
-            if write(&mut tx, provider, account, total, observed_at_ms, mode).await? {
-                games.insert(game_id);
-            }
+        if totals.is_empty() {
+            return Ok(Vec::new());
         }
+        // Chunk writes so large store refreshes (3,000+ games) never hold
+        // BEGIN IMMEDIATE long enough to starve concurrent writers.
         let mut changed = Vec::new();
-        for game_id in games {
-            let before = self.totals_in(&mut tx, &game_id).await?;
-            recount(&mut tx, &game_id).await?;
-            if self.totals_in(&mut tx, &game_id).await? != before {
-                changed.push(game_id);
+        let mut seen_changed = BTreeSet::new();
+        for chunk in totals.chunks(200) {
+            // Reads before it writes: IMMEDIATE waits for another writer
+            // where a deferred transaction would fail as busy.
+            let mut tx = self.pool.begin_with("BEGIN IMMEDIATE").await?;
+            let unique_ids: Vec<&str> = {
+                let mut seen = HashSet::with_capacity(chunk.len());
+                chunk
+                    .iter()
+                    .map(|total| total.entry_id.as_str())
+                    .filter(|id| seen.insert(*id))
+                    .collect()
+            };
+            let entry_games: HashMap<String, String> = {
+                let mut query = QueryBuilder::<Sqlite>::new(
+                    "SELECT id, game_id FROM game_entries WHERE id IN (",
+                );
+                let mut list = query.separated(", ");
+                for id in unique_ids {
+                    list.push_bind(id);
+                }
+                query.push(")");
+                query
+                    .build_query_as::<(String, String)>()
+                    .fetch_all(&mut *tx)
+                    .await?
+                    .into_iter()
+                    .collect()
+            };
+            let mut games = BTreeSet::new();
+            for total in chunk {
+                let Some(game_id) = entry_games.get(&total.entry_id) else {
+                    continue;
+                };
+                if write(&mut tx, provider, account, total, observed_at_ms, mode).await? {
+                    games.insert(game_id.clone());
+                }
             }
+            for game_id in games {
+                let before = self.totals_in(&mut tx, &game_id).await?;
+                recount(&mut tx, &game_id).await?;
+                if self.totals_in(&mut tx, &game_id).await? != before
+                    && seen_changed.insert(game_id.clone())
+                {
+                    changed.push(game_id);
+                }
+            }
+            tx.commit().await?;
         }
-        tx.commit().await?;
         Ok(changed)
     }
 
@@ -256,8 +285,9 @@ async fn write(
     if total.total_ms.is_none() && total.last_played_ms.is_none() {
         return Ok(false);
     }
-    let old: Option<(i64, Option<i64>)> = sqlx::query_as(
-        "SELECT observed_at_ms,max_total_ms FROM remote_playtime \
+    type PreviousRow = (i64, Option<i64>, Option<i64>, Option<i64>);
+    let old: Option<PreviousRow> = sqlx::query_as(
+        "SELECT observed_at_ms,total_ms,max_total_ms,last_played_ms FROM remote_playtime \
          WHERE entry_id=? AND provider=? AND account=?",
     )
     .bind(&total.entry_id)
@@ -269,13 +299,37 @@ async fn write(
         // New games only: the first total stays.
         Some(_) if mode == PlaytimeImport::NewGames => return Ok(false),
         // An older read than the one kept.
-        Some((observed, _)) if observed > observed_at_ms => return Ok(false),
+        Some((observed, _, _, _)) if observed > observed_at_ms => return Ok(false),
         _ => {}
     }
     let total_ms = total.total_ms.map(signed);
-    let max_total = match (old.and_then(|(_, max)| max), total_ms) {
+    let max_total = match (old.and_then(|(_, _, max, _)| max), total_ms) {
         (Some(old), Some(new)) => Some(old.max(new)),
         (old, new) => old.or(new),
+    };
+    let next_total = total_ms.or(old.and_then(|(_, t, _, _)| t));
+    let next_last = total.last_played_ms.or(old.and_then(|(_, _, _, l)| l));
+    let needs_recount = match old {
+        Some((old_observed, old_total, old_max, old_last))
+            if old_total == next_total && old_max == max_total && old_last == next_last =>
+        {
+            // Totals didn't change: only recount if a session finished since the old observation.
+            if old_observed == observed_at_ms {
+                return Ok(false);
+            }
+            let has_newer_session: bool = sqlx::query_scalar(
+                "SELECT EXISTS(SELECT 1 FROM play_sessions \
+                 WHERE entry_id=? AND ended_at_ms IS NOT NULL \
+                 AND ended_at_ms>? AND ended_at_ms<=?)",
+            )
+            .bind(&total.entry_id)
+            .bind(old_observed)
+            .bind(observed_at_ms)
+            .fetch_one(&mut *connection)
+            .await?;
+            has_newer_session
+        }
+        _ => true,
     };
     sqlx::query(
         "INSERT INTO remote_playtime(entry_id,provider,account,total_ms,max_total_ms,last_played_ms,\
@@ -293,7 +347,7 @@ async fn write(
     .bind(observed_at_ms)
     .execute(&mut *connection)
     .await?;
-    Ok(true)
+    Ok(needs_recount)
 }
 
 /// A launcher's own total discovery found on a game's first import.

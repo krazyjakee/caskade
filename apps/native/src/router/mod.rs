@@ -380,8 +380,8 @@ pub fn RouteLink(
     children: Element,
 ) -> Element {
     let router = use_router();
-    let route = router.route();
     let current = current.unwrap_or_else(|| {
+        let route = router.route();
         let target = Route::parse(&to, router.memory().remembered());
         if exact {
             target == route

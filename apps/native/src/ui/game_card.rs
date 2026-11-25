@@ -241,31 +241,6 @@ pub fn GameCard(
             on_open.call(());
         }
     };
-    let hours = game.playtime_ms / 3_600_000;
-    let playtime = if hours > 0 {
-        t!(
-            note = "Hours played, abbreviated",
-            "{playtimeHours}h",
-            playtimeHours = hours
-        )
-    } else {
-        "\u{2014}".to_owned()
-    };
-    let size = game
-        .size_bytes
-        .map(|bytes| {
-            let gb = ((bytes as f64) / 1e9 * 10.0).round() / 10.0;
-            t!(
-                note = "A game's size on disk, in gigabytes",
-                "{sizeGb} GB",
-                sizeGb = gb
-            )
-        })
-        .unwrap_or_else(|| "\u{2014}".to_owned());
-    let last_played = game
-        .last_played_ms
-        .map(crate::library::date_time)
-        .unwrap_or_else(|| caskade_ui_i18n::format::last_played(None));
     let offline = game.remote_copy.as_ref().is_some_and(|copy| copy.offline);
     rsx! {
         div {
@@ -334,27 +309,60 @@ pub fn GameCard(
                 if variant != CardVariant::Library && variant != CardVariant::Web {
                     div { "data-part": "meta", class: "flex items-center justify-between font-mono text-[11px] text-fg-muted",
                         if variant == CardVariant::Store {
-                            span { "data-part": "size", class: "inline-flex items-center gap-1",
-                                Svg { icon: HARD_DRIVE, class: "size-3.5" }
-                                "{size}"
-                            }
-                            if let Some(stores) = game.stores {
-                                span { "data-part": "stores", class: "inline-flex items-center gap-1",
-                                    Svg { icon: STORE, class: "size-3.5" }
-                                    {tn!(note = "How many stores sell a game", "# store", "# stores", stores)}
-                                }
-                            } else {
-                                span { "data-part": "owned", class: "inline-flex items-center gap-1 text-status-installed",
-                                    Svg { icon: CIRCLE_CHECK, class: "size-3.5" }
-                                    {t!(note = "A store game the user already owns", "Owned")}
+                            {
+                                let size = game
+                                    .size_bytes
+                                    .map(|bytes| {
+                                        let gb = ((bytes as f64) / 1e9 * 10.0).round() / 10.0;
+                                        t!(
+                                            note = "A game's size on disk, in gigabytes",
+                                            "{sizeGb} GB",
+                                            sizeGb = gb
+                                        )
+                                    })
+                                    .unwrap_or_else(|| "\u{2014}".to_owned());
+                                rsx! {
+                                    span { "data-part": "size", class: "inline-flex items-center gap-1",
+                                        Svg { icon: HARD_DRIVE, class: "size-3.5" }
+                                        "{size}"
+                                    }
+                                    if let Some(stores) = game.stores {
+                                        span { "data-part": "stores", class: "inline-flex items-center gap-1",
+                                            Svg { icon: STORE, class: "size-3.5" }
+                                            {tn!(note = "How many stores sell a game", "# store", "# stores", stores)}
+                                        }
+                                    } else {
+                                        span { "data-part": "owned", class: "inline-flex items-center gap-1 text-status-installed",
+                                            Svg { icon: CIRCLE_CHECK, class: "size-3.5" }
+                                            {t!(note = "A store game the user already owns", "Owned")}
+                                        }
+                                    }
                                 }
                             }
                         } else {
-                            span { "data-part": "playtime", class: "inline-flex items-center gap-1",
-                                Svg { icon: CLOCK, class: "size-3.5" }
-                                "{playtime}"
+                            {
+                                let hours = game.playtime_ms / 3_600_000;
+                                let playtime = if hours > 0 {
+                                    t!(
+                                        note = "Hours played, abbreviated",
+                                        "{playtimeHours}h",
+                                        playtimeHours = hours
+                                    )
+                                } else {
+                                    "\u{2014}".to_owned()
+                                };
+                                let last_played = game
+                                    .last_played_ms
+                                    .map(crate::library::date_time)
+                                    .unwrap_or_else(|| caskade_ui_i18n::format::last_played(None));
+                                rsx! {
+                                    span { "data-part": "playtime", class: "inline-flex items-center gap-1",
+                                        Svg { icon: CLOCK, class: "size-3.5" }
+                                        "{playtime}"
+                                    }
+                                    span { "data-part": "last-played", "{last_played}" }
+                                }
                             }
-                            span { "data-part": "last-played", "{last_played}" }
                         }
                     }
                 }

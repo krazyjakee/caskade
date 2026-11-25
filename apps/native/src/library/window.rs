@@ -1,8 +1,7 @@
 //! Which rows of a long library are mounted, and which pages of games are
 //! loaded, from the scroll position: the arithmetic behind
 //! [`VirtualLibrary`](super::VirtualLibrary), kept apart so it can be tested
-//! without a window. Rows have fixed heights, as the webview's do
-//! (`gameCardLayout.ts`, `LibraryRow.tsx`).
+//! without a window. Rows have fixed heights.
 
 use std::ops::RangeInclusive;
 
@@ -28,6 +27,19 @@ pub enum Layout {
     #[default]
     Grid,
     List,
+}
+
+impl serde::Serialize for Layout {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(self.name())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for Layout {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let name = String::deserialize(deserializer)?;
+        Ok(Self::parse(&name))
+    }
 }
 
 impl Layout {
@@ -169,8 +181,15 @@ impl Frame {
     /// Whether page `page` is worth keeping: a needed one, or within
     /// [`KEEP_PAGES`] of one. However far focus and the viewport are apart,
     /// that's a few pages each.
+    #[cfg(test)]
     pub fn keeps(&self, page: usize, focused: Option<usize>) -> bool {
-        self.needed_pages(focused)
+        let needed = self.needed_pages(focused);
+        self.keeps_with(page, &needed)
+    }
+
+    /// Same as [`keeps`](Self::keeps), reusing a precomputed `needed` page list.
+    pub fn keeps_with(&self, page: usize, needed: &[usize]) -> bool {
+        needed
             .iter()
             .any(|&needed| page.abs_diff(needed) <= KEEP_PAGES)
     }

@@ -91,7 +91,7 @@ fn every_swedish_translation_of_a_native_message_resolves() {
                     &message::parse(&entry.translations[0]),
                     &[],
                     None,
-                    &Numbers("sv".into()),
+                    &Numbers("sv"),
                     &|text| text.to_owned(),
                 );
                 assert_eq!(
@@ -106,7 +106,7 @@ fn every_swedish_translation_of_a_native_message_resolves() {
                     &message::parse_counted(&entry.translations[1]),
                     &[],
                     Some(5.0),
-                    &Numbers("sv".into()),
+                    &Numbers("sv"),
                     &|text| text.to_owned(),
                 );
                 assert_eq!(plural(context, &message.id, english, 5.0, &[]), expected);

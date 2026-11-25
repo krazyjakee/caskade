@@ -223,7 +223,10 @@ impl LibraryStore {
     }
 
     pub async fn delete_save_versions(&self, ids: &[String]) -> Result<()> {
-        let mut tx = self.pool.begin().await?;
+        if ids.is_empty() {
+            return Ok(());
+        }
+        let mut tx = self.begin_write().await?;
         for id in ids {
             sqlx::query("DELETE FROM save_versions WHERE id=?")
                 .bind(id)

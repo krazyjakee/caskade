@@ -18,7 +18,7 @@ use std::{
         mpsc::{self, RecvTimeoutError, SyncSender},
     },
     thread::JoinHandle,
-    time::{Duration, Instant},
+    time::Instant,
 };
 
 /// Missing watch paths are covered by their nearest existing parent, at
@@ -105,7 +105,7 @@ where
             let mut debouncer = Debouncer::new(options.debounce, options.max_delay);
             let mut next_poll = now() + options.poll_interval;
             loop {
-                let mut wait = next_poll.saturating_sub(now()).min(Duration::from_secs(1));
+                let mut wait = next_poll.saturating_sub(now());
                 if let Some(due) = debouncer.next_due() {
                     wait = wait.min(due.saturating_sub(now()));
                 }

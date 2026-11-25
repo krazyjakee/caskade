@@ -103,6 +103,26 @@ pub fn look(
     safe: bool,
     prefers_reduced_motion: bool,
 ) -> Look {
+    look_with_backdrop(
+        themes,
+        theme,
+        modes,
+        prefs,
+        safe,
+        prefers_reduced_motion,
+        None,
+    )
+}
+
+fn look_with_backdrop(
+    themes: &ThemeService,
+    theme: &str,
+    modes: Vec<String>,
+    prefs: AppearanceSettings,
+    safe: bool,
+    prefers_reduced_motion: bool,
+    cached_backdrop: Option<Option<Arc<crate::backdrop::Prepared>>>,
+) -> Look {
     let theme_css = themes.stylesheet(theme).unwrap_or_else(|error| {
         tracing::warn!(%error, theme, "theme not applied");
         Arc::from("")
@@ -121,6 +141,10 @@ pub fn look(
     } else {
         None
     };
+    let backdrop = match cached_backdrop {
+        Some(existing) => existing,
+        None => crate::backdrop::prepare(themes, theme),
+    };
     Look {
         theme: theme.to_owned(),
         theme_css,
@@ -128,7 +152,18 @@ pub fn look(
         user_css,
         prefs,
         prefers_reduced_motion,
-        backdrop: crate::backdrop::prepare(themes, theme),
+        backdrop,
+    }
+}
+
+impl Look {
+    fn same_appearance(&self, other: &Self) -> bool {
+        self.theme == other.theme
+            && self.theme_css == other.theme_css
+            && self.modes == other.modes
+            && self.user_css == other.user_css
+            && serde_json::to_value(&self.prefs).ok() == serde_json::to_value(&other.prefs).ok()
+            && self.prefers_reduced_motion == other.prefers_reduced_motion
     }
 }
 
@@ -163,8 +198,10 @@ pub fn first(themes: &ThemeService, settings: &SettingsService) -> Look {
 }
 
 /// The look now, from the running services: plugin themes included, the
-/// requested one's fallback noticed.
-async fn current(services: &caskade_app::start::Services) -> Look {
+/// requested one's fallback noticed. When `reload_backdrop` is false and the
+/// active theme hasn't changed, reuses the cached GPU backdrop instead of
+/// re-decoding and premultiplying backdrop images on every appearance tweak.
+async fn current(services: &caskade_app::start::Services, reload_backdrop: bool) -> Look {
     let safe = caskade_app::commands::themes::safe_mode(None);
     let prefs = prefs(&services.settings).await;
     let resolved = caskade_app::commands::themes::theme_resolve(
@@ -191,13 +228,22 @@ async fn current(services: &caskade_app::start::Services) -> Look {
             (fallback.id, fallback.modes)
         }
     };
-    look(
+    let cached_backdrop = if reload_backdrop {
+        None
+    } else {
+        caskade_core::lock(&LAST)
+            .as_ref()
+            .filter(|last| last.theme == theme)
+            .map(|last| last.backdrop.clone())
+    };
+    look_with_backdrop(
         &services.themes,
         &theme,
         modes,
         prefs,
         safe,
         prefers_reduced_motion(),
+        cached_backdrop,
     )
 }
 
@@ -213,19 +259,31 @@ fn restyle(look: Look) {
     crate::launch::ask(crate::launch::Request::Restyle);
 }
 
+fn restyle_if_changed(next: Look, force: bool) {
+    if !force
+        && caskade_core::lock(&LAST)
+            .as_ref()
+            .is_some_and(|last| last.same_appearance(&next))
+    {
+        return;
+    }
+    restyle(next);
+}
+
 /// Keeps the look live once the services run: the theme with plugins'
 /// themes known, then every `core.appearance` change and dev theme reload.
 pub fn follow(services: &'static caskade_app::start::Services) {
     caskade_app::runtime::spawn(async move {
-        restyle(current(services).await);
+        restyle_if_changed(current(services, false).await, false);
         let mut settings = services.settings.subscribe();
         let mut events = crate::shell::events().subscribe();
         use tokio::sync::broadcast::error::RecvError;
         loop {
-            let changed = tokio::select! {
+            let reload = tokio::select! {
                 changed = settings.recv() => match changed {
-                    Ok(changed) => changed.namespace == "core.appearance",
-                    Err(RecvError::Lagged(_)) => true,
+                    Ok(changed) if changed.namespace == "core.appearance" => Some(false),
+                    Ok(_) => None,
+                    Err(RecvError::Lagged(_)) => Some(false),
                     Err(RecvError::Closed) => break,
                 },
                 event = events.recv() => match event {
@@ -233,15 +291,15 @@ pub fn follow(services: &'static caskade_app::start::Services) {
                         if let Some(error) = &reloaded.error {
                             tracing::warn!(theme = reloaded.theme, error, "theme reload failed");
                         }
-                        true
+                        Some(true)
                     }
-                    Ok(_) => false,
-                    Err(RecvError::Lagged(_)) => true,
+                    Ok(_) => None,
+                    Err(RecvError::Lagged(_)) => Some(true),
                     Err(RecvError::Closed) => break,
                 },
             };
-            if changed {
-                restyle(current(services).await);
+            if let Some(reload_theme) = reload {
+                restyle_if_changed(current(services, reload_theme).await, reload_theme);
             }
         }
     });

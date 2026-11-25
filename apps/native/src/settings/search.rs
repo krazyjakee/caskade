@@ -1,10 +1,8 @@
-//! Settings search (#46, ported in #103): what each section holds, as a
-//! static table of translatable labels and the other words people look for
-//! them by (begun as the webview's `searchIndex.ts`, entry for entry, with
-//! the same messages and contexts, so they share translations). The search never
-//! reads the panels: a label here is written as its panel shows it, which
-//! is also how the panel's row is found and highlighted once the section
-//! opens (`ui::Found`).
+//! Settings search (#46, #103): what each section holds, as a static table
+//! of translatable labels and the other words people look for them by. The
+//! search never reads the panels: a label here is written as its panel
+//! shows it, which is also how the panel's row is found and highlighted
+//! once the section opens (`ui::Found`).
 //!
 //! Add a row here when a panel gains a preference worth finding. Words are
 //! one translatable, comma-separated list per entry.
@@ -21,6 +19,7 @@ mod search_index;
 pub use search_index::{INDEX, section_words};
 
 /// Whether every word of `query` appears somewhere in `texts`.
+#[cfg(test)]
 pub fn matches(query: &str, texts: &[&str]) -> bool {
     let query = fold(query);
     let terms: Vec<&str> = query.split_whitespace().collect();
@@ -52,53 +51,118 @@ pub struct SearchResult {
 /// The most results shown.
 const MOST: usize = 30;
 
-/// The results for `query` among `sections` (the ones this account sees):
-/// sections first, then preferences, each those whose name matches before
-/// those found by another word.
-pub fn search_settings(query: &str, sections: &[&Section]) -> Vec<SearchResult> {
-    let mut found: Vec<(SearchResult, bool)> = sections
+/// Pre-folded searchable text for one section or preference so keystrokes
+/// avoid repeating ~280 i18n lookups and Unicode NFD decompositions.
+#[derive(Clone, PartialEq)]
+struct FoldedSection {
+    id: &'static str,
+    title: String,
+    folded_title: String,
+    folded_all: String,
+}
+
+#[derive(Clone, PartialEq)]
+struct FoldedPref {
+    tab: &'static str,
+    section: Option<&'static str>,
+    label: String,
+    within: String,
+    key: String,
+    folded_label: String,
+    folded_all: String,
+}
+
+#[derive(Clone, PartialEq)]
+struct FoldedIndex {
+    sections: Vec<FoldedSection>,
+    preferences: Vec<FoldedPref>,
+}
+
+fn build_folded_index(sections: &[&Section]) -> FoldedIndex {
+    let folded_sections: Vec<FoldedSection> = sections
         .iter()
-        .filter_map(|section| {
+        .map(|section| {
             let title = (section.label)();
             let words = section_words(section.id);
-            if !matches(query, &[&title, &words]) {
-                return None;
+            let folded_title = fold(&title);
+            let folded_all = format!("{folded_title}\n{}", fold(&words));
+            FoldedSection {
+                id: section.id,
+                title,
+                folded_title,
+                folded_all,
             }
-            let named = matches(query, &[&title]);
-            Some((
+        })
+        .collect();
+    let folded_prefs: Vec<FoldedPref> = INDEX
+        .iter()
+        .filter_map(|entry| {
+            let within = folded_sections.iter().find(|s| s.id == entry.tab)?;
+            let label = (entry.label)();
+            let words = entry.words.map(|words| words()).unwrap_or_default();
+            let folded_label = fold(&label);
+            let folded_all = format!("{folded_label}\n{}", fold(&words));
+            let key = format!("{}\n{}\n{label}", entry.tab, entry.section.unwrap_or(""));
+            Some(FoldedPref {
+                tab: entry.tab,
+                section: entry.section,
+                label,
+                within: within.title.clone(),
+                key,
+                folded_label,
+                folded_all,
+            })
+        })
+        .collect();
+    FoldedIndex {
+        sections: folded_sections,
+        preferences: folded_prefs,
+    }
+}
+
+fn search_folded(query: &str, index: &FoldedIndex) -> Vec<SearchResult> {
+    let folded_query = fold(query);
+    let terms: Vec<&str> = folded_query.split_whitespace().collect();
+    if terms.is_empty() {
+        return Vec::new();
+    }
+    let has_all = |haystack: &str| terms.iter().all(|term| haystack.contains(term));
+    let mut found: Vec<(SearchResult, bool)> = index
+        .sections
+        .iter()
+        .filter(|section| has_all(&section.folded_all))
+        .map(|section| {
+            let named = has_all(&section.folded_title);
+            (
                 SearchResult {
                     key: section.id.to_owned(),
                     tab: section.id,
                     section: None,
                     label: None,
-                    title,
+                    title: section.title.clone(),
                     within: None,
                 },
                 named,
-            ))
+            )
         })
         .collect();
-    let mut preferences: Vec<(SearchResult, bool)> = INDEX
+    let mut preferences: Vec<(SearchResult, bool)> = index
+        .preferences
         .iter()
-        .filter_map(|entry| {
-            let within = sections.iter().find(|section| section.id == entry.tab)?;
-            let label = (entry.label)();
-            let words = entry.words.map(|words| words()).unwrap_or_default();
-            if !matches(query, &[&label, &words]) {
-                return None;
-            }
-            let named = matches(query, &[&label]);
-            Some((
+        .filter(|entry| has_all(&entry.folded_all))
+        .map(|entry| {
+            let named = has_all(&entry.folded_label);
+            (
                 SearchResult {
-                    key: format!("{}\n{}\n{label}", entry.tab, entry.section.unwrap_or("")),
+                    key: entry.key.clone(),
                     tab: entry.tab,
                     section: entry.section,
-                    label: Some(label.clone()),
-                    title: label,
-                    within: Some((within.label)()),
+                    label: Some(entry.label.clone()),
+                    title: entry.label.clone(),
+                    within: Some(entry.within.clone()),
                 },
                 named,
-            ))
+            )
         })
         .collect();
     // Stable: names first, the table's order within each.
@@ -112,6 +176,15 @@ pub fn search_settings(query: &str, sections: &[&Section]) -> Vec<SearchResult> 
         .collect()
 }
 
+/// The results for `query` among `sections` (the ones this account sees):
+/// sections first, then preferences, each those whose name matches before
+/// those found by another word.
+#[cfg(test)]
+pub fn search_settings(query: &str, sections: &[&Section]) -> Vec<SearchResult> {
+    let index = build_folded_index(sections);
+    search_folded(query, &index)
+}
+
 /// The search above the section list: a field, and in place of the list
 /// while it has a query, the results. Enter opens the first, Escape clears
 /// it; a pad types in it on the on-screen keyboard like any other field.
@@ -122,14 +195,24 @@ pub fn SettingsSearch(
     sections: Vec<&'static str>,
     on_open: EventHandler<SearchResult>,
 ) -> Element {
-    let shown: Vec<&Section> = SECTIONS
-        .iter()
-        .filter(|section| sections.contains(&section.id))
-        .collect();
+    let mut sections_sig = use_signal(|| sections.clone());
+    if *sections_sig.peek() != sections {
+        sections_sig.set(sections);
+    }
+    let index = use_memo(move || {
+        // Re-build when the UI language or visible section set changes.
+        let _ = caskade_ui_i18n::language();
+        let allowed = sections_sig.read();
+        let shown: Vec<&Section> = SECTIONS
+            .iter()
+            .filter(|section| allowed.contains(&section.id))
+            .collect();
+        build_folded_index(&shown)
+    });
     let results = if query.trim().is_empty() {
         Vec::new()
     } else {
-        search_settings(&query, &shown)
+        search_folded(&query, &index.read())
     };
     let first = results.first().cloned();
     rsx! {

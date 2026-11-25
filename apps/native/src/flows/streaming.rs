@@ -46,6 +46,10 @@ pub fn StreamPairingHost(pairing: StreamPairing) -> Element {
         use_hook(move || {
             spawn(async move {
                 loop {
+                    if !crate::shell::main_window_shown() {
+                        sleep(HOSTING_EVERY).await;
+                        continue;
+                    }
                     // Hosting first: it's in memory, and an app that isn't
                     // hosting reads no accounts (#111).
                     let admin = pairing.hosting() && {
@@ -58,7 +62,9 @@ pub fn StreamPairingHost(pairing: StreamPairing) -> Element {
                     if admin {
                         let read = pairing.clone();
                         // A failed read keeps what's shown until the next.
-                        if let Ok(list) = change(async move { read.requests().await }).await {
+                        if let Ok(list) = change(async move { read.requests().await }).await
+                            && *requests.peek() != list
+                        {
                             requests.set(list);
                         }
                         sleep(REQUESTS_EVERY).await;

@@ -270,6 +270,9 @@ struct Inner {
     /// Games arrived without a library event (from another device, #75):
     /// [`Metadata::watch`] runs soon.
     wake: tokio::sync::Notify,
+    /// Library write counter at the last `merge_same()` pass, so idle hourly
+    /// ticks skip re-scanning all games when nothing has been written.
+    merged_at: std::sync::atomic::AtomicU64,
 }
 
 impl Metadata {
@@ -294,6 +297,7 @@ impl Metadata {
                 lock: Mutex::new(()),
                 refresh: selected::RefreshJob::default(),
                 wake: tokio::sync::Notify::new(),
+                merged_at: std::sync::atomic::AtomicU64::new(u64::MAX),
             }),
         }
     }
@@ -322,7 +326,20 @@ impl Metadata {
         }
         // Libraries from before merging are merged on their first run.
         // Merging needs only the library, so it goes ahead offline too.
-        self.merge_same(dumps.as_deref(), &mut report).await?;
+        // Skip the full-library scan when no games were matched and the
+        // library has not been written since the last merge check.
+        let writes = self.inner.store.writes();
+        let last_merged = self
+            .inner
+            .merged_at
+            .load(std::sync::atomic::Ordering::Relaxed);
+        if !games.is_empty() || writes != last_merged {
+            self.merge_same(dumps.as_deref(), &mut report).await?;
+            self.inner.merged_at.store(
+                self.inner.store.writes(),
+                std::sync::atomic::Ordering::Relaxed,
+            );
+        }
         if games.is_empty() && report.merged == 0 {
             return Ok(report);
         }
