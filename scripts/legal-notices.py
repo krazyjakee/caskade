@@ -21,8 +21,9 @@ native app embeds (apps/native/assets/notices.generated.json):
 
 Each package keeps its licence expression, repository and the copyright lines
 found in its licence files (its authors otherwise); each licence's text is kept
-once, from the first package that ships it. Run it after changing dependencies
-or the 7-Zip pin; see docs/legal/README.md.
+once, from the first package that ships it (falling back to verbatim SPDX texts
+in scripts/licenses/<SPDX-ID>.txt when no crate bundles a file for that term).
+Run it after changing dependencies or the 7-Zip pin; see docs/legal/README.md.
 """
 import argparse
 import importlib.util
@@ -33,6 +34,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "apps/native/assets/notices.generated.json"
+FALLBACK_LICENSES = ROOT / "scripts/licenses"
 # The binaries the bundle ships.
 APP_CRATES = ("caskade-native",)
 APP_FONTS = ROOT / "apps/native/assets/fonts"
@@ -261,6 +263,13 @@ def main():
 
     ordered = sorted(groups.items(), key=lambda item: (-len(item[1]), item[0]))
     used = {term for expression in groups for term in terms(expression)}
+    for term in sorted(used):
+        if term not in texts:
+            fallback = FALLBACK_LICENSES / f"{term}.txt"
+            if fallback.is_file():
+                text = read(fallback)
+                if text:
+                    texts[term] = text
     result = {
         "generatedBy": "scripts/legal-notices.py",
         "sevenZip": seven_zip(),

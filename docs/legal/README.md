@@ -32,9 +32,4 @@ It needs `cargo`, and `pnpm` with installed `node_modules` for Biome, and reads 
 
 Each package keeps its licence expression, repository and the copyright lines of its licence files (its authors when it has none). Each licence's text is kept once, from the first package that ships it. The script prints the licences it found no text for (`missingTexts` in the output); a missing text that is the only choice for a package needs adding by hand before a release.
 
-Components the generator can't see are described by hand in `LICENSING.md`: bundled data (the emulator definitions), platform-specific parts of each bundle (the AppImage's libraries, the Windows installer's WebView2 bootstrapper) and software Caskade downloads on request. Update it when `tauri.conf.json`'s `bundle` (or a platform's override), `.github/workflows/release.yml`'s targets, or `crates/*/THIRD-PARTY.md` change.
-
-## Missing
-
-- The legal entity behind Caskade and its metadata server, a contact address, and the law that governs the terms.
-- The notices of the libraries the AppImage bundles (GTK, WebKitGTK, libayatana-appindicator and their dependencies).
+Components the generator can't see are described by hand in `LICENSING.md`: bundled data (the emulator definitions), platform-specific parts of each bundle (the AppImage's libraries, the Windows installer's WebView2 bootstrapper) and software Caskade downloads on request. Update it when `apps/native/Tauri.toml`'s `bundle` (or a platform's override), `.github/workflows/release.yml`'s targets, or `crates/*/THIRD-PARTY.md` change.

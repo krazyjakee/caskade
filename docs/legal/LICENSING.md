@@ -1,6 +1,6 @@
 # Licenses
 
-Revision: 2026-11-13
+Revision: 2026-11-25
 
 ## Caskade
 
@@ -25,19 +25,20 @@ Caskade's own code, its built-in themes (apart from their fonts), its app icon a
 
 ## Platform-specific components
 
-- **Linux AppImage**: the AppImage carries copies of the system libraries Caskade needs, including GTK 3, WebKitGTK 4.1 and libayatana-appindicator3, with their dependencies, taken from the Ubuntu 22.04 build machine. These are mostly under the GNU LGPL 2.1 or later; their sources are available from Ubuntu's archive.
-- **Windows installer**: built with NSIS. Caskade uses Microsoft Edge WebView2, which Windows provides; if it is missing, the installer fetches Microsoft's WebView2 bootstrapper, which comes under Microsoft's own terms.
-- **macOS**: Caskade uses the system's WebKit and ships no extra native libraries.
-
-> **Missing:** the notices of the libraries in the AppImage are not collected into this view yet. The Debian package uses the system's own copies of these libraries and ships none of them.
+- **Linux AppImage**: built on Ubuntu 22.04 ("jammy") and carries copies of the runtime system libraries Caskade needs — including GTK 3 (`libgtk-3-0`), WebKitGTK 4.1 (`libwebkit2gtk-4.1-0`, used by `caskade-player` for web game and video windows), `librsvg2` and `libayatana-appindicator3-1` (for the system tray), together with their Ubuntu runtime dependencies. These libraries are licensed primarily under the GNU LGPL 2.1 or later (with supporting libraries under MIT, BSD, or GPL with runtime exceptions). Complete corresponding source packages, copyright notices and licence texts for every bundled library are available from the Ubuntu 22.04 package archive at [packages.ubuntu.com](https://packages.ubuntu.com/jammy/) and [archive.ubuntu.com](https://archive.ubuntu.com/ubuntu/), or on request from `krazyjakee@gmail.com`.
+- **Linux Debian package (`.deb`)**: links against the system's installed copies of GTK 3, WebKitGTK 4.1 and `libayatana-appindicator3-1`, and bundles none of those libraries.
+- **Windows installer**: built with NSIS. Caskade uses Microsoft Edge WebView2 for web game and video windows, which Windows provides; if it is missing, the installer fetches Microsoft's WebView2 bootstrapper, which comes under Microsoft's own terms.
+- **macOS**: Caskade uses the system's WebKit for web game and video windows and ships no extra native libraries.
 
 ## Software Caskade fetches at your request
 
-Emulators, RetroArch cores, umu-launcher (and the Steam Runtime and Proton that umu downloads on Linux) and games are not part of Caskade. Caskade downloads them from their publishers when you ask it to, and each comes under its own licence.
+Emulators, RetroArch cores, umu-launcher (and the Steam Runtime and Proton that umu downloads on Linux), Sunshine and Moonlight (GPLv3, for game streaming), ViGEmBus (on Windows, for game streaming), fan ports and games are not part of Caskade. Caskade downloads them from their publishers when you ask it to, and each comes under its own licence.
 
 ## Data and services
 
 - **IGDB**: game metadata and artwork come from [IGDB](https://www.igdb.com/), through Caskade's metadata server.
 - **Hasheous**: hash and title data comes from the [Hasheous](https://hasheous.org/) data dumps, downloaded by Caskade.
+- **Ludusavi manifest and PCGamingWiki**: save-file locations come from the [Ludusavi manifest](https://github.com/mtkennerly/ludusavi-manifest) (MIT License), which includes data compiled from [PCGamingWiki](https://www.pcgamingwiki.com/) (CC BY-NC-SA 3.0).
+- **Decomp Buddy**: fan port install plans come from [Decomp Buddy](https://github.com/TanookiStudios/decomp-buddy).
 
 Their data remains subject to those services' own terms.
