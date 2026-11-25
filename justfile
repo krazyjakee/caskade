@@ -116,3 +116,24 @@ corpus *args:
 # Explicit live resolver metadata refresh; assets are never downloaded or executed
 test-resolvers-live:
     CASKADE_RESOLVERS_LIVE=1 flock /tmp/caskade-heavy.lock cargo test -p caskade-installer --all-features --locked --test it fetch_resolvers_live::refresh_public_github_response -- --ignored --exact
+
+# Repeatable tray-idle memory and CPU budget gate on an 8,400-game library (docs/TECH-SPEC.md §9)
+idle-bench-budget warmup="120" duration="300" max_anon_mb="250" max_cpu="0.5":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    P=(--profile bench-release --config 'profile.bench-release.inherits="release"')
+    T=$(flock /tmp/caskade-heavy.lock cargo metadata --format-version 1 --no-deps | python3 -c 'import json, sys; print(json.load(sys.stdin)["target_directory"])')
+    flock /tmp/caskade-heavy.lock cargo build "${P[@]}" -p caskade-native
+    flock /tmp/caskade-heavy.lock cargo build "${P[@]}" -p caskade-core --example seed_library
+    OUT=$(mktemp -d "${TMPDIR:-/tmp}/caskade-idle-budget-XXXXXX")
+    trap 'rm -rf "$OUT"' EXIT
+    mkdir -p "$OUT/app"
+    cp "$T/bench-release/caskade-native" "$OUT/app/caskade"
+    flock /tmp/caskade-heavy.lock python3 scripts/7zz-sidecar.py --dev
+    cp apps/native/binaries/7zz-x86_64-unknown-linux-gnu "$OUT/app/7zz"
+    scripts/idle-bench/run.sh --app "$OUT/app/caskade" \
+      --seed "$T/bench-release/examples/seed_library" \
+      --out "$OUT/run" \
+      --label "budget gate ($(git rev-parse --short HEAD))" \
+      --hide --warmup "{{warmup}}" --duration "{{duration}}" \
+      --max-anon-mb "{{max_anon_mb}}" --max-cpu-s-per-min "{{max_cpu}}"

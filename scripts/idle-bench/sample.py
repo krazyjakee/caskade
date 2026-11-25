@@ -146,6 +146,22 @@ def markdown(summary, meta):
     return "\n".join(lines) + "\n"
 
 
+def check_budget(summary, max_anon_mb, max_cpu_s_per_min):
+    failures = []
+    if max_anon_mb is not None:
+        median = summary["anon_swap_mb"]["median"]
+        last = summary["anon_swap_mb"]["last"]
+        if median > max_anon_mb:
+            failures.append(f"median anon+swap {median:.1f} MB exceeds {max_anon_mb:.1f} MB budget")
+        if last > max_anon_mb:
+            failures.append(f"final anon+swap {last:.1f} MB exceeds {max_anon_mb:.1f} MB budget")
+    if max_cpu_s_per_min is not None:
+        cpu = summary["cpu_s_per_min"]
+        if cpu > max_cpu_s_per_min:
+            failures.append(f"idle CPU {cpu:.3f} CPU-s/min exceeds {max_cpu_s_per_min:.3f} CPU-s/min budget")
+    return failures
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
@@ -154,6 +170,10 @@ def main():
     ap.add_argument("--duration", type=float, default=1800)
     ap.add_argument("--interval", type=float, default=10)
     ap.add_argument("--meta", default="{}")
+    ap.add_argument("--max-anon-mb", type=float, default=None,
+                    help="Fail non-zero if median or final anon+swap MB exceeds this budget.")
+    ap.add_argument("--max-cpu-s-per-min", type=float, default=None,
+                    help="Fail non-zero if idle CPU-s/min exceeds this budget.")
     args = ap.parse_args()
     pattern, netns = re.compile(args.exe), own_netns()
     meta = json.loads(args.meta)
@@ -189,11 +209,22 @@ def main():
 
     summary = summarise(samples, args.interval)
     summary["meta"] = meta
+    failures = check_budget(summary, args.max_anon_mb, args.max_cpu_s_per_min)
+    summary["budget"] = {
+        "max_anon_mb": args.max_anon_mb,
+        "max_cpu_s_per_min": args.max_cpu_s_per_min,
+        "passed": not failures,
+        "failures": failures,
+    }
     with open(os.path.join(args.out, "summary.json"), "w") as fh:
         json.dump(summary, fh, indent=1)
     with open(os.path.join(args.out, "summary.md"), "w") as fh:
         fh.write(markdown(summary, meta))
     print(markdown(summary, meta))
+    if failures:
+        for failure in failures:
+            print(f"BUDGET FAILED: {failure}", flush=True)
+        raise SystemExit(1)
 
 
 main()

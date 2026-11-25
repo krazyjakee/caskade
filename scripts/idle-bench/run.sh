@@ -8,10 +8,12 @@
 #                             [--label <text>] [--games 8400] [--warmup 300]
 #                             [--duration 1800] [--interval 10]
 #                             [--exe 'caskade|WebKit\w*Process'] [--size 1600x900]
-#                             [--hide]
+#                             [--hide] [--max-anon-mb <MB>] [--max-cpu-s-per-min <S>]
 #
 # --hide closes the window once it shows (WM_DELETE_WINDOW, as its close
 # button does), so the app idles in the tray.
+# --max-anon-mb / --max-cpu-s-per-min enforce the budget and exit non-zero on
+# regression.
 #
 # Needs no root and touches nothing outside --out. Stops only processes in its
 # own namespace, never any by name.
@@ -20,6 +22,7 @@ here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
 if [ "${1:-}" != --inside ]; then
   app= seed= out= label= games=8400 warmup=300 duration=1800 interval=10 size=1600x900 hide=0
+  max_anon_mb= max_cpu=
   exe='caskade|WebKit\w*Process'
   while [ $# -gt 0 ]; do
     case $1 in
@@ -34,10 +37,12 @@ if [ "${1:-}" != --inside ]; then
       --exe) exe=$2; shift 2 ;;
       --size) size=$2; shift 2 ;;
       --hide) hide=1; shift ;;
+      --max-anon-mb) max_anon_mb=$2; shift 2 ;;
+      --max-cpu-s-per-min) max_cpu=$2; shift 2 ;;
       *) echo "unknown option $1" >&2; exit 2 ;;
     esac
   done
-  [ -x "$app" ] && [ -x "$seed" ] && [ -n "$out" ] || { sed -n 2,13p "$0" >&2; exit 2; }
+  [ -x "$app" ] && [ -x "$seed" ] && [ -n "$out" ] || { sed -n 2,15p "$0" >&2; exit 2; }
   [ -e "$out" ] && { echo "$out exists: pick a new --out" >&2; exit 2; }
   mkdir -p "$out"
   out=$(realpath "$out")
@@ -58,11 +63,11 @@ print(json.dumps({
 EOF
 )
   echo "$meta" > "$out/meta.json"
-  exec unshare -rn "$0" --inside "$app" "$seed" "$out" "$games" "$warmup" "$duration" "$interval" "$exe" "$size" "$meta" "$hide"
+  exec unshare -rn "$0" --inside "$app" "$seed" "$out" "$games" "$warmup" "$duration" "$interval" "$exe" "$size" "$meta" "$hide" "$max_anon_mb" "$max_cpu"
 fi
 
 shift
-app=$1 seed=$2 out=$3 games=$4 warmup=$5 duration=$6 interval=$7 exe=$8 size=$9 meta=${10} hide=${11}
+app=$1 seed=$2 out=$3 games=$4 warmup=$5 duration=$6 interval=$7 exe=$8 size=$9 meta=${10} hide=${11} max_anon_mb=${12:-} max_cpu=${13:-}
 netns=$(readlink /proc/self/ns/net)
 
 # Stops every process in this namespace but this script.
@@ -89,7 +94,10 @@ echo "seeding $games games"
 "$seed" "$games" >"$out/seed.log" 2>&1
 
 export IDLE_BENCH_APP=$app IDLE_BENCH_OUT=$out IDLE_BENCH_HERE=$here
-export IDLE_BENCH_ARGS="--out $out --warmup $warmup --duration $duration --interval $interval"
+budget_args=""
+[ -n "$max_anon_mb" ] && budget_args="$budget_args --max-anon-mb $max_anon_mb"
+[ -n "$max_cpu" ] && budget_args="$budget_args --max-cpu-s-per-min $max_cpu"
+export IDLE_BENCH_ARGS="--out $out --warmup $warmup --duration $duration --interval $interval$budget_args"
 export IDLE_BENCH_EXE=$exe IDLE_BENCH_META=$meta IDLE_BENCH_HIDE=$hide
 dbus-run-session -- bash -c '
   set -euo pipefail

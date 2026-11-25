@@ -205,6 +205,7 @@ impl LibraryStore {
         let writes = Arc::default();
         let pool = writes::counting(SqlitePoolOptions::new(), &writes)
             .max_connections(4)
+            .idle_timeout(Some(Duration::from_secs(120)))
             .acquire_slow_level(log::LevelFilter::Warn)
             .acquire_slow_threshold(SLOW_ACQUIRE)
             .connect_lazy_with(options);
@@ -275,6 +276,14 @@ impl LibraryStore {
     }
     pub async fn close(&self) {
         self.pool.close().await;
+    }
+
+    /// Ask SQLite to release non-essential page-cache memory on an open
+    /// connection (called when the main window hides to the tray).
+    pub async fn shrink_memory(&self) {
+        let _ = sqlx::query("PRAGMA shrink_memory")
+            .execute(&self.pool)
+            .await;
     }
 }
 

@@ -56,6 +56,21 @@ measuring). `--warmup`, `--duration`, `--interval`, `--games` and `--size`
 (the Xvfb screen, default 1600x900) change the procedure; keep them the same
 across builds you compare, and say so if you don't.
 
+### Budget gate
+
+Pass `--max-anon-mb` and `--max-cpu-s-per-min` to fail non-zero when idle
+memory or CPU regresses past the `docs/TECH-SPEC.md` §9 budget (250 MB
+anonymous+swap, 0.5 CPU-s/min in the tray on an 8,400-game library):
+
+```sh
+scripts/idle-bench/run.sh --app ~/idle-bench/app/caskade \
+  --seed "$T/bench-release/examples/seed_library" \
+  --out ~/idle-bench/budget-$(git rev-parse --short HEAD) \
+  --hide --max-anon-mb 250 --max-cpu-s-per-min 0.5
+```
+
+`just idle-bench-budget` runs a release build against this gate automatically.
+
 ## Reading the results
 
 - **Anonymous + swap** is what the processes hold that isn't a file: the

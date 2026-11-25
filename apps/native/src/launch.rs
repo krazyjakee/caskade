@@ -296,8 +296,15 @@ impl<S: Shell> Loop<S> {
             self.renderer.suspend();
             self.released = true;
             // What that freed goes back to the system now, not at malloc's
-            // leisure.
+            // leisure; also release idle SQLite page-cache memory (#181).
             caskade_malloc::trim();
+            if let Some(services) = crate::shell::services() {
+                let store = services.store.clone();
+                caskade_app::runtime::spawn(async move {
+                    store.shrink_memory().await;
+                    caskade_malloc::trim();
+                });
+            }
             tracing::info!("window hidden: its GPU resources are released");
         } else if !hidden && self.released {
             let size = window.surface_size();
