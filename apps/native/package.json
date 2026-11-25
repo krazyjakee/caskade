@@ -10,6 +10,6 @@
     "@tailwindcss/node": "^4.3.3",
     "@tailwindcss/oxide": "^4.3.3",
     "@tauri-apps/cli": "2.12.4",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.5"
   }
 }
