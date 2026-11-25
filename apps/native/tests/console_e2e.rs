@@ -238,7 +238,7 @@ const CONSOLE_SCRIPT: &str = "\
 # Console mode from the start; Home opens on the hero.
 wait-event console-on
 wait-text Continue Playing
-focus-is Resume · View details
+focus-is Play
 # Down into Recently Played (its View all, then the card below it; the
 # hero's game isn't in it), then into Recently Added, which has both games:
 # LT and RT page the shelf, and focus follows.

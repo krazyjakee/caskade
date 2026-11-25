@@ -55,14 +55,16 @@ fn the_game_played_last_is_the_hero_and_leaves_recently_played() {
         recent.contains(&"System Fixture 1".to_owned()),
         "{recent:?}"
     );
-    // Resume · View details: its page, which goes back to Home.
-    let resume = window.find_in(hero, "data-part", "actions").unwrap();
-    assert_eq!(window.text(resume), "Resume · View details");
+    // Play is the primary focused action; View details opens the game page.
+    let play = window.find_in(hero, "data-part", "primary-action").unwrap();
+    assert_eq!(window.text(play).trim(), "Play");
     assert_eq!(
-        window.attr(resume, "data-focus-default").as_deref(),
+        window.attr(play, "data-focus-default").as_deref(),
         Some("true")
     );
-    window.click(resume);
+    let details = window.find_in(hero, "data-part", "details").unwrap();
+    assert_eq!(window.text(details).trim(), "View details");
+    window.click(details);
     match window.route() {
         Route::Game { id, from } => {
             assert_eq!(id, "fixture-emulated-4-0");
@@ -207,8 +209,8 @@ fn home_is_driven_by_keys_alone() {
         std::iter::successors(Some(node), |&id| doc.get_node(id).and_then(|n| n.parent))
             .any(|id| id == root)
     };
-    tab_to(&mut window, "Resume · View details", |window, node| {
-        window.attr(node, "data-part").as_deref() == Some("actions")
+    tab_to(&mut window, "View details", |window, node| {
+        window.attr(node, "data-part").as_deref() == Some("details")
             && window
                 .find("data-cs", "hero")
                 .is_some_and(|hero| inside(window, node, hero))

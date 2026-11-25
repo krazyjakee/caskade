@@ -1,4 +1,4 @@
-//! Home (#98): the game played last as a hero with Resume · View details,
+//! Home (#98): the game played last as a hero with Play and View details,
 //! then Recently Played, Recently Added and Recently Released as shelves of
 //! the library's cards, and the plugins' sections.
 
@@ -12,20 +12,22 @@ pub(crate) use shelf_row::ShelfRow;
 
 use caskade_core::model::{GameFilter, GamePage, GameSort, GameSummary, ListGames, PlayedOn};
 use caskade_ui_data::Key as DataKey;
-use caskade_ui_i18n::{format, t};
+use caskade_ui_i18n::{format, t, tp};
 use caskade_ui_input::Action;
 use dioxus_native::NodeHandle;
 use dioxus_native::prelude::keyboard_types::{Key, NamedKey};
 use dioxus_native::prelude::*;
+use std::collections::HashSet;
 
 use crate::input::{Bind, use_input_action};
 
-use crate::data::{Query, use_library_stats, use_query};
-use crate::game_menu::{Target, use_game_menus};
+use crate::data::{Query, use_game, use_library_stats, use_query};
+use crate::game_menu::entries::{EntryView, entries, playable};
+use crate::game_menu::{Target, use_game_menus, use_sessions};
 use crate::library::LibraryCard;
 use crate::router::{Route, use_router};
 use crate::ui::icons::{self, Icon};
-use crate::ui::{GameArt, Link, Svg};
+use crate::ui::{Button, ButtonVariant, GameArt, Link, Svg};
 
 /// Games on a shelf.
 const SHELF_SIZE: u32 = 12;
@@ -244,18 +246,53 @@ pub fn HomeView() -> Element {
     }
 }
 
-/// The game played last: its art, Continue Playing, its play time, the
-/// other device it was played on, and Resume · View details, which opens
-/// its page (and goes back to Home from there).
+/// The game played last: its hero artwork blended into the panel, Continue
+/// playing, its play time, the other device it was played on, a direct Play
+/// (or Stream / Stop) button, and View details to open its page.
 #[component]
 fn ContinueHero(game: GameSummary) -> Element {
     let router = use_router();
     let menus = use_game_menus();
+    let details_query = use_game(game.id.clone());
+    let sessions_query = use_sessions(game.id.clone());
     let mut me = use_signal(|| None::<NodeHandle>);
+    let mut stopping = use_signal(|| false);
+    let details = details_query
+        .read()
+        .as_ref()
+        .and_then(|game| game.as_ref().ok().cloned().flatten());
+    let running = sessions_query
+        .read()
+        .as_ref()
+        .and_then(|list| list.as_ref().ok())
+        .and_then(|list| list.iter().find(|session| session.ended_at_ms.is_none()))
+        .cloned();
+    let list: Vec<EntryView> = details.as_ref().map(entries).unwrap_or_default();
+    let none = HashSet::new();
+    let chosen: Option<EntryView> = details.as_ref().and_then(|details| {
+        details
+            .game
+            .default_entry
+            .as_ref()
+            .and_then(|id| list.iter().find(|entry| &entry.id == id))
+            .or_else(|| playable(&list, &none, None))
+            .cloned()
+    });
+    let starting = menus.is_some_and(|menus| menus.starting(&game.id));
+    let is_stream = chosen.as_ref().is_some_and(|entry| entry.stream);
+    let can_play = match &details {
+        Some(_) => chosen.as_ref().is_some_and(|entry| entry.can_launch),
+        None => game.installed,
+    };
     let target = Target {
         game_id: game.id.clone(),
         title: game.title.clone(),
         entry_id: None,
+    };
+    let play_target = Target {
+        game_id: game.id.clone(),
+        title: game.title.clone(),
+        entry_id: chosen.as_ref().map(|entry| entry.id.clone()),
     };
     let open_menu = {
         let target = target.clone();
@@ -289,7 +326,10 @@ fn ContinueHero(game: GameSummary) -> Element {
     }
     let playtime = format::playtime(game.playtime_ms / 1000);
     let played_on = played_on_label(game.last_played_on.as_ref());
-    let cover = crate::library::art_url_card(game.cover.as_ref());
+    let hero_art = details
+        .as_ref()
+        .and_then(|details| crate::library::art_url_hero(&details.artwork))
+        .or_else(|| crate::library::art_url_card(game.cover.as_ref()));
     let href = Route::Game {
         id: game.id.clone(),
         from: None,
@@ -298,7 +338,7 @@ fn ContinueHero(game: GameSummary) -> Element {
     rsx! {
         section {
             "data-cs": "hero",
-            class: "relative flex min-h-64 overflow-hidden rounded-panel border border-border bg-surface-raised",
+            class: "relative flex min-h-64 items-center overflow-hidden rounded-panel border border-border bg-surface-raised",
             onmounted: move |event| me.set(event.data().downcast::<NodeHandle>().cloned()),
             oncontextmenu: {
                 let open_menu = open_menu.clone();
@@ -318,8 +358,13 @@ fn ContinueHero(game: GameSummary) -> Element {
                     }
                 }
             },
-            GameArt { part: "art", image: cover, class: "w-1/3 shrink-0" }
-            div { "data-part": "content", class: "flex flex-col justify-center p-8",
+            GameArt { part: "art", image: hero_art, class: "absolute inset-y-0 right-0 w-3/4" }
+            div {
+                "data-part": "shade",
+                "aria-hidden": "true",
+                class: "pointer-events-none absolute inset-0 bg-linear-to-r from-surface-raised from-25% via-surface-raised/85 via-50% to-transparent",
+            }
+            div { "data-part": "content", class: "relative z-10 flex max-w-2xl flex-col justify-center p-8",
                 p { "data-part": "eyebrow", class: "font-mono text-xs tracking-widest text-accent-alt uppercase",
                     {t!("Continue Playing")}
                 }
@@ -333,17 +378,65 @@ fn ContinueHero(game: GameSummary) -> Element {
                         }
                     }
                 }
-                Link {
-                    href,
-                    "data-part": "actions",
-                    // With a pad, Home opens on the hero's action.
-                    "data-focus-default": "true",
-                    class: "mt-5 w-fit rounded-control bg-accent px-5 py-2 font-semibold text-accent-fg outline-none data-focus-visible:focus-ring",
-                    on_press: {
-                        let id = game.id.clone();
-                        move |_| router.open_game(&id)
-                    },
-                    {t!("Resume · View details")}
+                div { "data-part": "actions", class: "mt-5 flex flex-wrap items-center gap-3",
+                    if let Some(session) = running.clone() {
+                        Button {
+                            "data-part": "primary-action",
+                            "data-focus-default": "true",
+                            variant: ButtonVariant::Danger,
+                            icon: Some(icons::SQUARE),
+                            disabled: stopping(),
+                            on_press: {
+                                let id = session.id.clone();
+                                move |_| {
+                                    let id = id.clone();
+                                    stopping.set(true);
+                                    spawn(async move {
+                                        let _ = crate::game_menu::actions::stop(id).await;
+                                        stopping.set(false);
+                                    });
+                                }
+                            },
+                            if stopping() {
+                                {t!("Stopping…")}
+                            } else {
+                                {tp!("game action", "Stop")}
+                            }
+                        }
+                    } else {
+                        Button {
+                            "data-part": "primary-action",
+                            "data-focus-default": "true",
+                            variant: ButtonVariant::Primary,
+                            icon: Some(icons::PLAY),
+                            disabled: !can_play || starting,
+                            on_press: {
+                                let play_target = play_target.clone();
+                                move |_| {
+                                    if let Some(menus) = menus {
+                                        menus.play(play_target.clone());
+                                    }
+                                }
+                            },
+                            if starting {
+                                {t!("Starting…")}
+                            } else if is_stream {
+                                {t!(note = "Button: streams the game from another device", "Stream")}
+                            } else {
+                                {t!(note = "Button: starts the game", "Play")}
+                            }
+                        }
+                    }
+                    Link {
+                        href,
+                        "data-part": "details",
+                        class: "inline-flex items-center rounded-control border border-border-strong bg-surface-overlay/80 px-4 py-2 text-sm font-medium text-fg outline-none transition-colors duration-(--cs-motion-duration-fast) data-hovered:border-accent-alt/50 data-hovered:bg-surface-hover data-focus-visible:focus-ring",
+                        on_press: {
+                            let id = game.id.clone();
+                            move |_| router.open_game(&id)
+                        },
+                        {t!("View details")}
+                    }
                 }
             }
         }

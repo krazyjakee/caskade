@@ -21,6 +21,7 @@ pub const ANATOMY: Entry = Entry {
         ("meta", "Genre, size and playtime."),
         ("actions", "The buttons."),
         ("primary-action", "The launch button group."),
+        ("details", "On Home, the secondary link to the game's page."),
         ("badge", "The status (a `status-badge`)."),
         ("tags", "The game's tags."),
         (
@@ -32,7 +33,7 @@ pub const ANATOMY: Entry = Entry {
             "On Home, the other device the game was last played on (in the meta).",
         ),
     ],
-    app_only: &["art", "tags", "website", "played-on"],
+    app_only: &["art", "details", "tags", "website", "played-on"],
     contains: &["game-art", "status-badge"],
     slots: &["actions"],
     ..Entry::new(
