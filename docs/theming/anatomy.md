@@ -401,6 +401,7 @@ Root: `[data-cs="hero"]`
 | `meta` | `[data-cs="hero"] [data-part="meta"]` | Genre, size and playtime. |
 | `actions` | `[data-cs="hero"] [data-part="actions"]` | The buttons. |
 | `primary-action` | `[data-cs="hero"] [data-part="primary-action"]` | The launch button group. |
+| `details` (app only) | `[data-cs="hero"] [data-part="details"]` | On Home, the secondary link to the game's page. |
 | `badge` | `[data-cs="hero"] [data-part="badge"]` | The status (a `status-badge`). |
 | `tags` (app only) | `[data-cs="hero"] [data-part="tags"]` | The game's tags. |
 | `website` (app only) | `[data-cs="hero"] [data-part="website"]` | A link to the game's own page on the web (a web game's). |
@@ -1064,7 +1065,7 @@ Root: `[data-cs="topbar"]`
 | `job-count` | `[data-cs="topbar"] [data-part="job-count"]` | The number of running jobs; `data-status` is `active` or `needs-user`. |
 | `notification-count` | `[data-cs="topbar"] [data-part="notification-count"]` | The number of unread notifications, apart from the jobs. |
 | `avatar` | `[data-cs="topbar"] [data-part="avatar"]` | The signed-in account's button, which opens the account menu (an `avatar` inside). |
-| `console` | `[data-cs="topbar"] [data-part="console"]` | Enters console mode, where Caskade draws no window controls (macOS, the browser preview). |
+| `console` | `[data-cs="topbar"] [data-part="console"]` | Enters console mode (fullscreen, for a controller). |
 
 Slots: `actions` hold the caller's content; parts inside them belong to that content.
 
@@ -1079,7 +1080,6 @@ Root: `[data-cs="window-controls"]`
 | Part | Selector | What it is |
 | --- | --- | --- |
 | `minimize` | `[data-cs="window-controls"] [data-part="minimize"]` | Minimizes the window. |
-| `console` | `[data-cs="window-controls"] [data-part="console"]` | Enters console mode (fullscreen, for a controller). |
 | `maximize` | `[data-cs="window-controls"] [data-part="maximize"]` | Maximizes the window, or restores it when maximized. |
 | `close` | `[data-cs="window-controls"] [data-part="close"]` | Closes the window. |
 

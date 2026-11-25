@@ -264,6 +264,7 @@
         "meta",
         "actions",
         "primary-action",
+        "details",
         "badge",
         "tags",
         "website",
@@ -822,7 +823,6 @@
     "window-controls": {
       "parts": [
         "minimize",
-        "console",
         "maximize",
         "close"
       ],
