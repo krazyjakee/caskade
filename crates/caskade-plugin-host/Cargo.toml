@@ -22,7 +22,7 @@ caskade-installer = { path = "../caskade-installer", default-features = false, f
 # Provider adapters return discovered games (#126).
 caskade-discovery = { path = "../caskade-discovery", default-features = false }
 wasmtime = { version = "=50.0.3", default-features = false, features = ["component-model", "async", "cranelift", "runtime", "std", "parallel-compilation"] }
-wasmtime-wasi = { version = "=50.0.3", default-features = false, features = ["p2"] }
+wasmtime-wasi = { version = "=51.0.0", default-features = false, features = ["p2"] }
 # Outbound HTTP for plugins with a `network` grant (#124).
 wasmtime-wasi-http = { version = "=50.0.3", default-features = false, features = ["p2", "default-send-request"] }
 http = "1"
