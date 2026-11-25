@@ -1,15 +1,15 @@
 # Product spec
 
-What Caskade does today, and what is planned. Last reviewed 2026-11-08, at version 0.1.3.
+What Caskade does today, and what is planned. Last reviewed 2026-11-25, at version 0.2.2.
 
 Why it exists is in the [mission](MISSION.md). How it is built is in the [tech spec](TECH-SPEC.md). How it looks and reads is in the [design guidelines](DESIGN-GUIDELINES.md).
 
 ## 1. Status
 
-- **Released**: 0.1.x builds are published as GitHub releases (deb, AppImage, NSIS, MSI and a macOS app bundle), and installed copies update themselves from them.
+- **Released**: 0.2.x native-UI builds are published as GitHub releases (Linux `.deb` and `.AppImage`, Authenticode-signed Windows NSIS setup installer, and Developer ID signed and Apple-notarized Apple silicon and Intel macOS `.dmg` and updater tarballs) with `SHA256SUMS` and changelog-backed updater notes. Installed copies update themselves from them.
 - **Linux** (X11, including Cinnamon, GNOME and gamescope): the reference platform. Every feature runs and is tested here, with live checks under Xvfb.
-- **Windows**: the app builds and passes lint. CI runs the launch channel and the administrator steps natively, and streaming, sync and launches have been tried in Windows VMs. Some real-hardware checks are still open (§5).
-- **macOS**: the native app has been built and run on an Intel Mac; Apple Silicon and remaining native integration checks still need hardware validation. The standalone installer and discovery libraries are tested on macOS in CI.
+- **Windows**: Authenticode-signed releases build and pass lint. CI runs the launch channel, elevation, and signed silent-install checks natively, and streaming, sync and launches have been verified in Windows VMs. Remaining real-hardware checks are tracked in [#120](https://github.com/krazyjakee/caskade/issues/120).
+- **macOS**: Developer ID signed and Apple-notarized native builds run on macOS (Apple silicon and Intel), and the standalone installer and discovery libraries are tested on macOS in CI. Remaining real-hardware checks are tracked in [#120](https://github.com/krazyjakee/caskade/issues/120).
 - **Languages**: English and Swedish. A translation ships as soon as its PO files are added.
 
 ## 2. Who it's for
@@ -183,7 +183,7 @@ Settings → Backup (admins): back up now, daily or weekly automatic backups wit
 - **Settings → Statistics**: CPU, GPU, memory, network and storage use, sampled only while you watch.
 - **Self-healing**: a lost web game or video webview reloads, the app restarts itself after a crash (with a cap), interrupted installs and updates finish or roll back at start, and failures say what happened and what to do.
 - **First-run setup**: language, where games and ROMs live, the first account, or setting up from another device.
-- **About**: version, terms, privacy policy and third-party licences.
+- **About**: version, build and renderer details, Open logs folder, Copy system info, terms, privacy policy and third-party licences.
 
 ## 5. Planned
 
@@ -191,12 +191,11 @@ Settings → Backup (admins): back up now, daily or weekly automatic backups wit
 
 | Issue | What it needs |
 | --- | --- |
-| [#71](https://github.com/krazyjakee/caskade/issues/71) | Idle memory with a large library (8,000+ games). The allocator caps, trimming and several fixes have landed. Still to do: a memory budget for an idle app, checked so it can't creep back up. |
-| [#8](https://github.com/krazyjakee/caskade/issues/8) Playnite milestone | One acceptance check left: from a clean profile, connect Steam, GOG and Epic, install an owned game through its launcher, and launch it with accurate playtime, on real accounts. |
-| [#20](https://github.com/krazyjakee/caskade/issues/20), [#19](https://github.com/krazyjakee/caskade/issues/19) Devices, sync and sharing | Sync is built and tested in CI with several cores and a local relay. Still open: the manual checklist on real machines on all three platforms. |
-| [#33](https://github.com/krazyjakee/caskade/issues/33), [#27](https://github.com/krazyjakee/caskade/issues/27), [#28](https://github.com/krazyjakee/caskade/issues/28), [#29](https://github.com/krazyjakee/caskade/issues/29) Game streaming | Streaming is built. Still open: real-machine checks of the first-stream install, pairing and streaming, across operating systems. |
+| [#120](https://github.com/krazyjakee/caskade/issues/120) | Real-hardware checks for closed issues across macOS, Steam Deck (gamescope), Wayland, Windows 11, and Cinnamon (login start, GPU/scroll pacing, screen readers, IME, tray, notarized macOS updates, streaming, and paired-device checks). |
+| [#181](https://github.com/krazyjakee/caskade/issues/181) | Meet and enforce the 250 MB tray-idle anonymous+swap memory budget on real 8,000+ game libraries, with an automated idle-bench budget gate. |
+| [#177](https://github.com/krazyjakee/caskade/issues/177) | Brand and OS packaging polish (refined app icon, branded NSIS and macOS DMG installers, and Linux desktop/AppStream metadata). |
 
-The procedures for these checks, grouped by the machines they need, are in [manual checks](manual-checks.md).
+The procedures for manual hardware checks, grouped by the machines they need, are in [manual checks](manual-checks.md).
 
 ### 5.2 Next, not yet filed as issues
 

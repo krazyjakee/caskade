@@ -4,15 +4,16 @@ A game library and launcher for Windows, Linux and macOS, written in Rust with a
 
 Every game you own, on every device in your home, in one library: store and launcher games, emulated games with emulators set up for you, web games, fan ports, and games streamed from another PC in the house. Devices pair and keep the library, saves and playtime in step directly, with no account and no server. It has a desktop mode, a fullscreen console mode for gamepads, themes and WebAssembly plugins.
 
-- [Website](https://caskade.app/) · [Downloads](https://github.com/krazyjakee/caskade/releases/latest)
+- [Website](https://caskade.app/) · [Downloads](https://github.com/krazyjakee/caskade/releases/latest) · [Changelog](CHANGELOG.md)
 - [Mission](docs/MISSION.md)
 - [Product spec](docs/PRODUCT-SPEC.md): what it does today and what is planned
 - [Tech spec](docs/TECH-SPEC.md): how it is built
 - [Design guidelines](docs/DESIGN-GUIDELINES.md)
+- [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 ## Status
 
-Version 0.1.x is published as [GitHub releases](https://github.com/krazyjakee/caskade/releases), and installed copies update themselves. Linux is the reference platform. Windows builds and is partly verified on real systems; the app hasn't been run on macOS yet. Details are in the product spec's Status section.
+Version 0.2.x is published as [GitHub releases](https://github.com/krazyjakee/caskade/releases) with signed Linux (`.AppImage` and `.deb`), Authenticode-signed Windows (NSIS), and Apple-notarized macOS (Apple silicon and Intel `.dmg`) bundles, and installed copies update themselves. Linux is the reference platform; Windows and macOS are built, signed, and tested with remaining real-hardware checks tracked in [#120](https://github.com/krazyjakee/caskade/issues/120). Details are in the product spec's Status section.
 
 ## Build and run
 

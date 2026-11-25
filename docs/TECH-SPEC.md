@@ -1,6 +1,6 @@
 # Tech spec
 
-How Caskade is built today. Last reviewed 2026-11-08, at version 0.1.3.
+How Caskade is built today. Last reviewed 2026-11-25, at version 0.2.2.
 
 What it does is in the [product spec](PRODUCT-SPEC.md). Public contracts for extension authors live beside this document: [plugins](plugins/README.md) (with `plugin.schema.json` and `wit/caskade-plugin.wit`) and [theming](theming/README.md) (with the generated [token](theming/tokens.md) and [anatomy](theming/anatomy.md) references).
 
