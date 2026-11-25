@@ -6,24 +6,34 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-11-25
+
 ### Added
 
 - Home hero now offers a direct **Play** action alongside **View details**, with smoothly blended wide hero artwork.
 - Diagnostics tools in **Settings → About**: **Open logs folder** and **Copy system info** for bug reports.
+- Games installed on paired devices are now clearly distinguished in the library.
 - Release pipeline now populates in-app updater release notes from `CHANGELOG.md` and publishes `SHA256SUMS` checksums alongside release downloads.
 - Repository community templates, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, and Dependabot configuration.
 
 ### Changed
 
 - Moved the **Console mode** button out of the OS window controls cluster into the top bar actions on Windows and Linux.
+- Refined the app icon, branded the Windows NSIS and macOS DMG installers, and added Linux `.desktop` and AppStream metadata.
 - Improved native UI polish: translucent scrims behind game card overlay icons, cleaner empty states on game pages, Settings sidebar scrollbar gutter, radial-gradient onboarding logo halo, centred wordmark, and consistent sentence-case button labels.
 - Completed Swedish (`sv`) translations and localized native OS dialogs and the macOS app menu bar.
 - Finalised Privacy Policy, Terms and Conditions, Licensing notices, and `SECURITY.md`.
-- Updated core, service, and native UI performance across database queries, background workers, and virtualised lists.
+- Shrunk SQLite caches when hiding to the tray and improved core, service, and native UI performance across database queries, background workers, and virtualised lists.
+- Updated `cookie` to 0.18.3 for RustSec advisory RUSTSEC-2026-0594.
 
 ### Fixed
 
 - Trackpad scroll gestures now lock to their dominant axis so vertical swipes over horizontal shelves no longer drift sideways.
+- Reset the outer scroll position when navigating between pages.
+- Show an icon for unreachable paired devices.
+- Keep Console mode prompts on controller glyphs instead of falling back to keyboard hints.
+- Clean up the emulator setup cache directory before marking the setup job finished.
+- Improved overlay focus handoff and settle-frame handling for keyboard and gamepad navigation.
 
 ## [0.2.2] - 2026-11-23
 
