@@ -471,11 +471,12 @@ fn Welcome(
             div { "data-part": "logo", class: "relative mb-10 animate-rise",
                 div {
                     "aria-hidden": "true",
-                    class: "absolute inset-0 -z-10 scale-150 rounded-full bg-glow opacity-60 blur-3xl",
+                    class: "pointer-events-none absolute -inset-12 -z-10 rounded-full",
+                    style: "background: radial-gradient(circle at center, color-mix(in oklab, var(--cs-color-glow) 45%, transparent) 0%, color-mix(in oklab, var(--cs-color-glow) 18%, transparent) 38%, transparent 72%)",
                 }
                 crate::frame::Brand { class: "size-28 drop-shadow-[0_0_24px_var(--cs-color-glow)]" }
             }
-            h1 { class: "animate-rise font-display text-5xl font-semibold tracking-[0.4em] [--i:3]",
+            h1 { class: "animate-rise pl-[0.4em] font-display text-5xl font-semibold tracking-[0.4em] [--i:3]",
                 // The product's name, as its logo spells it.
                 {WORDMARK}
             }
