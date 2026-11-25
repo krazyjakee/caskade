@@ -118,8 +118,15 @@ mod platform {
                 Pick::File | Pick::Files => gtk::FileChooserAction::Open,
                 Pick::Folder => gtk::FileChooserAction::SelectFolder,
             };
-            let dialog =
-                gtk::FileChooserNative::new(Some(&title), None::<&gtk::Window>, action, None, None);
+            let accept = caskade_core::tr!("Open");
+            let cancel = caskade_core::tr!("Cancel");
+            let dialog = gtk::FileChooserNative::new(
+                Some(&title),
+                None::<&gtk::Window>,
+                action,
+                Some(&accept),
+                Some(&cancel),
+            );
             dialog.set_select_multiple(pick == Pick::Files);
             if let Some((name, patterns)) = &filter {
                 let gtk_filter = gtk::FileFilter::new();

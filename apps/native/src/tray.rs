@@ -146,7 +146,7 @@ pub fn app_menu() {
     let separator = PredefinedMenuItem::separator;
     let built = (|| -> Result<(), tray_icon::menu::Error> {
         let about = PredefinedMenuItem::about(
-            None,
+            Some(&caskade_core::tr!("About Caskade")),
             Some(AboutMetadata {
                 name: Some("Caskade".into()),
                 version: Some(env!("CARGO_PKG_VERSION").into()),
@@ -159,11 +159,11 @@ pub fn app_menu() {
             &[
                 &about,
                 &separator(),
-                &PredefinedMenuItem::services(None),
+                &PredefinedMenuItem::services(Some(&caskade_core::tr!("Services"))),
                 &separator(),
-                &PredefinedMenuItem::hide(None),
-                &PredefinedMenuItem::hide_others(None),
-                &PredefinedMenuItem::show_all(None),
+                &PredefinedMenuItem::hide(Some(&caskade_core::tr!("Hide Caskade"))),
+                &PredefinedMenuItem::hide_others(Some(&caskade_core::tr!("Hide Others"))),
+                &PredefinedMenuItem::show_all(Some(&caskade_core::tr!("Show All"))),
                 &separator(),
                 &quit,
             ],
@@ -172,21 +172,21 @@ pub fn app_menu() {
             caskade_core::tr!("Edit"),
             true,
             &[
-                &PredefinedMenuItem::undo(None),
-                &PredefinedMenuItem::redo(None),
+                &PredefinedMenuItem::undo(Some(&caskade_core::tr!("Undo"))),
+                &PredefinedMenuItem::redo(Some(&caskade_core::tr!("Redo"))),
                 &separator(),
-                &PredefinedMenuItem::cut(None),
-                &PredefinedMenuItem::copy(None),
-                &PredefinedMenuItem::paste(None),
-                &PredefinedMenuItem::select_all(None),
+                &PredefinedMenuItem::cut(Some(&caskade_core::tr!("Cut"))),
+                &PredefinedMenuItem::copy(Some(&caskade_core::tr!("Copy"))),
+                &PredefinedMenuItem::paste(Some(&caskade_core::tr!("Paste"))),
+                &PredefinedMenuItem::select_all(Some(&caskade_core::tr!("Select All"))),
             ],
         )?;
         let window = Submenu::with_items(
             caskade_core::tr!("Window"),
             true,
             &[
-                &PredefinedMenuItem::minimize(None),
-                &PredefinedMenuItem::fullscreen(None),
+                &PredefinedMenuItem::minimize(Some(&caskade_core::tr!("Minimize"))),
+                &PredefinedMenuItem::fullscreen(Some(&caskade_core::tr!("Toggle Full Screen"))),
             ],
         )?;
         let menu = Menu::with_items(&[&caskade, &edit, &window])?;
