@@ -1,13 +1,11 @@
 use super::{ManifestError, Result};
-use cap_std::fs::{Dir, OpenOptions};
+use cap_std::fs::Dir;
 use std::{
-    io::{self, Read, Write},
+    io::{self, Read},
     path::Path,
-    sync::atomic::{AtomicU64, Ordering},
 };
 
 const MAX_BYTES: u64 = 64 * 1024 * 1024;
-static NEXT_TEMP: AtomicU64 = AtomicU64::new(0);
 
 fn metadata_directory(root: &Path, create: bool) -> Result<Dir> {
     let directory = Dir::open_ambient_dir(root, cap_std::ambient_authority())?;
@@ -54,23 +52,9 @@ pub(super) fn write(root: &Path, name: &str, bytes: &[u8]) -> Result<()> {
         ));
     }
     let directory = metadata_directory(root, true)?;
-    let temp = format!(
-        ".{name}.{}-{}.tmp",
-        std::process::id(),
-        NEXT_TEMP.fetch_add(1, Ordering::Relaxed)
-    );
-    // create_new cannot overwrite a link/file planted at the temporary name.
-    let mut file = directory.open_with(&temp, OpenOptions::new().write(true).create_new(true))?;
-    let result = (|| {
-        file.write_all(bytes)?;
-        file.write_all(b"\n")?;
-        file.sync_all()?;
-        drop(file);
-        directory.rename(&temp, &directory, name)?;
-        Ok(())
-    })();
-    if result.is_err() {
-        let _ = directory.remove_file(temp);
-    }
-    result
+    let mut payload = Vec::with_capacity(bytes.len() + 1);
+    payload.extend_from_slice(bytes);
+    payload.push(b'\n');
+    crate::safety::replace_file(&directory, Path::new(name), &payload, false)?;
+    Ok(())
 }

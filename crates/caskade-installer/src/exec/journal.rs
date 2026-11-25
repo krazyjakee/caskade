@@ -1,12 +1,11 @@
 use std::{
-    fs,
-    io::{self, Write},
+    fs, io,
     path::{Path, PathBuf},
     sync::{Arc, Mutex},
     time::Duration,
 };
 
-use cap_std::fs::{Dir, OpenOptions};
+use cap_std::fs::Dir;
 use serde::{Deserialize, Serialize};
 
 use crate::{RuntimeSpec, runtime::ProcessCommand};
@@ -105,21 +104,9 @@ impl JournalHandle {
             .clone()
     }
     fn persist(&self, state: &Record) -> Result<()> {
-        let temporary = self.name.with_extension("tmp");
-        // The job exclusively owns this temp name. Do not follow a preexisting
-        // symbolic link, including one left by an interrupted native installer.
-        remove(&self.directory, &temporary)?;
-        let mut file = self
-            .directory
-            .open_with(&temporary, OpenOptions::new().write(true).create_new(true))?;
-        serde_json::to_writer(&mut file, state)?;
-        file.write_all(b"\n")?;
-        file.sync_all()?;
-        drop(file);
-        self.directory
-            .rename(&temporary, &self.directory, &self.name)?;
-        #[cfg(unix)]
-        self.directory.open(".")?.sync_all()?;
+        let mut bytes = serde_json::to_vec(state)?;
+        bytes.push(b'\n');
+        crate::safety::replace_file(&self.directory, &self.name, &bytes, true)?;
         Ok(())
     }
     pub(super) fn set_final_owned(&self) -> Result<()> {
@@ -186,6 +173,14 @@ pub(super) fn runtime<'a>(
 }
 
 pub(super) fn rollback(root: &Dir, record: &Record, runtimes: &Runtimes) -> Result<()> {
+    let install_locations: Vec<&Path> = record
+        .entries
+        .iter()
+        .filter_map(|entry| match entry {
+            JournalEntry::InstallLocation { path, .. } => Some(path.as_path()),
+            _ => None,
+        })
+        .collect();
     let mut errors = vec![];
     for entry in record.entries.iter().rev() {
         let result = match entry {
@@ -194,10 +189,7 @@ pub(super) fn rollback(root: &Dir, record: &Record, runtimes: &Runtimes) -> Resu
                 restore_file(path, original.as_deref())
             }
             JournalEntry::ExternalDirectory { path }
-                if record.entries.iter().any(|entry| {
-                    matches!(entry,
-                JournalEntry::InstallLocation { path: kept, .. } if kept.starts_with(path))
-                }) =>
+                if install_locations.iter().any(|kept| kept.starts_with(path)) =>
             {
                 Ok(())
             }

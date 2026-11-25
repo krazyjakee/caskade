@@ -1,7 +1,7 @@
 //! Finds games that launchers, stores and the operating system have already
 //! installed, and returns them as plain data.
 //!
-//! The crate knows nothing about the database or Tauri. Sources read files and
+//! The crate knows nothing about the database or the UI. Sources read files and
 //! the registry directly and never start subprocesses. The library emits
 //! `tracing` events and spans without setting a global subscriber.
 

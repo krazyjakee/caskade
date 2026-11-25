@@ -1,6 +1,5 @@
 use std::{
-    fs,
-    io::{self, Write},
+    fs, io,
     path::{Path, PathBuf},
 };
 
@@ -76,9 +75,8 @@ impl Storage {
     pub fn write(&self, state: &State) -> Result<()> {
         let mut bytes = serde_json::to_vec(state)?;
         bytes.push(b'\n');
-        replace_file(&self.states, &format!("{}.json", state.request_key), &bytes)?;
-        #[cfg(unix)]
-        self.states.open(".")?.sync_all()?;
+        let name = format!("{}.json", state.request_key);
+        crate::safety::replace_file(&self.states, Path::new(&name), &bytes, true)?;
         Ok(())
     }
     pub fn purge(&self, key: &str) -> Result<()> {
@@ -157,19 +155,6 @@ pub(super) fn remove_file(dir: &Dir, name: &str) -> Result<()> {
     }
 }
 
-/// Writes `bytes` to `name` in `dir` through a synced temporary file, so a
-/// crash leaves the old file or the new one, never part of it.
-pub(super) fn replace_file(dir: &Dir, name: &str, bytes: &[u8]) -> Result<()> {
-    let temporary = format!("{name}.tmp");
-    remove_file(dir, &temporary)?;
-    let mut file = dir.open_with(&temporary, OpenOptions::new().write(true).create_new(true))?;
-    file.write_all(bytes)?;
-    file.sync_all()?;
-    drop(file);
-    dir.rename(&temporary, dir, name)?;
-    Ok(())
-}
-
 pub(super) fn directory(root: &Dir, path: &Path, create: bool) -> Result<Dir> {
     let mut dir = root.try_clone()?;
     for component in path.components() {
@@ -212,7 +197,13 @@ impl Storage {
     /// Records that this job's download is torrent `hash`'s data.
     #[cfg_attr(not(feature = "torrent"), allow(dead_code))]
     pub fn mark_torrent(&self, hash: &str) -> Result<()> {
-        replace_file(&self.states, TORRENT_MARKER, hash.as_bytes())
+        crate::safety::replace_file(
+            &self.states,
+            Path::new(TORRENT_MARKER),
+            hash.as_bytes(),
+            false,
+        )?;
+        Ok(())
     }
 }
 

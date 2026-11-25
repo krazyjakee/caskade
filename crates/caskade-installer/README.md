@@ -2,7 +2,7 @@
 
 A standalone Rust library and development CLI for inspecting, planning,
 installing and uninstalling games under a managed storage root. The library has
-no Tauri dependency. Plans are data; probing never executes an input program.
+no UI toolkit dependency. Plans are data; probing never executes an input program.
 
 ## Build the development CLI
 
@@ -210,7 +210,7 @@ GNU and macOS, from the bindings it ships). librqbit's own TLS features are
 not used, because they add `aws-lc-rs` to `rustls` next to the `ring` that
 the rest of Caskade uses, and a process with both providers has no default:
 its tracker client (`reqwest` 0.13) uses the ring provider the engine
-installs when none is installed yet. The crate stays independent of Tauri.
+installs when none is installed yet. The crate stays independent of any UI toolkit.
 
 **Protocol.** BitTorrent v1 and hybrid v1/v2 torrents (their v1 info hash);
 v2-only torrents and magnet links with only a `btmh` hash are refused as

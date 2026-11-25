@@ -1,9 +1,8 @@
 use std::{
-    collections::BTreeMap,
     io::{Read, Write},
-    path::{Path, PathBuf},
+    path::Path,
     sync::{
-        Arc, Mutex, OnceLock, Weak,
+        Arc,
         atomic::{AtomicU64, Ordering},
     },
     time::Instant,
@@ -483,45 +482,51 @@ impl FetchEngine {
             let mut bytes = if append { offset } else { 0 };
             context.check_space(total.unwrap_or(0).saturating_sub(bytes))?;
             storage.write(&state)?;
-            let mut file = storage.open_part(&state, append)?;
+            let mut file = Some(storage.open_part(&state, append)?);
             context.emit(if append { "resumed" } else { "started" }, bytes, total)?;
             const SPACE_CHECK_BYTES: u64 = 16 * 1024 * 1024;
             const PROGRESS_EVERY: std::time::Duration = std::time::Duration::from_millis(100);
             let mut since_space_check: u64 = 0;
             let mut last_progress: Option<Instant> = None;
             while let Some(chunk) = next_chunk(&mut body, context.token).await? {
-                // Bounded synchronous writes have no detached I/O after a future
-                // drop. The file and per-job lock cannot outlive each other.
-                for chunk in chunk.chunks(64 * 1024) {
-                    let len = chunk.len() as u64;
-                    let next = bytes.checked_add(len).ok_or(FetchError::TooLarge {
+                let len = chunk.len() as u64;
+                let next = bytes.checked_add(len).ok_or(FetchError::TooLarge {
+                    limit: self.config.max_bytes,
+                })?;
+                if next > self.config.max_bytes {
+                    return Err(FetchError::TooLarge {
                         limit: self.config.max_bytes,
-                    })?;
-                    if next > self.config.max_bytes {
-                        return Err(FetchError::TooLarge {
-                            limit: self.config.max_bytes,
-                        });
-                    }
-                    since_space_check = since_space_check.saturating_add(len);
-                    if since_space_check >= SPACE_CHECK_BYTES {
-                        context.check_space(len)?;
-                        since_space_check = 0;
-                    }
-                    file.write_all(chunk)?;
-                    bytes = next;
-                    context.reached.fetch_max(bytes, Ordering::Relaxed);
-                    if last_progress.is_none_or(|at| at.elapsed() >= PROGRESS_EVERY) {
-                        context.emit("progress", bytes, total)?;
-                        last_progress = Some(Instant::now());
-                        tokio::task::yield_now().await;
-                    } else {
-                        http::cancelled(context.token)?;
-                    }
+                    });
+                }
+                since_space_check = since_space_check.saturating_add(len);
+                if since_space_check >= SPACE_CHECK_BYTES {
+                    context.check_space(len)?;
+                    since_space_check = 0;
+                }
+                let mut f = file.take().expect("file held between writes");
+                let (f, write_res) = tokio::task::spawn_blocking(move || {
+                    let res = f.write_all(&chunk);
+                    (f, res)
+                })
+                .await
+                .map_err(|error| FetchError::Io(std::io::Error::other(error)))?;
+                file = Some(f);
+                write_res?;
+                bytes = next;
+                context.reached.fetch_max(bytes, Ordering::Relaxed);
+                if last_progress.is_none_or(|at| at.elapsed() >= PROGRESS_EVERY) {
+                    context.emit("progress", bytes, total)?;
+                    last_progress = Some(Instant::now());
+                    tokio::task::yield_now().await;
+                } else {
+                    http::cancelled(context.token)?;
                 }
             }
-            tokio::task::spawn_blocking(move || file.sync_all())
-                .await
-                .map_err(|error| FetchError::Io(std::io::Error::other(error)))??;
+            if let Some(f) = file.take() {
+                tokio::task::spawn_blocking(move || f.sync_all())
+                    .await
+                    .map_err(|error| FetchError::Io(std::io::Error::other(error)))??;
+            }
             let body_received = bytes.saturating_sub(if append { offset } else { 0 });
             if body_length.is_some_and(|expected| expected != body_received)
                 || total.is_some_and(|expected| expected != bytes)
@@ -728,18 +733,7 @@ fn request_key(request: &DownloadRequest) -> String {
     hash.update(serde_json::to_vec(request).expect("download request serialization is infallible"));
     format!("{:x}", hash.finalize())
 }
-type JobLocks = Mutex<BTreeMap<PathBuf, Weak<AsyncMutex<()>>>>;
 pub(super) fn job_lock(path: &Path) -> Arc<AsyncMutex<()>> {
-    static LOCKS: OnceLock<JobLocks> = OnceLock::new();
-    let mut locks = LOCKS
-        .get_or_init(Default::default)
-        .lock()
-        .expect("download lock registry poisoned");
-    locks.retain(|_, lock| lock.strong_count() > 0);
-    if let Some(lock) = locks.get(path).and_then(Weak::upgrade) {
-        return lock;
-    }
-    let lock = Arc::new(AsyncMutex::new(()));
-    locks.insert(path.into(), Arc::downgrade(&lock));
-    lock
+    static LOCKS: crate::safety::PathLocks = crate::safety::PathLocks::new();
+    LOCKS.lock_for(path)
 }

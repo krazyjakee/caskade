@@ -19,6 +19,7 @@ pub mod input;
 pub mod manifest;
 pub mod pipeline;
 pub mod plan;
+pub mod plist_guard;
 pub mod probe;
 pub mod quarantine;
 pub mod reconcile;

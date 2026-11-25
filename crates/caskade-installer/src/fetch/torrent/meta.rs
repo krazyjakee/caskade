@@ -5,7 +5,7 @@ use std::{io::Read, path::Path};
 
 use cap_std::fs::Dir;
 
-use crate::fetch::{FetchError, Result, storage};
+use crate::fetch::{FetchError, Result};
 
 const METADATA: &str = "meta.torrent";
 
@@ -68,5 +68,6 @@ pub(super) fn cached(folder: &Dir, hash: &str, limit: u64) -> Option<Vec<u8>> {
 }
 
 pub(super) fn write_cached(folder: &Dir, bytes: &[u8]) -> Result<()> {
-    storage::replace_file(folder, METADATA, bytes)
+    crate::safety::replace_file(folder, Path::new(METADATA), bytes, false)?;
+    Ok(())
 }

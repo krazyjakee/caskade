@@ -729,3 +729,79 @@ pub fn open_staging(path: &Path) -> Result<Dir> {
         cap_std::ambient_authority(),
     )?)
 }
+
+/// Atomically write `bytes` to `name` inside `dir` via a unique `create_new`
+/// temporary file and rename, optionally syncing `dir` on Unix.
+pub(crate) fn replace_file(
+    dir: &Dir,
+    name: &Path,
+    bytes: &[u8],
+    sync_dir: bool,
+) -> std::io::Result<()> {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static NEXT_TEMP: AtomicU64 = AtomicU64::new(0);
+    let leaf = name
+        .file_name()
+        .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::InvalidInput, "empty file name"))?
+        .to_string_lossy();
+    let pid = std::process::id();
+    for _ in 0..128 {
+        let temporary = name.with_file_name(format!(
+            ".{leaf}.{pid}-{}.tmp",
+            NEXT_TEMP.fetch_add(1, Ordering::Relaxed)
+        ));
+        // create_new cannot overwrite a link or file planted at the temp name.
+        let mut file =
+            match dir.open_with(&temporary, OpenOptions::new().write(true).create_new(true)) {
+                Ok(file) => file,
+                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+                Err(error) => return Err(error),
+            };
+        let result = (|| {
+            file.write_all(bytes)?;
+            file.sync_all()?;
+            drop(file);
+            dir.rename(&temporary, dir, name)
+        })();
+        if let Err(error) = result {
+            let _ = dir.remove_file(&temporary);
+            return Err(error);
+        }
+        #[cfg(unix)]
+        if sync_dir {
+            dir.open(".")?.sync_all()?;
+        }
+        #[cfg(not(unix))]
+        let _ = sync_dir;
+        return Ok(());
+    }
+    Err(std::io::Error::new(
+        std::io::ErrorKind::AlreadyExists,
+        "temporary file collision limit reached",
+    ))
+}
+
+/// Per-path weak registry of async locks. Finished entries are pruned on the
+/// next lookup so old paths do not accumulate.
+pub(crate) struct PathLocks {
+    locks: std::sync::Mutex<BTreeMap<PathBuf, std::sync::Weak<tokio::sync::Mutex<()>>>>,
+}
+
+impl PathLocks {
+    pub(crate) const fn new() -> Self {
+        Self {
+            locks: std::sync::Mutex::new(BTreeMap::new()),
+        }
+    }
+
+    pub(crate) fn lock_for(&self, path: &Path) -> std::sync::Arc<tokio::sync::Mutex<()>> {
+        let mut locks = self.locks.lock().expect("path lock registry poisoned");
+        locks.retain(|_, lock| lock.strong_count() > 0);
+        if let Some(lock) = locks.get(path).and_then(std::sync::Weak::upgrade) {
+            return lock;
+        }
+        let lock = std::sync::Arc::new(tokio::sync::Mutex::new(()));
+        locks.insert(path.into(), std::sync::Arc::downgrade(&lock));
+        lock
+    }
+}

@@ -1,7 +1,6 @@
 use std::{
-    collections::BTreeMap,
     path::{Path, PathBuf},
-    sync::{Arc, Mutex, OnceLock, Weak},
+    sync::Arc,
 };
 
 use cap_std::fs::Dir;
@@ -630,18 +629,7 @@ impl Drop for Attempt {
     }
 }
 
-type RootLocks = Mutex<BTreeMap<PathBuf, Weak<AsyncMutex<()>>>>;
 pub(super) fn root_lock(root: &Path) -> Arc<AsyncMutex<()>> {
-    static LOCKS: OnceLock<RootLocks> = OnceLock::new();
-    let mut locks = LOCKS
-        .get_or_init(Default::default)
-        .lock()
-        .expect("root lock registry poisoned");
-    locks.retain(|_, lock| lock.strong_count() != 0);
-    if let Some(lock) = locks.get(root).and_then(Weak::upgrade) {
-        return lock;
-    }
-    let lock = Arc::new(AsyncMutex::new(()));
-    locks.insert(root.into(), Arc::downgrade(&lock));
-    lock
+    static LOCKS: safety::PathLocks = safety::PathLocks::new();
+    LOCKS.lock_for(root)
 }

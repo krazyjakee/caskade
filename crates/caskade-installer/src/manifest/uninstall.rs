@@ -10,15 +10,12 @@ use super::{
 use crate::exec::{CancellationToken, ExecError, Executor};
 use crate::plan::presets::{InstallerFamily, build_uninstall_args};
 use crate::runtime::{ProcessCommand, Runtime};
-use cap_std::fs::{Dir, OpenOptions};
+use cap_std::fs::Dir;
 use serde::{Deserialize, Serialize};
 use std::{
     io,
     path::{Path, PathBuf},
-    sync::{
-        Arc,
-        atomic::{AtomicU64, Ordering},
-    },
+    sync::Arc,
     time::Duration,
 };
 
@@ -488,7 +485,6 @@ fn forget_msi_product(runtime: &dyn Runtime, code: &str, report: &mut NativeUnin
     }
 }
 
-static NEXT_TEMP: AtomicU64 = AtomicU64::new(0);
 fn undo_effect(base: &Path, effect: &ExternalEffect) -> io::Result<()> {
     let directory = Dir::open_ambient_dir(base, cap_std::ambient_authority())?;
     let path = &effect.location().path;
@@ -529,26 +525,10 @@ fn undo_effect(base: &Path, effect: &ExternalEffect) -> io::Result<()> {
 }
 
 fn restore_file(directory: &Dir, path: &Path, bytes: &[u8]) -> io::Result<()> {
-    use std::io::Write;
     let parent = path
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
         .unwrap_or_else(|| Path::new("."));
     directory.create_dir_all(parent)?;
-    let name = parent.join(format!(
-        ".caskade-restore-{}-{}.tmp",
-        std::process::id(),
-        NEXT_TEMP.fetch_add(1, Ordering::Relaxed)
-    ));
-    let mut file = directory.open_with(&name, OpenOptions::new().write(true).create_new(true))?;
-    let result = (|| {
-        file.write_all(bytes)?;
-        file.sync_all()?;
-        drop(file);
-        directory.rename(&name, directory, path)
-    })();
-    if result.is_err() {
-        let _ = directory.remove_file(name);
-    }
-    result
+    crate::safety::replace_file(directory, path, bytes, false)
 }

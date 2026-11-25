@@ -9,7 +9,7 @@ use crate::{
 };
 use globset::{GlobBuilder, GlobMatcher};
 use std::{
-    collections::{BTreeMap, BTreeSet, HashMap},
+    collections::{BTreeMap, BTreeSet, HashMap, HashSet},
     path::{Path, PathBuf},
 };
 
@@ -185,6 +185,12 @@ pub fn merge(
         .flat_map(uri::external_identities)
         .filter(|identity| !ambiguous.contains(identity))
         .collect();
+    let excluded_source_keys: HashSet<(&str, &str)> = config
+        .exclusions
+        .source_keys
+        .iter()
+        .map(|k| (k.source.as_str(), k.key.as_str()))
+        .collect();
     let mut result = Vec::new();
     for mut group in groups.into_values() {
         if group.iter().all(|r| uri::is_proxy(&r.entry)) {
@@ -194,11 +200,7 @@ pub fn merge(
         // shortcuts that would otherwise resurrect it through another source.
         if group.iter().any(|r| {
             !r.ids.is_disjoint(&excluded_ids)
-                || config
-                    .exclusions
-                    .source_keys
-                    .iter()
-                    .any(|k| k.source == r.entry.source && k.key == r.entry.key)
+                || excluded_source_keys.contains(&(r.entry.source.as_str(), r.entry.key.as_str()))
                 || globs.matches(&r.entry, &r.paths)
         }) {
             continue;

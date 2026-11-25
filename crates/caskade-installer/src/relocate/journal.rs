@@ -1,6 +1,6 @@
 //! Write-ahead compensation for relocation. A caller holds both root leases.
 use super::*;
-use cap_std::fs::{Dir, OpenOptions};
+use cap_std::fs::Dir;
 use serde::{Deserialize, Serialize};
 use std::io::Read;
 
@@ -79,24 +79,11 @@ impl UndoLog {
             committed: record.committed,
             entries: self.entries.clone(),
         };
-        let temporary = format!("{name}.tmp");
-        match dir.remove_file(&temporary) {
-            Ok(()) => {}
-            Err(e) if e.kind() == io::ErrorKind::NotFound => {}
-            Err(e) => return Err(e),
-        }
-        let mut file =
-            dir.open_with(&temporary, OpenOptions::new().write(true).create_new(true))?;
-        serde_json::to_writer(&mut file, &record)?;
-        if file.metadata()?.len() > 128 * 1024 * 1024 {
+        let bytes = serde_json::to_vec(&record)?;
+        if bytes.len() > 128 * 1024 * 1024 {
             return Err(io::Error::other("move journal exceeds its recovery budget"));
         }
-        file.sync_all()?;
-        drop(file);
-        dir.rename(&temporary, dir, name)?;
-        #[cfg(unix)]
-        dir.open(".")?.sync_all()?;
-        Ok(())
+        crate::safety::replace_file(dir, Path::new(name), &bytes, true)
     }
     pub fn commit(&mut self) -> io::Result<()> {
         if let Some((_, _, record)) = &mut self.durable {
