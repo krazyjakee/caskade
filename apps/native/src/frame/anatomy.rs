@@ -207,7 +207,7 @@ pub const TOPBAR: Entry = Entry {
         ),
         (
             "console",
-            "Enters console mode, where Caskade draws no window controls (macOS, the browser preview).",
+            "Enters console mode (fullscreen, for a controller).",
         ),
     ],
     contains: &["search", "window-controls", "avatar"],
@@ -223,10 +223,6 @@ pub const TOPBAR: Entry = Entry {
 pub const WINDOW_CONTROLS: Entry = Entry {
     parts: &[
         ("minimize", "Minimizes the window."),
-        (
-            "console",
-            "Enters console mode (fullscreen, for a controller).",
-        ),
         (
             "maximize",
             "Maximizes the window, or restores it when maximized.",

@@ -851,3 +851,25 @@ fn repeated_navigation_does_not_retain_detached_page_trees() {
         }
     }
 }
+
+#[test]
+fn console_mode_button_lives_in_topbar_actions_not_window_controls() {
+    let _one = caskade_core::lock(&ONE);
+    let _runtime = caskade_app::runtime::handle().enter();
+    let window = Window::open();
+    let actions = window.get("data-part", "actions");
+    assert!(
+        window.find_in(actions, "data-part", "console").is_some(),
+        "console mode button should live in topbar actions"
+    );
+    if super::window::CUSTOM_FRAME {
+        let controls = window.get("data-cs", "window-controls");
+        assert!(
+            window.find_in(controls, "data-part", "console").is_none(),
+            "console mode button must not be inside window controls"
+        );
+        assert!(window.find_in(controls, "data-part", "minimize").is_some());
+        assert!(window.find_in(controls, "data-part", "maximize").is_some());
+        assert!(window.find_in(controls, "data-part", "close").is_some());
+    }
+}
