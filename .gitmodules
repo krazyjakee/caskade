@@ -1,0 +1,3 @@
+[submodule "apps/caskade-app"]
+	path = apps/caskade-app
+	url = https://github.com/krazyjakee/caskade-app.git
