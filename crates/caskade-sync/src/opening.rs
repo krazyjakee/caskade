@@ -60,6 +60,9 @@ pub enum Purpose {
     Stream,
     /// A paired device asks this one to start a game here (#234).
     Play,
+    /// A paired companion device controls this instance (state, library,
+    /// launches, console mode, pad input and navigation).
+    Control,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

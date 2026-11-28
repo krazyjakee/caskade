@@ -207,7 +207,7 @@ Carried over from the retired design plans. Each needs an issue before work star
 - **JavaScript plugin backends**: backends are Rust-only for API 0.1. An embedded JS runner behind the same contract is an open question.
 - **Untrusted UI plugins**: whether signing and review are enough, or plugin UIs need an isolated tier.
 - **Windows hosts' gamepads** depend on ViGEmBus, which is archived. If Windows stops loading it, a signed replacement is needed.
-- **Mobile companion app (`apps/caskade-app`)**: Flutter iOS and Android companion app (`krazyjakee/caskade-app`) to browse a synced library and control a connected Caskade instance over `caskade/sync/1`; desktop-side `Purpose::Control` protocol support and mobile FFI packaging are next.
+- **Mobile companion app (`apps/caskade-app`)**: Flutter iOS and Android companion app (`krazyjakee/caskade-app`) with a live `iroh` Rust bridge speaking `caskade/sync/1` (`Purpose::Control`, implemented in desktop Caskade for state pushes, library browsing, remote play/stop, console mode, pad input and view navigation); mobile ABI packaging via `flutter_rust_bridge_codegen` is next.
 
 ### 5.3 Decided against
 

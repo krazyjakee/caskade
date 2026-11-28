@@ -13,6 +13,7 @@ pub(super) struct PeerServices {
     pub(super) transfers: Option<caskade_core::transfer::Transfers>,
     pub(super) shares: Option<caskade_share::Shares>,
     pub(super) remote_play: caskade_core::remote_play::RemotePlay,
+    pub(super) companion_control: caskade_core::companion_control::CompanionControl,
     pub(super) sync: caskade_core::sync::SyncService,
     pub(super) presence: caskade_core::sync::presence::Presence,
     pub(super) peer_backups: caskade_backup::peers::PeerBackups,
@@ -123,6 +124,17 @@ pub(super) fn start_peers(local: &LocalServices, events: Events, network: Networ
         caskade_core::remote_play::RemotePlay::new(local.store.clone(), devices.clone());
     remote_play.set_settings(local.settings.clone());
     crate::commands::remote_play::setup(events.clone(), &remote_play, devices.clone());
+    // Companion remote control (`Purpose::Control`): state, library, pad
+    // actions, console mode and navigation from a paired phone or tablet.
+    let companion_control = caskade_core::companion_control::CompanionControl::new(
+        local.store.clone(),
+        devices.clone(),
+        local.accounts.clone(),
+        local.launch.clone(),
+        remote_play.clone(),
+        local.bus.clone(),
+    );
+    companion_control.set_settings(local.settings.clone());
     // Library sync with paired devices (#228–#230), in the background.
     let sync = caskade_core::sync::SyncService::new(local.store.clone(), devices.clone());
     sync.set_settings(local.settings.clone());
@@ -219,6 +231,7 @@ pub(super) fn start_peers(local: &LocalServices, events: Events, network: Networ
         local.store.clone(),
     );
     crate::commands::sync::setup(events.clone(), &devices, &sync);
+    crate::commands::companion::setup(events.clone(), &companion_control, sync.clone());
     crate::commands::saves::forward_changes(events, &local.save_versions);
     PeerServices {
         devices,
@@ -226,6 +239,7 @@ pub(super) fn start_peers(local: &LocalServices, events: Events, network: Networ
         transfers,
         shares,
         remote_play,
+        companion_control,
         sync,
         presence,
         peer_backups,

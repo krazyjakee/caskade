@@ -5,6 +5,7 @@
 pub use crate::commands::addon_packages::AddonProgress;
 pub use crate::commands::app_update::AppUpdateChanged;
 pub use crate::commands::backup::BackupChanged;
+pub use crate::commands::companion::{CompanionConsoleRequested, CompanionViewRequested};
 pub use crate::commands::game_edit::GamesRefreshChanged;
 pub use crate::commands::i18n::LocaleChanged;
 pub use crate::commands::input::InputActionEvent;
@@ -165,6 +166,8 @@ pub enum Event {
     ThemeReloaded(ThemeReloaded),
     PlayingElsewhereChanged(PlayingElsewhereChanged),
     RemotePlayRequested(RemotePlayRequested),
+    CompanionConsoleRequested(CompanionConsoleRequested),
+    CompanionViewRequested(CompanionViewRequested),
     StoreAccountsChanged(StoreAccountsChanged),
     AddonProgress(AddonProgress),
     SharesChanged(SharesChanged),
@@ -242,6 +245,8 @@ impl Event {
             Self::ThemeReloaded(_) => "theme.reloaded",
             Self::PlayingElsewhereChanged(_) => "playing.elsewhere.changed",
             Self::RemotePlayRequested(_) => "remote.play.requested",
+            Self::CompanionConsoleRequested(_) => "companion.console.requested",
+            Self::CompanionViewRequested(_) => "companion.view.requested",
             Self::StoreAccountsChanged(_) => "store_accounts.changed",
             Self::AddonProgress(_) => "addon.progress",
             Self::SharesChanged(_) => "shares.changed",

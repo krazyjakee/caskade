@@ -125,6 +125,32 @@ impl RemotePlay {
         }
     }
 
+    /// Starts `game_id` (already in this device's library) through the app's
+    /// registered play handler, waiting for the UI's outcome. Used by both
+    /// `Purpose::Play` and companion `Purpose::Control`.
+    pub async fn request_local(&self, device_id: &str, game_id: &str) -> PlayOutcome {
+        if !self.allowed().await {
+            return PlayOutcome::NotStarted(crate::tr!("this device doesn't take play requests"));
+        }
+        let Some(handler) = self.inner.handler.get() else {
+            return PlayOutcome::NotStarted(crate::tr!("this device doesn't take play requests"));
+        };
+        let id = crate::model::new_id();
+        let (sender, receiver) = oneshot::channel();
+        crate::lock(&self.inner.waiting).insert(id.clone(), sender);
+        handler(PlayRequest {
+            id: id.clone(),
+            device_id: device_id.to_owned(),
+            game_id: game_id.to_owned(),
+        });
+        let outcome = tokio::time::timeout(START_WAIT, receiver).await;
+        crate::lock(&self.inner.waiting).remove(&id);
+        match outcome {
+            Ok(Ok(outcome)) => outcome,
+            _ => PlayOutcome::NotStarted(crate::tr!("nobody started it on that device in time")),
+        }
+    }
+
     /// Starts `game_id` (this device's id) on `device_id`, waking it first
     /// when it's out of reach and its Wake-on-LAN addresses are known.
     pub async fn play_on(

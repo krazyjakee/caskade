@@ -197,6 +197,48 @@ msgstr "Uppdaterar tillägg"
 msgid "Could not open the local {cache} cache"
 msgstr "Kunde inte öppna den lokala {cache}-cachen"
 
+#: crates/caskade-core/src/companion_control.rs
+msgid "couldn't read the library"
+msgstr "kunde inte läsa biblioteket"
+
+#: crates/caskade-core/src/companion_control.rs
+#: crates/caskade-core/src/devices/mod.rs
+msgid "sync isn't ready on this device yet"
+msgstr "synkning är inte redo på den här enheten än"
+
+#: crates/caskade-core/src/companion_control.rs
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "that game isn't in this device's library"
+msgstr "det spelet finns inte i den här enhetens bibliotek"
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "couldn't update that game"
+msgstr "kunde inte uppdatera det spelet"
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "no matching game is running"
+msgstr "inget matchande spel körs"
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "couldn't stop the running game"
+msgstr "kunde inte stoppa det pågående spelet"
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "this device doesn't take remote control requests"
+msgstr "den här enheten tar inte emot fjärrstyrningsförfrågningar"
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "unknown remote action"
+msgstr "okänd fjärråtgärd"
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "that view can't be opened remotely"
+msgstr "den vyn kan inte öppnas på distans"
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "no account is signed in on this device"
+msgstr "inget konto är inloggat på den här enheten"
+
 #: crates/caskade-core/src/db/accounts.rs
 msgid "the last admin can't be removed or made standard"
 msgstr "den sista administratören kan inte tas bort eller göras till standard"
@@ -473,10 +515,6 @@ msgstr "kunde inte nå den andra enheten"
 #: crates/caskade-core/src/devices/mod.rs
 msgid "the other device turned the connection down"
 msgstr "den andra enheten avvisade anslutningen"
-
-#: crates/caskade-core/src/devices/mod.rs
-msgid "sync isn't ready on this device yet"
-msgstr "synkning är inte redo på den här enheten än"
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "that isn't a device id"
@@ -2819,6 +2857,14 @@ msgid "the plan names no release file"
 msgstr "planen anger ingen utgåvefil"
 
 #: crates/caskade-core/src/remote_play/mod.rs
+msgid "this device doesn't take play requests"
+msgstr "den här enheten tar inte emot spelförfrågningar"
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "nobody started it on that device in time"
+msgstr "ingen startade det på den enheten i tid"
+
+#: crates/caskade-core/src/remote_play/mod.rs
 #: crates/caskade-app/src/commands/copies.rs
 msgid "that device isn't paired"
 msgstr "den enheten är inte parkopplad"
@@ -2834,18 +2880,6 @@ msgstr "anslutningen till {device} bröts"
 #: crates/caskade-core/src/remote_play/mod.rs
 msgid "the device didn't wake up; check that Wake-on-LAN is on in its settings"
 msgstr "enheten vaknade inte; kontrollera att Wake-on-LAN är påslaget i dess inställningar"
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "this device doesn't take play requests"
-msgstr "den här enheten tar inte emot spelförfrågningar"
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "nobody started it on that device in time"
-msgstr "ingen startade det på den enheten i tid"
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "that game isn't in this device's library"
-msgstr "det spelet finns inte i den här enhetens bibliotek"
 
 #: crates/caskade-core/src/remote_play/mod.rs
 msgid "the wake-up message couldn't be sent"

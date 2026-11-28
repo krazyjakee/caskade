@@ -136,10 +136,32 @@ pub fn ModeRoot(children: Element) -> Element {
     let input = crate::input::use_input();
     let settings = try_use_context::<crate::data::DataSource>().map(|source| source.settings);
     use_hook(|| {
+        if let Some(services) = crate::shell::services() {
+            services.companion_control.set_console_reader(active);
+        }
         let mut asked = requests().subscribe();
         spawn(async move {
             while let Ok(mode) = asked.recv().await {
                 set_mode(mode, false);
+            }
+        });
+        let mut events = crate::shell::events().subscribe();
+        spawn(async move {
+            use caskade_app::events::Event as AppEvent;
+            use tokio::sync::broadcast::error::RecvError;
+            loop {
+                match events.recv().await {
+                    Ok(AppEvent::CompanionConsoleRequested(request)) => {
+                        let next = if request.enabled {
+                            Mode::Console
+                        } else {
+                            Mode::Desktop
+                        };
+                        set_mode(next, true);
+                    }
+                    Ok(_) | Err(RecvError::Lagged(_)) => {}
+                    Err(RecvError::Closed) => break,
+                }
             }
         });
     });

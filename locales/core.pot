@@ -196,6 +196,48 @@ msgstr ""
 msgid "Could not open the local {cache} cache"
 msgstr ""
 
+#: crates/caskade-core/src/companion_control.rs
+msgid "couldn't read the library"
+msgstr ""
+
+#: crates/caskade-core/src/companion_control.rs
+#: crates/caskade-core/src/devices/mod.rs
+msgid "sync isn't ready on this device yet"
+msgstr ""
+
+#: crates/caskade-core/src/companion_control.rs
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "that game isn't in this device's library"
+msgstr ""
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "couldn't update that game"
+msgstr ""
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "no matching game is running"
+msgstr ""
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "couldn't stop the running game"
+msgstr ""
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "this device doesn't take remote control requests"
+msgstr ""
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "unknown remote action"
+msgstr ""
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "that view can't be opened remotely"
+msgstr ""
+
+#: crates/caskade-core/src/companion_control.rs
+msgid "no account is signed in on this device"
+msgstr ""
+
 #: crates/caskade-core/src/db/accounts.rs
 msgid "the last admin can't be removed or made standard"
 msgstr ""
@@ -471,10 +513,6 @@ msgstr ""
 
 #: crates/caskade-core/src/devices/mod.rs
 msgid "the other device turned the connection down"
-msgstr ""
-
-#: crates/caskade-core/src/devices/mod.rs
-msgid "sync isn't ready on this device yet"
 msgstr ""
 
 #: crates/caskade-core/src/devices/mod.rs
@@ -2817,6 +2855,14 @@ msgid "the plan names no release file"
 msgstr ""
 
 #: crates/caskade-core/src/remote_play/mod.rs
+msgid "this device doesn't take play requests"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
+msgid "nobody started it on that device in time"
+msgstr ""
+
+#: crates/caskade-core/src/remote_play/mod.rs
 #: crates/caskade-app/src/commands/copies.rs
 msgid "that device isn't paired"
 msgstr ""
@@ -2831,18 +2877,6 @@ msgstr ""
 
 #: crates/caskade-core/src/remote_play/mod.rs
 msgid "the device didn't wake up; check that Wake-on-LAN is on in its settings"
-msgstr ""
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "this device doesn't take play requests"
-msgstr ""
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "nobody started it on that device in time"
-msgstr ""
-
-#: crates/caskade-core/src/remote_play/mod.rs
-msgid "that game isn't in this device's library"
 msgstr ""
 
 #: crates/caskade-core/src/remote_play/mod.rs

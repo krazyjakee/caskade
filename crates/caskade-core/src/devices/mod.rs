@@ -116,6 +116,8 @@ struct Inner {
     share_handler: OnceLock<Arc<dyn Sessions>>,
     /// Where play requests (#234) take `play` sessions.
     play_handler: OnceLock<Arc<dyn Sessions>>,
+    /// Where companion remote-control sessions take `control` sessions.
+    control_handler: OnceLock<Arc<dyn Sessions>>,
     /// Serves the folders offered to other devices (#233), bound with the
     /// endpoint.
     copy_provider: OnceLock<caskade_sync::copy::CopyProtocol>,
@@ -218,6 +220,7 @@ impl Devices {
                 stream_handler: OnceLock::new(),
                 share_handler: OnceLock::new(),
                 play_handler: OnceLock::new(),
+                control_handler: OnceLock::new(),
                 copy_provider: OnceLock::new(),
                 dialer: tokio::sync::Mutex::new(None),
                 swarm: tokio::sync::Mutex::new(None),
@@ -419,6 +422,11 @@ impl Devices {
     /// Where `play` sessions from paired devices go (#234).
     pub fn set_play_handler(&self, handler: Arc<dyn Sessions>) {
         let _ = self.inner.play_handler.set(handler);
+    }
+
+    /// Where `control` sessions from paired companion devices go.
+    pub fn set_control_handler(&self, handler: Arc<dyn Sessions>) {
+        let _ = self.inner.control_handler.set(handler);
     }
 
     /// Where `share` sessions go (#246).
@@ -778,6 +786,10 @@ impl Sessions for Handler {
                 None => session.end().await,
             },
             Purpose::Play => match inner.play_handler.get() {
+                Some(handler) => handler.opened(session).await,
+                None => session.end().await,
+            },
+            Purpose::Control => match inner.control_handler.get() {
                 Some(handler) => handler.opened(session).await,
                 None => session.end().await,
             },

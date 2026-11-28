@@ -15,6 +15,7 @@ pub mod backup;
 pub mod browse;
 pub mod clipboard;
 pub mod collections;
+pub mod companion;
 pub mod console;
 pub mod copies;
 pub mod diagnostics;

@@ -330,6 +330,20 @@ pub fn RouterRoot(
             router.back();
         });
         input.on_details(move |id| router.open_game(&id));
+        let mut events = crate::shell::events().subscribe();
+        spawn(async move {
+            use caskade_app::events::Event as AppEvent;
+            use tokio::sync::broadcast::error::RecvError;
+            loop {
+                match events.recv().await {
+                    Ok(AppEvent::CompanionViewRequested(request)) => {
+                        router.navigate(&request.route);
+                    }
+                    Ok(_) | Err(RecvError::Lagged(_)) => {}
+                    Err(RecvError::Closed) => break,
+                }
+            }
+        });
         let start = start.clone();
         spawn(async move {
             let href = match start {

@@ -13,6 +13,8 @@ pub mod backup_error;
 pub mod browse;
 pub mod bus;
 mod cache_db;
+#[cfg(feature = "net")]
+pub mod companion_control;
 pub mod db;
 pub mod device_type;
 #[cfg(feature = "net")]
